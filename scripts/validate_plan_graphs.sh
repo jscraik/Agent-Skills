@@ -24,20 +24,19 @@ if [[ $# -gt 0 ]]; then
   esac
 fi
 
-CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-LINTER="${PLAN_GRAPH_LINTER:-$CODEX_HOME/scripts/plan-graph-lint.py}"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+lint_python="${PLAN_GRAPH_LINT_PYTHON:-python3}"
+LINTER="${PLAN_GRAPH_LINTER:-$repo_root/scripts/plan_graph_lint.py}"
+
+cd "$repo_root"
 
 if [[ ! -f "$LINTER" ]]; then
   echo "[plan-graph] missing linter: $LINTER" >&2
-  echo "[plan-graph] skipping (local codex tool not available in this environment)."
-  exit 0
+  exit 1
 fi
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$repo_root"
-
 sanitize_plan_graph_output() {
-  python3 - "$repo_root" "${HOME:-}" <<'PY'
+  python3 -c '
 import os
 import pathlib
 import re
@@ -57,7 +56,12 @@ for raw_line in sys.stdin:
     line = re.sub(r"/Users/[^/]+", "/Users/<redacted>", line)
     line = re.sub(r"/home/[^/]+", "/home/<redacted>", line)
     print(line)
-PY
+' "$repo_root" "${HOME:-}"
+}
+
+run_plan_graph_linter() {
+  local path="$1"
+  "$lint_python" "$LINTER" "$path"
 }
 
 paths=(".agent/PLANS.md")
@@ -69,7 +73,14 @@ status=0
 failed_plans=()
 for path in "${paths[@]}"; do
   echo "[plan-graph] lint $path"
-  if ! python3 "$LINTER" "$path" 2>&1 | sanitize_plan_graph_output; then
+  set +e
+  lint_output="$(run_plan_graph_linter "$path" 2>&1 | sanitize_plan_graph_output)"
+  lint_rc=$?
+  set -e
+  if [[ -n "$lint_output" ]]; then
+    echo "$lint_output"
+  fi
+  if [[ "$lint_rc" -ne 0 ]]; then
     status=1
     failed_plans+=("$path")
   fi

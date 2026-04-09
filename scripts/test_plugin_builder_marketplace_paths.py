@@ -162,6 +162,27 @@ class PluginBuilderMarketplacePathTests(TestCase):
                     strict_openai_layout=True,
                 )
 
+    def test_relative_repo_source_path_strict_mode_accepts_agents_symlink_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            (repo_root / ".git").mkdir()
+            plugin_root = repo_root / "plugins" / "example-plugin"
+            plugin_root.mkdir(parents=True)
+            legacy_plugins = repo_root / "plugins"
+            agents_dir = repo_root / ".agents"
+            agents_dir.mkdir(parents=True, exist_ok=True)
+            (agents_dir / "plugins").symlink_to(legacy_plugins, target_is_directory=True)
+            marketplace_path = agents_dir / "plugins" / "marketplace.json"
+            marketplace_path.write_text('{"name":"test","plugins":[]}\n', encoding="utf-8")
+
+            path = plugin_builder._relative_repo_source_path(
+                plugin_root,
+                marketplace_path,
+                strict_openai_layout=True,
+            )
+
+            self.assertEqual(path, "./plugins/example-plugin")
+
     def test_relative_plugin_path_validator_rejects_parent_segments(self) -> None:
         self.assertFalse(plugin_builder._is_relative_plugin_path("./plugins/example/../escape"))
 

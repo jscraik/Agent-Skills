@@ -35,6 +35,21 @@
       "category": "Productivity"
     },
     {
+      "name": "harness-engineering",
+      "source": {
+        "source": "local",
+        "path": "./plugins/harness-engineering"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "plugin-factory",
       "source": {
         "source": "local",

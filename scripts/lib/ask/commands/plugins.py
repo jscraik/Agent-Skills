@@ -4,10 +4,60 @@ from pathlib import Path
 from typing import List, Optional
 
 from ask.envelope import CallResult, ErrorObject
+from ask.plugin_state import collect_plugin_state
 
 # Allow-list for companion folder types per plugin-creator contract
 _ALLOWED_COMPANION_FOLDERS = {"skills", "hooks", "scripts", "assets", "mcp", "apps", "references", "workflows"}
 _INSTALL_SUMMARY_RE = re.compile(r"Installed\s+([a-z0-9][a-z0-9-]{0,63})\s+to\s+(.+)")
+
+
+def list_plugins_state(repo_root: Path) -> CallResult:
+    """List read-only plugin lifecycle state for the current repo."""
+    result = CallResult()
+    snapshot = collect_plugin_state(repo_root)
+    result.status = "success"
+    result.data.update(snapshot)
+    return result
+
+
+def status_plugin_state(repo_root: Path, name: str) -> CallResult:
+    """Return read-only lifecycle state for a single plugin."""
+    result = CallResult()
+    snapshot = collect_plugin_state(repo_root, plugin_name=name)
+    plugins = snapshot["installed_state"]["plugins"]
+    if not plugins:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Plugin '{name}' was not found in installed state.",
+                fix_suggestion="Run `ask plugins list` to inspect available plugin names.",
+            )
+        )
+        return result
+    result.status = "success"
+    result.data.update(snapshot)
+    return result
+
+
+def doctor_plugins_state(repo_root: Path) -> CallResult:
+    """Run read-only plugin health diagnostics."""
+    result = CallResult()
+    snapshot = collect_plugin_state(repo_root, run_doctor=True)
+    result.data.update(snapshot)
+    if snapshot["health_state"]["status"] == "healthy":
+        result.status = "success"
+        return result
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message="Plugin doctor detected lifecycle blockers.",
+            fix_suggestion="Inspect data.health_state.blockers and resolve the listed checks.",
+        )
+    )
+    return result
 
 
 def init_plugin(

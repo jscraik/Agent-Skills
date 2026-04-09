@@ -58,6 +58,35 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("name", skill)
             self.assertIn("path", skill)
 
+    def test_skills_route_json_contract(self):
+        """CA1: Verify ask skills route exposes selection-decision fields."""
+        cmd = ["python3", "bin/ask", "skills", "route", "create-auth", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # Route may exit non-zero for unresolved ambiguity/no-candidate, but should emit envelope JSON.
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("status", output)
+        self.assertIn("data", output)
+        self.assertIn("decision", output["data"])
+        decision = output["data"]["decision"]
+        self.assertIn("decision_status", decision)
+        self.assertIn("policy_identity", decision)
+        self.assertIn("considered_limit", decision)
+        self.assertIn("selected_candidates", decision)
+
+    def test_plugins_list_state(self):
+        """CA1: Verify ask plugins list returns lifecycle state groups."""
+        cmd = ["python3", "bin/ask", "plugins", "list", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        self.assertEqual(result.returncode, 0, f"plugins list failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertIn("installed_state", output["data"])
+        self.assertIn("activation_state", output["data"])
+        self.assertIn("health_state", output["data"])
+
     def test_skills_sync_dry_run(self):
         """CA2: Verify ask skills sync --dry-run returns a plan without changes."""
         cmd = ["python3", "bin/ask", "skills", "sync", "--dry-run", "--json"]

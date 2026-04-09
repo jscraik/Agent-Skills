@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "id": "resolved-single-candidate",
+      "request": "create auth",
+      "considered_limit": 5,
+      "top_k": 1,
+      "eligible_candidates": [
+        {
+          "name": "create-auth",
+          "path": "auth/create-auth",
+          "description": "Implement Better Auth integrations.",
+          "scope_rank": 1
+        },
+        {
+          "name": "best-practices",
+          "path": "auth/best-practices",
+          "description": "Audit Better Auth integrations.",
+          "scope_rank": 1
+        }
+      ],
+      "ranked_candidates": [
+        {
+          "skill_name": "create-auth",
+          "skill_path": "auth/create-auth",
+          "confidence": 0.93,
+          "rationale": ["keyword overlap=2"],
+          "risk_tier": "low"
+        }
+      ],
+      "uncertainty_reasons": [],
+      "expected": {
+        "decision_status": "resolved",
+        "failure_class": null,
+        "selected_names": ["create-auth"],
+        "considered_total": 2,
+        "considered_truncated": false
+      }
+    },
+    {
+      "id": "unresolved-ambiguity-close-scores",
+      "request": "review code",
+      "considered_limit": 5,
+      "top_k": 2,
+      "eligible_candidates": [
+        {
+          "name": "ce-review",
+          "path": "plugins/harness-engineering/skills/ce-review",
+          "description": "Readiness review for package-level delivery.",
+          "scope_rank": 12
+        },
+        {
+          "name": "ce-technical-review",
+          "path": "plugins/harness-engineering/skills/ce-technical-review",
+          "description": "Technical risk review with severity findings.",
+          "scope_rank": 12
+        }
+      ],
+      "ranked_candidates": [
+        {
+          "skill_name": "ce-review",
+          "skill_path": "plugins/harness-engineering/skills/ce-review",
+          "confidence": 0.81,
+          "rationale": ["keyword overlap=1"],
+          "risk_tier": "medium"
+        },
+        {
+          "skill_name": "ce-technical-review",
+          "skill_path": "plugins/harness-engineering/skills/ce-technical-review",
+          "confidence": 0.79,
+          "rationale": ["keyword overlap=1"],
+          "risk_tier": "medium"
+        }
+      ],
+      "uncertainty_reasons": ["top_candidates_close_score"],
+      "expected": {
+        "decision_status": "unresolved_ambiguity",
+        "failure_class": "AMBIGUITY_UNRESOLVED",
+        "selected_names": [],
+        "considered_total": 2,
+        "considered_truncated": false
+      }
+    },
+    {
+      "id": "degraded-no-candidates",
+      "request": "unknown request",
+      "considered_limit": 3,
+      "top_k": 1,
+      "eligible_candidates": [
+        {
+          "name": "context7",
+          "path": "product/docs/context7",
+          "description": "Retrieve current third-party docs.",
+          "scope_rank": 7
+        }
+      ],
+      "ranked_candidates": [],
+      "uncertainty_reasons": [],
+      "expected": {
+        "decision_status": "degraded_no_candidates",
+        "failure_class": "NO_ELIGIBLE_CANDIDATES",
+        "selected_names": [],
+        "considered_total": 1,
+        "considered_truncated": false
+      }
+    }
+  ]
+}

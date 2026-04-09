@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "name": "harness-engineering",
+  "version": "0.1.0",
+  "description": "Bundle the compound-engineering workflow family for ideation, specification, planning, implementation, and review.",
+  "author": {
+    "name": "Jamie Craik",
+    "url": "https://github.com/jscraik"
+  },
+  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "repository": "https://github.com/jscraik/Agent-Skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "plugin",
+    "harness-engineering",
+    "compound-engineering",
+    "planning",
+    "review",
+    "codex"
+  ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "canonical",
+    "owner": "Agent Skills Team",
+    "review_cadence": "quarterly",
+    "last_reviewed": "2026-04-09",
+    "metadata_source": "plugin_manifest"
+  },
+  "skills": "./skills/",
+  "hooks": "./hooks/",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Harness Engineering",
+    "shortDescription": "Run the full compound-engineering workflow",
+    "longDescription": "A Codex plugin package that bundles compound-engineering lifecycle skills, from ideation through execution and review.",
+    "developerName": "Jamie Craik",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jscraik/Agent-Skills",
+    "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
+    "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
+    "defaultPrompt": "Help me run compound-engineering workflow stages end to end.",
+    "brandColor": "#0EA5E9"
+  }
+}

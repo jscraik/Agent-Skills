@@ -154,6 +154,10 @@ agent-skills/
 - **[Skill Index](SKILL.md)** – All 129 skills by category
 - **[Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
+## Privacy and Data Handling
+
+This repository stores skill source, docs, and validation artifacts for local-first agent workflows. Do not commit credentials, tokens, or personal data. Security and secret checks run in CI, but contributors remain responsible for keeping sensitive values out of commits and generated artifacts.
+
 ## Governance
 
 - **License:** Apache 2.0

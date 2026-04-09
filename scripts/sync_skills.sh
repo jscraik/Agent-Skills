@@ -42,6 +42,15 @@ fi
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
+selection_policy_shell="$(
+  python3 "$repo_root/scripts/selection_policy.py" --format shell
+)"
+if [ -z "$selection_policy_shell" ]; then
+  echo "Failed to load selection policy shell exports." >&2
+  exit 1
+fi
+eval "$selection_policy_shell"
+
 acquire_sync_lock() {
   if mkdir "$lock_dir" 2>/dev/null; then
     printf '%s\n' "$$" > "$lock_pid_file"
@@ -178,15 +187,7 @@ fi
 # Remove meta/internal skills from the flat runtime surface so they do not
 # appear as user-selectable skills in Codex. Lifecycle family skills such as
 # `skill-creator` and `skill-installer` are intentionally visible again.
-hidden_flat_skills=(
-  "coderabbit"
-  "linear"
-  "plugin-builder"
-  "plugin-creator"
-  "plugin-installer"
-  "skillgrade-graders"
-  "skillgrade-setup"
-)
+hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
 is_hidden_flat_skill_name() {
   local skill_name="$1"
   case " ${hidden_flat_skills[*]} " in
@@ -205,54 +206,29 @@ for hidden_skill in "${hidden_flat_skills[@]}"; do
 done
 
 # Recreate symlinks for all discovered SKILL.md directories (with exclusions).
-skill_files_cmd() {
-  # Allowlist of trusted category directories — only these are scanned.
-  # This prevents untrusted paths (artifacts/, logs/, reports/, templates/, etc.)
-  # from ever contributing a SKILL.md into the canonical skills/ view.
-  local skill_roots=(
-    "./auth"
-    "./backend"
-    "./design"
-    "./frontend"
-    "./github"
-    "./interview"
-    "./ops"
-    "./personas"
-    "./product"
-    "./skills-system"
-    "./utilities"
-  )
+find_skill_files_with_policy() {
+  local root="$1"
+  local segment=""
+  local -a find_args=()
 
+  for segment in "${SELECTION_POLICY_EXCLUDED_SEGMENTS[@]}"; do
+    find_args+=(-path "*/$segment/*" -prune -o)
+  done
+
+  find -L "$root" "${find_args[@]}" -name "SKILL.md" -print
+}
+
+skill_files_cmd() {
   local root=""
-  for root in "${skill_roots[@]}"; do
+  for root in "${SELECTION_POLICY_REPO_SCAN_ROOTS[@]}"; do
     [ -d "$root" ] || continue
-    find -L "$root" \
-      -path "*/_archive/*" -prune -o \
-      -path "*/assets/*" -prune -o \
-      -path "*/fixtures/*" -prune -o \
-      -path "*/examples/*" -prune -o \
-      -path "*/templates/*" -prune -o \
-      -path "*/references/*" -prune -o \
-      -path "*/agents/*" -prune -o \
-      -path "*/rules/*" -prune -o \
-      -path "*/scripts/*" -prune -o \
-      -name "SKILL.md" -print
+    find_skill_files_with_policy "$root"
   done
 
   local plugin_skills_root=""
-  for plugin_skills_root in ./plugins/*/skills; do
+  for plugin_skills_root in ${SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB}; do
     [ -d "$plugin_skills_root" ] || continue
-    find -L "$plugin_skills_root" \
-      -path "*/_archive/*" -prune -o \
-      -path "*/assets/*" -prune -o \
-      -path "*/fixtures/*" -prune -o \
-      -path "*/examples/*" -prune -o \
-      -path "*/templates/*" -prune -o \
-      -path "*/references/*" -prune -o \
-      -path "*/agents/*" -prune -o \
-      -path "*/rules/*" -prune -o \
-      -path "*/scripts/*" -prune -o \
-      -name "SKILL.md" -print
+    find_skill_files_with_policy "$plugin_skills_root"
   done
 }
 
@@ -1037,4 +1013,5 @@ sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/p
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
 
+echo "Selection policy identity: $SELECTION_POLICY_IDENTITY"
 echo "Synced symlinks and regenerated SKILL.md."

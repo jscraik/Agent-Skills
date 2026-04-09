@@ -737,6 +737,7 @@ def _ensure_marketplace_interface(payload: dict[str, Any]) -> None:
 
 
 def _marketplace_repo_root(marketplace_path: Path) -> Path:
+    lexical_path = marketplace_path.expanduser().absolute()
     resolved_path = marketplace_path.resolve()
     for candidate in (resolved_path.parent, *resolved_path.parents):
         if (candidate / ".git").exists():
@@ -748,7 +749,21 @@ def _marketplace_repo_root(marketplace_path: Path) -> Path:
             "Expected a '.git' sentinel above the marketplace file."
         )
 
-    relative_marketplace = resolved_path.relative_to(repo_root).as_posix()
+    lexical_repo_root: Path | None = None
+    for candidate in (lexical_path.parent, *lexical_path.parents):
+        try:
+            if candidate.resolve() == repo_root:
+                lexical_repo_root = candidate
+                break
+        except OSError:
+            continue
+
+    if lexical_repo_root is not None:
+        # Keep lexical path components so ".agents/plugins/..." remains visible
+        # even when ".agents/plugins" is a symlink to "plugins".
+        relative_marketplace = lexical_path.relative_to(lexical_repo_root).as_posix()
+    else:
+        relative_marketplace = resolved_path.relative_to(repo_root).as_posix()
     if relative_marketplace in {
         "plugins/marketplace.json",
         OPENAI_MARKETPLACE_RELATIVE_PATH,
@@ -762,6 +777,13 @@ def _marketplace_repo_root(marketplace_path: Path) -> Path:
 
 
 def _marketplace_relative_path(marketplace_path: Path, repo_root: Path) -> str:
+    lexical_path = marketplace_path.expanduser().absolute()
+    for candidate in (lexical_path.parent, *lexical_path.parents):
+        try:
+            if candidate.resolve() == repo_root:
+                return lexical_path.relative_to(candidate).as_posix()
+        except OSError:
+            continue
     return marketplace_path.resolve().relative_to(repo_root).as_posix()
 
 
@@ -3094,7 +3116,7 @@ def _run_scaffold(args: argparse.Namespace) -> int:
 
     marketplace_path: Path | None = None
     if args.with_marketplace:
-        marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+        marketplace_path = Path(args.marketplace_path).expanduser()
         update_marketplace_json(
             marketplace_path,
             plugin_name,
@@ -3206,10 +3228,10 @@ def _run_validate(args: argparse.Namespace) -> int:
         ):
             add_finding("error", message)
 
-    marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+    marketplace_path = Path(args.marketplace_path).expanduser()
     strict_openai_layout = not bool(args.allow_legacy_marketplace_path)
     extra_marketplace_paths = [
-        Path(raw_path).expanduser().resolve()
+        Path(raw_path).expanduser()
         for raw_path in (args.extra_marketplace_path or [])
     ]
     all_marketplace_paths = list(dict.fromkeys([marketplace_path, *extra_marketplace_paths]))
@@ -3293,7 +3315,7 @@ def _run_inspect_local(args: argparse.Namespace) -> int:
 
 
 def _run_audit_marketplace(args: argparse.Namespace) -> int:
-    marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+    marketplace_path = Path(args.marketplace_path).expanduser()
     plugins_path = Path(args.plugins_path).expanduser().resolve()
     if not marketplace_path.exists():
         print(f"ERROR: marketplace path does not exist: {marketplace_path}", file=sys.stderr)
@@ -3313,7 +3335,7 @@ def _run_audit_marketplace(args: argparse.Namespace) -> int:
 
 
 def _run_normalize_marketplace(args: argparse.Namespace) -> int:
-    marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+    marketplace_path = Path(args.marketplace_path).expanduser()
     plugins_path = Path(args.plugins_path).expanduser().resolve()
     try:
         payload, notes = _normalize_marketplace_payload(
@@ -3349,7 +3371,7 @@ def _run_audit_compat(args: argparse.Namespace) -> int:
         return 1
     marketplace_payload = None
     if args.marketplace_path:
-        marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+        marketplace_path = Path(args.marketplace_path).expanduser()
         if marketplace_path.exists():
             if not args.allow_legacy_marketplace_path:
                 try:

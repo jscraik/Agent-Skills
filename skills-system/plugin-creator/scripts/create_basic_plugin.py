@@ -176,11 +176,13 @@ def _marketplace_repo_root(
     *,
     allow_legacy_marketplace_path: bool,
 ) -> Path:
-    resolved = marketplace_path.resolve()
-    if resolved.name != "marketplace.json":
+    # Preserve lexical path components so ".agents/plugins/..." remains valid
+    # even when ".agents/plugins" is a symlink to "plugins".
+    absolute = marketplace_path.expanduser().absolute()
+    if absolute.name != "marketplace.json":
         raise ValueError("marketplace path must end with 'marketplace.json'.")
 
-    plugins_dir = resolved.parent
+    plugins_dir = absolute.parent
     if plugins_dir.name != "plugins":
         raise ValueError(
             "marketplace path must live under '.agents/plugins/' "
@@ -189,12 +191,12 @@ def _marketplace_repo_root(
 
     dot_agents_or_root = plugins_dir.parent
     if dot_agents_or_root.name == ".agents":
-        return dot_agents_or_root.parent
+        return dot_agents_or_root.parent.resolve()
 
     if allow_legacy_marketplace_path:
-        return dot_agents_or_root
+        return dot_agents_or_root.resolve()
 
-    relative_path = resolved.as_posix()
+    relative_path = absolute.as_posix()
     raise ValueError(
         f"OpenAI/Codex marketplace mode requires '{OPENAI_MARKETPLACE_RELATIVE_PATH}'. "
         f"Legacy path '{LEGACY_MARKETPLACE_RELATIVE_PATH}' is disabled by default. "
@@ -423,7 +425,7 @@ def main() -> None:
 
     marketplace_path: Optional[Path] = None
     if args.with_marketplace:
-        marketplace_path = Path(args.marketplace_path).expanduser().resolve()
+        marketplace_path = Path(args.marketplace_path).expanduser()
         update_marketplace_json(
             marketplace_path,
             plugin_name,

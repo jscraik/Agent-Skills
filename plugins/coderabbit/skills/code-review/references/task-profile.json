@@ -3,12 +3,28 @@
   "profile_id": "plugins-coderabbit-code-review",
   "scope_skill": "plugins/coderabbit/skills/code-review",
   "scope_profile": "plugins/coderabbit",
+  "rubric_version": "2026-04-08",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    { "id": "clarity", "label": "Review workflow clarity", "threshold": 0.72, "weight": 0.34, "critical": true },
+    { "id": "specificity", "label": "Finding specificity", "threshold": 0.68, "weight": 0.33, "critical": true },
+    { "id": "safety", "label": "Safety and redaction", "threshold": 0.85, "weight": 0.33, "critical": true }
+  ],
   "delegation": {
     "mode": "co-pilot",
     "human_baseline_minutes": 35,
     "ai_process_minutes": 12,
     "probability_of_success": 0.8,
-    "rationale": "AI triage plus human risk acceptance."
+    "rationale": "Code review guidance is high-leverage with AI triage while humans confirm risk acceptance and final remediation decisions."
   },
   "learning_posture": {
     "supported": ["learn", "guided", "execute"],

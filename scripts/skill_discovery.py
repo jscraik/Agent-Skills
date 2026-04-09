@@ -9,18 +9,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List
 
+from selection_policy import (
+    EXCLUDED_SCAN_SEGMENTS as POLICY_EXCLUDED_SCAN_SEGMENTS,
+    HIDDEN_FLAT_SKILL_NAMES as POLICY_HIDDEN_FLAT_SKILL_NAMES,
+    REPO_SCAN_ROOTS as POLICY_REPO_SCAN_ROOTS,
+    policy_identity,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FLAT_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
-REPO_SCAN_ROOTS = (
-    "auth",
-    "backend",
-    "frontend",
-    "github",
-    "interview",
-    "product",
-    "skills-system",
-    "utilities",
-)
+REPO_SCAN_ROOTS = POLICY_REPO_SCAN_ROOTS
+
+# Ignore SKILL.md files in implementation/support subtrees that are not
+# runtime-selectable skills.
+EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
+
+# Keep hidden/internal skills out of runtime discovery. This mirrors
+# scripts/sync_skills.sh hidden_flat_skills.
+HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 
 # Ignore SKILL.md files in implementation/support subtrees that are not
 # runtime-selectable skills.
@@ -55,6 +61,10 @@ class SkillEntry:
     source_dir: Path
     category: str
     description: str
+
+
+def get_policy_identity() -> str:
+    return policy_identity()
 
 
 def _iter_flat_skill_dirs() -> Iterable[Path]:
@@ -245,6 +255,7 @@ def render_index(entries: List[SkillEntry], source: str = "auto") -> str:
             "## Summary",
             f"- `total_skills`: {len(entries)}",
             f"- `catalog_source`: {source_label}",
+            f"- `policy_identity`: {get_policy_identity()}",
             "",
             "## Catalog",
             "",
@@ -271,6 +282,11 @@ def parse_args() -> argparse.Namespace:
         default="auto",
         help="Catalog source: flat runtime view, repo scan, or auto fallback (default).",
     )
+    parser.add_argument(
+        "--policy-identity",
+        action="store_true",
+        help="Print canonical selection-policy identity.",
+    )
     return parser.parse_args()
 
 
@@ -281,12 +297,15 @@ def main() -> int:
     if args.count:
         print(len(entries))
 
+    if args.policy_identity:
+        print(get_policy_identity())
+
     if args.write_index:
         rendered = render_index(entries, source=args.source)
         args.write_index.write_text(rendered + "\n", encoding="utf-8")
         print(f"Wrote skill index: {args.write_index}")
 
-    if not args.count and not args.write_index:
+    if not args.count and not args.write_index and not args.policy_identity:
         print(render_index(entries, source=args.source))
 
     return 0

@@ -5,10 +5,18 @@ import subprocess
 import re
 import sys
 import importlib.util
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
+
+SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT))
+
 from ask.envelope import CallResult, ErrorObject
-from skill_discovery import discover_skill_entries
+from skill_discovery import discover_skill_entries, get_policy_identity
+from selection_policy import REPO_SCAN_ROOTS
+from ask.selection_contract import EligibleCandidate, build_decision_payload, canonical_sort_key
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -68,6 +76,13 @@ def _summarize_family_benchmark_failure(stdout: str, stderr: str, limit: int = 3
 
     return None
 
+
+@dataclass(frozen=True)
+class _RouterSkill:
+    name: str
+    description: str
+    skill_path: str
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     module_path = repo_root / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
@@ -100,6 +115,7 @@ def list_skills(repo_root: Path, category: Optional[str] = None) -> CallResult:
             "description": entry.description
         })
     result.data["skills"] = skills_data
+    result.data["policy_identity"] = get_policy_identity()
     result.status = "success"
     return result
 
@@ -348,6 +364,116 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
 
     return result
 
+
+def _scope_rank_for_path(skill_path: str) -> int:
+    root = skill_path.split("/", 1)[0].strip()
+    if root in REPO_SCAN_ROOTS:
+        return REPO_SCAN_ROOTS.index(root) + 1
+    return len(REPO_SCAN_ROOTS) + 1
+
+
+def route_skills(
+    repo_root: Path,
+    request: str,
+    top_k: int = 3,
+    considered_limit: int = 20,
+) -> CallResult:
+    """Route a request to deterministic skill candidates with explainability."""
+    result = CallResult()
+    query = request.strip()
+    if not query:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Request cannot be empty for skills route.",
+                fix_suggestion="Provide request text, for example: ask skills route \"review this PR\"",
+            )
+        )
+        return result
+
+    router_mod = _load_builder_module(repo_root, "skill_router")
+    if not router_mod:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="Skill router module is not available.",
+                fix_suggestion="Ensure utilities/skill-builder/scripts/skill_router.py exists and rerun.",
+            )
+        )
+        return result
+
+    eligible_candidates: list[EligibleCandidate] = []
+    for entry in discover_skill_entries(source="repo"):
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        eligible_candidates.append(
+            EligibleCandidate(
+                name=entry.name,
+                path=rel_path,
+                description=entry.description,
+                scope_rank=_scope_rank_for_path(rel_path),
+            )
+        )
+
+    ordered_candidates = sorted(eligible_candidates, key=canonical_sort_key)
+    bounded_limit = max(1, int(considered_limit))
+    considered_candidates = ordered_candidates[:bounded_limit]
+    router_skills = [
+        _RouterSkill(name=item.name, description=item.description, skill_path=item.path)
+        for item in considered_candidates
+    ]
+
+    ranked, uncertainty_reasons = router_mod.route(query, router_skills, top_k=max(1, int(top_k)))
+    ranked_payload = [
+        {
+            "skill_name": candidate.skill_name,
+            "skill_path": candidate.skill_path,
+            "confidence": float(candidate.confidence),
+            "rationale": list(candidate.rationale),
+            "risk_tier": candidate.risk_tier,
+        }
+        for candidate in ranked
+    ]
+
+    decision = build_decision_payload(
+        request=query,
+        policy_identity=get_policy_identity(),
+        considered_limit=bounded_limit,
+        top_k=max(1, int(top_k)),
+        eligible_candidates=ordered_candidates,
+        ranked_candidates=ranked_payload,
+        uncertainty_reasons=list(uncertainty_reasons),
+    )
+
+    decision_status = decision["decision_status"]
+    result.data["decision"] = decision
+    result.data["policy_identity"] = decision["policy_identity"]
+    result.data["decision_status"] = decision_status
+
+    if decision_status == "resolved":
+        result.status = "success"
+        return result
+
+    failure_class = decision.get("failure_class")
+    code = "ERR_VALIDATION"
+    if failure_class == "AMBIGUITY_UNRESOLVED":
+        code = "ERR_CONFLICT"
+    elif failure_class == "DISCOVERY_POLICY_DRIFT":
+        code = "ERR_DEPENDENCY"
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code=code,
+            message=f"skills route returned {decision_status}",
+            fix_suggestion=decision.get("operator_action"),
+        )
+    )
+    return result
+
 def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
     """Safely create or update a symlink."""
     action = "Created" if not target.exists() else "Updated"
@@ -478,5 +604,6 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
         return result
     result.data["plan"] = plan
     result.data["logs"] = logs
+    result.data["policy_identity"] = get_policy_identity()
     result.status = "success"
     return result

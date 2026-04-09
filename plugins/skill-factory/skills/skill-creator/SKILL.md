@@ -64,7 +64,7 @@ Assumptions and requirements:
 When the new skill needs a dedicated subagent path, handle role wiring during scaffold creation:
 
 1. Check for reusable role TOMLs in `/Users/jamiecraik/dev/configs/codex/agents/`.
-2. If no reusable role exists, invoke [[codex-agent-builder]] to create a purpose-built agent file.
+2. If no reusable role exists, invoke [[codex-agent-creator]] to create a purpose-built agent file.
 3. Validate the selected/generated role file:
 
 ```bash

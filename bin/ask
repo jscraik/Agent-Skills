@@ -26,6 +26,7 @@ from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
 from ask.context import find_repo_root
 from ask.commands.skills import (
     list_skills,
+    route_skills,
     sync_skills,
     audit_skill,
     install_skill,
@@ -34,7 +35,13 @@ from ask.commands.skills import (
     extract_family_fail_lines,
 )
 from ask.commands.repo import repo_status, repo_validate, check_hub_stability
-from ask.commands.plugins import init_plugin, install_plugin
+from ask.commands.plugins import (
+    init_plugin,
+    install_plugin,
+    list_plugins_state,
+    status_plugin_state,
+    doctor_plugins_state,
+)
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
@@ -60,8 +67,8 @@ ERROR_MAP = {
 VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability"],
-    "skills": ["list", "sync", "audit", "install", "fold", "init"],
-    "plugins": ["init", "install"],
+    "skills": ["list", "route", "sync", "audit", "install", "fold", "init"],
+    "plugins": ["list", "status", "doctor", "init", "install"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
@@ -183,6 +190,7 @@ def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: L
     if topic == "skills" or not topic:
         examples.extend([
             "ask skills list",
+            "ask skills route \"find me the right skill for this request\"",
             "ask skills audit backend/cli-spec --level strict",
             "ask skills init my-skill --category backend --description 'Does something useful'",
         ])
@@ -402,6 +410,11 @@ def main():
     
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
     skills_list_parser.add_argument("--category", help="Filter by category")
+
+    skills_route_parser = skills_subparsers.add_parser("route", help="Route a request to matching skills", parents=[global_parser])
+    skills_route_parser.add_argument("request", nargs="+", help="Request text to route")
+    skills_route_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to return")
+    skills_route_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
     
     skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
     skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
@@ -430,6 +443,13 @@ def main():
     # --- plugins ---
     plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
     plugins_subparsers = plugins_parser.add_subparsers(dest="action")
+
+    plugins_subparsers.add_parser("list", help="List plugin lifecycle state", parents=[global_parser])
+
+    plugins_status_parser = plugins_subparsers.add_parser("status", help="Show state for one plugin", parents=[global_parser])
+    plugins_status_parser.add_argument("name", help="Plugin name")
+
+    plugins_subparsers.add_parser("doctor", help="Run read-only plugin diagnostics", parents=[global_parser])
     
     plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
     plugins_init_parser.add_argument("name", help="Name of the new plugin")
@@ -711,6 +731,13 @@ def main():
     elif args.topic == "skills":
         if args.action == "list":
             result = list_skills(repo_root, category=args.category)
+        elif args.action == "route":
+            result = route_skills(
+                repo_root,
+                request=" ".join(args.request),
+                top_k=args.top_k,
+                considered_limit=args.considered_limit,
+            )
         elif args.action == "sync":
             result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run)
         elif args.action == "audit":
@@ -727,11 +754,17 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'skills'",
-                fix_suggestion="Valid actions: list, sync, audit, install, fold, init"
+                fix_suggestion="Valid actions: list, route, sync, audit, install, fold, init"
             ))
             
     elif args.topic == "plugins":
-        if args.action == "init":
+        if args.action == "list":
+            result = list_plugins_state(repo_root)
+        elif args.action == "status":
+            result = status_plugin_state(repo_root, name=args.name)
+        elif args.action == "doctor":
+            result = doctor_plugins_state(repo_root)
+        elif args.action == "init":
             companion = []
             if args.with_scripts: companion.append("scripts")
             if args.with_assets: companion.append("assets")
@@ -757,7 +790,7 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'plugins'",
-                fix_suggestion="Valid actions: init, install"
+                fix_suggestion="Valid actions: list, status, doctor, init, install"
             ))
 
     elif args.topic == "evals":
@@ -1004,12 +1037,46 @@ def main():
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:
                         print(f"  - {skill['name']} [{skill['category']}]")
+                    if result.data.get("policy_identity"):
+                        print(f"Policy identity: {result.data['policy_identity']}")
+                elif args.topic == "skills" and args.action == "route":
+                    decision = result.data["decision"]
+                    print(f"🧭 Route decision: {decision['decision_status']}")
+                    print(f"Policy identity: {decision['policy_identity']}")
+                    print(
+                        "Considered: "
+                        f"{len(decision['considered_candidates'])}/{decision['considered_total']} "
+                        f"(limit={decision['considered_limit']}, truncated={decision['considered_truncated']})"
+                    )
+                    if decision["selected_candidates"]:
+                        print("Selected:")
+                        for candidate in decision["selected_candidates"]:
+                            print(
+                                f"  - {candidate['name']} ({candidate['path']}) "
+                                f"confidence={candidate.get('confidence', 0.0):.4f}"
+                            )
+                            rationale = candidate.get("rationale") or []
+                            if rationale:
+                                print(f"    rationale: {', '.join(rationale)}")
+                    if decision.get("failure_class"):
+                        print(f"Failure class: {decision['failure_class']}")
+                    if decision.get("operator_action"):
+                        print(f"Operator action: {decision['operator_action']}")
+                    if decision.get("ambiguity_set"):
+                        print("Ambiguity set:")
+                        for candidate in decision["ambiguity_set"]:
+                            print(
+                                f"  - {candidate.get('name')} ({candidate.get('path')}) "
+                                f"confidence={candidate.get('confidence', 0.0):.4f}"
+                            )
                 elif args.topic == "skills" and args.action == "sync":
                     print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
                     for log in result.data.get("logs", []):
                         print(f"  {log}")
                     if args.dry_run:
                         print("  (Dry run - no changes made)")
+                    if result.data.get("policy_identity"):
+                        print(f"  Policy identity: {result.data['policy_identity']}")
                 elif args.topic == "skills" and args.action == "audit":
                     print(f"✅ Audit passed: {args.path}")
                     print(result.data["diagnostics"]["stdout"])
@@ -1035,6 +1102,20 @@ def main():
                 elif args.topic == "plugins" and args.action == "init":
                     print(f"✅ {result.data['message']}")
                     print(result.data.get("raw_output", ""))
+                elif args.topic == "plugins" and args.action in {"list", "status", "doctor"}:
+                    installed_state = result.data.get("installed_state", {})
+                    activation_state = result.data.get("activation_state", {})
+                    health_state = result.data.get("health_state", {})
+                    print(f"Plugins installed: {installed_state.get('plugin_count', 0)}")
+                    for plugin in installed_state.get("plugins", []):
+                        print(f"  - {plugin.get('name')} ({plugin.get('path')})")
+                    print(f"Activation entries: {activation_state.get('plugin_count', 0)}")
+                    print(f"Health status: {health_state.get('status', 'unknown')}")
+                    blockers = health_state.get("blockers", [])
+                    if blockers:
+                        print("Blockers:")
+                        for blocker in blockers:
+                            print(f"  - {blocker}")
                 elif args.topic == "plugins" and args.action == "install":
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install plugin:")
@@ -1165,6 +1246,21 @@ def main():
         else:
             # Enhanced error output with examples
             error = result.errors[0] if result.errors else ErrorObject(code=ErrorCode.ERR_RUNTIME, message="Unknown error")
+            if args.topic == "skills" and args.action == "route" and result.data.get("decision"):
+                decision = result.data["decision"]
+                print(f"🧭 Route decision: {decision.get('decision_status', 'unknown')}")
+                if decision.get("failure_class"):
+                    print(f"Failure class: {decision['failure_class']}")
+                if decision.get("operator_action"):
+                    print(f"Operator action: {decision['operator_action']}")
+                if decision.get("ambiguity_set"):
+                    print("Ambiguity set:")
+                    for candidate in decision["ambiguity_set"]:
+                        print(
+                            f"  - {candidate.get('name')} ({candidate.get('path')}) "
+                            f"confidence={candidate.get('confidence', 0.0):.4f}"
+                        )
+                print("")
             error_message = error.message
             if args.topic == "skills" and args.action == "audit" and " First failures:" in error_message:
                 error_message = error_message.split(" First failures:", 1)[0]

@@ -19,15 +19,23 @@ fi
 repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_root"
 
-python_cmd=()
-python_cmd_display=""
+python_cmd=(python3)
+python_cmd_display="python3"
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
   python_cmd_display="$PYTHON_BIN"
 elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
-  python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+  if mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1; then
+    python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
+    python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+  elif uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1; then
+    python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
+    python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+    echo "[family-gate] WARN: Python launcher fallback engaged (mise probe failed); using uv directly"
+  else
+    echo "[family-gate] WARN: Python launcher probes failed; using python3 fallback"
+  fi
 elif command -v uv >/dev/null 2>&1; then
   python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
   python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"

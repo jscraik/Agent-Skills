@@ -1,6 +1,9 @@
 # Prek configuration for agent-skills
 # Run: prek install && prek run --all-files
 
+pre-commit = ["make hooks-pre-commit"]
+pre-push = ["make hooks-pre-push"]
+
 [default_install_hook_types]
 pre_commit = true
 
