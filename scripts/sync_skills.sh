@@ -1070,18 +1070,11 @@ sync_local_marketplace_cache() {
       find "$target_local_dir" -name '.DS_Store' -type f -delete
     fi
 
-    # Avoid duplicate "System" + "Personal" skill rows in pickers when a
-    # plugin exports a skill that already exists in skills-system.
-    if [ -d "$target_local_dir/skills" ]; then
-      for cached_skill_dir in "$target_local_dir/skills"/*; do
-        [ -d "$cached_skill_dir" ] || continue
-        skill_name="$(basename "$cached_skill_dir")"
-        if [ -f "$system_skills_dir/$skill_name/SKILL.md" ]; then
-          rm -rf -- "$cached_skill_dir"
-          echo "[OK] Suppressed duplicate cached skill (system already provides it): $plugin_name/$skill_name"
-        fi
-      done
-    fi
+    # Preserve all plugin-owned skills in cache even when a same-named system
+    # skill exists. Modern runtimes namespace plugin skills by plugin id, so
+    # cache-time deduplication can incorrectly hide valid plugin surfaces.
+    # Flat runtime deduplication remains enforced separately via
+    # is_plugin_owned_skill_path() above.
   done < <(
     python3 - "$marketplace_file" <<'PY'
 import json

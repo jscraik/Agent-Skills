@@ -27,7 +27,6 @@
     "metadata_source": "plugin_manifest"
   },
   "skills": "./skills/",
-  "hooks": "./hooks/",
   "mcpServers": "./.mcp.json",
   "apps": "./.app.json",
   "interface": {
