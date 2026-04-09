@@ -22,6 +22,17 @@ from ask.selection_contract import EligibleCandidate, build_decision_payload, bu
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments for the selection contract verification tool.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes:
+            - fixtures (Path): Path to the route fixture JSON.
+            - artifact (Path): Path to write the routing quality JSON artifact.
+            - goal_fixtures (Path): Path to the goal fixture JSON.
+            - history_path (Path|None): Optional JSONL history file path for append-only trend records.
+            - history_max_runs (int): Maximum number of schema-valid history rows to retain.
+    """
     parser = argparse.ArgumentParser(description="Verify deterministic selection contract fixtures.")
     parser.add_argument(
         "--fixtures",
@@ -70,6 +81,20 @@ def _check_explainability(decision: dict[str, Any]) -> list[str]:
 
 
 def _fixture_to_eligible(fixture: dict[str, Any]) -> list[EligibleCandidate]:
+    """
+    Convert a route fixture's `eligible_candidates` entries into a list of `EligibleCandidate` objects.
+    
+    Parameters:
+        fixture (dict): Fixture object expected to contain an `eligible_candidates` list of candidate mappings.
+            Each candidate mapping should include:
+            - `name` (required): candidate name
+            - `path` (required): candidate path
+            - `description` (optional): candidate description (defaults to empty string)
+            - `scope_rank` (optional): numeric rank (defaults to 999)
+    
+    Returns:
+        list[EligibleCandidate]: A list of `EligibleCandidate` instances built from the fixture entries.
+    """
     items = []
     for candidate in fixture.get("eligible_candidates", []):
         items.append(
@@ -89,6 +114,16 @@ def _append_history(
     *,
     max_runs: int,
 ) -> None:
+    """
+    Append a metrics row to a bounded JSONL history file, preserving only previously valid metric rows.
+    
+    Reads existing JSONL lines from `history_path`, ignoring blank lines, non-JSON lines and payloads that are not objects or that lack both `unresolved_ambiguity_rate` and `no_candidate_rate`. Appends `row`, truncates the combined list to the last `max(1, int(max_runs))` entries, ensures the parent directory exists, and writes the resulting list back to `history_path` as JSONL.
+    
+    Parameters:
+    	history_path (Path): Path to the JSONL history file to read and overwrite.
+    	row (dict[str, Any]): Metrics row to append (no schema enforcement is performed here).
+    	max_runs (int): Maximum number of history rows to retain; values less than 1 are treated as 1.
+    """
     existing_rows: list[dict[str, Any]] = []
     if history_path.exists():
         for raw in history_path.read_text(encoding="utf-8", errors="ignore").splitlines():
@@ -116,6 +151,14 @@ def _append_history(
 
 
 def main() -> int:
+    """
+    Run verification of selection contract fixtures, produce a routing-quality artifact and optional history entry.
+    
+    Loads route fixtures (and optionally goal fixtures), builds and validates decisions against expected outputs, aggregates per-fixture results and summary metrics (including explainability and failure-mapping checks), writes a JSON artifact describing outcomes and gates, optionally appends a bounded JSONL history row when provided and there are no failures, prints a concise summary to stdout, and exits with a status indicating success or failure.
+    
+    Returns:
+        int: 0 on successful verification (no failing fixtures), 1 on failure or input/validation errors.
+    """
     args = parse_args()
     if not args.fixtures.exists():
         print(f"Fixture file not found: {args.fixtures}")

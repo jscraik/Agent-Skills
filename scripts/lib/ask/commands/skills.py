@@ -26,7 +26,17 @@ from ask.selection_contract import (
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
-    """Build a Python launcher command with deterministic uv-first resolution."""
+    """
+    Constructs a platform-appropriate Python invocation command prioritising uv/mise wrappers when available.
+    
+    The returned command is chosen with this observable precedence: a non-empty PYTHON_BIN environment value, a `mise`+`uv` wrapper, an `uv` wrapper, a user virtualenv at `~/.venvs/pyyaml/bin/python`, then the system `python3`.
+    
+    Parameters:
+        with_packages (Optional[List[str]]): Optional iterable of package names to request via `--with` when using a wrapper that accepts package flags; falsy entries are ignored.
+    
+    Returns:
+        List[str]: Tokenised command suitable for subprocess invocation to run Python.
+    """
     configured = os.environ.get("PYTHON_BIN", "").strip()
     if configured:
         return shlex.split(configured)
@@ -108,6 +118,16 @@ STARTER_ARCHETYPES = {
 
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
+    """
+    Load a skill-builder script from the repository and return it as an imported module.
+    
+    Parameters:
+        repo_root (Path): Repository root used to locate `utilities/skill-builder/scripts/<module_name>.py`.
+        module_name (str): Script base name (without `.py`) to load.
+    
+    Returns:
+        module (types.ModuleType | None): The imported module object if the script exists and is loaded, `None` otherwise.
+    """
     module_path = repo_root / "utilities" / "skill-builder" / "scripts" / f"{module_name}.py"
     if not module_path.exists():
         return None
@@ -125,6 +145,15 @@ def _load_builder_module(repo_root: Path, module_name: str):
     return None
 
 def _canonical_entries(repo_root: Path) -> list:
+    """
+    Return skill entries whose source directory is inside the repository root.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to filter discovered skill entries.
+    
+    Returns:
+    	entries (list): List of discovered skill entries whose `source_dir` is relative to `repo_root`.
+    """
     return [
         entry
         for entry in discover_skill_entries(source="repo")
@@ -133,6 +162,19 @@ def _canonical_entries(repo_root: Path) -> list:
 
 
 def _starter_entries(entries: list, archetype: str, limit: int) -> list:
+    """
+    Selects a deterministic subset of skill entries for starter mode.
+    
+    Prefers skills listed in the chosen archetype (in archetype order) and, if needed, appends additional entries from the provided list until a bounded minimum of 1 up to `limit` items is reached. Unknown archetype keys fall back to the "general" archetype.
+    
+    Parameters:
+        entries (list): Iterable of skill entry objects; each must expose a `name` attribute.
+        archetype (str): Archetype key whose ordered starter names guide preferred selection.
+        limit (int): Maximum number of entries to return; values below 1 are treated as 1.
+    
+    Returns:
+        list: Ordered list of selected entries (length >= 1 and <= `limit`), preferring archetype-specified names first and then remaining entries in input order.
+    """
     bounded_limit = max(1, int(limit))
     archetype_key = archetype if archetype in STARTER_ARCHETYPES else "general"
     preferred = list(STARTER_ARCHETYPES[archetype_key])
@@ -159,6 +201,25 @@ def list_skills(
     archetype: str = "general",
     limit: int = 12,
 ) -> CallResult:
+    """
+    Return a listing of skills in the repository, optionally filtered or reduced to a deterministic "starter" subset.
+    
+    Parameters:
+    	repo_root (Path): Root path of the repository to discover skills from; entries outside this root are excluded.
+    	category (Optional[str]): Case-insensitive substring filter applied to each skill's category; omit to include all.
+    	starter (bool): When true, return a deterministic, archetype-ordered subset of skills instead of the full set.
+    	archetype (str): Archetype key to select starter skills from; falls back to "general" when unknown.
+    	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
+    
+    Returns:
+    	CallResult: Result with `status == "success"` and `data` containing:
+    		- "skills": list of objects with keys `name`, `path` (repository-relative when possible), `category`, `description`
+    		- "policy_identity": current policy identity string
+    		- When `starter` is true, also includes:
+    			- "starter_mode": true
+    			- "starter_archetype": resolved archetype key
+    			- "starter_limit": effective integer limit
+    """
     result = CallResult()
     entries = _canonical_entries(repo_root)
     if starter:
@@ -441,7 +502,23 @@ def route_skills(
     top_k: int = 3,
     considered_limit: int = 20,
 ) -> CallResult:
-    """Route a request to deterministic skill candidates with explainability."""
+    """
+    Route a textual request to ranked skill candidates and build a decision payload.
+    
+    Parameters:
+        repo_root (Path): Repository root used to discover canonical skill entries.
+        request (str): Textual request to route; must be non-empty after trimming.
+        top_k (int): Number of top-ranked skills to return (bounded to at least 1).
+        considered_limit (int): Maximum number of candidate skills to consider when routing (bounded to at least 1).
+    
+    Returns:
+        CallResult: Result object whose `data` contains:
+            - `decision`: the decision payload produced by the routing logic.
+            - `catalog_parity`: parity information comparing catalog and routing considerations.
+            - `policy_identity`: policy identity used for the decision.
+            - `decision_status`: the decision's status string.
+        On error, `status` will be "error" and `errors` will include one or more `ErrorObject` entries describing validation, dependency or runtime issues.
+    """
     result = CallResult()
     query = request.strip()
     if not query:
@@ -553,6 +630,23 @@ def goal_skills(
     top_k: int = 3,
     considered_limit: int = 20,
 ) -> CallResult:
+    """
+    Builds a goal-oriented decision from an intent by routing the intent to skills and converting the resulting route decision into a goal decision.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to discover and route against skills.
+    	intent_text (str): Natural-language intent to resolve into a goal decision.
+    	top_k (int): Maximum number of top candidate skills to return from routing.
+    	considered_limit (int): Number of skills to consider during routing.
+    
+    Returns:
+    	CallResult: Contains:
+    		- `data["goal_decision"]` (dict): The constructed goal decision payload.
+    		- `data["decision_status"]` (str): Final goal decision status.
+    		- `data["policy_identity"]` (dict): Policy identity associated with the decision.
+    		- `data["route_decision_status"]` (optional[str]): Status of the underlying route decision.
+    		On success (`decision_status == "resolved"`) the result.status is `"success"`. On failure the result.status is `"error"` and result.errors includes an ErrorObject with `code="ERR_VALIDATION"` and a `fix_suggestion` when available. If the routing step did not produce a decision payload the result.error contains an ErrorObject with `code="ERR_RUNTIME"`.
+    """
     result = CallResult()
     route_result = route_skills(
         repo_root,
@@ -593,7 +687,19 @@ def goal_skills(
     return result
 
 def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
-    """Safely create or update a symlink."""
+    """
+    Create or update a symbolic link at `target` that points to `source`.
+    
+    Ensures `target.parent` exists. If `target` already exists and is a directory (and not a symlink) it is removed; otherwise the existing file or symlink is unlinked before creating the new link. When `dry_run` is True no filesystem mutations are performed.
+    
+    Parameters:
+        source (Path): Path the new symlink should point to.
+        target (Path): Path at which to create or update the symlink.
+        dry_run (bool): If True, do not modify the filesystem; only simulate the action.
+    
+    Returns:
+        str: Human-readable action summary, e.g. "Created symlink: <target> -> <source>" or "Updated symlink: <target> -> <source>".
+    """
     action = "Created" if not target.exists() else "Updated"
     if not dry_run:
         target.parent.mkdir(parents=True, exist_ok=True)

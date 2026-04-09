@@ -13,6 +13,15 @@ from ask.envelope import CallResult
 
 
 def _route_result(decision: dict) -> CallResult:
+    """
+    Create a CallResult that wraps a routing decision and sets status based on the decision outcome.
+    
+    Parameters:
+        decision (dict): A routing decision payload containing at least a `decision_status` key.
+    
+    Returns:
+        CallResult: An instance whose `status` is `"success"` when `decision["decision_status"] == "resolved"`, otherwise `"error"`. The original `decision` is stored under `result.data["decision"]`.
+    """
     result = CallResult()
     result.status = "success" if decision.get("decision_status") == "resolved" else "error"
     result.data["decision"] = decision
@@ -21,6 +30,16 @@ def _route_result(decision: dict) -> CallResult:
 
 class TestAskSkillsGoal(unittest.TestCase):
     def test_goal_resolved_returns_recommendation_and_alternatives(self) -> None:
+        """
+        Verifies that a resolved routing decision yields a goal decision recommending the top candidate and listing the remaining candidates as alternatives.
+        
+        Patches `route_skills` to return a decision with three selected candidates, calls `goal_skills`, and asserts:
+        - `result.status` is `"success"`.
+        - `goal_decision.schema_version` is `"goal-decision.v1"` and `decision_status` is `"resolved"`.
+        - the first selected candidate is set as `recommended_candidate`.
+        - the remaining selected candidates appear in `alternative_candidates` in order.
+        - `failure_class` and `operator_action` are `None`.
+        """
         route_decision = {
             "decision_status": "resolved",
             "policy_identity": "abc123def4567890",
@@ -44,6 +63,11 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(goal["operator_action"], None)
 
     def test_goal_non_success_maps_to_intent_unresolved(self) -> None:
+        """
+        Verify that a non-resolved routing decision is mapped to an intent-level unresolved goal decision.
+        
+        The test supplies a routed decision with `decision_status` set to "unresolved_ambiguity" and an ambiguity set. It asserts the produced `CallResult` has status "error", the goal decision's `decision_status` is "intent_unresolved", `failure_class` is remapped to "INTENT_UNRESOLVED", `disambiguation_prompts` is non-empty, and `operator_action` is preserved.
+        """
         route_decision = {
             "decision_status": "unresolved_ambiguity",
             "policy_identity": "abc123def4567890",

@@ -7,7 +7,17 @@ from ask.envelope import CallResult, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
-    """Returns overall health, sync status, and lint issues."""
+    """
+    Collect basic repository metadata and whether agent skills appear to be synced.
+    
+    The returned CallResult's `data` includes:
+    - `repo_root` (str): the repository root path as a string.
+    - `is_git` (bool): `True` if a `.git` directory exists at `repo_root`, `False` otherwise.
+    - `skills_synced` (bool): `True` if `.agents/skills` exists and contains at least one entry, `False` otherwise.
+    
+    Returns:
+        CallResult: A CallResult with `status` set to `"success"` and the metadata above stored in `data`.
+    """
     result = CallResult()
     result.data["repo_root"] = str(repo_root)
     result.data["is_git"] = (repo_root / ".git").exists()
@@ -21,7 +31,23 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     return result
 
 def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
-    """Wraps scripts/validate_all.sh with structured JSON error reporting."""
+    """
+    Run the repository validation script and collect a structured result.
+    
+    Executes the repository's scripts/validate_all.sh with either `--ephemeral` or `--persistent`, parses the script summary from stdout, and records the raw output and summary counts in the returned result. If the script fails to emit the expected summary lines or exits with a non‑zero code, the result is marked as an error and includes an `ErrorObject` describing the validation failure.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root where the script will be executed.
+        ephemeral (bool): When True run validation with `--ephemeral`; otherwise use `--persistent`.
+    
+    Returns:
+        CallResult: Contains `data` with keys:
+            - `required_failures` (int): Number of required failures reported by the validator.
+            - `warn_only_issues` (int): Number of warn-only issues reported by the validator.
+            - `raw_output` (str): Full stdout captured from the validation script.
+          The result's `status` is `"success"` when the script exits with code 0, otherwise `"error"`.
+          On error the result may include one or more `ErrorObject` entries with `code="ERR_VALIDATION"` and a `fix_suggestion`.
+    """
     result = CallResult()
     
     cmd = ["bash", "scripts/validate_all.sh"]
@@ -74,7 +100,23 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
 
 
 def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
-    """Return canonical catalog parity diagnostics."""
+    """
+    Run catalog parity diagnostics and record the findings in a CallResult.
+    
+    Performs parity checks for the catalog at `repo_root` (optionally using stricter rules when `strict` is True), stores the full parity report under `result.data["catalog_parity"]` and exposes `decision_status` and `policy_identity` in `result.data`. If no drift is detected the returned CallResult has `status` set to `"success"`. If drift is detected the CallResult has `status` set to `"error"` and includes an `ErrorObject` (code `"ERR_VALIDATION"`) whose message contains the detected drift class and whose `fix_suggestion` is taken from the report's `operator_action` or a default instruction.
+    
+    Parameters:
+        repo_root (Path): Root path of the repository to analyse.
+        strict (bool): Apply stricter parity rules when True.
+    
+    Returns:
+        CallResult: Result object containing:
+            - data["catalog_parity"]: full parity report object
+            - data["decision_status"]: decision status from the report (if present)
+            - data["policy_identity"]: policy identity from the report (if present)
+            - status: `"success"` when no drift, `"error"` when drift detected
+            - errors: may include an `ErrorObject` with code `"ERR_VALIDATION"` if drift is detected
+    """
     result = CallResult()
     report = compute_catalog_parity(repo_root, strict=strict)
     result.data["catalog_parity"] = report
@@ -97,7 +139,26 @@ def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
     return result
 
 def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:
-    """CI gate: blocks deletion/rename of stable skills without deprecation notice."""
+    """
+    Validate stability-related changes to SKILL.md files and enforce rules for skills marked `stability: stable`.
+    
+    Checks the repository for SKILL.md frontmatter that declares a skill as stable and, when a list of changed files is provided, verifies that:
+    - stable SKILL.md files include `name:` and `description:` fields in their frontmatter, and
+    - deletion of a stable skill is not performed without an existing deprecation notice.
+    
+    Parameters:
+        repo_root (Path): Repository root directory against which paths and SKILL.md files are resolved.
+        changed_files (List[str], optional): Iterable of file paths (typically relative to `repo_root`) to inspect; if omitted, only a global scan is performed.
+    
+    Returns:
+        CallResult: Contains:
+          - `status`: `"success"` if no stability violations were found, `"error"` otherwise.
+          - `data.stable_skills` (List[str]): Sorted list of discovered stable skill identifiers.
+          - `data.stable_count` (int): Number of discovered stable skills.
+          - `data.checked_files` (int): Number of `changed_files` inspected (0 if `changed_files` was not provided).
+          - `data.errors` (List[str], optional): When `status` is `"error"`, a list of human-readable error messages describing each violation.
+          - `errors` (List[ErrorObject]): For each string in `data.errors`, an `ErrorObject` with `code="ERR_VALIDATION"` is appended to the result's `errors` list.
+    """
     result = CallResult()
 
     # Build list of all SKILL.md files

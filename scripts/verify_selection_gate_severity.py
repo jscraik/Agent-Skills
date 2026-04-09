@@ -11,6 +11,22 @@ from typing import Any
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Build and return the command-line arguments for the selection-gate-severity script.
+    
+    Parameters:
+        None
+    
+    Arguments:
+        --check-results (Path): TSV file of check results produced by validate_all.
+        --output (Path): Destination path for the JSON artifact.
+        --schema (Path): Path to the schema file used for structural validation.
+        --run-id (str): Identifier for this validation run to embed in the artifact.
+        --required-check (list[str]): Repeatable option listing spec-critical check names that must be present and have mode equal to "required".
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes corresponding to the options above.
+    """
     parser = argparse.ArgumentParser(description="Write selection gate severity artifact.")
     parser.add_argument("--check-results", type=Path, required=True, help="TSV check result file from validate_all.")
     parser.add_argument("--output", type=Path, required=True, help="Output JSON artifact path.")
@@ -26,6 +42,21 @@ def parse_args() -> argparse.Namespace:
 
 
 def _load_check_rows(path: Path) -> list[dict[str, str]]:
+    """
+    Parse a TSV check-results file into a list of row dictionaries.
+    
+    Parameters:
+        path (Path): Path to a tab-separated values file where each non-empty line
+            contains at least four columns: slug, mode, result, log_file.
+    
+    Returns:
+        list[dict[str, str | None]]: A list of dictionaries for each row with keys
+            `name`, `mode`, `result` and `log_file` (`None` when the field is empty).
+    
+    Raises:
+        ValueError: If the file does not exist, if any non-empty line has fewer than
+            four tab-separated fields, or if the file contains no valid rows.
+    """
     if not path.exists():
         raise ValueError(f"check results file not found: {path}")
 
@@ -53,6 +84,18 @@ def _load_check_rows(path: Path) -> list[dict[str, str]]:
 
 def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> list[str]:
     # Keep this validator dependency-free; enforce the fields from schema contract directly.
+    """
+    Validate that a payload conforms to the expected selection-gate-severity schema contract.
+    
+    Performs dependency-free structural checks: verifies the schema file exists, that top-level fields meet the contract (schema_version equals "selection-gate-severity.v1", non-empty `run_id` and `generated_at`, and `all_required_passed` is boolean), and that `checks` is a non-empty list of objects where each check has non-empty string `name`, `mode`, `result`, and `rationale`, with `mode` one of `required` or `warn` and `result` one of `pass`, `fail`, or `blocked`.
+    
+    Parameters:
+        payload (dict[str, Any]): The JSON-serialisable payload to validate.
+        schema_path (Path): Path to the schema file; used to confirm the schema file exists.
+    
+    Returns:
+        list[str]: A list of validation issue messages; an empty list indicates the payload satisfies the contract.
+    """
     issues: list[str] = []
     if not schema_path.exists():
         issues.append(f"schema file missing: {schema_path}")
@@ -89,6 +132,20 @@ def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> list
 
 
 def main() -> int:
+    """
+    Run the CLI: read TSV check results, build a selection-gate-severity JSON artefact, validate it against the schema, write it to the output path and report any issues.
+    
+    The function:
+    - Loads check rows from the provided TSV; prints the error and returns 1 if loading fails.
+    - Ensures any specified required checks exist and have mode "required", collecting issues for missing or mismatched entries.
+    - Constructs per-check entries with `rationale` derived from the check `result`, computes `all_required_passed`, and assembles the payload.
+    - Performs structural validation against the provided schema path and aggregates any validation issues.
+    - Writes the JSON artefact to the output path (creating parent directories as needed).
+    - Prints the artefact path and either a summary of validation issues or a success message.
+    
+    Returns:
+        int: `0` on successful validation and write; `1` on TSV parse errors or if any validation issues are detected.
+    """
     args = parse_args()
 
     try:

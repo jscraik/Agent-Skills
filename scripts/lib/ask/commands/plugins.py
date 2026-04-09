@@ -41,7 +41,14 @@ def status_plugin_state(repo_root: Path, name: str) -> CallResult:
 
 
 def doctor_plugins_state(repo_root: Path) -> CallResult:
-    """Run read-only plugin health diagnostics."""
+    """
+    Run plugin health diagnostics and return a CallResult containing the diagnostic snapshot.
+    
+    Populates result.data with the collected snapshot from the plugin state doctor. If the snapshot's health_state.status is "healthy" the result.status is set to "success". If not healthy, result.status is set to "error", result.data["operator_action"] is set to instruct inspection of data.health_state.blockers, and an ErrorObject with code "ERR_VALIDATION" and a fix suggestion is appended to result.errors.
+    
+    Returns:
+        CallResult: The call result containing the diagnostic snapshot and status.
+    """
     result = CallResult()
     snapshot = collect_plugin_state(repo_root, run_doctor=True)
     result.data.update(snapshot)

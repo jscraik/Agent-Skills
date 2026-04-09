@@ -33,6 +33,19 @@ def load_payload(path: Path | None) -> Dict[str, Any]:
 
 
 def _selection_payload_from_envelope(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extract the nested selection-like payload from an envelope when present.
+    
+    If `payload` is an envelope containing a `data` mapping with a nested `decision`,
+    `goal_decision` or `catalog_parity` mapping, return that nested mapping;
+    otherwise return the original `payload`.
+    
+    Parameters:
+        payload (Dict[str, Any]): Top-level JSON object parsed from the envelope.
+    
+    Returns:
+        Dict[str, Any]: The extracted nested payload if found, otherwise the original payload.
+    """
     data = payload.get("data")
     if isinstance(data, dict):
         decision = data.get("decision")
@@ -48,6 +61,22 @@ def _selection_payload_from_envelope(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def validate_selection_decision(payload: Dict[str, Any]) -> List[str]:
+    """
+    Validate a "selection decision" payload for required fields, types and consistency.
+    
+    Checks presence of required keys, that `decision_status` corresponds to the expected `failure_class`
+    (mapping includes: `resolved`→None, `unresolved_ambiguity`→`AMBIGUITY_UNRESOLVED`,
+    `blocked_policy_drift`→`DISCOVERY_POLICY_DRIFT`, `degraded_no_candidates`→`NO_ELIGIBLE_CANDIDATES`,
+    `blocked_catalog_parity`→`CATALOG_PARITY_DRIFT`), and that specific fields have the expected types
+    (e.g. candidate lists, integer counters, boolean flag). For any `decision_status` other than
+    `resolved`, requires a non-empty `operator_action`.
+    
+    Parameters:
+        payload (Dict[str, Any]): The selection decision JSON object to validate.
+    
+    Returns:
+        List[str]: Validation issue messages found; empty list if the payload passes all checks.
+    """
     issues: List[str] = []
     required = {
         "schema_version",
@@ -106,6 +135,17 @@ def validate_selection_decision(payload: Dict[str, Any]) -> List[str]:
 
 
 def validate_goal_decision(payload: Dict[str, Any]) -> List[str]:
+    """
+    Validate a "goal decision" payload for required fields, value constraints and type expectations.
+    
+    Checks that required keys are present, that `decision_status` is either "resolved" or "intent_unresolved" and that associated fields satisfy the conditional rules for each status (e.g. `failure_class` and `operator_action` expectations), and that `alternative_candidates` and `disambiguation_prompts` are lists.
+    
+    Parameters:
+        payload (Dict[str, Any]): The goal-decision JSON object to validate.
+    
+    Returns:
+        List[str]: A list of validation issue messages; empty if the payload conforms to the expected schema and constraints.
+    """
     issues: List[str] = []
     required = {
         "schema_version",
@@ -144,6 +184,17 @@ def validate_goal_decision(payload: Dict[str, Any]) -> List[str]:
 
 
 def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
+    """
+    Validate a catalog-parity payload and collect schema or semantic issues.
+    
+    Checks for required fields and validates types and conditional constraints specific to catalog-parity payloads. In particular it enforces allowed `decision_status` values and, when `decision_status` is `blocked_catalog_parity`, requires `drift_detected` to be `True` and a non-empty `operator_action`.
+    
+    Parameters:
+        payload (Dict[str, Any]): Parsed JSON object representing a catalog-parity payload.
+    
+    Returns:
+        List[str]: A list of human-readable issue messages; empty when the payload satisfies all checks.
+    """
     issues: List[str] = []
     required = {
         "schema_version",
@@ -180,6 +231,21 @@ def validate_catalog_parity(payload: Dict[str, Any]) -> List[str]:
 
 
 def validate_routing_quality(payload: Dict[str, Any]) -> List[str]:
+    """
+    Validate a routing-quality metrics payload for required fields, types and value constraints.
+    
+    Checks:
+    - Presence of required top-level fields expected for a routing-quality payload.
+    - `decision_status_counts` is an object and `top_rejection_reasons` is an array.
+    - `unresolved_ambiguity_rate`, `no_candidate_rate` and `explainability_completeness_ratio` are numeric and within 0 to 1 inclusive.
+    - `parity_status` is either `"pass"` or `"fail"`.
+    
+    Parameters:
+        payload (dict): Parsed JSON object representing routing-quality metrics.
+    
+    Returns:
+        list[str]: A list of human-readable issue messages describing validation failures; empty if the payload passes validation.
+    """
     issues: List[str] = []
     required = {
         "schema_version",
@@ -225,6 +291,14 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    """
+    Determine the payload type, run the corresponding schema validations, print results and return an exit code.
+    
+    The function reads a pre-loaded payload (already obtained via CLI args), infers its validation mode from content or schema version, invokes the appropriate validator, prints a short summary and any validation issues to stdout, and yields a conventional CLI exit code.
+    
+    Returns:
+        int: `0` if validation passed or no payload was provided, `1` if validation failed.
+    """
     args = parse_args()
     payload = load_payload(args.input)
 

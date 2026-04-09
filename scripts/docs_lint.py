@@ -31,6 +31,22 @@ class Issue:
 
 
 def load_config(config_path: Path) -> dict:
+    """
+    Load JSON configuration from `config_path` and merge it with built-in defaults.
+    
+    Parameters:
+        config_path (Path): Filesystem path to the JSON configuration file.
+    
+    Returns:
+        dict: Configuration dictionary where values from the file override the following defaults:
+            - `enforcement_mode`: "warn"
+            - `docs_root`: "/docs"
+            - `required_index_dirs`: ["/docs"]
+            - `allow_relative_links`: False
+            - `allow_trailing_slash_links`: False
+            - `exclude_paths`: []
+            - `required_sections`: {}
+    """
     with config_path.open("r", encoding="utf-8") as f:
         cfg = json.load(f)
     defaults = {
@@ -207,6 +223,16 @@ def lint_file(path: Path, repo_root: Path, config: dict) -> list[Issue]:
 
 
 def index_file_issues(repo_root: Path, config: dict) -> list[Issue]:
+    """
+    Check configured directories for a required `index.md` and report missing files.
+    
+    Parameters:
+        repo_root (Path): Repository root against which configured paths are resolved.
+        config (dict): Configuration mapping; looks for the `required_index_dirs` iterable of directory paths (strings).
+    
+    Returns:
+        issues (list[Issue]): A list of `Issue` objects with code `missing-index` for each directory that lacks an `index.md`.
+    """
     issues: list[Issue] = []
     for dir_path in config.get("required_index_dirs", []):
         target_dir = (repo_root / str(dir_path).lstrip("/")).resolve()
@@ -227,6 +253,18 @@ def index_file_issues(repo_root: Path, config: dict) -> list[Issue]:
 
 
 def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
+    """
+    Check configured documentation files for existence and required section headings.
+    
+    Scans config["required_sections"] (a mapping of doc paths to iterable of expected heading names). For each configured path, emits an error Issue if the target file is missing, and for existing files emits an error Issue for each expected heading that is not present in the document (headings are compared to the plain heading text as it appears in ATX-style Markdown).
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve configured doc paths; leading '/' in config keys is ignored.
+        config (dict): Lint configuration containing the `required_sections` mapping; entries should map a doc path (string) to an iterable of expected heading strings.
+    
+    Returns:
+        list[Issue]: A list of Issue objects describing missing documents and missing required section headings.
+    """
     issues: list[Issue] = []
     required_sections = config.get("required_sections", {})
     if not isinstance(required_sections, dict):
@@ -284,6 +322,19 @@ def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
 
 
 def emit_text_summary(issues: Iterable[Issue], effective_mode: str, scanned_files: int) -> None:
+    """
+    Print a concise text report of lint issues including a summary header and one line per issue.
+    
+    Parameters:
+        issues (Iterable[Issue]): Iterable of Issue objects to report.
+        effective_mode (str): The resolved enforcement mode printed in the header (e.g. "warn" or "block").
+        scanned_files (int): Number of files that were scanned, included in the header.
+    
+    Description:
+        Prints a single header line reporting the mode, number of scanned files, and counts of errors and warnings.
+        Then prints one line per issue in the form:
+        "SEVERITY FILE:LINE CODE - MESSAGE"
+    """
     issues = list(issues)
     errors = [i for i in issues if i.severity == "error"]
     warnings = [i for i in issues if i.severity == "warning"]
@@ -293,6 +344,14 @@ def emit_text_summary(issues: Iterable[Issue], effective_mode: str, scanned_file
 
 
 def main() -> int:
+    """
+    Command-line entrypoint that lints repository Markdown files against the configured docs governance rules.
+    
+    Parses command-line arguments, loads policy configuration, discovers and scans Markdown files, aggregates issues from linting, index checks and required-section checks, emits a text summary and optionally writes a JSON report.
+    
+    Returns:
+        int: Exit code where `0` indicates success, `1` indicates failure because `mode` resolved to "block" and one or more errors were found, and `2` indicates the configured policy file was not found.
+    """
     parser = argparse.ArgumentParser(description="Lint docs governance rules.")
     parser.add_argument("--mode", choices=["warn", "block"], default=None)
     parser.add_argument("--changed-only", action="store_true")

@@ -24,6 +24,21 @@ class _RouterStub:
 
 class TestAskSkillsRoute(unittest.TestCase):
     def test_route_resolved_contains_contract_fields(self):
+        """
+        Verify route_skills returns a resolved routing decision containing the expected contract fields when a single high-confidence candidate is available.
+        
+        Patches:
+        - Replaces discovered skill entries with two entries including "reviewer".
+        - Uses a router stub that ranks "reviewer" as the sole candidate.
+        - Forces catalog parity to report no drift.
+        
+        Asserts that the result status is "success" and the decision includes:
+        - decision_status "resolved"
+        - failure_class `None`
+        - considered_limit and considered_total equal to the supplied limit
+        - considered_truncated `False` and truncated_count `0`
+        - a single selected candidate named "reviewer"
+        """
         entries = [
             SimpleNamespace(
                 name="auth-check",
@@ -65,6 +80,11 @@ class TestAskSkillsRoute(unittest.TestCase):
         self.assertEqual(decision["selected_candidates"][0]["name"], "reviewer")
 
     def test_route_reports_unresolved_ambiguity(self):
+        """
+        Verify that routing reports an unresolved ambiguity when two similarly scored low-risk candidates are returned.
+        
+        Patches discovery, router builder and catalog parity to produce two candidate entries with close confidence scores and an uncertainty marker `["top_candidates_close_score"]`. Asserts the result is an error with `decision_status` "unresolved_ambiguity", `failure_class` "AMBIGUITY_UNRESOLVED", an `ambiguity_set` containing both candidates, and that `operator_action` suggests narrowing the request.
+        """
         entries = [
             SimpleNamespace(
                 name="alpha",

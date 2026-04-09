@@ -77,6 +77,7 @@ fi
 check_results_file="$run_dir/check-results.tsv"
 : > "$check_results_file"
 
+# cleanup deletes the ephemeral run directory when ephemeral logs are enabled and the run had no required failures.
 cleanup() {
   if [[ "$cleanup_ephemeral_logs" -eq 1 && "$required_failures" -eq 0 ]]; then
     rm -rf "$run_dir"
@@ -94,6 +95,7 @@ refresh_latest_dir() {
   cp -R "$run_dir" "$latest_dir"
 }
 
+# run_check prints a label, runs the given command redirecting its stdout/stderr to a per-check log, records the outcome in the run's check-results TSV, increments `required_failures` (if `mode` is `required`) or `warn_only_issues` otherwise, refreshes the `latest` directory when applicable and always returns 0.
 run_check() {
   local mode="$1"
   local slug="$2"

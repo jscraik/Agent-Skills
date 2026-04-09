@@ -34,6 +34,18 @@ def candidate_id(candidate: EligibleCandidate) -> str:
 
 
 def default_operator_action(decision_status: str) -> str | None:
+    """
+    Provide the recommended operator action for a decision status.
+    
+    Parameters:
+    	decision_status (str): Decision status string; recognised values include
+    		"unresolved_ambiguity", "blocked_policy_drift", "blocked_catalog_parity"
+    		and "degraded_no_candidates".
+    
+    Returns:
+    	action (str | None): Operator instruction string for the status, or `None`
+    	if no recommendation exists for the given status.
+    """
     if decision_status == "unresolved_ambiguity":
         return "Narrow the request or mention an exact skill path to resolve ambiguity."
     if decision_status == "blocked_policy_drift":
@@ -62,6 +74,24 @@ def build_decision_payload(
     catalog_parity_ok: bool = True,
     request_id: str | None = None,
 ) -> dict:
+    """
+    Builds a deterministic selection decision payload for routing from a request, policy identity, candidate lists and ranking/uncertainty signals.
+    
+    Parameters:
+    	request (str): Original request or intent text driving the routing decision.
+    	policy_identity (str): Identifier for the policy used to produce the decision.
+    	considered_limit (int): Maximum number of eligible candidates to consider (minimum 1).
+    	top_k (int): Number of top-ranked candidates to attempt to select from the ranked list.
+    	eligible_candidates (list[EligibleCandidate]): Ordered set of possible candidates; deterministic ordering is applied before truncation.
+    	ranked_candidates (list[dict]): Ranked candidate entries; each dict should contain `skill_name`, `skill_path` and may include `confidence` and `rationale`.
+    	uncertainty_reasons (list[str]): Signals describing sources of uncertainty (e.g. `"top_candidates_close_score"`).
+    	policy_parity_ok (bool): If False, marks the decision as blocked by policy parity drift and no candidate is selected.
+    	catalog_parity_ok (bool): If False, marks the decision as blocked by catalog parity drift and no candidate is selected.
+    	request_id (str | None): Optional request identifier; a UUID is generated when omitted.
+    
+    Returns:
+    	dict: A selection decision payload containing schema/version, request and policy metadata, a `decision_status`, optional `failure_class` and `operator_action`, counts and ordering info, lists of `selected_candidates`, `considered_candidates` and `excluded_candidates`, `uncertainty_reasons`, and an `ambiguity_set` when ambiguity is unresolved.
+    """
     ordered = sorted(eligible_candidates, key=canonical_sort_key)
     considered_limit = max(1, considered_limit)
     considered = ordered[:considered_limit]
@@ -174,6 +204,24 @@ def build_decision_payload(
 
 
 def _candidate_brief(candidate: dict) -> dict:
+    """
+    Build a compact brief representation of a candidate dictionary.
+    
+    Parameters:
+        candidate (dict): Mapping representing a candidate. Expected keys:
+            - `candidate_id`
+            - `candidate_type` (defaults to `"skill"` if missing)
+            - `name`
+            - `path`
+            - `confidence`
+            - `rationale` (defaults to an empty list if missing)
+            - `scope_rank`
+    
+    Returns:
+        dict: A brief candidate dict containing the keys:
+            `candidate_id`, `candidate_type`, `name`, `path`, `confidence`,
+            `rationale`, and `scope_rank`.
+    """
     return {
         "candidate_id": candidate.get("candidate_id"),
         "candidate_type": candidate.get("candidate_type", "skill"),
@@ -186,6 +234,17 @@ def _candidate_brief(candidate: dict) -> dict:
 
 
 def _disambiguation_prompts(route_decision: dict) -> list[str]:
+    """
+    Produce disambiguation prompt strings appropriate to the routing decision's status.
+    
+    The function inspects `route_decision["decision_status"]` and returns one or two short prompts that guide the caller (or end user) to clarify intent, resolve parity issues, or provide more specific routing information. For an ambiguity status it may use names from `route_decision["ambiguity_set"]` to form a selection question.
+    
+    Parameters:
+        route_decision (dict): Routing decision payload containing at least `decision_status`. May include `ambiguity_set` (list of dicts with `name`) when the status is `unresolved_ambiguity`.
+    
+    Returns:
+        list[str]: One or two prompt strings for disambiguation or operational guidance; an empty list if no prompts apply.
+    """
     status = route_decision.get("decision_status")
     if status == "unresolved_ambiguity":
         options = [item.get("name") for item in route_decision.get("ambiguity_set", []) if item.get("name")]
@@ -215,6 +274,23 @@ def _disambiguation_prompts(route_decision: dict) -> list[str]:
 
 
 def build_goal_decision(route_decision: dict) -> dict:
+    """
+    Convert a routing decision payload into a goal-level decision containing a recommended candidate and up to two alternatives.
+    
+    Parameters:
+        route_decision (dict): A routing/selection decision payload produced by the selection step. Expected keys include
+            `decision_status`, `policy_identity`, `selected_candidates`, `considered_candidates`, and optionally
+            `operator_action`.
+    
+    Returns:
+        dict: A goal decision payload (schema_version = GOAL_SCHEMA_VERSION) with:
+            - `decision_status`: `"resolved"` when the route was resolved, otherwise `"intent_unresolved"`.
+            - `recommended_candidate`: brief representation of the top selected candidate or `None`.
+            - `alternative_candidates`: list of up to two brief candidate representations (from selected candidates then
+              considered candidates, excluding the recommended candidate).
+            - On unresolved intent: `failure_class` set to `"INTENT_UNRESOLVED"`, `operator_action` taken from
+              `route_decision` or a default clarifying instruction, and `disambiguation_prompts` derived from the route decision.
+    """
     route_status = route_decision.get("decision_status")
     selected = list(route_decision.get("selected_candidates", []))
     recommended = _candidate_brief(selected[0]) if selected else None
