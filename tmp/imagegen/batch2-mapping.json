@@ -1,0 +1,180 @@
+{
+  "jobs": [
+    {
+      "kind": "skill",
+      "name": "og-image-creator",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-og-image-creator-small.png",
+      "target": "frontend/graphics/og-image-creator/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Og Image Creator\".\nConcept: Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with P...\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "og-image-creator",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-og-image-creator-large.png",
+      "target": "frontend/graphics/og-image-creator/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Og Image Creator\".\nConcept: Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with P...\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "threejs-builder",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-threejs-builder-small.png",
+      "target": "frontend/graphics/threejs-builder/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Threejs Builder\".\nConcept: Build and validate simple, performant Three.js web apps using modern ES module patterns\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "threejs-builder",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-threejs-builder-large.png",
+      "target": "frontend/graphics/threejs-builder/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Threejs Builder\".\nConcept: Build and validate simple, performant Three.js web apps using modern ES module patterns\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "agentation",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-agentation-small.png",
+      "target": "frontend/tools/agentation/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Agentation\".\nConcept: Install, verify, and troubleshoot Agentation in React 18+ apps, including dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP health, watch mode, critique mode, and self-driving workflows.\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "agentation",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-agentation-large.png",
+      "target": "frontend/tools/agentation/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Agentation\".\nConcept: Install, verify, and troubleshoot Agentation in React 18+ apps, including dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP health, watch mode, critique mode, and self-driving workflows.\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "stitch-loop",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-stitch-loop-small.png",
+      "target": "frontend/tools/stitch-loop/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Stitch Loop\".\nConcept: Run iterative autonomous website-building loops with Stitch using a baton file and multi-pass page generation\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "stitch-loop",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-stitch-loop-large.png",
+      "target": "frontend/tools/stitch-loop/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Stitch Loop\".\nConcept: Run iterative autonomous website-building loops with Stitch using a baton file and multi-pass page generation\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "test-browser",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-test-browser-small.png",
+      "target": "frontend/tools/test-browser/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Test Browser\".\nConcept: Run or plan browser-based verification for changed web surfaces using sanctioned browser automation tools\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "test-browser",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-test-browser-large.png",
+      "target": "frontend/tools/test-browser/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Test Browser\".\nConcept: Run or plan browser-based verification for changed web surfaces using sanctioned browser automation tools\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ui-cloner",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-ui-cloner-small.png",
+      "target": "frontend/tools/ui-cloner/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"UI Cloner\".\nConcept: Create implementation-ready UI replication plans from a reference website URL.\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ui-cloner",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-ui-cloner-large.png",
+      "target": "frontend/tools/ui-cloner/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"UI Cloner\".\nConcept: Create implementation-ready UI replication plans from a reference website URL.\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "baseline-ui",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-baseline-ui-small.png",
+      "target": "frontend/ui/baseline-ui/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Baseline UI\".\nConcept: Check Tailwind UI work for accessibility, performance, theming, responsive behavior, and anti-patterns\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "baseline-ui",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-baseline-ui-large.png",
+      "target": "frontend/ui/baseline-ui/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Baseline UI\".\nConcept: Check Tailwind UI work for accessibility, performance, theming, responsive behavior, and anti-patterns\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "design-system",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-design-system-small.png",
+      "target": "frontend/ui/design-system/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Design System\".\nConcept: Repository-grounded design-system skill for token layers, semantic UI styling, and guidance policy checks.\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "design-system",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-design-system-large.png",
+      "target": "frontend/ui/design-system/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Design System\".\nConcept: Repository-grounded design-system skill for token layers, semantic UI styling, and guidance policy checks.\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "frontend-design",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-frontend-design-small.png",
+      "target": "frontend/ui/frontend-design/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Frontend Design\".\nConcept: Analyze broad frontend design requests and route them to the correct local UI skill after classifying intent and matu...\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "frontend-design",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-frontend-design-large.png",
+      "target": "frontend/ui/frontend-design/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Frontend Design\".\nConcept: Analyze broad frontend design requests and route them to the correct local UI skill after classifying intent and matu...\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "frontend-ui-design",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch2-out/skill-frontend-ui-design-small.png",
+      "target": "frontend/ui/frontend-ui-design/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Frontend UI Design\".\nConcept: Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm,...\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "frontend-ui-design",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch2-out/skill-frontend-ui-design-large.png",
+      "target": "frontend/ui/frontend-ui-design/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Frontend UI Design\".\nConcept: Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm,...\nStyle profile: frontend\nPalette direction: Cobalt + cyan + electric mint accents\nMotif direction: Layout grids, viewport frames, component blocks, motion arcs\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "plugin",
+      "name": "coderabbit",
+      "variant": "icon",
+      "generated": "tmp/imagegen/batch2-out/plugin-coderabbit-icon.png",
+      "target": "plugins/coderabbit/assets/icon.png",
+      "prompt": "Create a clean product icon and logo pair for a developer plugin named \"CodeRabbit\".\nConcept: CodeRabbit review, simplify, and autofix skills\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: same visual family as the full skill/plugin icon set, modern and minimal, no text.\nBackground: transparent.\nComposition: one compact icon for composer contexts and one polished logo mark for plugin branding.\nOutput: square images.\n\nVariant instruction: produce the plugin ICON optimized for compact UI surfaces and high recognizability at small size."
+    },
+    {
+      "kind": "plugin",
+      "name": "coderabbit",
+      "variant": "logo",
+      "generated": "tmp/imagegen/batch2-out/plugin-coderabbit-logo.png",
+      "target": "plugins/coderabbit/assets/logo.png",
+      "prompt": "Create a clean product icon and logo pair for a developer plugin named \"CodeRabbit\".\nConcept: CodeRabbit review, simplify, and autofix skills\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: same visual family as the full skill/plugin icon set, modern and minimal, no text.\nBackground: transparent.\nComposition: one compact icon for composer contexts and one polished logo mark for plugin branding.\nOutput: square images.\n\nVariant instruction: produce the plugin LOGO optimized for larger card/header contexts with slightly richer detail."
+    }
+  ]
+}

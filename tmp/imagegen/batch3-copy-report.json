@@ -1,0 +1,200 @@
+[
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "react-ui-patterns",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-react-ui-patterns-small.png",
+    "target_requested": "frontend/ui/react-ui-patterns/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/react-ui-patterns/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "react-ui-patterns",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-react-ui-patterns-large.png",
+    "target_requested": "frontend/ui/react-ui-patterns/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/react-ui-patterns/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "remotion",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-remotion-small.png",
+    "target_requested": "frontend/ui/remotion/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/remotion/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "remotion",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-remotion-large.png",
+    "target_requested": "frontend/ui/remotion/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/remotion/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "shadcn-ui",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-shadcn-ui-small.png",
+    "target_requested": "frontend/ui/shadcn-ui/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/shadcn-ui/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "shadcn-ui",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-shadcn-ui-large.png",
+    "target_requested": "frontend/ui/shadcn-ui/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/shadcn-ui/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "stitch-remotion",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-stitch-remotion-small.png",
+    "target_requested": "frontend/ui/stitch-remotion/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/stitch-remotion/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "stitch-remotion",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-stitch-remotion-large.png",
+    "target_requested": "frontend/ui/stitch-remotion/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/stitch-remotion/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ui-ux-creative-coding",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-ui-ux-creative-coding-small.png",
+    "target_requested": "frontend/ui/ui-ux-creative-coding/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/ui-ux-creative-coding/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ui-ux-creative-coding",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-ui-ux-creative-coding-large.png",
+    "target_requested": "frontend/ui/ui-ux-creative-coding/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/ui-ux-creative-coding/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ui-visual-regression",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-ui-visual-regression-small.png",
+    "target_requested": "frontend/ui/ui-visual-regression/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/ui-visual-regression/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ui-visual-regression",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-ui-visual-regression-large.png",
+    "target_requested": "frontend/ui/ui-visual-regression/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/ui-visual-regression/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "fixing-accessibility",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-fixing-accessibility-small.png",
+    "target_requested": "frontend/website/fixing-accessibility/agents/assets/icon-small.png",
+    "target_written": "frontend/website/fixing-accessibility/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "fixing-accessibility",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-fixing-accessibility-large.png",
+    "target_requested": "frontend/website/fixing-accessibility/agents/assets/icon-large.png",
+    "target_written": "frontend/website/fixing-accessibility/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "fixing-metadata",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-fixing-metadata-small.png",
+    "target_requested": "frontend/website/fixing-metadata/agents/assets/icon-small.png",
+    "target_written": "frontend/website/fixing-metadata/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "fixing-metadata",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-fixing-metadata-large.png",
+    "target_requested": "frontend/website/fixing-metadata/agents/assets/icon-large.png",
+    "target_written": "frontend/website/fixing-metadata/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "gh-workflow",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-gh-workflow-small.png",
+    "target_requested": "github/gh-workflow/agents/assets/icon-small.png",
+    "target_written": "github/gh-workflow/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "gh-workflow",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-gh-workflow-large.png",
+    "target_requested": "github/gh-workflow/agents/assets/icon-large.png",
+    "target_written": "github/gh-workflow/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "resolve-pr-parallel",
+    "variant": "small",
+    "source": "tmp/imagegen/batch3-out/skill-resolve-pr-parallel-small.png",
+    "target_requested": "github/resolve-pr-parallel/agents/assets/icon-small.png",
+    "target_written": "github/resolve-pr-parallel/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "resolve-pr-parallel",
+    "variant": "large",
+    "source": "tmp/imagegen/batch3-out/skill-resolve-pr-parallel-large.png",
+    "target_requested": "github/resolve-pr-parallel/agents/assets/icon-large.png",
+    "target_written": "github/resolve-pr-parallel/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied_with_suffix",
+    "kind": "plugin",
+    "name": "harness-engineering",
+    "variant": "icon",
+    "source": "tmp/imagegen/batch3-out/plugin-harness-engineering-icon.png",
+    "target_requested": "plugins/harness-engineering/assets/icon.png",
+    "target_written": "plugins/harness-engineering/assets/icon.gen1.png"
+  },
+  {
+    "status": "copied_with_suffix",
+    "kind": "plugin",
+    "name": "harness-engineering",
+    "variant": "logo",
+    "source": "tmp/imagegen/batch3-out/plugin-harness-engineering-logo.png",
+    "target_requested": "plugins/harness-engineering/assets/logo.png",
+    "target_written": "plugins/harness-engineering/assets/logo.gen1.png"
+  }
+]

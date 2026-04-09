@@ -1,0 +1,200 @@
+[
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "best-practices",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-best-practices-small.png",
+    "target_requested": "auth/best-practices/agents/assets/icon-small.png",
+    "target_written": "auth/best-practices/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "best-practices",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-best-practices-large.png",
+    "target_requested": "auth/best-practices/agents/assets/icon-large.png",
+    "target_written": "auth/best-practices/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "create-auth",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-create-auth-small.png",
+    "target_requested": "auth/create-auth/agents/assets/icon-small.png",
+    "target_written": "auth/create-auth/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "create-auth",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-create-auth-large.png",
+    "target_requested": "auth/create-auth/agents/assets/icon-large.png",
+    "target_written": "auth/create-auth/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "backend-engineer",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-backend-engineer-small.png",
+    "target_requested": "backend/backend-engineer/agents/assets/icon-small.png",
+    "target_written": "backend/backend-engineer/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "backend-engineer",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-backend-engineer-large.png",
+    "target_requested": "backend/backend-engineer/agents/assets/icon-large.png",
+    "target_written": "backend/backend-engineer/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "cli-spec",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-cli-spec-small.png",
+    "target_requested": "backend/cli-spec/agents/assets/icon-small.png",
+    "target_written": "backend/cli-spec/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "cli-spec",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-cli-spec-large.png",
+    "target_requested": "backend/cli-spec/agents/assets/icon-large.png",
+    "target_written": "backend/cli-spec/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "mcp-builder",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-mcp-builder-small.png",
+    "target_requested": "backend/mcp-builder/agents/assets/icon-small.png",
+    "target_written": "backend/mcp-builder/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "mcp-builder",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-mcp-builder-large.png",
+    "target_requested": "backend/mcp-builder/agents/assets/icon-large.png",
+    "target_written": "backend/mcp-builder/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "stitch-react-components",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-stitch-react-components-small.png",
+    "target_requested": "frontend/stitch-react-components/agents/assets/icon-small.png",
+    "target_written": "frontend/stitch-react-components/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "stitch-react-components",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-stitch-react-components-large.png",
+    "target_requested": "frontend/stitch-react-components/agents/assets/icon-large.png",
+    "target_written": "frontend/stitch-react-components/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "better-icons",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-better-icons-small.png",
+    "target_requested": "frontend/graphics/better-icons/agents/assets/icon-small.png",
+    "target_written": "frontend/graphics/better-icons/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "better-icons",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-better-icons-large.png",
+    "target_requested": "frontend/graphics/better-icons/agents/assets/icon-large.png",
+    "target_written": "frontend/graphics/better-icons/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "favicon-generator",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-favicon-generator-small.png",
+    "target_requested": "frontend/graphics/favicon-generator/agents/assets/icon-small.png",
+    "target_written": "frontend/graphics/favicon-generator/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "favicon-generator",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-favicon-generator-large.png",
+    "target_requested": "frontend/graphics/favicon-generator/agents/assets/icon-large.png",
+    "target_written": "frontend/graphics/favicon-generator/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "imagegen",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-imagegen-small.png",
+    "target_requested": "frontend/graphics/imagegen/agents/assets/icon-small.png",
+    "target_written": "frontend/graphics/imagegen/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "imagegen",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-imagegen-large.png",
+    "target_requested": "frontend/graphics/imagegen/agents/assets/icon-large.png",
+    "target_written": "frontend/graphics/imagegen/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "nano-banana-builder",
+    "variant": "small",
+    "source": "tmp/imagegen/batch1-out/skill-nano-banana-builder-small.png",
+    "target_requested": "frontend/graphics/nano-banana-builder/agents/assets/icon-small.png",
+    "target_written": "frontend/graphics/nano-banana-builder/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "nano-banana-builder",
+    "variant": "large",
+    "source": "tmp/imagegen/batch1-out/skill-nano-banana-builder-large.png",
+    "target_requested": "frontend/graphics/nano-banana-builder/agents/assets/icon-large.png",
+    "target_written": "frontend/graphics/nano-banana-builder/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied_with_suffix",
+    "kind": "plugin",
+    "name": "arscontexta",
+    "variant": "icon",
+    "source": "tmp/imagegen/batch1-out/plugin-arscontexta-icon.png",
+    "target_requested": "plugins/arscontexta/assets/icon.png",
+    "target_written": "plugins/arscontexta/assets/icon.gen1.png"
+  },
+  {
+    "status": "copied_with_suffix",
+    "kind": "plugin",
+    "name": "arscontexta",
+    "variant": "logo",
+    "source": "tmp/imagegen/batch1-out/plugin-arscontexta-logo.png",
+    "target_requested": "plugins/arscontexta/assets/logo.png",
+    "target_written": "plugins/arscontexta/assets/logo.gen1.png"
+  }
+]

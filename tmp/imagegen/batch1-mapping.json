@@ -1,0 +1,180 @@
+{
+  "jobs": [
+    {
+      "kind": "skill",
+      "name": "best-practices",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-best-practices-small.png",
+      "target": "auth/best-practices/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Best Practices\".\nSubject: Audit Better Auth integrations for secure patterns, config mistakes, and operational gaps\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "best-practices",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-best-practices-large.png",
+      "target": "auth/best-practices/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Best Practices\".\nSubject: Audit Better Auth integrations for secure patterns, config mistakes, and operational gaps\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "create-auth",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-create-auth-small.png",
+      "target": "auth/create-auth/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Create Auth\".\nSubject: Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "create-auth",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-create-auth-large.png",
+      "target": "auth/create-auth/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Create Auth\".\nSubject: Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "backend-engineer",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-backend-engineer-small.png",
+      "target": "backend/backend-engineer/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Backend Engineer\".\nSubject: Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary)\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "backend-engineer",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-backend-engineer-large.png",
+      "target": "backend/backend-engineer/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Backend Engineer\".\nSubject: Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary)\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "cli-spec",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-cli-spec-small.png",
+      "target": "backend/cli-spec/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"CLI Spec\".\nSubject: Create an implementation-grade CLI specification when the user requests a binding technical contract for a new or exi...\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "cli-spec",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-cli-spec-large.png",
+      "target": "backend/cli-spec/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"CLI Spec\".\nSubject: Create an implementation-grade CLI specification when the user requests a binding technical contract for a new or exi...\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "mcp-builder",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-mcp-builder-small.png",
+      "target": "backend/mcp-builder/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"MCP Builder\".\nSubject: Create general-purpose MCP servers and tool schemas for standard integrations\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "mcp-builder",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-mcp-builder-large.png",
+      "target": "backend/mcp-builder/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"MCP Builder\".\nSubject: Create general-purpose MCP servers and tool schemas for standard integrations\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "stitch-react-components",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-stitch-react-components-small.png",
+      "target": "frontend/stitch-react-components/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Stitch React Components\".\nSubject: Convert Stitch screens into modular Vite or React components with extracted structure and style-system alignment\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "stitch-react-components",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-stitch-react-components-large.png",
+      "target": "frontend/stitch-react-components/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Stitch React Components\".\nSubject: Convert Stitch screens into modular Vite or React components with extracted structure and style-system alignment\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "better-icons",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-better-icons-small.png",
+      "target": "frontend/graphics/better-icons/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Better Icons\".\nSubject: Search and extract SVG icons from Iconify collections through the better-icons CLI or MCP\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "better-icons",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-better-icons-large.png",
+      "target": "frontend/graphics/better-icons/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Better Icons\".\nSubject: Search and extract SVG icons from Iconify collections through the better-icons CLI or MCP\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "favicon-generator",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-favicon-generator-small.png",
+      "target": "frontend/graphics/favicon-generator/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Favicon Generator\".\nSubject: Generate complete favicon/app icon suites with templates and assets\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "favicon-generator",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-favicon-generator-large.png",
+      "target": "frontend/graphics/favicon-generator/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Favicon Generator\".\nSubject: Generate complete favicon/app icon suites with templates and assets\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "imagegen",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-imagegen-small.png",
+      "target": "frontend/graphics/imagegen/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Image Gen\".\nSubject: Generate and edit images using OpenAI\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "imagegen",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-imagegen-large.png",
+      "target": "frontend/graphics/imagegen/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Image Gen\".\nSubject: Generate and edit images using OpenAI\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "nano-banana-builder",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch1-out/skill-nano-banana-builder-small.png",
+      "target": "frontend/graphics/nano-banana-builder/agents/assets/icon-small.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (small)\nPrimary request: Create the small icon for the developer skill \"Nano Banana Builder\".\nSubject: Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Ultra-clean tiny-ui icon; reduce micro-detail; maximize silhouette clarity.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "skill",
+      "name": "nano-banana-builder",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch1-out/skill-nano-banana-builder-large.png",
+      "target": "frontend/graphics/nano-banana-builder/agents/assets/icon-large.png",
+      "prompt": "Use case: logo-brand\nAsset type: skill icon (large)\nPrimary request: Create the large icon for the developer skill \"Nano Banana Builder\".\nSubject: Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows\nStyle/medium: minimal geometric app icon\nComposition/framing: centered mark, transparent background\nLighting/mood: Creative, modern, interactive\nColor palette: Cobalt + cyan + electric mint accents\nMaterials/textures: Softer gradients with crisp shape boundaries\nConstraints: No text or letters. Keep coherent family style. Richer detail for preview contexts while preserving the same core symbol.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "plugin",
+      "name": "arscontexta",
+      "variant": "icon",
+      "generated": "tmp/imagegen/batch1-out/plugin-arscontexta-icon.png",
+      "target": "plugins/arscontexta/assets/icon.png",
+      "prompt": "Use case: logo-brand\nAsset type: plugin icon\nPrimary request: Create the icon for the plugin \"Ars Contexta\".\nSubject: Starter workflows for Ars Contexta in Codex\nStyle/medium: minimal geometric brand mark\nComposition/framing: centered symbol, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Compact composer icon with strong silhouette.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    },
+    {
+      "kind": "plugin",
+      "name": "arscontexta",
+      "variant": "logo",
+      "generated": "tmp/imagegen/batch1-out/plugin-arscontexta-logo.png",
+      "target": "plugins/arscontexta/assets/logo.png",
+      "prompt": "Use case: logo-brand\nAsset type: plugin logo\nPrimary request: Create the logo for the plugin \"Ars Contexta\".\nSubject: Starter workflows for Ars Contexta in Codex\nStyle/medium: minimal geometric brand mark\nComposition/framing: centered symbol, transparent background\nLighting/mood: Operational, stable, execution-focused\nColor palette: Teal + green + graphite neutrals\nMaterials/textures: Flat-to-subtle depth, clean technical geometry\nConstraints: No text or letters. Keep coherent family style. Polished branded logo mark for plugin card usage.\nAvoid: watermark, clutter, photoreal objects, tiny illegible details"
+    }
+  ]
+}
