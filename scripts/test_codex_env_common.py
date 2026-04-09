@@ -103,8 +103,6 @@ class TestCodexRepoRoot(unittest.TestCase):
         """When git is not available or dir is not a repo, CODEX_REPO_ROOT falls back to pwd -P."""
         with tempfile.TemporaryDirectory() as tmp:
             # /tmp is typically not a git repo
-            # Resolve symlinks since pwd -P does too
-            expected = str(Path(tmp).resolve())
             result = _source_and_run(
                 'printf "%s" "$CODEX_REPO_ROOT"',
                 cwd=tmp,
