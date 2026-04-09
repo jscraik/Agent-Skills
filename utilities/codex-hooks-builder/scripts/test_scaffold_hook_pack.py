@@ -545,6 +545,9 @@ class TestSessionStartTemplate(unittest.TestCase):
         # add branch logic for a 'clear' source that the matcher won't pass.
         # We just verify the startup/resume branch is explicit.
         self.assertIn("startup", self.text)
+        self.assertIn("resume", self.text)
+        self.assertNotIn('== "clear"', self.text)
+        self.assertNotIn('*"clear"*', self.text)
 
     def test_template_handles_jq_not_found(self) -> None:
         """Template must gracefully degrade when jq is absent."""

@@ -31,45 +31,45 @@ ask skills sync --scope user
 
 ```bash
 # Search skills
-./bin/ask graph find security --tier stable
+ask graph find security --tier stable
 
 # See related skills
-./bin/ask graph related skill-builder --depth 2
+ask graph related skill-builder --depth 2
 
 # Find path between skills
-./bin/ask graph chain skill-creator skill-installer
+ask graph chain skill-creator skill-installer
 ```
 
 ### Validate quality
 
 ```bash
 # Quick structural check
-./bin/ask skills audit backend/cli-spec --level compat
+ask skills audit backend/cli-spec --level compat
 
 # Full security audit
-./bin/ask skills audit backend/cli-spec --level strict
+ask skills audit backend/cli-spec --level strict
 
 # Run evaluation suite
-./bin/ask evals run backend/cli-spec --mode smoke
+ask evals run backend/cli-spec --mode smoke
 
 # Validate entire repository
-./bin/ask repo validate --ephemeral
+ask repo validate --ephemeral
 ```
 
 ### Manage lifecycle
 
 ```bash
 # Install from GitHub with auto-remediation
-./bin/ask skills install https://github.com/owner/repo --remediate
+ask skills install https://github.com/owner/repo --remediate
 
 # Check for overlap
-./bin/ask skills fold source-skill target-skill
+ask skills fold source-skill target-skill
 
 # Create new skill
-./bin/ask skills init my-skill --category backend --description "Does X when Y"
+ask skills init my-skill --category backend --description "Does X when Y"
 
 # Create plugin scaffold
-./bin/ask plugins init my-plugin --with-marketplace
+ask plugins init my-plugin --with-marketplace
 ```
 
 ## Robot mode for AI agents
@@ -78,9 +78,9 @@ When intent is clear but syntax is off, use `--robot` (or `-r`):
 
 ```bash
 # These work and get corrected:
-./bin/ask skill list --robot          # → skills list
-./bin/ask skills ls --robot           # → skills list
-./bin/ask graph search X --robot      # → graph find X
+ask skill list --robot          # → skills list
+ask skills ls --robot           # → skills list
+ask graph search X --robot      # → graph find X
 ```
 
 Errors include suggestions and examples:
@@ -100,13 +100,13 @@ Errors include suggestions and examples:
 
 ```bash
 # JSON output with trace IDs
-./bin/ask repo status --json --trace-id "build-123"
+ask repo status --json --trace-id "build-123"
 
 # Check for corrections
-./bin/ask skill list --robot --json | jq '.metadata.correction_note'
+ask skill list --robot --json | jq '.metadata.correction_note'
 
 # Ephemeral validation (read-only)
-./bin/ask repo validate --ephemeral
+ask repo validate --ephemeral
 ```
 
 **Response envelope** (all commands):
@@ -173,5 +173,5 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 
 - **License:** Apache 2.0
 - **Skills:** 109 canonical total (manual cluster table above is non-canonical)
-- **Validation:** 10+ automated checks via `./bin/ask repo validate`
+- **Validation:** 10+ automated checks via `ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity

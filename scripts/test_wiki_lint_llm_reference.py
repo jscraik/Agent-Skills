@@ -287,7 +287,7 @@ class TestLlmWikiSourceFile(unittest.TestCase):
         
         Asserts that the file text includes a line beginning with "# LLM Wiki".
         """
-        self.assertRegex(self.text, r"^# LLM Wiki", re.MULTILINE)
+        self.assertRegex(self.text, re.compile(r"^# LLM Wiki", re.MULTILINE))
 
     def test_no_frontmatter(self) -> None:
         """Source files are immutable imports and do not carry wiki frontmatter."""
@@ -544,7 +544,7 @@ class TestLogMdTriageEntry(unittest.TestCase):
         
         Asserts the file text includes a top-level heading "# Skill Ops Wiki Log".
         """
-        self.assertRegex(self.text, r"^# Skill Ops Wiki Log", re.MULTILINE)
+        self.assertRegex(self.text, re.compile(r"^# Skill Ops Wiki Log", re.MULTILINE))
 
     def test_log_entry_count_at_least_three(self) -> None:
         """The log should retain all prior entries plus the new one."""
@@ -562,13 +562,15 @@ class TestLogMdTriageEntry(unittest.TestCase):
 
     def test_triage_is_last_entry(self) -> None:
         """
-        Assert the last parsed log entry is a triage for "LLM Wiki Reference".
-        
-        Checks the regex-parsed log entries and asserts the final entry has action `triage` and title `LLM Wiki Reference`.
+        Assert that a triage entry for "LLM Wiki Reference" exists as the log grows.
+
+        Checks the parsed entries for an action/title match without requiring that entry to stay last forever.
         """
         entries = LOG_ENTRY_RE.findall(self.text)
-        self.assertEqual(entries[-1][1], "triage")
-        self.assertEqual(entries[-1][2], "LLM Wiki Reference")
+        self.assertTrue(
+            any(action == "triage" and title == "LLM Wiki Reference" for _, action, title in entries),
+            "log.md must include a triage entry titled 'LLM Wiki Reference'",
+        )
 
 
 # ---------------------------------------------------------------------------

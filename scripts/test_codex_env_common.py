@@ -2,7 +2,7 @@
 """Tests for scripts/codex_env_common.sh changes introduced in this PR.
 
 Covers:
-- CODEX_REPO_ROOT variable: set via git rev-parse with pwd -P fallback
+- CODEX_REPO_ROOT variable: resolved from script location, preferring git toplevel
 - codex_apply_env(): prepends $CODEX_REPO_ROOT/bin to PATH (new in this PR)
 - codex_prepend_path_if_exists(): idempotency, skips non-existent dirs
 - bin/ directory appears before ~/.local/bin in PATH after apply_env
@@ -99,20 +99,19 @@ class TestCodexRepoRoot(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stdout.strip(), expected)
 
-    def test_codex_repo_root_fallback_to_pwd_outside_git_repo(self) -> None:
-        """When git is not available or dir is not a repo, CODEX_REPO_ROOT falls back to pwd -P."""
+    def test_codex_repo_root_fallback_to_script_parent_outside_git_repo(self) -> None:
+        """When script dir is outside git, CODEX_REPO_ROOT falls back to script-dir parent."""
         with tempfile.TemporaryDirectory() as tmp:
-            # /tmp is typically not a git repo
-            result = _source_and_run(
-                'printf "%s" "$CODEX_REPO_ROOT"',
-                cwd=tmp,
-            )
+            temp_root = Path(tmp).resolve()
+            temp_scripts = temp_root / "scripts"
+            temp_scripts.mkdir(parents=True, exist_ok=True)
+            temp_script = temp_scripts / "codex_env_common.sh"
+            temp_script.write_text(SCRIPT_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+            expected = str(temp_root)
+            result = _bash(f'source "{temp_script}"; printf "%s" "$CODEX_REPO_ROOT"', cwd=tmp)
             self.assertEqual(result.returncode, 0)
             actual = result.stdout.strip()
-            # Either git found a root (unlikely for /tmp) or it fell back to pwd -P.
-            # Accept both: just ensure it's non-empty and absolute.
-            self.assertTrue(actual, "CODEX_REPO_ROOT must not be empty even outside a git repo")
-            self.assertTrue(actual.startswith("/"))
+            self.assertEqual(actual, expected, "Outside a git repo, fallback should resolve to script-dir parent")
 
     def test_codex_repo_root_is_a_directory(self) -> None:
         """CODEX_REPO_ROOT must point to a directory that exists."""
@@ -132,8 +131,9 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
     def test_apply_env_adds_repo_bin_to_path(self) -> None:
         """After codex_apply_env, $CODEX_REPO_ROOT/bin must appear in PATH."""
         result = _source_and_run(
-            'codex_apply_env; printf "%s" "$PATH"',
+            'mise() { return 1; }; codex_apply_env; printf "%s" "$PATH"',
             cwd=str(REPO_ROOT),
+            env={"PATH": "/usr/bin:/bin"},
         )
         self.assertEqual(result.returncode, 0)
         # At minimum, PATH should have the repo's bin if it exists or CODEX_REPO_ROOT/bin
@@ -148,8 +148,9 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
         If the repository bin is not found in PATH the test is skipped.
         """
         result = _source_and_run(
-            'codex_apply_env; printf "%s" "$PATH"',
+            'mise() { return 1; }; codex_apply_env; printf "%s" "$PATH"',
             cwd=str(REPO_ROOT),
+            env={"PATH": "/usr/bin:/bin"},
         )
         self.assertEqual(result.returncode, 0)
         path_entries = result.stdout.strip().split(":")
