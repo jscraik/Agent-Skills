@@ -38,6 +38,7 @@ from ask.commands.plugins import init_plugin, install_plugin
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
+from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
 
 # Error Code Mapping (per spec Error Registry)
 ERROR_MAP = {
@@ -56,14 +57,15 @@ ERROR_MAP = {
 }
 
 # Valid commands for fuzzy matching
-VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp"]
+VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability"],
     "skills": ["list", "sync", "audit", "install", "fold", "init"],
     "plugins": ["init", "install"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
-    "mcp": ["sync"]
+    "mcp": ["sync"],
+    "wiki": ["lint", "ingest", "add", "query", "add-asset"],
 }
 
 # Common mistakes and their corrections
@@ -80,6 +82,9 @@ FUZZY_MATCHES = {
     "evaluation": "evals",
     "mcp": "mcp",
     "mc": "mcp",
+    "wiki": "wiki",
+    "wik": "wiki",
+    "wili": "wiki",
     # Action typos for skills
     "aud": "audit",
     "audt": "audit",
@@ -108,6 +113,17 @@ FUZZY_MATCHES = {
     "topics": "topics",
     "tags": "topics",
     "categories": "topics",
+    # Wiki actions
+    "ingest": "ingest",
+    "import": "ingest",
+    "add": "add",
+    "triage": "add",
+    "query": "query",
+    "lookup": "query",
+    "asset": "add-asset",
+    "add-asset": "add-asset",
+    "lint": "lint",
+    "check": "lint",
 }
 
 
@@ -186,6 +202,15 @@ def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: L
         examples.extend([
             "ask mcp sync",
             "ask mcp sync --dry-run",
+        ])
+    if topic == "wiki" or not topic:
+        examples.extend([
+            "ask wiki lint",
+            "ask wiki ingest 'Title' --summary 'Summary' --source '<source>'",
+            "ask wiki add --interactive",
+            "ask wiki query '1password signing'",
+            "ask wiki add-asset /path/to/screenshot.png --title 'Checkout flow' --summary 'Reference layout' --status verified",
+            "ask wiki add-asset --interactive",
         ])
 
     # Build the full error message
@@ -287,6 +312,36 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
     full_remaining = prefix_flags + remaining
     return topic, action, full_remaining, correction_note
 
+
+def _prompt_choice(prompt: str, options: List[str]) -> str:
+    """Prompt the operator for one option using 1-based indexing."""
+    print(prompt)
+    for idx, option in enumerate(options, start=1):
+        print(f"  {idx}. {option}")
+    while True:
+        raw = input("> ").strip()
+        if raw.isdigit():
+            choice = int(raw)
+            if 1 <= choice <= len(options):
+                return options[choice - 1]
+        if raw in options:
+            return raw
+        print(f"Please choose 1-{len(options)} or type an exact option value.")
+
+
+def _prompt_nonempty(prompt: str) -> str:
+    """Prompt until a non-empty string is entered."""
+    while True:
+        value = input(prompt).strip()
+        if value:
+            return value
+        print("This value cannot be empty.")
+
+
+def _prompt_optional(prompt: str) -> str:
+    """Prompt for an optional value (can be empty)."""
+    return input(prompt).strip()
+
 def main():
     start_time = time.time()
 
@@ -314,6 +369,7 @@ def main():
                "  ask skills list --json             # List skills as JSON\n"
                "  ask graph find security --robot    # Fuzzy search with corrections\n"
                "  ask skills audit backend/cli-spec  # Validate a skill\n"
+               "  ask wiki add --interactive         # Triage and file a wiki note\n"
                "\n🤖 Robot mode (--robot): Auto-corrects minor syntax errors when intent is clear."
     )
     subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
@@ -432,6 +488,60 @@ def main():
     mcp_sync_parser = mcp_subparsers.add_parser("sync", help="Sync MCP config from Codex to Antigravity", parents=[global_parser])
     mcp_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing")
 
+    # --- wiki ---
+    wiki_parser = subparsers.add_parser("wiki", help="Skill Ops Wiki operations", parents=[global_parser])
+    wiki_subparsers = wiki_parser.add_subparsers(dest="action")
+
+    wiki_lint_parser = wiki_subparsers.add_parser("lint", help="Lint wiki links and freshness", parents=[global_parser])
+    wiki_lint_parser.add_argument("--wiki-root", default="docs/skill-ops-wiki/wiki", help="Wiki root path")
+    wiki_lint_parser.add_argument("--max-age-days", type=int, default=60, help="Max last_reviewed age before warning")
+
+    wiki_ingest_parser = wiki_subparsers.add_parser("ingest", help="Ingest raw source notes into wiki logs", parents=[global_parser])
+    wiki_ingest_parser.add_argument("title", help="Ingest title")
+    wiki_ingest_parser.add_argument("--source", action="append", default=[], help="Source reference (repeatable)")
+    wiki_ingest_parser.add_argument("--summary", required=True, help="One-paragraph summary")
+    wiki_ingest_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
+    wiki_ingest_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
+
+    wiki_add_parser = wiki_subparsers.add_parser("add", help="Triage and add a structured wiki note", parents=[global_parser])
+    wiki_add_parser.add_argument("title", nargs="?", help="Note title")
+    wiki_add_parser.add_argument("--summary", help="Summary text")
+    wiki_add_parser.add_argument("--source", help="Primary source reference")
+    wiki_add_parser.add_argument(
+        "--intent",
+        choices=["finding", "playbook", "design-asset", "lesson-learned"],
+        help="Triage intent",
+    )
+    wiki_add_parser.add_argument(
+        "--status",
+        choices=["needs-verification", "verified", "fix-now"],
+        help="Current status",
+    )
+    wiki_add_parser.add_argument(
+        "--destination",
+        choices=["failures", "playbooks", "assets/ui", "learnings"],
+        help="Override destination folder under docs/skill-ops-wiki/wiki",
+    )
+    wiki_add_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
+    wiki_add_parser.add_argument("--interactive", action="store_true", help="Prompt for missing triage fields")
+    wiki_add_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
+
+    wiki_query_parser = wiki_subparsers.add_parser("query", help="Search wiki pages", parents=[global_parser])
+    wiki_query_parser.add_argument("query", help="Search query")
+    wiki_query_parser.add_argument("--limit", type=int, default=5, help="Max results to return")
+    wiki_query_parser.add_argument("--wiki-root", default="docs/skill-ops-wiki/wiki", help="Wiki root path")
+
+    wiki_asset_parser = wiki_subparsers.add_parser("add-asset", help="Add screenshot/asset to wiki and create linked note", parents=[global_parser])
+    wiki_asset_parser.add_argument("asset_path", nargs="?", help="Path to local asset file")
+    wiki_asset_parser.add_argument("--title", help="Asset note title")
+    wiki_asset_parser.add_argument("--summary", help="Summary for why this asset matters")
+    wiki_asset_parser.add_argument("--source", default="", help="Original source reference (optional)")
+    wiki_asset_parser.add_argument("--status", choices=["needs-verification", "verified", "fix-now"], help="Current status")
+    wiki_asset_parser.add_argument("--destination", choices=["assets/ui", "learnings"], help="Destination folder under wiki")
+    wiki_asset_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
+    wiki_asset_parser.add_argument("--interactive", action="store_true", help="Prompt for missing asset fields")
+    wiki_asset_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
+
     # Pre-parse to check for help
     if not filtered_args or filtered_args[0] in ("-h", "--help"):
         parser.print_help()
@@ -506,7 +616,7 @@ def main():
                 result.errors.append(ErrorObject(
                     code=ErrorCode.ERR_VALIDATION,
                     message="Unknown command. Use --robot to enable flexible parsing.",
-                    fix_suggestion="Valid topics: repo, skills, plugins, evals, graph"
+                    fix_suggestion=f"Valid topics: {', '.join(VALID_TOPICS)}"
                 ))
                 print(result.to_json())
             else:
@@ -515,6 +625,7 @@ def main():
                 print("  ask skills list")
                 print("  ask repo status")
                 print("  ask graph find security")
+                print("  ask wiki add --interactive")
             sys.exit(2)
 
     # If fuzzy matching failed to produce valid command
@@ -691,6 +802,169 @@ def main():
                 fix_suggestion="Valid actions: sync"
             ))
 
+    elif args.topic == "wiki":
+        if args.action == "lint":
+            result = wiki_lint(repo_root, wiki_root=args.wiki_root, max_age_days=args.max_age_days)
+        elif args.action == "ingest":
+            result = wiki_ingest(
+                repo_root,
+                title=args.title,
+                sources=args.source or [],
+                summary=args.summary,
+                tags=args.tag or [],
+                dry_run=args.dry_run,
+            )
+        elif args.action == "add":
+            title = args.title
+            summary = args.summary
+            source = args.source
+            intent = args.intent
+            status = args.status
+            destination = args.destination
+            tags = args.tag or []
+
+            if args.interactive:
+                if args.json:
+                    result.status = "error"
+                    result.errors.append(
+                        ErrorObject(
+                            code=ErrorCode.ERR_VALIDATION,
+                            message="--interactive cannot be combined with --json.",
+                            fix_suggestion="Use interactive mode without --json or pass all fields explicitly.",
+                        )
+                    )
+                else:
+                    print("🧭 Wiki triage questionnaire")
+                    title = title or _prompt_nonempty("Title: ")
+                    summary = summary or _prompt_nonempty("Summary: ")
+                    source = source or _prompt_nonempty("Source: ")
+                    intent = intent or _prompt_choice(
+                        "Intent:",
+                        ["finding", "playbook", "design-asset", "lesson-learned"],
+                    )
+                    status = status or _prompt_choice(
+                        "Status:",
+                        ["needs-verification", "verified", "fix-now"],
+                    )
+                    destination = destination or _prompt_choice(
+                        "Destination:",
+                        ["failures", "playbooks", "assets/ui", "learnings"],
+                    )
+
+            required_missing = []
+            if not title:
+                required_missing.append("title")
+            if not summary:
+                required_missing.append("summary")
+            if not source:
+                required_missing.append("source")
+            if not intent:
+                required_missing.append("intent")
+            if not status:
+                required_missing.append("status")
+
+            if result.status != "error" and required_missing:
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code=ErrorCode.ERR_VALIDATION,
+                        message=f"Missing required fields for wiki add: {', '.join(required_missing)}",
+                        fix_suggestion="Use --interactive or pass --summary, --source, --intent, and --status explicitly.",
+                    )
+                )
+            elif result.status != "error":
+                result = wiki_add(
+                    repo_root,
+                    title=title,
+                    summary=summary,
+                    source=source,
+                    intent=intent,
+                    status=status,
+                    destination=destination,
+                    tags=tags,
+                    dry_run=args.dry_run,
+                )
+        elif args.action == "query":
+            result = wiki_query(
+                repo_root,
+                query=args.query,
+                wiki_root=args.wiki_root,
+                limit=args.limit,
+            )
+        elif args.action == "add-asset":
+            asset_path = args.asset_path
+            title = args.title
+            summary = args.summary
+            source = args.source
+            status = args.status
+            destination = args.destination
+            tags = args.tag or []
+
+            if args.interactive:
+                if args.json:
+                    result.status = "error"
+                    result.errors.append(
+                        ErrorObject(
+                            code=ErrorCode.ERR_VALIDATION,
+                            message="--interactive cannot be combined with --json.",
+                            fix_suggestion="Use interactive mode without --json or pass all fields explicitly.",
+                        )
+                    )
+                else:
+                    print("🖼️ Wiki asset questionnaire")
+                    asset_path = asset_path or _prompt_nonempty("Asset path: ")
+                    title = title or _prompt_nonempty("Title: ")
+                    summary = summary or _prompt_nonempty("Summary: ")
+                    source = source or _prompt_optional("Source (optional): ")
+                    status = status or _prompt_choice(
+                        "Status:",
+                        ["needs-verification", "verified", "fix-now"],
+                    )
+                    destination = destination or _prompt_choice(
+                        "Destination:",
+                        ["assets/ui", "learnings"],
+                    )
+
+            required_missing = []
+            if not asset_path:
+                required_missing.append("asset_path")
+            if not title:
+                required_missing.append("title")
+            if not summary:
+                required_missing.append("summary")
+            status = status or "verified"
+            destination = destination or "assets/ui"
+
+            if result.status != "error" and required_missing:
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code=ErrorCode.ERR_VALIDATION,
+                        message=f"Missing required fields for wiki add-asset: {', '.join(required_missing)}",
+                        fix_suggestion="Use --interactive or pass asset_path, --title, and --summary explicitly.",
+                    )
+                )
+            elif result.status != "error":
+                result = wiki_add_asset(
+                    repo_root,
+                    asset_path=asset_path,
+                    title=title,
+                    summary=summary,
+                    source=source,
+                    status=status,
+                    destination=destination,
+                    tags=tags,
+                    dry_run=args.dry_run,
+                )
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'wiki'",
+                fix_suggestion="Valid actions: lint, ingest, add, query, add-asset"
+            ))
+
     # Finalize Result Metadata (before output dispatch so both JSON and human modes see it)
     result.metadata["command"] = " ".join(sys.argv[1:])
     if correction_note:
@@ -783,6 +1057,44 @@ def main():
                     else:
                         print(f"✅ Synced {result.data['server_count']} MCP servers to {result.data['target_path']}")
                         print("   Restart Antigravity or type '/refresh' to pick up changes.")
+                elif args.topic == "wiki":
+                    if args.action == "lint":
+                        print(f"✅ {result.data.get('message', 'Wiki lint passed.')}")
+                        if result.data.get("raw_output"):
+                            print(result.data["raw_output"])
+                    elif args.action == "ingest":
+                        if result.data.get("dry_run"):
+                            print("🔍 Dry run - would ingest:")
+                            print(f"   Raw note: {result.data.get('raw_note')}")
+                            print(f"   Log file: {result.data.get('log_file')}")
+                        else:
+                            print(f"✅ {result.data.get('message', 'Wiki ingest complete.')}")
+                            print(f"   Raw note: {result.data.get('raw_note')}")
+                            print(f"   Log file: {result.data.get('log_file')}")
+                    elif args.action == "add":
+                        if result.data.get("dry_run"):
+                            print("🔍 Dry run - would add triaged wiki note:")
+                        else:
+                            print(f"✅ {result.data.get('message', 'Wiki note added.')}")
+                        print(f"   Note: {result.data.get('note_path')}")
+                        print(f"   Intent: {result.data.get('intent')}")
+                        print(f"   Status: {result.data.get('status')}")
+                        print(f"   Destination: {result.data.get('destination')}")
+                    elif args.action == "query":
+                        count = result.data.get("count", 0)
+                        print(f"✅ {result.data.get('message', f'Found {count} page(s).')}")
+                        for entry in result.data.get("results", []):
+                            print(f"   • {entry.get('title')} ({entry.get('path')})")
+                            if entry.get("snippet"):
+                                print(f"     {entry.get('snippet')}")
+                    elif args.action == "add-asset":
+                        if result.data.get("dry_run"):
+                            print("🔍 Dry run - would add asset-backed wiki note:")
+                        else:
+                            print(f"✅ {result.data.get('message', 'Asset wiki note added.')}")
+                        print(f"   Asset source: {result.data.get('asset_source')}")
+                        print(f"   Asset stored: {result.data.get('asset_stored_path')}")
+                        print(f"   Note: {result.data.get('note_path')}")
                 elif args.topic == "graph":
                     if args.action == "related":
                         print(f"\n📊 {result.data['skill']} [{result.data['direction']}, depth={result.data['depth']}]")
@@ -921,6 +1233,14 @@ def main():
                 print("\n📚 MCP examples:")
                 print("   ask mcp sync")
                 print("   ask mcp sync --dry-run")
+            elif args.topic == "wiki":
+                print("\n📚 Wiki examples:")
+                print("   ask wiki lint")
+                print("   ask wiki ingest 'Title' --summary 'Summary' --source '<source>'")
+                print("   ask wiki add --interactive")
+                print("   ask wiki query 'prompt injection'")
+                print("   ask wiki add-asset ./tmp/screenshot.png --title 'UI reference' --summary 'Capture for reuse'")
+                print("   ask wiki add-asset --interactive")
 
     # Semantic Exit Code
     if result.status == "success":
