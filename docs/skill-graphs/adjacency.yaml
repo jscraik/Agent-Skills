@@ -588,7 +588,7 @@ simple-tasks:
   linear: Escalate to Linear when tasks need team-wide visibility
   verification-before-completion: Mark tasks done only after verification evidence
 skill-builder:
-  codex-agent-builder: Package finalized skill behavior as a reusable Codex subagent
+  codex-agent-creator: Package finalized skill behavior as a reusable Codex subagent
     when agentization is the next operational step
   codex-sessions-skill-scan: Audit skill coverage, failures, and overlap using real
     session evidence instead of authoring doctrine alone
@@ -599,7 +599,7 @@ skill-builder:
   skill-installer: Install, import, or repair runtime visibility when the skill package
     is already valid and the remaining work is distribution
 skill-creator:
-  codex-agent-builder: Promote stable skill workflows into dedicated Codex agent
+  codex-agent-creator: Promote stable skill workflows into dedicated Codex agent
     roles when role-specific execution is preferred
   plugin-creator: Package finished skills into a plugin distribution scaffold
   skill-builder: Lifecycle hardening, comparative eval rounds, and release-quality
