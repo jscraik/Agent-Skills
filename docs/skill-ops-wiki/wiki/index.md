@@ -5,6 +5,7 @@
 - [Playbooks](#playbooks)
 - [Assets](#assets)
 - [Learnings](#learnings)
+- [Sources](#sources)
 - [Operations](#operations)
 
 ## Failures
@@ -31,6 +32,14 @@
 
 | Page | Summary |
 | --- | --- |
+
+| [LLM Wiki Reference](/docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md) | Reference note for externally provided LLM wiki markdown. |
+
+## Sources
+
+| Page | Summary |
+| --- | --- |
+| [LLM Wiki Source](/docs/skill-ops-wiki/wiki/sources/llm-wiki.md) | Imported source markdown for the LLM reference note. |
 
 ## Operations
 
