@@ -268,6 +268,16 @@ def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
     issues: list[Issue] = []
     required_sections = config.get("required_sections", {})
     if not isinstance(required_sections, dict):
+        issues.append(
+            Issue(
+                code="invalid-required-sections-config",
+                severity="error",
+                file="/docs-policy.json",
+                line=1,
+                message="required_sections must be an object mapping file paths to heading lists.",
+                suggestion="Fix docs-policy.json: set required_sections to an object of path => [headings].",
+            )
+        )
         return issues
 
     for raw_path, raw_sections in required_sections.items():
@@ -275,6 +285,18 @@ def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
         if not rel_path:
             continue
         target = (repo_root / rel_path.lstrip("/")).resolve()
+        if not target.is_relative_to(repo_root):
+            issues.append(
+                Issue(
+                    code="invalid-required-doc-path",
+                    severity="error",
+                    file="/" + rel_path.lstrip("/"),
+                    line=1,
+                    message="Required documentation path resolves outside repository root.",
+                    suggestion="Keep required_sections paths within the repository.",
+                )
+            )
+            continue
         if not target.exists():
             issues.append(
                 Issue(

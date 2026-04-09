@@ -103,14 +103,12 @@ run_check() {
   shift 3
 
   local log_file="$run_dir/${slug}.log"
-  local exit_code=0
   local outcome="pass"
 
   echo "$label"
   if "$@" >"$log_file" 2>&1; then
     echo "  ✅ OK"
   else
-    exit_code=$?
     outcome="fail"
     if [ "$mode" = "required" ]; then
       required_failures=$((required_failures + 1))

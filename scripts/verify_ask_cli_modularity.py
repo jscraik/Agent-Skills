@@ -106,7 +106,11 @@ def main() -> int:
 
     text = ASK_PATH.read_text(encoding="utf-8")
     line_count = len(text.splitlines())
-    tree = ast.parse(text, filename=str(ASK_PATH))
+    try:
+        tree = ast.parse(text, filename=str(ASK_PATH))
+    except SyntaxError as exc:
+        print(f"ask_cli_modularity: parse_failed file={ASK_PATH} line={exc.lineno} msg={exc.msg}")
+        return 1
     modules = _imported_modules(tree)
 
     issues: list[str] = []

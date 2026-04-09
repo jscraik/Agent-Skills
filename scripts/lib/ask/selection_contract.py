@@ -313,8 +313,7 @@ def build_goal_decision(route_decision: dict) -> dict:
 
     alternatives: list[dict] = []
     if selected:
-        for candidate in selected[1:3]:
-            alternatives.append(_candidate_brief(candidate))
+        alternatives.extend(_candidate_brief(candidate) for candidate in selected[1:3])
 
     if len(alternatives) < 2:
         selected_ids = {item.get("candidate_id") for item in selected}

@@ -89,7 +89,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("data", output)
         self.assertIn("goal_decision", output["data"])
         goal = output["data"]["goal_decision"]
-        self.assertIn("schema_version", goal)
+        self.assertEqual(goal.get("schema_version"), "goal-decision.v1")
         self.assertIn("decision_status", goal)
         self.assertIn("policy_identity", goal)
         self.assertIn("recommended_candidate", goal)
@@ -108,7 +108,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("status", output)
         self.assertIn("catalog_parity", output.get("data", {}))
         report = output["data"]["catalog_parity"]
-        self.assertIn("schema_version", report)
+        self.assertEqual(report.get("schema_version"), "catalog-parity.v1")
         self.assertIn("drift_detected", report)
         self.assertIn("surfaces", report)
 
@@ -147,7 +147,7 @@ class TestAskCLI(unittest.TestCase):
         Runs `bin/ask skills starter --archetype delivery --limit 5 --json` and asserts the process exits with code 0, the JSON envelope `status` is `"success"`, `data.starter_mode` is truthy, `data.starter_archetype` equals `"delivery"`, and `data.skills` is a list.
         """
         cmd = ["python3", "bin/ask", "skills", "starter", "--archetype", "delivery", "--limit", "5", "--json"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, f"skills starter failed: {result.stderr}")
         output = json.loads(result.stdout)
         self.assertEqual(output["status"], "success")

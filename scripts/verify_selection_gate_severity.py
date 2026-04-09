@@ -210,16 +210,15 @@ def main() -> int:
     structural_issues = _validate_against_schema(payload, args.schema)
     issues.extend(structural_issues)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-    print(f"selection-gate-severity artifact: {args.output}")
     if issues:
         print("Selection gate severity validation failed:")
         for issue in issues:
             print(f"- {issue}")
         return 1
 
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"selection-gate-severity artifact: {args.output}")
     print("Selection gate severity validation passed.")
     return 0
 
