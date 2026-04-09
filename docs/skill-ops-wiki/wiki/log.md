@@ -15,5 +15,5 @@
 
 - Intent: `lesson-learned`
 - Status: `verified`
-- Source: /Users/jamiecraik/dev/agent-skills/docs/skill-ops-wiki/wiki/sources/llm-wiki.md
+- Source: /docs/skill-ops-wiki/wiki/sources/llm-wiki.md
 - Note: `docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md`

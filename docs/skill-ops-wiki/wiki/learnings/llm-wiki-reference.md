@@ -1,7 +1,7 @@
 ---
 last_reviewed: '2026-04-09'
 sources:
-- /Users/jamiecraik/dev/agent-skills/docs/skill-ops-wiki/wiki/sources/llm-wiki.md
+- /docs/skill-ops-wiki/wiki/sources/llm-wiki.md
 status: verified
 title: LLM Wiki Reference
 triage_status: verified
