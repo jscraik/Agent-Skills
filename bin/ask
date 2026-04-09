@@ -129,7 +129,6 @@ FUZZY_MATCHES = {
     "import": "ingest",
     "add": "add",
     "triage": "add",
-    "query": "query",
     "lookup": "query",
     "asset": "add-asset",
     "add-asset": "add-asset",
