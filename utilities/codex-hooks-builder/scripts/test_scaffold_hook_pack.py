@@ -289,7 +289,6 @@ class TestMainProjectScope(unittest.TestCase):
         # Patch sys.argv and capture stdout
         import sys as _sys
         old_argv = _sys.argv
-        old_stdout = _sys.stdout
         try:
             _sys.argv = ["scaffold_hook_pack.py"] + args_list
             with redirect_stdout(buf):
