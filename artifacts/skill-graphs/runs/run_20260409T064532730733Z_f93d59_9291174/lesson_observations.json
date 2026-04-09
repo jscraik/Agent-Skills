@@ -1,0 +1,260 @@
+{
+  "items": [
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `clarity`.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-04-09T06:45:32Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.161
+        },
+        "summary": "Applied focused remediation for: clarity"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_d0207f69f3ed",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.172,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260409T064532730733Z_f93d59_9291174",
+      "schema_version": "1.0",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on clarity was amplified by feedback status `missing`.",
+        "score": 0.668
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.161
+      },
+      "title": "frontend/ui/react-ui-patterns positive pattern observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `specificity`.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-04-09T06:45:32Z",
+      "criterion_id": "specificity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "specificity": 0.142
+        },
+        "summary": "Applied focused remediation for: clarity"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_2dc277f7fa57",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.172,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260409T064532730733Z_f93d59_9291174",
+      "schema_version": "1.0",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on specificity was amplified by feedback status `missing`.",
+        "score": 0.652
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.142
+      },
+      "title": "frontend/ui/react-ui-patterns positive pattern observation (specificity)"
+    },
+    {
+      "advice": {
+        "summary": "Strengthen concrete examples, file-path specificity, and measurable checks.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-04-09T06:45:32Z",
+      "criterion_id": "clarity",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "clarity": 0.161,
+          "safety": 0.002,
+          "specificity": 0.142
+        },
+        "summary": "Applied focused remediation for: clarity"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_855b40d84247",
+      "observation_type": "remediation",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.172,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260409T064532730733Z_f93d59_9291174",
+      "schema_version": "1.0",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.95,
+        "rationale": "Weakness in clarity was prioritized because feedback status was `missing`.",
+        "score": 0.57
+      },
+      "signals": {
+        "deficit": 0.003,
+        "positive_delta": 0.0
+      },
+      "title": "frontend/ui/react-ui-patterns remediation observation (clarity)"
+    },
+    {
+      "advice": {
+        "summary": "Preserve and reuse the pattern that improved `safety`.",
+        "weakest_criteria": [
+          "clarity"
+        ]
+      },
+      "confidence": {
+        "bucket": "medium",
+        "calibration_bucket": "C2_medium_confidence",
+        "evidence_completeness": 0.8,
+        "score": 0.63
+      },
+      "created_at": "2026-04-09T06:45:32Z",
+      "criterion_id": "safety",
+      "delegation_context": {
+        "agentic_cost_benefit": {
+          "ai_process_minutes": 15.0,
+          "human_baseline_minutes": 45.0,
+          "probability_of_success": 0.75,
+          "roi_signal": "positive",
+          "time_delta_minutes": 30.0
+        },
+        "mode": "co-pilot",
+        "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+      },
+      "evidence_refs": {
+        "events_path": "events.jsonl",
+        "evidence_packet_path": "evidence_packet.json",
+        "iteration_journal_path": "iteration_journal.jsonl"
+      },
+      "implementation": {
+        "positive_criterion_deltas": {
+          "safety": 0.002
+        },
+        "summary": "Applied focused remediation for: clarity"
+      },
+      "iteration_id": 2,
+      "observation_id": "observation_e77d70f3b4fe",
+      "observation_type": "positive_pattern",
+      "outcome": {
+        "feedback_note": "",
+        "feedback_status": "missing",
+        "quality_uplift": 0.172,
+        "stop_reason": "pass",
+        "terminal_status": "passed"
+      },
+      "profile_id": "react-ui-patterns",
+      "run_id": "run_20260409T064532730733Z_f93d59_9291174",
+      "schema_version": "1.0",
+      "scope_profile": "frontend",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "selection_hint": {
+        "feedback_weight": 0.85,
+        "rationale": "Positive delta on safety was amplified by feedback status `missing`.",
+        "score": 0.533
+      },
+      "signals": {
+        "deficit": 0.0,
+        "positive_delta": 0.002
+      },
+      "title": "frontend/ui/react-ui-patterns positive pattern observation (safety)"
+    }
+  ],
+  "run_id": "run_20260409T064532730733Z_f93d59_9291174",
+  "schema_version": "1.0"
+}
