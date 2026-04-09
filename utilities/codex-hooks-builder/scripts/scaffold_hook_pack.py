@@ -62,7 +62,7 @@ def build_hooks_json(
         "hooks": {
             "SessionStart": [
                 {
-                    "matcher": "^(startup|resume|clear)$",
+                    "matcher": "^(startup|resume)$",
                     "hooks": [
                         {
                             "type": "command",
