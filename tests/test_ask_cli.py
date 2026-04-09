@@ -101,7 +101,7 @@ class TestAskCLI(unittest.TestCase):
         
         Asserts the CLI emits non-empty JSON and that `data.catalog_parity` contains `schema_version`, `drift_detected` and `surfaces`.
         """
-        cmd = ["python3", "bin/ask", "repo", "doctor-catalog", "--json"]
+        cmd = [__import__("sys").executable, "bin/ask", "repo", "doctor-catalog", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
         output = json.loads(result.stdout)
@@ -118,7 +118,7 @@ class TestAskCLI(unittest.TestCase):
         
         Runs `bin/ask goal create auth integration --json`, asserts stdout contains JSON and that `data.goal_decision` exists.
         """
-        cmd = ["python3", "bin/ask", "goal", "create auth integration", "--json"]
+        cmd = [__import__("sys").executable, "bin/ask", "goal", "create auth integration", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
         output = json.loads(result.stdout)
@@ -126,7 +126,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_goal_alias_normalization_with_prefix_global_flag(self):
         """CA1: Verify ask --json goal alias maps to ask skills goal."""
-        cmd = ["python3", "bin/ask", "--json", "goal", "create auth integration"]
+        cmd = [__import__("sys").executable, "bin/ask", "--json", "goal", "create auth integration"]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
         output = json.loads(result.stdout)
@@ -134,7 +134,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_doctor_catalog_alias_normalization_with_prefix_global_flag(self):
         """CA1: Verify ask --json doctor catalog alias maps to repo doctor-catalog."""
-        cmd = ["python3", "bin/ask", "--json", "doctor", "catalog"]
+        cmd = [__import__("sys").executable, "bin/ask", "--json", "doctor", "catalog"]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
         output = json.loads(result.stdout)
@@ -146,7 +146,7 @@ class TestAskCLI(unittest.TestCase):
         
         Runs `bin/ask skills starter --archetype delivery --limit 5 --json` and asserts the process exits with code 0, the JSON envelope `status` is `"success"`, `data.starter_mode` is truthy, `data.starter_archetype` equals `"delivery"`, and `data.skills` is a list.
         """
-        cmd = ["python3", "bin/ask", "skills", "starter", "--archetype", "delivery", "--limit", "5", "--json"]
+        cmd = [__import__("sys").executable, "bin/ask", "skills", "starter", "--archetype", "delivery", "--limit", "5", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, f"skills starter failed: {result.stderr}")
         output = json.loads(result.stdout)
