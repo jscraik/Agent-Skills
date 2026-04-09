@@ -16,7 +16,7 @@ This matrix is the derived April 2026 readiness view for the governed skill-auth
 - `skills-system/skill-installer`
 - `skills-system/plugin-creator`
 
-> **Boundary note (2026-04-05):** `utilities/codex-plugin-builder` is an adjacent plugin-packaging handoff surface, not an active gate-family member. Active gate membership is enforced by `scripts/validate_skill_authoring_family.sh`. See `docs/reference/skill-authoring-family-boundary-decision.md` for the canonical decision record.
+> **Boundary note (2026-04-05):** `utilities/plugin-builder` is an adjacent plugin-packaging handoff surface, not an active gate-family member. Active gate membership is enforced by `scripts/validate_skill_authoring_family.sh`. See `docs/reference/skill-authoring-family-boundary-decision.md` for the canonical decision record.
 
 It is evidence-focused only. The canonical family contract remains:
 - [docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md](/Users/jamiecraik/dev/agent-skills/docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)

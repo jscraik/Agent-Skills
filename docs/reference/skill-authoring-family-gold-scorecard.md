@@ -118,7 +118,7 @@ Next review due: **2026-07-05**
 ### 2026-04-05 — Gold Standard Upgrade (P0–P4)
 
 **Changes:**
-- P0: Reconciled active family boundary across spec, maturity matrix, and decision record. `plugin-creator` is now the canonical gate member; `codex-plugin-builder` is adjacent handoff surface.
+- P0: Reconciled active family boundary across spec, maturity matrix, and decision record. `plugin-creator` is now the canonical gate member; `plugin-builder` is adjacent handoff surface.
 - P1: Added `SKILL_FAMILY_RELEASE_READY=1` mode to `validate_skill_authoring_family.sh` with evidence artifact capture, freshness constraints, branch-lineage metadata, and degraded-mode policy.
 - P2: Fixed OpenClaw false positives by tightening `potential_exfiltration` context pattern (requires actual HTTP method calls, not bare string mentions). Added 3 new adversarial pressure cases: data exfiltration, tool abuse, retrieval contamination.
 - P3: Uplifted `skill-installer` (Variation +10, Empowerment +5) and `plugin-creator` (Variation +13, Empowerment +5, Scope Focus +9). Frozen baseline documented.

@@ -41,7 +41,7 @@ metadata:
 
 ## When not to use
 - The user wants to execute one plan, one spec, or one small todo file; use `ce-work`.
-- The repo needs local task tooling installed; use `simple-tasks`.
+- The repo needs local task tooling installed; use `ce-work`.
 - The user wants review findings turned into todo files rather than resolved; use `ce-review`.
 - The user wants broad parallel agent orchestration unrelated to file-based todo cleanup.
 
@@ -70,7 +70,7 @@ metadata:
 - Cleanup results for resolved todo artifacts when approved.
 
 ## Failure mode
-- If the repo has no `todos/` workflow, stop and route to `ce-work` or `simple-tasks`.
+- If the repo has no `todos/` workflow, stop and route to `ce-work`.
 - If todo dependencies overlap too heavily for safe parallelism, fall back to serial execution and say why.
 - If commit, push, or deletion approval is missing, stop at a verified local result and leave the final mutation step pending.
 - If the todo artifacts are stale, contradictory, or underspecified, summarize the blocker and ask for the smallest clarification needed.

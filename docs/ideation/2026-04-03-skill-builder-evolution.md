@@ -45,7 +45,7 @@ Issue intelligence:
 2. Reposition `skill-builder` explicitly as an expert lifecycle maintainer skill rather than a default starter skill
 3. Remove install-distribute behavior from `skill-builder` and hand it back to `skill-installer`
 4. Keep install-distribute in `skill-builder`, but downgrade it to a delegated wrapper that routes to `skill-installer` when the task is primarily installation
-5. Add an overlap matrix and routing truth table across `skill-builder`, `skill-creator`, `skill-installer`, and `codex-plugin-builder`
+5. Add an overlap matrix and routing truth table across `skill-builder`, `skill-creator`, `skill-installer`, and `plugin-builder`
 6. Add routing regression evals that pressure-test ambiguous prompts across the overlapping skill set
 7. Introduce a two-tier experience: starter path via `skill-creator`, expert path via `skill-builder`
 8. Make `skill-builder` explicit-only in `agents/openai.yaml` and widen its UI description to match its real scope
@@ -69,7 +69,7 @@ Issue intelligence:
 **Status:** Unexplored
 
 ### 2. Add a canonical overlap and delegation contract across the skill-authoring family
-**Description:** Create one explicit routing matrix covering `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`, then encode that contract in descriptions, See Also guidance, and examples so ambiguous prompts resolve more consistently.
+**Description:** Create one explicit routing matrix covering `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-builder`, then encode that contract in descriptions, See Also guidance, and examples so ambiguous prompts resolve more consistently.
 **Rationale:** The repo's current problem is really family-level product shape, not just one stale paragraph. A visible overlap contract would reduce routing ambiguity, preserve specialization, and let `skill-builder` stay powerful without forcing a brittle split too early.
 **Downsides:** A written matrix can drift unless evals and docs are updated alongside it.
 **Confidence:** 91%

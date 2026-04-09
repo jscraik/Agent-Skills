@@ -21,7 +21,7 @@ covers:
 
 ## App Scaffolding
 
-- [[apple-app-creator]] — Orchestrate iOS/macOS app scaffolding with XcodeGen and optionally install xcode-makefiles and simple-tasks via a guided wizard.
+- [[apple-app-creator]] — Orchestrate iOS/macOS app scaffolding with XcodeGen and optionally install xcode-makefiles via a guided wizard.
 
 ## Build Tooling
 

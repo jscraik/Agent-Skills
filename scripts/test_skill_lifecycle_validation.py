@@ -220,7 +220,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 cached_copy,
             )
             write_text(
-                repo_root / "utilities" / "codex-plugin-builder" / "fixtures" / "sample" / "skills" / "fixture-skill" / "SKILL.md",
+                repo_root / "utilities" / "plugin-builder" / "fixtures" / "sample" / "skills" / "fixture-skill" / "SKILL.md",
                 fixture_copy,
             )
 
@@ -231,7 +231,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertNotIn("shared-skill", result.stdout)
             self.assertNotIn("fixture-skill", result.stdout)
 
-    def test_codex_shadow_skill_trees_are_skipped(self) -> None:
+    def test_plugin_shadow_skill_trees_are_skipped(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             canonical = f"""

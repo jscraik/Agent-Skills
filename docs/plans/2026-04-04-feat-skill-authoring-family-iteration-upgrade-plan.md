@@ -48,7 +48,7 @@ Upgrade the skill-authoring family from a clean routing split into a coherent, e
 This plan implements the approved spec by:
 - making `skill-creator` produce a durable creator-to-builder handoff artifact for non-trivial skills;
 - teaching `skill-builder` one explicit comparative iteration loop with frozen inputs, baseline rules, round states, and visible review evidence;
-- keeping `skill-installer` and `codex-plugin-builder` as downstream-only owners gated by `ContractValidityEvidence`;
+- keeping `skill-installer` and `plugin-builder` as downstream-only owners gated by `ContractValidityEvidence`;
 - extending existing repo-native eval and reporting surfaces instead of introducing a new standalone viewer or parallel harness.
 
 Plan mode: `standard-plan`  
@@ -69,7 +69,7 @@ Without a deliberate implementation sequence, execution will drift in one of two
 
 ## Requirements Trace
 
-- R1. Preserve the current family split and routing ownership across `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`.
+- R1. Preserve the current family split and routing ownership across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-builder`.
   Trace: spec goals 1 and 7; `SA1`
 - R2. Non-trivial creator-stage work must end with a durable dedicated handoff artifact file carrying the required context fields.
   Trace: spec `HandoffPackage`; spec invariants; `SA2`, `SA2a`, `SA3`
@@ -89,7 +89,7 @@ In scope:
   - `skills-system/skill-creator/`
   - `utilities/skill-builder/`
   - `skills-system/skill-installer/`
-  - `utilities/codex-plugin-builder/`
+  - `utilities/plugin-builder/`
 - creator-stage artifact guidance and reusable template support
 - `skill-builder` iteration, evidence, and reporting contract
 - eval harness additions required to protect the new loop
@@ -134,7 +134,7 @@ Out of scope:
   - canonical docs for report outputs and validator expectations
 - `skills-system/skill-installer/SKILL.md`
   - current downstream install/import boundary and provenance language
-- `utilities/codex-plugin-builder/SKILL.md`
+- `utilities/plugin-builder/SKILL.md`
   - current downstream plugin-packaging boundary and validator expectations
 
 ### Institutional Learnings
@@ -209,7 +209,7 @@ flowchart LR
   E --> G["ContractValidityEvidence"]
   F --> G
   G --> H["skill-installer handoff"]
-  G --> I["codex-plugin-builder handoff"]
+  G --> I["plugin-builder handoff"]
 ```
 
 Design notes:
@@ -381,17 +381,17 @@ Design notes:
 **Files:**
 - Modify: `skills-system/skill-installer/SKILL.md`
 - Modify: `skills-system/skill-installer/agents/openai.yaml`
-- Modify: `utilities/codex-plugin-builder/SKILL.md`
+- Modify: `utilities/plugin-builder/SKILL.md`
 - Test: `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 - Test: `bash scripts/sync_skills.sh`
 
 **Approach:**
 - Update downstream docs so install and plugin packaging clearly depend on contract-valid evidence from the builder loop.
-- Keep `skill-installer` focused on import/install/visibility and `codex-plugin-builder` focused on package conversion once lifecycle judgment is already settled.
+- Keep `skill-installer` focused on import/install/visibility and `plugin-builder` focused on package conversion once lifecycle judgment is already settled.
 - Regenerate public skill catalog surfaces after metadata wording changes so the visible index matches the new family contract.
 
 **Patterns to follow:**
-- Existing downstream handoff wording already present in `skill-installer` and `codex-plugin-builder`
+- Existing downstream handoff wording already present in `skill-installer` and `plugin-builder`
 - Repo skill-sync behavior used for prior family visibility fixes
 
 **Test scenarios:**
@@ -533,7 +533,7 @@ STEP_ID | status | owner | evidence
 P0 | completed | ce-work | Added non-trivial handoff contract + template in `skills-system/skill-creator/SKILL.md`, `skills-system/skill-creator/agents/openai.yaml`, and `skills-system/skill-creator/references/handoff-package-template.md`.
 P1 | completed | ce-work | Landed explicit round contract and artifact ownership across `utilities/skill-builder/SKILL.md`, `utilities/skill-builder/agents/openai.yaml`, and builder references (`iteration-and-testing.md`, `description-optimization.md`, `quality-tools.md`, `release-manifest.template.json`).
 P2 | completed | ce-work | Extended harness + eval contracts in `utilities/skill-builder/scripts/run_skill_evals.py`, `utilities/skill-builder/scripts/test_run_skill_evals.py`, and `utilities/skill-builder/references/evals.yaml`; `python3 utilities/skill-builder/scripts/test_run_skill_evals.py` passed; targeted smoke cases passed: `builder-round-metadata-contract` (`artifacts/reports/skills/skill-builder/20260404-192346-391682`), `clarification-package-ambiguous` (`artifacts/reports/skills/skill-builder/20260404-191825-956858`), and `provenance-import-rollback` (`artifacts/reports/skills/skill-builder/20260404-191825-956931`).
-P3 | completed | ce-work | Updated downstream-only gating language in `skills-system/skill-installer/*` and `utilities/codex-plugin-builder/SKILL.md`; ran `bash scripts/sync_skills.sh` successfully.
+P3 | completed | ce-work | Updated downstream-only gating language in `skills-system/skill-installer/*` and `utilities/plugin-builder/SKILL.md`; ran `bash scripts/sync_skills.sh` successfully.
 P4 | completed | ce-work | Validation stack completed: preflight, docs lint, plan-graph lint, skill quick validators (`skill-creator` via `uv run --with pyyaml`), harness tests, and `bash scripts/verify-work.sh` pass (`artifacts/validation/20260404T181136Z`).
 
 ## Acceptance Checklist
@@ -546,7 +546,7 @@ P4 | completed | ce-work | Validation stack completed: preflight, docs lint, pla
   Trace: R4, R6; `SA6`, `SA11`, `SA17`
 - [x] **AC4.** Eval harness outputs and regression coverage enforce the new round vocabulary and downstream-gating language.
   Trace: R3, R4; `SA12`, `SA13`, `SA18`
-- [x] **AC5.** `skill-installer` and `codex-plugin-builder` remain downstream-only and consume `ContractValidityEvidence` rather than self-attesting lifecycle validity.
+- [x] **AC5.** `skill-installer` and `plugin-builder` remain downstream-only and consume `ContractValidityEvidence` rather than self-attesting lifecycle validity.
   Trace: R5; `SA9`, `SA10`, `SA18`
 - [x] **AC6.** Docs lint, targeted validators, eval-harness regression, skill sync, plan-graph lint, and broad repo validation all pass, or remaining blockers are explicit and evidence-backed.
   Trace: R1-R6; spec observability and definition of done
@@ -560,4 +560,4 @@ P4 | completed | ce-work | Validation stack completed: preflight, docs lint, pla
 - Builder surface: `utilities/skill-builder/SKILL.md`
 - Eval harness: `utilities/skill-builder/scripts/run_skill_evals.py`
 - Eval regression tests: `utilities/skill-builder/scripts/test_run_skill_evals.py`
-- Downstream surfaces: `skills-system/skill-installer/SKILL.md`, `utilities/codex-plugin-builder/SKILL.md`
+- Downstream surfaces: `skills-system/skill-installer/SKILL.md`, `utilities/plugin-builder/SKILL.md`

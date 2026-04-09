@@ -1,6 +1,6 @@
 purpose: >
   Define expected behavior for app-builder to scaffold or adopt iOS/macOS projects,
-  optionally installing xcode-makefiles and simple-tasks.
+  optionally installing xcode-makefiles.
 schema_version: 1.0
 triggers:
   - user asks to scaffold a new iOS/macOS app from templates

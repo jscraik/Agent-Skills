@@ -34,7 +34,7 @@ Roll out the skill-authoring family contract so the repo exposes one coherent, A
 - `skill-creator`
 - `skill-builder`
 - `skill-installer`
-- `codex-plugin-builder`
+- `plugin-builder`
 
 This plan implements the approved spec by:
 - synchronizing phase-zero validator and frontmatter guidance,
@@ -58,7 +58,7 @@ Without a deliberate rollout sequence, the repo could land a partially correct f
 
 ## Requirements Trace
 
-- R1. Implement one canonical routing contract across `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`.
+- R1. Implement one canonical routing contract across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-builder`.
 - R2. Preserve the two-tier authoring model: starter creation in `skill-creator`, expert lifecycle work in `skill-builder`.
 - R3. Distinguish standalone-skill packaging from plugin packaging and keep the validation-first plugin gate intact.
 - R4. Add explicit clarification and handoff behavior in user-visible family surfaces.
@@ -74,7 +74,7 @@ In scope:
   - `skills-system/skill-creator/`
   - `skills-system/skill-installer/`
   - `utilities/skill-builder/`
-  - `utilities/codex-plugin-builder/`
+  - `utilities/plugin-builder/`
 - frontmatter and helper-validator enforcement for the family
 - routing, packaging, clarification, handoff, and provenance eval coverage for this family
 - readiness verification that proves the contract across both directory families
@@ -155,8 +155,8 @@ Out of scope:
 
 ### Resolved for Execution
 
-- `skills-system/skill-installer/SKILL.md` must point to `codex-plugin-builder` as the canonical plugin-packaging handoff inside the governed family contract.
-  - `plugin-creator` may remain as an additional adjacent scaffold reference only if it does not replace or obscure the canonical family packaging handoff to `codex-plugin-builder`.
+- `skills-system/skill-installer/SKILL.md` must point to `plugin-builder` as the canonical plugin-packaging handoff inside the governed family contract.
+  - `plugin-creator` may remain as an additional adjacent scaffold reference only if it does not replace or obscure the canonical family packaging handoff to `plugin-builder`.
 
 ## Implementation Units
 
@@ -217,8 +217,8 @@ Out of scope:
 - Modify: `skills-system/skill-creator/agents/openai.yaml`
 - Modify: `skills-system/skill-installer/SKILL.md`
 - Modify: `skills-system/skill-installer/agents/openai.yaml`
-- Modify: `utilities/codex-plugin-builder/SKILL.md`
-- Test: `rg -n "Create or update a skill|route_clarification|package a validated standalone skill|plugin package" utilities/skill-builder/SKILL.md skills-system/skill-creator/SKILL.md skills-system/skill-installer/SKILL.md utilities/codex-plugin-builder/SKILL.md utilities/skill-builder/agents/openai.yaml`
+- Modify: `utilities/plugin-builder/SKILL.md`
+- Test: `rg -n "Create or update a skill|route_clarification|package a validated standalone skill|plugin package" utilities/skill-builder/SKILL.md skills-system/skill-creator/SKILL.md skills-system/skill-installer/SKILL.md utilities/plugin-builder/SKILL.md utilities/skill-builder/agents/openai.yaml`
 
 **Approach:**
 - Update `skill-builder` metadata and body text so it reads as the expert lifecycle maintainer rather than a starter creator.
@@ -226,8 +226,8 @@ Out of scope:
 - Add or refine explicit handoff language across the family:
   - `skill-creator` -> `skill-builder`
   - `skill-builder` -> `skill-installer`
-  - `skill-installer` -> `codex-plugin-builder` for governed family plugin packaging adjacency
-  - any governed surface -> `codex-plugin-builder` when the deliverable becomes a plugin
+  - `skill-installer` -> `plugin-builder` for governed family plugin packaging adjacency
+  - any governed surface -> `plugin-builder` when the deliverable becomes a plugin
 - Make standalone-skill packaging and plugin packaging visibly distinct in surface-level prose and examples.
 
 **Execution note:** copy and examples must mirror the spec; do not create new behavioral branches here.
@@ -243,7 +243,7 @@ Out of scope:
 
 **Verification:**
 - Family copy and metadata read consistently with the routing matrix and no longer under-describe `skill-builder`.
-- `skills-system/skill-installer/SKILL.md` exposes `codex-plugin-builder` as the canonical governed plugin-packaging handoff.
+- `skills-system/skill-installer/SKILL.md` exposes `plugin-builder` as the canonical governed plugin-packaging handoff.
 
 **Exit criteria:**
 - All governed family surfaces expose role-consistent copy and handoff guidance.
@@ -311,9 +311,9 @@ Out of scope:
 
 **Files:**
 - Modify: `skills-system/skill-installer/SKILL.md`
-- Modify: `utilities/codex-plugin-builder/SKILL.md`
+- Modify: `utilities/plugin-builder/SKILL.md`
 - Modify: `utilities/skill-builder/SKILL.md`
-- Test: `rg -n "trusted-source|pinned|provenance|quarantine|rollback|contract-valid|standalone skill" skills-system/skill-installer/SKILL.md utilities/codex-plugin-builder/SKILL.md utilities/skill-builder/SKILL.md`
+- Test: `rg -n "trusted-source|pinned|provenance|quarantine|rollback|contract-valid|standalone skill" skills-system/skill-installer/SKILL.md utilities/plugin-builder/SKILL.md utilities/skill-builder/SKILL.md`
 
 **Approach:**
 - Make installer guidance explicitly require trusted sources, pinned refs when remote content is involved, staged validation before activation, and atomic rollback language.
@@ -351,7 +351,7 @@ Out of scope:
 - Verify: `skills-system/skill-installer/SKILL.md`
 - Verify: `skills-system/skill-creator/agents/openai.yaml`
 - Verify: `skills-system/skill-installer/agents/openai.yaml`
-- Verify: `utilities/codex-plugin-builder/SKILL.md`
+- Verify: `utilities/plugin-builder/SKILL.md`
 - Verify: `utilities/skill-builder/agents/openai.yaml`
 - Verify: `scripts/lint_openai_skill_format.sh`
 - Verify: `skills-system/skill-creator/scripts/quick_validate.py`
@@ -465,7 +465,7 @@ tasks:
 
 STEP_ID | status | owner | evidence
 P0 | completed | Codex | `scripts/lint_openai_skill_format.sh` now covers `skills-system`, both quick validators accept `compatibility`, and direct validator commands passed; temp fixture with `compatibility: codex` also passed both helper validators.
-P1 | completed | Codex | Family copy and metadata now distinguish starter authoring, lifecycle maintenance, installation, and plugin packaging across `skill-creator`, `skill-builder`, `skill-installer`, and `codex-plugin-builder`.
+P1 | completed | Codex | Family copy and metadata now distinguish starter authoring, lifecycle maintenance, installation, and plugin packaging across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-builder`.
 P2 | completed | Codex | New clarification, packaging-boundary, mixed authoring/install, validation-first, and provenance cases were added; `run_skill_evals.py` now preserves runner-failure truth, live Codex-home preflight, and timeout-profile routing; `python3 utilities/skill-builder/scripts/run_skill_evals.py utilities/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback` passed with both family cases green in `/private/tmp/skill-builder-live-smoke-pair-rerun/skill-builder/20260404-164154-350888/summary.json`.
 P3 | completed | Codex | Installer and plugin-packaging surfaces now expose trusted-source, pinned-ref, quarantine, staged-validation, rollback, and validation-first handoff guidance, and the family packaging boundary remains explicit between standalone skills and plugin packaging.
 P4 | completed | Codex | Repo-root readiness proof now passes across preflight, strict format lint, helper validation, eval inventory, discovery smoke, targeted live smoke, docs lint, and `bash scripts/verify-work.sh`; the derived maturity matrix remains in `docs/reference/skill-authoring-validation-maturity-matrix.md`. Residual risk only: one transient live-runner timeout was observed before the final passing pair rerun.
@@ -475,7 +475,7 @@ P4 | completed | Codex | Repo-root readiness proof now passes across preflight, 
 - [x] AC1. Governed frontmatter guidance and helper validators accept official keys, including `compatibility`, across both `utilities/` and `skills-system/`.
 Traceability: R5, R6; spec `SA7`, `SA20`, `SA21`
 
-- [x] AC2. `skill-builder`, `skill-creator`, `skill-installer`, `codex-plugin-builder`, and `utilities/skill-builder/agents/openai.yaml` expose role-consistent routing and handoff copy aligned with the canonical contract.
+- [x] AC2. `skill-builder`, `skill-creator`, `skill-installer`, `plugin-builder`, and `utilities/skill-builder/agents/openai.yaml` expose role-consistent routing and handoff copy aligned with the canonical contract.
 Traceability: R1, R2, R3, R4, R5; spec `SA2`, `SA4`, `SA5`, `SA6`, `SA9`, `SA13`
 
 - [x] AC3. The family visibly distinguishes clarification-required prompts, standalone-skill packaging, and plugin packaging without dual-owner ambiguity.

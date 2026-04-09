@@ -794,10 +794,7 @@ def _plugin_builder_script() -> Path:
     primary = repo_root / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py"
     if primary.exists():
         return primary
-    fallback = repo_root / "utilities" / "codex-plugin-builder" / "scripts" / "plugin_builder.py"
-    if fallback.exists():
-        return fallback
-    raise InstallError("Plugin validator script not found under utilities/plugin-builder or utilities/codex-plugin-builder.")
+    raise InstallError("Plugin validator script not found under utilities/plugin-builder.")
 
 
 def _run_plugin_validation(

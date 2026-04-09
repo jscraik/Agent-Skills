@@ -64,7 +64,7 @@ Execution posture: contract-first, security-first, live-evidence-required.
 ## Problem Frame
 
 The family currently passes structural gates, but several readiness gaps remain before it can be treated as "gold standard":
-- active enforcement scripts use `plugin-creator`, while core spec/reference text still mixes in `codex-plugin-builder` as a family member;
+- active enforcement scripts use `plugin-creator`, while core spec/reference text still mixes in `plugin-builder` as a family member;
 - live runner checks are still optional in default family validation mode;
 - `skill-builder` script surfaces still emit potential exfiltration warnings under OpenClaw;
 - adversarial eval coverage is present but still minimum-threshold rather than broad threat-surface coverage;
@@ -125,7 +125,7 @@ Out of scope:
 - `docs/reference/skill-authoring-validation-maturity-matrix.md`
   - latest readiness matrix and currently marked `meets` critical layer status.
 - `docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
-  - governing family contract that still names `codex-plugin-builder` in current phase-one boundary text.
+  - governing family contract that still names `plugin-builder` in current phase-one boundary text.
 - `utilities/skill-builder/scripts/openclaw_skill_guard.py`
   - security scanner used in family gate output.
 - family SKILL and `agents/openai.yaml` files
@@ -145,11 +145,11 @@ Out of scope:
 
 - Decision 1: Treat `skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator` as the active implementation family for this upgrade pass.
   - Rationale: this matches current validator enforcement and the requested execution target.
-- Decision 2: Keep `codex-plugin-builder` as an adjacent packaging surface, not an active member of this family gate.
+- Decision 2: Keep `plugin-builder` as an adjacent packaging surface, not an active member of this family gate.
   - Rationale: preserves compatibility while removing current boundary ambiguity.
 - Decision 2a: Use a two-layer parity model for authoring and enhancement lanes.
   - First-layer scaffolding owners: `skill-creator` and `plugin-creator`.
-  - Enhancement-layer owners: `skill-builder` and `codex-plugin-builder`.
+  - Enhancement-layer owners: `skill-builder` and `plugin-builder`.
   - Rationale: this keeps plugin and skill workflows mentally parallel while preserving current gate ownership boundaries.
 - Decision 3: Make trusted live smoke plus release evals required in release-ready mode.
   - Rationale: structural listing alone is insufficient for "gold" readiness claims.
@@ -202,17 +202,17 @@ flowchart TD
 - Modify: `docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
 - Modify: `docs/reference/skill-authoring-validation-maturity-matrix.md`
 - Create: `docs/reference/skill-authoring-family-boundary-decision.md`
-- Modify: any active family docs that still frame `codex-plugin-builder` as a core member for this lane
-- Test: `rg -n "skill-creator|skill-builder|skill-installer|plugin-creator|codex-plugin-builder" docs/specs docs/reference scripts/validate_skill_authoring_family.sh scripts/validate_skill_authoring_family_benchmarks.py`
+- Modify: any active family docs that still frame `plugin-builder` as a core member for this lane
+- Test: `rg -n "skill-creator|skill-builder|skill-installer|plugin-creator|plugin-builder" docs/specs docs/reference scripts/validate_skill_authoring_family.sh scripts/validate_skill_authoring_family_benchmarks.py`
 
 **Approach:**
 - Adopt one explicit "active family" statement used by all release-readiness artifacts.
-- Preserve compatibility notes where `codex-plugin-builder` remains an adjacent handoff surface.
+- Preserve compatibility notes where `plugin-builder` remains an adjacent handoff surface.
 - Keep historical completed plans intact; update only active reference and contract surfaces.
 - Write a Boundary Migration Decision Record with:
   - authority order for family ownership wording (`family gate scripts` -> `active spec` -> `reference matrix`);
   - required files to reconcile (`spec`, `matrix`, active validation docs);
-  - compatibility notes required for adjacent `codex-plugin-builder` surfaces;
+  - compatibility notes required for adjacent `plugin-builder` surfaces;
   - rollback condition when downstream contract consumers break.
 
 **Test scenarios:**
@@ -220,7 +220,7 @@ flowchart TD
 - adjacency wording does not reintroduce ownership ambiguity.
 - boundary-decision record unambiguously states layered ownership:
   - first-layer scaffolding (`skill-creator`, `plugin-creator`);
-  - enhancement-layer hardening/packaging (`skill-builder`, `codex-plugin-builder`).
+  - enhancement-layer hardening/packaging (`skill-builder`, `plugin-builder`).
 
 **Verification:**
 - no active family doc contradicts gate-level family membership.
@@ -491,7 +491,7 @@ P4 | completed | codex | gold-scorecard.md created; .harness/quality/criteria.md
 - [x] AC5 (R5): `skill-installer` and `plugin-creator` meet hybrid quality thresholds (absolute floors + uplift deltas + no-regression guardrails) from `docs/reference/skill-authoring-family-quality-baseline.md` without role-overlap regressions.
 - [x] AC6 (R6): Official-doc alignment cadence, source list, and freshness checks are documented and enforced.
 - [x] AC7 (R7): Scorecard metrics have owners, thresholds, and evidence paths with clear blocker routing.
-- [ ] AC8 (R1-R7): Full family gate passes in structural and trusted live modes with evidence archived for closeout. **Structural: ✓. Trusted live: attempted 2026-04-05; quota-limited (spark model daily limit exhausted at ~19:08). Eval calibration applied (cases 7, 11 regexes; case 12 discovery-heavy). Rerun at quota reset (11:58 PM) with `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash scripts/validate_skill_authoring_family.sh`. Known remaining risk: cases 8 (tool-unavailable fallback) and 10 (codex-plugin-builder routing) are behavioral gaps with spark model.**
+- [ ] AC8 (R1-R7): Full family gate passes in structural and trusted live modes with evidence archived for closeout. **Structural: ✓. Trusted live: attempted 2026-04-05; quota-limited (spark model daily limit exhausted at ~19:08). Eval calibration applied (cases 7, 11 regexes; case 12 discovery-heavy). Rerun at quota reset (11:58 PM) with `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash scripts/validate_skill_authoring_family.sh`. Known remaining risk: cases 8 (tool-unavailable fallback) and 10 (plugin-builder routing) are behavioral gaps with spark model.**
 
 ## Sources and References
 

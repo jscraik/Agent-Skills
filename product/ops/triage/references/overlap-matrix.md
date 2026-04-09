@@ -20,7 +20,7 @@ Use this matrix to keep `triage` focused on file-based todo approval and status 
 | "Review this branch and create todo findings." | Review generation and todo creation | `ce-review` |
 | "Resolve all ready todos in parallel." | Todo execution | `resolve-todo-parallel` |
 | "Triage our Linear backlog." | External tracker triage | `linear` |
-| "Set up tasks/TASKS.md for this repo." | Lightweight task tooling | `simple-tasks` |
+| "Set up tasks/TASKS.md for this repo." | Lightweight task tooling | `ce-work` |
 
 ## Notes
 - `triage` is the approval bridge between `ce-review` and `resolve-todo-parallel`.

@@ -179,7 +179,11 @@ fi
 # appear as user-selectable skills in Codex. Lifecycle family skills such as
 # `skill-creator` and `skill-installer` are intentionally visible again.
 hidden_flat_skills=(
-  "codex-plugin-builder"
+  "coderabbit"
+  "linear"
+  "plugin-builder"
+  "plugin-creator"
+  "plugin-installer"
   "skillgrade-graders"
   "skillgrade-setup"
 )
@@ -225,6 +229,11 @@ skill_files_cmd() {
     find -L "$root" \
       -path "*/_archive/*" -prune -o \
       -path "*/assets/*" -prune -o \
+      -path "*/fixtures/*" -prune -o \
+      -path "*/examples/*" -prune -o \
+      -path "*/templates/*" -prune -o \
+      -path "*/references/*" -prune -o \
+      -path "*/agents/*" -prune -o \
       -path "*/rules/*" -prune -o \
       -path "*/scripts/*" -prune -o \
       -name "SKILL.md" -print
@@ -272,25 +281,6 @@ all_skill_files_cmd() {
       }
     }
   '
-}
-
-# Collect plugin-exported skill names once so standalone duplicates (for example
-# `utilities/coderabbit`) can be suppressed from the flat runtime surface when a
-# plugin provides the canonical copy.
-plugin_skill_names="$(
-  find -L "./plugins" \
-    -path "./plugins/*/skills/*/SKILL.md" -print 2>/dev/null \
-    | awk -F/ '{print $(NF-1)}' \
-    | sort -u
-)"
-plugin_skill_names_ws=" $(printf '%s\n' "$plugin_skill_names" | tr '\n' ' ') "
-
-plugin_exports_skill_name() {
-  local skill_name="$1"
-  case "$plugin_skill_names_ws" in
-    *" $skill_name "*) return 0 ;;
-    *) return 1 ;;
-  esac
 }
 
 # Extract `metadata.skill-type` (or `metadata.skill_type`) from frontmatter.
@@ -364,10 +354,6 @@ while IFS= read -r skill_path; do
   fi
   if is_plugin_owned_skill_path "$skill_path"; then
     echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
-    continue
-  fi
-  if plugin_exports_skill_name "$skill_name"; then
-    echo "Skipping standalone skill shadowed by plugin bundle: $skill_name"
     continue
   fi
   skill_dir_abs="$repo_root/$skill_dir"
@@ -688,10 +674,6 @@ HEADER
     if is_plugin_owned_skill_path "$skill_path"; then
       continue
     fi
-    if plugin_exports_skill_name "$skill_name"; then
-      continue
-    fi
-
     category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
     safe_category="$(echo "$category" | tr '/' '_')"
 
@@ -774,10 +756,6 @@ generate_skill_type_index() {
     if is_plugin_owned_skill_path "$skill_path"; then
       continue
     fi
-    if plugin_exports_skill_name "$skill_name"; then
-      continue
-    fi
-
     skill_type_raw="$(extract_skill_type "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
     if [ -z "$skill_type_raw" ]; then
       continue

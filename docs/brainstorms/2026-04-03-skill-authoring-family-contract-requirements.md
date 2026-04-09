@@ -27,7 +27,7 @@ The repo has already improved the skill-authoring family by clarifying the lifec
 - `skill-creator` owns first-draft scaffolding and starter authoring.
 - `skill-builder` owns lifecycle hardening, routing, evals, and standalone packaging.
 - `skill-installer` owns import, install, and runtime visibility for already-valid skills.
-- `codex-plugin-builder` owns plugin packaging once the standalone-skill boundary is settled.
+- `plugin-builder` owns plugin packaging once the standalone-skill boundary is settled.
 
 That family split is now in a good place. The remaining gap is the quality of the authoring loop itself.
 
@@ -68,7 +68,7 @@ This is the smallest durable move that makes the family feel modern and evidence
   - `skill-creator` for starter authoring and scaffold-bound edits;
   - `skill-builder` for lifecycle hardening, evals, and standalone packaging;
   - `skill-installer` for already-valid install/import/visibility work;
-  - `codex-plugin-builder` for plugin packaging.
+  - `plugin-builder` for plugin packaging.
 - R2. Do not merge or rename these family members in this phase unless the upgraded loop proves the split is materially harmful.
 
 **Creator-to-builder handoff**

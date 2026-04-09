@@ -22,6 +22,32 @@ REPO_SCAN_ROOTS = (
     "utilities",
 )
 
+# Ignore SKILL.md files in implementation/support subtrees that are not
+# runtime-selectable skills.
+EXCLUDED_REPO_SCAN_SEGMENTS = {
+    "_archive",
+    "assets",
+    "rules",
+    "scripts",
+    "fixtures",
+    "examples",
+    "templates",
+    "references",
+    "agents",
+}
+
+# Keep hidden/internal skills out of runtime discovery. This mirrors
+# scripts/sync_skills.sh hidden_flat_skills.
+HIDDEN_FLAT_SKILL_NAMES = {
+    "coderabbit",
+    "linear",
+    "plugin-builder",
+    "plugin-creator",
+    "plugin-installer",
+    "skillgrade-graders",
+    "skillgrade-setup",
+}
+
 
 @dataclass(frozen=True)
 class SkillEntry:
@@ -29,29 +55,6 @@ class SkillEntry:
     source_dir: Path
     category: str
     description: str
-
-
-def _plugin_skill_names() -> set[str]:
-    names: set[str] = set()
-    plugins_root = REPO_ROOT / "plugins"
-    if not plugins_root.is_dir():
-        return names
-
-    for skill_md in sorted(plugins_root.rglob("SKILL.md")):
-        if skill_md.parent.parent.name != "skills":
-            continue
-        names.add(skill_md.parent.name)
-    return names
-
-
-def _is_plugin_owned_skill_dir(path: Path) -> bool:
-    try:
-        rel = path.resolve().relative_to(REPO_ROOT)
-    except ValueError:
-        return False
-
-    parts = rel.parts
-    return len(parts) >= 3 and parts[0] == "plugins" and parts[-2] == "skills"
 
 
 def _iter_flat_skill_dirs() -> Iterable[Path]:
@@ -74,6 +77,9 @@ def _iter_repo_skill_dirs() -> Iterable[Path]:
         if not root.is_dir():
             continue
         for skill_md in sorted(root.rglob("SKILL.md")):
+            rel_parts = skill_md.relative_to(root).parts
+            if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
+                continue
             dirs.append(skill_md.parent)
     return dirs
 
@@ -145,7 +151,6 @@ def _normalize_description(text: str) -> str:
 def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
     seen: set[str] = set()
     entries: List[SkillEntry] = []
-    plugin_skill_names = _plugin_skill_names()
     if source == "flat":
         skill_dirs = list(_iter_flat_skill_dirs())
     elif source == "repo":
@@ -163,7 +168,7 @@ def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
         name = skill_dir.name.strip() or source_dir.name
         if not name or name in seen:
             continue
-        if name in plugin_skill_names and not _is_plugin_owned_skill_dir(source_dir):
+        if name in HIDDEN_FLAT_SKILL_NAMES:
             continue
 
         try:
