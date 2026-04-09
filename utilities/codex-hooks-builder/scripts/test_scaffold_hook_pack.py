@@ -302,7 +302,7 @@ class TestMainProjectScope(unittest.TestCase):
     def test_project_scope_creates_codex_hooks_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            summary = self._run_main(root)
+            self._run_main(root)
             hooks_json_path = root / ".codex" / "hooks.json"
             self.assertTrue(hooks_json_path.exists())
 
