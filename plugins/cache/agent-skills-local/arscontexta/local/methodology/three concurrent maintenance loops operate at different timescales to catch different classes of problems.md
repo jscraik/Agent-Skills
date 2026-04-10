@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/three concurrent maintenance loops operate at different timescales to catch different classes of problems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # three concurrent maintenance loops operate at different timescales to catch different classes of problems
 

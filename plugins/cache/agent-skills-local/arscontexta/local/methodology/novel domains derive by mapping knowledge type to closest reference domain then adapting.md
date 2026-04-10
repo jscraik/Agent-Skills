@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/novel domains derive by mapping knowledge type to closest reference domain then adapting.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # novel domains derive by mapping knowledge type to closest reference domain then adapting
 

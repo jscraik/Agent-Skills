@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/premature complexity is the most common derivation failure mode.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # premature complexity is the most common derivation failure mode
 

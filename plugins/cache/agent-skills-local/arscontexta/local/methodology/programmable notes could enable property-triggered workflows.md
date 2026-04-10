@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Original"]
 source: [[2-4-metadata-properties]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/programmable notes could enable property-triggered workflows.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # programmable notes could enable property-triggered workflows
 

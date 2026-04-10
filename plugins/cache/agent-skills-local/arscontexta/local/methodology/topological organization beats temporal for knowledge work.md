@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Evergreen"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/topological organization beats temporal for knowledge work.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # topological organization beats temporal for knowledge work
 

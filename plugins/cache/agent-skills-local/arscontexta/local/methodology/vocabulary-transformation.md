@@ -2,6 +2,8 @@
 description: 6-level domain-native vocabulary mapping -- from folder names through command names
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/vocabulary-transformation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # vocabulary-transformation
 

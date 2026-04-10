@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]", "[[discovery-retrieval]]"]
 source: [[2026-01-19-vibe-note-taking-101]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/structure enables navigation without reading everything.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # structure enables navigation without reading everything
 

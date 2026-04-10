@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[note-design]]", "[[maintenance-patterns]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/design MOCs as attention management devices with lifecycle governance.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # design MOCs as attention management devices with lifecycle governance
 

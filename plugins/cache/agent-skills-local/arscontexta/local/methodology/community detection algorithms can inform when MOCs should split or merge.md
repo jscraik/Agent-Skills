@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[maintenance-patterns]]"]
 methodology: ["Network Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/community detection algorithms can inform when MOCs should split or merge.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # community detection algorithms can inform when MOCs should split or merge
 

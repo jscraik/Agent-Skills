@@ -2,6 +2,8 @@
 description: Three-space separation (notes, self, ops) -- why content boundaries matter for retrieval and trust
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/memory-architecture.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # memory-architecture
 

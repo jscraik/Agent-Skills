@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/four abstraction layers separate platform-agnostic from platform-dependent knowledge system features.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # four abstraction layers separate platform-agnostic from platform-dependent knowledge system features
 

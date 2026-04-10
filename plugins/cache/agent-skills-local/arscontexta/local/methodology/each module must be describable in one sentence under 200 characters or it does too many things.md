@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[note-design]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/each module must be describable in one sentence under 200 characters or it does too many things.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # each module must be describable in one sentence under 200 characters or it does too many things
 

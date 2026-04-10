@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/derivation generates knowledge systems from composable research claims not template customization.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # derivation generates knowledge systems from composable research claims not template customization
 

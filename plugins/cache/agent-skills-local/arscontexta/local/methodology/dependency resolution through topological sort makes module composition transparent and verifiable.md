@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/dependency resolution through topological sort makes module composition transparent and verifiable.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # dependency resolution through topological sort makes module composition transparent and verifiable
 

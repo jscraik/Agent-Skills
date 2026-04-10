@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/platform adapter translation is semantic not mechanical because hook event meanings differ.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # platform adapter translation is semantic not mechanical because hook event meanings differ
 

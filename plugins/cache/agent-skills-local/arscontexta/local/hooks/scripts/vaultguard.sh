@@ -1,4 +1,6 @@
 #!/bin/bash
+# GENERATED PROJECTION: source=plugins/arscontexta/hooks/scripts/vaultguard.sh; DO NOT EDIT PROJECTION COPY.
+
 # Ars Contexta — Vault Guard
 # Checks if the current directory is an Ars Contexta vault.
 # Called by all hooks to skip execution in non-vault repos.

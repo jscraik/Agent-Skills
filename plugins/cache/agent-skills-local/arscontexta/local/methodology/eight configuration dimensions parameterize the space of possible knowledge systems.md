@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/eight configuration dimensions parameterize the space of possible knowledge systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # eight configuration dimensions parameterize the space of possible knowledge systems
 

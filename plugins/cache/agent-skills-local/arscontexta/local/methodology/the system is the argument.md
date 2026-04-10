@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]"]
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the system is the argument.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the system is the argument
 

@@ -5,6 +5,8 @@ topics: ["[[discovery-retrieval]]"]
 methodology: ["Original"]
 source: [[2-4-metadata-properties]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/live index via periodic regeneration keeps discovery current.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # live index via periodic regeneration keeps discovery current
 

@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Evergreen"]
 source: [[tft-research-part1]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/mnemonic medium embeds verification into navigation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # mnemonic medium embeds verification into navigation
 

@@ -3,6 +3,8 @@ description: Context rot means later phases run on degraded attention, so each t
 kind: research
 topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/fresh context per task preserves quality better than chaining phases.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # fresh context per task preserves quality better than chaining phases
 

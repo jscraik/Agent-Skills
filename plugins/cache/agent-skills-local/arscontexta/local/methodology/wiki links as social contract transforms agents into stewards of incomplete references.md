@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[maintenance-patterns]]"]
 methodology: ["Digital Gardening"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/wiki links as social contract transforms agents into stewards of incomplete references.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # wiki links as social contract transforms agents into stewards of incomplete references
 

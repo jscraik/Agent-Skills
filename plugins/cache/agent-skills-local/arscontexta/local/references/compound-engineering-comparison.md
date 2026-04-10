@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/compound-engineering-comparison.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Compound Engineering Comparison
 
 The Ars Contexta source repo is a single plugin-oriented repository with shared generation/runtime assets, not a multi-plugin marketplace bundle.

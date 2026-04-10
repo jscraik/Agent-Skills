@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Cognitive Science", "Augmentation Research"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/AI shifts knowledge systems from externalizing memory to externalizing attention.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # AI shifts knowledge systems from externalizing memory to externalizing attention
 

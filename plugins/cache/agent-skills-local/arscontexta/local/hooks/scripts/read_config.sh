@@ -1,4 +1,6 @@
 #!/bin/bash
+# GENERATED PROJECTION: source=plugins/arscontexta/hooks/scripts/read_config.sh; DO NOT EDIT PROJECTION COPY.
+
 # Ars Contexta — Config Reader
 # Reads values from .arscontexta vault marker (which doubles as config).
 # Usage: read_config.sh <key> [default]

@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[maintenance-patterns]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/implicit dependencies create distributed monoliths that fail silently across configurations.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # implicit dependencies create distributed monoliths that fail silently across configurations
 

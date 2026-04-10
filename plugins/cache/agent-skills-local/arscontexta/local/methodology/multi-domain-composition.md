@@ -2,6 +2,8 @@
 description: Adding and connecting multiple knowledge domains within a single vault architecture
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/multi-domain-composition.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # multi-domain-composition
 

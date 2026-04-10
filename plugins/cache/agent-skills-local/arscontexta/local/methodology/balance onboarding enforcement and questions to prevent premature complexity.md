@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[derivation-engine]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/balance onboarding enforcement and questions to prevent premature complexity.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # balance onboarding enforcement and questions to prevent premature complexity
 

@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Evergreen", "Cognitive Science"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/MOC construction forces synthesis that automated generation from metadata cannot replicate.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # MOC construction forces synthesis that automated generation from metadata cannot replicate
 

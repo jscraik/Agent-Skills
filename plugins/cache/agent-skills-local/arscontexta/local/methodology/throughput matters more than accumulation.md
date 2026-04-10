@@ -3,6 +3,8 @@ description: Success in knowledge systems is measured by processing velocity fro
 kind: research
 topics: ["[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/throughput matters more than accumulation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # throughput matters more than accumulation
 

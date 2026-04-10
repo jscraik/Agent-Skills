@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the no wrong patches guarantee ensures any valid module combination produces a valid system.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the no wrong patches guarantee ensures any valid module combination produces a valid system
 

@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[maintenance-patterns]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the derivation engine improves recursively as deployed systems generate observations.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the derivation engine improves recursively as deployed systems generate observations
 

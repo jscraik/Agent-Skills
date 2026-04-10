@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/each new note compounds value by creating traversal paths.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # each new note compounds value by creating traversal paths
 

@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]", "[[graph-structure]]"]
 source: [[2026-01-25-build-claude-a-tool-for-thought]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/title as claim enables traversal as reasoning.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # title as claim enables traversal as reasoning
 

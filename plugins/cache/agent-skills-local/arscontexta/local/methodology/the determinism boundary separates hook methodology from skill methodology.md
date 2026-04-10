@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 methodology: ["Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the determinism boundary separates hook methodology from skill methodology.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the determinism boundary separates hook methodology from skill methodology
 

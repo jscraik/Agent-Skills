@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema validation hooks externalize inhibitory control that degrades under cognitive load.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema validation hooks externalize inhibitory control that degrades under cognitive load
 

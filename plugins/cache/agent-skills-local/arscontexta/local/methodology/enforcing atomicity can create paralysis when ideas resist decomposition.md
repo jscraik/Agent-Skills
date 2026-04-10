@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Zettelkasten", "Evergreen"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/enforcing atomicity can create paralysis when ideas resist decomposition.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # enforcing atomicity can create paralysis when ideas resist decomposition
 

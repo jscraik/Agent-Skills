@@ -3,6 +3,8 @@ description: Skills contain selectivity gates, verification steps, and phase bou
 kind: research
 topics: ["[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/skills encode methodology so manual execution bypasses quality gates.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # skills encode methodology so manual execution bypasses quality gates
 

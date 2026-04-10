@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["GTD"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/continuous small-batch processing eliminates review dread.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # continuous small-batch processing eliminates review dread
 

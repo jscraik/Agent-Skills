@@ -4,6 +4,8 @@ kind: example
 domain: therapy
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/therapy journal uses warm personality with pattern detection for emotional processing.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # therapy journal uses warm personality with pattern detection for emotional processing
 

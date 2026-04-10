@@ -1,4 +1,6 @@
 #!/bin/bash
+# GENERATED PROJECTION: source=plugins/arscontexta/hooks/scripts/session-orient.sh; DO NOT EDIT PROJECTION COPY.
+
 # Ars Contexta — Session Orientation Hook
 # Injects workspace structure, identity, methodology, and maintenance signals at session start.
 # Also handles session tracking (capture moved here from Stop hook — fires once per session).

@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/role field makes graph structure explicit.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # role field makes graph structure explicit
 

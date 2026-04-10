@@ -3,6 +3,8 @@ description: tacit knowledge doesn't fit in claim notes — it's learned through
 kind: research
 topics: ["[[agent-cognition]]", "[[maintenance-patterns]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/operational wisdom requires contextual observation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # operational wisdom requires contextual observation
 

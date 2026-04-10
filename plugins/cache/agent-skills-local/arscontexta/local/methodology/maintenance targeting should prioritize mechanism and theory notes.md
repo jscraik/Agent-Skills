@@ -3,6 +3,8 @@ description: When reweaving experiments, find notes that discuss the MECHANISM b
 kind: research
 topics: ["[[maintenance-patterns]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/maintenance targeting should prioritize mechanism and theory notes.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 Reweave targeting benefits from semantic judgment about WHAT an experiment tests, not just topic proximity. Since [[spreading activation models how agents should traverse]] describes traversal as decay-based context loading through wiki links, the question "where should activation spread?" during reweave has two answers: topic proximity (same MOC) or mechanism connection (same underlying concept). This note argues mechanism connection produces higher-value reweave targets for experiments.
 

@@ -4,6 +4,8 @@ kind: example
 domain: creative-writing
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/creative writing uses worldbuilding consistency with character tracking.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # creative writing uses worldbuilding consistency with character tracking
 

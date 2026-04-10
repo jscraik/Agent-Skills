@@ -4,6 +4,8 @@ kind: research
 topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/session transcript mining enables experiential validation that structural tests cannot provide.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # session transcript mining enables experiential validation that structural tests cannot provide
 

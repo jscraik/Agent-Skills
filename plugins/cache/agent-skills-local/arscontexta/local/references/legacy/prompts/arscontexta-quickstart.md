@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/legacy/prompts/arscontexta-quickstart.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Ars Contexta Quickstart (Codex)
 
 You are operating an Ars Contexta vault in Codex.

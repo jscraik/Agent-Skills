@@ -1,18 +1,27 @@
 ---
 name: uv-python-project-setup
 description: "Python project initialization and dependency management with uv. Use when starting new CLI tools or libraries, configuring pyproject.toml, managing virtual environments, or setting up development workflows. Covers project types, dependency commands, and environment synchronization."
+metadata:
+  skill-type: runbook
 ---
 
 # uv Python Project Setup
 
 Fast Python project initialization and dependency management with automatic environment handling.
 
-## When to Apply
+## When to use
 
-- Starting new Python CLI tools or libraries
-- Migrating from pip/pipenv to modern project management
-- Setting up reproducible development environments
-- Managing complex dependency requirements
+- Starting new Python CLI tools or libraries.
+- Migrating from pip/pipenv to modern project management.
+- Setting up reproducible development environments.
+- Managing complex dependency requirements.
+
+## Required inputs
+
+- Intended project type (`app` or distributable `library`).
+- Target Python runtime contract (default repo policy uses Python 3.12 commands).
+- Dependency policy (runtime vs development dependencies).
+- Execution context (`local dev`, `CI`, or release verification).
 
 ## Critical Rules
 
@@ -36,6 +45,13 @@ python main.py
 # RIGHT - Automatic sync and execution
 uv run --python 3.12 main.py
 ```
+
+## Deliverables
+
+- A valid `pyproject.toml` aligned to project type and dependency intent.
+- A synchronized `uv.lock` checked into source control.
+- Reproducible command set based on `uv run --python 3.12 ...`.
+- Explicit validation commands for lint/test/build entrypoints.
 
 ## Key Patterns
 
@@ -118,10 +134,21 @@ uv run --python 3.12 --with rich debug_script.py
 - **Wrong project type** — Use `--lib` for packages that will be distributed
 - **Direct pyproject.toml edits** — Use `uv add/remove` to maintain lockfile sync
 
-## See Also
-| Skill | When to use together |
-|---|---|
-| [[test-driven-development]] | Establish test-first workflows for new Python projects once the uv scaffold is ready |
-| [[systematic-debugging]] | Diagnose dependency conflicts, interpreter mismatch, or lockfile drift in uv-managed projects |
+## Failure mode
 
-**Topic map:** [[utilities]]
+- If project type (`app` vs `library`) is unclear, pause and request explicit confirmation before scaffolding.
+- If required Python version differs from repo policy, return partial with the exact mismatch and impact.
+
+## Gotchas
+
+- `uv init` defaults to app-style layout; use `--lib` for package distributions.
+- Running tools from manually activated virtualenvs can bypass lockfile sync guarantees.
+
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[test-driven-development]] | Pair uv-managed environments with behavior-first testing workflows |
+| [[verification-before-completion]] | Enforce final verification before declaring setup complete |
+
+**Topic map:** [[agent-ops]]

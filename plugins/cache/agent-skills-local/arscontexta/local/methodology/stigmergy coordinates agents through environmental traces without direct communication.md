@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[graph-structure]]"]
 methodology: ["Systems Theory", "Digital Gardening"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/stigmergy coordinates agents through environmental traces without direct communication.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # stigmergy coordinates agents through environmental traces without direct communication
 

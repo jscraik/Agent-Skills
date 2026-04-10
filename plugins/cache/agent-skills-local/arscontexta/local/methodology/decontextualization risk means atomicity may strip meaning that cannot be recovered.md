@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Zettelkasten", "Cognitive Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/decontextualization risk means atomicity may strip meaning that cannot be recovered.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # decontextualization risk means atomicity may strip meaning that cannot be recovered
 

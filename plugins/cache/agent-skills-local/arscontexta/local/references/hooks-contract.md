@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/hooks-contract.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Hooks Contract
 
 ## Included hook surfaces

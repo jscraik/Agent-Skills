@@ -1,14 +1,6 @@
 ---
 name: plugin-builder
 description: Harden, convert, and validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package and needs contract-grade safety checks, not when standalone skill lifecycle hardening is still unresolved.
-metadata:
-  skill-type: scaffolding_templates
-  lifecycle_state: active
-  maturity: canonical
-  owner: Agent Skills Team
-  review_cadence: quarterly
-  last_reviewed: 2026-04-07
-  metadata_source: frontmatter
 ---
 
 # Plugin Builder

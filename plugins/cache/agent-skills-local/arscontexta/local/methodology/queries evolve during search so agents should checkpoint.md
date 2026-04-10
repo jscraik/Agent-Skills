@@ -3,6 +3,8 @@ description: The berrypicking model shows information needs transform during ret
 kind: research
 topics: ["[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/queries evolve during search so agents should checkpoint.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # queries evolve during search so agents should checkpoint
 

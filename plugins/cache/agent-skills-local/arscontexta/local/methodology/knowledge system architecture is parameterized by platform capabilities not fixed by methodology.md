@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/knowledge system architecture is parameterized by platform capabilities not fixed by methodology.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # knowledge system architecture is parameterized by platform capabilities not fixed by methodology
 

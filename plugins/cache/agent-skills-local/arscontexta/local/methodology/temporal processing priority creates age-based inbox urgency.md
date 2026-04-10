@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Cornell"]
 source: [[3-3-cornell-note-taking-system]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/temporal processing priority creates age-based inbox urgency.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # temporal processing priority creates age-based inbox urgency
 

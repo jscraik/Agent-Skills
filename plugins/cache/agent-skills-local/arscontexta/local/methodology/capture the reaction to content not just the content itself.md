@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Evergreen"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/capture the reaction to content not just the content itself.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # capture the reaction to content not just the content itself
 

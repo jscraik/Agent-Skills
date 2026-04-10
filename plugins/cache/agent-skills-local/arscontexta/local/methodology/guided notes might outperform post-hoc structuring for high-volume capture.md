@@ -5,6 +5,8 @@ topics: ["[[note-design]]"]
 methodology: ["Cornell"]
 source: [[3-3-cornell-note-taking-system]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/guided notes might outperform post-hoc structuring for high-volume capture.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # guided notes might outperform post-hoc structuring for high-volume capture
 

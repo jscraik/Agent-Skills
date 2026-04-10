@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/hooks enable context window efficiency by delegating deterministic checks to external processes.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # hooks enable context window efficiency by delegating deterministic checks to external processes
 

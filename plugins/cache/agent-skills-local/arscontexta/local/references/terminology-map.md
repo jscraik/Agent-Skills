@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/terminology-map.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Terminology Map (Claude -> Codex)
 
 ## Core mapping

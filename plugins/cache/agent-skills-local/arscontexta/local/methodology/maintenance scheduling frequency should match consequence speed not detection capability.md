@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/maintenance scheduling frequency should match consequence speed not detection capability.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # maintenance scheduling frequency should match consequence speed not detection capability
 

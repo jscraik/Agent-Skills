@@ -4,6 +4,8 @@ kind: research
 topics: ["[[processing-workflows]]"]
 methodology: ["Cornell"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/generation effect gate blocks processing without transformation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # generation effect gate blocks processing without transformation
 

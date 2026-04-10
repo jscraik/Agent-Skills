@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Augmentation Research"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/bootstrapping principle enables self-improving systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # bootstrapping principle enables self-improving systems
 

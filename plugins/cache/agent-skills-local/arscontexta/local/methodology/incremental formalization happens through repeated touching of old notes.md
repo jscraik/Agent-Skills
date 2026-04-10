@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Zettelkasten"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/incremental formalization happens through repeated touching of old notes.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # incremental formalization happens through repeated touching of old notes
 

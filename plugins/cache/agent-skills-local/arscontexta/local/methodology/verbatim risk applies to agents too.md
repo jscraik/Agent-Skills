@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/verbatim risk applies to agents too.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # verbatim risk applies to agents too
 

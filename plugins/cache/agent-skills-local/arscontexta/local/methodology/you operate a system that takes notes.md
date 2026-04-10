@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]", "[[agent-cognition]]"]
 source: [[2026-01-19-vibe-note-taking-101]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/you operate a system that takes notes.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # you operate a system that takes notes
 

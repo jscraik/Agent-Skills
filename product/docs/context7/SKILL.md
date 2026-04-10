@@ -1,6 +1,6 @@
 ---
 name: context7
-description: "Retrieve current third-party library docs and Context7 CLI/Wizard guidance; use this skill when users need version-sensitive dependency answers or explicit `ctx7 docs/library/skills/setup` workflows."
+description: "Analyze current external library/API documentation and generate Context7 CLI guidance when the user asks for version-sensitive dependency behavior, library API references, or Context7 skills/setup/auth command help."
 metadata:
   skill-type: library_api_reference
 ---
@@ -77,6 +77,7 @@ Retrieve current external library documentation via Context7 so implementation g
 - Do not invent `ctx7` options that are not listed in `references/context7-skill-wizard.md`.
 
 ## Validation
+- Fail fast: stop at the first failed gate, fix it, then continue.
 - Confirm the library id matches the intended ecosystem before using results.
 - If results look stale or off-target, refine the query or re-run with narrower scope.
 - Cap retrieval attempts per user question:

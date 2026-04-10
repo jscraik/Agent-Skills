@@ -3,6 +3,8 @@ description: humans augment persistent identity with vaults; agents constitute i
 kind: research
 topics: ["[[agent-cognition]]", "[[note-design]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the vault constitutes identity for agents.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the vault constitutes identity for agents
 

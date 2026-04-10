@@ -3,6 +3,8 @@ description: Network science shows knowledge graphs need power-law distributions
 kind: research
 topics: ["[[graph-structure]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/small-world topology requires hubs and dense local links.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # small-world topology requires hubs and dense local links
 

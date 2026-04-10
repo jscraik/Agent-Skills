@@ -5,6 +5,8 @@ topics: ["[[note-design]]"]
 methodology: ["Cornell"]
 source: [[3-3-cornell-note-taking-system]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/logic column pattern separates reasoning from procedure.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # logic column pattern separates reasoning from procedure
 

@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[schema-enforcement]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/enforce schema with graduated strictness across capture processing and query zones.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # enforce schema with graduated strictness across capture processing and query zones
 

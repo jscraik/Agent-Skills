@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["PKM Research", "Zettelkasten", "Cornell", "Evergreen", "GTD"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/methodology traditions are named points in a shared configuration space not competing paradigms.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # methodology traditions are named points in a shared configuration space not competing paradigms
 

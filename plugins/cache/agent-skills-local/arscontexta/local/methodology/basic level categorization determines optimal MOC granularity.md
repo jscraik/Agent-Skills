@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Cognitive Science", "PKM Research"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/basic level categorization determines optimal MOC granularity.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # basic level categorization determines optimal MOC granularity
 

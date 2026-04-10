@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[discovery-retrieval]]"]
 confidence: speculative
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/markdown plus YAML plus ripgrep implements a queryable graph database without infrastructure.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # markdown plus YAML plus ripgrep implements a queryable graph database without infrastructure
 

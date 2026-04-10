@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 methodology: ["PKM Research", "Original"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/vibe notetaking is the emerging industry consensus for AI-native self-organization.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # vibe notetaking is the emerging industry consensus for AI-native self-organization
 

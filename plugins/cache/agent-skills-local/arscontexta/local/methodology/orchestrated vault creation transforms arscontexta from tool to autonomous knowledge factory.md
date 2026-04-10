@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[agent-cognition]]"]
 confidence: speculative
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/orchestrated vault creation transforms arscontexta from tool to autonomous knowledge factory.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # orchestrated vault creation transforms arscontexta from tool to autonomous knowledge factory
 

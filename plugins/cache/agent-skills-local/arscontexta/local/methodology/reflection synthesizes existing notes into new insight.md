@@ -3,6 +3,8 @@ description: re-reading own notes surfaces cross-note patterns invisible in any 
 kind: research
 topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/reflection synthesizes existing notes into new insight.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # reflection synthesizes existing notes into new insight
 

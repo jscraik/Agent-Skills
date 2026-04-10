@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/use-case presets dissolve the tension between composability and simplicity.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # use-case presets dissolve the tension between composability and simplicity
 

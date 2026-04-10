@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Zettelkasten", "Systems Theory"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/knowledge systems become communication partners through complexity and memory humans cannot sustain.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # knowledge systems become communication partners through complexity and memory humans cannot sustain
 

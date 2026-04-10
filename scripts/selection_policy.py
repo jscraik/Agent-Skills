@@ -54,7 +54,7 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 
 # Plugin router skills that should be visible in default flat discovery.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
-    "coderabbit",
+    # Keep empty by default to avoid flat/runtime shadowing with plugin-owned skills.
 )
 
 # Plugin lane skills that stay hidden by default unless advanced mode is used.

@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]"]
 methodology: ["Evergreen"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/note titles should function as APIs enabling sentence transclusion.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # note titles should function as APIs enabling sentence transclusion
 

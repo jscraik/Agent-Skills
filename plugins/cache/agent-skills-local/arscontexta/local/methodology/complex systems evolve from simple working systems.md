@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Systems Theory"]
 source: TFT research corpus (00_inbox/heinrich/), [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/complex systems evolve from simple working systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # complex systems evolve from simple working systems
 

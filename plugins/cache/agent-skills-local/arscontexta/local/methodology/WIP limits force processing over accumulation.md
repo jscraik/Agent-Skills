@@ -4,6 +4,8 @@ kind: research
 topics: ["[[processing-workflows]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/WIP limits force processing over accumulation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # WIP limits force processing over accumulation
 
