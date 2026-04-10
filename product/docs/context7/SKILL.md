@@ -1,6 +1,6 @@
 ---
 name: context7
-description: "Analyze current external library/API documentation and provide Context7 CLI-first guidance for version-sensitive dependency behavior, library API references, and explicit `ctx7 docs/library/skills/setup/auth` workflows."
+description: "Analyze current external library/API documentation and generate Context7 CLI guidance when the user asks for version-sensitive dependency behavior, library API references, or Context7 skills/setup/auth command help."
 metadata:
   skill-type: library_api_reference
 ---
@@ -80,7 +80,6 @@ Retrieve current external library documentation via Context7 so implementation g
 - Fail fast: stop at the first failed gate, fix it, then continue.
 - Confirm the library id matches the intended ecosystem before using results.
 - If results look stale or off-target, refine the query or re-run with narrower scope.
-- Fail fast: stop at the first failed retrieval or contract gate, report the blocker, and avoid speculative fallback behavior.
 - Cap retrieval attempts per user question:
   - max 3 `library` resolution attempts
   - max 3 `docs` retrieval attempts

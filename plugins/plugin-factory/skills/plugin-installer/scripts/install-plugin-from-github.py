@@ -841,11 +841,26 @@ def _write_json_atomic(path: str, payload: dict[str, object]) -> None:
 
 
 def _plugin_builder_script() -> Path:
-    repo_root = Path(__file__).resolve().parents[3]
-    primary = repo_root / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py"
-    if primary.exists():
-        return primary
-    raise InstallError("Plugin validator script not found under utilities/plugin-builder.")
+    script_path = Path(__file__).resolve()
+    repo_root: Path | None = None
+    for candidate in script_path.parents:
+        if (candidate / ".git").exists() and (candidate / "scripts").is_dir():
+            repo_root = candidate
+            break
+    if repo_root is None:
+        repo_root = script_path.parents[5]
+
+    candidates = (
+        repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder" / "scripts" / "plugin_builder.py",
+        repo_root / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py",
+    )
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    raise InstallError(
+        "Plugin validator script not found under plugins/plugin-factory/skills/plugin-builder "
+        "or utilities/plugin-builder."
+    )
 
 
 def _run_plugin_validation(

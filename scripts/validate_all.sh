@@ -134,8 +134,12 @@ fi
 echo ""
 
 projection_manifest="$run_dir/projection-integrity.json"
+recursive_artifacts_cmd=("${python_cmd[@]}" scripts/verify_recursive_skill_graph_artifacts.py --quiet)
+if [[ "$output_mode" == "ephemeral" ]]; then
+  recursive_artifacts_cmd+=(--manifest "$run_dir/artifact-parity-manifest.json")
+fi
 run_check warn plan-graphs "📊 Validating plan graphs..." ./scripts/validate_plan_graphs.sh
-run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${python_cmd[@]}" scripts/verify_recursive_skill_graph_artifacts.py --quiet
+run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${recursive_artifacts_cmd[@]}"
 run_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" scripts/docs_lint.py --mode block --config docs-policy.json
 run_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" scripts/verify_question_lifecycle_contract.py
 run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" scripts/test_skill_lifecycle_validation.py

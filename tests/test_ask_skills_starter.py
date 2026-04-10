@@ -69,8 +69,16 @@ class TestAskSkillsStarter(unittest.TestCase):
             ),
         ]
 
-        with patch("ask.commands.skills._canonical_entries", return_value=entries):
+        def _discover_with_visibility(*, source: str = "auto", visibility: str = "default"):
+            self.assertEqual(source, "auto")
+            if visibility == "advanced":
+                return entries
+            return [entries[0]]
+
+        with patch("ask.commands.skills.discover_skill_entries", side_effect=_discover_with_visibility) as mocked_discover:
             result = list_skills(REPO_ROOT)
+
+        mocked_discover.assert_called_once_with(source="auto", visibility="default")
 
         self.assertEqual(result.status, "success")
         names = [item["name"] for item in result.data["skills"]]

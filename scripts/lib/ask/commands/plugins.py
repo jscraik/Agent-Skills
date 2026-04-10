@@ -303,15 +303,7 @@ def init_plugin(
     if process.returncode == 0:
         plugin_root = _extract_plugin_root_from_output(process.stdout, repo_root, name)
         plugin_root_missing = not plugin_root.is_dir()
-        plugin_root_empty = False
-        if not plugin_root_missing:
-            try:
-                next(plugin_root.iterdir())
-            except StopIteration:
-                plugin_root_empty = True
-            except OSError:
-                plugin_root_missing = True
-        if plugin_root_missing or plugin_root_empty:
+        if plugin_root_missing:
             result.status = "error"
             result.errors.append(
                 ErrorObject(

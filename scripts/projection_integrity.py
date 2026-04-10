@@ -390,13 +390,24 @@ def read_text(path: Path) -> str:
 
 def write_text(path: Path, content: str) -> None:
     """
-    Write text to a file using UTF-8 encoding, replacing any existing contents.
+    Write text to a file using UTF-8 encoding, preserving existing mode bits.
     
     Parameters:
         path (Path): Destination file path to write.
         content (str): Text content to write to the file.
     """
+    existing_mode: int | None = None
+    try:
+        existing_mode = path.stat().st_mode & 0o777
+    except OSError:
+        existing_mode = None
     path.write_text(content, encoding="utf-8")
+    if existing_mode is not None:
+        try:
+            os.chmod(path, existing_mode)
+        except OSError:
+            # Best effort: content updates should not fail on chmod issues.
+            pass
 
 
 def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object]:
@@ -647,6 +658,10 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             if projection_file.exists() or projection_file.is_symlink():
                 projection_file.unlink()
             projection_file.write_bytes(source_bytes)
+            try:
+                os.chmod(projection_file, source_file.stat().st_mode & 0o777)
+            except OSError:
+                pass
             changed_files += 1
 
         for path in sorted(projection_abs.rglob("*"), reverse=True):

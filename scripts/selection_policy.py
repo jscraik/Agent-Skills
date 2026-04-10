@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-10.v2"
+POLICY_VERSION = "2026-04-10.v3"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -54,7 +54,27 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 
 # Plugin router skills that should be visible in default flat discovery.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
-    # Keep empty by default to avoid flat/runtime shadowing with plugin-owned skills.
+    "arscontexta",
+    "ce-brainstorm",
+    "ce-compound",
+    "ce-compound-refresh",
+    "ce-deepen-plan",
+    "ce-deepen-spec",
+    "ce-ideate",
+    "ce-plan",
+    "ce-reliability-review",
+    "ce-review",
+    "ce-spec",
+    "ce-tdd",
+    "ce-technical-review",
+    "ce-work",
+    "coderabbit",
+    "skill-builder",
+    "skill-creator",
+    "skill-factory",
+    "skill-installer",
+    "skill-refactor",
+    "skillify",
 )
 
 # Plugin lane skills that stay hidden by default unless advanced mode is used.

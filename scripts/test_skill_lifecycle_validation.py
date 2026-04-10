@@ -410,6 +410,23 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
+                repo_root / "plugins" / "harness-engineering" / "skills" / "ce-work" / "SKILL.md",
+                "# plugin skill",
+            )
+            write_text(
+                repo_root / ".agents" / "skills" / "ce-work" / "SKILL.md",
+                "# flat skill",
+            )
+
+            result = run_shadow_check(repo_root)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Plugin-shadowing check failed", result.stderr)
+            self.assertIn("- ce-work", result.stderr)
+
+    def test_plugin_shadowing_check_allows_router_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            write_text(
                 repo_root / "plugins" / "coderabbit" / "skills" / "coderabbit" / "SKILL.md",
                 "# plugin skill",
             )
@@ -419,9 +436,8 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             )
 
             result = run_shadow_check(repo_root)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("Plugin-shadowing check failed", result.stderr)
-            self.assertIn("- coderabbit", result.stderr)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("Plugin-shadowing check passed", result.stdout)
 
     def test_selection_policy_identity_matches_discovery_identity(self) -> None:
         """
@@ -436,9 +452,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_skill_discovery_visibility_hides_plugin_lanes_by_default(self) -> None:
         """
-        Verify that plugin-owned skills are hidden by default but included in advanced visibility.
+        Verify that plugin-owned lane skills are hidden by default but included in advanced visibility.
 
-        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` returns no plugin-owned skills while `visibility="advanced"` returns all four skills.
+        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` keeps the router skill while hiding lane skills and that `visibility="advanced"` returns all four skills.
         """
         skill_discovery = load_skill_discovery_module()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -482,7 +498,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         default_names = sorted(entry.name for entry in default_entries)
         advanced_names = sorted(entry.name for entry in advanced_entries)
-        self.assertEqual(default_names, [])
+        self.assertEqual(default_names, ["coderabbit"])
         self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
 
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_hides_them(self) -> None:
@@ -559,6 +575,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
+        self.assertIn("projection_integrity.py", content)
 
 
 if __name__ == "__main__":
