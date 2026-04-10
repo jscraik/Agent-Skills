@@ -48,14 +48,13 @@ else
 fi
 
 skill_dirs=(
-  "utilities/plugin-builder"
-  "utilities/skill-builder"
-  "utilities/skillify"
-  "utilities/plugin-builder"
-  "skills-system/skill-creator"
-  "skills-system/skill-installer"
-  "skills-system/plugin-installer"
-  "skills-system/plugin-creator"
+  "plugins/plugin-factory/skills/plugin-builder"
+  "plugins/skill-factory/skills/skill-builder"
+  "plugins/skill-factory/skills/skillify"
+  "plugins/skill-factory/skills/skill-creator"
+  "plugins/skill-factory/skills/skill-installer"
+  "plugins/plugin-factory/skills/plugin-installer"
+  "plugins/plugin-factory/skills/plugin-creator"
 )
 
 ce_work_skill="plugins/harness-engineering/skills/ce-work/SKILL.md"

@@ -2,13 +2,13 @@
 """Deterministic benchmark checks for the skill-authoring family.
 
 This script enforces equivalent contract/eval/security baseline requirements for:
-- utilities/skill-builder
-- utilities/skillify
-- utilities/plugin-builder
-- skills-system/skill-creator
-- skills-system/skill-installer
-- skills-system/plugin-installer
-- skills-system/plugin-creator
+- plugins/skill-factory/skills/skill-builder
+- plugins/skill-factory/skills/skillify
+- plugins/plugin-factory/skills/plugin-builder
+- plugins/skill-factory/skills/skill-creator
+- plugins/skill-factory/skills/skill-installer
+- plugins/plugin-factory/skills/plugin-installer
+- plugins/plugin-factory/skills/plugin-creator
 
 It is designed for CI and local gates where live LLM eval execution is not required.
 """
@@ -68,17 +68,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Severity ranking for baseline regression comparison (higher = worse)
 SEVERITY_RANK = {"INFO": 0, "WARN": 1, "FAIL": 2}
-_SCHEMA_DIR = REPO_ROOT / "utilities" / "skill-builder" / "references"
+_SCHEMA_DIR = REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder" / "references"
 _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
-    "utilities/skill-builder",
-    "utilities/skillify",
-    "utilities/plugin-builder",
-    "skills-system/skill-creator",
-    "skills-system/skill-installer",
-    "skills-system/plugin-installer",
-    "skills-system/plugin-creator",
+    "plugins/skill-factory/skills/skill-builder",
+    "plugins/skill-factory/skills/skillify",
+    "plugins/plugin-factory/skills/plugin-builder",
+    "plugins/skill-factory/skills/skill-creator",
+    "plugins/skill-factory/skills/skill-installer",
+    "plugins/plugin-factory/skills/plugin-installer",
+    "plugins/plugin-factory/skills/plugin-creator",
 )
 
 REQUIRED_CONTRACT_KEYS = {
