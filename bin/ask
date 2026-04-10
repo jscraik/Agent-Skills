@@ -105,7 +105,6 @@ FUZZY_MATCHES = {
     "ls": "list",
     "init": "init",
     "create": "init",
-    "import": "install",
     "harden": "harden",
     "fold": "fold",
     "merge": "fold",
