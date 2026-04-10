@@ -19,6 +19,8 @@ inputs:
 outputs:
   - resolved Context7 library id used for lookup
   - focused docs-backed guidance tied to the user question
+  - source basis describing the retrieved documentation used
+  - response schema version for schema-bound outputs
   - explicit clarification or assumptions when the match is ambiguous
   - wizard command sequence and target flags for `ctx7 skills` requests
 output_contract:

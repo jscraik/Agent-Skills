@@ -25,7 +25,8 @@ outputs:
     type: string
     description: High-level cleanup outcome summary.
   - name: diff_source
-    type: string
+    type: enum
+    values: [staged, unstaged, fallback-files]
     description: Origin of the diff.
   - name: execution_mode
     type: enum

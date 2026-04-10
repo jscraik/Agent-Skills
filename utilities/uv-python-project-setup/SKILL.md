@@ -117,3 +117,11 @@ uv run --python 3.12 --with rich debug_script.py
 - **Skipping lockfile** — Always commit `uv.lock` for reproducible builds  
 - **Wrong project type** — Use `--lib` for packages that will be distributed
 - **Direct pyproject.toml edits** — Use `uv add/remove` to maintain lockfile sync
+
+## See Also
+| Skill | When to use together |
+|---|---|
+| [[test-driven-development]] | Establish test-first workflows for new Python projects once the uv scaffold is ready |
+| [[systematic-debugging]] | Diagnose dependency conflicts, interpreter mismatch, or lockfile drift in uv-managed projects |
+
+**Topic map:** [[utilities]]
