@@ -41,7 +41,7 @@ For this incident, the resolved conflict set was:
 - `product/docs/context7/references/evals.yaml`
 - `utilities/uv-python-project-setup/scripts/README.md`
 
-The durable rule is: isolate merge-conflict work from unrelated local edits first, then treat hook bypass as a narrow operational fallback when blocking signals are external to the conflict delta.
+The durable rule is: isolate merge-conflict work from unrelated local edits first. Hook bypass must not be treated as an operational pattern; authoring-family and projection-integrity CI gates remain mandatory before merge. Never mark a skill-authoring-family PR merge-ready while the authoring-family-gate is failing or missing.
 
 ## Evidence
 
@@ -58,8 +58,11 @@ The durable rule is: isolate merge-conflict work from unrelated local edits firs
   - `git worktree add ... /tmp/agent-skills-pr104 ...`
   - `git merge --no-edit origin/feature/wiki-llm-reference`
   - `rg -n "^(<<<<<<<|=======|>>>>>>>)" ...`
-  - `git commit --no-verify ...`
-  - `git push --no-verify origin HEAD:codex/context7-skill-wizard-pr-20260410`
+  - `git commit --no-verify ...` ⚠️
+  - `git push --no-verify origin HEAD:codex/context7-skill-wizard-pr-20260410` ⚠️
+
+  ⚠️ **Warning:** The `--no-verify` flags shown above represent an exceptional incident and must not be copied as standard procedure. See Follow-up section for mandatory CI gate requirements.
+
 - Hook failure signal captured during normal flow:
   - pre-push diagnostics failed with `make: *** [hooks-pre-push] Terminated: 15` while running `scripts/validate_skill_authoring_family.sh`.
 
@@ -67,6 +70,7 @@ The durable rule is: isolate merge-conflict work from unrelated local edits firs
 
 - Investigate why `scripts/validate_skill_authoring_family.sh` intermittently terminates under hook execution even with a clean tree.
 - Keep conflict-only remediation commits narrowly scoped and avoid bundling repo-wide drift fixes in the same PR.
+- **Mandatory CI gate requirement:** Changes touching the skill authoring family must require the `authoring-family-gate` CI job (enforced by the `validate_skill_authoring_family.sh` script). Reviewers must mandate that CI gate for any authoring-family changes.
 - If hook bypass is used in exceptional cases, immediately verify:
   - Record the exact hook bypass blocker text (referencing `scripts/validate_skill_authoring_family.sh` or other hook scripts)
   - Confirm PR mergeability on GitHub
