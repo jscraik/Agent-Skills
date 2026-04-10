@@ -188,9 +188,25 @@ fi
 # appear as user-selectable skills in Codex. Lifecycle family skills such as
 # `skill-creator` and `skill-installer` are intentionally visible again.
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
+plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
+plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
 is_hidden_flat_skill_name() {
   local skill_name="$1"
   case " ${hidden_flat_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+is_plugin_visible_router_skill_name() {
+  local skill_name="$1"
+  case " ${plugin_visible_router_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+is_plugin_hidden_lane_skill_name() {
+  local skill_name="$1"
+  case " ${plugin_hidden_lane_skills[*]} " in
     *" $skill_name "*) return 0 ;;
     *) return 1 ;;
   esac
@@ -345,8 +361,15 @@ while IFS= read -r skill_path; do
     continue
   fi
   if is_plugin_owned_skill_path "$skill_path"; then
-    echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
-    continue
+    if is_plugin_hidden_lane_skill_name "$skill_name"; then
+      echo "Skipping hidden plugin lane skill: $skill_name"
+      continue
+    fi
+    if ! is_plugin_visible_router_skill_name "$skill_name"; then
+      echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
+      continue
+    fi
+    echo "Including plugin router skill in flat runtime list: $skill_name"
   fi
   skill_dir_abs="$repo_root/$skill_dir"
   # Relative path from $skills_dir (.agents/skills/) back to the skill source.
@@ -664,7 +687,12 @@ HEADER
       continue
     fi
     if is_plugin_owned_skill_path "$skill_path"; then
-      continue
+      if is_plugin_hidden_lane_skill_name "$skill_name"; then
+        continue
+      fi
+      if ! is_plugin_visible_router_skill_name "$skill_name"; then
+        continue
+      fi
     fi
     category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
     safe_category="$(echo "$category" | tr '/' '_')"
@@ -746,7 +774,12 @@ generate_skill_type_index() {
       continue
     fi
     if is_plugin_owned_skill_path "$skill_path"; then
-      continue
+      if is_plugin_hidden_lane_skill_name "$skill_name"; then
+        continue
+      fi
+      if ! is_plugin_visible_router_skill_name "$skill_name"; then
+        continue
+      fi
     fi
     skill_type_raw="$(extract_skill_type "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
     if [ -z "$skill_type_raw" ]; then

@@ -49,6 +49,7 @@ fi
 
 skill_dirs=(
   "utilities/skill-builder"
+  "utilities/skillify"
   "skills-system/skill-creator"
   "skills-system/skill-installer"
   "skills-system/plugin-creator"
@@ -262,6 +263,7 @@ if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   if "${python_cmd[@]}" -m pytest \
       utilities/skill-builder/scripts/test_skill_gate.py \
       scripts/test_validate_skill_authoring_family_benchmarks.py \
+      scripts/test_projection_integrity.py \
       -q --tb=short; then
     echo "[family-gate] pytest passed"
   else
@@ -270,15 +272,6 @@ if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   fi
 else
   echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --with pytest ... , uv pip install pytest, or brew install python)"
-fi
-
-echo "[family-gate] checking plugin-factory source/package parity..."
-if "${python_cmd[@]}" scripts/test_plugin_factory_family_parity.py; then
-  echo "[family-gate] plugin-factory parity passed"
-else
-  echo "[family-gate] ERROR: plugin-factory packaged skills drifted from source-of-truth"
-  echo "[family-gate]        run: bash scripts/sync_plugin_factory_family.sh"
-  exit 2
 fi
 
 # Track per-skill evidence for the release-ready index

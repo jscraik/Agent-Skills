@@ -11,6 +11,9 @@ on:
       - "skills-system/skill-installer/scripts/install-skill-from-github.py"
       - "scripts/validate_skill_authoring_family.sh"
       - "scripts/validate_skill_authoring_family_benchmarks.py"
+      - "scripts/projection_integrity.py"
+      - "scripts/validate_projection_integrity.sh"
+      - "scripts/sync_projection_trees.sh"
       - "templates/evals.yaml"
   workflow_dispatch:
     inputs:
@@ -101,6 +104,8 @@ jobs:
         env:
           SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
         run: bash scripts/validate_skill_authoring_family.sh
+      - name: Verify projection integrity (all scopes)
+        run: bash scripts/validate_projection_integrity.sh
 
   eval-baseline:
     if: github.event_name == 'workflow_dispatch' && inputs.run_evals == 'true'

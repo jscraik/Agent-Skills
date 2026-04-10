@@ -15,8 +15,8 @@ cases:
       - type: regex
         value: "(?i)(success criteria|SKILL\\.md)"
 
-  - id: repo-local-destination-default
-    name: project-specific workflow should prefer repo-local destination
+  - id: canonical-destination-default
+    name: project-specific workflow should prefer canonical destination
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
@@ -24,10 +24,10 @@ cases:
     prompt: "Please capture this repo-specific PR handoff flow as a skill and save it in this repo, not globally."
     acceptance:
       - type: regex
-        value: "(?i)(\\.codex/skills|repo local|project-bound)"
+        value: "(?i)(canonical|category path|github/|utilities/)"
 
-  - id: personal-destination-selection
-    name: personal workflow saved in CODEX_HOME skills
+  - id: personal-destination-rejected
+    name: personal-home destination request is redirected to canonical path
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
@@ -35,7 +35,7 @@ cases:
     prompt: "This routine is cross-repo. Can you save it as a personal Codex skill under my home skills folder?"
     acceptance:
       - type: regex
-        value: "(?i)(CODEX_HOME|\\$\\{CODEX_HOME:-\\$HOME\\}/\\.codex/skills|personal)"
+        value: "(?i)(canonical|home destination|not supported|category path)"
 
   - id: minimal-interview-for-simple-process
     name: avoid over-questioning simple process

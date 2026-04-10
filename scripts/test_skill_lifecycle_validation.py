@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import textwrap
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -427,12 +428,110 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
+    def test_skill_discovery_visibility_hides_plugin_lanes_by_default(self) -> None:
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            for name in ("coderabbit", "autofix", "code-review", "simplify"):
+                write_text(
+                    flat_root / name / "SKILL.md",
+                    f"""
+                    ---
+                    name: {name}
+                    description: "{name} test skill"
+                    ---
+
+                    # {name}
+                    """,
+                )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+                mock.patch.object(
+                    skill_discovery,
+                    "_is_plugin_owned_skill_dir",
+                    side_effect=lambda skill_dir: skill_dir.name in {
+                        "coderabbit",
+                        "autofix",
+                        "code-review",
+                        "simplify",
+                    },
+                ),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="advanced",
+                )
+
+        default_names = sorted(entry.name for entry in default_entries)
+        advanced_names = sorted(entry.name for entry in advanced_entries)
+        self.assertEqual(default_names, ["coderabbit"])
+        self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
+
+    def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_hides_them(self) -> None:
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            plugin_root = repo_root / "plugins" / "coderabbit" / "skills"
+
+            # Runtime projection keeps only router skill.
+            write_text(
+                flat_root / "coderabbit" / "SKILL.md",
+                """
+                ---
+                name: coderabbit
+                description: "router"
+                ---
+                # coderabbit
+                """,
+            )
+
+            # Canonical plugin source still contains lane skills.
+            for lane in ("autofix", "code-review", "simplify"):
+                write_text(
+                    plugin_root / lane / "SKILL.md",
+                    f"""
+                    ---
+                    name: {lane}
+                    description: "{lane}"
+                    ---
+                    # {lane}
+                    """,
+                )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="advanced",
+                )
+
+        default_names = sorted(entry.name for entry in default_entries)
+        advanced_names = sorted(entry.name for entry in advanced_entries)
+        self.assertEqual(default_names, ["coderabbit"])
+        self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
+
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("selection_policy.py", content)
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
         self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
         self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
 
 
 if __name__ == "__main__":

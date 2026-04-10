@@ -36,6 +36,66 @@ class TestAskSkillsStarter(unittest.TestCase):
         names = [item["name"] for item in result.data["skills"]]
         self.assertEqual(names, ["ce-plan", "ce-work", "gh-workflow"])
 
+    def test_default_list_hides_coderabbit_lane_skills(self) -> None:
+        entries = [
+            SimpleNamespace(
+                name="coderabbit",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
+                category="plugins/coderabbit/skills",
+                description="router",
+            ),
+            SimpleNamespace(
+                name="autofix",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "autofix",
+                category="plugins/coderabbit/skills",
+                description="lane",
+            ),
+            SimpleNamespace(
+                name="code-review",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "code-review",
+                category="plugins/coderabbit/skills",
+                description="lane",
+            ),
+            SimpleNamespace(
+                name="simplify",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "simplify",
+                category="plugins/coderabbit/skills",
+                description="lane",
+            ),
+        ]
+
+        with patch("ask.commands.skills._canonical_entries", return_value=entries):
+            result = list_skills(REPO_ROOT)
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertEqual(names, ["coderabbit"])
+        self.assertFalse(result.data.get("advanced_mode"))
+
+    def test_advanced_list_includes_coderabbit_lane_skills(self) -> None:
+        entries = [
+            SimpleNamespace(
+                name="coderabbit",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
+                category="plugins/coderabbit/skills",
+                description="router",
+            ),
+            SimpleNamespace(
+                name="autofix",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "autofix",
+                category="plugins/coderabbit/skills",
+                description="lane",
+            ),
+        ]
+
+        with patch("ask.commands.skills._canonical_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, advanced=True)
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertEqual(names, ["coderabbit", "autofix"])
+        self.assertTrue(result.data.get("advanced_mode"))
+
 
 if __name__ == "__main__":
     unittest.main()

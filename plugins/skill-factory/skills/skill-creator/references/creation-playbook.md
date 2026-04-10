@@ -48,7 +48,7 @@ Run this from the repository root where `scripts/init_skill.py` exists. If you a
 
 Defaults and naming:
 
-- Use `${CODEX_HOME:-$HOME/.codex}/skills` when no path is provided.
+- Use the canonical repository category path (for example `github/<skill-name>`) when no path is provided.
 - Use lowercase, digits, and hyphens only.
 - Keep names short, action-oriented, and trigger-friendly.
 

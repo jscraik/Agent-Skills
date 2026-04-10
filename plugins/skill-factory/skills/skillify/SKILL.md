@@ -17,7 +17,7 @@ Codex-native workflow for converting a just-completed conversation into a reusab
 ## Required inputs
 - Optional short process description from the user.
 - Current session context (messages, constraints, corrections, and outcomes).
-- Preferred destination: repo-local skill or personal skill.
+- Preferred destination: canonical git-backed skill category path.
 
 ## Deliverables
 - A reviewed `SKILL.md` draft matching the process.
@@ -66,10 +66,10 @@ Codex-native workflow for converting a just-completed conversation into a reusab
   - high-level ordered steps;
   - arguments needed for reuse;
   - execution style (`inline` vs `fork`);
-  - destination:
-    - repo local: `./.codex/skills/<name>/SKILL.md`
-    - personal: `${CODEX_HOME:-$HOME/.codex}/skills/<name>/SKILL.md`
-- For Codex-specific skills, default to repo-local when the workflow is project-bound.
+  - destination category path under canonical source tree:
+    - example: `utilities/<name>/SKILL.md`
+    - example: `github/<name>/SKILL.md`
+- Default to canonical repository destination and do not propose personal-home destinations.
 
 **Success criteria**:
 - Step skeleton, argument set, execution style, and save location are confirmed.
@@ -137,8 +137,8 @@ bash scripts/validate_skill_authoring_family.sh
 
 ## Examples
 - "We just finished debugging a failing `pr-pipeline` check and posting the Linear update. Skillify exactly what we did so I can reuse it next week."
-- "Convert this morning's review-to-merge flow into a reusable skill and keep it repo-local in `./.codex/skills/pr-ready-flow`."
-- "Capture my incident-triage handoff process as a personal Codex skill in `${CODEX_HOME:-$HOME/.codex}/skills`, and keep the interview short."
+- "Convert this morning's review-to-merge flow into a reusable skill and save it in `utilities/pr-ready-flow`."
+- "Capture my incident-triage handoff process as a reusable skill in `github/incident-triage-flow`, and keep the interview short."
 
 ## Failure mode
 - If `request_user_input` cannot be used (tool unavailable or blocked), stop before drafting and report that the interview contract cannot be satisfied safely.

@@ -12,6 +12,8 @@ from typing import Dict, Iterable, List
 from selection_policy import (
     EXCLUDED_SCAN_SEGMENTS as POLICY_EXCLUDED_SCAN_SEGMENTS,
     HIDDEN_FLAT_SKILL_NAMES as POLICY_HIDDEN_FLAT_SKILL_NAMES,
+    PLUGIN_HIDDEN_LANE_SKILL_NAMES as POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
+    PLUGIN_SKILL_ROOT_GLOB as POLICY_PLUGIN_SKILL_ROOT_GLOB,
     REPO_SCAN_ROOTS as POLICY_REPO_SCAN_ROOTS,
     policy_identity,
 )
@@ -27,6 +29,7 @@ EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
 # Keep hidden/internal skills out of runtime discovery. This mirrors
 # scripts/sync_skills.sh hidden_flat_skills.
 HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
+PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
 
 
 @dataclass(frozen=True)
@@ -62,6 +65,19 @@ def _iter_repo_skill_dirs() -> Iterable[Path]:
             continue
         for skill_md in sorted(root.rglob("SKILL.md")):
             rel_parts = skill_md.relative_to(root).parts
+            if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
+                continue
+            dirs.append(skill_md.parent)
+    return dirs
+
+
+def _iter_plugin_skill_dirs() -> Iterable[Path]:
+    dirs: List[Path] = []
+    for plugin_root in sorted(REPO_ROOT.glob(POLICY_PLUGIN_SKILL_ROOT_GLOB)):
+        if not plugin_root.is_dir():
+            continue
+        for skill_md in sorted(plugin_root.rglob("SKILL.md")):
+            rel_parts = skill_md.relative_to(plugin_root).parts
             if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
                 continue
             dirs.append(skill_md.parent)
@@ -144,15 +160,31 @@ def _normalize_description(text: str) -> str:
     return normalized or "Skill description pending."
 
 
-def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
+def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
+    if visibility not in {"default", "advanced"}:
+        raise ValueError(f"Unsupported visibility mode: {visibility}")
+
     seen: set[str] = set()
     entries: List[SkillEntry] = []
     if source == "flat":
         skill_dirs = list(_iter_flat_skill_dirs())
+        if visibility == "advanced":
+            # Flat runtime intentionally hides plugin lane skills; advanced mode
+            # augments from plugin sources so lanes remain discoverable.
+            skill_dirs.extend(_iter_plugin_skill_dirs())
     elif source == "repo":
         skill_dirs = list(_iter_repo_skill_dirs())
+        skill_dirs.extend(_iter_plugin_skill_dirs())
     else:
-        skill_dirs = list(_iter_flat_skill_dirs()) or list(_iter_repo_skill_dirs())
+        skill_dirs = list(_iter_flat_skill_dirs())
+        if skill_dirs:
+            if visibility == "advanced":
+                # Default listing follows flat runtime projection; advanced mode
+                # adds plugin lanes without changing default surface area.
+                skill_dirs.extend(_iter_plugin_skill_dirs())
+        else:
+            skill_dirs = list(_iter_repo_skill_dirs())
+            skill_dirs.extend(_iter_plugin_skill_dirs())
 
     for skill_dir in skill_dirs:
         source_dir = skill_dir.resolve()
@@ -164,8 +196,13 @@ def discover_skill_entries(source: str = "auto") -> List[SkillEntry]:
         name = skill_dir.name.strip() or source_dir.name
         if not name or name in seen:
             continue
-        if name in HIDDEN_FLAT_SKILL_NAMES and not _is_plugin_owned_skill_dir(
-            source_dir
+        plugin_owned = _is_plugin_owned_skill_dir(source_dir)
+        if name in HIDDEN_FLAT_SKILL_NAMES and not plugin_owned:
+            continue
+        if (
+            visibility != "advanced"
+            and plugin_owned
+            and name in PLUGIN_HIDDEN_LANE_SKILL_NAMES
         ):
             continue
 
@@ -198,7 +235,7 @@ def _category_heading(category: str) -> str:
     return " — ".join(words)
 
 
-def render_index(entries: List[SkillEntry], source: str = "auto") -> str:
+def render_index(entries: List[SkillEntry], source: str = "auto", visibility: str = "default") -> str:
     categories: Dict[str, List[SkillEntry]] = {}
     for entry in entries:
         categories.setdefault(entry.category, []).append(entry)
@@ -229,6 +266,7 @@ def render_index(entries: List[SkillEntry], source: str = "auto") -> str:
             "## Summary",
             f"- `total_skills`: {len(entries)}",
             f"- `catalog_source`: {source_label}",
+            f"- `visibility`: {visibility}",
             f"- `policy_identity`: {get_policy_identity()}",
             "",
             "## Catalog",
@@ -257,6 +295,12 @@ def parse_args() -> argparse.Namespace:
         help="Catalog source: flat runtime view, repo scan, or auto fallback (default).",
     )
     parser.add_argument(
+        "--visibility",
+        choices=("default", "advanced"),
+        default="default",
+        help="Catalog visibility mode: default hides lane skills, advanced shows all.",
+    )
+    parser.add_argument(
         "--policy-identity",
         action="store_true",
         help="Print canonical selection-policy identity.",
@@ -266,7 +310,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    entries = discover_skill_entries(source=args.source)
+    entries = discover_skill_entries(source=args.source, visibility=args.visibility)
 
     if args.count:
         print(len(entries))
@@ -275,12 +319,12 @@ def main() -> int:
         print(get_policy_identity())
 
     if args.write_index:
-        rendered = render_index(entries, source=args.source)
+        rendered = render_index(entries, source=args.source, visibility=args.visibility)
         args.write_index.write_text(rendered + "\n", encoding="utf-8")
         print(f"Wrote skill index: {args.write_index}")
 
     if not args.count and not args.write_index and not args.policy_identity:
-        print(render_index(entries, source=args.source))
+        print(render_index(entries, source=args.source, visibility=args.visibility))
 
     return 0
 

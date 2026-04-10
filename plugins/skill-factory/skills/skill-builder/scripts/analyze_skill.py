@@ -8,8 +8,8 @@ Usage:
     ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>
 
 Examples:
-    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py .codex/skills/my-skill
-    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py .codex/skills/my-skill/SKILL.md
+    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py github/my-skill
+    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py github/my-skill/SKILL.md
 
 Exit codes:
     0  score >= --min-pass

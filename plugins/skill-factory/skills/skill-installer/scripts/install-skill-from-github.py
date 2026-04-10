@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a skill from a GitHub repo path into $CODEX_HOME/skills."""
+"""Install a skill from GitHub into canonical repository skill categories."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ import tempfile
 import urllib.error
 import urllib.parse
 import zipfile
+from pathlib import Path
 
 from github_utils import github_request
 DEFAULT_REF = "main"
@@ -40,10 +41,6 @@ class Source:
 
 class InstallError(Exception):
     pass
-
-
-def _codex_home() -> str:
-    return os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex"))
 
 
 def _tmp_root() -> str:
@@ -240,8 +237,46 @@ def _resolve_source(args: Args) -> Source:
     )
 
 
-def _default_dest() -> str:
-    return os.path.join(_codex_home(), "skills")
+def _canonical_repo_dest() -> str | None:
+    override = os.environ.get("ASK_SKILLS_CANONICAL_DEST", "").strip()
+    if override:
+        return override
+
+    script_path = Path(__file__).resolve()
+    for parent in [script_path.parent, *script_path.parents]:
+        if not (parent / ".git").exists():
+            continue
+        if (parent / "AGENTS.md").is_file() and (parent / "scripts" / "sync_skills.sh").is_file() and (parent / "plugins").is_dir():
+            return str(parent / "github")
+    return None
+
+
+def _resolve_dest_root(dest: str | None) -> str:
+    canonical = _canonical_repo_dest()
+    if not canonical:
+        raise InstallError(
+            "Canonical skill destination was not detected. "
+            "Set ASK_SKILLS_CANONICAL_DEST or run inside the canonical agent-skills repository."
+        )
+
+    canonical_dest = Path(canonical).resolve()
+    repo_root = canonical_dest.parent
+
+    if not dest:
+        return str(canonical_dest)
+
+    requested = Path(dest)
+    resolved = requested.resolve() if requested.is_absolute() else (repo_root / requested).resolve()
+    try:
+        rel = resolved.relative_to(repo_root)
+    except ValueError as exc:
+        raise InstallError(
+            f"Destination must stay inside canonical repository root: {repo_root}"
+        ) from exc
+
+    if str(rel) in ("", "."):
+        raise InstallError("Destination must target a category directory under canonical repository root.")
+    return str(resolved)
 
 
 def _parse_args(argv: list[str]) -> Args:
@@ -254,7 +289,7 @@ def _parse_args(argv: list[str]) -> Args:
         help="Path(s) to skill(s) inside repo",
     )
     parser.add_argument("--ref", default=DEFAULT_REF)
-    parser.add_argument("--dest", help="Destination skills directory")
+    parser.add_argument("--dest", help="Canonical destination category (repo-relative or absolute within canonical repo)")
     parser.add_argument(
         "--name", help="Destination skill name (defaults to basename of path)"
     )
@@ -275,7 +310,7 @@ def main(argv: list[str]) -> int:
             raise InstallError("No skill paths provided.")
         for path in source.paths:
             _validate_relative_path(path)
-        dest_root = args.dest or _default_dest()
+        dest_root = _resolve_dest_root(args.dest)
         tmp_dir = tempfile.mkdtemp(prefix="skill-install-", dir=_tmp_root())
         try:
             repo_root = _prepare_repo(source, args.method, tmp_dir)

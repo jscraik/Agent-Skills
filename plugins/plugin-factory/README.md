@@ -29,17 +29,19 @@ Codex plugin package that bundles the plugin-authoring family in one installable
   - `assets/`
 
 ## Source Of Truth
-- Source skill family:
-  - `utilities/plugin-builder/`
-  - `skills-system/plugin-creator/`
-  - `skills-system/plugin-installer/`
-- Packaged skill family:
+- Canonical writable source (edit here):
   - `plugins/plugin-factory/skills/plugin-builder/`
   - `plugins/plugin-factory/skills/plugin-creator/`
   - `plugins/plugin-factory/skills/plugin-installer/`
+- Compatibility aliases (do not edit directly):
+  - `utilities/plugin-builder/`
+  - `skills-system/plugin-creator/`
+  - `skills-system/plugin-installer/`
+- Generated projection cache (do not edit directly):
+  - `plugins/cache/agent-skills-local/plugin-factory/local/`
 - Repo: `https://github.com/jscraik/Agent-Skills`
 
-When updating family logic, keep packaged skills aligned with the source family paths above.
+When updating family logic, edit plugin paths first and regenerate projections.
 
 ## Usage
 The `plugin-factory` plugin helps you:
@@ -48,17 +50,25 @@ The `plugin-factory` plugin helps you:
 - Install and verify plugins from trusted sources (`plugin-factory:plugin-installer`).
 - Keep scripts, references, and assets shipped with each family skill.
 
-## Validation
-Sync packaged skills from canonical sources first:
+`ask` workflow shortcuts:
 
 ```sh
-bash scripts/sync_plugin_factory_family.sh
+ask plugins create my-plugin --with-marketplace
+ask plugins import https://github.com/<owner>/<repo> --path plugins/<plugin-name> --dry-run
+ask plugins harden plugins/my-plugin
 ```
 
-Verify packaged/source parity:
+## Validation
+Sync projection trees first:
 
 ```sh
-python3 scripts/test_plugin_factory_family_parity.py
+bash scripts/sync_projection_trees.sh plugin-factory
+```
+
+Verify projection integrity:
+
+```sh
+bash scripts/validate_projection_integrity.sh
 ```
 
 Validate the package:

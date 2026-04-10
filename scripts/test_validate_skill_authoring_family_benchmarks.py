@@ -8,6 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +38,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../plugins/skill-factory/skills/skill-builder")
 
-            with unittest.mock.patch.object(self.module, "REPO_ROOT", root):
+            with mock.patch.object(self.module, "REPO_ROOT", root):
                 canonical = self.module._canonical_skill_rel("utilities/skill-builder")
 
             self.assertEqual(canonical, "plugins/skill-factory/skills/skill-builder")
@@ -51,7 +52,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../plugins/skill-factory/skills/skill-builder")
 
-            with unittest.mock.patch.object(self.module, "REPO_ROOT", root):
+            with mock.patch.object(self.module, "REPO_ROOT", root):
                 deduped = self.module._dedupe_requested_skills(
                     ("utilities/skill-builder", "plugins/skill-factory/skills/skill-builder")
                 )
@@ -89,15 +90,45 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             (alias_parent / "skill-builder").symlink_to("../plugins/skill-factory/skills/skill-builder")
 
             with (
-                unittest.mock.patch.object(self.module, "REPO_ROOT", root),
-                unittest.mock.patch.object(self.module, "_validate_contract", return_value=[]),
-                unittest.mock.patch.object(self.module, "_validate_evals", return_value=[]),
-                unittest.mock.patch.object(self.module, "_validate_reference_pi", return_value=[]),
+                mock.patch.object(self.module, "REPO_ROOT", root),
+                mock.patch.object(self.module, "_validate_contract", return_value=[]),
+                mock.patch.object(self.module, "_validate_evals", return_value=[]),
+                mock.patch.object(self.module, "_validate_reference_pi", return_value=[]),
             ):
                 findings = self.module._validate_skill("utilities/skill-builder")
 
             scope_failures = [f for f in findings if f.code == "TASK_PROFILE_SCOPE"]
             self.assertEqual(scope_failures, [])
+
+    def test_canonical_skill_rel_resolves_skillify_symlink_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skillify"
+            plugin_skill.mkdir(parents=True, exist_ok=True)
+            alias_parent = root / "utilities"
+            alias_parent.mkdir(parents=True, exist_ok=True)
+            (alias_parent / "skillify").symlink_to("../plugins/skill-factory/skills/skillify")
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                canonical = self.module._canonical_skill_rel("utilities/skillify")
+
+            self.assertEqual(canonical, "plugins/skill-factory/skills/skillify")
+
+    def test_dedupe_requested_skills_uses_skillify_canonical_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skillify"
+            plugin_skill.mkdir(parents=True, exist_ok=True)
+            alias_parent = root / "utilities"
+            alias_parent.mkdir(parents=True, exist_ok=True)
+            (alias_parent / "skillify").symlink_to("../plugins/skill-factory/skills/skillify")
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                deduped = self.module._dedupe_requested_skills(
+                    ("utilities/skillify", "plugins/skill-factory/skills/skillify")
+                )
+
+            self.assertEqual(deduped, ("utilities/skillify",))
 
 
 if __name__ == "__main__":

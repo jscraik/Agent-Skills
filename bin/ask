@@ -39,6 +39,7 @@ from ask.commands.repo import repo_status, repo_validate, check_hub_stability, d
 from ask.commands.plugins import (
     init_plugin,
     install_plugin,
+    harden_plugin,
     list_plugins_state,
     status_plugin_state,
     doctor_plugins_state,
@@ -69,7 +70,7 @@ VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog"],
     "skills": ["list", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
-    "plugins": ["list", "status", "doctor", "init", "install"],
+    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
@@ -104,6 +105,8 @@ FUZZY_MATCHES = {
     "ls": "list",
     "init": "init",
     "create": "init",
+    "import": "install",
+    "harden": "harden",
     "fold": "fold",
     "merge": "fold",
     # Graph actions
@@ -445,6 +448,7 @@ def main():
     
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
     skills_list_parser.add_argument("--category", help="Filter by category")
+    skills_list_parser.add_argument("--advanced", action="store_true", help="Include lane skills hidden in default listings")
     skills_list_parser.add_argument("--starter", action="store_true", help="Return starter-mode curated skills")
     skills_list_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
@@ -473,7 +477,7 @@ def main():
     
     skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
     skills_install_parser.add_argument("url", help="GitHub URL of the skill")
-    skills_install_parser.add_argument("--dest", default="github", help="Destination category directory")
+    skills_install_parser.add_argument("--dest", default="github", help="Repo-relative canonical category directory (default: github)")
     skills_install_parser.add_argument("--remediate", action="store_true", help="Scaffold missing contract/eval files")
     skills_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation")
     
@@ -491,6 +495,25 @@ def main():
     plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
     plugins_subparsers = plugins_parser.add_subparsers(dest="action")
 
+    def _add_plugin_init_args(parser):
+        parser.add_argument("name", help="Name of the new plugin")
+        parser.add_argument("--with-marketplace", action="store_true", help="Add to local marketplace")
+        parser.add_argument("--with-scripts", action="store_true", help="Add scripts directory")
+        parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
+        parser.add_argument("--with-references", action="store_true", help="Add references directory")
+        parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
+
+    def _add_plugin_install_args(parser):
+        parser.add_argument("url", help="GitHub URL of the plugin source")
+        parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
+        parser.add_argument("--name", help="Override installed plugin name")
+        parser.add_argument("--ref", help="Pinned Git ref to install (recommended: commit SHA)")
+        parser.add_argument("--dest", default="plugins/third-party", help="Destination directory relative to repo root")
+        parser.add_argument("--validation-level", choices=["strict", "compat"], default="compat", help="Installer validation depth")
+        parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
+        parser.add_argument("--allow-unpinned-ref", action="store_true", help="Allow non-SHA refs (e.g. main)")
+        parser.add_argument("--dry-run", action="store_true", help="Preview installation without writing")
+
     plugins_subparsers.add_parser("list", help="List plugin lifecycle state", parents=[global_parser])
 
     plugins_status_parser = plugins_subparsers.add_parser("status", help="Show state for one plugin", parents=[global_parser])
@@ -499,23 +522,24 @@ def main():
     plugins_subparsers.add_parser("doctor", help="Run read-only plugin diagnostics", parents=[global_parser])
     
     plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
-    plugins_init_parser.add_argument("name", help="Name of the new plugin")
-    plugins_init_parser.add_argument("--with-marketplace", action="store_true", help="Add to local marketplace")
-    plugins_init_parser.add_argument("--with-scripts", action="store_true", help="Add scripts directory")
-    plugins_init_parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
-    plugins_init_parser.add_argument("--with-references", action="store_true", help="Add references directory")
-    plugins_init_parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
+    _add_plugin_init_args(plugins_init_parser)
+
+    plugins_create_parser = plugins_subparsers.add_parser("create", help="Alias for plugins init", parents=[global_parser])
+    _add_plugin_init_args(plugins_create_parser)
 
     plugins_install_parser = plugins_subparsers.add_parser("install", help="Install a plugin from GitHub", parents=[global_parser])
-    plugins_install_parser.add_argument("url", help="GitHub URL of the plugin source")
-    plugins_install_parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
-    plugins_install_parser.add_argument("--name", help="Override installed plugin name")
-    plugins_install_parser.add_argument("--ref", help="Pinned Git ref to install (recommended: commit SHA)")
-    plugins_install_parser.add_argument("--dest", default="plugins/third-party", help="Destination directory relative to repo root")
-    plugins_install_parser.add_argument("--validation-level", choices=["strict", "compat"], default="compat", help="Installer validation depth")
-    plugins_install_parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
-    plugins_install_parser.add_argument("--allow-unpinned-ref", action="store_true", help="Allow non-SHA refs (e.g. main)")
-    plugins_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation without writing")
+    _add_plugin_install_args(plugins_install_parser)
+
+    plugins_import_parser = plugins_subparsers.add_parser("import", help="Alias for plugins install", parents=[global_parser])
+    _add_plugin_install_args(plugins_import_parser)
+
+    plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
+    plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: plugins/my-plugin)")
+    plugins_harden_parser.add_argument("--marketplace-path", default=".agents/plugins/marketplace.json", help="Marketplace manifest path")
+    plugins_harden_parser.add_argument("--skip-compat", action="store_true", help="Skip audit-compat step")
+    plugins_harden_parser.add_argument("--skip-marketplace-audit", action="store_true", help="Skip audit-marketplace step")
+    plugins_harden_parser.add_argument("--no-require-marketplace", action="store_true", help="Do not require a matching marketplace entry")
+    plugins_harden_parser.add_argument("--strict-marketplace-path", action="store_true", help="Disallow legacy marketplace path override")
     
     # --- evals ---
     evals_parser = subparsers.add_parser("evals", help="Evaluation and Benchmarking", parents=[global_parser])
@@ -794,6 +818,7 @@ def main():
                 starter=args.starter,
                 archetype=args.archetype,
                 limit=args.limit,
+                advanced=args.advanced,
             )
         elif args.action == "route":
             result = route_skills(
@@ -843,14 +868,19 @@ def main():
             result = status_plugin_state(repo_root, name=args.name)
         elif args.action == "doctor":
             result = doctor_plugins_state(repo_root)
-        elif args.action == "init":
-            companion = []
-            if args.with_scripts: companion.append("scripts")
-            if args.with_assets: companion.append("assets")
-            if args.with_references: companion.append("references")
-            if args.with_workflows: companion.append("workflows")
+        elif args.action in {"init", "create"}:
+            companion = [
+                name
+                for enabled, name in (
+                    (args.with_scripts, "scripts"),
+                    (args.with_assets, "assets"),
+                    (args.with_references, "references"),
+                    (args.with_workflows, "workflows"),
+                )
+                if enabled
+            ]
             result = init_plugin(repo_root, name=args.name, with_marketplace=args.with_marketplace, companion_folders=companion)
-        elif args.action == "install":
+        elif args.action in {"install", "import"}:
             result = install_plugin(
                 repo_root,
                 url=args.url,
@@ -863,13 +893,23 @@ def main():
                 allow_unpinned_ref=args.allow_unpinned_ref,
                 dry_run=args.dry_run,
             )
+        elif args.action == "harden":
+            result = harden_plugin(
+                repo_root,
+                plugin_path=args.plugin_path,
+                require_marketplace=not args.no_require_marketplace,
+                marketplace_path=args.marketplace_path,
+                run_compat=not args.skip_compat,
+                run_marketplace_audit=not args.skip_marketplace_audit,
+                allow_legacy_marketplace_path=not args.strict_marketplace_path,
+            )
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'plugins'",
-                fix_suggestion="Valid actions: list, status, doctor, init, install"
+                fix_suggestion="Valid actions: list, status, doctor, init, create, install, import, harden"
             ))
 
     elif args.topic == "evals":
@@ -1130,6 +1170,8 @@ def main():
                         print(f"  - {skill['name']} [{skill['category']}]")
                     if result.data.get("policy_identity"):
                         print(f"Policy identity: {result.data['policy_identity']}")
+                    if result.data.get("advanced_mode"):
+                        print("Advanced mode: visible")
                     if result.data.get("starter_mode"):
                         print(
                             f"Starter mode: archetype={result.data.get('starter_archetype')} "
@@ -1222,9 +1264,14 @@ def main():
                     print(f"  Rationale: {result.data['rationale']}")
                 elif args.topic == "skills" and args.action == "init":
                     print(f"✅ {result.data['message']}")
-                elif args.topic == "plugins" and args.action == "init":
+                elif args.topic == "plugins" and args.action in {"init", "create"}:
                     print(f"✅ {result.data['message']}")
                     print(result.data.get("raw_output", ""))
+                    created_manual = result.data.get("created_manual_folders", [])
+                    if created_manual:
+                        print("Created companion folders:")
+                        for folder in created_manual:
+                            print(f"  - {folder}")
                 elif args.topic == "plugins" and args.action in {"list", "status", "doctor"}:
                     installed_state = result.data.get("installed_state", {})
                     activation_state = result.data.get("activation_state", {})
@@ -1239,7 +1286,7 @@ def main():
                         print("Blockers:")
                         for blocker in blockers:
                             print(f"  - {blocker}")
-                elif args.topic == "plugins" and args.action == "install":
+                elif args.topic == "plugins" and args.action in {"install", "import"}:
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install plugin:")
                         print(f"   URL: {result.data.get('url')}")
@@ -1252,6 +1299,13 @@ def main():
                         print(f"✅ {result.data.get('message', 'Plugin installed.')}")
                         if result.data.get("raw_output"):
                             print(result.data["raw_output"])
+                elif args.topic == "plugins" and args.action == "harden":
+                    print(f"✅ {result.data.get('message', 'Plugin hardening checks passed.')}")
+                    command_runs = result.data.get("command_runs", [])
+                    if command_runs:
+                        print("Checks run:")
+                        for run in command_runs:
+                            print(f"  - {run.get('step')}: {run.get('command')}")
                 elif args.topic == "evals":
                     if args.action == "run":
                         print(f"✅ Evaluation complete for {args.path}")
@@ -1442,12 +1496,13 @@ def main():
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")
-            elif args.topic == "plugins" and args.action in ("init", "install"):
+            elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden"):
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
                 print("\n📚 Plugin examples:")
                 print("   ask plugins init my-plugin --with-marketplace")
                 print("   ask plugins install https://github.com/<owner>/<repo> --path plugins/<name>")
+                print("   ask plugins harden plugins/my-plugin")
             elif args.topic == "evals":
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])

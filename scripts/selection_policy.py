@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-09.v1"
+POLICY_VERSION = "2026-04-10.v2"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -44,13 +44,24 @@ EXCLUDED_SCAN_SEGMENTS: tuple[str, ...] = (
 
 # Internal skills intentionally hidden from flat runtime discovery.
 HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
-    "coderabbit",
     "linear",
     "plugin-builder",
     "plugin-creator",
     "plugin-installer",
     "skillgrade-graders",
     "skillgrade-setup",
+)
+
+# Plugin router skills that should be visible in default flat discovery.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+    "coderabbit",
+)
+
+# Plugin lane skills that stay hidden by default unless advanced mode is used.
+PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
+    "autofix",
+    "code-review",
+    "simplify",
 )
 
 
@@ -66,6 +77,8 @@ def payload() -> dict[str, Any]:
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,
         "excluded_scan_segments": list(EXCLUDED_SCAN_SEGMENTS),
         "hidden_flat_skill_names": list(HIDDEN_FLAT_SKILL_NAMES),
+        "plugin_visible_router_skill_names": list(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
+        "plugin_hidden_lane_skill_names": list(PLUGIN_HIDDEN_LANE_SKILL_NAMES),
     }
 
 
@@ -85,6 +98,14 @@ def render_shell() -> str:
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),
         _shell_array("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", HIDDEN_FLAT_SKILL_NAMES),
+        _shell_array(
+            "SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS",
+            PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
+        ),
+        _shell_array(
+            "SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS",
+            PLUGIN_HIDDEN_LANE_SKILL_NAMES,
+        ),
         f"SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB={shlex.quote(PLUGIN_SKILL_ROOT_GLOB)}",
     ]
     return "\n".join(lines)

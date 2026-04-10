@@ -49,7 +49,7 @@ Collect these inputs before editing:
 
 - The target outcome and trigger phrases the skill must cover.
 - Concrete example prompts users are likely to issue.
-- Target location for the skill folder. If unspecified, default to `${CODEX_HOME:-$HOME/.codex}/skills`.
+- Target location for the skill folder. If unspecified, default to canonical repo category path `github/<skill-name>` under the git source tree.
 - Required bundled resources (scripts, references, assets).
 - Any explicit UI metadata provided by the user (`display_name`, icons, brand color, default prompt).
 
@@ -159,7 +159,7 @@ Safety and quality constraints:
 
 Example requests this skill should handle:
 
-- "I want to create a `gh-release-notes` skill in `${CODEX_HOME:-$HOME/.codex}/skills`, include `references/contract.yaml` and `references/evals.yaml`, and then run a strict audit."
+- "I want to create a `gh-release-notes` skill in `github/gh-release-notes`, include `references/contract.yaml` and `references/evals.yaml`, and then run a strict audit."
 - "My `SKILL.md` is too long. Can you move deep implementation details into `references/` while keeping behavior and triggers unchanged?"
 - "I updated trigger phrasing in frontmatter. Please regenerate `agents/openai.yaml` and confirm metadata parity."
 

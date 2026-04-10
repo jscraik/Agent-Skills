@@ -9,6 +9,22 @@ metadata:
 
 Route ambiguous skill-authoring requests to the correct lane before executing heavy workflows.
 
+## Table of Contents
+
+- [Philosophy](#philosophy)
+- [When to use](#when-to-use)
+- [Execution modes](#execution-modes)
+- [Routing workflow](#routing-workflow)
+- [Required inputs](#required-inputs)
+- [Outputs](#outputs)
+- [Validation](#validation)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
+- [Failure mode](#failure-mode)
+- [Examples](#examples)
+- [See Also](#see-also)
+- [References](#references)
+
 ## Philosophy
 
 - Route first, execute second.
@@ -28,12 +44,21 @@ Skip this router when the user explicitly requests one lane:
 - [[skillify]] for session-to-skill conversion
 - [[skill-installer]] for installation/import flows
 
+## Execution modes
+
+Choose one mode before routing and report it in outputs:
+- `direct`: intent is unambiguous, route without clarification.
+- `clarify-once`: ask one focused question, then route.
+
 ## Routing workflow
 
 1. Identify primary intent: `create`, `improve`, `install`, or `skillify`.
-2. If intent spans multiple lanes, pick the first lane that unblocks work and state the handoff order.
-3. Confirm any high-risk ambiguity in one short question.
-4. Hand off to the selected lane skill and keep this router out of the execution path.
+2. Select execution mode:
+   - use `direct` when intent is clear;
+   - use `clarify-once` when one answer will remove high-risk ambiguity.
+3. If intent spans multiple lanes, pick the first lane that unblocks work and state the handoff order.
+4. Confirm high-risk ambiguity with one short question only in `clarify-once`.
+5. Hand off to the selected lane skill and keep this router out of the execution path.
 
 ## Required inputs
 
@@ -44,19 +69,29 @@ Collect only the minimum needed to route safely:
 
 ## Outputs
 
-Return a compact routing handoff object:
-- `schema_version`
-- `mode`
-- `selected_lane`
-- `reason`
-- `next_skill`
-- `required_inputs`
-- `blocked_by` (if any)
+Return one compact routing handoff object in this shape:
+
+```yaml
+schema_version: 1
+execution_mode: "direct|clarify-once"
+selected_lane: "create|improve|install|skillify"
+reason: "<why this lane was selected>"
+next_skill: "[[skill-creator|skill-builder|skill-installer|skillify]]"
+handoff_order:
+  - "<lane-1>"
+  - "<lane-2>"
+required_inputs:
+  - "<minimum missing/present inputs for next lane>"
+blocked_by:
+  - "<blocker>"  # optional
+confidence: "high|medium|low"
+```
 
 ## Validation
 
 - Confirm the selected lane matches the user's primary intent and constraints.
 - Confirm all required inputs for that lane are either present or explicitly listed as missing.
+- Confirm `next_skill` is one of: `[[skill-creator]]`, `[[skill-builder]]`, `[[skill-installer]]`, `[[skillify]]`.
 - Do not run lane-specific scripts from this router.
 - Fail fast: stop at the first failed gate, fix or report the blocker, and do not continue with downstream execution.
 

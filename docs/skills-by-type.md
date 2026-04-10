@@ -9,7 +9,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 6
+- `library_api_reference`: 7
 - `product_verification`: 8
 - `data_fetch_analysis`: 5
 - `team_automation`: 25
@@ -19,13 +19,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `runbook`: 4
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 94
+- `total_tagged`: 95
 
 ## Semantic Types
 
 ### Library Api Reference
 
 - `agent-native-architecture` — `product/domain`
+- `coderabbit` — `plugins/coderabbit/skills`
 - `context7` — `product/docs`
 - `oak-api` — `product/domain`
 - `react-ui-patterns` — `frontend/ui`

@@ -100,6 +100,9 @@ class _RouterSkill:
     skill_path: str
 
 
+CODERABBIT_HIDDEN_LANE_SKILLS = {"autofix", "code-review", "simplify"}
+
+
 STARTER_ARCHETYPES = {
     "general": (
         "ce-brainstorm",
@@ -144,7 +147,12 @@ def _load_builder_module(repo_root: Path, module_name: str):
         return mod
     return None
 
-def _canonical_entries(repo_root: Path) -> list:
+def _canonical_entries(
+    repo_root: Path,
+    *,
+    source: str = "auto",
+    visibility: str = "default",
+) -> list:
     """
     Return skill entries whose source directory is inside the repository root.
     
@@ -156,7 +164,7 @@ def _canonical_entries(repo_root: Path) -> list:
     """
     return [
         entry
-        for entry in discover_skill_entries(source="repo")
+        for entry in discover_skill_entries(source=source, visibility=visibility)
         if entry.source_dir.is_relative_to(repo_root)
     ]
 
@@ -193,6 +201,17 @@ def _starter_entries(entries: list, archetype: str, limit: int) -> list:
     return selected
 
 
+def _is_hidden_coderabbit_lane(entry) -> bool:
+    """Defensive guard so default lists stay router-first even with leaked entries."""
+    if entry.name not in CODERABBIT_HIDDEN_LANE_SKILLS:
+        return False
+    source_dir = getattr(entry, "source_dir", None)
+    if not isinstance(source_dir, Path):
+        return False
+    parts = source_dir.parts
+    return "plugins" in parts and "coderabbit" in parts and "skills" in parts
+
+
 def list_skills(
     repo_root: Path,
     category: Optional[str] = None,
@@ -200,6 +219,7 @@ def list_skills(
     starter: bool = False,
     archetype: str = "general",
     limit: int = 12,
+    advanced: bool = False,
 ) -> CallResult:
     """
     Return a listing of skills in the repository, optionally filtered or reduced to a deterministic "starter" subset.
@@ -207,9 +227,10 @@ def list_skills(
     Parameters:
     	repo_root (Path): Root path of the repository to discover skills from; entries outside this root are excluded.
     	category (Optional[str]): Case-insensitive substring filter applied to each skill's category; omit to include all.
-    	starter (bool): When true, return a deterministic, archetype-ordered subset of skills instead of the full set.
-    	archetype (str): Archetype key to select starter skills from; falls back to "general" when unknown.
-    	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
+        starter (bool): When true, return a deterministic, archetype-ordered subset of skills instead of the full set.
+        archetype (str): Archetype key to select starter skills from; falls back to "general" when unknown.
+        limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
+        advanced (bool): When true, include lane skills that are hidden in default listings.
     
     Returns:
     	CallResult: Result with `status == "success"` and `data` containing:
@@ -221,11 +242,17 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
-    entries = _canonical_entries(repo_root)
+    entries = _canonical_entries(
+        repo_root,
+        source="auto",
+        visibility="advanced" if advanced else "default",
+    )
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
+        if not advanced and _is_hidden_coderabbit_lane(entry):
+            continue
         if category and category.lower() not in entry.category.lower():
             continue
         skills_data.append({
@@ -236,6 +263,7 @@ def list_skills(
         })
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
+    result.data["advanced_mode"] = bool(advanced)
     if starter:
         result.data["starter_mode"] = True
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
@@ -368,10 +396,47 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         
     return result
 
+def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, str]:
+    """
+    Resolve a skills-install destination to a repo-canonical category path.
+
+    Returns:
+        tuple[Path, str]: Absolute destination path and normalized repo-relative
+        destination string.
+    """
+    dest_token = (dest or "github").strip() or "github"
+    raw_dest = Path(dest_token)
+    if raw_dest.is_absolute():
+        raise ValueError("Destination must be repo-relative (for example: github or backend).")
+
+    resolved_root = repo_root.resolve()
+    resolved_dest = (repo_root / raw_dest).resolve()
+    try:
+        rel_dest = resolved_dest.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError("Destination escapes repository root.") from exc
+
+    rel_text = str(rel_dest)
+    if rel_text in ("", "."):
+        raise ValueError("Destination must include a category directory under repository root.")
+    return resolved_dest, rel_text
+
+
 def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "github", dry_run: bool = False) -> CallResult:
-    """Installs a skill from GitHub, wrapping the hardened installer script."""
+    """Installs a skill from GitHub into the repo-canonical source tree."""
     result = CallResult()
-    dest_path = repo_root / dest
+    try:
+        dest_path, dest_rel = _resolve_canonical_install_dest(repo_root, dest)
+    except ValueError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Invalid install destination '{dest}': {exc}",
+                fix_suggestion="Use a repo-relative category path such as 'github' or 'backend'.",
+            )
+        )
+        return result
 
     # Parse skill name from URL for preview
     skill_name = url.split("/")[-1].replace(".git", "") if "/" in url else url
@@ -391,8 +456,9 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.data["target_path"] = display_path
         result.data["url"] = url
         result.data["remediate"] = remediate
+        result.data["canonical_dest"] = dest_rel
         result.metadata["next_steps"] = [
-            f"ask skills install {url} --dest {dest}" + (" --remediate" if remediate else "")
+            f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else "")
         ]
         return result
 
@@ -410,34 +476,95 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
             fix_suggestion="Remove the existing skill or choose a different destination with --dest."
         ))
         result.data["skill_name"] = skill_name
+        result.data["canonical_dest"] = dest_rel
         result.data["existing_path"] = display_path
         return result
 
-    cmd = _get_python_command(["pyyaml"]) + [
+    python_cmd = _get_python_command(["pyyaml"])
+    supported_flags = _install_script_supported_flags(repo_root, python_cmd)
+    cmd = python_cmd + [
         "skills-system/skill-installer/scripts/install-skill-from-github.py",
         "--url", url,
         "--dest", str(dest_path),
-        "--validation-level", "compat"
     ]
+    if "--validation-level" in supported_flags:
+        cmd.extend(["--validation-level", "compat"])
+        result.data["validation_level"] = "compat"
+    else:
+        result.data["validation_level"] = "compat_skipped_unsupported"
 
     if remediate:
-        cmd.append("--remediate")
+        if "--remediate" in supported_flags:
+            cmd.append("--remediate")
+        else:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Installed skill installer does not support --remediate.",
+                    fix_suggestion=(
+                        "Re-run without --remediate, or update the installer to a version "
+                        "that supports remediation."
+                    ),
+                )
+            )
+            return result
 
     process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
+    result.data["canonical_dest"] = dest_rel
 
     if process.returncode == 0:
         result.status = "success"
         match = re.search(r"Installed (.*?) to", process.stdout)
-        if match:
-            result.data["skill_name"] = match.group(1)
-            result.metadata["next_steps"] = [f"ask skills audit {dest}/{match.group(1)} --level strict"]
+        installed_name = match.group(1) if match else skill_name
+        result.data["skill_name"] = installed_name
+
+        # Keep repo projections current so canonical install and loader symlinks
+        # remain in lockstep.
+        sync_result = sync_skills(repo_root, scope="workspace", dry_run=False)
+        result.data["workspace_sync"] = {
+            "status": sync_result.status,
+            "logs": sync_result.data.get("logs", []),
+        }
+        if sync_result.status != "success":
+            sync_error = sync_result.errors[0].message if sync_result.errors else "Unknown sync failure."
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Skill installed to '{dest_rel}', but workspace sync failed: {sync_error}",
+                    fix_suggestion="Run `ask skills sync --scope workspace` after resolving the sync error.",
+                )
+            )
+            return result
+        result.metadata["next_steps"] = [f"ask skills audit {dest_rel}/{installed_name} --level strict"]
     else:
         result.status = "error"
         result.errors.append(ErrorObject(code="ERR_RUNTIME", message=process.stderr.strip() or "Installation failed."))
 
     return result
+
+
+def _install_script_supported_flags(repo_root: Path, python_cmd: List[str]) -> set[str]:
+    """Return supported optional flags from the active installer script."""
+    help_cmd = python_cmd + [
+        "skills-system/skill-installer/scripts/install-skill-from-github.py",
+        "--help",
+    ]
+    try:
+        process = subprocess.run(help_cmd, cwd=str(repo_root), capture_output=True, text=True)
+    except OSError:
+        return set()
+
+    help_text = "\n".join([process.stdout or "", process.stderr or ""])
+    supported = set()
+    for flag in ("--validation-level", "--remediate"):
+        if flag in help_text:
+            supported.add(flag)
+    return supported
+
 
 def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 0.2) -> CallResult:
     """Calculates functional similarity and suggests folding source into target."""
@@ -545,7 +672,7 @@ def route_skills(
         return result
 
     eligible_candidates: list[EligibleCandidate] = []
-    for entry in _canonical_entries(repo_root):
+    for entry in _canonical_entries(repo_root, source="auto", visibility="advanced"):
         rel_path = entry.source_dir.relative_to(repo_root).as_posix()
         eligible_candidates.append(
             EligibleCandidate(

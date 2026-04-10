@@ -45,6 +45,14 @@ def _write_min_skill(skill_dir: Path) -> None:
 
 
 class SkillInstallerSecurityTests(unittest.TestCase):
+    def test_default_dest_prefers_env_override(self) -> None:
+        with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": "/tmp/canonical-skills-dest"}, clear=False):
+            self.assertEqual(installer._default_dest(), "/tmp/canonical-skills-dest")
+
+    def test_default_dest_uses_repo_canonical_path_in_agent_skills_repo(self) -> None:
+        default_dest = installer._default_dest()
+        self.assertTrue(default_dest.endswith("/github"), f"expected repo canonical github dest, got {default_dest}")
+
     def test_validate_relative_path_rejects_option_like_path(self) -> None:
         with self.assertRaises(installer.InstallError):
             installer._validate_relative_path("--dangerous")

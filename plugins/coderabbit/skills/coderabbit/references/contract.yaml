@@ -7,6 +7,10 @@ triggers:
   - User asks for CodeRabbit CLI usage or integration details.
   - User asks for feature comparison across CodeRabbit capabilities such as Autofix, Simplify, or reporting.
 inputs:
+  - name: mode
+    type: enum
+    values: [run, setup, review-only, autofix-safe, pre-merge-simplify]
+    description: Mode selector. `run` is default and should route to the safest lane.
   - name: goal
     type: string
     description: Desired outcome such as snippet, explanation, troubleshooting, or migration guidance.
@@ -31,12 +35,25 @@ outputs:
   - name: summary
     type: string
     description: High-level recommendation summary.
+  - name: mode
+    type: string
+    description: Effective mode used for this response.
   - name: actions
     type: array
     description: Concrete steps the user or agent should execute.
   - name: recommendation
     type: string
     description: Actionable response grounded in local corpus evidence.
+  - name: trust_banner
+    type: object
+    description: Provenance and freshness signal for corpus-based recommendations.
+    properties:
+      freshness_checked_at:
+        type: string
+      confidence:
+        type: string
+      live_verification_needed:
+        type: boolean
   - name: evidence
     type: array
     description: Referenced corpus paths supporting the recommendation.
@@ -53,6 +70,7 @@ outputs:
     type: string
     description: Safest immediate follow-up action.
 success_criteria:
+  - Output always includes the standard envelope keys: schema_version, summary, actions, validation, risk_note, next_step.
   - Every non-trivial recommendation is backed by local corpus files.
   - Platform-specific guidance is correctly scoped.
   - Structured outputs include schema_version when requested.

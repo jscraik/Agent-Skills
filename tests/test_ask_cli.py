@@ -58,6 +58,16 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("name", skill)
             self.assertIn("path", skill)
 
+    def test_skills_list_advanced_flag(self):
+        """CA1: Verify ask skills list --advanced toggles advanced_mode in JSON output."""
+        cmd = ["python3", "bin/ask", "skills", "list", "--advanced", "--json"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"].get("advanced_mode"))
+
     def test_skills_route_json_contract(self):
         """CA1: Verify ask skills route exposes selection-decision fields."""
         cmd = ["python3", "bin/ask", "skills", "route", "create-auth", "--json"]

@@ -3,6 +3,7 @@
 
 This script enforces equivalent contract/eval/security baseline requirements for:
 - utilities/skill-builder
+- utilities/skillify
 - utilities/plugin-builder
 - skills-system/skill-creator
 - skills-system/skill-installer
@@ -72,6 +73,7 @@ _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "utilities/skill-builder",
+    "utilities/skillify",
     "utilities/plugin-builder",
     "skills-system/skill-creator",
     "skills-system/skill-installer",
