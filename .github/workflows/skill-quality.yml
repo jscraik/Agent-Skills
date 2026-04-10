@@ -8,6 +8,7 @@ on:
       - "**/references/contract.yaml"
       - "**/references/task-profile.json"
       - "utilities/skill-builder/scripts/**"
+      - "plugins/skill-factory/skills/skill-builder/scripts/**"
       - "plugins/skill-factory/skills/skill-installer/scripts/install-skill-from-github.py"
       - "scripts/validate_skill_authoring_family.sh"
       - "scripts/validate_skill_authoring_family_benchmarks.py"
