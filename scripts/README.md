@@ -22,6 +22,7 @@ Index for repository automation, validation, and maintenance scripts.
 - `lint_skill_types.sh`
 - `validate_skill_authoring_family.sh`
 - `validate_skill_authoring_family_benchmarks.py`
+- `test_plugin_factory_family_parity.py`
 - `check_plugin_skill_shadowing.sh`
 - `verify_skill_catalog_freshness.py`
 - `verify_recursive_skill_graph_artifacts.py`
@@ -30,6 +31,7 @@ Index for repository automation, validation, and maintenance scripts.
 ## Sync and projection
 - `sync_skills.sh`
 - `sync_skills_sandbox_safe.sh`
+- `sync_plugin_factory_family.sh`
 - `sync_mcp.py`
 - `skill_catalog.py`
 - `skill_scan.py`

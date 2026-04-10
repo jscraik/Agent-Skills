@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import json
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 MAX_PLUGIN_NAME_LENGTH = 64
@@ -17,6 +18,14 @@ DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
 DEFAULT_MARKETPLACE_DISPLAY_NAME = "[TODO: Marketplace Display Name]"
+DEFAULT_VERSION = "0.1.0"
+DEFAULT_AUTHOR_EMAIL = "maintainers@example.com"
+DEFAULT_AUTHOR_URL = "https://github.com/example"
+DEFAULT_LICENSE = "MIT"
+DEFAULT_PRIVACY_URL = "https://example.com/privacy"
+DEFAULT_TERMS_URL = "https://example.com/terms"
+DEFAULT_LIFECYCLE_STATE = "incubating"
+DEFAULT_MATURITY = "experimental"
 VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
 VALID_POLICY_PRODUCTS = {"CHATGPT", "CODEX", "ATLAS"}
@@ -49,7 +58,79 @@ def validate_plugin_name(plugin_name: str) -> None:
         )
 
 
-def build_plugin_json(plugin_name: str) -> dict:
+def _display_name(plugin_name: str) -> str:
+    return " ".join(part.capitalize() for part in plugin_name.split("-") if part)
+
+
+def _default_docs_url(plugin_name: str) -> str:
+    return f"https://example.com/plugins/{plugin_name}"
+
+
+def _default_repo_url(plugin_name: str) -> str:
+    return f"{DEFAULT_AUTHOR_URL}/{plugin_name}"
+
+
+def _build_governance(owner: str, review_cadence: str) -> dict[str, str]:
+    return {
+        "lifecycle_state": DEFAULT_LIFECYCLE_STATE,
+        "maturity": DEFAULT_MATURITY,
+        "owner": owner,
+        "review_cadence": review_cadence,
+        "last_reviewed": date.today().isoformat(),
+        "metadata_source": "plugin_manifest",
+    }
+
+
+def _build_canonical_plugin_json(
+    plugin_name: str,
+    *,
+    description: str,
+    owner: str,
+    review_cadence: str,
+    enabled_surfaces: dict[str, bool],
+) -> dict[str, Any]:
+    display_name = _display_name(plugin_name)
+    payload: dict[str, Any] = {
+        "schema_version": 1,
+        "name": plugin_name,
+        "version": DEFAULT_VERSION,
+        "description": description,
+        "author": {
+            "name": owner,
+            "email": DEFAULT_AUTHOR_EMAIL,
+            "url": DEFAULT_AUTHOR_URL,
+        },
+        "homepage": _default_docs_url(plugin_name),
+        "repository": _default_repo_url(plugin_name),
+        "license": DEFAULT_LICENSE,
+        "keywords": ["plugin", plugin_name, "codex"],
+        "governance": _build_governance(owner, review_cadence),
+        "interface": {
+            "displayName": display_name,
+            "shortDescription": description,
+            "longDescription": description,
+            "developerName": owner,
+            "category": DEFAULT_CATEGORY,
+            "capabilities": ["Interactive", "Read", "Write"],
+            "websiteURL": _default_docs_url(plugin_name),
+            "privacyPolicyURL": DEFAULT_PRIVACY_URL,
+            "termsOfServiceURL": DEFAULT_TERMS_URL,
+            "defaultPrompt": f"Help me use {display_name}.",
+            "brandColor": "#3B82F6",
+        },
+    }
+    if enabled_surfaces.get("skills"):
+        payload["skills"] = "./skills/"
+    if enabled_surfaces.get("hooks"):
+        payload["hooks"] = "./hooks.json"
+    if enabled_surfaces.get("mcp"):
+        payload["mcpServers"] = "./.mcp.json"
+    if enabled_surfaces.get("apps"):
+        payload["apps"] = "./.app.json"
+    return payload
+
+
+def _build_placeholder_plugin_json(plugin_name: str) -> dict[str, Any]:
     return {
         "name": plugin_name,
         "version": "[TODO: 1.2.0]",
@@ -92,6 +173,32 @@ def build_plugin_json(plugin_name: str) -> dict:
             ],
         },
     }
+
+
+def build_plugin_json(
+    plugin_name: str,
+    *,
+    description: str | None = None,
+    owner: str | None = None,
+    review_cadence: str | None = None,
+    enabled_surfaces: dict[str, bool] | None = None,
+) -> dict[str, Any]:
+    lifecycle_mode = any((description, owner, review_cadence))
+    if not lifecycle_mode:
+        return _build_placeholder_plugin_json(plugin_name)
+
+    if not description or not owner or not review_cadence:
+        raise ValueError(
+            "Lifecycle scaffold mode requires --description, --owner, and --review-cadence."
+        )
+
+    return _build_canonical_plugin_json(
+        plugin_name,
+        description=description.strip(),
+        owner=owner.strip(),
+        review_cadence=review_cadence.strip(),
+        enabled_surfaces=enabled_surfaces or {},
+    )
 
 
 def build_marketplace_entry(
@@ -308,9 +415,40 @@ def create_stub_file(path: Path, payload: dict, force: bool) -> None:
         handle.write("\n")
 
 
+def create_text_file(path: Path, content: str, force: bool) -> None:
+    if path.exists() and not force:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def build_readme(plugin_name: str, description: str | None = None) -> str:
+    title = _display_name(plugin_name)
+    summary = description.strip() if description and description.strip() else "[TODO: Describe this plugin.]"
+    return f"# {title}\n\n{summary}\n"
+
+
+def validate_lifecycle_scaffold_args(args: argparse.Namespace) -> None:
+    if args.description and (not args.owner or not args.review_cadence):
+        raise SystemExit(
+            "error: lifecycle scaffold mode requires --description, --owner, and --review-cadence."
+        )
+    if args.owner and not args.review_cadence:
+        raise SystemExit("error: --review-cadence is required when --owner is set.")
+    if args.review_cadence and not args.owner:
+        raise SystemExit("error: --owner is required when --review-cadence is set.")
+    if any((args.description, args.owner, args.review_cadence)) and not args.description:
+        raise SystemExit(
+            "error: --description is required when lifecycle scaffold governance fields are set."
+        )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a plugin skeleton with placeholder plugin.json."
+        description=(
+            "Create a plugin skeleton with either a placeholder plugin.json "
+            "or a lifecycle-governed canonical manifest."
+        )
     )
     parser.add_argument("plugin_name")
     parser.add_argument(
@@ -379,11 +517,25 @@ def parse_args() -> argparse.Namespace:
         help="Marketplace category value",
     )
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
+    parser.add_argument(
+        "--description",
+        help="Lifecycle scaffold description. Enables governed non-placeholder plugin manifest mode.",
+    )
+    parser.add_argument(
+        "--owner",
+        help="Lifecycle scaffold owner for governance metadata.",
+    )
+    parser.add_argument(
+        "--review-cadence",
+        help="Lifecycle scaffold review cadence for governance metadata (for example: monthly).",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    validate_lifecycle_scaffold_args(args)
+
     raw_plugin_name = args.plugin_name
     plugin_name = normalize_plugin_name(raw_plugin_name)
     if plugin_name != raw_plugin_name:
@@ -394,8 +546,30 @@ def main() -> None:
     plugin_root.mkdir(parents=True, exist_ok=True)
     policy_products = _effective_policy_products(args.product)
 
+    enabled_surfaces = {
+        "skills": bool(args.with_skills),
+        "hooks": bool(args.with_hooks),
+        "mcp": bool(args.with_mcp),
+        "apps": bool(args.with_apps),
+    }
+
     plugin_json_path = plugin_root / ".codex-plugin" / "plugin.json"
-    write_json(plugin_json_path, build_plugin_json(plugin_name), args.force)
+    write_json(
+        plugin_json_path,
+        build_plugin_json(
+            plugin_name,
+            description=args.description,
+            owner=args.owner,
+            review_cadence=args.review_cadence,
+            enabled_surfaces=enabled_surfaces,
+        ),
+        args.force,
+    )
+    create_text_file(
+        plugin_root / "README.md",
+        build_readme(plugin_name, args.description),
+        args.force,
+    )
 
     optional_directories = {
         "skills": args.with_skills,
@@ -423,7 +597,7 @@ def main() -> None:
             args.force,
         )
 
-    marketplace_path: Optional[Path] = None
+    marketplace_path: Path | None = None
     if args.with_marketplace:
         marketplace_path = Path(args.marketplace_path).expanduser()
         update_marketplace_json(

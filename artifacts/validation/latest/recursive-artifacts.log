@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-04-08T20:58:24Z",
+  "generated_at": "2026-04-09T23:05:17Z",
   "runs_root": "artifacts/skill-graphs/runs",
   "counts": {
     "compliant": 0,
-    "missing_mandatory": 101,
+    "missing_mandatory": 109,
     "legacy_partial": 2,
     "empty": 0
   },
-  "total_runs": 103,
+  "total_runs": 111,
   "run_status_counts": {
     "compliant": 0,
-    "missing_mandatory": 101,
+    "missing_mandatory": 109,
     "legacy_partial": 2,
     "empty": 0
   },

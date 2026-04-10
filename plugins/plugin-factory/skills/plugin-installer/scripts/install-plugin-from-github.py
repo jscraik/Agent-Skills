@@ -6,8 +6,8 @@ Installer guarantees:
 - source trust allowlist enforced by default
 - plugin staged in quarantine before promotion
 - strict mode runs plugin-builder validation before activation
-- Python helper execution requires uv in PATH
 - rollback journal and provenance manifest persisted for each run
+- uv is required for Python helper execution during staged validation
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ DEFAULT_REF = "main"
 PINNED_REF_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 PLUGIN_NAME_RE = re.compile(r"^[a-z0-9](?:-?[a-z0-9]){0,63}$")
 VERIFICATION_TIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
-UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/installation/."
+SIGNED_PAYLOAD_IDENTITY_RE = re.compile(r"^(author|committer)\s+.+<([^>]+)>\s+\d+\s+[+-]\d{4}$")
 SEMVER_RE = re.compile(
     r"^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
     r"(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
@@ -44,6 +44,7 @@ DEFAULT_TRUSTED_REPOS = {
     "openai/plugins",
     "jscraik/Agent-Skills",
 }
+UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/installation/."
 
 
 class InstallError(Exception):
@@ -185,10 +186,29 @@ def _extract_commit_verification(commit_payload: dict[str, object]) -> dict[str,
 
 
 def _extract_commit_signer_identity(commit_payload: dict[str, object]) -> dict[str, list[str]]:
-    emails: set[str] = set()
-    logins: set[str] = set()
+    attested_emails: set[str] = set()
+    metadata_emails: set[str] = set()
+    metadata_logins: set[str] = set()
 
     commit_obj = commit_payload.get("commit")
+    verification_obj = commit_payload.get("verification")
+    if isinstance(commit_obj, dict):
+        nested_verification = commit_obj.get("verification")
+        if isinstance(nested_verification, dict):
+            verification_obj = nested_verification
+
+    if isinstance(verification_obj, dict):
+        payload = verification_obj.get("payload")
+        if isinstance(payload, str) and payload.strip():
+            for raw_line in payload.splitlines():
+                line = raw_line.strip()
+                match = SIGNED_PAYLOAD_IDENTITY_RE.match(line)
+                if not match:
+                    continue
+                email = match.group(2).strip().lower()
+                if email:
+                    attested_emails.add(email)
+
     if isinstance(commit_obj, dict):
         for actor_key in ("author", "committer"):
             actor = commit_obj.get(actor_key)
@@ -196,7 +216,7 @@ def _extract_commit_signer_identity(commit_payload: dict[str, object]) -> dict[s
                 continue
             email = actor.get("email")
             if isinstance(email, str) and email.strip():
-                emails.add(email.strip().lower())
+                metadata_emails.add(email.strip().lower())
 
     for actor_key in ("author", "committer"):
         actor = commit_payload.get(actor_key)
@@ -204,14 +224,18 @@ def _extract_commit_signer_identity(commit_payload: dict[str, object]) -> dict[s
             continue
         login = actor.get("login")
         if isinstance(login, str) and login.strip():
-            logins.add(login.strip().lower())
+            metadata_logins.add(login.strip().lower())
         email = actor.get("email")
         if isinstance(email, str) and email.strip():
-            emails.add(email.strip().lower())
+            metadata_emails.add(email.strip().lower())
 
     return {
-        "emails": sorted(emails),
-        "logins": sorted(logins),
+        "emails": sorted(attested_emails),
+        "logins": sorted(metadata_logins),
+        "attested_emails": sorted(attested_emails),
+        "attested_logins": [],
+        "metadata_emails": sorted(metadata_emails),
+        "metadata_logins": sorted(metadata_logins),
     }
 
 
@@ -274,14 +298,26 @@ def _enforce_signed_commit_provenance(
 
     signer_emails = {
         email.strip().lower()
-        for email in signer_identity.get("emails", [])
+        for email in signer_identity.get("attested_emails", signer_identity.get("emails", []))
         if isinstance(email, str) and email.strip()
     }
-    signer_logins = {
+    attested_logins = {
         login.strip().lower()
-        for login in signer_identity.get("logins", [])
+        for login in signer_identity.get("attested_logins", signer_identity.get("logins", []))
         if isinstance(login, str) and login.strip()
     }
+    metadata_emails = {
+        email.strip().lower()
+        for email in signer_identity.get("metadata_emails", [])
+        if isinstance(email, str) and email.strip()
+    }
+    metadata_logins = {
+        login.strip().lower()
+        for login in signer_identity.get("metadata_logins", [])
+        if isinstance(login, str) and login.strip()
+    }
+    signer_logins = attested_logins if attested_logins else metadata_logins
+    login_identity_source = "attested" if attested_logins else ("metadata" if metadata_logins else "none")
     signer_domains = {
         email.rsplit("@", 1)[1]
         for email in signer_emails
@@ -295,19 +331,27 @@ def _enforce_signed_commit_provenance(
                 "Signer allowlist checks require a signed/verified commit. "
                 f"Observed verification reason='{reason}' for {owner}/{repo}@{resolved_commit}."
             )
+        if reason != "valid":
+            raise InstallError(
+                "Signer allowlist checks require GitHub verification reason='valid'. "
+                f"Observed reason='{reason}' for {owner}/{repo}@{resolved_commit}."
+            )
 
-        matched_email = bool(signer_emails & allowed_signer_emails)
-        matched_domain = bool(signer_domains & allowed_signer_domains)
-        matched_login = bool(signer_logins & allowed_signer_logins)
-        if not (matched_email or matched_domain or matched_login):
+        matched_email = (not allowed_signer_emails) or bool(signer_emails & allowed_signer_emails)
+        matched_domain = (not allowed_signer_domains) or bool(signer_domains & allowed_signer_domains)
+        matched_login = (not allowed_signer_logins) or bool(signer_logins & allowed_signer_logins)
+        if not (matched_email and matched_domain and matched_login):
             raise InstallError(
                 "Commit signer identity did not match allowlist policy. "
                 f"allowed_emails={sorted(allowed_signer_emails)} "
                 f"allowed_domains={sorted(allowed_signer_domains)} "
                 f"allowed_logins={sorted(allowed_signer_logins)} "
-                f"observed_emails={sorted(signer_emails)} "
+                f"observed_attested_emails={sorted(signer_emails)} "
                 f"observed_domains={sorted(signer_domains)} "
-                f"observed_logins={sorted(signer_logins)}."
+                f"observed_signer_logins={sorted(signer_logins)} "
+                f"observed_login_source={login_identity_source} "
+                f"metadata_emails={sorted(metadata_emails)} "
+                f"metadata_logins={sorted(metadata_logins)}."
             )
 
     if journal_path:
@@ -325,9 +369,13 @@ def _enforce_signed_commit_provenance(
                 "allowed_signer_emails": sorted(allowed_signer_emails),
                 "allowed_signer_domains": sorted(allowed_signer_domains),
                 "allowed_signer_logins": sorted(allowed_signer_logins),
-                "observed_signer_emails": sorted(signer_emails),
+                "observed_attested_signer_emails": sorted(signer_emails),
                 "observed_signer_domains": sorted(signer_domains),
                 "observed_signer_logins": sorted(signer_logins),
+                "observed_signer_login_source": login_identity_source,
+                "observed_attested_signer_logins": sorted(attested_logins),
+                "observed_metadata_signer_emails": sorted(metadata_emails),
+                "observed_metadata_signer_logins": sorted(metadata_logins),
             },
         )
 
@@ -503,7 +551,10 @@ def _resolve_install_plugin_name(
 def _uv_python_command() -> list[str]:
     uv_bin = shutil.which("uv")
     if not uv_bin:
-        raise InstallError(f"uv is required for plugin install validation but was not found in PATH. {UV_INSTALL_HINT}")
+        raise InstallError(
+            "uv is required for Python execution in this installer but was not found in PATH. "
+            f"{UV_INSTALL_HINT}"
+        )
     return [uv_bin, "run", "python"]
 
 
@@ -867,7 +918,9 @@ def _rollback_install_state(
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Install a Codex plugin from GitHub (requires uv in PATH).")
+    parser = argparse.ArgumentParser(
+        description="Install a Codex plugin from GitHub (requires uv in PATH)."
+    )
     parser.add_argument("--url", help="GitHub URL (supports /tree/<ref>/<path>).")
     parser.add_argument("--repo", help="GitHub repo in owner/repo format.")
     parser.add_argument("--path", required=False, help="Plugin directory path inside repo.")

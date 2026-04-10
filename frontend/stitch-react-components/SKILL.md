@@ -105,7 +105,6 @@ metadata:
 | [[stitch-loop]] | Generate the Stitch screens that this skill converts |
 | [[react-ui-patterns]] | Apply React composition patterns to converted components |
 | [[design-system]] | Align converted components with the design-system token layer |
-| [[figma]] | Use Figma context alongside Stitch for richer conversion |
 | [[baseline-ui]] | Validate converted components against baseline UI rules |
 
 **Topic map:** [[frontend-ui]]

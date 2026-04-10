@@ -1,4 +1,7 @@
 interface:
-  display_name: "Diagram CLI"
-  short_description: "Generate and validate architecture diagrams for repository understanding."
-  default_prompt: "Use $diagram-cli to map this repository and summarize architecture risks."
+  display_name: Diagram CLI
+  short_description: Generate and validate architecture diagrams for repository understanding.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: Use $diagram-cli to map this repository and summarize architecture
+    risks.

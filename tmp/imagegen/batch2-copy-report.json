@@ -1,0 +1,200 @@
+[
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "og-image-creator",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-og-image-creator-small.png",
+    "target_requested": "frontend/graphics/og-image-creator/agents/assets/icon-small.png",
+    "target_written": "frontend/graphics/og-image-creator/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "og-image-creator",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-og-image-creator-large.png",
+    "target_requested": "frontend/graphics/og-image-creator/agents/assets/icon-large.png",
+    "target_written": "frontend/graphics/og-image-creator/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "threejs-builder",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-threejs-builder-small.png",
+    "target_requested": "frontend/graphics/threejs-builder/agents/assets/icon-small.png",
+    "target_written": "frontend/graphics/threejs-builder/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "threejs-builder",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-threejs-builder-large.png",
+    "target_requested": "frontend/graphics/threejs-builder/agents/assets/icon-large.png",
+    "target_written": "frontend/graphics/threejs-builder/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "agentation",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-agentation-small.png",
+    "target_requested": "frontend/tools/agentation/agents/assets/icon-small.png",
+    "target_written": "frontend/tools/agentation/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "agentation",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-agentation-large.png",
+    "target_requested": "frontend/tools/agentation/agents/assets/icon-large.png",
+    "target_written": "frontend/tools/agentation/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "stitch-loop",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-stitch-loop-small.png",
+    "target_requested": "frontend/tools/stitch-loop/agents/assets/icon-small.png",
+    "target_written": "frontend/tools/stitch-loop/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "stitch-loop",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-stitch-loop-large.png",
+    "target_requested": "frontend/tools/stitch-loop/agents/assets/icon-large.png",
+    "target_written": "frontend/tools/stitch-loop/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "test-browser",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-test-browser-small.png",
+    "target_requested": "frontend/tools/test-browser/agents/assets/icon-small.png",
+    "target_written": "frontend/tools/test-browser/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "test-browser",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-test-browser-large.png",
+    "target_requested": "frontend/tools/test-browser/agents/assets/icon-large.png",
+    "target_written": "frontend/tools/test-browser/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ui-cloner",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-ui-cloner-small.png",
+    "target_requested": "frontend/tools/ui-cloner/agents/assets/icon-small.png",
+    "target_written": "frontend/tools/ui-cloner/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ui-cloner",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-ui-cloner-large.png",
+    "target_requested": "frontend/tools/ui-cloner/agents/assets/icon-large.png",
+    "target_written": "frontend/tools/ui-cloner/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "baseline-ui",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-baseline-ui-small.png",
+    "target_requested": "frontend/ui/baseline-ui/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/baseline-ui/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "baseline-ui",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-baseline-ui-large.png",
+    "target_requested": "frontend/ui/baseline-ui/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/baseline-ui/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "design-system",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-design-system-small.png",
+    "target_requested": "frontend/ui/design-system/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/design-system/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "design-system",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-design-system-large.png",
+    "target_requested": "frontend/ui/design-system/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/design-system/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "frontend-design",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-frontend-design-small.png",
+    "target_requested": "frontend/ui/frontend-design/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/frontend-design/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "frontend-design",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-frontend-design-large.png",
+    "target_requested": "frontend/ui/frontend-design/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/frontend-design/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "frontend-ui-design",
+    "variant": "small",
+    "source": "tmp/imagegen/batch2-out/skill-frontend-ui-design-small.png",
+    "target_requested": "frontend/ui/frontend-ui-design/agents/assets/icon-small.png",
+    "target_written": "frontend/ui/frontend-ui-design/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "frontend-ui-design",
+    "variant": "large",
+    "source": "tmp/imagegen/batch2-out/skill-frontend-ui-design-large.png",
+    "target_requested": "frontend/ui/frontend-ui-design/agents/assets/icon-large.png",
+    "target_written": "frontend/ui/frontend-ui-design/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "plugin",
+    "name": "coderabbit",
+    "variant": "icon",
+    "source": "tmp/imagegen/batch2-out/plugin-coderabbit-icon.png",
+    "target_requested": "plugins/coderabbit/assets/icon.png",
+    "target_written": "plugins/coderabbit/assets/icon.png"
+  },
+  {
+    "status": "copied",
+    "kind": "plugin",
+    "name": "coderabbit",
+    "variant": "logo",
+    "source": "tmp/imagegen/batch2-out/plugin-coderabbit-logo.png",
+    "target_requested": "plugins/coderabbit/assets/logo.png",
+    "target_written": "plugins/coderabbit/assets/logo.png"
+  }
+]

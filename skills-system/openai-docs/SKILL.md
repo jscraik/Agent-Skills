@@ -54,6 +54,14 @@ Read only what you need:
 - `references/upgrading-to-gpt-5p4.md` -> only for explicit GPT-5.4 upgrade and upgrade-planning requests; verify the checklist and compatibility guidance against current OpenAI docs before answering.
 - `references/gpt-5p4-prompting-guide.md` -> prompt rewrites and prompt-behavior upgrades for GPT-5.4; verify prompting guidance against current OpenAI docs before answering.
 
+## See Also
+
+| Skill | Why |
+| --- | --- |
+| [[chatgpt-apps]] | Use with Apps SDK implementation tasks that need official OpenAI API references. |
+| [[context7]] | Use when third-party library docs are needed alongside OpenAI docs. |
+| [[mcp-builder]] | Pair when building MCP servers that integrate OpenAI APIs. |
+
 ## Quality rules
 
 - Treat OpenAI docs as the source of truth; avoid speculation.

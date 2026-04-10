@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "product-ops-ce-reliability-review",
+  "scope_skill": "product/ops/ce-reliability-review",
+  "scope_profile": "product",
+  "rubric_version": "2026-04-07",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 14000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "clarity",
+      "label": "Instructional clarity",
+      "threshold": 0.72,
+      "weight": 0.30,
+      "critical": true
+    },
+    {
+      "id": "specificity",
+      "label": "Concrete failure scenario detail",
+      "threshold": 0.68,
+      "weight": 0.30,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Safety/compliance",
+      "threshold": 0.85,
+      "weight": 0.20,
+      "critical": true
+    },
+    {
+      "id": "reliability_coverage",
+      "label": "Resilience pattern coverage breadth",
+      "threshold": 0.70,
+      "weight": 0.20,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 60.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.70,
+    "rationale": "Co-pilot mode: reliability review requires architectural context and judgment about acceptable risk levels."
+  }
+}

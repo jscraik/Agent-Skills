@@ -1,0 +1,6 @@
+interface:
+  display_name: Youtube Hooks Scripts
+  short_description: Use this skill to create high-retention hooks, outlines, and
+    full scripts for technical YouTube videos when the user...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

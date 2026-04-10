@@ -1,0 +1,6 @@
+interface:
+  display_name: Rclone
+  short_description: Upload, sync, verify, or inspect files in remote storage with
+    rclone
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

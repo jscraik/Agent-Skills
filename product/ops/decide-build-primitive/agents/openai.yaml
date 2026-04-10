@@ -1,0 +1,6 @@
+interface:
+  display_name: Decide Build Primitive
+  short_description: Use this skill to analyze whether a capability should become
+    a Skill, Custom Prompt, or Agent automation when the use...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

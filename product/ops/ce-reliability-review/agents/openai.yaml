@@ -1,9 +1,10 @@
 interface:
-  display_name: "CE Reliability Review"
-  short_description: "Review services and systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness."
-
+  display_name: CE Reliability Review
+  short_description: Review services and systems for reliability risks including failure
+    modes, cascading failures, resilience gaps, and SLO readiness.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
 policy:
   allow_implicit_invocation: true
-
 dependencies:
   tools: []

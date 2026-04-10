@@ -1,9 +1,10 @@
 interface:
-  display_name: "Feature Video"
-  short_description: "Produce a concise feature walkthrough video and package it for PR, release, or handoff workflows."
-
+  display_name: Feature Video
+  short_description: Produce a concise feature walkthrough video and package it for
+    PR, release, or handoff workflows.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
 policy:
   allow_implicit_invocation: true
-
 dependencies:
   tools: []

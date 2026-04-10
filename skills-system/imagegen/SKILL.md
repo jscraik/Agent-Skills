@@ -1,6 +1,6 @@
 ---
 name: "imagegen"
-description: "Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas."
+description: "Generate or edit raster images when a task needs bitmap outputs such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use for net-new images, edits to existing images, or variants from references. Prefer repo-native SVG/code workflows for vector icon/logo systems or deterministic code-built graphics."
 ---
 
 # Image Generation Skill
@@ -57,6 +57,41 @@ Fallback-only docs/resources for CLI mode:
 - Creating simple shapes, diagrams, wireframes, or icons that are better produced directly in SVG, HTML/CSS, or canvas
 - Making a small project-local asset edit when the source file already exists in an editable native format
 - Any task where the user clearly wants deterministic code-native output instead of a generated bitmap
+
+## Philosophy
+- Prefer the built-in `image_gen` path for normal work and keep the CLI path explicit-only.
+- Optimize for user intent fidelity over stylistic improvisation.
+- Make image outputs safe to adopt in-repo: deterministic naming, non-destructive writes, and clear provenance.
+
+## Inputs
+- User request describing generation or edit intent.
+- Optional source images (attachments or local files loaded via `view_image` for built-in edits).
+- Prompt constraints: exact text, preserve/do-not-change rules, avoid list, and target usage context.
+- Destination intent: preview-only vs project-bound asset.
+
+## Outputs
+- Final image artifact(s) either rendered inline (preview) or copied into the workspace.
+- Final prompt specification used for the selected output.
+- Mode disclosure: built-in `image_gen` or explicit CLI fallback.
+- Reported final path for any workspace-bound output.
+
+## Constraints
+- Do not switch to CLI fallback unless the user explicitly asks for it.
+- Do not ask for or expose raw API keys in chat.
+- Do not overwrite existing project assets without explicit user confirmation.
+- Do not leave project-referenced assets only in `$CODEX_HOME/generated_images/...`.
+
+## Anti-patterns
+- Auto-falling back to CLI when built-in generation is available.
+- Replacing vector/icon-system requests with raster outputs when the user asked for repo-native assets.
+- Iterating with broad prompt rewrites instead of one targeted change at a time.
+- Saving final project assets only to temporary/default generated image paths.
+
+## Validation
+- Confirm request classification: `generate` vs `edit`, plus single vs batch strategy.
+- Validate output against invariants: subject correctness, composition, text accuracy, and avoid-list compliance.
+- Verify filesystem outcome for project-bound assets: correct workspace path and non-destructive naming.
+- Report final prompt and selected mode in the completion summary.
 
 ## Decision tree
 
@@ -277,3 +312,11 @@ If installation is not possible in this environment, tell the user which depende
 - `references/image-api.md`: fallback-only API/CLI parameter reference.
 - `references/codex-network.md`: fallback-only network/sandbox troubleshooting for CLI mode.
 - `scripts/image_gen.py`: fallback-only CLI implementation. Do not load or use it unless the user explicitly chooses CLI mode.
+
+## See Also
+
+| Skill | Why |
+| --- | --- |
+| [[nano-banana-builder]] | Use when the task needs iterative image generation or editing with Google's Nano Banana APIs. |
+| [[og-image-builder]] | Use when route-specific Open Graph images should be generated directly from an existing web codebase. |
+| [[sora]] | Use when the user needs video generation rather than static raster image output. |

@@ -272,6 +272,15 @@ else
   echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --with pytest ... , uv pip install pytest, or brew install python)"
 fi
 
+echo "[family-gate] checking plugin-factory source/package parity..."
+if "${python_cmd[@]}" scripts/test_plugin_factory_family_parity.py; then
+  echo "[family-gate] plugin-factory parity passed"
+else
+  echo "[family-gate] ERROR: plugin-factory packaged skills drifted from source-of-truth"
+  echo "[family-gate]        run: bash scripts/sync_plugin_factory_family.sh"
+  exit 2
+fi
+
 # Track per-skill evidence for the release-ready index
 # Using parallel indexed arrays for Bash 3.2+ compatibility (avoid associative arrays)
 skill_dirs_ordered=()

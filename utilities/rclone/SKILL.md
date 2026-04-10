@@ -168,7 +168,6 @@ If a remote must be created, use the provider guidance in `references/provider-o
 | Skill | When to use together |
 |---|---|
 | [[1password]] | Inject remote credentials or secrets safely into the runtime |
-| [[cf-crawl]] | Export crawl results locally, then move them to remote storage |
 | [[feature-video]] | Upload generated demo artifacts after rendering or capture |
 | [[video-transcript-downloader]] | Transfer downloaded media or transcripts to long-term storage |
 

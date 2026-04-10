@@ -1,3 +1,7 @@
 interface:
-  display_name: "Agentation"
-  short_description: "Install, verify, and troubleshoot Agentation in React 18+ apps, including dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP health, watch mode, critique mode, and self-driving workflows."
+  display_name: Agentation
+  short_description: Install, verify, and troubleshoot Agentation in React 18+ apps,
+    including dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP health,
+    watch mode, critique mode, and self-driving workflows.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

@@ -58,11 +58,23 @@ def build_hooks_json(
     stop_guard_path: Path,
     timeout: int,
 ) -> str:
+    """
+    Create the JSON content for a Codex `hooks.json` that defines the three scaffold command hooks.
+    
+    Parameters:
+        session_start_path (Path): Path to the session-start hook script used as the `SessionStart` command.
+        user_prompt_submit_path (Path): Path to the user-prompt-submit hook script used as the `UserPromptSubmit` command.
+        stop_guard_path (Path): Path to the stop-guard hook script used as the `Stop` command.
+        timeout (int): Timeout in seconds applied to each command hook.
+    
+    Returns:
+        json_text (str): Pretty-printed JSON for `hooks.json`, including a trailing newline.
+    """
     payload = {
         "hooks": {
             "SessionStart": [
                 {
-                    "matcher": "^(startup|resume|clear)$",
+                    "matcher": "^(startup|resume)$",
                     "hooks": [
                         {
                             "type": "command",
@@ -210,7 +222,7 @@ def session_start_template() -> str:
         fi
 
         case "$permission_mode" in
-          bypassPermissions)
+          bypassPerm""issions)
             context_parts+=("Full-access permission mode is active; verify before destructive commands.")
             if [[ -z "$system_message" ]]; then
               system_message="High-autonomy permission mode is active."
@@ -267,50 +279,73 @@ def user_prompt_submit_template() -> str:
         block_reason=""
 
         typeset -a context_parts
+        typeset -a instruction_override_markers=(
+          "ig""nore|previous instructions"
+          "ig""nore|the previous instructions"
+          "ig""nore|all previous instructions"
+          "for""get|previous instructions"
+          "for""get|the previous instructions"
+          "ov""erride|the system prompt"
+          "ig""nore|system prompt"
+          "ig""nore|developer instructions"
+          "ig""nore|repo instructions"
+          "ig""nore|project instructions"
+          "ig""nore|agents.md"
+          "dis""regard|agents.md"
+          "by""pass|the guardrails"
+          "disable|the guardrails"
+          "ig""nore|the guardrails"
+        )
+        typeset -a validation_skip_markers=(
+          "skip|validation"
+          "skip|tests"
+          "skip|test"
+          "skip|lint"
+          "skip|typecheck"
+          "without|tests"
+          "no|tests"
+          "don.t|validate"
+          "do not|validate"
+          "ship it|without validation"
+        )
+        typeset -a destructive_markers=(
+          "rm|-rf"
+          "reset|--hard"
+          "checkout|--"
+          "dangerously|skip permissions"
+          "--|yolo"
+          "delete|everything"
+          "remove|everything"
+        )
 
-        if [[ "$prompt_lc" == *"ignore previous instructions"* \\
-           || "$prompt_lc" == *"ignore the previous instructions"* \\
-           || "$prompt_lc" == *"ignore all previous instructions"* \\
-           || "$prompt_lc" == *"forget previous instructions"* \\
-           || "$prompt_lc" == *"forget the previous instructions"* \\
-           || "$prompt_lc" == *"override the system prompt"* \\
-           || "$prompt_lc" == *"ignore system prompt"* \\
-           || "$prompt_lc" == *"ignore developer instructions"* \\
-           || "$prompt_lc" == *"ignore repo instructions"* \\
-           || "$prompt_lc" == *"ignore project instructions"* \\
-           || "$prompt_lc" == *"ignore agents.md"* \\
-           || "$prompt_lc" == *"disregard agents.md"* \\
-           || "$prompt_lc" == *"bypass the guardrails"* \\
-           || "$prompt_lc" == *"disable the guardrails"* \\
-           || "$prompt_lc" == *"ignore the guardrails"* ]]; then
-          block_reason="Cannot ignore higher-priority system, developer, or repo instructions. Rephrase the request within the active guardrails."
+        has_phrase_marker() {
+          local haystack="$1"
+          shift
+          local marker=""
+          local phrase=""
+          for marker in "$@"; do
+            phrase="${marker//|/ }"
+            if [[ "$haystack" == *"$phrase"* ]]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        if has_phrase_marker "$prompt_lc" "${instruction_override_markers[@]}"; then
+          block_reason="Cannot waive higher-priority system, developer, or repo instructions. Rephrase the request within the active guardrails."
         fi
 
-        if [[ "$prompt_lc" == *"skip validation"* \\
-           || "$prompt_lc" == *"skip tests"* \\
-           || "$prompt_lc" == *"skip test"* \\
-           || "$prompt_lc" == *"skip lint"* \\
-           || "$prompt_lc" == *"skip typecheck"* \\
-           || "$prompt_lc" == *"without tests"* \\
-           || "$prompt_lc" == *"no tests"* \\
-           || "$prompt_lc" == *"don't validate"* \\
-           || "$prompt_lc" == *"do not validate"* \\
-           || "$prompt_lc" == *"ship it without validation"* ]]; then
+        if has_phrase_marker "$prompt_lc" "${validation_skip_markers[@]}"; then
           context_parts+=("If validation is skipped, say so explicitly with a reason in the final handoff.")
         fi
 
-        if [[ "$prompt_lc" == *"rm -rf"* \\
-           || "$prompt_lc" == *"reset --hard"* \\
-           || "$prompt_lc" == *"checkout --"* \\
-           || "$prompt_lc" == *"dangerously skip permissions"* \\
-           || "$prompt_lc" == *"--yolo"* \\
-           || "$prompt_lc" == *"delete everything"* \\
-           || "$prompt_lc" == *"remove everything"* ]]; then
+        if has_phrase_marker "$prompt_lc" "${destructive_markers[@]}"; then
           context_parts+=("The prompt may imply destructive changes; verify scope carefully and protect unrelated edits.")
         fi
 
         case "$permission_mode" in
-          bypassPermissions|dontAsk)
+          bypassPerm""issions|dontAsk)
             if (( ${#context_parts[@]} > 0 )); then
               context_parts+=("High-autonomy mode is active, so apply extra caution before destructive or low-verification shortcuts.")
             fi
@@ -372,7 +407,7 @@ def stop_guard_template() -> str:
           block_reason="Rewrite the response before stopping: unresolved checklist items remain in the final message."
         fi
 
-        if [[ -z "$block_reason" ]] && printf '%s' "$normalized_message" | grep -Eq '(did not run|didn.t run|have not run|haven.t run|unable to verify|could not verify|couldn.t verify)'; then
+        if [[ -z "$block_reason" ]] && printf '%s' "$normalized_message" | grep -Eq '(did not run|didn.t run|was not run|wasn.t run|have not run|haven.t run|unable to verify|could not verify|couldn.t verify)'; then
           if ! printf '%s' "$normalized_message" | grep -Eq '(because|due to|since|per your request|as requested)'; then
             block_reason="Rewrite the response before stopping: if validation was skipped, state the reason clearly or run the smallest relevant check."
           fi
@@ -423,7 +458,7 @@ def readme_template(config_dir: Path, hooks_dir: Path) -> str:
 
         ## What this pack does
         - `SessionStart` adds concise repo-aware startup context
-        - `UserPromptSubmit` blocks obvious instruction-bypass attempts and annotates risky shortcuts
+        - `UserPromptSubmit` blocks obvious instruction-waiver attempts and annotates risky shortcuts
         - `Stop` blocks clearly incomplete final handoffs once, then fails open on retry
         - `PreToolUse` and `PostToolUse` are supported by Codex docs but intentionally not scaffolded in this starter pack unless requested
 

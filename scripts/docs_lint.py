@@ -13,6 +13,7 @@ from dataclasses import dataclass, asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import urlparse
 
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)\n]+)\)")
 FILE_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+[.][A-Za-z0-9]+")
@@ -345,6 +346,219 @@ def required_section_issues(repo_root: Path, config: dict) -> list[Issue]:
     return issues
 
 
+def _github_anchor_slug(heading: str) -> str:
+    slug = heading.strip().lower()
+    slug = re.sub(r"`+", "", slug)
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"\s+", "-", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    return slug.strip("-")
+
+
+def _extract_heading_anchors(path: Path) -> set[str]:
+    anchors: set[str] = set()
+    with path.open("r", encoding="utf-8") as f:
+        in_fence = False
+        for line in f:
+            stripped = line.strip()
+            if stripped.startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
+            match = HEADING_RE.match(stripped)
+            if not match:
+                continue
+            heading_text = match.group(2).strip().rstrip("#").strip()
+            anchor = _github_anchor_slug(heading_text)
+            if anchor:
+                anchors.add(anchor)
+    return anchors
+
+
+def _local_github_repo_slug(repo_root: Path) -> tuple[str, str] | None:
+    origin_lines = run_git(repo_root, ["remote", "get-url", "origin"])
+    if not origin_lines:
+        return None
+    origin = origin_lines[0]
+    match = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?$", origin)
+    if not match:
+        return None
+    return match.group("owner").lower(), match.group("repo").lower()
+
+
+def _git_ref_exists(repo_root: Path, ref: str, cache: dict[str, bool]) -> bool:
+    if ref in cache:
+        return cache[ref]
+    proc = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", ref],
+        cwd=repo_root,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    exists = proc.returncode == 0
+    cache[ref] = exists
+    return exists
+
+
+def _split_blob_path(repo_root: Path, after_blob: str, ref_cache: dict[str, bool]) -> str | None:
+    segments = [segment for segment in after_blob.split("/") if segment]
+    if len(segments) < 2:
+        return None
+
+    candidates: list[tuple[int, bool, bool, str]] = []
+    for idx in range(1, len(segments)):
+        ref = "/".join(segments[:idx])
+        repo_relative = "/".join(segments[idx:])
+        resolved = (repo_root / repo_relative).resolve()
+        path_exists = resolved.is_relative_to(repo_root) and resolved.exists()
+        ref_exists = _git_ref_exists(repo_root, ref, ref_cache)
+        candidates.append((idx, ref_exists, path_exists, repo_relative))
+
+    ref_and_path = [candidate for candidate in candidates if candidate[1] and candidate[2]]
+    if ref_and_path:
+        return max(ref_and_path, key=lambda candidate: candidate[0])[3]
+
+    ref_only = [candidate for candidate in candidates if candidate[1]]
+    if ref_only:
+        return max(ref_only, key=lambda candidate: candidate[0])[3]
+
+    path_only = [candidate for candidate in candidates if candidate[2]]
+    if path_only:
+        return min(path_only, key=lambda candidate: candidate[0])[3]
+
+    return candidates[0][3]
+
+
+def _resolve_github_blob_url(
+    repo_root: Path, raw_url: str, local_repo_slug: tuple[str, str] | None, ref_cache: dict[str, bool]
+) -> tuple[Path | None, str, bool]:
+    parsed = urlparse(raw_url)
+    if parsed.scheme not in {"http", "https"} or parsed.netloc.lower() != "github.com":
+        return None, parsed.fragment, False
+
+    match = re.match(r"^/([^/]+)/([^/]+)/blob/(.+)$", parsed.path)
+    if not match:
+        return None, parsed.fragment, False
+
+    owner, repo, after_blob = match.groups()
+    if local_repo_slug and (owner.lower(), repo.lower()) != local_repo_slug:
+        return None, parsed.fragment, True
+
+    repo_relative = _split_blob_path(repo_root, after_blob, ref_cache)
+    if not repo_relative:
+        return None, parsed.fragment, False
+    return (repo_root / repo_relative).resolve(), parsed.fragment, False
+
+
+def plugin_manifest_url_issues(repo_root: Path) -> list[Issue]:
+    issues: list[Issue] = []
+    anchor_cache: dict[Path, set[str]] = {}
+    ref_cache: dict[str, bool] = {}
+    local_repo_slug = _local_github_repo_slug(repo_root)
+
+    for manifest in sorted(repo_root.glob("plugins/*/.codex-plugin/plugin.json")):
+        rel_manifest = "/" + manifest.relative_to(repo_root).as_posix()
+        try:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            issues.append(
+                Issue(
+                    code="invalid-plugin-manifest-json",
+                    severity="error",
+                    file=rel_manifest,
+                    line=1,
+                    message=f"Failed to parse plugin.json: {exc}",
+                    suggestion="Fix malformed JSON before running docs lint.",
+                )
+            )
+            continue
+
+        interface = payload.get("interface")
+        if not isinstance(interface, dict):
+            continue
+
+        for key in ("privacyPolicyURL", "termsOfServiceURL"):
+            raw_url = interface.get(key)
+            if not isinstance(raw_url, str) or not raw_url.strip():
+                continue
+
+            resolved, anchor, external_repo = _resolve_github_blob_url(
+                repo_root, raw_url.strip(), local_repo_slug, ref_cache
+            )
+            if external_repo:
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-external-repo",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} must reference this repository, not an external GitHub repo: {raw_url}",
+                        suggestion=f"Update {key} to a repository-local docs URL.",
+                    )
+                )
+                continue
+            if resolved is None:
+                continue
+            if not resolved.is_relative_to(repo_root):
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-outside-repo",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} points outside the repository: {raw_url}",
+                        suggestion=f"Update {key} to a repository-local docs URL.",
+                    )
+                )
+                continue
+            if not resolved.exists():
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-missing-target",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} target does not exist: {raw_url}",
+                        suggestion=f"Fix {key} to reference an existing file.",
+                    )
+                )
+                continue
+
+            if resolved.suffix.lower() != ".md":
+                continue
+
+            if not anchor:
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-missing-anchor",
+                        severity="warning",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} points to markdown without an anchor: {raw_url}",
+                        suggestion=f"Add a stable heading anchor to {key} when linking markdown docs.",
+                    )
+                )
+                continue
+
+            anchors = anchor_cache.setdefault(resolved, _extract_heading_anchors(resolved))
+            if anchor not in anchors:
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-invalid-anchor",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} anchor '#{anchor}' not found in {resolved.relative_to(repo_root).as_posix()}",
+                        suggestion=f"Update {key} to an existing markdown heading anchor.",
+                    )
+                )
+
+    return issues
+
+
 def emit_text_summary(issues: Iterable[Issue], effective_mode: str, scanned_files: int) -> None:
     """
     Print a concise text report of lint issues including a summary header and one line per issue.
@@ -398,6 +612,7 @@ def main() -> int:
         issues.extend(lint_file(md, repo_root, config))
     issues.extend(index_file_issues(repo_root, config))
     issues.extend(required_section_issues(repo_root, config))
+    issues.extend(plugin_manifest_url_issues(repo_root))
 
     emit_text_summary(issues, effective_mode, len(files))
 

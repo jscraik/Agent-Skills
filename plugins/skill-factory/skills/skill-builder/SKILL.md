@@ -60,7 +60,7 @@ Use this skill when the user asks to:
 - refine skill-graph contracts tied to recursive workflow operations;
 - prepare a contract-valid skill for install/distribute handoff or finish bounded distribution work when lifecycle judgment is already settled.
 
-Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`plugin-builder`); session-scan coverage (`codex-sessions-skill-scan`).
+Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`plugin-builder`); session-scan coverage (`skill-refactor`).
 
 ## Iteration Round Contract
 For non-trivial lifecycle work, use one explicit round model:
@@ -194,7 +194,7 @@ If critical inputs are missing, ask only the minimum needed to proceed safely.
 ## Agent injection
 When the request includes skill-linked subagent support, wire it explicitly during `create`, `improve`, or `install-distribute`:
 
-1. Reuse-first discovery: check `/Users/jamiecraik/dev/configs/codex/agents/`, then project/global `.codex/agents/`.
+1. Reuse-first discovery: check repo-shared agents in `./configs/codex/agents/` when present, then project/global `.codex/agents/`.
 2. If no suitable role exists, hand off role creation to [[codex-agent-creator]] and request a purpose-built agent with explicit `model`, `model_reasoning_effort`, and scope.
 3. Validate candidate role files: `bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>`.
 4. Install/update role files only when requested: `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]`.
@@ -333,16 +333,15 @@ Reference files:
 - Validate in quarantine before atomic move/swap; rollback on write failure.
 - Hand off pure installation or runtime-visibility work on an already-valid skill to `skill-installer`.
 - Hand off plugin conversion to `plugin-builder` once the standalone skill is contract-valid and the deliverable boundary becomes a plugin.
-- Hand off session coverage scans to `codex-sessions-skill-scan`.
+- Hand off session coverage scans to `skill-refactor`.
 - Use `references/advanced-workflow.md` for full install-distribute mechanics and checklists.
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
-| [[plugin-builder]] | Package a contract-valid standalone skill when the deliverable explicitly becomes a plugin |
-| [[codex-sessions-skill-scan]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
-| [[skill-installer]] | Install, import, or repair runtime visibility when the skill package is already valid and the remaining work is distribution |
+| [[skill-refactor]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
 | [[codex-agent-creator]] | Reuse existing agent TOMLs or create role-specific custom agents for skill-linked delegation flows |
 
 **Topic map:** [[agent-ops]]

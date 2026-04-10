@@ -9,17 +9,17 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 7
-- `product_verification`: 9
-- `data_fetch_analysis`: 6
+- `library_api_reference`: 6
+- `product_verification`: 8
+- `data_fetch_analysis`: 5
 - `team_automation`: 25
-- `scaffolding_templates`: 26
+- `scaffolding_templates`: 23
 - `code_quality_review`: 12
-- `ci_cd_deployment`: 7
+- `ci_cd_deployment`: 6
 - `runbook`: 4
-- `infrastructure_ops`: 6
+- `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 102
+- `total_tagged`: 94
 
 ## Semantic Types
 
@@ -27,7 +27,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - `agent-native-architecture` — `product/domain`
 - `context7` — `product/docs`
-- `figma` — `frontend/tools`
 - `oak-api` — `product/domain`
 - `react-ui-patterns` — `frontend/ui`
 - `remotion` — `frontend/ui`
@@ -42,16 +41,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `playwright-interactive` — `frontend/tools`
 - `reproduce-bug` — `utilities`
 - `test-browser` — `frontend/tools`
-- `test-xcode` — `utilities`
 - `ui-visual-regression` — `frontend/ui`
 
 ### Data Fetch Analysis
 
-- `cf-crawl` — `utilities`
-- `codex-sessions-skill-scan` — `utilities`
 - `insight-report` — `utilities`
 - `notebooklm` — `utilities`
 - `security-ownership-map` — `product/security`
+- `skill-refactor` — `utilities`
 - `spreadsheet` — `utilities`
 
 ### Team Automation
@@ -84,7 +81,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Scaffolding Templates
 
-- `apple-app-creator` — `utilities`
 - `backend-engineer` — `backend`
 - `beautiful-mermaid` — `utilities`
 - `better-icons` — `frontend/graphics`
@@ -97,7 +93,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `favicon-generator` — `frontend/graphics`
 - `frontend-design` — `frontend/ui`
 - `frontend-ui-design` — `frontend/ui`
-- `imagegen` — `frontend/graphics`
 - `mcp-builder` — `backend`
 - `nano-banana-builder` — `frontend/graphics`
 - `og-image-creator` — `frontend/graphics`
@@ -109,7 +104,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `threejs-builder` — `frontend/graphics`
 - `ui-cloner` — `frontend/tools`
 - `ui-ux-creative-coding` — `frontend/ui`
-- `xcode-makefiles` — `utilities`
 
 ### Code Quality Review
 
@@ -129,7 +123,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 ### Ci Cd Deployment
 
 - `circleci` — `utilities`
-- `cloudflare-deploy` — `product/domain`
 - `fallback-release` — `product/ops`
 - `gh-workflow` — `github`
 - `release` — `product/ops`
@@ -150,7 +143,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `fix-mise` — `utilities`
 - `process-watch` — `utilities`
 - `rclone` — `utilities`
-- `workers-mcp` — `backend`
 
 ## Validation Notes
 

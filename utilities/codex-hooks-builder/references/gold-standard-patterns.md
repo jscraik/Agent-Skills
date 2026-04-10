@@ -23,10 +23,10 @@ For most repos, start with three hooks:
 1. `SessionStart`
 - Add a short repo-aware context string.
 - Mention dirty worktree state, branch, and validation hints.
-- Use `matcher: "^(startup|resume|clear)$"` so startup/resume coverage is explicit and clear-source sessions remain compatible.
+- Use `matcher: "^(startup|resume)$"` so the starter matches the current documented runtime without depending on undocumented extra source values.
 
 2. `UserPromptSubmit`
-- Block direct attempts to ignore system, developer, or repo instructions.
+- Block direct attempts to waive higher-priority system, developer, or repo instructions.
 - Add small context for risky shortcut prompts such as skipping validation or using destructive commands.
 - Keep this narrow so normal prompts are unaffected.
 
@@ -42,12 +42,15 @@ Optional, when explicitly requested:
 - Match on `tool_name` and remember Codex currently emits `Bash` for this event.
 - Keep matcher patterns explicit (`^Bash$` for narrow scope, or `*`/empty string only when broad matching is intentional).
 - Keep a clear note that this is a guardrail, not complete enforcement.
+- Classify commit, push, scaffold, or other command classes inside the script because matcher cannot see subcommand intent today.
+- Use supported block paths only: `permissionDecision: "deny"`, legacy `decision: "block"`, or exit code `2` with `stderr`.
 
 5. `PostToolUse` (Bash-only today)
 - Use for after-command feedback and additional context.
 - Do not treat it as rollback because command side effects have already happened.
 - Use it only when the extra latency is worth the additional safety signal.
 - Include `statusMessage` so operators can see which post-tool guardrail is running.
+- Make post hooks cheap to skip, file-target aware, and fail-open by default.
 
 ## Project vs user scope
 Prefer project scope when:
@@ -78,6 +81,7 @@ Do not install the same pack in both places unless you intentionally want duplic
 `PreToolUse` and `PostToolUse`
 - good pattern: gate or annotate a small set of risky Bash behaviors with explicit reasons
 - bad pattern: pretend Bash-only interception can enforce all command execution paths
+- bad pattern: rely on matcher to distinguish `git commit`, `git push`, or file-edit intent
 
 ## Validation standard
 Minimum:

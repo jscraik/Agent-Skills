@@ -1,0 +1,11 @@
+interface:
+  display_name: "CE Compound"
+  short_description: "Coordinate the CE lifecycle or capture a solved problem into durable docs/solutions knowledge, refreshing an existing solution doc when overlap is high."
+  icon_small: "./assets/icon-small.png"
+  icon_large: "./assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

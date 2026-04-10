@@ -2,9 +2,140 @@ from __future__ import annotations
 
 """Skill graph navigation and discovery for agent-native workflows."""
 import json
+import re
 from pathlib import Path
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 from ask.envelope import CallResult, ErrorObject
+from skill_discovery import discover_skill_entries
+
+TOPIC_CLUSTERS = {
+    "frontend-ui",
+    "backend-platform",
+    "agent-ops",
+    "product-strategy",
+    "security-ops",
+    "content-publishing",
+    "mobile-native",
+}
+TOPIC_WIKILINK_RE = re.compile(r"\[\[([a-z0-9_-]+)\]\]")
+
+
+def _topic_from_category(category: str) -> str | None:
+    """Best-effort fallback mapping from discovery category path to topic cluster."""
+    def _is(prefix: str) -> bool:
+        return category == prefix or category.startswith(prefix + "/")
+
+    if _is("frontend"):
+        return "frontend-ui"
+    if _is("backend") or _is("github"):
+        return "backend-platform"
+    if _is("auth") or _is("product/security"):
+        return "security-ops"
+    if _is("product/content"):
+        return "content-publishing"
+    if (
+        _is("product/strategy")
+        or _is("product/specs")
+        or _is("interview")
+    ):
+        return "product-strategy"
+    if _is("product/domain"):
+        return "backend-platform"
+    if (
+        _is("product/ops")
+        or _is("product/docs")
+        or _is("skills-system")
+        or _is("utilities")
+        or _is("plugins")
+    ):
+        return "agent-ops"
+    return None
+
+
+def _load_topic_assignments(
+    repo_root: Path, fallback_topic_by_skill: dict[str, str]
+) -> dict[str, str]:
+    """Loads explicit skill->topic assignments from topic-map docs with fallback."""
+    assignments = dict(fallback_topic_by_skill)
+    topic_map_dir = repo_root / "docs" / "skill-graphs" / "topic-maps"
+    if not topic_map_dir.exists():
+        return assignments
+
+    for topic_map in sorted(topic_map_dir.glob("*.md")):
+        topic = topic_map.stem
+        if topic == "index" or topic not in TOPIC_CLUSTERS:
+            continue
+        try:
+            content = topic_map.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for skill in TOPIC_WIKILINK_RE.findall(content):
+            if skill in TOPIC_CLUSTERS or skill == "index":
+                continue
+            assignments[skill] = topic
+    return assignments
+
+
+def _canonicalize_graph(repo_root: Path, data: dict) -> dict:
+    """Filters graph data to canonical discovered skills and normalizes topics."""
+    try:
+        entries = discover_skill_entries(source="repo")
+    except Exception:
+        return data
+    if not entries:
+        return data
+
+    entry_by_skill = {entry.name: entry for entry in entries}
+    canonical_ids = set(entry_by_skill)
+    raw_nodes = {
+        node["id"]: dict(node)
+        for node in data.get("nodes", [])
+        if isinstance(node, dict) and "id" in node
+    }
+
+    fallback_topic_by_skill: dict[str, str] = {}
+    for skill, entry in entry_by_skill.items():
+        fallback = _topic_from_category(entry.category)
+        if fallback:
+            fallback_topic_by_skill[skill] = fallback
+    topic_by_skill = _load_topic_assignments(repo_root, fallback_topic_by_skill)
+
+    filtered_edges = []
+    for edge in data.get("edges", []):
+        if not isinstance(edge, dict):
+            continue
+        from_skill = edge.get("from")
+        to_skill = edge.get("to")
+        if from_skill in canonical_ids and to_skill in canonical_ids:
+            filtered_edges.append(dict(edge))
+
+    in_deg = Counter(edge["to"] for edge in filtered_edges)
+    out_deg = Counter(edge["from"] for edge in filtered_edges)
+
+    filtered_nodes = []
+    for skill in sorted(canonical_ids):
+        node = raw_nodes.get(skill, {"id": skill})
+        topic = topic_by_skill.get(skill) or node.get("topic")
+        if topic not in TOPIC_CLUSTERS:
+            topic = fallback_topic_by_skill.get(skill, "unknown")
+        node["topic"] = topic
+        node["in_degree"] = in_deg.get(skill, 0)
+        node["out_degree"] = out_deg.get(skill, 0)
+        if node.get("tier") not in {"stable", "growing", "experimental"}:
+            if node.get("stability") == "stable" or node["in_degree"] >= 15:
+                node["tier"] = "stable"
+            elif node["in_degree"] >= 5:
+                node["tier"] = "growing"
+            else:
+                node["tier"] = "experimental"
+        filtered_nodes.append(node)
+
+    normalized = dict(data)
+    normalized["nodes"] = filtered_nodes
+    normalized["edges"] = filtered_edges
+    normalized["node_count"] = len(filtered_nodes)
+    normalized["edge_count"] = len(filtered_edges)
+    return normalized
 
 def _get_graph_path(repo_root: Path) -> Path:
     """Returns the path to skill-edges.json."""
@@ -58,7 +189,7 @@ def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
                 fix_suggestion="Regenerate the graph with: python3 scripts/build-adjacency-yaml.py ."
             )
 
-    return data, None
+    return _canonicalize_graph(repo_root, data), None
 
 def _build_index(data: dict):
     """Builds node map and forward/reverse edge indices."""

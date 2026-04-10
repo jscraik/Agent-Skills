@@ -1,0 +1,6 @@
+interface:
+  display_name: Insight Report
+  short_description: 'WHAT: Generate comprehensive HTML insights from Codex OTEL data
+    using local Ollama LLMs'
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

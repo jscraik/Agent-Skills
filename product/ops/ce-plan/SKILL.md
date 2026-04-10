@@ -274,7 +274,7 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 - review the plan or refine it directly
 - run `ce-review`, `ce-technical-review`, or `ce-deepen-plan` when scrutiny is needed
 - generate a companion UI plan when UI work is in scope
-- start `ce-work` (with `[[ce-tdd]]` posture if TDD) or hand to `[[linear]]` for issue creation
+- start `ce-work` (with `[[ce-tdd]]` posture if TDD) or hand to the tracker workflow for issue creation
 - recommend the companion UI plan when the work is UI-heavy and not already covered by a dedicated UI artifact
 
 ## Validation
@@ -285,7 +285,7 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 - verify the correct stable IDs and traceable acceptance rationale are present for the chosen mode
 - verify implementation units name exact file and test-file paths when the work is feature-bearing
 - verify optional technical-design sections stay directional, and rollout, rollback, validation, accessibility, and prototype planning are explicit when relevant
-- verify any tracker handoff is framed as a `[[linear]]` handoff rather than an inline tracker mutation inside `ce-plan`
+- verify any tracker handoff is framed as an explicit tracker handoff rather than an inline tracker mutation inside `ce-plan`
 - report exact failures and the smallest safe fix if a check does not pass
 
 ## Anti-patterns
@@ -314,7 +314,6 @@ User says:
 |---|---|
 | [[ce-brainstorm]] | Clarify WHAT/WHY |
 | [[product-spec]] | Product contract |
-| [[linear]] | Issue creation |
 
 **Topic map:** [[product-ops]]
 

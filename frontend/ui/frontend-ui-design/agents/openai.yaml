@@ -1,0 +1,7 @@
+interface:
+  display_name: Frontend UI Design
+  short_description: Design or implement production-ready frontend UI components and
+    screens with strong visual direction, layout rhythm, and accessibility best
+    practices.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

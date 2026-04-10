@@ -73,11 +73,11 @@ This document maps the original planning prompts in `/Users/jamiecraik/dev/confi
   - 4-variant Prototype Pack brief for broader UI+technical delivery plans
 - `references/contract.yaml` and `references/evals.yaml` were added to meet current skill quality requirements and strengthen routing reliability.
 - Pressure and prompt-injection evals were added because the original prompts relied more on ambient scaffolding than a packaged skill can safely assume.
-- Tracker creation was modernized into an explicit `[[linear]]` handoff so plan generation and issue mutation stay separated while still preserving the original post-plan issue workflow intent.
+- Tracker creation was modernized into an explicit tracker-workflow handoff (default `[[gh-workflow]]`) so plan generation and issue mutation stay separated while still preserving the original post-plan issue workflow intent.
 - The donor prompt's plan-deepening fast path was intentionally separated into `ce-deepen-plan` in this repository so `ce-plan` stays focused on initial plan creation and safe plan revision, while holistic plan-confidence passes route to the dedicated deepening stage.
 - The donor prompt's sequenced `docs/plans/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
 - The beta prompt's `-beta-plan.md` filename pattern was not adopted into stable `ce-plan`; the canonical skill keeps the existing stable plan filename convention to avoid unnecessary artifact churn across the repo. This is an intentional portability decision, not a loss of planning behavior.
-- The beta prompt's inline Proof-share and tracker-mutation branches were not moved into the core planning skill. `ce-plan` remains focused on producing the plan artifact, then handing off to dedicated tracker workflows such as `[[linear]]`.
+- The beta prompt's inline Proof-share and tracker-mutation branches were not moved into the core planning skill. `ce-plan` remains focused on producing the plan artifact, then handing off to dedicated tracker workflows such as `[[gh-workflow]]`.
 - Progressive-disclosure hardening keeps `SKILL.md` route-critical while relocating standards rationale and planning philosophy to `references/style-and-operating-guidance.md` with explicit read-when signposting.
 - Repeated operational tables for testing, verification, rollout, and reliability were deduplicated from `SKILL.md`; canonical details remain in `references/production-considerations.md` and `references/verification-first.md` so nuance is preserved without bloating the main route map.
 

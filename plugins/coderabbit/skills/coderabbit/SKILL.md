@@ -1,6 +1,12 @@
 ---
 name: coderabbit
 description: Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
+version: 0.2.0
+triggers:
+  - Human example: user asks about CodeRabbit configuration
+  - Human example: user asks about CodeRabbit docs or command usage
+  - Human example: user asks about CodeRabbit CLI or integrations
+  - Human example: user asks about CodeRabbit setup or rollout
 metadata:
   skill-type: library_api_reference
 ---
@@ -12,6 +18,7 @@ metadata:
 - [Philosophy](#philosophy)
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
+- [Intent Router](#intent-router)
 - [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
 - [Deliverables](#deliverables)
@@ -36,6 +43,8 @@ metadata:
 - Distinguish local-corpus answers from live/vendor-state assumptions.
 - Escalate missing-doc or stale-doc risk explicitly instead of guessing.
 
+Routing note: these trigger lines are human-facing examples only. Runtime router scoring uses skill `name`, `description`, and `skill_path`.
+
 ## Philosophy
 - Use a setup-first framework: baseline configuration, safety checks, then optional advanced features.
 - Explain why each recommendation exists and what tradeoff it introduces.
@@ -55,6 +64,18 @@ metadata:
 - The request is generic PR review triage unrelated to CodeRabbit behavior.
 - The user needs fresh live data from CodeRabbit SaaS state not present in local artifacts.
 - The user asks for Cloudflare crawl orchestration itself (use `cf-crawl`).
+
+## Intent Router
+Use this routing map for deterministic skill selection:
+
+| User intent | Route |
+|---|---|
+| Reference docs, configuration guidance, feature comparison, command lookup | `coderabbit` |
+| Run CodeRabbit CLI review against repo changes | `code-review` |
+| Apply unresolved CodeRabbit review-thread fixes on PRs | `autofix` |
+| Behavior-preserving post-change cleanup | `simplify` |
+
+When requests span multiple intents, start with `coderabbit` to scope platform and constraints, then route to one execution skill.
 
 ## Required inputs
 - The target outcome, for example config draft, command reference, migration plan, or troubleshooting path.
@@ -116,9 +137,10 @@ coderabbit review --plain
 ## Setup quickstart
 1. Confirm the target platform and repository constraints before drafting config.
 2. Start with a minimal `.coderabbit.yaml` and explicitly set `reviews.sequence_diagrams`.
-3. Validate that review comments and PR command flows operate on a test PR.
-4. Expand to integrations (for example CI/CD failure analysis) only after baseline stability.
-5. Capture the chosen defaults and rollout caveats in repo docs for repeatable onboarding.
+3. Keep GitHub issue auto-enrichment disabled by default in Linear-first repos unless explicitly requested.
+4. Validate that review comments and PR command flows operate on a test PR.
+5. Expand to integrations (for example CI/CD failure analysis) only after baseline stability.
+6. Capture the chosen defaults and rollout caveats in repo docs for repeatable onboarding.
 
 ## Failure mode
 - If corpus evidence is missing for the requested topic, report the gap and propose the narrowest next retrieval step.
@@ -131,6 +153,8 @@ Use this shape when structured output is requested:
 ```json
 {
   "schema_version": 1,
+  "summary": "string",
+  "actions": ["string"],
   "recommendation": "string",
   "evidence": [
     {
@@ -139,12 +163,21 @@ Use this shape when structured output is requested:
     }
   ],
   "snippet": "string|null",
-  "risk_note": "string"
+  "risk_note": "string",
+  "validation": [
+    {
+      "command": "string",
+      "outcome": "pass|fail|blocked",
+      "reason": "string"
+    }
+  ],
+  "next_step": "string|null"
 }
 ```
 
 Contract rules:
 - Always include `schema_version`.
+- Always include `summary`, `actions`, `validation`, and `next_step` for agent handoff consistency.
 - Keep `snippet` as `null` when unavailable.
 - Prefer 2 or more evidence entries for non-trivial recommendations.
 
@@ -217,7 +250,6 @@ Fast path for low-latency responses:
 
 | Skill | When to use together |
 |---|---|
-| [[cf-crawl]] | Refresh or expand the local CodeRabbit docs corpus before analysis |
 | [[gh-workflow]] | Apply CodeRabbit guidance while executing GitHub PR lifecycle changes |
 | [[circleci]] | Pair CodeRabbit guidance with broader CircleCI migration and policy workflows |
 | [[context7]] | Cross-check third-party library docs when CodeRabbit guidance references external tools |

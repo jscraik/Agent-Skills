@@ -1,0 +1,6 @@
+interface:
+  display_name: 1password
+  short_description: Plan, validate, and use 1Password CLI setup for secret injection
+    and auth
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

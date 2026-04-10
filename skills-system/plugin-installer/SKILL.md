@@ -119,8 +119,7 @@ Family gate note:
 
 | Skill | When to use together |
 |---|---|
-| [[plugin-builder]] | Harden/convert plugin packages before distribution install |
-| [[plugin-creator]] | Scaffold a local plugin package before hardening or install |
-| [[skill-installer]] | Install standalone skills when plugin packaging is unnecessary |
+| [[plugin-builder]] | Harden or convert plugin packages before installation and activation |
+| [[plugin-creator]] | Scaffold a fresh local plugin package before install/distribution workflows |
 
 **Topic map:** [[agent-ops]]

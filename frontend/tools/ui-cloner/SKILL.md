@@ -179,7 +179,6 @@ Use this shape for `adaptation-map.json`:
 | [[stitch-loop]] | Feed cloned UI design into Stitch for iterative generation |
 | [[frontend-ui-design]] | Adapt the cloned design system to your brand |
 | [[design-system]] | Map cloned design tokens into your design system |
-| [[figma]] | Use Figma as the intermediate for cloned designs |
 
 **Topic map:** [[product-strategy]]
 

@@ -10,7 +10,7 @@
 Read when: spawning internal research subagents during Phase 1.1 (Standard or Deep scope)
 
 ## Policy
-This operational quick-reference delegates enforceable rules to the [Canonical Agent Delegation Policy](../../docs/agents/agent-delegation-policy.md). In brief:
+This operational quick-reference defines the enforceable delegation rules inline. In brief:
 - **Approval required**: Blocking user confirmation before spawning subagents
 - **Research roles**: repo-research-analyst, learnings-researcher (bounded scope)
 - **Fallback**: Serial grounding when tools unavailable
@@ -28,7 +28,7 @@ This operational quick-reference delegates enforceable rules to the [Canonical A
 ### learnings-researcher
 ```text
 "Find prior learnings relevant to: <topic>
-- Check .harness/memory/LEARNINGS.md first when it exists
+- Check .harness/memory/LEARNINGS.md first when it exists (see docs/agents/03-local-memory.md for governance)
 - Then docs/solutions/ for directly relevant entries
 - Return only directly relevant findings, <=200 words total"
 ```

@@ -58,7 +58,7 @@ covers:
 - [[favicon-generator]] — Generate complete favicon/app icon suites with templates and assets.
 - [[og-image-creator]] — Generate brand-aligned Open Graph images for existing routes via Playwright.
 - [[better-icons]] — Search and extract SVG icons via the better-icons CLI or MCP from Iconify collections.
-- [[figma]] — Extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance.
+- [[agent-browser]] + [[frontend-ui-design]] — Capture hosted design references/screenshots and translate them into production-ready UI implementation guidance.
 
 ## Accessibility & Metadata
 

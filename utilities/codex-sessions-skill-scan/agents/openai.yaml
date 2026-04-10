@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codex Sessions Skill Scan"
-  short_description: "Daily scan for skill failures"
-  default_prompt: "Scan the last 1 day of ~/.codex/sessions for skill-related issues (personal skills only) and include local OTel signals."

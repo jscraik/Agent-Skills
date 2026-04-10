@@ -1,0 +1,6 @@
+interface:
+  display_name: Markdown Converter
+  short_description: Convert source files into Markdown outputs using the bundled
+    converter workflow
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

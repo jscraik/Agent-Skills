@@ -1,0 +1,6 @@
+interface:
+  display_name: Architecture Interview
+  short_description: Use this skill to analyze architecture alternatives through a
+    structured interview that produces an ADR-style decision record.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

@@ -12,6 +12,7 @@
 .skillsctl/
 .codex/
 .playwright-mcp/
+.worktrees/
 
 # Local dependency caches
 node_modules/
@@ -41,32 +42,23 @@ utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
 # Keep coderabbit plugin skills tracked despite global skills/ ignore.
 !plugins/coderabbit/skills/
 plugins/coderabbit/skills/*
-!plugins/coderabbit/skills/autofix/
-!plugins/coderabbit/skills/code-review/
-!plugins/coderabbit/skills/coderabbit/
-!plugins/coderabbit/skills/simplify/
-!plugins/coderabbit/skills/autofix/**
-!plugins/coderabbit/skills/code-review/**
-!plugins/coderabbit/skills/coderabbit/**
-!plugins/coderabbit/skills/simplify/**
+!plugins/coderabbit/skills/**
+# Keep harness-engineering plugin skills tracked despite global skills/ ignore.
+!plugins/harness-engineering/skills/
+plugins/harness-engineering/skills/*
+!plugins/harness-engineering/skills/**
+plugins/coderabbit/skills/**/.DS_Store
+plugins/coderabbit/skills/**/__pycache__/
+plugins/harness-engineering/skills/**/.DS_Store
+plugins/harness-engineering/skills/**/__pycache__/
 # Keep skill-factory plugin skills tracked despite global skills/ ignore.
 !plugins/skill-factory/skills/
 plugins/skill-factory/skills/*
-!plugins/skill-factory/skills/skill-builder/
-!plugins/skill-factory/skills/skill-creator/
-!plugins/skill-factory/skills/skill-installer/
-!plugins/skill-factory/skills/skill-builder/**
-!plugins/skill-factory/skills/skill-creator/**
-!plugins/skill-factory/skills/skill-installer/**
+!plugins/skill-factory/skills/**
 # Keep plugin-factory plugin skills tracked despite global skills/ ignore.
 !plugins/plugin-factory/skills/
 plugins/plugin-factory/skills/*
-!plugins/plugin-factory/skills/plugin-builder/
-!plugins/plugin-factory/skills/plugin-creator/
-!plugins/plugin-factory/skills/plugin-installer/
-!plugins/plugin-factory/skills/plugin-builder/**
-!plugins/plugin-factory/skills/plugin-creator/**
-!plugins/plugin-factory/skills/plugin-installer/**
+!plugins/plugin-factory/skills/**
 # Keep generated/runtime debris ignored inside tracked skill-factory skills.
 plugins/skill-factory/skills/**/.DS_Store
 plugins/skill-factory/skills/**/__pycache__/

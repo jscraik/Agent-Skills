@@ -221,6 +221,5 @@ Install a broad, deconflicted frontend design entrypoint that preserves the upst
 | [[frontend-ui-design]] | Hand off once the request clearly becomes standard UI build or redesign work |
 | [[design-system]] | Route token, alias, or system-governance work to the dedicated owner |
 | [[ui-ux-creative-coding]] | Route post-direction polish and motion refinement to the narrower owner |
-| [[figma]] | Pull design context from Figma before choosing the downstream implementation skill |
 
 **Topic map:** [[frontend-ui]]

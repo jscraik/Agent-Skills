@@ -1,0 +1,182 @@
+[
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "codex-automation-architect",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-codex-automation-architect-small.png",
+    "target_requested": "utilities/codex-automation-architect/agents/assets/icon-small.png",
+    "target_written": "utilities/codex-automation-architect/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "codex-automation-architect",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-codex-automation-architect-large.png",
+    "target_requested": "utilities/codex-automation-architect/agents/assets/icon-large.png",
+    "target_written": "utilities/codex-automation-architect/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "codex-home-audit",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-codex-home-audit-small.png",
+    "target_requested": "utilities/codex-home-audit/agents/assets/icon-small.png",
+    "target_written": "utilities/codex-home-audit/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "codex-home-audit",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-codex-home-audit-large.png",
+    "target_requested": "utilities/codex-home-audit/agents/assets/icon-large.png",
+    "target_written": "utilities/codex-home-audit/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "codex-hooks-builder",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-codex-hooks-builder-small.png",
+    "target_requested": "utilities/codex-hooks-builder/agents/assets/icon-small.png",
+    "target_written": "utilities/codex-hooks-builder/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "codex-hooks-builder",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-codex-hooks-builder-large.png",
+    "target_requested": "utilities/codex-hooks-builder/agents/assets/icon-large.png",
+    "target_written": "utilities/codex-hooks-builder/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "coding-harness",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-coding-harness-small.png",
+    "target_requested": "utilities/coding-harness/agents/assets/icon-small.png",
+    "target_written": "utilities/coding-harness/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "coding-harness",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-coding-harness-large.png",
+    "target_requested": "utilities/coding-harness/agents/assets/icon-large.png",
+    "target_written": "utilities/coding-harness/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "diagram-cli",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-diagram-cli-small.png",
+    "target_requested": "utilities/diagram-cli/agents/assets/icon-small.png",
+    "target_written": "utilities/diagram-cli/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "diagram-cli",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-diagram-cli-large.png",
+    "target_requested": "utilities/diagram-cli/agents/assets/icon-large.png",
+    "target_written": "utilities/diagram-cli/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "evals-router",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-evals-router-small.png",
+    "target_requested": "utilities/evals-router/agents/assets/icon-small.png",
+    "target_written": "utilities/evals-router/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "evals-router",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-evals-router-large.png",
+    "target_requested": "utilities/evals-router/agents/assets/icon-large.png",
+    "target_written": "utilities/evals-router/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "fix-mise",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-fix-mise-small.png",
+    "target_requested": "utilities/fix-mise/agents/assets/icon-small.png",
+    "target_written": "utilities/fix-mise/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "fix-mise",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-fix-mise-large.png",
+    "target_requested": "utilities/fix-mise/agents/assets/icon-large.png",
+    "target_written": "utilities/fix-mise/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "insight-report",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-insight-report-small.png",
+    "target_requested": "utilities/insight-report/agents/assets/icon-small.png",
+    "target_written": "utilities/insight-report/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "insight-report",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-insight-report-large.png",
+    "target_requested": "utilities/insight-report/agents/assets/icon-large.png",
+    "target_written": "utilities/insight-report/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "markdown-converter",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-markdown-converter-small.png",
+    "target_requested": "utilities/markdown-converter/agents/assets/icon-small.png",
+    "target_written": "utilities/markdown-converter/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "markdown-converter",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-markdown-converter-large.png",
+    "target_requested": "utilities/markdown-converter/agents/assets/icon-large.png",
+    "target_written": "utilities/markdown-converter/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "notebooklm",
+    "variant": "small",
+    "source": "tmp/imagegen/batch9-out/skill-notebooklm-small.png",
+    "target_requested": "utilities/notebooklm/agents/assets/icon-small.png",
+    "target_written": "utilities/notebooklm/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "notebooklm",
+    "variant": "large",
+    "source": "tmp/imagegen/batch9-out/skill-notebooklm-large.png",
+    "target_requested": "utilities/notebooklm/agents/assets/icon-large.png",
+    "target_written": "utilities/notebooklm/agents/assets/icon-large.png"
+  }
+]

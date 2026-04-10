@@ -17,6 +17,14 @@
     "simplify",
     "plugin"
   ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "canonical",
+    "owner": "Agent Skills Team",
+    "review_cadence": "quarterly",
+    "last_reviewed": "2026-04-09",
+    "metadata_source": "plugin_manifest"
+  },
   "skills": "./skills/",
   "interface": {
     "displayName": "CodeRabbit",
@@ -30,8 +38,12 @@
       "Write"
     ],
     "websiteURL": "https://www.coderabbit.ai",
+    "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
+    "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": "Help me review, simplify, and refine this PR with CodeRabbit workflows.",
-    "brandColor": "#3B82F6"
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
   },
   "source": {
     "repo": "https://github.com/coderabbitai/skills.git",

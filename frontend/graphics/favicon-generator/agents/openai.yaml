@@ -1,0 +1,6 @@
+interface:
+  display_name: Favicon Generator
+  short_description: Generate complete favicon/app icon suites with templates and
+    assets
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

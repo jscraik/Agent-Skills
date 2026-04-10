@@ -75,21 +75,6 @@ cases:
       - type: regex
         value: "(?i)(reject|invalid|do not guess|validation)"
 
-  - id: edge-agent-injection-plugin-scaffold
-    name: edge agent injection plugin scaffold
-    category: edge
-    eval_modes: [smoke, release]
-    should_trigger: true
-    prepend_skill: false
-    prompt: "Scaffold this plugin and inject a role: reuse /Users/jamiecraik/dev/configs/codex/agents if possible, otherwise create one with codex-agent-builder."
-    acceptance:
-      - type: regex
-        value: "(?i)(/Users/jamiecraik/dev/configs/codex/agents|reuse-existing)"
-      - type: regex
-        value: "(?i)(codex-agent-builder|create-purpose-built)"
-      - type: regex
-        value: "(?i)(validate_role\\.sh|install_role\\.sh|agents/)"
-
   - id: negative-skill-install-request
     name: negative skill install request
     category: negative

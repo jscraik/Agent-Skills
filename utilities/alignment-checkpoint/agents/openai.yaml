@@ -1,4 +1,8 @@
 interface:
-  display_name: "Alignment Checkpoint"
-  short_description: "Extract goal/assumptions/criteria and require /proceed before any tool use."
-  default_prompt: "Run an alignment checkpoint: extract explicit_goal, implicit_assumptions, and success_criteria, then stop and wait for /proceed."
+  display_name: Alignment Checkpoint
+  short_description: Extract goal/assumptions/criteria and require /proceed before
+    any tool use.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: 'Run an alignment checkpoint: extract explicit_goal, implicit_assumptions,
+    and success_criteria, then stop and wait for /proceed.'

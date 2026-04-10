@@ -1,0 +1,6 @@
+interface:
+  display_name: Production Deployment
+  short_description: Deploy and manage production services across various platforms
+    with automated verification and rollback safety
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

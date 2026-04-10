@@ -1,0 +1,6 @@
+interface:
+  display_name: Codex Hooks Builder
+  short_description: Create, upgrade, or audit Codex hook packs for repo-local or
+    user-level `.codex` installs
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

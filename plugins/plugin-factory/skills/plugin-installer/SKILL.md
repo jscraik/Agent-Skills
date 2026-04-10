@@ -39,26 +39,6 @@ Install mode minimum inputs:
 - provenance pin (`--ref` commit SHA unless explicit override);
 - validation policy (`--validation-level strict|compat`).
 
-## Agent injection
-
-When the install flow includes plugin role activation:
-
-1. Reuse role TOMLs from `/Users/jamiecraik/dev/configs/codex/agents/` if they match the plugin use case.
-2. If no suitable role exists, create one through [[codex-agent-builder]] before final install handoff.
-3. Validate role files prior to activation:
-
-```bash
-bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
-```
-
-4. If the user requests role installation/update, run:
-
-```bash
-bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]
-```
-
-5. Report route as `reuse-existing` or `create-purpose-built` with resolved role path.
-
 ## Outputs
 
 Expected outputs from a successful run:
@@ -86,6 +66,7 @@ Installation is downstream execution, not package design judgment:
 - require pinned commit refs unless explicit override is approved;
 - stage in quarantine before promotion; never activate unvalidated plugin content directly;
 - network access is required only for GitHub install paths;
+- `uv` must be available on `PATH` for installer Python helper execution;
 - never print secrets, access tokens, or credentials in output.
 
 ## Procedure
@@ -102,7 +83,7 @@ Core commands:
 
 ```bash
 bin/ask plugins install https://github.com/<owner>/<repo> --path plugins/<plugin-name>
-python3 skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name>
+uv run python skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name>
 ```
 
 ## Anti-Patterns
@@ -124,8 +105,8 @@ Avoid these failures:
 Run checks in order and fail fast: stop at first failure, fix it, then rerun from the failed gate.
 
 ```bash
-python3 skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name> --validation-level strict
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate <installed-plugin-path>
+uv run python skills-system/plugin-installer/scripts/install-plugin-from-github.py --url https://github.com/<owner>/<repo> --path plugins/<plugin-name> --validation-level strict
+uv run python utilities/plugin-builder/scripts/plugin_builder.py validate <installed-plugin-path>
 ./bin/ask repo validate --ephemeral
 ```
 
@@ -138,9 +119,7 @@ Family gate note:
 
 | Skill | When to use together |
 |---|---|
-| [[plugin-builder]] | Harden/convert plugin packages before distribution install |
-| [[plugin-creator]] | Scaffold a local plugin package before hardening or install |
-| [[skill-installer]] | Install standalone skills when plugin packaging is unnecessary |
-| [[codex-agent-builder]] | Build or update role TOMLs when plugin install workflows require dedicated agents |
+| [[plugin-builder]] | Harden or convert plugin packages before installation and activation |
+| [[plugin-creator]] | Scaffold a fresh local plugin package before install/distribution workflows |
 
 **Topic map:** [[agent-ops]]

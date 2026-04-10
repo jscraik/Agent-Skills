@@ -42,7 +42,7 @@ description: Create and scaffold plugin directories for Codex with a required `.
 python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
 ```
 
-2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace `[TODO: ...]` placeholders.
+2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace the sample values with your real plugin metadata.
 
 3. Generate or update the repo marketplace entry when the plugin should appear in Codex UI ordering:
 
@@ -138,9 +138,9 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 
 ```json
 {
-  "name": "[TODO: marketplace-name]",
+  "name": "example-marketplace",
   "interface": {
-    "displayName": "[TODO: Marketplace Display Name]"
+    "displayName": "Example Marketplace"
   },
   "plugins": [
     {
@@ -193,8 +193,7 @@ Fail-fast rule:
 
 | Skill | When to use together |
 |---|---|
-| [[plugin-builder]] | Harden scaffolded plugins before distribution, conversion, or release |
-| [[plugin-installer]] | Install and verify plugin packages after creation and hardening |
-| [[skill-creator]] | Build standalone skills that may later be bundled into a plugin |
+| [[plugin-builder]] | Harden scaffolded plugins, run compatibility checks, and emit deconflict evidence before release |
+| [[plugin-installer]] | Install and verify a contract-valid plugin after packaging work is complete |
 
 **Topic map:** [[agent-ops]]

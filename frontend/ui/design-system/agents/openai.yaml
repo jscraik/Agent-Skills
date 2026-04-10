@@ -1,6 +1,8 @@
 interface:
-  display_name: "Design System"
-  short_description: "Repository-grounded design-system skill for token layers, semantic UI styling, and guidance policy checks."
-
+  display_name: Design System
+  short_description: Repository-grounded design-system skill for token layers, semantic
+    UI styling, and guidance policy checks.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
 policy:
   allow_implicit_invocation: true

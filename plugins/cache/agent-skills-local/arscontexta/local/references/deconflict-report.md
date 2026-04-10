@@ -4,7 +4,7 @@
 Exact local plugin match found for `arscontexta`. Decision: update-in-place rather than creating a duplicate package.
 
 ## Evidence
-- Inspector command: `python3 utilities/codex-plugin-builder/scripts/plugin_builder.py inspect-local arscontexta --path plugins`
+- Inspector command: `python3 utilities/plugin-builder/scripts/plugin_builder.py inspect-local arscontexta --path plugins`
 - Result: `merge-or-update-existing` with exact match.
 
 ## Decision

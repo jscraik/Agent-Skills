@@ -1,9 +1,11 @@
 interface:
-  display_name: "CE Compound Refresh"
-  short_description: "Refresh stale docs/solutions learnings and patterns against the current codebase with evidence-backed update, consolidate, replace, archive, or stale outcomes."
-
+  display_name: CE Compound Refresh
+  short_description: Refresh stale docs/solutions learnings and patterns against the
+    current codebase with evidence-backed update, consolidate, replace, archive, or
+    stale outcomes.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
 policy:
   allow_implicit_invocation: true
-
 dependencies:
   tools: []

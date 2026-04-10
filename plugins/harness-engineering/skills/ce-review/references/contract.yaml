@@ -1,0 +1,42 @@
+schema_version: 1
+
+purpose: >
+  Run the broad compound-engineering review stage so PRs, branches, diffs, and
+  workflow artifacts receive deduplicated findings, readiness guidance,
+  protected-artifact filtering, and clear next-step recommendations.
+
+triggers:
+  - the user wants a broad PR or branch review before merge
+  - the user wants a package-level review rather than only a narrow technical critique
+  - the user wants a spec, plan, UI artifact, or solution document reviewed for readiness
+  - the user wants blockers, recommendation, and follow-up guidance synthesized across reviewer lenses
+
+inputs:
+  - a review target such as PR, branch, current diff, latest PR, file path, spec path, plan path, or solution path
+  - access to the relevant diff, files, or markdown artifact
+  - optional reviewer context from compound-engineering.local.md
+  - optional review modifiers such as mode:report-only, mode:autofix, mode:headless, base:<ref>, or plan:<path>
+
+outputs:
+  - a chosen review mode such as pr-branch-review or artifact-review
+  - a resolved post-review policy such as interactive, report-only, autofix, or headless when the user supplied mode modifiers
+  - severity-ranked findings with blockers and unknowns
+  - protected-artifact cleanup filtering
+  - merge or readiness recommendation
+  - suggested next action such as fix, deepen, re-review, or proceed
+  - optional todo-follow-up artifacts using the file-based todos workflow when the repo uses it or the user requests it, with autofix residual work landing as ready
+
+non_goals:
+  - implementing fixes from review mode
+  - collapsing broad review into technical-review semantics
+  - deleting, cleanup-flagging, or gitignoring CE pipeline artifacts
+  - using external docs instead of repo evidence when local evidence is sufficient
+  - running concurrent mutating review loops and runtime verification on the same checkout
+
+risks:
+  - reviewing the wrong branch or target; mitigate with explicit target resolution and setup checks
+  - conflicting override tokens; mitigate with fail-fast mode parsing before analysis
+  - noisy reviewer fanout; mitigate with bounded reviewer selection and serial fallback
+  - stale or unsupported external claims; mitigate with repo-first review and current-source checks only when needed
+  - accidental artifact-cleanup findings; mitigate with explicit protected-artifact filtering
+  - missing readiness context; mitigate with linked-artifact reads and agent-native/learnings coverage

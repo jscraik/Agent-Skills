@@ -106,8 +106,6 @@ When interactive sign-in is required, use a fresh tmux-backed session and keep a
 |---|---|
 | [[security-best-practices]] | Apply secret management best practices alongside 1Password |
 | [[create-auth]] | Inject credentials into authentication flows via 1Password |
-| [[cloudflare-deploy]] | Inject secrets into Cloudflare deployments via op run |
-| [[workers-mcp]] | Secure MCP server secrets with 1Password injection |
 | [[bootstrap]] | Provision dev environment secrets via 1Password during bootstrap |
 
 **Topic map:** [[security-ops]]

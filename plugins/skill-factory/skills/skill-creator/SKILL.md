@@ -63,7 +63,7 @@ Assumptions and requirements:
 
 When the new skill needs a dedicated subagent path, handle role wiring during scaffold creation:
 
-1. Check for reusable role TOMLs in `/Users/jamiecraik/dev/configs/codex/agents/`.
+1. Check for reusable role TOMLs in `./configs/codex/agents/` when present, then fall back to project/global `.codex/agents/`.
 2. If no reusable role exists, invoke [[codex-agent-creator]] to create a purpose-built agent file.
 3. Validate the selected/generated role file:
 
@@ -100,14 +100,14 @@ Follow this workflow in order unless the user asks for a scoped shortcut.
 3. Initialize when creating from scratch:
 
 ```bash
-scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
+python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
 ```
 
 4. Implement reusable resources first, then update `SKILL.md` so it points to those resources.
 5. Generate or refresh `agents/openai.yaml` when needed:
 
 ```bash
-python3 plugins/skill-factory/skills/skill-creator/scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
+python3 scripts/generate_openai_yaml.py <path/to/skill-folder> --interface key=value
 ```
 
 6. Forward-test complex changes with independent runs that use realistic artifacts and task prompts.
@@ -123,7 +123,7 @@ Detailed procedures, examples, and rationale live in:
 Run validation after each meaningful change and before handoff:
 
 ```bash
-scripts/quick_validate.py <path/to/skill-folder>
+python3 scripts/quick_validate.py <path/to/skill-folder>
 ./bin/ask skills audit <path/to/skill-folder> --level strict --robot
 ```
 
@@ -180,9 +180,6 @@ Read these files based on the task:
 
 | Skill | When to use together |
 |---|---|
-| [[skill-builder]] | Harden and benchmark completed skill drafts before release |
-| [[skill-installer]] | Install already-validated skills into Codex environments |
-| [[plugin-creator]] | Package finished skills into a plugin distribution scaffold |
 | [[codex-agent-creator]] | Create or update custom agents when skill workflows need dedicated role files |
 
 **Topic map:** [[agent-ops]]

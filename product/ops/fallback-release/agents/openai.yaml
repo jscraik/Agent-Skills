@@ -1,0 +1,5 @@
+interface:
+  display_name: Fallback Release
+  short_description: Execute deterministic fallback releases when primary CI is unavailable
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

@@ -1,0 +1,6 @@
+interface:
+  display_name: MCP Builder
+  short_description: Create general-purpose MCP servers and tool schemas for standard
+    integrations
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

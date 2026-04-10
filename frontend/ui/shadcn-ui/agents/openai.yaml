@@ -1,0 +1,5 @@
+interface:
+  display_name: Shadcn UI
+  short_description: Integrate and customize shadcn/ui components in existing projects
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

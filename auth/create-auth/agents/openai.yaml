@@ -1,0 +1,6 @@
+interface:
+  display_name: Create Auth
+  short_description: Implement or migrate Better Auth in TypeScript or JavaScript
+    apps with secure defaults
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

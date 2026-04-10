@@ -1,60 +1,67 @@
 #!/usr/bin/env node
 /**
- * Setup git hooks for this configuration-first repository.
- *
- * This repo has no root package manager, so we install hooks directly:
- *   - pre-commit: bash scripts/validate_all.sh --ephemeral
- *   - commit-msg: node scripts/validate-commit-msg.js "$1"
- *   - pre-push:   python3 scripts/diagnose_skill.py --all
+ * Install canonical prek-managed git hooks for this repository.
  */
 
-import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
 
-const REPO_ROOT = process.cwd();
-const HOOKS_DIR = resolve(REPO_ROOT, ".git", "hooks");
+function tryRead(command, args) {
+	try {
+		return execFileSync(command, args, {
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+	} catch {
+		return "";
+	}
+}
 
-const HOOKS = {
-	"pre-commit": `#!/bin/sh
-if [ "$SKIP_SIMPLE_GIT_HOOKS" = "1" ]; then
-  echo "[INFO] SKIP_SIMPLE_GIT_HOOKS=1, skipping pre-commit."
-  exit 0
-fi
-bash scripts/validate_all.sh --ephemeral
-`,
-	"commit-msg": `#!/bin/sh
-if [ "$SKIP_SIMPLE_GIT_HOOKS" = "1" ]; then
-  echo "[INFO] SKIP_SIMPLE_GIT_HOOKS=1, skipping commit-msg."
-  exit 0
-fi
-node scripts/validate-commit-msg.js "$1"
-`,
-	"pre-push": `#!/bin/sh
-if [ "$SKIP_SIMPLE_GIT_HOOKS" = "1" ]; then
-  echo "[INFO] SKIP_SIMPLE_GIT_HOOKS=1, skipping pre-push."
-  exit 0
-fi
-python3 scripts/diagnose_skill.py --all
-`,
-};
+function readLegacyLocalHooksPath() {
+	return tryRead("git", ["config", "--local", "--get", "core.hooksPath"]);
+}
+
+function clearLegacyLocalHooksPath(configuredPath) {
+	if (!configuredPath) {
+		return;
+	}
+
+	console.info(`Removing legacy local core.hooksPath: ${configuredPath}`);
+	execFileSync("git", ["config", "--local", "--unset", "core.hooksPath"], {
+		stdio: "ignore",
+	});
+}
+
+function restoreLegacyLocalHooksPath(configuredPath) {
+	if (!configuredPath) {
+		return;
+	}
+	execFileSync("git", ["config", "--local", "core.hooksPath", configuredPath], {
+		stdio: "ignore",
+	});
+}
 
 function main() {
-	if (!existsSync(resolve(REPO_ROOT, ".git"))) {
-		console.error("Error: .git directory not found.");
-		console.error("Run this script from the repository root.");
+	const legacyHooksPath = readLegacyLocalHooksPath();
+	clearLegacyLocalHooksPath(legacyHooksPath);
+
+	try {
+		execFileSync("prek", ["install"], { stdio: "inherit" });
+		console.info("Installed canonical prek hooks");
+	} catch (error) {
+		try {
+			restoreLegacyLocalHooksPath(legacyHooksPath);
+		} catch {
+			console.error("Error: failed to restore previous core.hooksPath after hook install failure.");
+		}
+
+		if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+			console.error("Error: `prek` is not available; hook installation failed.");
+			console.error("Install `prek` and re-run scripts/setup-git-hooks.js.");
+		} else {
+			console.error("Error: `prek install` failed.");
+		}
 		process.exit(1);
 	}
-
-	mkdirSync(HOOKS_DIR, { recursive: true });
-
-	for (const [hookName, content] of Object.entries(HOOKS)) {
-		const hookPath = resolve(HOOKS_DIR, hookName);
-		writeFileSync(hookPath, content);
-		chmodSync(hookPath, 0o755);
-		console.info(`✓ Installed ${hookName} hook`);
-	}
-
-	console.info("\n✓ Git hooks installed for agent-skills");
 }
 
 main();

@@ -1,33 +1,34 @@
-# Prek configuration for agent-skills
-# Run: prek install && prek run --all-files
+# Canonical prek configuration for agent-skills
+# Run: prek install
 
-pre-commit = ["make hooks-pre-commit"]
-pre-push = ["make hooks-pre-push"]
-
-[default_install_hook_types]
-pre_commit = true
+default_install_hook_types = ["pre-commit", "commit-msg", "pre-push"]
 
 [[repos]]
 repo = "local"
 
 [[repos.hooks]]
-id = "validate-all"
-name = "Validate all"
-entry = "bash scripts/validate_all.sh --ephemeral"
+id = "hooks-pre-commit"
+name = "Run pre-commit validation"
+entry = "make hooks-pre-commit"
 language = "system"
+stages = ["pre-commit"]
 pass_filenames = false
+always_run = true
 
 [[repos.hooks]]
-id = "diagnose-skills"
-name = "Diagnose skills"
-entry = "python3 scripts/diagnose_skill.py --all"
+id = "hooks-commit-msg"
+name = "Validate commit message policy"
+entry = "bash -lc 'make hooks-commit-msg HOOK_COMMIT_MSG_FILE=\"$1\"' --"
 language = "system"
-pass_filenames = false
+stages = ["commit-msg"]
+pass_filenames = true
+always_run = true
 
 [[repos.hooks]]
-id = "docs-lint"
-name = "Docs lint"
-entry = "python3 scripts/docs_lint.py --mode warn --config docs-policy.json"
+id = "hooks-pre-push"
+name = "Run pre-push diagnostics"
+entry = "make hooks-pre-push"
 language = "system"
-pass_filenames = false
 stages = ["pre-push"]
+pass_filenames = false
+always_run = true

@@ -1,0 +1,6 @@
+interface:
+  display_name: Deep Interview
+  short_description: Deepen an existing doc or topic through a structured gap-filling
+    interview that adds missing assumptions, edge cases, and approval gates.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

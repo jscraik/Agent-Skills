@@ -1,21 +1,27 @@
 schema_version: "1.1"
 purpose: >
   Define the simplify-stage contract for post-change cleanup so changed code is reviewed
-  for reuse, quality, and efficiency, then updated with behavior-preserving fixes.
+  for reuse, quality, efficiency, and surgical maintainability refactors, then updated
+  with behavior-preserving fixes.
 triggers:
   - user asks to simplify or clean up changed files before merge
   - user asks for a refactor polish pass on an existing diff
+  - user asks to extract methods, improve naming, or remove code smells in changed code
   - user asks for duplication, quality, and efficiency improvements without feature expansion
 inputs:
   - unified diff context from git diff or git diff HEAD
   - changed file paths and nearby code context
   - optional additional focus areas from the user
 outputs:
+  - schema_version (always 1)
+  - summary
   - grouped findings for reuse, quality, and efficiency
   - optional cross-cutting findings when modern hardening overlay is enabled
   - applied fixes with file-level traceability
+  - actions
   - skipped findings with concise reason
-  - final summary confirming fixed items or already-clean status
+  - risk_note
+  - next_step
   - deterministic validation evidence (command, outcome, blocker reason)
   - optional baseline metadata (compare base, risk tier map) for high-risk cleanups
 non_goals:

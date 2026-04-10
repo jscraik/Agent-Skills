@@ -43,7 +43,7 @@ covers:
 ## Codex Tooling & Home
 
 - [[codex-home-audit]] — Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions, rules, config.toml).
-- [[codex-sessions-skill-scan]] — Daily skill health scan: analyze `~/.codex/sessions` and per-repo session logs for invocations and failures.
+- [[skill-refactor]] — Daily skill health scan: analyze `~/.codex/sessions` and per-repo session logs for invocations and failures.
 - [[insight-report]] — Generate a high-fidelity Codex usage insights HTML report from local session data.
 - [[repoprompt]] — Plan and guide Repo Prompt integration and usage in AI coding workflows.
 - [[fix-mise]] — Diagnose and repair mise trust/runtime failures.
@@ -59,7 +59,7 @@ covers:
 
 ## Task & Session Management
 
-- [[linear]] — Manage Linear issues, projects, and docs through the Linear MCP workflow.
+- [[gh-workflow]] — Manage GitHub issues and PRs through the repository’s tracker workflow.
 - [[alignment-checkpoint]] — Intent-alignment gate for ambiguous/high-stakes requests; requires explicit `/proceed` approval before tool use.
 
 ## Workflow Planning & Routing
@@ -85,5 +85,5 @@ covers:
 
 - Building a new skill? [[brainstorming]] → [[skill-builder]] → [[decide-build-primitive]] → [[plugin-builder]].
 - Debugging a failing automation? [[systematic-debugging]] → [[evals-router]] → [[verification-before-completion]].
-- Session health check? [[codex-sessions-skill-scan]] → [[insight-report]].
+- Session health check? [[skill-refactor]] → [[insight-report]].
 - Topic maps: [[backend-platform]] | [[product-strategy]] | [[security-ops]]

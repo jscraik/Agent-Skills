@@ -1,0 +1,5 @@
+interface:
+  display_name: Ce Tdd
+  short_description: Build behavior-safe code changes with TDD and RED/GREEN evidence
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
