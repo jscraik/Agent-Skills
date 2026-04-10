@@ -625,7 +625,7 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             stale.unlink()
             deleted_files += 1
 
-        for rel_key, rel in source_files.items():
+        for rel in source_files.values():
             source_file = source_abs / rel
             projection_file = projection_abs / rel
             projection_file.parent.mkdir(parents=True, exist_ok=True)

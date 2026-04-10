@@ -73,11 +73,8 @@ _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "plugins/skill-factory/skills/skill-builder",
-    "plugins/skill-factory/skills/skillify",
-    "plugins/plugin-factory/skills/plugin-builder",
     "plugins/skill-factory/skills/skill-creator",
     "plugins/skill-factory/skills/skill-installer",
-    "plugins/plugin-factory/skills/plugin-installer",
     "plugins/plugin-factory/skills/plugin-creator",
 )
 

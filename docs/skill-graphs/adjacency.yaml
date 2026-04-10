@@ -328,7 +328,6 @@ gh-workflow:
     and `git log` evidence
 imagegen:
   nano-banana-builder: Use Nano Banana when iterative prompt-image editing is required
-  og-image-creator: Use route-aware OG generation when image output is tied to metadata tags
   sora: Extend still-image workflows into AI-generated video
 insight-report:
   codex-automation-architect: Convert recommendations into automations

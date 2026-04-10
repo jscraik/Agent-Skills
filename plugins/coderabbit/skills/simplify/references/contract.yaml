@@ -24,9 +24,13 @@ outputs:
   - name: summary
     type: string
     description: High-level cleanup outcome summary.
-  - name: execution_mode
+  - name: diff_source
     type: string
-    description: inline|delegated-parallel|delegated-serial.
+    description: Origin of the diff.
+  - name: execution_mode
+    type: enum
+    values: [inline, delegated-parallel, delegated-serial]
+    description: Execution mode used for applying changes.
   - name: files_reviewed
     type: array
     description: Reviewed file list.
@@ -46,7 +50,7 @@ outputs:
     type: string
     description: Safest immediate follow-up action.
 success_criteria:
-  - Output always includes the standard envelope keys: schema_version, summary, execution_mode, files_reviewed, actions, skipped, validation, risk_note, next_step.
+  - Output always includes the standard envelope keys: schema_version, summary, diff_source, execution_mode, files_reviewed, actions, skipped, validation, risk_note, next_step.
   - Cleanup remains behavior-preserving unless user explicitly requests semantic changes.
   - Reuse, quality, and efficiency lanes are each evaluated.
   - Validation evidence is deterministic and command-specific.

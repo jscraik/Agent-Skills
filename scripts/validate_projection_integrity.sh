@@ -17,8 +17,10 @@ verify_status=$?
 set -e
 
 if [[ "$verify_status" -eq 0 ]]; then
-  echo "[projection-integrity] pass: scope=${scope}"
-elif [[ "$verify_status" -eq 1 ]] && [[ -f "$manifest_out" ]] && python3 - "$manifest_out" <<'PY'
+  if [[ "$output_format" != "json" ]]; then
+    echo "[projection-integrity] pass: scope=${scope}"
+  fi
+elif [[ "$verify_status" -eq 1 ]] && [[ -e "$manifest_out" ]] && python3 - "$manifest_out" <<'PY'
 import json
 import sys
 from pathlib import Path
