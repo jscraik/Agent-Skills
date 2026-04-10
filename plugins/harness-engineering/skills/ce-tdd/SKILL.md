@@ -156,9 +156,7 @@ Before writing any code:
 - Design interfaces for testability (dependency injection, return results over side effects)
 - If the user explicitly requests delegation, select reviewer lanes from `references/sub-agent-map.md` before fan-out.
 - List the behaviors to test (not implementation steps)
-- Confirm approval state:
-  - If the governing `ce-work` contract is already approved, continue without re-asking
-  - Ask a focused blocker question only if unresolved ambiguity would materially change scope, interface, architecture, or shipping risk
+- Confirm approval state per `../ce-work/references/approval-flow.md`
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"
 
@@ -194,7 +192,7 @@ Rules:
 - Only enough code to pass current test
 - Don't anticipate future tests
 - Keep tests focused on observable behavior
-- Update Linear issue or tracker at governing cadence (default per implementation unit/phase; per tracer bullet only when explicitly required)
+- Update Linear issue or tracker at governing cadence (the governing artifact determines frequency; default per implementation unit/phase as defined in `../ce-work/references/execution-workflow.md`; per tracer bullet only when explicitly required)
 
 ### Phase 4: Refactor
 

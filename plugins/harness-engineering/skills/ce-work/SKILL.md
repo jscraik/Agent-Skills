@@ -148,9 +148,7 @@ Before coding:
   - what is not in scope
   - what must be validated before completion
   - what would require a contract update before continuing
-- align approval state before implementation:
-  - if the governing artifact or user already approved execution scope, continue without re-asking
-  - ask a focused blocker question only when ambiguity would change scope, interface, architecture, or shipping risk
+- align approval state before implementation per `references/approval-flow.md`
 
 Then choose the working setup:
 - if already on a feature branch, confirm whether to continue there or create a fresh branch/worktree
@@ -179,7 +177,7 @@ For full execution-mode rules, delegate safeguards, and branch/worktree guidance
 For each implementation unit per `references/execution-workflow.md`:
 - mark task `in_progress`
 - honor execution posture:
-  - `test-first` (TDD): vertical tracer bullets per [[ce-tdd]]; tracker update cadence follows the governing artifact (default per implementation unit/phase, per-tracer only when explicitly required)
+  - `test-first` (TDD): vertical tracer bullets per [[ce-tdd]]; tracker update cadence follows the governing artifact (the plan/spec/checklist/todo contract established during Phase 1 planning; default per implementation unit/phase, per-tracer only when explicitly required)
   - `characterization-first`: capture current behavior
   - no special posture: validate continuously
 - implement minimal slice
