@@ -76,10 +76,11 @@ def parse_plain_output(text: str) -> dict[str, object]:
             if severity is not None:
                 current = severity
                 continue
+            if current is None:
+                findings.setdefault('unclassified', []).append(bullet)
+                continue
         if current is not None and bullet is not None:
             findings[current].append(bullet)
-
-    counts = {severity: len(entries) for severity, entries in findings.items()}
 
     # Build actions from critical and warning findings
     actions = []

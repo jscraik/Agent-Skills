@@ -133,6 +133,7 @@
     "personas/",
     "product/",
     "skills/",
+    "skills-system/",
     "utilities/"
   ],
   "exclude_prefixes": [
