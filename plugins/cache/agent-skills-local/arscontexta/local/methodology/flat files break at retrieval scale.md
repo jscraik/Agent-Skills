@@ -3,6 +3,8 @@ description: unstructured storage works until you need to find things — then s
 kind: research
 topics: ["[[discovery-retrieval]]", "[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/flat files break at retrieval scale.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # flat files break at retrieval scale
 

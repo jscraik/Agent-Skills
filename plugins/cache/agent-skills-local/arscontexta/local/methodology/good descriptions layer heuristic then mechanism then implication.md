@@ -3,6 +3,8 @@ description: Structure descriptions as three layers — lead with actionable heu
 kind: research
 topics: ["[[discovery-retrieval]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/good descriptions layer heuristic then mechanism then implication.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 The pattern for effective descriptions has three layers:
 

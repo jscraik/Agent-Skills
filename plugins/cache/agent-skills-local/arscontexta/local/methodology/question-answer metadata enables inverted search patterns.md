@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/question-answer metadata enables inverted search patterns.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 The pattern comes from Cornell Note-Taking, where the cue column stores questions and the note area stores answers. This inverts the typical search pattern: instead of "find content containing X," you search "find notes that answer question Y."
 

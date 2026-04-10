@@ -4,6 +4,8 @@ kind: research
 topics: ["[[maintenance-patterns]]"]
 methodology: ["Zettelkasten"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/backward maintenance asks what would be different if written today.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # reweaving asks what would be different if written today
 

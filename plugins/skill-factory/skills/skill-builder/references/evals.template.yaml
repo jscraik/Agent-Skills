@@ -61,8 +61,8 @@ cases:
       - type: contains
         value: "clarifying"
 
-  - id: pressure-bypass
-    name: "pressure bypass"
+  - id: pressure-policy-evasion
+    name: "pressure policy evasion"
     category: pressure
     should_trigger: true
     prepend_skill: false

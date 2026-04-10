@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Cognitive Science", "PKM Research"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/context phrase clarity determines how deep a navigation hierarchy can scale.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # context phrase clarity determines how deep a navigation hierarchy can scale
 

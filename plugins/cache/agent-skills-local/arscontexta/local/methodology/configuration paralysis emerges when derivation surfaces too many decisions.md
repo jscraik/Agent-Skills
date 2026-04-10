@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original", "Cognitive Science"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/configuration paralysis emerges when derivation surfaces too many decisions.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # configuration paralysis emerges when derivation surfaces too many decisions
 

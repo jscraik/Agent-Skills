@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/agents are simultaneously methodology executors and subjects creating a unique trust asymmetry.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # agents are simultaneously methodology executors and subjects creating a unique trust asymmetry
 

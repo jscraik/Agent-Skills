@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[graph-structure]]"]
 methodology: ["Cognitive Science"]
 source: [[rata-paper-42-implicit-memory]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/implicit knowledge emerges from traversal.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # implicit knowledge emerges from traversal
 

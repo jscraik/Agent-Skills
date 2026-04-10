@@ -3,6 +3,8 @@ description: Explicit wiki links create a human-curated knowledge graph that ena
 kind: research
 topics: ["[[graph-structure]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/wiki links implement GraphRAG without the infrastructure.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # wiki links implement GraphRAG without the infrastructure
 

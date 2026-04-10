@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[automated-knowledge-maintenance-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/automated detection is always safe because it only reads state while automated remediation risks content corruption.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # automated detection is always safe because it only reads state while automated remediation risks content corruption
 

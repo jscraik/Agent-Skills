@@ -4,6 +4,8 @@ kind: example
 domain: pm
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/product management uses feedback pipelines with experiment tracking.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # product management uses feedback pipelines with experiment tracking
 

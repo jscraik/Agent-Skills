@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]", "[[maintenance-patterns]]"]
 methodology: ["PKM Research"]
 source: [[7-3-failure-modes-anti-patterns]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/behavioral anti-patterns matter more than tool selection.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # behavioral anti-patterns matter more than tool selection
 

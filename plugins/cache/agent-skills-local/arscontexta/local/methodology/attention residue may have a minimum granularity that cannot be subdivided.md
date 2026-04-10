@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Cognitive Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/attention residue may have a minimum granularity that cannot be subdivided.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # attention residue may have a minimum granularity that cannot be subdivided
 

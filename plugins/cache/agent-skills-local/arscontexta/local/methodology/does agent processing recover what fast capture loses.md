@@ -4,6 +4,8 @@ kind: research
 topics: ["[[processing-workflows]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/does agent processing recover what fast capture loses.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # does agent processing recover what fast capture loses
 

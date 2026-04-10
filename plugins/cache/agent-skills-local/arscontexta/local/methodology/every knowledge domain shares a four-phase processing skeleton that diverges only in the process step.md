@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[processing-workflows]]"]
 methodology: ["PKM Research", "Systems Theory"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/every knowledge domain shares a four-phase processing skeleton that diverges only in the process step.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # every knowledge domain shares a four-phase processing skeleton that diverges only in the process step
 

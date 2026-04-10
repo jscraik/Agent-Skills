@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Cognitive Science"]
 source: [[4-2-processing-workflows]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/incremental reading enables cross-source connection finding.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # incremental reading enables cross-source connection finding
 

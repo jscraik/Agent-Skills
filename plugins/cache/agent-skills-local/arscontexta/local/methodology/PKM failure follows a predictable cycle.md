@@ -4,6 +4,8 @@ kind: research
 topics: ["[[processing-workflows]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/PKM failure follows a predictable cycle.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 PKM systems don't fail randomly. The research documents a predictable cascade:
 

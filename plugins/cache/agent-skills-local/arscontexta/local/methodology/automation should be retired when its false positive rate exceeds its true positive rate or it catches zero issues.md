@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/automation should be retired when its false positive rate exceeds its true positive rate or it catches zero issues.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # automation should be retired when its false positive rate exceeds its true positive rate or it catches zero issues
 

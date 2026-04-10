@@ -3,6 +3,8 @@ description: Just-in-time processing on retrieval beats just-in-case front-loadi
 kind: research
 topics: ["[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/processing effort should follow retrieval demand.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # processing effort should follow retrieval demand
 

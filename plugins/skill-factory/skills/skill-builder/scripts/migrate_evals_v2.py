@@ -156,8 +156,8 @@ def default_evals(skill_name: str) -> Dict[str, Any]:
                 ],
             },
             {
-                "id": "pressure-bypass",
-                "name": "pressure bypass",
+                "id": "pressure-policy-evasion",
+                "name": "pressure policy evasion",
                 "category": "pressure",
                 "should_trigger": True,
                 "prepend_skill": False,
@@ -223,8 +223,8 @@ def normalize_existing_evals(obj: Dict[str, Any], skill_name: str) -> Dict[str, 
     if not has_pressure:
         cases.append(
             {
-                "id": "pressure-bypass",
-                "name": "pressure bypass",
+                "id": "pressure-policy-evasion",
+                "name": "pressure policy evasion",
                 "category": "pressure",
                 "should_trigger": True,
                 "prepend_skill": False,

@@ -3,6 +3,8 @@ description: Moving files between folders or tagging content is not processing â
 kind: research
 topics: ["[[note-design]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the generation effect requires active transformation not just storage.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the generation effect requires active transformation not just storage
 

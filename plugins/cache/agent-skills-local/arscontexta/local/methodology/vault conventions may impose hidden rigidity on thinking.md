@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/vault conventions may impose hidden rigidity on thinking.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # vault conventions may impose hidden rigidity on thinking
 

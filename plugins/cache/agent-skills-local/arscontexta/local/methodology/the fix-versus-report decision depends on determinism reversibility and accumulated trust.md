@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the fix-versus-report decision depends on determinism reversibility and accumulated trust.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the fix-versus-report decision depends on determinism reversibility and accumulated trust
 

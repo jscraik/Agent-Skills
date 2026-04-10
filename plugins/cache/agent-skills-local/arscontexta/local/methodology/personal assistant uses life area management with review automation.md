@@ -4,6 +4,8 @@ kind: example
 domain: companion
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/personal assistant uses life area management with review automation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # personal assistant uses life area management with review automation
 

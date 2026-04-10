@@ -47,6 +47,7 @@ VALID_METADATA_SOURCES = {"frontmatter", "plugin_manifest", "inherited"}
 GOVERNED_SKILL_PATHS = {
     "utilities/coding-harness/SKILL.md",
     "utilities/skill-builder/SKILL.md",
+    "utilities/plugin-builder/SKILL.md",
     "plugins/skill-factory/skills/skill-builder/SKILL.md",
 }
 GOVERNED_PLUGIN_MANIFEST_PATHS = {

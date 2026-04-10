@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 methodology: ["Capture Design", "Zettelkasten", "Evergreen"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/three capture schools converge through agent-mediated synthesis.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # three capture schools converge through agent-mediated synthesis
 

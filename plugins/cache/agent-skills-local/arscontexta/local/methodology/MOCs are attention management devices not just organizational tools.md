@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[graph-structure]]"]
 methodology: ["Cognitive Science", "Evergreen"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/MOCs are attention management devices not just organizational tools.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # MOCs are attention management devices not just organizational tools
 

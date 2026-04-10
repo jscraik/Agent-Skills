@@ -4,6 +4,8 @@ kind: research
 topics: ["[[design-dimensions]]"]
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/ten universal primitives form the kernel of every viable agent knowledge system.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # ten universal primitives form the kernel of every viable agent knowledge system
 

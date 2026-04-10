@@ -2,6 +2,8 @@
 description: Entry point to the Ars Contexta research substrate -- start here to navigate the knowledge graph
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/index.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # index
 

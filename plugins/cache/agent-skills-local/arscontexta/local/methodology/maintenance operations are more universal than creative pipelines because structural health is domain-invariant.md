@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[design-dimensions]]"]
 methodology: ["Original", "Digital Gardening"]
 source: [[arscontexta-notes]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/maintenance operations are more universal than creative pipelines because structural health is domain-invariant.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # maintenance operations are more universal than creative pipelines because structural health is domain-invariant
 

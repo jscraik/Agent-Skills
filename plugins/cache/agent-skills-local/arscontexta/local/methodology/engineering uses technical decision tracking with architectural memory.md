@@ -4,6 +4,8 @@ kind: example
 domain: engineering
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/engineering uses technical decision tracking with architectural memory.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # engineering uses technical decision tracking with architectural memory
 

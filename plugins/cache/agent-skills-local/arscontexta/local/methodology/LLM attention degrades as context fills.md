@@ -3,6 +3,8 @@ description: The first ~40% of context window is the "smart zone" where reasonin
 kind: research
 topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/LLM attention degrades as context fills.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # LLM attention degrades as context fills
 

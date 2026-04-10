@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/agent self-memory should be architecturally separate from user knowledge systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # agent self-memory should be architecturally separate from user knowledge systems
 

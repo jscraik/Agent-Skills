@@ -2,6 +2,8 @@
 description: How wiki-linked vaults work as graph databases -- nodes, edges, traversal, and structural analysis
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/graph-structure.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # graph-structure
 

@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[note-design]]"]
 methodology: ["Original", "Capture Design"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema fields should use domain-native vocabulary not abstract terminology.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema fields should use domain-native vocabulary not abstract terminology
 

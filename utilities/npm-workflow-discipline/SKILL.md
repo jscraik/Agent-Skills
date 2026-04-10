@@ -22,14 +22,14 @@ Reproducible npm workflows for dependency installs, lockfile hygiene, and script
 - Keep CI installs immutable and predictable.
 - Make `package.json` scripts explicit operational interfaces.
 
-## Inputs
+## Required inputs
 
 - `package.json` and `package-lock.json` state.
 - Target environment (`local`, `CI`, or release job).
 - Expected script contract (for example `lint`, `test`, `build`, `check`).
 - Package update intent (`add`, `remove`, `upgrade`, or frozen install).
 
-## Outputs
+## Deliverables
 
 - A deterministic npm workflow recommendation with exact commands.
 - Lockfile policy guidance tied to the current repo state.
@@ -162,13 +162,23 @@ npm run check --if-present
 - If no lockfile exists, pause and request an explicit decision to generate and commit one.
 - If scripts required by policy are missing, return partial and list exact missing script entries.
 
-## Common mistakes
+## Gotchas
 
 - Using `npm install` in CI where deterministic installs are required.
 - Forgetting to commit `package-lock.json` after dependency updates.
 - Hand-editing lockfiles instead of using npm commands.
 - Defining scripts inconsistently across projects (`verify` vs `check` vs `ci`) with no contract.
 - Relying on hidden side effects in `pre*` and `post*` scripts.
+
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[coding-harness]] | Validate and enforce repository quality gates in CI and local workflows |
+| [[circleci]] | Align deterministic npm install and script contracts with CircleCI pipeline behavior |
+| [[release]] | Apply package and script contract checks during release readiness and cutover |
+
+**Topic map:** [[agent-ops]]
 
 ## References
 

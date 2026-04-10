@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/operational-spec.md; DO NOT EDIT PROJECTION COPY. -->
+
 # arscontexta Operational Spec
 
 ## Table of Contents

@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[agent-cognition]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/composable knowledge architecture builds systems from independent toggleable modules not monolithic templates.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # composable knowledge architecture builds systems from independent toggleable modules not monolithic templates
 

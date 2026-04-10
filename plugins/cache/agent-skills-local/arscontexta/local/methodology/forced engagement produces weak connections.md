@@ -3,6 +3,8 @@ description: Waiting for natural fits where you have genuine substance to contri
 kind: research
 topics: ["[[note-design]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/forced engagement produces weak connections.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # forced engagement produces weak connections
 

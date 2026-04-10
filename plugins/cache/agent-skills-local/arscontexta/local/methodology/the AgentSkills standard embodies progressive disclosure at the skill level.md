@@ -5,6 +5,8 @@ topics: ["[[discovery-retrieval]]", "[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the AgentSkills standard embodies progressive disclosure at the skill level.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the AgentSkills standard embodies progressive disclosure at the skill level
 

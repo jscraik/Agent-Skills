@@ -4,6 +4,8 @@ kind: example
 domain: relationships
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/people relationships uses Dunbar-layered graphs with interaction tracking.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # people relationships uses Dunbar-layered graphs with interaction tracking
 

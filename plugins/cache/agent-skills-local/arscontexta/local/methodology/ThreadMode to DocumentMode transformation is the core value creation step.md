@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Digital Gardening"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/ThreadMode to DocumentMode transformation is the core value creation step.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # ThreadMode to DocumentMode transformation is the core value creation step
 

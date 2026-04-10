@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["PKM Research", "Systems Theory"]
 source: [[arscontexta-notes]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/knowledge systems share universal operations and structural components across all methodology traditions.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # knowledge systems share universal operations and structural components across all methodology traditions
 

@@ -3,6 +3,8 @@ description: Plain text with embedded metadata survives tool death and requires 
 kind: research
 topics: ["[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/local-first file formats are inherently agent-native.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # local-first file formats are inherently agent-native
 

@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[graph-structure]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/multi-domain systems compose through separate templates and shared graph.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # multi-domain systems compose through separate templates and shared graph
 

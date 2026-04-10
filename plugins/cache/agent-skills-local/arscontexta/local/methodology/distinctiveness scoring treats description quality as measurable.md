@@ -3,6 +3,8 @@ description: NLP-based validation tool that computes pairwise description simila
 kind: research
 topics: ["[[discovery-retrieval]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/distinctiveness scoring treats description quality as measurable.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # distinctiveness scoring treats description quality as measurable
 

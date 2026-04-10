@@ -3,6 +3,8 @@ description: The prose surrounding a wiki link captures WHY two notes connect, n
 kind: research
 topics: ["[[graph-structure]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/inline links carry richer relationship data than metadata fields.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # inline links carry richer relationship data than metadata fields
 

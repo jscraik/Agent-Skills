@@ -4,6 +4,8 @@ kind: research
 topics: ["[[maintenance-patterns]]", "[[processing-workflows]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/productivity porn risk in meta-system building.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 Building meta-systems — workflows, skills, infrastructure — feels productive. It's work about work. The question: when does this investment pay off in output, and when does it become its own trap?
 

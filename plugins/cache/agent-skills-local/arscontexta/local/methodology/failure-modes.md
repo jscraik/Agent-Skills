@@ -2,6 +2,8 @@
 description: The 10 failure modes and domain vulnerability matrix -- what breaks knowledge systems and how to prevent it
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/failure-modes.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # failure-modes
 

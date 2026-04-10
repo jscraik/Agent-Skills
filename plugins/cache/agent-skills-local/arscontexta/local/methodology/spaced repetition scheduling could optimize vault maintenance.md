@@ -4,6 +4,8 @@ kind: research
 topics: ["[[maintenance-patterns]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/spaced repetition scheduling could optimize vault maintenance.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # spaced repetition scheduling could optimize vault maintenance
 

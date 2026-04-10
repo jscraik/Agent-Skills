@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: [[rata-paper-41-prospective-memory]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/prospective memory requires externalization.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # prospective memory requires externalization
 

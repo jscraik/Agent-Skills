@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Concept Mapping"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/cross-links between MOC territories indicate creative leaps and integration depth.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # cross-links between MOC territories indicate creative leaps and integration depth
 

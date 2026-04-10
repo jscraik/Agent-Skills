@@ -3,6 +3,8 @@ description: wiki links are curated graph edges that implement GraphRAG-style re
 kind: research
 topics: ["[[graph-structure]]", "[[discovery-retrieval]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/wiki links create navigation paths that shape retrieval.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # wiki links create navigation paths that shape retrieval
 

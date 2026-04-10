@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Cornell"]
 source: [[3-3-cornell-note-taking-system]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/dual-coding with visual elements could enhance agent traversal.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # dual-coding with visual elements could enhance agent traversal
 

@@ -3,6 +3,8 @@ description: Work products structured as composable packets let agents assemble 
 kind: research
 topics: ["[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/intermediate packets enable assembly over creation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # intermediate packets enable assembly over creation
 

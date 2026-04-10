@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[maintenance-patterns]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/implement condition-based maintenance triggers for derived systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # implement condition-based maintenance triggers for derived systems
 

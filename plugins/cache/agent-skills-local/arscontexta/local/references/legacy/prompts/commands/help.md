@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/legacy/prompts/commands/help.md; DO NOT EDIT PROJECTION COPY. -->
+
 # /arscontexta:help (Codex Prompt Equivalent)
 
 Source: upstream Ars Contexta skill at commit 2acfd5cc4473c4d06c46be63df748e77e00e2746.

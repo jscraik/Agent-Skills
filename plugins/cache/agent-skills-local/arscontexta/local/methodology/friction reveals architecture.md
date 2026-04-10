@@ -4,6 +4,8 @@ kind: research
 topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 source: personal experience (2026-02-01)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/friction reveals architecture.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # friction reveals architecture
 

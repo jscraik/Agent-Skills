@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/platform fragmentation means identical conceptual operations require different implementations across agent environments.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # platform fragmentation means identical conceptual operations require different implementations across agent environments
 

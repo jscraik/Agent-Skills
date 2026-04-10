@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[maintenance-patterns]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[automated-knowledge-maintenance-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/confidence thresholds gate automated action between the mechanical and judgment zones.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # confidence thresholds gate automated action between the mechanical and judgment zones
 

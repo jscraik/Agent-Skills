@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Cornell"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/temporal separation of capture and processing preserves context freshness.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # temporal separation of capture and processing preserves context freshness
 

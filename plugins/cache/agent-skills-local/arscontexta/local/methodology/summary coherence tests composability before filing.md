@@ -5,6 +5,8 @@ topics: ["[[note-design]]"]
 methodology: ["Cornell"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/summary coherence tests composability before filing.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # summary coherence tests composability before filing
 

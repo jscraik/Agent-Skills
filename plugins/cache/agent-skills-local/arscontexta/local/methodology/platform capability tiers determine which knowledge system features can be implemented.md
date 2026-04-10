@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/platform capability tiers determine which knowledge system features can be implemented.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # platform capability tiers determine which knowledge system features can be implemented
 

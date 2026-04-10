@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]", "[[note-design]]"]
 methodology: ["PKM Research"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/narrow folksonomy optimizes for single-operator retrieval unlike broad consensus tagging.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # narrow folksonomy optimizes for single-operator retrieval unlike broad consensus tagging
 

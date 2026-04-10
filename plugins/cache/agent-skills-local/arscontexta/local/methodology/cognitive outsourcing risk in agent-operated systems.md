@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/cognitive outsourcing risk in agent-operated systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # cognitive outsourcing risk in agent-operated systems
 

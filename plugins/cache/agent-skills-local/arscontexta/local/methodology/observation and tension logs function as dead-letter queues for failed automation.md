@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/observation and tension logs function as dead-letter queues for failed automation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # observation and tension logs function as dead-letter queues for failed automation
 

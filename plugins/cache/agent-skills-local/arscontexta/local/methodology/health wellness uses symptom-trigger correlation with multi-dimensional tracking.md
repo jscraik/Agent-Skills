@@ -4,6 +4,8 @@ kind: example
 domain: companion
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/health wellness uses symptom-trigger correlation with multi-dimensional tracking.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # health wellness uses symptom-trigger correlation with multi-dimensional tracking
 

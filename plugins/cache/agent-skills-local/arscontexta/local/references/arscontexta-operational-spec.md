@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/arscontexta-operational-spec.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Ars Contexta Operational Spec (Source-backed)
 
 This note captures source-backed runtime model assumptions from upstream Ars Contexta for conversion review.

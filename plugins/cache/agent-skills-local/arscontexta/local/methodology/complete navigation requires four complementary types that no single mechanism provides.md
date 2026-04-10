@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[discovery-retrieval]]"]
 methodology: ["PKM Research"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/complete navigation requires four complementary types that no single mechanism provides.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # complete navigation requires four complementary types that no single mechanism provides
 

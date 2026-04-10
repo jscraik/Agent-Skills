@@ -5,6 +5,8 @@ topics: ["[[note-design]]"]
 methodology: ["Evergreen"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/writing for audience blocks authentic creation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # writing for audience blocks authentic creation
 

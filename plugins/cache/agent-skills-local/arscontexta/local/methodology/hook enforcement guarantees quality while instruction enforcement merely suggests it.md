@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/hook enforcement guarantees quality while instruction enforcement merely suggests it.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # hook enforcement guarantees quality while instruction enforcement merely suggests it
 

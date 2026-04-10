@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Capture Design"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema templates reduce cognitive overhead at capture time.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema templates reduce cognitive overhead at capture time
 

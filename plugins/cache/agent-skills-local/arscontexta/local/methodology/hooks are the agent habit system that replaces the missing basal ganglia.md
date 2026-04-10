@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/hooks are the agent habit system that replaces the missing basal ganglia.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # hooks are the agent habit system that replaces the missing basal ganglia
 

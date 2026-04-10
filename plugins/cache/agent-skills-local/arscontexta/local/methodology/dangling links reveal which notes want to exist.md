@@ -3,6 +3,8 @@ description: Wiki links to non-existent notes accumulate as organic signals of c
 kind: research
 topics: ["[[graph-structure]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/dangling links reveal which notes want to exist.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # dangling links reveal which notes want to exist
 

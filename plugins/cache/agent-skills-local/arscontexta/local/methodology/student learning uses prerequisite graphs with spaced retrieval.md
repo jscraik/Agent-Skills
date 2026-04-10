@@ -4,6 +4,8 @@ kind: example
 domain: student-learning
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/student learning uses prerequisite graphs with spaced retrieval.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # student learning uses prerequisite graphs with spaced retrieval
 

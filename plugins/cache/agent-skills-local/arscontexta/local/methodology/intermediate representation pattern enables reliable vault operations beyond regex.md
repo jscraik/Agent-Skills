@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Original"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/intermediate representation pattern enables reliable vault operations beyond regex.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # intermediate representation pattern enables reliable vault operations beyond regex
 

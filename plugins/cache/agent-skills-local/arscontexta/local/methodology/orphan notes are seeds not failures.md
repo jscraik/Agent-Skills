@@ -4,6 +4,8 @@ kind: research
 topics: ["[[maintenance-patterns]]"]
 methodology: ["Digital Gardening"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/orphan notes are seeds not failures.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # orphan notes are seeds not failures
 

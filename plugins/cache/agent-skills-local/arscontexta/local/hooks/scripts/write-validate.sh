@@ -1,4 +1,6 @@
 #!/bin/bash
+# GENERATED PROJECTION: source=plugins/arscontexta/hooks/scripts/write-validate.sh; DO NOT EDIT PROJECTION COPY.
+
 # Ars Contexta — Schema Enforcement Hook
 # Validates notes in the knowledge space have required fields.
 # Runs as PostToolUse hook on Write events.

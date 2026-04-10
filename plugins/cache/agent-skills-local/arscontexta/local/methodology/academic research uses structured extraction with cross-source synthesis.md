@@ -4,6 +4,8 @@ kind: example
 domain: research
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/academic research uses structured extraction with cross-source synthesis.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # academic research uses structured extraction with cross-source synthesis
 

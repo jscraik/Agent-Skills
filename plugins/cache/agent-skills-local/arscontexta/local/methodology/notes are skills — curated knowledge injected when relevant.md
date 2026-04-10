@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]", "[[agent-cognition]]"]
 source: [[2026-01-19-vibe-note-taking-101]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/notes are skills — curated knowledge injected when relevant.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # notes are skills — curated knowledge injected when relevant
 

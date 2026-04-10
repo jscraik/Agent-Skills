@@ -3,6 +3,8 @@ description: Without metadata agents rely on full-text search which returns many
 kind: research
 topics: ["[[discovery-retrieval]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/metadata reduces entropy enabling precision over recall.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # metadata reduces entropy enabling precision over recall
 

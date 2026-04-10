@@ -3,6 +3,8 @@ description: agents with identical weights reach different conclusions when thei
 kind: research
 topics: ["[[agent-cognition]]", "[[design-dimensions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/scaffolding enables divergence that fine-tuning cannot.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # scaffolding enables divergence that fine-tuning cannot
 

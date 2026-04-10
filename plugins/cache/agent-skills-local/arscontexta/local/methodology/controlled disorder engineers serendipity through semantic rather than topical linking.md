@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[design-dimensions]]"]
 methodology: ["Zettelkasten"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/controlled disorder engineers serendipity through semantic rather than topical linking.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # controlled disorder engineers serendipity through semantic rather than topical linking
 

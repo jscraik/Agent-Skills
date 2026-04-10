@@ -22,14 +22,14 @@ Practical Bash scripting hygiene for script structure, strict mode, quoting safe
 - Prefer correctness and clarity over shell cleverness.
 - Treat quoting and portability as baseline quality, not optional polish.
 
-## Inputs
+## Required inputs
 
 - Target interpreter and shell compatibility goals.
 - Script context (`hook`, `build script`, `utility`, or `CI helper`).
 - Command/data inputs, including untrusted user-provided values.
 - Existing linting/validation contract (for example ShellCheck).
 
-## Outputs
+## Deliverables
 
 - A Bash script or review guidance with strict-mode and quoting safety.
 - Interpreter-appropriate portability recommendations.
@@ -168,13 +168,23 @@ shellcheck -x scripts/*.sh
 - If interpreter target is ambiguous, pause and request `bash` vs `sh` intent.
 - If strict mode introduces expected behavior changes, return partial with exact compatibility tradeoff.
 
-## Common mistakes
+## Gotchas
 
 - Unquoted variables (`$var`) causing glob expansion and split bugs.
 - Using `$*` when `"$@"` is required.
 - Mixing Bash features into scripts declared as `#!/bin/sh`.
 - Omitting strict mode in scripts that mutate state.
 - Assuming portability without ShellCheck or interpreter-specific validation.
+
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[codex-hooks-builder]] | Harden shell-heavy hook scripts and hook-pack scaffolds with safer defaults |
+| [[systematic-debugging]] | Triage shell failures with evidence-first diagnosis before behavioral changes |
+| [[verification-before-completion]] | Enforce verification routines after Bash script edits before claiming done |
+
+**Topic map:** [[agent-ops]]
 
 ## References
 

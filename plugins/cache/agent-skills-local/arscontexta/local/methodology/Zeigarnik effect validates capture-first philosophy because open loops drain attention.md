@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Cognitive Science", "GTD"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/Zeigarnik effect validates capture-first philosophy because open loops drain attention.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # Zeigarnik effect validates capture-first philosophy because open loops drain attention
 

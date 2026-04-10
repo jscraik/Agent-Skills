@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/adapt the four-phase processing pipeline to domain-specific throughput needs.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # adapt the four-phase processing pipeline to domain-specific throughput needs
 

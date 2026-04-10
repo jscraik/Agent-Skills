@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/justification chains enable forward backward and evolution reasoning about configuration decisions.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # justification chains enable forward backward and evolution reasoning about configuration decisions
 

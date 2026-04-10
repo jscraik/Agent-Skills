@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 methodology: ["Evergreen"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/navigational vertigo emerges in pure association systems without local hierarchy.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # navigational vertigo emerges in pure association systems without local hierarchy
 

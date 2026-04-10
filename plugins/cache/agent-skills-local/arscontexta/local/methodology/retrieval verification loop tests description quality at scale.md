@@ -5,6 +5,8 @@ topics: ["[[discovery-retrieval]]"]
 methodology: ["Cornell"]
 source: [[tft-research-part1]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/retrieval verification loop tests description quality at scale.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # retrieval verification loop tests description quality at scale
 

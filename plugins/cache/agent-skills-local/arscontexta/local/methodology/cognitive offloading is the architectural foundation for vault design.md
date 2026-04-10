@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Cognitive Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/cognitive offloading is the architectural foundation for vault design.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # cognitive offloading is the architectural foundation for vault design
 

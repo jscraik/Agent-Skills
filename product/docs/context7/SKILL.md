@@ -1,6 +1,6 @@
 ---
 name: context7
-description: "Retrieve current third-party library docs and Context7 CLI/Wizard guidance; use this skill when users need version-sensitive dependency answers or explicit `ctx7 docs/library/skills/setup` workflows."
+description: "Analyze and retrieve current third-party library docs plus Context7 CLI/Wizard guidance; use this skill when users need version-sensitive dependency answers or explicit `ctx7 docs/library/skills/setup` workflows."
 metadata:
   skill-type: library_api_reference
 ---
@@ -79,6 +79,7 @@ Retrieve current external library documentation via Context7 so implementation g
 ## Validation
 - Confirm the library id matches the intended ecosystem before using results.
 - If results look stale or off-target, refine the query or re-run with narrower scope.
+- Fail fast: stop at the first failed retrieval or contract gate, report the blocker, and avoid speculative fallback behavior.
 - Cap retrieval attempts per user question:
   - max 3 `library` resolution attempts
   - max 3 `docs` retrieval attempts

@@ -3,6 +3,8 @@ description: The efficiency framing misses the point — tokens are free, qualit
 kind: research
 topics: ["[[discovery-retrieval]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/progressive disclosure means reading right not reading less.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # progressive disclosure means reading right not reading less
 

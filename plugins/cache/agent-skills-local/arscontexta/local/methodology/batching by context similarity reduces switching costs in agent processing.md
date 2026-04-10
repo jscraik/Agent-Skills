@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Cognitive Science", "GTD"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/batching by context similarity reduces switching costs in agent processing.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # batching by context similarity reduces switching costs in agent processing
 

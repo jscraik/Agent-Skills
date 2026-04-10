@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 methodology: ["Systems Theory"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/aspect-oriented programming solved the same cross-cutting concern problem that hooks solve.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # aspect-oriented programming solved the same cross-cutting concern problem that hooks solve
 

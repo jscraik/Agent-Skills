@@ -3,6 +3,8 @@ description: agents should track not just what they believe but where beliefs or
 kind: research
 topics: ["[[agent-cognition]]", "[[note-design]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/provenance tracks where beliefs come from.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # provenance tracks where beliefs come from
 

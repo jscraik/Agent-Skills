@@ -4,6 +4,8 @@ kind: example
 domain: pm
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/project management uses decision tracking with stakeholder context.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # project management uses decision tracking with stakeholder context
 

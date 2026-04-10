@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[maintenance-patterns]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/module deactivation must account for structural artifacts that survive the toggle.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # module deactivation must account for structural artifacts that survive the toggle
 

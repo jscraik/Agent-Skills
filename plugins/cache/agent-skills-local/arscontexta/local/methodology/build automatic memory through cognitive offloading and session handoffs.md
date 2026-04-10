@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[memory-architecture]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/build automatic memory through cognitive offloading and session handoffs.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # build automatic memory through cognitive offloading and session handoffs
 

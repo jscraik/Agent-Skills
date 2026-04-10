@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[graph-structure]]"]
 methodology: ["Digital Gardening"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/federated wiki pattern enables multi-agent divergence as feature not bug.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # federated wiki pattern enables multi-agent divergence as feature not bug
 

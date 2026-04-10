@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Evergreen"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/digital mutability enables note evolution that physical permanence forbids.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # digital mutability enables note evolution that physical permanence forbids
 

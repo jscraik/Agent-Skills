@@ -1,3 +1,5 @@
+# GENERATED PROJECTION: source=plugins/arscontexta/references/contract.yaml; DO NOT EDIT PROJECTION COPY.
+
 schema_version: 1
 source:
   repo_url: https://github.com/agenticnotetaking/arscontexta.git

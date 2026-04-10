@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/legacy/prompts/workflows/remember.md; DO NOT EDIT PROJECTION COPY. -->
+
 # /remember (Codex Prompt Equivalent)
 
 Source: upstream Ars Contexta skill-source at commit 2acfd5cc4473c4d06c46be63df748e77e00e2746.

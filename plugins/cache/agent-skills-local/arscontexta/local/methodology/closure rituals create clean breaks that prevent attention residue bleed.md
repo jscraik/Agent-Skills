@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 methodology: ["Cognitive Science", "GTD"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/closure rituals create clean breaks that prevent attention residue bleed.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # closure rituals create clean breaks that prevent attention residue bleed
 
