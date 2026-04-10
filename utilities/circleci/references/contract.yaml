@@ -33,30 +33,9 @@ inputs:
   - compliance level and rollback constraints
 
 outputs:
-  - name: migration_plan
-    type: markdown
-    min_sections:
-      - scope
-      - phased plan
-      - risk matrix
-      - required gates
-      - validation commands
-      - owners and next step
-  - name: gold_standard
-    type: markdown
-    min_sections:
-      - workflow design
-      - jobs and resources
-      - security and secrets
-      - deployment policy
-      - optimization
-      - policy-as-code checks
-  - name: reference_pack
-    type: markdown
-    min_sections:
-      - source files and URLs
-      - crawl timestamps
-      - version assumptions
+  - "migration_plan markdown with sections: scope, phased plan, risk matrix, required gates, validation commands, owners and next step"
+  - "gold_standard markdown with sections: workflow design, jobs and resources, security and secrets, deployment policy, optimization, policy-as-code checks"
+  - "reference_pack markdown with sections: source files and URLs, crawl timestamps, version assumptions"
 
 non_goals:
   - single-job click-by-click UI or browser debugging
@@ -64,9 +43,19 @@ non_goals:
   - secrets exfiltration or raw credential disclosure
 
 risks:
-  - missing context inputs -> mitigated by clarifying questions before final plan
-  - stale docs -> mitigated by local crawl timestamps and `cf-crawl` refresh workflow
-  - policy mismatch -> mitigated by explicit gate and review criteria
+  - missing context inputs mitigated by clarifying questions before final plan
+  - stale docs mitigated by Context7 refresh and local crawl timestamps
+  - policy mismatch mitigated by explicit gate and review criteria
+
+rollback_procedure: >
+  Revert guidance changes by restoring the previous `utilities/circleci/SKILL.md`,
+  `utilities/circleci/references/contract.yaml`, and `utilities/circleci/references/evals.yaml`
+  from git, rerun strict audit for this skill, and only re-apply minimal proven-safe edits.
+
+observability: >
+  Monitor skill health through `ask skills audit utilities/circleci --level strict --robot`,
+  family benchmark validation output, and expected CircleCI guidance markers
+  (approval requires chain, context restrictions, filter precedence, and CLI validation commands).
 
 examples:
   happy_path:
