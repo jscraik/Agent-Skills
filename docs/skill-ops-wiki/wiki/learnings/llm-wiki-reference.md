@@ -12,7 +12,7 @@ type: lesson-learned
 ## Triage
 
 - Intent: `lesson-learned`
-- Status: `verified`
+- Status: `pending`
 - Destination: `docs/skill-ops-wiki/wiki/learnings`
 - Tags: reference
 
