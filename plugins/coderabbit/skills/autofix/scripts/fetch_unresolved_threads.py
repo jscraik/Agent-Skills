@@ -69,6 +69,10 @@ def _run_gh_graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
         )
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"gh graphql request timed out after {GH_TIMEOUT_SECONDS}s") from exc
+    except (FileNotFoundError, PermissionError) as exc:
+        raise RuntimeError("gh executable not found or not executable") from exc
+    except OSError as exc:
+        raise RuntimeError(f"failed to execute gh CLI: {exc}") from exc
 
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or "gh graphql request failed")
@@ -117,7 +121,9 @@ def _collect_review_threads(owner: str, repo: str, pr: int) -> list[dict[str, An
             },
         )
 
-        root = (payload.get("data") or {}).get("repository", {}).get("pullRequest", {})
+        data = payload.get("data") or {}
+        repository = data.get("repository") or {}
+        root = repository.get("pullRequest") or {}
         if not isinstance(root, dict) or not root:
             raise RuntimeError("pull request not found in GitHub response")
 

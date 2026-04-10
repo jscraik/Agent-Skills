@@ -58,7 +58,7 @@ Start with `ce-compound` when users do not know the exact stage:
 - It outputs a stage decision, required inputs, and next command.
 
 Call stage skills directly when stage intent is explicit:
-- `ce-brainstorm`, `ce-spec`, `ce-plan`, `ce-work`, `ce-review`, `ce-technical-review`, `ce-reliability-review`, `ce-compound`, `ce-compound-refresh`.
+- `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-deepen-spec`, `ce-plan`, `ce-deepen-plan`, `ce-work`, `ce-review`, `ce-technical-review`, `ce-reliability-review`, `ce-tdd`, `ce-compound`, `ce-compound-refresh`.
 
 ## Validation
 Validate plugin contract and marketplace registration:

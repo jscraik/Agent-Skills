@@ -7,7 +7,7 @@ Map plan weak spots to deterministic specialist lanes so the split upstream `doc
 
 ## Selection contract
 1. Start with baseline grounding lanes.
-2. Add only lanes that match the weak sections selected in Phase 1.
+2. Add only lanes that match the weak sections selected in Phase 1 (see `../SKILL.md#phase-1-build-the-section-manifest-and-score-confidence-gaps`).
 3. Keep the smallest set that materially improves confidence.
 4. Use bounded parallel where available; otherwise run the same lanes serially.
 

@@ -1,5 +1,5 @@
 ---
-module: [Module name or "System" for system-wide]
+module: [Module name or "System-wide" for system-wide]
 date: [YYYY-MM-DD]
 problem_type: [build_error|test_failure|runtime_error|performance_issue|database_issue|security_issue|ui_bug|integration_issue|logic_error]
 component: [rails_model|rails_controller|rails_view|service_object|background_job|database|frontend_stimulus|hotwire_turbo|email_processing|brief_system|assistant|authentication|payments]

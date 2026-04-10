@@ -19,6 +19,7 @@ This operational quick-reference defines the enforceable delegation rules inline
 ## Quick Reference
 
 ### repo-research-analyst
+
 ```text
 "Find similar features, conventions, or patterns relevant to: <topic>
 - Max 20 files, max 4 MB total read
@@ -26,6 +27,7 @@ This operational quick-reference defines the enforceable delegation rules inline
 ```
 
 ### learnings-researcher
+
 ```text
 "Find prior learnings relevant to: <topic>
 - Check .harness/memory/LEARNINGS.md first when it exists (see docs/agents/03-local-memory.md for governance)

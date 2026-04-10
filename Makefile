@@ -32,9 +32,11 @@ hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK
 	if [ -n "$${HOOK_COMMIT_MSG:-}" ]; then \
 		printf '%s\n' "$${HOOK_COMMIT_MSG}" > "$$tmp_file"; \
 	elif [ -n "$${HOOK_COMMIT_MSG_FILE:-}" ]; then \
-		cat "$${HOOK_COMMIT_MSG_FILE}" > "$$tmp_file"; \
+		test -r "$${HOOK_COMMIT_MSG_FILE}" || { echo "Cannot read $$HOOK_COMMIT_MSG_FILE" >&2; exit 2; }; \
+		cp "$${HOOK_COMMIT_MSG_FILE}" "$$tmp_file"; \
 	elif [ -n "$${MSG_FILE:-}" ]; then \
-		cat "$${MSG_FILE}" > "$$tmp_file"; \
+		test -r "$${MSG_FILE}" || { echo "Cannot read $$MSG_FILE" >&2; exit 2; }; \
+		cp "$${MSG_FILE}" "$$tmp_file"; \
 	else \
 		echo "Usage: HOOK_COMMIT_MSG=\"feat: test\" make hooks-commit-msg or make hooks-commit-msg HOOK_COMMIT_MSG_FILE=/path/to/commit-msg" >&2; \
 		exit 2; \
@@ -42,6 +44,7 @@ hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK
 	node scripts/validate-commit-msg.js "$$tmp_file"
 
 hooks-pre-push: ## Run local pre-push governance gates before pushing
+	bash scripts/validate_skill_authoring_family.sh
 	python3 scripts/diagnose_skill.py --all
 
 secrets-staged: ## Scan staged content for secrets before committing

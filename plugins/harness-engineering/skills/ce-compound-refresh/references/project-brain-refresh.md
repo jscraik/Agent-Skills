@@ -68,7 +68,7 @@ observe({
     "source:ce-compound-refresh",
     "action:refresh"
   ],
-  session_id: "project-brain:{repo}"
+  session_id: "repo:{repo}:task:{task_id}"
 })
 ```
 

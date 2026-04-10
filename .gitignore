@@ -12,6 +12,7 @@
 .skillsctl/
 .codex/
 .playwright-mcp/
+.worktrees/
 
 # Local dependency caches
 node_modules/
@@ -46,6 +47,10 @@ plugins/coderabbit/skills/*
 !plugins/harness-engineering/skills/
 plugins/harness-engineering/skills/*
 !plugins/harness-engineering/skills/**
+plugins/coderabbit/skills/**/.DS_Store
+plugins/coderabbit/skills/**/__pycache__/
+plugins/harness-engineering/skills/**/.DS_Store
+plugins/harness-engineering/skills/**/__pycache__/
 # Keep skill-factory plugin skills tracked despite global skills/ ignore.
 !plugins/skill-factory/skills/
 plugins/skill-factory/skills/*

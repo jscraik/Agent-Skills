@@ -2,6 +2,7 @@
 
 ## Table of Contents
 - [Workflow](#workflow)
+- [Harness Memory Governance](#harness-memory-governance)
 - [Store rules](#store-rules)
 - [Minimal session convention](#minimal-session-convention)
 - [See Also](#see-also)

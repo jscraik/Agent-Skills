@@ -239,6 +239,7 @@ When the target repo has a `.harness/` directory, use dual-write to both `docs/s
    - etc.
 
 2. **Write to knowledge**: Append to `.harness/knowledge/{domain}/knowledge.md`:
+
    ```yaml
    ---
    title: "{problem summary}"
@@ -262,7 +263,8 @@ When the target repo has a `.harness/` directory, use dual-write to both `docs/s
    ```
 
 3. **Sync to Local Memory MCP**:
-   ```
+
+   ```text
    observe(
      content="{problem summary} → {solution summary}",
      level="learning",
@@ -282,7 +284,8 @@ When the target repo has a `.harness/` directory, use dual-write to both `docs/s
    - Mark as "Promoted from knowledge (3+ confirmations)"
 
 ### Promotion Path
-```
+
+```text
 First capture     → docs/solutions/ + .harness/knowledge/{domain}/knowledge.md
                   → observe(tags=["type:knowledge", ...])
                   
