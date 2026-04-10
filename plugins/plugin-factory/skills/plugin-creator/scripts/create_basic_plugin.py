@@ -17,6 +17,20 @@ LEGACY_MARKETPLACE_RELATIVE_PATH = "plugins/marketplace.json"
 
 
 def _discover_repo_root() -> Path:
+    """
+    Locate the repository root directory based on the script's location.
+
+    Searches the script's ancestor directories for a directory that qualifies as
+    the repository root. A candidate is accepted if it contains a `plugins`
+    directory and either a `.git` entry, or both a `.agents` directory and
+    `plugins/plugin-factory/skills`.
+
+    Returns:
+    	Path: Resolved path to the discovered repository root.
+
+    Raises:
+        RuntimeError: When repository root discovery fails.
+    """
     def _looks_like_repo_root(candidate: Path) -> bool:
         if not (candidate / "plugins").is_dir():
             return False
@@ -29,7 +43,10 @@ def _discover_repo_root() -> Path:
     for ancestor in Path(__file__).resolve().parents:
         if _looks_like_repo_root(ancestor):
             return ancestor
-    return Path.cwd().resolve()
+    raise RuntimeError(
+        "Unable to discover repository root from script location. "
+        "Run from the canonical repository or pass explicit --path and --marketplace-path."
+    )
 
 
 REPO_ROOT = _discover_repo_root()
@@ -54,7 +71,14 @@ DEFAULT_POLICY_PRODUCTS = ["CODEX"]
 
 
 def normalize_plugin_name(plugin_name: str) -> str:
-    """Normalize a plugin name to lowercase hyphen-case."""
+    """
+    Convert a plugin name into kebab-case suitable for identifiers and filenames.
+    
+    Converts the input to lowercase, replaces runs of non-alphanumeric characters with a single hyphen, collapses repeated hyphens, and removes leading or trailing hyphens.
+    
+    Returns:
+        str: Kebab-case string containing only lowercase ASCII letters, digits and single hyphens; leading and trailing hyphens are removed.
+    """
     normalized = plugin_name.strip().lower()
     normalized = re.sub(r"[^a-z0-9]+", "-", normalized)
     normalized = normalized.strip("-")
@@ -463,6 +487,14 @@ def validate_lifecycle_scaffold_args(args: argparse.Namespace) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments for creating a plugin scaffold.
+    
+    Recognises options to control created surfaces, marketplace update behaviour, policy and governance metadata. Defaults for `--path` and `--marketplace-path` are resolved from the script location's discovered repository root.
+    
+    Returns:
+    	argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Create a plugin skeleton with either a placeholder plugin.json "

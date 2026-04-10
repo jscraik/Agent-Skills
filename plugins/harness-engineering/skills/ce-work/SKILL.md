@@ -105,6 +105,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 - redact or avoid exposing secrets, tokens, credentials, private keys, personal data, and other sensitive values in logs, screenshots, summaries, prompts, and handoff notes
 - use focused user questions only when one blocker materially changes scope, architecture, or shipping risk
 - use MCP tools selectively per `references/mcp-integration.md`; do not replace repo-grounded evidence by default
+- default behavior work to `test-first` (TDD) tracer bullets; use `characterization-first` or other posture only when the governing artifact explicitly calls for it or the user approves the exception
 
 ## Acceptance criteria
 - the execution lane is chosen before coding starts
@@ -147,6 +148,8 @@ Before coding:
   - what is not in scope
   - what must be validated before completion
   - what would require a contract update before continuing
+- align approval state before implementation:
+  - follow `../shared/references/approval-flow.md`
 
 Then choose the working setup:
 - if already on a feature branch, confirm whether to continue there or create a fresh branch/worktree
@@ -175,7 +178,7 @@ For full execution-mode rules, delegate safeguards, and branch/worktree guidance
 For each implementation unit per `references/execution-workflow.md`:
 - mark task `in_progress`
 - honor execution posture:
-  - `test-first` (TDD): vertical tracer bullets per [[ce-tdd]]; update the tracker issue per tracer bullet
+  - `test-first` (TDD): vertical tracer bullets per [[ce-tdd]]; tracker update cadence follows the governing artifact (the plan/spec/checklist/todo contract established during Phase 1 planning; default per implementation unit/phase, per-tracer only when explicitly required)
   - `characterization-first`: capture current behavior
   - no special posture: validate continuously
 - implement minimal slice

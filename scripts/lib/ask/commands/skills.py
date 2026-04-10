@@ -119,6 +119,21 @@ STARTER_ARCHETYPES = {
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
+
+_SKILL_INSTALLER_SCRIPT_CANDIDATES = (
+    "plugins/skill-factory/skills/skill-installer/scripts/install-skill-from-github.py",
+    "skills-system/skill-installer/scripts/install-skill-from-github.py",
+)
+
+
+def _resolve_skill_installer_script(repo_root: Path) -> str:
+    for rel in _SKILL_INSTALLER_SCRIPT_CANDIDATES:
+        candidate = repo_root / rel
+        if candidate.is_file():
+            return rel
+    # Keep canonical path in the error payload for predictable operator guidance.
+    return _SKILL_INSTALLER_SCRIPT_CANDIDATES[0]
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     """
@@ -154,13 +169,13 @@ def _canonical_entries(
     visibility: str = "default",
 ) -> list:
     """
-    Return skill entries whose source directory is inside the repository root.
+    Filter discovered skill entries to those whose source directory is inside the repository root.
     
     Parameters:
-    	repo_root (Path): Repository root used to filter discovered skill entries.
+    	repo_root (Path): Repository root used to determine whether an entry's `source_dir` is inside the repository.
     
     Returns:
-    	entries (list): List of discovered skill entries whose `source_dir` is relative to `repo_root`.
+    	entries (list): Discovered skill entries whose `source_dir` is relative to `repo_root`.
     """
     return [
         entry
@@ -202,7 +217,18 @@ def _starter_entries(entries: list, archetype: str, limit: int) -> list:
 
 
 def _is_hidden_coderabbit_lane(entry) -> bool:
-    """Defensive guard so default lists stay router-first even with leaked entries."""
+    """
+    Determine whether a discovered skill entry should be treated as a hidden CodeRabbit "lane" skill.
+    
+    Checks that the entry's name is listed in CODERABBIT_HIDDEN_LANE_SKILLS and that the entry has a Path-like
+    `source_dir` whose path components include "plugins", "coderabbit" and "skills".
+    
+    Parameters:
+        entry: An object representing a discovered skill entry; expected to expose `name` and `source_dir` attributes.
+    
+    Returns:
+        `true` if the entry matches the hidden CodeRabbit lane criteria, `false` otherwise.
+    """
     if entry.name not in CODERABBIT_HIDDEN_LANE_SKILLS:
         return False
     source_dir = getattr(entry, "source_dir", None)
@@ -222,20 +248,21 @@ def list_skills(
     advanced: bool = False,
 ) -> CallResult:
     """
-    Return a listing of skills in the repository, optionally filtered or reduced to a deterministic "starter" subset.
+    List skills in the repository, optionally filtering by category or returning a deterministic starter subset.
     
     Parameters:
-    	repo_root (Path): Root path of the repository to discover skills from; entries outside this root are excluded.
-    	category (Optional[str]): Case-insensitive substring filter applied to each skill's category; omit to include all.
-        starter (bool): When true, return a deterministic, archetype-ordered subset of skills instead of the full set.
-        archetype (str): Archetype key to select starter skills from; falls back to "general" when unknown.
-        limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-        advanced (bool): When true, include lane skills that are hidden in default listings.
+    	repo_root (Path): Repository root to discover skills from; entries outside this root are excluded.
+    	category (Optional[str]): Case-insensitive substring to filter skills by their category; omit to include all.
+    	starter (bool): If true, return a deterministic subset of skills ordered by `archetype` rather than the full set.
+    	archetype (str): Archetype key used to choose starter skills; unknown keys fall back to `"general"`.
+    	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
+    	advanced (bool): If false, omit certain internal "coderabbit lane" skills from the default listing; if true, include them.
     
     Returns:
     	CallResult: Result with `status == "success"` and `data` containing:
-    		- "skills": list of objects with keys `name`, `path` (repository-relative when possible), `category`, `description`
+    		- "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, `description`
     		- "policy_identity": current policy identity string
+    		- "advanced_mode": boolean reflecting the `advanced` parameter
     		- When `starter` is true, also includes:
     			- "starter_mode": true
     			- "starter_archetype": resolved archetype key
@@ -299,7 +326,19 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
     return result
 
 def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> CallResult:
-    """Runs structural and security audits on a skill."""
+    """
+    Run structural and (optionally) strict security audits for a skill directory.
+    
+    Performs path containment validation for `skill_path`, runs structural diagnostics, and when `level` is `"strict"` runs additional validation gates (security gate, family benchmark validation and OpenClaw guard). Populates `result.data` with subprocess outputs under keys `"diagnostics"`, `"security_gate"`, `"family_benchmarks"` and `"openclaw_guard"` as applicable, and appends `ErrorObject`s to `result.errors` when validations fail.
+    
+    Parameters:
+        repo_root (Path): Repository root against which `skill_path` is resolved.
+        skill_path (str): Repository-relative path to the skill directory to audit.
+        level (str): Validation level; `"compat"` runs structural diagnostics only, `"strict"` also runs security and benchmark guards.
+    
+    Returns:
+        CallResult: Result with `status` set to `"success"` when diagnostics pass (and all strict checks pass if requested), or `"error"` with `errors` containing one or more `ErrorObject`s. Possible error codes include `ERR_PATH_TRAVERSAL` and `ERR_VALIDATION`.
+    """
     result = CallResult()
 
     # Path traversal protection: resolve and verify path is within repo
@@ -398,11 +437,19 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
 def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, str]:
     """
-    Resolve a skills-install destination to a repo-canonical category path.
-
+    Resolve an install destination into an absolute repo path and a canonical repo-relative string.
+    
+    Parameters:
+        repo_root (Path): Repository root directory against which `dest` is resolved.
+        dest (str): User-supplied destination token (e.g. "github" or "backend"); empty values default to "github".
+    
     Returns:
-        tuple[Path, str]: Absolute destination path and normalized repo-relative
-        destination string.
+        tuple[Path, str]: A pair where the first element is the absolute resolved destination path inside `repo_root`
+        and the second is the normalized repo-relative destination string.
+    
+    Raises:
+        ValueError: If `dest` is an absolute path, if the resolved destination escapes the repository root,
+        or if the repo-relative destination is empty or "." (must include a category directory).
     """
     dest_token = (dest or "github").strip() or "github"
     raw_dest = Path(dest_token)
@@ -417,13 +464,32 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
         raise ValueError("Destination escapes repository root.") from exc
 
     rel_text = str(rel_dest)
-    if rel_text in ("", "."):
-        raise ValueError("Destination must include a category directory under repository root.")
+    if len(rel_dest.parts) != 1:
+        raise ValueError("Destination must be a top-level category directory under repository root.")
     return resolved_dest, rel_text
 
 
 def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "github", dry_run: bool = False) -> CallResult:
-    """Installs a skill from GitHub into the repo-canonical source tree."""
+    """
+    Install a GitHub-hosted skill into the repository's canonical skill directory.
+    
+    Dest is validated and normalised to a repo-relative category (for example "github" or "backend"). In dry-run mode no changes are made and a preview of the planned install is returned. If the installer supports `--validation-level` the command will request `compat` validation; if `--remediate` is requested but unsupported the call returns an error result. After a successful install the workspace projection is synchronised.
+    
+    Parameters:
+        repo_root (Path): Root path of the repository used to resolve and validate the install destination.
+        url (str): URL or repository path of the skill to install (may end with `.git`).
+        remediate (bool): Request installer remediation; fails with `ERR_VALIDATION` if the installer does not support `--remediate`.
+        dest (str): Repo-relative category directory for installation (must not be absolute or escape the repo).
+        dry_run (bool): If true, return a preview without performing any filesystem or network changes.
+    
+    Returns:
+        CallResult: Result object with `status` set to `"success"` or `"error"`. On success `data` includes at least:
+            - `skill_name`: installed skill name,
+            - `canonical_dest`: repo-relative destination used,
+            - `workspace_sync`: status and logs from the post-install sync.
+        On dry-run success `data` includes a preview (`dry_run`, `skill_name`, `target_path`, `url`, `remediate`, `canonical_dest`) and `metadata.next_steps` showing the equivalent install command.
+        On error the result contains `errors` with codes such as `ERR_VALIDATION`, `ERR_CONFLICT`, or `ERR_RUNTIME` and a `fix_suggestion`.
+    """
     result = CallResult()
     try:
         dest_path, dest_rel = _resolve_canonical_install_dest(repo_root, dest)
@@ -481,9 +547,10 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         return result
 
     python_cmd = _get_python_command(["pyyaml"])
+    installer_script = _resolve_skill_installer_script(repo_root)
     supported_flags = _install_script_supported_flags(repo_root, python_cmd)
     cmd = python_cmd + [
-        "skills-system/skill-installer/scripts/install-skill-from-github.py",
+        installer_script,
         "--url", url,
         "--dest", str(dest_path),
     ]
@@ -548,9 +615,19 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
 
 
 def _install_script_supported_flags(repo_root: Path, python_cmd: List[str]) -> set[str]:
-    """Return supported optional flags from the active installer script."""
+    """
+    Identify which optional flags the installer script advertises in its help text.
+    
+    Parameters:
+        repo_root (Path): Repository root used as the subprocess working directory.
+        python_cmd (List[str]): Tokenised Python command to invoke the script (e.g. ["python3"] or a wrapper tool chain).
+    
+    Returns:
+        supported (set[str]): Set containing any of `"--validation-level"` and `"--remediate"` that appear in the script's help output.
+    """
+    installer_script = _resolve_skill_installer_script(repo_root)
     help_cmd = python_cmd + [
-        "skills-system/skill-installer/scripts/install-skill-from-github.py",
+        installer_script,
         "--help",
     ]
     try:
@@ -567,7 +644,25 @@ def _install_script_supported_flags(repo_root: Path, python_cmd: List[str]) -> s
 
 
 def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 0.2) -> CallResult:
-    """Calculates functional similarity and suggests folding source into target."""
+    """
+    Determine whether the source skill should be folded into the target skill based on description similarity.
+    
+    Parameters:
+        repo_root (Path): Repository root used to load builder modules and the skill catalog.
+        source (str): Name or trailing path segment identifying the source skill to evaluate.
+        target (str): Name or trailing path segment identifying the target skill to compare against.
+        sensitivity (float): Confidence threshold in the range 0–1 above which overlap is considered high (default 0.2).
+    
+    Returns:
+        CallResult: Result object containing:
+            - On success: `status == "success"`, `data["overlap_score"]` (float), and `data["recommendation"]`
+              set to either a "KEEP" message or a "KEEP: No significant overlap found." message.
+            - On redundancy detection: `status == "error"`, an `ERR_REDUNDANCY` error with a `fix_suggestion`,
+              and `data["overlap_score"]`, `data["rationale"]`, and `data["recommendation"]` describing the overlap.
+            - On missing dependencies: `status == "error"` with `ERR_DEPENDENCY`.
+            - On missing skills: `status == "error"` with `ERR_VALIDATION`.
+            - `data["rationale"]`, when present, contains the router's textual rationale for the match.
+    """
     result = CallResult()
     
     builder_catalog = _load_builder_module(repo_root, "skill_catalog")
@@ -630,21 +725,23 @@ def route_skills(
     considered_limit: int = 20,
 ) -> CallResult:
     """
-    Route a textual request to ranked skill candidates and build a decision payload.
+    Route a textual request to candidate skills and produce a decision payload.
+    
+    Builds a set of eligible skills from the repository, ranks the best matches for the trimmed request using the skill router, evaluates catalog parity, and returns a CallResult containing the routing decision and related metadata.
     
     Parameters:
         repo_root (Path): Repository root used to discover canonical skill entries.
         request (str): Textual request to route; must be non-empty after trimming.
-        top_k (int): Number of top-ranked skills to return (bounded to at least 1).
-        considered_limit (int): Maximum number of candidate skills to consider when routing (bounded to at least 1).
+        top_k (int): Maximum number of top-ranked skills to return; values less than 1 are coerced to 1.
+        considered_limit (int): Maximum number of candidate skills to consider when routing; values less than 1 are coerced to 1.
     
     Returns:
-        CallResult: Result object whose `data` contains:
-            - `decision`: the decision payload produced by the routing logic.
+        CallResult: Result object whose `data` includes:
+            - `decision`: decision payload produced by the routing logic.
             - `catalog_parity`: parity information comparing catalog and routing considerations.
             - `policy_identity`: policy identity used for the decision.
             - `decision_status`: the decision's status string.
-        On error, `status` will be "error" and `errors` will include one or more `ErrorObject` entries describing validation, dependency or runtime issues.
+        On error the CallResult will have `status == "error"` and `errors` will include one or more ErrorObject entries describing validation, dependency or runtime issues.
     """
     result = CallResult()
     query = request.strip()

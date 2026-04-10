@@ -31,12 +31,12 @@ rollback_procedure: >
   If an install produces an unusable or malicious skill, use the rollback journal artifact to
   identify the staged install entry and delete the promoted skill directory from the canonical repository category root.
   Re-run with the previous pinned ref or a known-good commit SHA. For regressions in skill-installer
-  itself, restore skills-system/skill-installer/SKILL.md from git, re-run the family gate, and
+  itself, restore plugins/skill-factory/skills/skill-installer/SKILL.md from git, re-run the family gate, and
   verify the provenance manifest and quarantine paths are intact before re-deploying.
   Do not skip the quarantine-to-promote step during recovery.
 observability: >
   Monitor skill-installer via: (1) provenance manifest presence and ref-resolved-commit fields
   after each install run — missing entries indicate journal drift; (2) quarantine-to-promote
   success rate; installs that stall in quarantine signal validation failures requiring investigation;
-  (3) family gate CI pass/fail for skills-system/skill-installer; (4) supply chain alerts from
+  (3) family gate CI pass/fail for plugins/skill-factory/skills/skill-installer; (4) supply chain alerts from
   openclaw_skill_guard.py --mode security run against newly installed skills.

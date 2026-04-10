@@ -17,6 +17,19 @@ PLUGIN_CREATOR_SKILL = REPO_ROOT / "plugins" / "plugin-factory" / "skills" / "pl
 
 
 def _load_module(module_name: str, script_path: Path):
+    """
+    Load a Python module from a given file path under a specific module name.
+    
+    Parameters:
+        module_name (str): The name to assign to the loaded module.
+        script_path (Path): Filesystem path to the Python source file to import.
+    
+    Returns:
+        module: The loaded module object.
+    
+    Raises:
+        RuntimeError: If an import spec or loader cannot be created for the given script_path.
+    """
     spec = importlib.util.spec_from_file_location(module_name, script_path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Unable to load module from {script_path}")
@@ -27,6 +40,14 @@ def _load_module(module_name: str, script_path: Path):
 
 @contextmanager
 def _chdir(path: Path):
+    """
+    Context manager that temporarily changes the process working directory to the given path.
+    
+    On exit — including when an exception is raised inside the context — the original working directory is restored.
+    
+    Parameters:
+        path (Path): Directory to switch to for the duration of the context.
+    """
     original_cwd = Path.cwd()
     os.chdir(path)
     try:
@@ -39,6 +60,16 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
     def _assert_defaults_anchor_to_repo_root(
         self, *, script_path: Path, module_name: str, temp_prefix: str
     ) -> None:
+        """
+        Assert that a plugin script's path constants remain anchored to the repository root rather than the current working directory.
+        
+        Verifies that the loaded module's `REPO_ROOT`, `DEFAULT_PLUGIN_PARENT` and `DEFAULT_MARKETPLACE_PATH` resolve to the repository-level locations and that `DEFAULT_PLUGIN_PARENT` is not derived from a temporary CWD created for the test.
+        
+        Parameters:
+        	script_path (Path): Filesystem path to the plugin script to import.
+        	module_name (str): Module name to use when loading the script.
+        	temp_prefix (str): Prefix for the temporary directory created for the test.
+        """
         with tempfile.TemporaryDirectory(prefix=temp_prefix) as temp_dir:
             temp_path = Path(temp_dir)
             with _chdir(temp_path):
@@ -59,6 +90,11 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
         )
 
     def test_plugin_builder_defaults_anchor_to_repo_root(self) -> None:
+        """
+        Verify the plugin builder's default path constants are anchored to the repository root.
+        
+        Loads the plugin builder script from its file path while the process CWD is a temporary directory and asserts that the module's `REPO_ROOT`, `DEFAULT_PLUGIN_PARENT` and `DEFAULT_MARKETPLACE_PATH` resolve to repository-local paths (not to paths under the temporary CWD).
+        """
         self._assert_defaults_anchor_to_repo_root(
             script_path=PLUGIN_BUILDER_SCRIPT,
             module_name="plugin_builder_defaults_test",
@@ -67,7 +103,10 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
 
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
         skill_doc = PLUGIN_CREATOR_SKILL.read_text(encoding="utf-8")
-        self.assertIn("skills-system/plugin-creator/scripts/create_basic_plugin.py", skill_doc)
+        self.assertIn(
+            "plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py",
+            skill_doc,
+        )
         self.assertNotIn(
             ".agents/skills/plugin-creator/scripts/create_basic_plugin.py",
             skill_doc,

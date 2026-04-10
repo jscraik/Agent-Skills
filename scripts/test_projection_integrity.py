@@ -14,6 +14,14 @@ SCRIPT = Path(__file__).resolve().parent / "projection_integrity.py"
 
 
 def _load_module():
+    """
+    Load and return the projection_integrity module from the SCRIPT path.
+    
+    Raises a RuntimeError if the module spec or loader cannot be obtained.
+    
+    Returns:
+        module: The imported projection_integrity module object.
+    """
     spec = importlib.util.spec_from_file_location("projection_integrity", SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError("unable to load projection_integrity module")
@@ -26,6 +34,11 @@ def _load_module():
 class ProjectionIntegrityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        """
+        Set up a class-level fixture by loading the target projection_integrity module and assigning it to `cls.mod`.
+        
+        This loads the module once for the test class so individual tests reuse the same module instance.
+        """
         cls.mod = _load_module()
 
     def test_markdown_frontmatter_header_round_trip(self) -> None:
@@ -36,6 +49,11 @@ class ProjectionIntegrityTests(unittest.TestCase):
         self.assertEqual(stripped, source)
 
     def test_shell_shebang_header_round_trip(self) -> None:
+        """
+        Verify that applying then removing a projection header preserves a shell script starting with a shebang.
+        
+        This test ensures a shell script with an initial shebang line is stamped with a projection header by apply_projection_header and that strip_projection_header detects and removes that header, returning the original script content and indicating a header was present.
+        """
         source = "#!/usr/bin/env bash\necho hi\n"
         stamped = self.mod.apply_projection_header(source, "plugins/demo/script.sh", ".sh")
         stripped, had_header = self.mod.strip_projection_header(stamped, ".sh")
@@ -43,6 +61,11 @@ class ProjectionIntegrityTests(unittest.TestCase):
         self.assertEqual(stripped, source)
 
     def test_verify_mirror_requires_generated_headers(self) -> None:
+        """
+        Verifies that verify_mirror reports drift when projection files exist but lack projection headers.
+        
+        Creates a source and a projection README.md with identical content, constructs a MirrorProjection pointing at those paths, and calls verify_mirror. Asserts the result reports status "drift", includes "README.md" in `unstamped_files`, and indicates `manifest_mismatch` is False.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             source = repo_root / "plugins" / "demo"
@@ -64,6 +87,11 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertFalse(result["manifest_mismatch"])
 
     def test_sync_mirror_removes_stale_files_and_stamps_headers(self) -> None:
+        """
+        Ensure syncing a mirror removes stale files, copies source files into the projection with the required projection header, and results in a subsequent verification pass.
+        
+        This test creates a source tree with a README.md and shell script, places a stale file in the projection, runs sync_mirror(...) and asserts the stale file is deleted and the projected README contains HEADER_TOKEN, then verifies that verify_mirror(...) reports "pass".
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             source = repo_root / "plugins" / "demo"
@@ -107,6 +135,11 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertEqual(result["reason"], "canonical_missing")
 
     def test_ensure_symlink_refuses_directory_replacement(self) -> None:
+        """
+        Verifies that ensure_symlink does not replace an existing directory alias and requests manual migration.
+        
+        Sets up a canonical directory and an alias path that is already a directory containing a file, then calls ensure_symlink and asserts the result has status "error" with reason "alias_requires_manual_migration", and that the alias directory and its contents are unchanged.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             canonical = repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder"

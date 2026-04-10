@@ -424,11 +424,22 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("- coderabbit", result.stderr)
 
     def test_selection_policy_identity_matches_discovery_identity(self) -> None:
+        """
+        Assert selection policy identity matches skill discovery identity.
+        
+        Verifies that `selection_policy.policy_identity()` and `skill_discovery.get_policy_identity()`
+        produce the same value, ensuring both modules expose a consistent policy identity used for selection.
+        """
         selection_policy = load_selection_policy_module()
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
     def test_skill_discovery_visibility_hides_plugin_lanes_by_default(self) -> None:
+        """
+        Verify that plugin-owned lane skills are hidden by default but included in advanced visibility.
+        
+        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` returns only the router skill (`coderabbit`) while `visibility="advanced"` returns all four skills.
+        """
         skill_discovery = load_skill_discovery_module()
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir).resolve()
@@ -475,6 +486,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
 
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_hides_them(self) -> None:
+        """
+        Ensure advanced discovery merges plugin lane skills when flat projection hides them.
+        
+        Sets up a repository where the runtime (flat) projection exposes only a router skill (`coderabbit`)
+        while the plugin canonical source contains lane skills (`autofix`, `code-review`, `simplify`).
+        Asserts that discovery with `visibility="default"` returns only the router skill and that
+        `visibility="advanced"` returns the merged set including the plugin lane skills.
+        """
         skill_discovery = load_skill_discovery_module()
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir).resolve()
@@ -525,6 +544,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
 
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
+        """
+        Ensure the sync script references the selection policy and its exported constants required for skill syncing.
+        
+        Asserts that scripts/sync_skills.sh contains `selection_policy.py` and the exports:
+        `SELECTION_POLICY_REPO_SCAN_ROOTS`, `SELECTION_POLICY_EXCLUDED_SEGMENTS`,
+        `SELECTION_POLICY_HIDDEN_FLAT_SKILLS`, `SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS`,
+        and `SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS`.
+        """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("selection_policy.py", content)
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)

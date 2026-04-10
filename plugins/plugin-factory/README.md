@@ -71,6 +71,12 @@ Verify projection integrity:
 bash scripts/validate_projection_integrity.sh
 ```
 
+Run the required authoring-family gate:
+
+```sh
+bash scripts/validate_skill_authoring_family.sh
+```
+
 Validate the package:
 
 ```sh

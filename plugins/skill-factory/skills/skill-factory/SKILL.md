@@ -76,7 +76,7 @@ schema_version: 1
 execution_mode: "direct|clarify-once"
 selected_lane: "create|improve|install|skillify"
 reason: "<why this lane was selected>"
-next_skill: "[[skill-creator|skill-builder|skill-installer|skillify]]"
+next_skill: "[[skill-creator]]"
 handoff_order:
   - "<lane-1>"
   - "<lane-2>"
@@ -92,6 +92,7 @@ confidence: "high|medium|low"
 - Confirm the selected lane matches the user's primary intent and constraints.
 - Confirm all required inputs for that lane are either present or explicitly listed as missing.
 - Confirm `next_skill` is one of: `[[skill-creator]]`, `[[skill-builder]]`, `[[skill-installer]]`, `[[skillify]]`.
+- For skill-authoring family changes (`skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator`), require CI `authoring-family-gate` and script `bash scripts/validate_skill_authoring_family.sh`.
 - Do not run lane-specific scripts from this router.
 - Fail fast: stop at the first failed gate, fix or report the blocker, and do not continue with downstream execution.
 

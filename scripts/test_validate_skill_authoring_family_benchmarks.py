@@ -30,6 +30,11 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         self.module = load_validator_module()
 
     def test_canonical_skill_rel_resolves_symlink_alias(self) -> None:
+        """
+        Verify that _canonical_skill_rel resolves a symlinked skill alias to the canonical repository-relative skill path.
+        
+        Creates a temporary repository layout with a real skill at plugins/skill-factory/skills/skill-builder and a symlink alias at utilities/skill-builder, patches REPO_ROOT to the temp root, and asserts the canonicalised result equals plugins/skill-factory/skills/skill-builder.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skill-builder"
@@ -44,6 +49,14 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             self.assertEqual(canonical, "plugins/skill-factory/skills/skill-builder")
 
     def test_dedupe_requested_skills_uses_canonical_target(self) -> None:
+        """
+        Verifies deduplication prefers a symlink alias path over its canonical target.
+        
+        Creates a temporary repository where `utilities/skill-builder` is a symlink to
+        `plugins/skill-factory/skills/skill-builder` and asserts that passing both the
+        alias and the canonical path to `_dedupe_requested_skills` yields only the
+        alias entry, protecting against duplicate validations of the same skill.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skill-builder"
@@ -60,6 +73,11 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             self.assertEqual(deduped, ("utilities/skill-builder",))
 
     def test_validate_skill_accepts_canonical_scope_for_alias_invocation(self) -> None:
+        """
+        Ensure the validator accepts a task-profile that names the canonical skill path when the skill is invoked via a symlink alias.
+        
+        Creates a canonical skill directory containing SKILL.md and a references/task-profile.json whose `scope_skill` is the canonical path and `scope_profile` is "utilities", then places a symlink alias at `utilities/skill-builder` pointing to the canonical directory. Patches repository root and internal validators to isolate scope-check behaviour, invokes `_validate_skill` on the alias, and asserts there are no findings with code `TASK_PROFILE_SCOPE`.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             plugin_skill_rel = "plugins/skill-factory/skills/skill-builder"
@@ -101,6 +119,11 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             self.assertEqual(scope_failures, [])
 
     def test_canonical_skill_rel_resolves_skillify_symlink_alias(self) -> None:
+        """
+        Verifies that a 'skillify' symlink under utilities is resolved to the canonical plugins/skill-factory/skills/skillify path.
+        
+        Creates a temporary repository layout where utilities/skillify is a symlink to plugins/skill-factory/skills/skillify, patches the module's REPO_ROOT to that repository, and asserts that _canonical_skill_rel("utilities/skillify") returns "plugins/skill-factory/skills/skillify".
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skillify"
@@ -115,6 +138,11 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             self.assertEqual(canonical, "plugins/skill-factory/skills/skillify")
 
     def test_dedupe_requested_skills_uses_skillify_canonical_target(self) -> None:
+        """
+        Verifies deduplication prefers the aliased invocation when the canonical target is the `skillify` skill.
+        
+        Creates a temporary repository where `utilities/skillify` is a symlink to `plugins/skill-factory/skills/skillify`, calls `_dedupe_requested_skills` with both paths, and asserts only the alias (`utilities/skillify`) is retained.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skillify"

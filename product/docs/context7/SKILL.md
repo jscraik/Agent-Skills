@@ -29,11 +29,13 @@ Retrieve current external library documentation via Context7 so implementation g
 - Docs lookup outputs:
 1. Resolved Context7 library id.
 2. Focused docs-backed answer tied to the user question.
-3. Explicit assumptions or ambiguity notes when needed.
+3. Source basis (documentation source or retrieval context).
+4. Explicit assumptions or ambiguity notes when needed.
 - Skill wizard outputs:
 1. Exact `ctx7 skills` command(s).
 2. Selected target flags and scope (`project` vs `global`).
-3. Post-install verification commands and restart reminder when applicable.
+3. Source basis (command documentation or CLI reference).
+4. Post-install verification commands and restart reminder when applicable.
 
 ## Workflow
 

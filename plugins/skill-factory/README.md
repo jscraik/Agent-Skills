@@ -88,3 +88,9 @@ Projection sync + parity gate:
 bash scripts/sync_projection_trees.sh skill-factory
 PROJECTION_INTEGRITY_SCOPE=skill-factory bash scripts/validate_projection_integrity.sh
 ```
+
+Authoring-family governance gate (required for skill-authoring family changes):
+
+```sh
+bash scripts/validate_skill_authoring_family.sh
+```

@@ -39,7 +39,7 @@ description: Create and scaffold plugin directories for Codex with a required `.
   # The generated folder and plugin.json name are always the same.
 # Run from repo root.
 # By default creates in <repo_root>/plugins/<plugin-name>.
-python3 skills-system/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
 ```
 
 2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace the sample values with your real plugin metadata.
@@ -48,13 +48,13 @@ python3 skills-system/plugin-creator/scripts/create_basic_plugin.py <plugin-name
 
 ```bash
 # marketplace.json always lives at <repo-root>/.agents/plugins/marketplace.json
-python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
 ```
 
 For a home-local plugin, treat `<home>` as the root and use:
 
 ```bash
-python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin \
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin \
   --path ~/plugins \
   --marketplace-path ~/.agents/plugins/marketplace.json \
   --with-marketplace
@@ -63,7 +63,7 @@ python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin \
 4. Generate/adjust optional companion folders as needed:
 
 ```bash
-python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
   --with-skills --with-hooks --with-scripts --with-assets --with-mcp --with-apps --with-marketplace
 ```
 
@@ -181,7 +181,7 @@ For the exact canonical sample JSON for both plugin manifests and marketplace en
 After editing `SKILL.md`, run:
 
 ```bash
-python3 skills-system/skill-creator/scripts/quick_validate.py skills-system/plugin-creator
+python3 utilities/skill-builder/scripts/quick_validate.py plugins/plugin-factory/skills/plugin-creator
 ```
 
 Fail-fast rule:

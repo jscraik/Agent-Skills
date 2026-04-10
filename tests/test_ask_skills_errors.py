@@ -64,9 +64,8 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIsNotNone(error.fix_suggestion)
         self.assertIn("data.family_benchmarks", error.fix_suggestion)
 
-    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
-    def test_install_skill_skips_validation_flag_when_unsupported(self, mock_run, _python_cmd):
+    def test_install_skill_skips_validation_flag_when_unsupported(self, mock_run):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             (repo_root / "github").mkdir(parents=True, exist_ok=True)
@@ -80,20 +79,25 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = install_skill(
-                repo_root=repo_root,
-                url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
-                dest="github",
-            )
+            with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
+                result = install_skill(
+                    repo_root=repo_root,
+                    url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
+                    dest="github",
+                )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data.get("validation_level"), "compat_skipped_unsupported")
         install_cmd = mock_run.call_args_list[1].args[0]
         self.assertNotIn("--validation-level", install_cmd)
 
-    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
-    def test_install_skill_uses_validation_flag_when_supported(self, mock_run, _python_cmd):
+    def test_install_skill_uses_validation_flag_when_supported(self, mock_run):
+        """
+        Verifies that when the installer advertises `--validation-level` in its usage output, install_skill enables and passes that flag.
+        
+        Mocks subprocess output so the first call returns usage text containing `--validation-level` and the second simulates a successful install. Asserts the result is successful, `result.data["validation_level"] == "compat"`, and the actual install command includes `--validation-level`.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             (repo_root / "github").mkdir(parents=True, exist_ok=True)
@@ -107,20 +111,25 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            result = install_skill(
-                repo_root=repo_root,
-                url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
-                dest="github",
-            )
+            with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
+                result = install_skill(
+                    repo_root=repo_root,
+                    url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
+                    dest="github",
+                )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data.get("validation_level"), "compat")
         install_cmd = mock_run.call_args_list[1].args[0]
         self.assertIn("--validation-level", install_cmd)
 
-    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
-    def test_install_skill_remediate_requires_flag_support(self, mock_run, _python_cmd):
+    def test_install_skill_remediate_requires_flag_support(self, mock_run):
+        """
+        Verifies that install_skill errors when remediation is requested but the installer does not support `--remediate`.
+        
+        Sets up a temporary repo with a `github` dest and mocks the installer usage output to omit `--remediate`. Calls install_skill(..., remediate=True) and asserts that the result has status "error", contains an `ERR_VALIDATION` error whose message mentions "does not support --remediate", and that the installer was probed exactly once (no install attempt).
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             (repo_root / "github").mkdir(parents=True, exist_ok=True)
@@ -128,12 +137,13 @@ class TestAskSkillsErrors(unittest.TestCase):
                 subprocess.CompletedProcess(args=[], returncode=0, stdout="usage: installer [--url URL --dest DEST]", stderr=""),
             ]
 
-            result = install_skill(
-                repo_root=repo_root,
-                url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
-                dest="github",
-                remediate=True,
-            )
+            with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
+                result = install_skill(
+                    repo_root=repo_root,
+                    url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
+                    dest="github",
+                    remediate=True,
+                )
 
         self.assertEqual(result.status, "error")
         self.assertTrue(result.errors)

@@ -105,7 +105,6 @@ FUZZY_MATCHES = {
     "ls": "list",
     "init": "init",
     "create": "init",
-    "import": "install",
     "harden": "harden",
     "fold": "fold",
     "merge": "fold",
@@ -1499,6 +1498,17 @@ def main():
             elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden"):
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
+                # Display command_runs for harden_plugin() failures
+                if "command_runs" in result.data:
+                    print("\n🔧 Command execution details:")
+                    for run in result.data["command_runs"]:
+                        print(f"\n  Step: {run.get('step')}")
+                        print(f"  Command: {run.get('command')}")
+                        print(f"  Return code: {run.get('returncode')}")
+                        if run.get('stdout'):
+                            print(f"  Stdout:\n{run.get('stdout')}")
+                        if run.get('stderr'):
+                            print(f"  Stderr:\n{run.get('stderr')}")
                 print("\n📚 Plugin examples:")
                 print("   ask plugins init my-plugin --with-marketplace")
                 print("   ask plugins install https://github.com/<owner>/<repo> --path plugins/<name>")

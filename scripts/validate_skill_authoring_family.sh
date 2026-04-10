@@ -48,12 +48,19 @@ else
 fi
 
 skill_dirs=(
-  "utilities/skill-builder"
-  "utilities/skillify"
-  "skills-system/skill-creator"
-  "skills-system/skill-installer"
-  "skills-system/plugin-creator"
+  "plugins/plugin-factory/skills/plugin-builder"
+  "plugins/skill-factory/skills/skill-builder"
+  "plugins/skill-factory/skills/skillify"
+  "plugins/skill-factory/skills/skill-creator"
+  "plugins/skill-factory/skills/skill-installer"
+  "plugins/plugin-factory/skills/plugin-installer"
+  "plugins/plugin-factory/skills/plugin-creator"
 )
+
+ce_work_skill="plugins/harness-engineering/skills/ce-work/SKILL.md"
+ce_tdd_skill="plugins/harness-engineering/skills/ce-tdd/SKILL.md"
+ce_shared_approval_doc="plugins/harness-engineering/skills/shared/references/approval-flow.md"
+ce_shared_approval_ref="../shared/references/approval-flow.md"
 
 # ---------------------------------------------------------------------------
 # Runner selection — override via SKILL_FAMILY_RUNNER (default: codex)
@@ -183,6 +190,31 @@ fi
 
 echo "[family-gate] using python: $python_cmd_display"
 
+echo "[family-gate] validating ce-work/ce-tdd approval-flow linkage"
+if [[ ! -f "$ce_shared_approval_doc" ]]; then
+  echo "[family-gate] ERROR: missing shared approval flow document: $ce_shared_approval_doc"
+  exit 1
+fi
+
+for skill_doc in "$ce_work_skill" "$ce_tdd_skill"; do
+  if [[ ! -f "$skill_doc" ]]; then
+    echo "[family-gate] ERROR: missing CE skill doc: $skill_doc"
+    exit 1
+  fi
+
+  if ! grep -Fq "$ce_shared_approval_ref" "$skill_doc"; then
+    echo "[family-gate] ERROR: $skill_doc must reference $ce_shared_approval_ref"
+    exit 1
+  fi
+
+  if grep -Fq "continue without re-asking" "$skill_doc" || \
+     grep -Fq "ask a focused blocker question only when ambiguity would change scope, interface, architecture, or shipping risk" "$skill_doc"; then
+    echo "[family-gate] ERROR: $skill_doc still contains inline approval-flow text; use shared reference"
+    exit 1
+  fi
+done
+echo "[family-gate] ce-work/ce-tdd approval-flow linkage passed"
+
 # ---------------------------------------------------------------------------
 # P1.2: shellcheck gate — lint all gate/validation shell scripts
 # ---------------------------------------------------------------------------
@@ -271,7 +303,7 @@ if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --with pytest ... , uv pip install pytest, or brew install python)"
+  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --python 3.12 --with pytest ... , uv pip install pytest, or brew install python)"
 fi
 
 # Track per-skill evidence for the release-ready index

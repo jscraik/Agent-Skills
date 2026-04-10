@@ -10,6 +10,7 @@ inputs:
   - name: mode
     type: enum
     values: [run, setup, review-only, autofix-safe, pre-merge-simplify]
+    default: run
     description: Mode selector. `run` is default and should route to the safest lane.
   - name: goal
     type: string

@@ -190,6 +190,7 @@ fi
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
+# is_hidden_flat_skill_name returns success (exit code 0) if the supplied skill name is listed in the hidden_flat_skills array, failure (exit code 1) otherwise.
 is_hidden_flat_skill_name() {
   local skill_name="$1"
   case " ${hidden_flat_skills[*]} " in
@@ -197,6 +198,7 @@ is_hidden_flat_skill_name() {
     *) return 1 ;;
   esac
 }
+# is_plugin_visible_router_skill_name checks whether the given skill name is present in the plugin_visible_router_skills array and returns success (0) if it is.
 is_plugin_visible_router_skill_name() {
   local skill_name="$1"
   case " ${plugin_visible_router_skills[*]} " in
@@ -204,6 +206,7 @@ is_plugin_visible_router_skill_name() {
     *) return 1 ;;
   esac
 }
+# is_plugin_hidden_lane_skill_name checks whether the given skill name is present in the plugin_hidden_lane_skills array and returns success (`0`) if present and failure (`1`) otherwise.
 is_plugin_hidden_lane_skill_name() {
   local skill_name="$1"
   case " ${plugin_hidden_lane_skills[*]} " in
@@ -463,7 +466,7 @@ while IFS= read -r existing_dir; do
   fi
 done < <(find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type d -print)
 
-# Regenerate root SKILL.md index dynamically from skill frontmatter.
+# generate_skill_index regenerates the repository root SKILL.md index from skills' YAML frontmatter, grouping skills by category and extracting short descriptions where available.
 generate_skill_index() {
   local index_file="$1"
   local temp_dir=""
@@ -742,6 +745,8 @@ HEADER
   done < <(cd "$temp_dir" && find . -mindepth 1 -maxdepth 1 -type f -print | sed 's|^\./||' | sort)
 }
 
+# generate_skill_type_index generates a skills-by-type markdown index from `metadata.skill-type` tags, grouping discovered skills into canonical semantic types, emitting counts, per-type lists and validation notes.
+# generate_skill_type_index takes a single argument: the path to the output index file.
 generate_skill_type_index() {
   local index_file="$1"
   local temp_dir=""

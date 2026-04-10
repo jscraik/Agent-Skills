@@ -26,6 +26,7 @@ output_contract:
   required_fields:
     - guidance
     - source_basis
+    - schema_version
   optional_fields:
     - library_id
     - assumptions

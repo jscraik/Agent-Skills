@@ -142,6 +142,11 @@ Guiding questions:
 
 ## Workflow
 
+When `[[ce-tdd]]` runs inside a `[[ce-work]]` execution lane:
+- scope and approval come from the governing plan/spec/todo contract already established in `ce-work`
+- this skill governs RED/GREEN tracer-bullet mechanics and evidence standards
+- ask new user questions only when uncertainty would change scope, interface, architecture, or shipping risk
+
 ### Phase 1: Planning (before any code)
 
 Before writing any code:
@@ -151,7 +156,8 @@ Before writing any code:
 - Design interfaces for testability (dependency injection, return results over side effects)
 - If the user explicitly requests delegation, select reviewer lanes from `references/sub-agent-map.md` before fan-out.
 - List the behaviors to test (not implementation steps)
-- Get user approval on the plan
+- Confirm approval state:
+  - follow `../shared/references/approval-flow.md`
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"
 
@@ -187,7 +193,7 @@ Rules:
 - Only enough code to pass current test
 - Don't anticipate future tests
 - Keep tests focused on observable behavior
-- Update Linear issue or tracker per tracer bullet when tracking is active
+- Update Linear issue or tracker at governing cadence (the governing artifact determines frequency; default per implementation unit/phase as defined in `../ce-work/references/execution-workflow.md`; per tracer bullet only when explicitly required)
 
 ### Phase 4: Refactor
 

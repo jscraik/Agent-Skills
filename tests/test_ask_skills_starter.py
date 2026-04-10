@@ -15,9 +15,9 @@ from ask.commands.skills import list_skills
 class TestAskSkillsStarter(unittest.TestCase):
     def test_starter_mode_returns_deterministic_subset(self) -> None:
         """
-        Verify that listing skills in starter mode yields a deterministic, limited subset.
+        Verify listing skills in starter mode returns a deterministic, limited subset.
         
-        Patches the canonical entries to a fixed set and calls list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3). Asserts the call succeeds, starter mode and archetype are reported, and the returned skill names are exactly ["ce-plan", "ce-work", "gh-workflow"] in that order.
+        Patches discovered canonical skill entries to a fixed set, calls list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3) and asserts the result reports starter mode with the specified archetype and that the returned skill names are exactly ["ce-plan", "ce-work", "gh-workflow"] in that order.
         """
         entries = [
             SimpleNamespace(name="ce-work", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "ce-work", category="plugins/harness-engineering/skills", description="ce-work"),
@@ -37,6 +37,11 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(names, ["ce-plan", "ce-work", "gh-workflow"])
 
     def test_default_list_hides_coderabbit_lane_skills(self) -> None:
+        """
+        Verify default skill listing hides 'lane' skills from coderabbit and does not enable advanced mode.
+        
+        Mocks canonical entries that include one router skill and several 'lane' skills under plugins/coderabbit/skills, calls list_skills with default options, and asserts the result contains only the router skill ("coderabbit") and that `advanced_mode` is falsy or absent.
+        """
         entries = [
             SimpleNamespace(
                 name="coderabbit",
