@@ -87,6 +87,7 @@ artifacts:
   - "<path to generated/updated artifact>"
 handoff:
   next_skill: "[[plugin-installer]]"
+  allowed_next_skills: ["[[plugin-installer]]", "[[plugin-creator]]", "[[skill-builder]]", "[[mcp-builder]]"]
   reason: "<why handoff is needed>"
 risk_note: "<residual risk>"
 ```

@@ -29,11 +29,7 @@ cases:
       - type: regex
         value: "(?i)(ctx7\\s+skills\\s+install\\s+/anthropics/skills)"
       - type: regex
-        value: "(?i)(--all)"
-      - type: regex
-        value: "(?i)(--cursor)"
-      - type: regex
-        value: "(?i)(--claude)"
+        value: "(?i)(--all|--cursor\\s+--claude|--claude\\s+--cursor)"
       - type: regex
         value: "(?i)(list|verify|restart)"
       - type: regex
@@ -124,12 +120,12 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Can you help me decide whether to use --all with ctx7 skills generate for project-only setup versus global setup?"
+    prompt: "Can you help me decide when to use --all for ctx7 skills generate and when to use --global for installation target scope?"
     acceptance:
       - type: regex
-        value: "(?i)(--all)"
+        value: "(?i)(--all.*(generate|project|repo|local))"
       - type: regex
-        value: "(?i)(project|global)"
+        value: "(?i)(--global.*(target|global|install))"
     realistic: true
 
   - id: negative-generic-refactor

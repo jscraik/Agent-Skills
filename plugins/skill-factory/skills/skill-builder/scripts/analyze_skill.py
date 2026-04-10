@@ -8,8 +8,8 @@ Usage:
     ~/.venvs/pyyaml/bin/python plugins/skill-factory/skills/skill-builder/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>
 
 Examples:
-    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py github/my-skill
-    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py github/my-skill/SKILL.md
+    ~/.venvs/pyyaml/bin/python plugins/skill-factory/skills/skill-builder/scripts/analyze_skill.py github/my-skill
+    ~/.venvs/pyyaml/bin/python plugins/skill-factory/skills/skill-builder/scripts/analyze_skill.py github/my-skill/SKILL.md
 
 Exit codes:
     0  score >= --min-pass
@@ -814,7 +814,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(
             "ERROR: PyYAML is required to run analyze_skill.py.\n\n"
             "Fix:\n"
-            "  ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>\n",
+            "  ~/.venvs/pyyaml/bin/python plugins/skill-factory/skills/skill-builder/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>\n",
             file=sys.stderr,
         )
         return 1
