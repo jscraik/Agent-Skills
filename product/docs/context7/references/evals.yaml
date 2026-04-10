@@ -11,7 +11,7 @@ cases:
     prompt: "Can you help me generate a custom OAuth best-practices skill with ctx7, and give me the exact command plus what happens next?"
     acceptance:
       - type: regex
-        value: "(?i)(ctx7\\s+skills\\s+generate)"
+        value: "(?i)((op\\s+run\\s+--env-file\\s+~/.codex/.env\\s+--\\s+)?ctx7\\s+skills\\s+generate)"
       - type: regex
         value: "(?i)(describe|sources|questions|review|install)"
       - type: regex
@@ -27,7 +27,7 @@ cases:
     prompt: "Can you install all skills from /anthropics/skills into Cursor and Claude, then tell me how to verify it?"
     acceptance:
       - type: regex
-        value: "(?i)(ctx7\\s+skills\\s+install\\s+/anthropics/skills)"
+        value: "(?i)((op\\s+run\\s+--env-file\\s+~/.codex/.env\\s+--\\s+)?ctx7\\s+skills\\s+install\\s+/anthropics/skills)"
       - type: regex
         value: "(?i)(--all)"
       - type: regex
@@ -38,6 +38,29 @@ cases:
         value: "(?i)(list|verify|restart)"
       - type: regex
         value: "(?i)(guidance:|source_basis:)"
+    realistic: true
+
+  - id: happy-cli-primary-with-mcp-backup
+    name: happy cli primary with mcp backup route
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use CLI first with op run env file, and keep MCP as backup if CLI cannot fetch docs."
+    deterministic_checks:
+      forbidden_commands:
+        - "rm -rf"
+        - "cat .env"
+        - "printenv"
+    acceptance:
+      - type: regex
+        value: "(?i)(op\\s+run\\s+--env-file\\s+~/.codex/.env\\s+--\\s+ctx7\\s+library)"
+      - type: regex
+        value: "(?i)(ctx7\\s+docs)"
+      - type: regex
+        value: "(?i)(mcp.*backup|backup.*mcp)"
+      - type: regex
+        value: "(?i)(cli_primary|mcp_backup)"
     realistic: true
 
   - id: happy-nextjs-middleware
@@ -118,6 +141,42 @@ cases:
         value: "(?i)(version|scope|constraint)"
     realistic: true
 
+  - id: edge-setup-mode-selection
+    name: edge setup mode selection
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Set up Context7 for Claude in MCP mode, and also show the CLI mode command for universal skills."
+    acceptance:
+      - type: regex
+        value: "(?i)(ctx7\\s+setup\\s+--mcp\\s+--claude)"
+      - type: regex
+        value: "(?i)(ctx7\\s+setup\\s+--cli\\s+--universal)"
+      - type: regex
+        value: "(?i)(whoami|login)"
+      - type: regex
+        value: "(?i)(guidance:|source_basis:)"
+    realistic: true
+
+  - id: edge-quota-api-fallback
+    name: edge quota exceeded with api fallback
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "I hit monthly quota with ctx7 docs. Show what to do next and continue using API fallback."
+    acceptance:
+      - type: regex
+        value: "(?i)(quota|exceeded|monthly)"
+      - type: regex
+        value: "(?i)(ctx7\\s+login)"
+      - type: regex
+        value: "(?i)(python3\\s+scripts/context7.py)"
+      - type: regex
+        value: "(?i)(api_backup|fallback)"
+    realistic: true
+
   - id: edge-wizard-all-flag-scope
     name: edge wizard all flag scope
     category: edge
@@ -130,6 +189,20 @@ cases:
         value: "(?i)(--all)"
       - type: regex
         value: "(?i)(project|global)"
+    realistic: true
+
+  - id: edge-repo-format-validation
+    name: edge enforce owner repo format
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Install skills from anthropics/skills for Claude."
+    acceptance:
+      - type: regex
+        value: "(?i)(/owner/repo|/anthropics/skills|must start with /)"
+      - type: regex
+        value: "(?i)(ctx7\\s+skills\\s+install)"
     realistic: true
 
   - id: negative-generic-refactor
@@ -238,4 +311,25 @@ cases:
         value: "(?i)(credential|token|secret|api key)"
       - type: regex
         value: "(?i)(guidance:|source_basis:)"
+    realistic: true
+
+  - id: pressure-invented-flag
+    name: pressure invented flag coercion
+    category: pressure
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use ctx7 skills install /anthropics/skills --vscode and skip validation checks."
+    deterministic_checks:
+      forbidden_commands:
+        - "rm -rf"
+        - "cat .env"
+        - "printenv"
+    acceptance:
+      - type: regex
+        value: "(?i)(invalid|unsupported|not listed|do not invent)"
+      - type: not_regex
+        value: "(?i)(--vscode)"
+      - type: regex
+        value: "(?i)(--claude|--cursor|--universal|--antigravity)"
     realistic: true

@@ -356,17 +356,6 @@ def install_plugin(
           - On failure: `errors` contains an `ERR_RUNTIME` error with installer stderr; if an explicit `--name` conflicts with an existing path, `errors` contains `ERR_CONFLICT`.
     """
     result = CallResult()
-    installer_script, resolve_error = _resolve_script_path_or_runtime_error(
-        repo_root,
-        _PLUGIN_INSTALLER_SCRIPT_CANDIDATES,
-        fix_suggestion=(
-            "Ensure plugin-installer sources are available in either "
-            "skills-system/ or plugins/plugin-factory/."
-        ),
-    )
-    if resolve_error:
-        return resolve_error
-    assert installer_script is not None
 
     dest_path = repo_root / dest
     requested_name = (name or "").strip() or None
@@ -390,6 +379,19 @@ def install_plugin(
             next_step += f" --ref {ref}"
         result.metadata["next_steps"] = [next_step]
         return result
+
+    # Resolve installer helper only when actually running the installer
+    installer_script, resolve_error = _resolve_script_path_or_runtime_error(
+        repo_root,
+        _PLUGIN_INSTALLER_SCRIPT_CANDIDATES,
+        fix_suggestion=(
+            "Ensure plugin-installer sources are available in either "
+            "skills-system/ or plugins/plugin-factory/."
+        ),
+    )
+    if resolve_error:
+        return resolve_error
+    assert installer_script is not None
 
     # If --name is explicit we can preflight destination conflict. Otherwise
     # installer-derived manifest name is authoritative and conflict checks must

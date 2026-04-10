@@ -109,7 +109,7 @@ Create favicon and app-icon sets that match the actual product identity instead 
 |---|---|
 | [[fixing-metadata]] | Pair with metadata fixes to ensure correct favicon references |
 | [[design-system]] | Keep favicon palette consistent with design-system tokens |
-| [[og-image-creator]] | Generate OG images alongside favicons for complete brand suite |
+| [[og-image-builder]] | Generate OG images alongside favicons for complete brand suite |
 
 **Topic map:** [[frontend-ui]]
 

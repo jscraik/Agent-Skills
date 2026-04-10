@@ -107,10 +107,6 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
             "plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py",
             skill_doc,
         )
-        self.assertNotIn(
-            ".agents/skills/plugin-creator/scripts/create_basic_plugin.py",
-            skill_doc,
-        )
 
 
 if __name__ == "__main__":

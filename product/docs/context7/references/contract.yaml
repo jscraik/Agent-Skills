@@ -3,7 +3,8 @@ skill: context7
 type: library_api_reference
 purpose: >
   Retrieve current third-party library documentation through Context7 and support
-  Context7 CLI skill-wizard workflows (`ctx7 skills ...`) with source-backed guidance.
+  Context7 CLI skill-wizard workflows (`ctx7 skills ...`) with source-backed guidance,
+  defaulting to CLI-first execution with MCP/API fallback for docs retrieval.
 triggers:
   - user needs current API details for an external dependency
   - user asks for version-sensitive behavior checks against library docs
@@ -14,13 +15,17 @@ inputs:
   - library or product name to resolve in Context7
   - specific implementation question to answer from docs
   - optional version or environment constraints
-  - optional Context7 CLI intent (`search|install|list|remove|info|suggest|generate`)
+  - optional Context7 CLI intent (`search|install|list|remove|info|suggest|generate|setup|login|whoami|logout`)
   - optional install target flags (`--claude|--cursor|--universal|--antigravity|--global|--all`)
+  - optional execution path preference (`cli_primary` by default)
 outputs:
   - resolved Context7 library id used for lookup
   - focused docs-backed guidance tied to the user question
+  - source basis describing the retrieved documentation used
+  - response schema version for schema-bound outputs
   - explicit clarification or assumptions when the match is ambiguous
   - wizard command sequence and target flags for `ctx7 skills` requests
+  - execution path used (`cli_primary|mcp_backup|api_backup`) and fallback reason when not primary
 output_contract:
   schema_version: "1.0"
   required_fields:
@@ -33,6 +38,8 @@ output_contract:
     - version_scope
     - wizard_commands
     - install_targets
+    - execution_path
+    - fallback_reason
 non_goals:
   - replacing first-party product documentation
   - providing speculative answers without retrieval
@@ -43,6 +50,7 @@ risks:
   - broad queries can return noisy snippets that obscure answers
   - undocumented assumptions can produce false confidence
   - wrong wizard flag mapping can install into the wrong target directory
+  - silent fallback away from CLI can hide retrieval-quality or auth failures
 rollback_procedure: >
   If contract or eval updates regress routing or validation behavior, restore the previous
   known-good files under product/docs/context7/references/ from git and rerun:
@@ -51,5 +59,5 @@ rollback_procedure: >
 observability: >
   Track health via strict skill audit output, family benchmark validation output, and live
   Context7 resolve/query smoke checks. Treat schema failures, missing pressure/negative eval
-  coverage, repeated ambiguous id matches, or wizard option drift as regression signals
-  requiring remediation.
+  coverage, repeated ambiguous id matches, wizard option drift, or unlabeled fallback-path use
+  as regression signals requiring remediation.

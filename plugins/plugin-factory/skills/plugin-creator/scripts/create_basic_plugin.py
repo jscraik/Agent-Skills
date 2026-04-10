@@ -49,9 +49,11 @@ def _discover_repo_root() -> Path:
     )
 
 
-REPO_ROOT = _discover_repo_root()
-DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
-DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
+# REPO_ROOT, DEFAULT_PLUGIN_PARENT, and DEFAULT_MARKETPLACE_PATH are initialized in main()
+# to allow argparse overrides to work correctly
+REPO_ROOT = None
+DEFAULT_PLUGIN_PARENT = None
+DEFAULT_MARKETPLACE_PATH = None
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
@@ -489,9 +491,9 @@ def validate_lifecycle_scaffold_args(args: argparse.Namespace) -> None:
 def parse_args() -> argparse.Namespace:
     """
     Parse command-line arguments for creating a plugin scaffold.
-    
-    Recognises options to control created surfaces, marketplace update behaviour, policy and governance metadata. Defaults for `--path` and `--marketplace-path` are resolved from the script location's discovered repository root.
-    
+
+    Recognises options to control created surfaces, marketplace update behaviour, policy and governance metadata. Defaults for `--path` and `--marketplace-path` are resolved lazily in main() when not provided.
+
     Returns:
     	argparse.Namespace: Parsed command-line arguments.
     """
@@ -504,7 +506,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("plugin_name")
     parser.add_argument(
         "--path",
-        default=str(DEFAULT_PLUGIN_PARENT),
+        default=None,
         help=(
             "Parent directory for plugin creation "
             "(defaults to <repo-root>/plugins resolved from this script location). "
@@ -527,7 +529,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--marketplace-path",
-        default=str(DEFAULT_MARKETPLACE_PATH),
+        default=None,
         help=(
             "Path to marketplace.json "
             "(defaults to <repo-root>/.agents/plugins/marketplace.json resolved from this script location). "
@@ -588,6 +590,19 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     validate_lifecycle_scaffold_args(args)
+
+    # Initialize defaults lazily so argparse overrides work correctly
+    global REPO_ROOT, DEFAULT_PLUGIN_PARENT, DEFAULT_MARKETPLACE_PATH
+    if REPO_ROOT is None:
+        REPO_ROOT = _discover_repo_root()
+        DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
+        DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
+
+    # Apply defaults if not provided by user
+    if args.path is None:
+        args.path = str(DEFAULT_PLUGIN_PARENT)
+    if args.marketplace_path is None:
+        args.marketplace_path = str(DEFAULT_MARKETPLACE_PATH)
 
     raw_plugin_name = args.plugin_name
     plugin_name = normalize_plugin_name(raw_plugin_name)

@@ -87,6 +87,7 @@ metadata:
   - Node.js 18 or later.
   - Use `npx ctx7 ...` for one-off runs, or `npm install -g ctx7` for a persistent CLI.
 - Preferred command sequence for CircleCI skill updates:
+
 ```bash
 npx ctx7 skills search circleci
 npx ctx7 skills generate --claude
@@ -94,7 +95,9 @@ npx ctx7 skills list --claude
 npx ctx7 skills list --cursor
 npx ctx7 skills list --universal
 ```
+
 - Preferred docs refresh sequence for CircleCI norms:
+
 ```bash
 npx ctx7 library circleci "workflows approval contexts filters config validate"
 npx ctx7 docs /circleci/circleci-docs "approval job type approval requires"
@@ -102,6 +105,7 @@ npx ctx7 docs /circleci/circleci-docs "contexts project restrictions security gr
 npx ctx7 docs /circleci/circleci-docs "filters branches tags only ignore precedence"
 npx ctx7 docs /circleci/circleci-docs "circleci config validate config process local execute"
 ```
+
 - `ctx7 skills info` expects a repository path (for example `/anthropics/skills`), not a keyword.
 - Install target flags allowed by contract:
   - `--claude`

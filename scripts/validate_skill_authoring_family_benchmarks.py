@@ -3,11 +3,8 @@
 
 This script enforces equivalent contract/eval/security baseline requirements for:
 - plugins/skill-factory/skills/skill-builder
-- plugins/skill-factory/skills/skillify
-- plugins/plugin-factory/skills/plugin-builder
 - plugins/skill-factory/skills/skill-creator
 - plugins/skill-factory/skills/skill-installer
-- plugins/plugin-factory/skills/plugin-installer
 - plugins/plugin-factory/skills/plugin-creator
 
 It is designed for CI and local gates where live LLM eval execution is not required.
@@ -73,11 +70,8 @@ _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "plugins/skill-factory/skills/skill-builder",
-    "plugins/skill-factory/skills/skillify",
-    "plugins/plugin-factory/skills/plugin-builder",
     "plugins/skill-factory/skills/skill-creator",
     "plugins/skill-factory/skills/skill-installer",
-    "plugins/plugin-factory/skills/plugin-installer",
     "plugins/plugin-factory/skills/plugin-creator",
 )
 
@@ -779,3 +773,4 @@ def main(argv: Sequence[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
+

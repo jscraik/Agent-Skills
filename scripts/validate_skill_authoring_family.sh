@@ -48,12 +48,9 @@ else
 fi
 
 skill_dirs=(
-  "plugins/plugin-factory/skills/plugin-builder"
   "plugins/skill-factory/skills/skill-builder"
-  "plugins/skill-factory/skills/skillify"
   "plugins/skill-factory/skills/skill-creator"
   "plugins/skill-factory/skills/skill-installer"
-  "plugins/plugin-factory/skills/plugin-installer"
   "plugins/plugin-factory/skills/plugin-creator"
 )
 

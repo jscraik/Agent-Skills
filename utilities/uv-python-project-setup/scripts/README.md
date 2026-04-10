@@ -1,3 +1,3 @@
 # uv-python-project-setup scripts
 
-Place helper scripts for uv setup and validation workflows here when extracted from SKILL.md examples.
+Place reusable uv workflow helper scripts here when setup snippets are promoted into executable checks.

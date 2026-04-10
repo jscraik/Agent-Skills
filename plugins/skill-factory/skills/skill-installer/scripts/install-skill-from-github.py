@@ -321,6 +321,12 @@ def _resolve_dest_root(dest: str | None) -> str:
             f"Destination must stay inside canonical repository root: {repo_root}"
         ) from exc
 
+    # Reject existing non-directories early
+    if resolved.exists() and not resolved.is_dir():
+        raise InstallError(
+            f"Destination must be a directory under the canonical repo root, but '{resolved}' exists and is not a directory."
+        )
+
     if len(rel.parts) != 1:
         raise InstallError(
             "Destination must target a single top-level category under canonical repository root."

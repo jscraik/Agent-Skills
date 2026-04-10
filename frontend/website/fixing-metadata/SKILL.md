@@ -90,7 +90,7 @@ Use this skill for precise metadata remediation, not broad SEO platform rewrites
 | Skill | When to use together |
 |---|---|
 | [[fixing-accessibility]] | Fix ARIA and semantic HTML alongside metadata |
-| [[og-image-creator]] | Generate OG images that the metadata tags will reference |
+| [[og-image-builder]] | Generate OG images that the metadata tags will reference |
 | [[favicon-generator]] | Add favicon tags alongside other head metadata |
 
 **Topic map:** [[frontend-ui]]

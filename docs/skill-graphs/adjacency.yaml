@@ -284,7 +284,7 @@ fallback-release:
 favicon-generator:
   design-system: Keep favicon palette consistent with design-system tokens
   fixing-metadata: Pair with metadata fixes to ensure correct favicon references
-  og-image-creator: Generate OG images alongside favicons for complete brand suite
+  og-image-builder: Generate OG images alongside favicons for complete brand suite
 feature-video:
   gh-workflow: Attach the final artifact to a PR or delivery note
   remotion: Create or review a custom Remotion composition
@@ -306,7 +306,7 @@ fixing-accessibility:
 fixing-metadata:
   favicon-generator: Add favicon tags alongside other head metadata
   fixing-accessibility: Fix ARIA and semantic HTML alongside metadata
-  og-image-creator: Generate OG images that the metadata tags will reference
+  og-image-builder: Generate OG images that the metadata tags will reference
 frontend-design:
   design-system: Route token, alias, or system-governance work to the dedicated owner
   frontend-ui-design: Hand off once the request clearly becomes standard UI build
@@ -328,7 +328,7 @@ gh-workflow:
     and `git log` evidence
 imagegen:
   nano-banana-builder: Use Nano Banana when iterative prompt-image editing is required
-  og-image-creator: Use route-aware OG generation when image output is tied to metadata tags
+  og-image-builder: Generate route-aware OG images when output needs metadata tag integration
   sora: Extend still-image workflows into AI-generated video
 insight-report:
   codex-automation-architect: Convert recommendations into automations
@@ -367,7 +367,7 @@ oak-api:
   fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
   mcp-builder: Expose Oak API as MCP tools for agent workflows
   product-spec: Spec the learning experience before implementing
-og-image-creator:
+og-image-builder:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation

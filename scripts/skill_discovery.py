@@ -194,7 +194,7 @@ def _normalize_description(text: str) -> str:
 def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
     """
     Discover skill entries from the configured skill sources.
-    
+
     Parameters:
         source (str): Which repository surface to scan. One of:
             - "auto": prefer flat skills if present, otherwise fall back to repository scan;
@@ -203,13 +203,15 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         visibility (str): Visibility mode affecting which skills are included.
             - "default": hide policy-marked hidden flat skills and hide certain plugin lane skills;
             - "advanced": include plugin lane skills that are otherwise hidden. Default "default".
-    
+
     Returns:
         List[SkillEntry]: A list of discovered SkillEntry objects, deduplicated by name and sorted by (category, name). Each entry's category is derived from the skill path relative to the repository root and the description is chosen from frontmatter (`metadata.short-description` or `description`) then normalised.
-    
+
     Raises:
-        ValueError: If `visibility` is not "default" or "advanced".
+        ValueError: If `visibility` is not "default" or "advanced", or if `source` is not one of "auto", "flat", or "repo".
     """
+    if source not in {"auto", "flat", "repo"}:
+        raise ValueError(f"Unsupported source: {source}")
     if visibility not in {"default", "advanced"}:
         raise ValueError(f"Unsupported visibility mode: {visibility}")
 

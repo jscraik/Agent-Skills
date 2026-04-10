@@ -269,6 +269,8 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
+    # _canonical_entries already respects visibility and delegates to discover_skill_entries,
+    # which handles filtering hidden skills appropriately for the requested visibility mode.
     entries = _canonical_entries(
         repo_root,
         source="auto",
@@ -278,8 +280,6 @@ def list_skills(
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
-        if not advanced and _is_hidden_coderabbit_lane(entry):
-            continue
         if category and category.lower() not in entry.category.lower():
             continue
         skills_data.append({
