@@ -25,9 +25,7 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
-    print_diff_lines,
     render_from_path,
-    unified_diff_lines,
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "spec.md.tmpl"
