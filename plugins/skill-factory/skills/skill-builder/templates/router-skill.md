@@ -63,10 +63,27 @@ See `workflows/`:
 - {{How to verify correctness}}
 - {{Tests/checks to run}}
 
+## See Also
+| Skill | When to use |
+|---|---|
+| `{{adjacent-router-or-skill-1}}` | {{When this nearby route or skill should be chosen instead}} |
+| `{{adjacent-router-or-skill-2}}` | {{Another related route in the local skill graph}} |
+
+**Topic map:** `[[{{topic-name}}]]`
+
 ## Anti-patterns
 - ❌ {{Common mistake to avoid}}
 - ❌ {{What not to do}}
 - ❌ {{How the skill can go wrong}}
+
+## See Also
+
+| Skill | When to use |
+|---|---|
+| `{{adjacent-skill-1}}` | {{When this neighboring skill should be selected instead}} |
+| `{{adjacent-skill-2}}` | {{Second nearby skill with a clear handoff boundary}} |
+
+**Topic map:** `[[{{topic-name}}]]`
 
 ## Done when
 {{Skill Title}} is complete when:
