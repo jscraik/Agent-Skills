@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/deconflict-report.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Deconflict Report
 
 ## Summary

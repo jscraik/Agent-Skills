@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[multi-domain-composition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/compose multi-domain systems through separate templates and shared graph.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # compose multi-domain systems through separate templates and shared graph
 

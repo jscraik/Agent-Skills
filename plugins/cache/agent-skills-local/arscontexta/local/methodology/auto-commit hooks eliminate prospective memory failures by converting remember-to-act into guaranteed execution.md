@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/auto-commit hooks eliminate prospective memory failures by converting remember-to-act into guaranteed execution.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # auto-commit hooks eliminate prospective memory failures by converting remember-to-act into guaranteed execution
 

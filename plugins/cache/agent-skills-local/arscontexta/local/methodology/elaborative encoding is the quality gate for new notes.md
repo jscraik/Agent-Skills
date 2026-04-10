@@ -5,6 +5,8 @@ topics: ["[[note-design]]", "[[graph-structure]]"]
 methodology: ["Zettelkasten", "Cognitive Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/elaborative encoding is the quality gate for new notes.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # elaborative encoding is the quality gate for new notes
 

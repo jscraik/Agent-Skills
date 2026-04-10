@@ -49,7 +49,7 @@ Collect these inputs before editing:
 
 - The target outcome and trigger phrases the skill must cover.
 - Concrete example prompts users are likely to issue.
-- Target location for the skill folder. If unspecified, default to `${CODEX_HOME:-$HOME/.codex}/skills`.
+- Target location for the skill folder. If unspecified, default to canonical repo category path `github/<skill-name>` under the git source tree.
 - Required bundled resources (scripts, references, assets).
 - Any explicit UI metadata provided by the user (`display_name`, icons, brand color, default prompt).
 
@@ -102,6 +102,8 @@ Follow this workflow in order unless the user asks for a scoped shortcut.
 ```bash
 python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
 ```
+
+`scripts/init_skill.py` renders `SKILL.md` from `templates/scaffold-simple-skill.md.tmpl`.
 
 4. Implement reusable resources first, then update `SKILL.md` so it points to those resources.
 5. Generate or refresh `agents/openai.yaml` when needed:
@@ -159,7 +161,7 @@ Safety and quality constraints:
 
 Example requests this skill should handle:
 
-- "I want to create a `gh-release-notes` skill in `${CODEX_HOME:-$HOME/.codex}/skills`, include `references/contract.yaml` and `references/evals.yaml`, and then run a strict audit."
+- "I want to create a `gh-release-notes` skill in `github/gh-release-notes`, include `references/contract.yaml` and `references/evals.yaml`, and then run a strict audit."
 - "My `SKILL.md` is too long. Can you move deep implementation details into `references/` while keeping behavior and triggers unchanged?"
 - "I updated trigger phrasing in frontmatter. Please regenerate `agents/openai.yaml` and confirm metadata parity."
 
@@ -181,5 +183,6 @@ Read these files based on the task:
 | Skill | When to use together |
 |---|---|
 | [[codex-agent-creator]] | Create or update custom agents when skill workflows need dedicated role files |
+| [[skillify]] | Convert hand-authored or rough skills into canonical, graph-aware skill packages |
 
 **Topic map:** [[agent-ops]]

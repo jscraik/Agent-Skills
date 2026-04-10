@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[automated-knowledge-maintenance-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/agent session boundaries create natural automation checkpoints that human-operated systems lack.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # agent session boundaries create natural automation checkpoints that human-operated systems lack
 

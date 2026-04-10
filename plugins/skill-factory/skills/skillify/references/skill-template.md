@@ -45,6 +45,14 @@ context: <fork|inline; omit when inline>
 ## Validation
 - <command 1>
 - <command 2>
+
+## See Also
+| Skill | When to use |
+|---|---|
+| [[<adjacent-skill-1>]] | <when this neighboring skill is a better fit> |
+| [[<adjacent-skill-2>]] | <another related skill in the local graph> |
+
+**Topic map:** [[<topic-name>]]
 ```
 
 Notes:
@@ -52,5 +60,6 @@ Notes:
 - Only include optional annotations (`Execution`, `Artifacts`, `Human checkpoint`, `Rules`) when they materially help execution.
 - Keep the skill concise and move deep references into `references/`.
 - Keep `allowed-tools` minimal and pattern-based (for example `Bash(gh:*)`), based on observed requirements.
+- Include a real `## See Also` table in final output (replace placeholders with real local skill links before saving).
 - For parallel work, use sub-step labels such as `3a`, `3b`.
 - For user-owned actions, mark step titles with `[human]`.

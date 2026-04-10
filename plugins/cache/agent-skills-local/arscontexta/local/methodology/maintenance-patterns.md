@@ -2,6 +2,8 @@
 description: Condition-based maintenance, health checks, reweaving, and the backward pass -- keeping vaults alive
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/maintenance-patterns.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # maintenance-patterns
 

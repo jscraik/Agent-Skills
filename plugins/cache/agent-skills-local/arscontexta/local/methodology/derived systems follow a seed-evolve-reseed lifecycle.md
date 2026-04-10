@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[maintenance-patterns]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/derived systems follow a seed-evolve-reseed lifecycle.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # derived systems follow a seed-evolve-reseed lifecycle
 

@@ -2,6 +2,8 @@
 description: Worked examples of derived vaults across 12 domains -- therapy, research, PM, trading, and more
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/domain-compositions.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # domain-compositions
 

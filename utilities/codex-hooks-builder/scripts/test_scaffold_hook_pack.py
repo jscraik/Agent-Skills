@@ -558,6 +558,23 @@ class TestSessionStartTemplate(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Template content checks: user_prompt_submit_template
+# ---------------------------------------------------------------------------
+
+
+class TestUserPromptSubmitTemplate(unittest.TestCase):
+    """Verify user_prompt_submit_template() includes safety markers that match natural prompts."""
+
+    def setUp(self) -> None:
+        self.text = scaffold_hook_pack.user_prompt_submit_template()
+
+    def test_template_matches_validate_skip_apostrophe_variants(self) -> None:
+        self.assertIn('"don\'t|validate"', self.text)
+        self.assertIn('"dont|validate"', self.text)
+        self.assertIn('"do not|validate"', self.text)
+
+
+# ---------------------------------------------------------------------------
 # Template content checks: stop_guard_template
 # ---------------------------------------------------------------------------
 

@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[hooks-as-methodology-encoders-research-source]], [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/methodology development should follow the trajectory from documentation to skill to hook as understanding hardens.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # methodology development should follow the trajectory from documentation to skill to hook as understanding hardens
 

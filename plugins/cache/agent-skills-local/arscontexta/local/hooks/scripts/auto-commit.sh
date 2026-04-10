@@ -1,4 +1,6 @@
 #!/bin/bash
+# GENERATED PROJECTION: source=plugins/arscontexta/hooks/scripts/auto-commit.sh; DO NOT EDIT PROJECTION COPY.
+
 # Ars Contexta — Auto-Commit Hook
 # Commits changes after writes to keep the vault in version control.
 # Runs as async PostToolUse hook on Write events.

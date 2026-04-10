@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]"]
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/description quality for humans diverges from description quality for keyword search.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # description quality for humans diverges from description quality for keyword search
 

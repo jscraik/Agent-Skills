@@ -2,6 +2,8 @@
 description: How the init wizard derives configurations from conversation -- signal extraction, cascade resolution, coherence validation
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/derivation-engine.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # derivation-engine
 

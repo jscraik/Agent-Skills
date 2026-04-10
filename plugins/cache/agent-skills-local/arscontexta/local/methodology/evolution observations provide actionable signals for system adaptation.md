@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[maintenance-patterns]]"]
 methodology: ["Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/evolution observations provide actionable signals for system adaptation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # evolution observations provide actionable signals for system adaptation
 

@@ -4,12 +4,32 @@ Read when: you are writing or verifying the actual plan artifact selected by `ce
 
 ## Table of Contents
 - [General plan template](#general-plan-template)
+- [Template scaffold workflow](#template-scaffold-workflow)
 - [Plan depth guidance](#plan-depth-guidance)
 - [Deep-plan extensions](#deep-plan-extensions)
 - [Dedicated UI plan template](#dedicated-ui-plan-template)
 - [Execution Ledger](#execution-ledger)
 - [Verification matrix](#verification-matrix)
 - [Handoff options](#handoff-options)
+
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `plan.md.tmpl`
+- rendered baseline: `references/plan-template.md`
+
+Render / refresh:
+
+```bash
+python3 plugins/harness-engineering/skills/ce-plan/scripts/render_plan_template.py
+python3 plugins/harness-engineering/skills/ce-plan/scripts/check_plan_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/harness-engineering/skills/ce-plan/scripts/check_plan_template_drift.py
+```
 
 ## General plan template
 Preferred path:

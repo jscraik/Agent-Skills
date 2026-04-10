@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[maintenance-patterns]]"]
 methodology: ["Systems Theory", "Network Science"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/navigation infrastructure passes through distinct scaling regimes that require qualitative strategy shifts.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # navigation infrastructure passes through distinct scaling regimes that require qualitative strategy shifts
 

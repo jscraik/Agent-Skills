@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[note-design]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/progressive schema validates only what active modules require not the full system schema.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # progressive schema validates only what active modules require not the full system schema
 

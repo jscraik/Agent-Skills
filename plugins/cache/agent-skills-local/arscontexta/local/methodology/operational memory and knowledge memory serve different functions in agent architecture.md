@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/operational memory and knowledge memory serve different functions in agent architecture.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # operational memory and knowledge memory serve different functions in agent architecture
 

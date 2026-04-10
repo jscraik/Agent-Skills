@@ -5,6 +5,8 @@ topics: ["[[note-design]]", "[[processing-workflows]]"]
 methodology: ["Cornell"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/structure without processing provides no value.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # structure without processing provides no value
 

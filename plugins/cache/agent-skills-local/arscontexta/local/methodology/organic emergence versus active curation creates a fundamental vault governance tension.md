@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Digital Gardening", "Zettelkasten", "Original"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/organic emergence versus active curation creates a fundamental vault governance tension.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # organic emergence versus active curation creates a fundamental vault governance tension
 

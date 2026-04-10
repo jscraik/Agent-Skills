@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/testing effect could enable agent knowledge verification.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # testing effect could enable agent knowledge verification
 

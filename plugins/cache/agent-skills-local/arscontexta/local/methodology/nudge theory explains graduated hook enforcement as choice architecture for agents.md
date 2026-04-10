@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/nudge theory explains graduated hook enforcement as choice architecture for agents.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # nudge theory explains graduated hook enforcement as choice architecture for agents
 

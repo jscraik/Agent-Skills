@@ -2,6 +2,7 @@
 
 ## Table of Contents
 - [When to use](#when-to-use)
+- [Template scaffold workflow](#template-scaffold-workflow)
 - [Template](#template)
 - [Field guidance](#field-guidance)
 
@@ -12,6 +13,25 @@ Use this template when `skill-creator` is handing non-trivial work to `skill-bui
 Create the artifact in the target skill at:
 
 `references/handoff-package.md`
+
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `templates/handoff-package.md.tmpl`
+- rendered baseline: `references/handoff-package-scaffold.md`
+
+Render / refresh:
+
+```bash
+python3 plugins/skill-factory/skills/skill-creator/scripts/render_handoff_package_template.py
+python3 plugins/skill-factory/skills/skill-creator/scripts/check_handoff_package_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/skill-factory/skills/skill-creator/scripts/check_handoff_package_template_drift.py
+```
 
 ## Template
 

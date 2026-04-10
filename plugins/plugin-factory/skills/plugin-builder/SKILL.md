@@ -1,14 +1,6 @@
 ---
 name: plugin-builder
 description: Harden, convert, and validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package and needs contract-grade safety checks, not when standalone skill lifecycle hardening is still unresolved.
-metadata:
-  skill-type: scaffolding_templates
-  lifecycle_state: active
-  maturity: canonical
-  owner: Agent Skills Team
-  review_cadence: quarterly
-  last_reviewed: 2026-04-07
-  metadata_source: frontmatter
 ---
 
 # Plugin Builder
@@ -17,7 +9,9 @@ Build and harden safe, focused plugin packages for Codex workflows.
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Execution modes](#execution-modes)
 - [Deliverables](#deliverables)
+- [Outputs](#outputs)
 - [Core philosophy](#core-philosophy)
 - [Encouraging variation](#encouraging-variation)
 - [Workflow](#workflow)
@@ -51,12 +45,44 @@ Handoffs:
 - validation depth (`none`, `smoke`, `full`).
 - `uv` available on `PATH` (required for helper script execution).
 
+## Execution modes
+
+Pick one mode and report it in the final output envelope:
+- `scaffold`: create a new plugin package shell with minimal required surfaces.
+- `convert`: transform an existing third-party source into Codex plugin structure.
+- `harden`: validate and deconflict an existing plugin package before release/install.
+
 ## Deliverables
 Produce only what the request needs:
 - plugin package root with `.codex-plugin/plugin.json`;
 - optional plugin-owned surfaces (`skills/`, `hooks.json`, `agents/`, `.mcp.json`, `.app.json`);
 - `references/operational-spec.md` and `references/deconflict-report.md` when hardening/conversion is in scope;
 - validator evidence summary and explicit blocker notes when checks fail.
+
+## Outputs
+
+Return one machine-checkable envelope:
+
+```yaml
+schema_version: 1
+execution_mode: "harden" # one of: scaffold|convert|harden
+summary: "<one-paragraph outcome>"
+plugin_path: "<path>"
+actions:
+  - step: "<what was done>"
+    result: "pass|fail|blocked"
+validation:
+  - command: "<exact command>"
+    outcome: "pass|fail|blocked"
+    note: "<optional detail>"
+artifacts:
+  - "<path to generated/updated artifact>"
+handoff:
+  next_skill: "[[plugin-installer]]"
+  allowed_next_skills: ["[[plugin-installer]]", "[[plugin-creator]]", "[[skill-builder]]", "[[mcp-builder]]"]
+  reason: "<why handoff is needed>"
+risk_note: "<residual risk>"
+```
 
 ## Core philosophy
 Plugin hardening is a safety-first downstream operation:

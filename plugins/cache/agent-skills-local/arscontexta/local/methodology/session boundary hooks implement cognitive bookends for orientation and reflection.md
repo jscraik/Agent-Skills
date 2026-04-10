@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/session boundary hooks implement cognitive bookends for orientation and reflection.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # session boundary hooks implement cognitive bookends for orientation and reflection
 

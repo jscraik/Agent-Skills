@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/maturity field enables agent context prioritization.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # maturity field enables agent context prioritization
 

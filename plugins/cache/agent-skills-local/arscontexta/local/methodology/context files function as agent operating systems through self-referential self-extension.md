@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/context files function as agent operating systems through self-referential self-extension.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # context files function as agent operating systems through self-referential self-extension
 

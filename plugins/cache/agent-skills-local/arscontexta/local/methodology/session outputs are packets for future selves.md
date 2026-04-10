@@ -3,6 +3,8 @@ description: each session's output should be a composable building block for fut
 kind: research
 topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/session outputs are packets for future selves.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # session outputs are packets for future selves
 

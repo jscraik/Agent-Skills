@@ -9,8 +9,8 @@ Usage:
     python upgrade_skill.py <path/to/skill-dir-or-SKILL.md>
 
 Examples:
-    python upgrade_skill.py .codex/skills/my-skill
-    python upgrade_skill.py .codex/skills/my-skill/SKILL.md
+    python upgrade_skill.py github/my-skill
+    python upgrade_skill.py github/my-skill/SKILL.md
 
 Exit codes:
     0  success (no HIGH-priority suggestions)

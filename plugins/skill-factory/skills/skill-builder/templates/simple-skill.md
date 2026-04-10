@@ -46,6 +46,14 @@ description: "{{What it does}} Use when {{primary trigger conditions}}. Don't us
 - {{How to verify correctness}}
 - {{Test or check to run}}
 
+## See Also
+| Skill | When to use |
+|---|---|
+| `{{adjacent-skill-1}}` | {{When this adjacent skill is a better fit}} |
+| `{{adjacent-skill-2}}` | {{Another related route in the local skill graph}} |
+
+**Topic map:** `[[{{topic-name}}]]`
+
 ## Anti-patterns
 - ❌ {{Common mistake to avoid}}
 - ❌ {{What not to do}}
@@ -53,6 +61,15 @@ description: "{{What it does}} Use when {{primary trigger conditions}}. Don't us
 ## Examples
 - Triggering prompt: "{{Example prompt that SHOULD use this skill}}"
 - Non-triggering prompt: "{{Example prompt that should NOT use this skill}}"
+
+## See Also
+
+| Skill | When to use |
+|---|---|
+| `{{adjacent-skill-1}}` | {{When this neighboring skill is a better fit}} |
+| `{{adjacent-skill-2}}` | {{Another nearby skill and its routing boundary}} |
+
+**Topic map:** `[[{{topic-name}}]]`
 
 ## Done when
 {{Skill Title}} is complete when:

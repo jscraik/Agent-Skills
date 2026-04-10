@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[graph-structure]]"]
 methodology: ["Original"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/agent notes externalize navigation intuition that search cannot discover and traversal cannot reconstruct.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # agent notes externalize navigation intuition that search cannot discover and traversal cannot reconstruct
 

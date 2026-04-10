@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/module communication through shared YAML fields creates loose coupling without direct dependencies.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # module communication through shared YAML fields creates loose coupling without direct dependencies
 

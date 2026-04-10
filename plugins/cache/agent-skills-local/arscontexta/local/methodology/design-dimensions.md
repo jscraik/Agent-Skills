@@ -2,6 +2,8 @@
 description: The 8 configuration axes and their interaction constraints -- granularity, processing, automation, and more
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/design-dimensions.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # design-dimensions
 

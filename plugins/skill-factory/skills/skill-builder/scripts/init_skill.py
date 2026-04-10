@@ -41,184 +41,10 @@ STRUCTURES = {"simple", "router"}
 VALID_LIFECYCLE_STATES = ("incubating", "active", "maintenance", "deprecated")
 VALID_MATURITY_LEVELS = ("experimental", "validated", "canonical")
 
-
-SKILL_TEMPLATE_SIMPLE = """---
-name: {skill_name}
-description: "{description}"
-metadata:
-  lifecycle_state: {lifecycle_state}
-  maturity: {maturity}
-  owner: {owner}
-  review_cadence: {review_cadence}
-  last_reviewed: {last_reviewed}
-  metadata_source: frontmatter
----
-
-# {skill_title}
-
-This scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter guidance below before treating it as active or broadly reusable.
-
-## Working agreement
-- Follow the repo's `AGENTS.md` (map, not a megadoc).
-- For long runs, also follow `~/.codex/instructions/shell-skills-compaction.md` if present.
-- Artifact boundary:
-  - Local CLI: write deliverables to `./artifacts/`
-  - Hosted shell: write deliverables to `/mnt/data/`
-
-## When to use
-- Primary triggers:
-  - Replace with the real user ask this skill should own.
-- Non-triggers (route elsewhere):
-  - Replace with the neighboring asks this skill should reject or reroute.
-
-## Inputs
-- Assumptions:
-  - Replace with the minimum safe assumptions for this skill.
-- Replace with the concrete files, repos, APIs, schemas, or constraints the finished skill will need.
-- Ask clarifying questions only for genuine gaps.
-
-## Outputs
-- Replace with the concrete outputs, paths, and formats the skill should produce.
-- Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
-
-## Constraints and safety
-- Redact secrets/PII by default.
-- If networking is required: specify a minimal domain allowlist and gate it behind explicit opt-in.
-- Destructive actions require explicit confirmation; prefer dry-run first.
-
-## Principles
-- Replace with 2–6 bullets capturing the mental model for this skill.
-- Adapt execution and output shape to context; avoid rigid one-size-fits-all responses.
-
-## Workflow
-1) Replace with the smallest reliable workflow for this skill.
-2) Prefer progressive disclosure:
-   - Put deep docs in `references/` and link to them.
-   - Put reusable automation in `scripts/` and reference it here.
-   - Put templates/boilerplate in `assets/`.
-3) End by writing artifacts + listing changed files/commands.
-
-## Validation
-- Replace with the commands, tests, or checks that prove this skill is safe to use.
-- Fail fast: if a gate fails, stop and report the failure before continuing.
-- For non-trivial skills, add `references/evals.yaml` with at least:
-  - happy-path
-  - edge-case
-  - failure-mode
-
-## Gotchas
-- Replace with the recurring mistake, misconception, or failure pattern this skill should call out early.
-
-## See Also
-| Skill | When to use |
-|---|---|
-| `adjacent-skill-name-1` | Replace with a real nearby skill this one is commonly confused with. |
-| `adjacent-skill-name-2` | Replace with another real related skill in the local graph. |
-
-**Topic map:** `[[topic-name]]`
-
-## Anti-patterns
-- ❌ Replace with the common pitfalls and what not to do.
-
-## Examples
-- Triggering prompt: "Replace with a realistic triggering prompt."
-- Non-triggering prompt: "Replace with a realistic non-triggering prompt."
-"""
-
-
-SKILL_TEMPLATE_ROUTER = """---
-name: {skill_name}
-description: "{description}"
-metadata:
-  lifecycle_state: {lifecycle_state}
-  maturity: {maturity}
-  owner: {owner}
-  review_cadence: {review_cadence}
-  last_reviewed: {last_reviewed}
-  metadata_source: frontmatter
----
-
-# {skill_title}
-
-This router scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter routes before treating it as active or reusable.
-
-## Working agreement
-- Follow the repo's `AGENTS.md` (map, not a megadoc).
-- For long runs, also follow `~/.codex/instructions/shell-skills-compaction.md` if present.
-- Artifact boundary:
-  - Local CLI: write deliverables to `./artifacts/`
-  - Hosted shell: write deliverables to `/mnt/data/`
-
-## When to use
-- This is a **router skill**: it asks one intake question and routes to a workflow in `workflows/`.
-- Primary triggers:
-  - Replace with the routing asks this skill should own.
-- Non-triggers (route elsewhere):
-  - Replace with the nearby asks this router should reject or hand off.
-
-## Inputs
-- Replace with the minimum user signal you need before routing.
-- Ask follow-up questions only when the route cannot be selected safely.
-
-## Outputs
-- Replace with the routed output contract, including paths and formats.
-- Always write artifacts to `./artifacts/` (local) or `/mnt/data/` (hosted).
-
-## Constraints and safety
-- Redact secrets/PII by default.
-- Prefer read-only checks before mutating actions.
-- Destructive actions require explicit confirmation.
-
-## Principles
-- Route with the smallest sufficient question.
-- Prefer deterministic route criteria over intuition.
-- Keep route explanations concise and evidence-based.
-
-## Intake
-Replace this line with the one concise routing question the user should answer.
-
-## Routes
-| Response | Workflow |
-|----------|----------|
-| 1 | `workflows/option-1.md` |
-| 2 | `workflows/option-2.md` |
-| 3 | `workflows/option-3.md` |
-
-## Workflow
-1) Ask one intake question and capture the response.
-2) Match the response to the route table and select one workflow.
-3) Read the chosen workflow fully, then execute it exactly.
-4) End with created/modified files, commands run, and route rationale.
-
-## Validation
-- Validate route selection before execution.
-- Fail fast: if route criteria are ambiguous or checks fail, stop and ask for clarification.
-- Verify outputs match the chosen workflow contract.
-
-## Gotchas
-- Replace with the routing misconception or common failure pattern this router should surface early.
-
-## See Also
-| Skill | When to use |
-|---|---|
-| `adjacent-router-or-skill-1` | Replace with a real nearby route or skill this router should defer to when appropriate. |
-| `adjacent-router-or-skill-2` | Replace with another real related route or skill in the local graph. |
-
-**Topic map:** `[[topic-name]]`
-
-## References map
-Prefer pointers over pasted docs.
-- `references/` for deep docs, contracts, and evals.
-
-## Anti-patterns
-- ❌ Asking multiple intake questions before attempting routing.
-- ❌ Executing multiple routes in parallel without explicit user approval.
-- ❌ Proceeding when route criteria are ambiguous.
-
-## Examples
-- Triggering prompt: "Replace with a realistic routing request."
-- Non-triggering prompt: "Replace with a realistic non-routing request."
-"""
+SCAFFOLD_TEMPLATE_FILES = {
+    "simple": "scaffold-simple-skill.md.tmpl",
+    "router": "scaffold-router-skill.md.tmpl",
+}
 
 
 PYTHON_RUNNER_TEMPLATE = '''#!/usr/bin/env python3
@@ -399,6 +225,48 @@ def find_repo_root(start: Path) -> Path:
         return start.resolve().parent if start.is_file() else start.resolve()
 
 
+def load_scaffold_template(*, structure: str, templates_dir: Path) -> str:
+    template_name = SCAFFOLD_TEMPLATE_FILES.get(structure)
+    if not template_name:
+        raise SystemExit(f"[ERROR] Unsupported structure '{structure}'.")
+    template_path = templates_dir / template_name
+    if not template_path.exists():
+        raise SystemExit(f"[ERROR] Missing scaffold template: {template_path}")
+    return template_path.read_text(encoding="utf-8")
+
+
+def resolve_scaffold_templates_dir(*, repo_root: Path, script_dir: Path, structure: str) -> Path:
+    template_name = SCAFFOLD_TEMPLATE_FILES.get(structure)
+    if not template_name:
+        raise SystemExit(f"[ERROR] Unsupported structure '{structure}'.")
+
+    candidate_dirs = [
+        repo_root / "plugins" / "skill-factory" / "skills" / "skill-creator" / "templates",
+        script_dir.parent / "templates",
+    ]
+    checked_paths: list[Path] = []
+    for candidate_dir in candidate_dirs:
+        candidate_template = candidate_dir / template_name
+        checked_paths.append(candidate_template)
+        if candidate_template.exists():
+            return candidate_dir
+
+    checked = "\n  - ".join(str(path) for path in checked_paths)
+    raise SystemExit(
+        "[ERROR] Missing scaffold template file. Checked:\n"
+        f"  - {checked}"
+    )
+
+
+def render_scaffold(*, structure: str, templates_dir: Path, context: dict[str, str]) -> str:
+    template = load_scaffold_template(structure=structure, templates_dir=templates_dir)
+    try:
+        return template.format(**context)
+    except KeyError as error:
+        missing = error.args[0]
+        raise SystemExit(f"[ERROR] Template placeholder '{{{missing}}}' missing from render context.") from error
+
+
 def create_resource_dirs(*, skill_dir: Path, skill_title: str, resources: List[str], include_examples: bool) -> None:
     repo_root = find_repo_root(Path(__file__).resolve().parent)
     template_contract = repo_root / "templates" / "contract.yaml"
@@ -438,6 +306,7 @@ def init_skill(
     *,
     skill_name: str,
     out_dir: Path,
+    templates_dir: Path,
     structure: str,
     resources: List[str],
     include_examples: bool,
@@ -474,16 +343,19 @@ def init_skill(
 
     skill_title = title_case_skill_name(skill_name)
 
-    template = SKILL_TEMPLATE_ROUTER if structure == "router" else SKILL_TEMPLATE_SIMPLE
-    content = template.format(
-        skill_name=skill_name,
-        skill_title=skill_title,
-        description=description,
-        owner=owner,
-        review_cadence=review_cadence,
-        last_reviewed=last_reviewed,
-        lifecycle_state=lifecycle_state,
-        maturity=maturity,
+    content = render_scaffold(
+        structure=structure,
+        templates_dir=templates_dir,
+        context={
+            "skill_name": skill_name,
+            "skill_title": skill_title,
+            "description": description,
+            "owner": owner,
+            "review_cadence": review_cadence,
+            "last_reviewed": last_reviewed,
+            "lifecycle_state": lifecycle_state,
+            "maturity": maturity,
+        },
     )
 
     (skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
@@ -629,6 +501,13 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     print(f"   Target: {args.target}")
     print(f"   Structure: {args.structure}")
     print(f"   Run type: {args.run_type}")
+    templates_dir = resolve_scaffold_templates_dir(
+        repo_root=repo_root,
+        script_dir=script_dir,
+        structure=args.structure,
+    )
+    scaffold_template_name = SCAFFOLD_TEMPLATE_FILES[args.structure]
+    print(f"   SKILL scaffold template: {templates_dir / scaffold_template_name}")
     if args.resources:
         print(f"   Resources: {', '.join(resources)} (explicit)")
     elif args.minimal:
@@ -644,6 +523,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     result = init_skill(
         skill_name=skill_name,
         out_dir=out_dir,
+        templates_dir=templates_dir,
         structure=args.structure,
         resources=resources,
         include_examples=args.examples,

@@ -188,12 +188,54 @@ fi
 # appear as user-selectable skills in Codex. Lifecycle family skills such as
 # `skill-creator` and `skill-installer` are intentionally visible again.
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
+plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
+plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
+plugin_router_skill_names=()
+plugin_router_skill_dirs=()
+router_collision_count=0
+# is_hidden_flat_skill_name returns success (exit code 0) if the supplied skill name is listed in the hidden_flat_skills array, failure (exit code 1) otherwise.
 is_hidden_flat_skill_name() {
   local skill_name="$1"
   case " ${hidden_flat_skills[*]} " in
     *" $skill_name "*) return 0 ;;
     *) return 1 ;;
   esac
+}
+# is_plugin_visible_router_skill_name checks whether the given skill name is present in the plugin_visible_router_skills array and returns success (0) if it is.
+is_plugin_visible_router_skill_name() {
+  local skill_name="$1"
+  case " ${plugin_visible_router_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+# is_plugin_hidden_lane_skill_name checks whether the given skill name is present in the plugin_hidden_lane_skills array and returns success (`0`) if present and failure (`1`) otherwise.
+is_plugin_hidden_lane_skill_name() {
+  local skill_name="$1"
+  case " ${plugin_hidden_lane_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+register_plugin_router_skill_source() {
+  local skill_name="$1"
+  local discovered_dir="$2"
+  local idx=""
+  for idx in "${!plugin_router_skill_names[@]}"; do
+    if [ "${plugin_router_skill_names[$idx]}" != "$skill_name" ]; then
+      continue
+    fi
+    if [ "${plugin_router_skill_dirs[$idx]}" = "$discovered_dir" ]; then
+      return 0
+    fi
+    echo "[ERROR] Plugin-visible router skill collision: $skill_name" >&2
+    echo "        first:  ${plugin_router_skill_dirs[$idx]}" >&2
+    echo "        second: $discovered_dir" >&2
+    return 1
+  done
+  plugin_router_skill_names+=("$skill_name")
+  plugin_router_skill_dirs+=("$discovered_dir")
+  return 0
 }
 for hidden_skill in "${hidden_flat_skills[@]}"; do
   if [ -e "$skills_dir/$hidden_skill" ]; then
@@ -344,11 +386,23 @@ while IFS= read -r skill_path; do
     echo "Skipping hidden flat skill: $skill_name"
     continue
   fi
-  if is_plugin_owned_skill_path "$skill_path"; then
-    echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
-    continue
-  fi
   skill_dir_abs="$repo_root/$skill_dir"
+  discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
+  if is_plugin_owned_skill_path "$skill_path"; then
+    if is_plugin_hidden_lane_skill_name "$skill_name"; then
+      echo "Skipping hidden plugin lane skill: $skill_name"
+      continue
+    fi
+    if ! is_plugin_visible_router_skill_name "$skill_name"; then
+      echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
+      continue
+    fi
+    if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
+      router_collision_count=$((router_collision_count + 1))
+      continue
+    fi
+    echo "Including plugin router skill in flat runtime list: $skill_name"
+  fi
   # Relative path from $skills_dir (.agents/skills/) back to the skill source.
   # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
   # then prepend '../..' to escape .agents/skills/ back to repo root.
@@ -376,6 +430,11 @@ while IFS= read -r skill_path; do
   fi
   ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
+
+if [ "$router_collision_count" -gt 0 ]; then
+  echo "[ERROR] Aborting sync due to plugin-visible router skill collisions." >&2
+  exit 1
+fi
 
 # Re-expose preserved system skills through the hidden `.system` path without
 # bringing them back into the flat runtime skill list.
@@ -440,7 +499,7 @@ while IFS= read -r existing_dir; do
   fi
 done < <(find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type d -print)
 
-# Regenerate root SKILL.md index dynamically from skill frontmatter.
+# generate_skill_index regenerates the repository root SKILL.md index from skills' YAML frontmatter, grouping skills by category and extracting short descriptions where available.
 generate_skill_index() {
   local index_file="$1"
   local temp_dir=""
@@ -664,7 +723,12 @@ HEADER
       continue
     fi
     if is_plugin_owned_skill_path "$skill_path"; then
-      continue
+      if is_plugin_hidden_lane_skill_name "$skill_name"; then
+        continue
+      fi
+      if ! is_plugin_visible_router_skill_name "$skill_name"; then
+        continue
+      fi
     fi
     category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
     safe_category="$(echo "$category" | tr '/' '_')"
@@ -714,6 +778,8 @@ HEADER
   done < <(cd "$temp_dir" && find . -mindepth 1 -maxdepth 1 -type f -print | sed 's|^\./||' | sort)
 }
 
+# generate_skill_type_index generates a skills-by-type markdown index from `metadata.skill-type` tags, grouping discovered skills into canonical semantic types, emitting counts, per-type lists and validation notes.
+# generate_skill_type_index takes a single argument: the path to the output index file.
 generate_skill_type_index() {
   local index_file="$1"
   local temp_dir=""
@@ -746,7 +812,12 @@ generate_skill_type_index() {
       continue
     fi
     if is_plugin_owned_skill_path "$skill_path"; then
-      continue
+      if is_plugin_hidden_lane_skill_name "$skill_name"; then
+        continue
+      fi
+      if ! is_plugin_visible_router_skill_name "$skill_name"; then
+        continue
+      fi
     fi
     skill_type_raw="$(extract_skill_type "$skill_path" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
     if [ -z "$skill_type_raw" ]; then
@@ -1129,8 +1200,20 @@ PY
   done < <(sort -u "$marketplace_keep_file")
 }
 
+sync_plugin_cache_projections() {
+  local projection_script="$repo_root/scripts/projection_integrity.py"
+
+  if [ ! -f "$projection_script" ]; then
+    echo "[WARN] Projection integrity script missing; skipping plugin-cache header sync."
+    return 0
+  fi
+
+  python3 "$projection_script" sync --scope plugin-caches --format text
+}
+
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
 sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
+sync_plugin_cache_projections
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"

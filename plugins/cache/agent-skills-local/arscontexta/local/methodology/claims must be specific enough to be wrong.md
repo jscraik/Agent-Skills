@@ -4,6 +4,8 @@ kind: research
 topics: ["[[note-design]]"]
 methodology: ["Evergreen"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/claims must be specific enough to be wrong.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # claims must be specific enough to be wrong
 

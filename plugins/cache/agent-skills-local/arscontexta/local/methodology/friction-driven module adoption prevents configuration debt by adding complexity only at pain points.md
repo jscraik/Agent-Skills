@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/friction-driven module adoption prevents configuration debt by adding complexity only at pain points.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # friction-driven module adoption prevents configuration debt by adding complexity only at pain points
 

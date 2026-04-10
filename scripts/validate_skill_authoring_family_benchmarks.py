@@ -2,12 +2,10 @@
 """Deterministic benchmark checks for the skill-authoring family.
 
 This script enforces equivalent contract/eval/security baseline requirements for:
-- utilities/skill-builder
-- utilities/plugin-builder
-- skills-system/skill-creator
-- skills-system/skill-installer
-- skills-system/plugin-installer
-- skills-system/plugin-creator
+- plugins/skill-factory/skills/skill-builder
+- plugins/skill-factory/skills/skill-creator
+- plugins/skill-factory/skills/skill-installer
+- plugins/plugin-factory/skills/plugin-creator
 
 It is designed for CI and local gates where live LLM eval execution is not required.
 """
@@ -67,16 +65,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Severity ranking for baseline regression comparison (higher = worse)
 SEVERITY_RANK = {"INFO": 0, "WARN": 1, "FAIL": 2}
-_SCHEMA_DIR = REPO_ROOT / "utilities" / "skill-builder" / "references"
+_SCHEMA_DIR = REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder" / "references"
 _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
-    "utilities/skill-builder",
-    "utilities/plugin-builder",
-    "skills-system/skill-creator",
-    "skills-system/skill-installer",
-    "skills-system/plugin-installer",
-    "skills-system/plugin-creator",
+    "plugins/skill-factory/skills/skill-builder",
+    "plugins/skill-factory/skills/skill-creator",
+    "plugins/skill-factory/skills/skill-installer",
+    "plugins/plugin-factory/skills/plugin-creator",
 )
 
 REQUIRED_CONTRACT_KEYS = {
@@ -177,7 +173,7 @@ def _validate_with_schema(
                 f"{fail_code}_NO_JSONSCHEMA",
                 skill_rel,
                 f"jsonschema not installed; skipping schema validation for {context}. "
-                "Install via: uv pip install jsonschema (or run with `uv run --with jsonschema ...`).",
+                "Install via: uv pip install jsonschema (or run with `uv run --python 3.12 --with jsonschema ...`).",
             )
         )
         return findings
@@ -777,3 +773,4 @@ def main(argv: Sequence[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
+

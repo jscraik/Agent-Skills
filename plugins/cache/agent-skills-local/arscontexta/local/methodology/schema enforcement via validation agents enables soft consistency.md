@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Original"]
 source: [[2-4-metadata-properties]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema enforcement via validation agents enables soft consistency.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema enforcement via validation agents enables soft consistency
 

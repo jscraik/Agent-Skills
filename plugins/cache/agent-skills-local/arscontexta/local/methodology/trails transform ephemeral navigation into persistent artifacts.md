@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/trails transform ephemeral navigation into persistent artifacts.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # trails transform ephemeral navigation into persistent artifacts
 

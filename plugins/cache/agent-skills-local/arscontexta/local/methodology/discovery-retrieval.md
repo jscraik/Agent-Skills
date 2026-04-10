@@ -2,6 +2,8 @@
 description: Progressive disclosure, description quality, findability -- how notes get discovered by agents and humans
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/discovery-retrieval.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # discovery-retrieval
 

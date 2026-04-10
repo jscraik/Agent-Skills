@@ -62,6 +62,13 @@ backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
   writing-plans: Plan backend extensions before implementing
+bash-hygiene:
+  codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
+    safer defaults
+  systematic-debugging: Triage shell failures with evidence-first diagnosis before
+    behavioral changes
+  verification-before-completion: Enforce verification routines after Bash script
+    edits before claiming done
 baseline-ui:
   design-system: Apply design tokens that baseline-ui validates
   fixing-accessibility: Fix accessibility issues found during baseline-ui checks
@@ -264,6 +271,8 @@ docs-expert:
   visual-explainer: Present a complex system, workflow, or docs audit as a visual
     artifact
 evals-router:
+  skill-refactor: Analyze session-derived skill quality signals before redesigning
+    eval plans
   systematic-debugging: When eval pipeline bugs emerge — debug root cause before redesigning
     the eval
   test-driven-development: For the implementation layer of the review tooling or judge
@@ -284,7 +293,7 @@ fallback-release:
 favicon-generator:
   design-system: Keep favicon palette consistent with design-system tokens
   fixing-metadata: Pair with metadata fixes to ensure correct favicon references
-  og-image-creator: Generate OG images alongside favicons for complete brand suite
+  og-image-builder: Generate OG images alongside favicons for complete brand suite
 feature-video:
   gh-workflow: Attach the final artifact to a PR or delivery note
   remotion: Create or review a custom Remotion composition
@@ -306,7 +315,7 @@ fixing-accessibility:
 fixing-metadata:
   favicon-generator: Add favicon tags alongside other head metadata
   fixing-accessibility: Fix ARIA and semantic HTML alongside metadata
-  og-image-creator: Generate OG images that the metadata tags will reference
+  og-image-builder: Generate OG images that the metadata tags will reference
 frontend-design:
   design-system: Route token, alias, or system-governance work to the dedicated owner
   frontend-ui-design: Hand off once the request clearly becomes standard UI build
@@ -326,7 +335,10 @@ gh-workflow:
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
-imagegen: {}
+imagegen:
+  nano-banana-builder: Use Nano Banana when iterative prompt-image editing is required
+  og-image-builder: Generate route-aware OG images when output needs metadata tag integration
+  sora: Extend still-image workflows into AI-generated video
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -359,12 +371,17 @@ notebooklm:
   insight-report: Feed session insights into NotebookLM for deeper analysis
   markdown-converter: Convert docs to markdown before uploading to NotebookLM
   video-transcript-downloader: Download transcripts to feed as NotebookLM sources
+npm-workflow-discipline:
+  circleci: Align deterministic npm install and script contracts with CircleCI pipeline
+    behavior
+  coding-harness: Validate and enforce repository quality gates in CI and local workflows
+  release: Apply package and script contract checks during release readiness and cutover
 oak-api:
   chatgpt-apps: Build a ChatGPT App that surfaces Oak curriculum content
   fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
   mcp-builder: Expose Oak API as MCP tools for agent workflows
   product-spec: Spec the learning experience before implementing
-og-image-creator:
+og-image-builder:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
@@ -519,6 +536,8 @@ skill-builder:
 skill-creator:
   codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
+  skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
+    packages
 skill-refactor:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -526,7 +545,9 @@ skill-refactor:
 skillify:
   skill-creator: Create first-draft skill scaffolds before hardening
   skill-installer: Install and surface a validated skill across Codex catalogs
-skill-installer: {}
+skill-installer:
+  skill-creator: Author or repair local skill packages before installation
+  skillify: Harden source skills into canonical templates before install/distribution
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

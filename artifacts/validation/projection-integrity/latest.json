@@ -1,0 +1,153 @@
+{
+  "schema_version": "projection-parity.v1",
+  "generated_at": "2026-04-10T22:57:42.211939+00:00",
+  "mode": "verify",
+  "scope": "all",
+  "status": "pass",
+  "results": [
+    {
+      "name": "skill-factory-skill-builder-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "utilities/skill-builder",
+      "canonical": "plugins/skill-factory/skills/skill-builder",
+      "target": "../plugins/skill-factory/skills/skill-builder"
+    },
+    {
+      "name": "skill-factory-skill-refactor-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "utilities/skill-refactor",
+      "canonical": "plugins/skill-factory/skills/skill-refactor",
+      "target": "../plugins/skill-factory/skills/skill-refactor"
+    },
+    {
+      "name": "skill-factory-skillify-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "utilities/skillify",
+      "canonical": "plugins/skill-factory/skills/skillify",
+      "target": "../plugins/skill-factory/skills/skillify"
+    },
+    {
+      "name": "skill-factory-skill-creator-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/skill-creator",
+      "canonical": "plugins/skill-factory/skills/skill-creator",
+      "target": "../plugins/skill-factory/skills/skill-creator"
+    },
+    {
+      "name": "skill-factory-skill-installer-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/skill-installer",
+      "canonical": "plugins/skill-factory/skills/skill-installer",
+      "target": "../plugins/skill-factory/skills/skill-installer"
+    },
+    {
+      "name": "plugin-factory-plugin-builder-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "utilities/plugin-builder",
+      "canonical": "plugins/plugin-factory/skills/plugin-builder",
+      "target": "../plugins/plugin-factory/skills/plugin-builder"
+    },
+    {
+      "name": "plugin-factory-plugin-creator-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/plugin-creator",
+      "canonical": "plugins/plugin-factory/skills/plugin-creator",
+      "target": "../plugins/plugin-factory/skills/plugin-creator"
+    },
+    {
+      "name": "plugin-factory-plugin-installer-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/plugin-installer",
+      "canonical": "plugins/plugin-factory/skills/plugin-installer",
+      "target": "../plugins/plugin-factory/skills/plugin-installer"
+    },
+    {
+      "name": "cache-arscontexta",
+      "type": "mirror",
+      "source": "plugins/arscontexta",
+      "projection": "plugins/cache/agent-skills-local/arscontexta/local",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 306,
+      "source_manifest_sha256": "77bd71e1d7764b19b583f2daa4d21e061cd1168ec1fc55a7d28d0571000e7a75",
+      "projection_manifest_sha256": "77bd71e1d7764b19b583f2daa4d21e061cd1168ec1fc55a7d28d0571000e7a75",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-coderabbit",
+      "type": "mirror",
+      "source": "plugins/coderabbit",
+      "projection": "plugins/cache/agent-skills-local/coderabbit/local",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 210,
+      "source_manifest_sha256": "86dc176590eb601b965c4580908a3dc41e84bf5016a0b42d62c0cf63843708a8",
+      "projection_manifest_sha256": "86dc176590eb601b965c4580908a3dc41e84bf5016a0b42d62c0cf63843708a8",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-harness-engineering",
+      "type": "mirror",
+      "source": "plugins/harness-engineering",
+      "projection": "plugins/cache/agent-skills-local/harness-engineering/local",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 197,
+      "source_manifest_sha256": "0b51b5bdad168c0f55e034b28569a23dc584f22142a68a008f1b1ed893029bf3",
+      "projection_manifest_sha256": "0b51b5bdad168c0f55e034b28569a23dc584f22142a68a008f1b1ed893029bf3",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-plugin-factory",
+      "type": "mirror",
+      "source": "plugins/plugin-factory",
+      "projection": "plugins/cache/agent-skills-local/plugin-factory/local",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 63,
+      "source_manifest_sha256": "eae9105722d93663356320af5493e7fe1275bed8be6944461ff629a2daaecd2e",
+      "projection_manifest_sha256": "eae9105722d93663356320af5493e7fe1275bed8be6944461ff629a2daaecd2e",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-skill-factory",
+      "type": "mirror",
+      "source": "plugins/skill-factory",
+      "projection": "plugins/cache/agent-skills-local/skill-factory/local",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 192,
+      "source_manifest_sha256": "92179626a67e23b3011bad48ea2f58326ea0461a447489620ed6bcc8fea9521d",
+      "projection_manifest_sha256": "92179626a67e23b3011bad48ea2f58326ea0461a447489620ed6bcc8fea9521d",
+      "manifest_mismatch": false,
+      "status": "pass"
+    }
+  ]
+}

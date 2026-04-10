@@ -1,0 +1,38 @@
+{
+  "name": "symphony-orchestrator",
+  "version": "0.1.0",
+  "description": "Coordinates issue-driven coding-agent workspaces with deterministic orchestration policy.",
+  "author": {
+    "name": "Symphony Maintainers",
+    "email": "maintainers@example.com",
+    "url": "https://github.com/example"
+  },
+  "homepage": "https://example.com/plugins/symphony-orchestrator",
+  "repository": "https://github.com/example/symphony-orchestrator",
+  "license": "MIT",
+  "keywords": ["orchestration", "agent-workflow"],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Symphony Orchestrator",
+    "shortDescription": "Run issue-driven coding workflows with guardrails.",
+    "longDescription": "A plugin for deterministic issue polling, workspace isolation, and coding-agent orchestration.",
+    "developerName": "Symphony Maintainers",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://example.com/plugins/symphony-orchestrator",
+    "privacyPolicyURL": "https://example.com/privacy",
+    "termsOfServiceURL": "https://example.com/terms",
+    "defaultPrompt": "Review active issues and dispatch the highest priority task.",
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/screenshot1.png",
+      "./assets/screenshot2.png",
+      "./assets/screenshot3.png"
+    ]
+  }
+}

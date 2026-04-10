@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List skills from a GitHub repo path."""
+"""List skills from a GitHub repo path and mark canonical installs."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import urllib.error
+from pathlib import Path
 
 from github_utils import github_api_contents_url, github_request
 
@@ -28,15 +29,51 @@ class Args(argparse.Namespace):
 
 
 def _request(url: str) -> bytes:
+    """
+    Fetch the raw response body bytes from the given GitHub API URL for the skills listing.
+    
+    Parameters:
+        url (str): The full GitHub API URL to request.
+    
+    Returns:
+        bytes: Raw response body.
+    """
     return github_request(url, "codex-skill-list")
 
 
-def _codex_home() -> str:
-    return os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex"))
+def _canonical_repo_dest() -> str | None:
+    """
+    Determine the local canonical repository 'github' directory to use for checking installed skills.
+    
+    If the environment variable ASK_SKILLS_CANONICAL_DEST is set to a non-empty value (after trimming whitespace), that value is returned. Otherwise, walk upward from the location of this script and return the first parent whose tree contains a `.git` entry and also has `AGENTS.md`, `scripts/sync_skills.sh` and a `plugins` directory; the returned path is that parent joined with `github`. If no such parent is found, return `None`.
+    
+    Returns:
+        str | None: The filesystem path to the canonical repository's `github` directory, or `None` if no canonical destination can be determined.
+    """
+    override = os.environ.get("ASK_SKILLS_CANONICAL_DEST", "").strip()
+    if override:
+        return override
+
+    script_path = Path(__file__).resolve()
+    for parent in [script_path.parent, *script_path.parents]:
+        if not (parent / ".git").exists():
+            continue
+        if (parent / "AGENTS.md").is_file() and (parent / "scripts" / "sync_skills.sh").is_file() and (parent / "plugins").is_dir():
+            return str(parent / "github")
+    return None
 
 
 def _installed_skills() -> set[str]:
-    root = os.path.join(_codex_home(), "skills")
+    """
+    Get the set of skill directory names present in the local canonical skills repository.
+    
+    Returns:
+        set[str]: Directory names for installed skills. Returns an empty set if no canonical repository was located or if the resolved root path is not a directory.
+    """
+    canonical_root = _canonical_repo_dest()
+    if not canonical_root:
+        return set()
+    root = canonical_root
     if not os.path.isdir(root):
         return set()
     entries = set()

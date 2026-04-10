@@ -3,6 +3,8 @@ description: Without random selection, vault maintenance exhibits selection bias
 kind: research
 topics: ["[[maintenance-patterns]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/random note resurfacing prevents write-only memory.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # random note resurfacing prevents write-only memory
 

@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-09.v1"
+POLICY_VERSION = "2026-04-10.v3"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -44,7 +44,6 @@ EXCLUDED_SCAN_SEGMENTS: tuple[str, ...] = (
 
 # Internal skills intentionally hidden from flat runtime discovery.
 HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
-    "coderabbit",
     "linear",
     "plugin-builder",
     "plugin-creator",
@@ -53,19 +52,75 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skillgrade-setup",
 )
 
+# Plugin router skills that should be visible in default flat discovery.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+    "arscontexta",
+    "ce-brainstorm",
+    "ce-compound",
+    "ce-compound-refresh",
+    "ce-deepen-plan",
+    "ce-deepen-spec",
+    "ce-ideate",
+    "ce-plan",
+    "ce-reliability-review",
+    "ce-review",
+    "ce-spec",
+    "ce-tdd",
+    "ce-technical-review",
+    "ce-work",
+    "coderabbit",
+    "skill-builder",
+    "skill-creator",
+    "skill-factory",
+    "skill-installer",
+    "skill-refactor",
+    "skillify",
+)
+
+# Plugin lane skills that stay hidden by default unless advanced mode is used.
+PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
+    "autofix",
+    "code-review",
+    "simplify",
+)
+
 
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:
+    """
+    Builds repository scan roots prefixed with "./".
+    
+    Each entry from REPO_SCAN_ROOTS is returned with a "./" prefix to ensure relative-path scanning.
+    
+    Returns:
+    	tuple[str, ...]: Tuple of scan-root strings, each prefixed with "./".
+    """
     return tuple(f"./{root}" for root in REPO_SCAN_ROOTS)
 
 
 def payload() -> dict[str, Any]:
-    """Stable serialization input used to compute policy identity."""
+    """
+    Produce a stable dictionary of all inputs that define the selection policy identity.
+    
+    Tuples are converted to lists to ensure deterministic JSON serialization for hashing and storage.
+    
+    Returns:
+        payload (dict[str, Any]): Mapping with the following keys:
+            - "policy_version": str
+            - "repo_scan_roots": list[str]
+            - "plugin_skill_root_glob": str
+            - "excluded_scan_segments": list[str]
+            - "hidden_flat_skill_names": list[str]
+            - "plugin_visible_router_skill_names": list[str]
+            - "plugin_hidden_lane_skill_names": list[str]
+    """
     return {
         "policy_version": POLICY_VERSION,
         "repo_scan_roots": list(REPO_SCAN_ROOTS),
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,
         "excluded_scan_segments": list(EXCLUDED_SCAN_SEGMENTS),
         "hidden_flat_skill_names": list(HIDDEN_FLAT_SKILL_NAMES),
+        "plugin_visible_router_skill_names": list(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
+        "plugin_hidden_lane_skill_names": list(PLUGIN_HIDDEN_LANE_SKILL_NAMES),
     }
 
 
@@ -80,11 +135,27 @@ def _shell_array(name: str, values: Iterable[str]) -> str:
 
 
 def render_shell() -> str:
+    """
+    Produce a newline-delimited shell fragment defining selection policy variables.
+    
+    The fragment contains a quoted `SELECTION_POLICY_IDENTITY`, shell-array assignments for repo scan roots, excluded segments, hidden flat skills, plugin-visible router skills and plugin-hidden lane skills, and a quoted `SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB`.
+    
+    Returns:
+        shell_fragment (str): Lines joined by newlines representing shell assignments.
+    """
     lines = [
         f"SELECTION_POLICY_IDENTITY={shlex.quote(policy_identity())}",
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),
         _shell_array("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", HIDDEN_FLAT_SKILL_NAMES),
+        _shell_array(
+            "SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS",
+            PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
+        ),
+        _shell_array(
+            "SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS",
+            PLUGIN_HIDDEN_LANE_SKILL_NAMES,
+        ),
         f"SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB={shlex.quote(PLUGIN_SKILL_ROOT_GLOB)}",
     ]
     return "\n".join(lines)

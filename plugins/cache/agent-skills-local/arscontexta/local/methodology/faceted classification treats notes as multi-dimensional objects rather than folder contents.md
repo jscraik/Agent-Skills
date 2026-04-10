@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]", "[[discovery-retrieval]]"]
 methodology: ["PKM Research"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/faceted classification treats notes as multi-dimensional objects rather than folder contents.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # faceted classification treats notes as multi-dimensional objects rather than folder contents
 

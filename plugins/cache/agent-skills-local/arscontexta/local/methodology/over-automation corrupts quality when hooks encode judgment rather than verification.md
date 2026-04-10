@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[maintenance-patterns]]"]
 methodology: ["Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/over-automation corrupts quality when hooks encode judgment rather than verification.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # over-automation corrupts quality when hooks encode judgment rather than verification
 

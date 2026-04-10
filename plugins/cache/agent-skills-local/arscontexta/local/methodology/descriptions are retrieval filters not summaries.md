@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]"]
 methodology: ["Cornell"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/descriptions are retrieval filters not summaries.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # descriptions are retrieval filters not summaries
 

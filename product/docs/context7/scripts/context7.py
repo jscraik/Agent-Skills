@@ -14,10 +14,23 @@ import urllib.error
 import os
 
 API_BASE = "https://context7.com/api/v2"
+ALLOWED_HOSTS = {"context7.com", "api.context7.com"}
+
+
+def _assert_allowed_context7_url(url: str) -> None:
+    """Fail closed when a request URL is outside the documented Context7 allowlist."""
+    parsed = urllib.parse.urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme != "https" or host not in ALLOWED_HOSTS:
+        raise ValueError(
+            "Blocked request URL outside Context7 allowlist. "
+            "Only https://context7.com and https://api.context7.com are permitted."
+        )
 
 
 def make_request(url: str, api_key: str) -> dict | str:
     """Make an authenticated request to Context7 API."""
+    _assert_allowed_context7_url(url)
     headers = {"Authorization": f"Bearer {api_key}"}
     req = urllib.request.Request(url, headers=headers)
 

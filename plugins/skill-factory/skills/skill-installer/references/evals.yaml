@@ -8,7 +8,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Can you list curated skills and help me install one into CODEX_HOME/skills using the standard installer workflow?"
+    prompt: "Can you list curated skills and help me install one into the canonical git-backed skills category using the standard installer workflow?"
     acceptance:
       - type: regex
         value: "(?i)(list|curated|install)"

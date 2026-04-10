@@ -10,6 +10,7 @@ description: Create and scaffold plugin directories for Codex with a required `.
 - Create the smallest viable plugin package first, then expand only where the user asks.
 - Keep discovery and install behavior predictable: canonical paths, canonical manifest shape, explicit defaults.
 - Bias toward safe scaffolding over opinionated completion; placeholders are intentional and easier to review.
+- Preserve single canonical ownership: when an existing skill is being pluginized, adopt it by move, not duplicate copy.
 
 ## Anti-Patterns to Avoid
 
@@ -17,12 +18,14 @@ description: Create and scaffold plugin directories for Codex with a required `.
 - Do not write marketplace entries with missing `policy.installation`, `policy.authentication`, or `category`.
 - Do not assume repo-local versus home-local targets when the request is ambiguous.
 - Do not reorder existing marketplace plugin entries unless explicitly requested.
+- Do not keep the same skill as active canonical source in both standalone and plugin paths.
 
 ## Scope Guardrails
 
 - First pass should stay focused on 2-3 surfaces: scaffold, manifest placeholders, and optional marketplace entry.
 - Add optional folders (`skills/`, `hooks/`, `scripts/`, `assets/`, `.mcp.json`, `.app.json`) only when requested.
 - Treat policy product gating as out of scope by default unless the user explicitly asks for `policy.products`.
+- Existing-skill adoption should remain deterministic and minimal: move source, sync projections, validate parity.
 
 ## Encouraging Variation
 
@@ -37,9 +40,9 @@ description: Create and scaffold plugin directories for Codex with a required `.
 ```bash
   # Plugin names are normalized to lower-case hyphen-case and must be <= 64 chars.
   # The generated folder and plugin.json name are always the same.
-# Run from repo root (or replace .agents/... with the absolute path to this SKILL).
+# Run from repo root.
 # By default creates in <repo_root>/plugins/<plugin-name>.
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
 ```
 
 2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace the sample values with your real plugin metadata.
@@ -48,13 +51,13 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-nam
 
 ```bash
 # marketplace.json always lives at <repo-root>/.agents/plugins/marketplace.json
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
 ```
 
 For a home-local plugin, treat `<home>` as the root and use:
 
 ```bash
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin \
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin \
   --path ~/plugins \
   --marketplace-path ~/.agents/plugins/marketplace.json \
   --with-marketplace
@@ -63,7 +66,7 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin \
 4. Generate/adjust optional companion folders as needed:
 
 ```bash
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
   --with-skills --with-hooks --with-scripts --with-assets --with-mcp --with-apps --with-marketplace
 ```
 
@@ -89,6 +92,26 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
   - `assets/`
   - `.mcp.json`
   - `.app.json`
+
+## Existing Skill Adoption (Default)
+
+When a user asks to create a plugin and provides an already-created skill, treat adoption as default behavior:
+
+- Move the existing skill into `plugins/<plugin-name>/skills/<skill-name>`; do not duplicate it.
+- Prefer `git mv` for tracked repository paths. Fall back to `mv` only when git move is not applicable.
+- Keep a single canonical source path after adoption; remove duplicate active source locations.
+- Only ask follow-up questions when source-path intent is ambiguous or multiple candidate skills match.
+- If a user explicitly requests a temporary duplicate/migration copy, do that as an exception and state the risk.
+
+Post-adoption sync and checks (required):
+
+```bash
+bash scripts/sync_skills.sh
+bash scripts/sync_projection_trees.sh all
+python3 scripts/verify_skill_catalog_freshness.py
+bash scripts/check_plugin_skill_shadowing.sh
+bash scripts/validate_projection_integrity.sh --all
+```
 
 ## Marketplace workflow
 
@@ -169,6 +192,7 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin -
 - When generating marketplace entries, always write `policy.installation`, `policy.authentication`, and `category` even if their values are defaults.
 - Add `policy.products` only when the user explicitly asks for that override.
 - Keep marketplace `source.path` relative to repo root as `./plugins/<plugin-name>`.
+- If an existing skill is supplied during plugin creation, adopt by move into the plugin skill path by default; avoid duplicate canonical copies.
 
 ## Reference to exact spec sample
 
@@ -181,7 +205,7 @@ For the exact canonical sample JSON for both plugin manifests and marketplace en
 After editing `SKILL.md`, run:
 
 ```bash
-python3 <path-to-skill-creator>/scripts/quick_validate.py .agents/skills/plugin-creator
+python3 utilities/skill-builder/scripts/quick_validate.py plugins/plugin-factory/skills/plugin-creator
 ```
 
 Fail-fast rule:

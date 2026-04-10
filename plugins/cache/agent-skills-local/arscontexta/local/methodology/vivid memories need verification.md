@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: [[rata-paper-43-flashbulb-memory]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/vivid memories need verification.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # vivid memories need verification
 

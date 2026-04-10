@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import textwrap
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -409,6 +410,23 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
+                repo_root / "plugins" / "harness-engineering" / "skills" / "ce-work" / "SKILL.md",
+                "# plugin skill",
+            )
+            write_text(
+                repo_root / ".agents" / "skills" / "ce-work" / "SKILL.md",
+                "# flat skill",
+            )
+
+            result = run_shadow_check(repo_root)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Plugin-shadowing check failed", result.stderr)
+            self.assertIn("- ce-work", result.stderr)
+
+    def test_plugin_shadowing_check_allows_router_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            write_text(
                 repo_root / "plugins" / "coderabbit" / "skills" / "coderabbit" / "SKILL.md",
                 "# plugin skill",
             )
@@ -418,21 +436,146 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             )
 
             result = run_shadow_check(repo_root)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("Plugin-shadowing check failed", result.stderr)
-            self.assertIn("- coderabbit", result.stderr)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("Plugin-shadowing check passed", result.stdout)
 
     def test_selection_policy_identity_matches_discovery_identity(self) -> None:
+        """
+        Assert selection policy identity matches skill discovery identity.
+        
+        Verifies that `selection_policy.policy_identity()` and `skill_discovery.get_policy_identity()`
+        produce the same value, ensuring both modules expose a consistent policy identity used for selection.
+        """
         selection_policy = load_selection_policy_module()
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
+    def test_skill_discovery_visibility_hides_plugin_lanes_by_default(self) -> None:
+        """
+        Verify that plugin-owned lane skills are hidden by default but included in advanced visibility.
+
+        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` keeps the router skill while hiding lane skills and that `visibility="advanced"` returns all four skills.
+        """
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            for name in ("coderabbit", "autofix", "code-review", "simplify"):
+                write_text(
+                    flat_root / name / "SKILL.md",
+                    f"""
+                    ---
+                    name: {name}
+                    description: "{name} test skill"
+                    ---
+
+                    # {name}
+                    """,
+                )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+                mock.patch.object(
+                    skill_discovery,
+                    "_is_plugin_owned_skill_dir",
+                    side_effect=lambda skill_dir: skill_dir.name in {
+                        "coderabbit",
+                        "autofix",
+                        "code-review",
+                        "simplify",
+                    },
+                ),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="advanced",
+                )
+
+        default_names = sorted(entry.name for entry in default_entries)
+        advanced_names = sorted(entry.name for entry in advanced_entries)
+        self.assertEqual(default_names, ["coderabbit"])
+        self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
+
+    def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_hides_them(self) -> None:
+        """
+        Ensure advanced discovery merges plugin lane skills when flat projection hides them.
+        
+        Sets up a repository where the runtime (flat) projection exposes only a router skill (`coderabbit`)
+        while the plugin canonical source contains lane skills (`autofix`, `code-review`, `simplify`).
+        Asserts that discovery with `visibility="default"` returns only the router skill and that
+        `visibility="advanced"` returns the merged set including the plugin lane skills.
+        """
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            plugin_root = repo_root / "plugins" / "coderabbit" / "skills"
+
+            # Runtime projection keeps only router skill.
+            write_text(
+                flat_root / "coderabbit" / "SKILL.md",
+                """
+                ---
+                name: coderabbit
+                description: "router"
+                ---
+                # coderabbit
+                """,
+            )
+
+            # Canonical plugin source still contains lane skills.
+            for lane in ("autofix", "code-review", "simplify"):
+                write_text(
+                    plugin_root / lane / "SKILL.md",
+                    f"""
+                    ---
+                    name: {lane}
+                    description: "{lane}"
+                    ---
+                    # {lane}
+                    """,
+                )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="advanced",
+                )
+
+        default_names = sorted(entry.name for entry in default_entries)
+        advanced_names = sorted(entry.name for entry in advanced_entries)
+        self.assertEqual(default_names, ["coderabbit"])
+        self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
+
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
+        """
+        Ensure the sync script references the selection policy and its exported constants required for skill syncing.
+        
+        Asserts that scripts/sync_skills.sh contains `selection_policy.py` and the exports:
+        `SELECTION_POLICY_REPO_SCAN_ROOTS`, `SELECTION_POLICY_EXCLUDED_SEGMENTS`,
+        `SELECTION_POLICY_HIDDEN_FLAT_SKILLS`, `SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS`,
+        and `SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS`.
+        """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("selection_policy.py", content)
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
         self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
         self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
+        self.assertIn("projection_integrity.py", content)
 
 
 if __name__ == "__main__":

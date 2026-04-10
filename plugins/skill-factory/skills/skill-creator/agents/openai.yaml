@@ -3,3 +3,5 @@ interface:
   short_description: "Create or update a skill"
   icon_small: "./assets/skill-creator.png"
   icon_large: "./assets/skill-creator.png"
+policy:
+  allow_implicit_invocation: false

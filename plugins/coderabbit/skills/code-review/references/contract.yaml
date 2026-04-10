@@ -58,6 +58,7 @@ outputs:
     type: string
     description: Outcome after iterative fix and rerun cycle.
 success_criteria:
+  - Output always includes the standard envelope keys: schema_version, summary, actions, validation, risk_note, next_step.
   - Review command matches requested scope and mode.
   - Critical/warning findings are surfaced before informational notes.
   - Safety constraints and redaction are enforced in summaries.

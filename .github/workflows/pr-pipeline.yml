@@ -88,8 +88,8 @@ jobs:
           SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
         run: bash scripts/validate_skill_authoring_family.sh
 
-  # CI orchestration policy: harness-preflight must wait for both repo-validate
-  # and authoring-family-gate so harness checks only run after repository and
+  # CI orchestration policy: harness-preflight must wait for repo-validate and
+  # authoring-family-gate so harness checks only run after repository and
   # authoring-family governance gates have passed.
   harness-preflight:
     name: harness-preflight

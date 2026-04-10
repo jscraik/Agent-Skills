@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 methodology: ["Network Science"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/backlinks implicitly define notes by revealing usage context.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # backlinks implicitly define notes by revealing usage context
 

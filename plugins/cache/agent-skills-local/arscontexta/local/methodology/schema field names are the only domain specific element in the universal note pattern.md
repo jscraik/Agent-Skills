@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[note-design]]"]
 methodology: ["Original"]
 source: [[arscontexta-notes]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema field names are the only domain specific element in the universal note pattern.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema field names are the only domain specific element in the universal note pattern
 

@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Cognitive Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/notes function as cognitive anchors that stabilize attention during complex tasks.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # notes function as cognitive anchors that stabilize attention during complex tasks
 

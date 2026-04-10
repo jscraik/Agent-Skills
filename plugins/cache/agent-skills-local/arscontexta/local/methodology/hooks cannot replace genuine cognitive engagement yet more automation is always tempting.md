@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Original", "Cognitive Science"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/hooks cannot replace genuine cognitive engagement yet more automation is always tempting.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # hooks cannot replace genuine cognitive engagement yet more automation is always tempting
 

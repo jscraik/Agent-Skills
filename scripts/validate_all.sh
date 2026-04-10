@@ -133,13 +133,19 @@ if [[ "$output_mode" == "ephemeral" ]]; then
 fi
 echo ""
 
+projection_manifest="$run_dir/projection-integrity.json"
+recursive_artifacts_cmd=("${python_cmd[@]}" scripts/verify_recursive_skill_graph_artifacts.py --quiet)
+if [[ "$output_mode" == "ephemeral" ]]; then
+  recursive_artifacts_cmd+=(--manifest "$run_dir/artifact-parity-manifest.json")
+fi
 run_check warn plan-graphs "📊 Validating plan graphs..." ./scripts/validate_plan_graphs.sh
-run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${python_cmd[@]}" scripts/verify_recursive_skill_graph_artifacts.py --quiet
+run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${recursive_artifacts_cmd[@]}"
 run_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" scripts/docs_lint.py --mode block --config docs-policy.json
 run_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" scripts/verify_question_lifecycle_contract.py
 run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" scripts/test_skill_lifecycle_validation.py
 run_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" scripts/verify_skill_catalog_freshness.py --strict
 run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash scripts/check_plugin_skill_shadowing.sh
+run_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash scripts/validate_projection_integrity.sh
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict

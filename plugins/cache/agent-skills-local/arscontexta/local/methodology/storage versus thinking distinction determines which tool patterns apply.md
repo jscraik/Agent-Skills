@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["PKM Research"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/storage versus thinking distinction determines which tool patterns apply.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # storage versus thinking distinction determines which tool patterns apply
 

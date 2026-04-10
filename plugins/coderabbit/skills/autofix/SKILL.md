@@ -30,6 +30,7 @@ triggers:
 
 ## Outputs
 - Ordered issue list mapped from unresolved CodeRabbit threads.
+- Pre-apply preview table for each actionable fix (`issue`, `file`, `line`, `proposed_change`, `risk`).
 - Applied code changes tied to specific issues.
 - Optional single consolidated commit and optional push.
 - End-of-run PR comment summarizing what was fixed.
@@ -52,10 +53,16 @@ triggers:
 7. Ask user for mode:
    - `manual`: show each proposed fix and request approval.
    - `auto`: apply all actionable fixes in order.
-8. Apply fixes, track changed files, and preserve original issue ordering.
-9. If changes exist, create one consolidated commit.
-10. Offer validation checks before push.
-11. If approved, push and post one final summary comment on the PR.
+8. Generate a pre-apply preview table before any edits:
+   - `issue`
+   - `file`
+   - `line`
+   - `proposed_change`
+   - `risk` (`low|medium|high`)
+9. Apply fixes, track changed files, and preserve original issue ordering.
+10. If changes exist, create one consolidated commit.
+11. Offer validation checks before push.
+12. If approved, push and post one final summary comment on the PR.
 
 ## Validation
 - Fail fast: stop immediately on missing PR context or no unresolved CodeRabbit threads.

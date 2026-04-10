@@ -4,6 +4,8 @@ kind: guidance
 status: active
 topics: ["[[vocabulary-transformation]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/transform universal vocabulary to domain-native language through six levels.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # transform universal vocabulary to domain-native language through six levels
 

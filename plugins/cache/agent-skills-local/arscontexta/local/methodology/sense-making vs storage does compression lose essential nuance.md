@@ -5,6 +5,8 @@ topics: ["[[discovery-retrieval]]"]
 methodology: ["Cognitive Science"]
 source: [[2-4-metadata-properties]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/sense-making vs storage does compression lose essential nuance.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # sense-making vs storage does compression lose essential nuance
 

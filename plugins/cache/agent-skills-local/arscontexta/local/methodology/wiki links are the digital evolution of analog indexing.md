@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 methodology: ["Cornell"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/wiki links are the digital evolution of analog indexing.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # wiki links are the digital evolution of analog indexing
 

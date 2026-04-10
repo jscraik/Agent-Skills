@@ -2,6 +2,8 @@
 description: Templates, validation, field evolution -- how schema stays consistent across notes and over time
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema-enforcement.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema-enforcement
 

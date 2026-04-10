@@ -1,0 +1,68 @@
+{
+  "jobs": [
+    {
+      "kind": "skill",
+      "name": "using-git-worktrees",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch11-out/skill-using-git-worktrees-small.png",
+      "target": "utilities/using-git-worktrees/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Using Git Worktrees\".\nConcept: Align Codex and Claude worktree setup, sync strategy, and cleanup safety.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "using-git-worktrees",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch11-out/skill-using-git-worktrees-large.png",
+      "target": "utilities/using-git-worktrees/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Using Git Worktrees\".\nConcept: Align Codex and Claude worktree setup, sync strategy, and cleanup safety.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "verification-before-completion",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch11-out/skill-verification-before-completion-small.png",
+      "target": "utilities/verification-before-completion/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Verification Before Completion\".\nConcept: Validate completion claims with fresh command evidence. Use\u2026\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "verification-before-completion",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch11-out/skill-verification-before-completion-large.png",
+      "target": "utilities/verification-before-completion/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Verification Before Completion\".\nConcept: Validate completion claims with fresh command evidence. Use\u2026\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "visual-explainer",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch11-out/skill-visual-explainer-small.png",
+      "target": "utilities/visual-explainer/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Visual Explainer\".\nConcept: Generate self-contained HTML explainers for systems, plans, and comparisons.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "visual-explainer",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch11-out/skill-visual-explainer-large.png",
+      "target": "utilities/visual-explainer/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Visual Explainer\".\nConcept: Generate self-contained HTML explainers for systems, plans, and comparisons.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "writing-plans",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch11-out/skill-writing-plans-small.png",
+      "target": "utilities/writing-plans/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Writing Plans\".\nConcept: Create execution-ready implementation plans with task\u2026\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "writing-plans",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch11-out/skill-writing-plans-large.png",
+      "target": "utilities/writing-plans/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Writing Plans\".\nConcept: Create execution-ready implementation plans with task\u2026\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    }
+  ]
+}

@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[graph-structure]]"]
 methodology: ["PKM Research"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/data exit velocity measures how quickly content escapes vendor lock-in.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # data exit velocity measures how quickly content escapes vendor lock-in
 

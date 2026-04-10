@@ -4,6 +4,8 @@ kind: example
 domain: trading
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/trading uses conviction tracking with thesis-outcome correlation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # trading uses conviction tracking with thesis-outcome correlation
 

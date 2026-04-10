@@ -15,7 +15,7 @@ cases:
       - type: regex
         value: '(?i)SKILL\.md'
       - type: regex
-        value: '(?i)(CODEX_HOME|\.codex/skills|destination path)'
+        value: '(?i)(canonical|github/|category path|destination path)'
 
   - id: implicit-starter-authoring
     name: implicit starter authoring

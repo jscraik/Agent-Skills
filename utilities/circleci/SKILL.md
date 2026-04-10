@@ -21,6 +21,7 @@ metadata:
 - [Inputs](#inputs)
 - [Reference sources](#reference-sources)
 - [Reference sources and crawl evidence](#reference-sources-and-crawl-evidence)
+- [Context7 CLI and Skill Wizard](#context7-cli-and-skill-wizard)
 - [Reference workflow](#reference-workflow)
 - [Outputs](#outputs)
 - [Workflow](#workflow)
@@ -65,6 +66,7 @@ metadata:
 - `references/raw-docs-md/docs-guides-security-security-overview.md` (security posture).
 - `references/raw-docs-md/docs-reference-configuration-reference.md` (official config key reference).
 - `references/raw-docs-md/docs-guides.md` (index anchor).
+- Context7 live docs target: `/circleci/circleci-docs`.
 
 ## Reference sources and crawl evidence
 - This skill ships with CircleCI documentation snapshots under `references/raw-docs-md/`.
@@ -75,13 +77,56 @@ metadata:
   - `references/cf-crawl/manual-run/status-response.json`
 - Use these for traceability if a recommendation references newly added or updated pages.
 - Local env for running/refreshing crawl jobs: `~/.codex/.env` (not `~/.codex.env`).
+- Context7 Skill Wizard command map: `../../product/docs/context7/references/context7-skill-wizard.md`.
+- Context7 CLI reference: `https://context7.com/docs/clients/cli` (use for command/auth drift checks).
+
+## Context7 CLI and Skill Wizard
+- Use this lane when asked to update CircleCI guidance through Context7 CLI workflows.
+- Treat `../../product/docs/context7/references/context7-skill-wizard.md` as the command source of truth.
+- Baseline runtime requirements:
+  - Node.js 18 or later.
+  - Use `npx ctx7 ...` for one-off runs, or `npm install -g ctx7` for a persistent CLI.
+- Preferred command sequence for CircleCI skill updates:
+
+```bash
+npx ctx7 skills search circleci
+npx ctx7 skills generate --claude
+npx ctx7 skills list --claude
+npx ctx7 skills list --cursor
+npx ctx7 skills list --universal
+```
+
+- Preferred docs refresh sequence for CircleCI norms:
+
+```bash
+npx ctx7 library circleci "workflows approval contexts filters config validate"
+npx ctx7 docs /circleci/circleci-docs "approval job type approval requires"
+npx ctx7 docs /circleci/circleci-docs "contexts project restrictions security groups"
+npx ctx7 docs /circleci/circleci-docs "filters branches tags only ignore precedence"
+npx ctx7 docs /circleci/circleci-docs "circleci config validate config process local execute"
+```
+
+- `ctx7 skills info` expects a repository path (for example `/anthropics/skills`), not a keyword.
+- Install target flags allowed by contract:
+  - `--claude`
+  - `--cursor`
+  - `--universal`
+  - `--antigravity`
+  - `--global`
+  - `--all`
+- Authentication expectations (from Context7 CLI docs):
+  - `ctx7 skills search|install|suggest|list|remove` do not require login.
+  - `ctx7 skills generate` requires authentication (`ctx7 login` or configured API key).
+- If `ctx7` is unavailable, fail fast and call out the blocker; do not invent flags or run undocumented subcommands.
+- If installed skills do not appear immediately, require an agent restart before treating the update as failed.
 
 ## Reference workflow
 1. Use local markdown references as primary source.
-2. If a requested topic is missing or stale, run/refine via `$cf-crawl` with bounded scope.
+2. If a requested topic is missing or stale, run the Context7 Skill Wizard lane first, then run the Context7 docs refresh sequence for `/circleci/circleci-docs`.
 3. Confirm source file, section, and publish timestamp before making normative guidance.
-4. Produce recommendations using verifiable references and explicit caveats.
-5. Preserve artifact trail in the `artifacts/` output.
+4. If gaps remain after Context7 retrieval, run/refine via `$cf-crawl` with bounded scope.
+5. Produce recommendations using verifiable references and explicit caveats.
+6. Preserve artifact trail in the `artifacts/` output.
 
 ## Deliverables
 - `artifacts/circleci-migration-plan.md`  
@@ -127,6 +172,12 @@ metadata:
 ## Validation
 - If required inputs are missing, ask clarifying questions before producing a fabrication.
 - Validate recommendations against local reference evidence (or refreshed `cf-crawl` output).
+- For Context7 wizard requests, validate commands and flags against `../../product/docs/context7/references/context7-skill-wizard.md`.
+- For Context7 docs-backed CircleCI updates, confirm these rules before publishing:
+  - manual approval jobs use `type: approval`, and downstream jobs explicitly list that job under `requires`
+  - when both branch and tag filters are configured, branch filters take precedence
+  - secrets are stored in contexts, with project restrictions applied for sensitive contexts
+  - local validation guidance includes `circleci config validate`; v2.1 local runs include `circleci config process` before `circleci local execute`
 - For config topics, include at least one explicit recommendation to run:
   - `circleci config validate`
   - `circleci setup` (when onboarding a local shell)

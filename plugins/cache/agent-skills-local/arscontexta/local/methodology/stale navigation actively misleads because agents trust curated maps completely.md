@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/stale navigation actively misleads because agents trust curated maps completely.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # stale navigation actively misleads because agents trust curated maps completely
 

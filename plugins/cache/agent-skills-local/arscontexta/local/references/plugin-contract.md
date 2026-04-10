@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/plugin-contract.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Plugin Contract
 
 This package follows Codex plugin packaging requirements for first-pass conversion.

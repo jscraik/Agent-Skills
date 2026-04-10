@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Evergreen"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/insight accretion differs from productivity in knowledge systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # insight accretion differs from productivity in knowledge systems
 

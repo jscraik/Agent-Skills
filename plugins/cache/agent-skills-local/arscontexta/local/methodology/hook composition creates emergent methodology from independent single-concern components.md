@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]", "[[agent-cognition]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/hook composition creates emergent methodology from independent single-concern components.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # hook composition creates emergent methodology from independent single-concern components
 

@@ -19,7 +19,33 @@ from typing import Any, Iterable
 
 MAX_PLUGIN_NAME_LENGTH = 64
 PLUGIN_NAME_RE = re.compile(r"^[a-z0-9](?:-?[a-z0-9]){0,63}$")
-REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _discover_repo_root() -> Path:
+    """
+    Discover the repository root directory for this project.
+    
+    Searches the ancestor directories of this file and returns the first directory that contains a "plugins" subdirectory and either a ".git" entry or both "plugins/plugin-factory/skills" and ".agents". If no such ancestor is found, returns the current working directory resolved to an absolute Path.
+    
+    Returns:
+        Path: The discovered repository root directory, or the resolved current working directory if no match is found.
+    """
+    def _looks_like_repo_root(candidate: Path) -> bool:
+        if not (candidate / "plugins").is_dir():
+            return False
+        if (candidate / ".git").exists():
+            return True
+        return (candidate / "plugins" / "plugin-factory" / "skills").is_dir() and (
+            candidate / ".agents"
+        ).is_dir()
+
+    for ancestor in Path(__file__).resolve().parents:
+        if _looks_like_repo_root(ancestor):
+            return ancestor
+    return Path.cwd().resolve()
+
+
+REPO_ROOT = _discover_repo_root()
 DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
 DEFAULT_MARKETPLACE_PATH = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 SKILL_BUILDER_INIT = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "init_skill.py"
@@ -999,10 +1025,35 @@ def update_marketplace_json(
 
 
 def _load_plugin_payload(plugin_root: Path) -> dict[str, Any] | None:
-    manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
-    if not manifest_path.exists():
+    manifest_path = _plugin_manifest_path(plugin_root)
+    if not manifest_path.is_file():
         return None
     return load_json(manifest_path)
+
+
+def _plugin_manifest_path(plugin_root: Path) -> Path:
+    return plugin_root / ".codex-plugin" / "plugin.json"
+
+
+def _is_plugin_like_dir(path: Path) -> bool:
+    return path.is_dir() and not path.name.startswith(".") and (path / ".codex-plugin").exists()
+
+
+def _is_local_plugin_package_dir(path: Path) -> bool:
+    return _is_plugin_like_dir(path) and _plugin_manifest_path(path).is_file()
+
+
+def _collect_malformed_local_plugin_dirs(plugin_parent: Path) -> list[Path]:
+    if not plugin_parent.exists() or not plugin_parent.is_dir():
+        return []
+    malformed: list[Path] = []
+    for child in sorted(plugin_parent.iterdir()):
+        if not _is_plugin_like_dir(child):
+            continue
+        if _is_local_plugin_package_dir(child):
+            continue
+        malformed.append(child)
+    return malformed
 
 
 def _normalize_marketplace_entry(
@@ -1181,10 +1232,22 @@ def _audit_marketplace(
                 }
             )
 
+    malformed_local_plugins = _collect_malformed_local_plugin_dirs(plugins_path)
+    for malformed_dir in malformed_local_plugins:
+        findings.append(
+            {
+                "severity": "warning",
+                "message": (
+                    f"plugin-like directory '{malformed_dir}' is missing a regular "
+                    ".codex-plugin/plugin.json file."
+                ),
+            }
+        )
+
     local_plugin_names = sorted(
         child.name
         for child in plugins_path.iterdir()
-        if child.is_dir() and not child.name.startswith(".")
+        if _is_local_plugin_package_dir(child)
     ) if plugins_path.exists() else []
     for plugin_name in local_plugin_names:
         if plugin_name not in seen_names:
@@ -2050,7 +2113,7 @@ def _collect_existing_plugin_signatures(plugin_parent: Path) -> list[dict[str, A
 
     signatures: list[dict[str, Any]] = []
     for child in sorted(plugin_parent.iterdir()):
-        if not child.is_dir():
+        if not _is_local_plugin_package_dir(child):
             continue
         signature = _load_existing_plugin_signature(child)
         if signature is not None:
@@ -2142,6 +2205,7 @@ def _find_existing_plugin_overlaps(
 ) -> dict[str, Any]:
     candidate = _source_signature_from_report(plugin_name, source_report)
     overlaps: list[dict[str, Any]] = []
+    malformed_plugin_dirs = [str(path) for path in _collect_malformed_local_plugin_dirs(plugin_parent)]
     exclude_resolved = str(exclude_root.expanduser().resolve()) if exclude_root else None
 
     for existing in _collect_existing_plugin_signatures(plugin_parent):
@@ -2169,6 +2233,7 @@ def _find_existing_plugin_overlaps(
         "recommendation": recommendation,
         "exact_matches": exact_matches,
         "similar_matches": similar_matches,
+        "malformed_plugin_dirs": malformed_plugin_dirs,
     }
 
 
@@ -2199,6 +2264,15 @@ def _deconflict_report_template(overlap_report: dict[str, Any]) -> str:
             lines.append(f"- `{match['plugin_name']}` at `{match['plugin_root']}`")
             lines.append(f"  score: `{match['score']}`; reasons: {reasons}; shared surfaces: {shared_surfaces}")
         lines.append("")
+
+    malformed = overlap_report.get("malformed_plugin_dirs") or []
+    lines.append("## Malformed local plugin directories")
+    if not malformed:
+        lines.append("- none")
+    else:
+        for path in malformed:
+            lines.append(f"- `{path}` (missing regular `.codex-plugin/plugin.json`)")
+    lines.append("")
 
     lines.extend(
         [
@@ -2964,6 +3038,11 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         source_report=source_report,
         exclude_root=plugin_root if plugin_root.exists() else None,
     )
+    malformed_plugin_dirs = overlap_report.get("malformed_plugin_dirs") or []
+    if malformed_plugin_dirs:
+        print("WARNING: malformed local plugin directories detected (missing regular .codex-plugin/plugin.json):")
+        for malformed_dir in malformed_plugin_dirs:
+            print(f"  - {malformed_dir}")
     if overlap_report["exact_matches"] or overlap_report["similar_matches"]:
         print("Local plugin overlap review:")
         print(json.dumps(overlap_report, indent=2))
@@ -3198,6 +3277,11 @@ def _run_validate(args: argparse.Namespace) -> int:
             plugin_root.parent,
             exclude_root=plugin_root,
         )
+        for malformed_dir in overlap_report.get("malformed_plugin_dirs") or []:
+            add_finding(
+                "warning",
+                f"Malformed sibling plugin directory missing regular manifest: {malformed_dir}"
+            )
         if overlap_report["exact_matches"] or overlap_report["similar_matches"]:
             add_finding(
                 "warning",

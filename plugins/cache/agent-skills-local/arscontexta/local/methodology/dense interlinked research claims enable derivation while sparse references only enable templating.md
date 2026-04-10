@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original"]
 source: [[arscontexta-notes]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/dense interlinked research claims enable derivation while sparse references only enable templating.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # dense interlinked research claims enable derivation while sparse references only enable templating
 

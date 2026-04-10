@@ -3,6 +3,8 @@ description: Memory retrieval in brains works through spreading activation where
 kind: research
 topics: ["[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/spreading activation models how agents should traverse.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # spreading activation models how agents should traverse
 

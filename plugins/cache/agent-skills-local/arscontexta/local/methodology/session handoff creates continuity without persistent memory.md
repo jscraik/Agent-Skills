@@ -3,6 +3,8 @@ description: Externalized state in task files and work queues gives each fresh s
 kind: research
 topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/session handoff creates continuity without persistent memory.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # session handoff creates continuity without persistent memory
 

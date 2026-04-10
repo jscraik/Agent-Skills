@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]", "[[maintenance-patterns]]"]
 methodology: ["Zettelkasten", "Digital Gardening"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/tag rot applies to wiki links because titles serve as both identifier and display text.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # tag rot applies to wiki links because titles serve as both identifier and display text
 

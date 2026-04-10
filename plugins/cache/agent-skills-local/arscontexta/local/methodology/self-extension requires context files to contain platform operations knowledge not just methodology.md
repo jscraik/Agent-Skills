@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/self-extension requires context files to contain platform operations knowledge not just methodology.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # self-extension requires context files to contain platform operations knowledge not just methodology
 

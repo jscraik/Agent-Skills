@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[design-dimensions]]"]
 confidence: speculative
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/goal-driven memory orchestration enables autonomous domain learning through directed compute allocation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # goal-driven memory orchestration enables autonomous domain learning through directed compute allocation
 

@@ -76,10 +76,10 @@ When operating inside `~/dev/recon-workbench`, follow:
 Prefer running inside the repo via `mise` to ensure `uv`, Python, and Node are correct:
 
 ```bash
-mise exec -- uv run python -m rwb <command> [args...]
+mise exec -- uv run --python 3.12 python -m rwb <command> [args...]
 ```
 
-If `uv` is already on PATH, `uv run python -m rwb ...` is equivalent.
+If `uv` is already on PATH, `uv run --python 3.12 python -m rwb ...` is equivalent.
 
 Secondary/legacy wrapper:
 - `./recon <command>` (shell wrapper around `scripts/recon_cli.py`)
@@ -162,13 +162,13 @@ If authorization is missing, scope is unclear, evidence validation fails, or the
 ### 1) Check Toolchain
 
 ```bash
-mise exec -- uv run python -m rwb doctor --json
+mise exec -- uv run --python 3.12 python -m rwb doctor --json
 ```
 
 ### 2) Create Authorization (required by scope)
 
 ```bash
-mise exec -- uv run python -m rwb authorize \
+mise exec -- uv run --python 3.12 python -m rwb authorize \
   --target-id myapp \
   --target-kind macos-app \
   --target-locator "/Applications/MyApp.app" \
@@ -178,7 +178,7 @@ mise exec -- uv run python -m rwb authorize \
 ### 3) Generate Probe Plan
 
 ```bash
-mise exec -- uv run python -m rwb plan \
+mise exec -- uv run --python 3.12 python -m rwb plan \
   --target-id myapp \
   --target-kind macos-app \
   --target-locator "/Applications/MyApp.app" \
@@ -189,7 +189,7 @@ mise exec -- uv run python -m rwb plan \
 ### 4) Execute Probes
 
 ```bash
-mise exec -- uv run python -m rwb run \
+mise exec -- uv run --python 3.12 python -m rwb run \
   --plan-file probe-plan.json \
   --run-dir runs/myapp/
 ```
@@ -197,18 +197,18 @@ mise exec -- uv run python -m rwb run \
 ### 5) Generate Findings + Report
 
 ```bash
-mise exec -- uv run python -m rwb summarize \
+mise exec -- uv run --python 3.12 python -m rwb summarize \
   --run-dir runs/myapp/
 ```
 
 ### 6) Validate Artifacts (CLI-first)
 
 ```bash
-mise exec -- uv run python -m rwb validate \
+mise exec -- uv run --python 3.12 python -m rwb validate \
   --catalog probes/catalog.json \
   --plan probe-plan.json
 
-mise exec -- uv run python -m rwb validate \
+mise exec -- uv run --python 3.12 python -m rwb validate \
   --evidence runs/myapp/derived/findings.json \
   --run-dir runs/myapp
 ```

@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 methodology: ["Evergreen"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/concept-orientation beats source-orientation for cross-domain connections.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # concept-orientation beats source-orientation for cross-domain connections
 

@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["PKM Research", "Cognitive Science"]
 source: [[2026-02-08-moc-architecture-hierarchy-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/MOC maintenance investment compounds because orientation savings multiply across every future session.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # MOC maintenance investment compounds because orientation savings multiply across every future session
 

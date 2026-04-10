@@ -5,6 +5,8 @@ topics: ["[[discovery-retrieval]]"]
 methodology: ["Cornell"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/retrieval utility should drive design over capture completeness.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # retrieval utility should drive design over capture completeness
 

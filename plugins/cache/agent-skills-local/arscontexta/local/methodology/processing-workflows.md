@@ -2,6 +2,8 @@
 description: Extraction, connection, reweaving, and verification pipelines -- the four-phase processing skeleton
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/processing-workflows.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # processing-workflows
 

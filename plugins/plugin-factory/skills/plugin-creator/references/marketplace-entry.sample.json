@@ -1,0 +1,12 @@
+{
+  "name": "symphony-orchestrator",
+  "source": {
+    "source": "local",
+    "path": "./plugins/symphony-orchestrator"
+  },
+  "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "ON_INSTALL"
+  },
+  "category": "Productivity"
+}

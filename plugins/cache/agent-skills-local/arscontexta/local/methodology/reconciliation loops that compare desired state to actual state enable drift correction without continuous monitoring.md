@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/reconciliation loops that compare desired state to actual state enable drift correction without continuous monitoring.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # reconciliation loops that compare desired state to actual state enable drift correction without continuous monitoring
 

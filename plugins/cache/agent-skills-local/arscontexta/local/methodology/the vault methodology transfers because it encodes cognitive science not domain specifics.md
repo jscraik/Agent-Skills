@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Cognitive Science", "Original"]
 source: [[arscontexta-notes]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/the vault methodology transfers because it encodes cognitive science not domain specifics.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # the vault methodology transfers because it encodes cognitive science not domain specifics
 

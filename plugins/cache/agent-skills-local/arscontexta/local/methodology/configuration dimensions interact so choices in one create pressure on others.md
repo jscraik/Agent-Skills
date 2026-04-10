@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]"]
 methodology: ["Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/configuration dimensions interact so choices in one create pressure on others.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # configuration dimensions interact so choices in one create pressure on others
 

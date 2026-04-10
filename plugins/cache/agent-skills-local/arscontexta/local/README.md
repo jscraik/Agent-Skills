@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/README.md; DO NOT EDIT PROJECTION COPY. -->
+
 # arscontexta
 
 Codex plugin package converted from Ars Contexta.

@@ -1,29 +1,60 @@
-schema_version: "1.1"
-purpose: >
-  Define the simplify-stage contract for post-change cleanup so changed code is reviewed
-  for reuse, quality, efficiency, and surgical maintainability refactors, then updated
-  with behavior-preserving fixes.
+schema_version: 1
+name: simplify
+purpose: Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish.
 triggers:
   - user asks to simplify or clean up changed files before merge
   - user asks for a refactor polish pass on an existing diff
   - user asks to extract methods, improve naming, or remove code smells in changed code
   - user asks for duplication, quality, and efficiency improvements without feature expansion
 inputs:
-  - unified diff context from git diff or git diff HEAD
-  - changed file paths and nearby code context
-  - optional additional focus areas from the user
+  - name: diff_source
+    type: enum
+    values: [staged, unstaged, fallback-files]
+    description: Source of changes under review.
+  - name: changed_files
+    type: array
+    description: Changed file paths and nearby code context.
+  - name: focus_areas
+    type: array
+    description: Optional user-prioritized areas.
 outputs:
-  - schema_version (always 1)
-  - summary
-  - grouped findings for reuse, quality, and efficiency
-  - optional cross-cutting findings when modern hardening overlay is enabled
-  - applied fixes with file-level traceability
-  - actions
-  - skipped findings with concise reason
-  - risk_note
-  - next_step
-  - deterministic validation evidence (command, outcome, blocker reason)
-  - optional baseline metadata (compare base, risk tier map) for high-risk cleanups
+  - name: schema_version
+    type: integer
+    description: Output envelope schema version (always 1).
+  - name: summary
+    type: string
+    description: High-level cleanup outcome summary.
+  - name: diff_source
+    type: enum
+    values: [staged, unstaged, fallback-files]
+    description: Origin of the diff.
+  - name: execution_mode
+    type: enum
+    values: [inline, delegated-parallel, delegated-serial]
+    description: Execution mode used for applying changes.
+  - name: files_reviewed
+    type: array
+    description: Reviewed file list.
+  - name: actions
+    type: array
+    description: Applied findings grouped by lane.
+  - name: skipped
+    type: array
+    description: Skipped findings with concise reason.
+  - name: validation
+    type: array
+    description: Validation commands and outcomes (pass, fail, blocked).
+  - name: risk_note
+    type: string
+    description: Key caveats or residual risks.
+  - name: next_step
+    type: string
+    description: Safest immediate follow-up action.
+success_criteria:
+  - Output always includes the standard envelope keys: schema_version, summary, diff_source, execution_mode, files_reviewed, actions, skipped, validation, risk_note, next_step.
+  - Cleanup remains behavior-preserving unless user explicitly requests semantic changes.
+  - Reuse, quality, and efficiency lanes are each evaluated.
+  - Validation evidence is deterministic and command-specific.
 non_goals:
   - introducing new product features unrelated to current diffs
   - broad architecture rewrites outside changed scope
@@ -33,12 +64,8 @@ risks:
   - false positives from static-only review
   - cleanup churn that harms readability
 rollback_procedure: >
-  If simplify edits introduce regressions, revert only the simplify-touched files from git,
-  re-run targeted validations, and reapply fixes incrementally in smaller batches. Keep the
-  original diff snapshot and findings list so skipped or reverted fixes remain traceable.
+  If simplify edits introduce regressions, revert only simplify-touched files, rerun targeted
+  checks, and reapply fixes incrementally in smaller batches while preserving finding traceability.
 observability: >
-  Track simplify runs by recording: diff source used (staged vs unstaged), number of findings
-  per review lane (reuse, quality, efficiency), number of applied vs skipped fixes, and whether
-  post-fix validation passed. When modern hardening is active, also track baseline commit, risk
-  tiers by file, cross-cutting finding counts, and measured vs not-measured efficiency claims.
-  Spikes in reverted fixes indicate over-aggressive cleanup criteria.
+  Track diff source, lane findings, applied versus skipped fixes, and post-fix validation outcomes.
+  When modern hardening is active, also track compare base, risk tiers, and cross-cutting findings.

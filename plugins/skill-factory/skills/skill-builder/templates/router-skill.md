@@ -63,6 +63,14 @@ See `workflows/`:
 - {{How to verify correctness}}
 - {{Tests/checks to run}}
 
+## See Also
+| Skill | When to use |
+|---|---|
+| [[{{adjacent-skill-1}}]] | {{When this neighboring skill should be selected instead}} |
+| [[{{adjacent-skill-2}}]] | {{Second nearby skill with a clear handoff boundary}} |
+
+**Topic map:** [[{{topic-name}}]]
+
 ## Anti-patterns
 - ❌ {{Common mistake to avoid}}
 - ❌ {{What not to do}}

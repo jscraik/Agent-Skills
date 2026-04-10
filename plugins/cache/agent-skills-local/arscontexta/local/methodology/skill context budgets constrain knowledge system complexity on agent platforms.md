@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Original"]
 source: [[agent-platform-capabilities-research-source]], [[composable-knowledge-architecture-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/skill context budgets constrain knowledge system complexity on agent platforms.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # skill context budgets constrain knowledge system complexity on agent platforms
 

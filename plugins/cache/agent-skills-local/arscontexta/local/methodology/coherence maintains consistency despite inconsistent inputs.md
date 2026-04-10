@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]", "[[maintenance-patterns]]"]
 source: [[rata-paper-memory-coherence]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/coherence maintains consistency despite inconsistent inputs.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # coherence maintains consistency despite inconsistent inputs
 

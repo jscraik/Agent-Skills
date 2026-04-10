@@ -3,6 +3,8 @@ description: retrieval architecture shapes what enters the context window and th
 kind: research
 topics: ["[[agent-cognition]]", "[[note-design]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/external memory shapes cognition more than base model.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # external memory shapes cognition more than base model
 

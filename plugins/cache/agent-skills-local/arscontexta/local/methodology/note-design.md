@@ -2,6 +2,8 @@
 description: Atomicity, prose-as-title, composability, the generation effect -- how individual notes should be designed
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/note-design.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # note-design
 

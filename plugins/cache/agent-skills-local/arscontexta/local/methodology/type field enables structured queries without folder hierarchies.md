@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/type field enables structured queries without folder hierarchies.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # type field enables structured queries without folder hierarchies
 

@@ -18,6 +18,7 @@ metadata:
 - [Philosophy](#philosophy)
 - [When to use](#when-to-use)
 - [When not to use](#when-not-to-use)
+- [Run Mode](#run-mode)
 - [Intent Router](#intent-router)
 - [Required inputs](#required-inputs)
 - [Discovery interview](#discovery-interview)
@@ -65,6 +66,16 @@ Routing note: these trigger lines are human-facing examples only. Runtime router
 - The user needs fresh live data from CodeRabbit SaaS state not present in local artifacts.
 - The user asks for Cloudflare crawl orchestration itself (use `cf-crawl`).
 
+## Run Mode
+Use `run` as the default front door when users do not specify a mode.
+
+Routing order:
+1. If `.coderabbit.yaml` is missing or invalid, route to `setup`.
+2. If user intent is findings only, route to `review-only`.
+3. If unresolved CodeRabbit PR threads exist and user asks to apply fixes, route to `autofix-safe`.
+4. If user asks for behavior-preserving cleanup on a current diff, route to `pre-merge-simplify`.
+5. If still ambiguous, route to `review-only` and ask one clarifying question.
+
 ## Intent Router
 Use this routing map for deterministic skill selection:
 
@@ -82,6 +93,7 @@ When requests span multiple intents, start with `coderabbit` to scope platform a
 - The CodeRabbit surface area in scope: config, CLI, PR commands, tools, integrations, planner, or reporting.
 - Any platform constraints: GitHub, GitLab, Bitbucket, Azure DevOps, self-hosted.
 - Optional path constraints if output must target specific repo files such as `.coderabbit.yaml`.
+- Optional `mode`: `run|setup|review-only|autofix-safe|pre-merge-simplify` (default `run`).
 - Guiding questions:
   - Which repository surface should this update target first?
   - What review behavior should be enabled now versus later rollout phases?
@@ -153,9 +165,15 @@ Use this shape when structured output is requested:
 ```json
 {
   "schema_version": 1,
+  "mode": "run|setup|review-only|autofix-safe|pre-merge-simplify",
   "summary": "string",
   "actions": ["string"],
   "recommendation": "string",
+  "trust_banner": {
+    "freshness_checked_at": "ISO-8601 timestamp",
+    "confidence": "high|medium|low",
+    "live_verification_needed": true
+  },
   "evidence": [
     {
       "path": "string",
@@ -177,7 +195,8 @@ Use this shape when structured output is requested:
 
 Contract rules:
 - Always include `schema_version`.
-- Always include `summary`, `actions`, `validation`, and `next_step` for agent handoff consistency.
+- Always include `mode`, `summary`, `actions`, `validation`, and `next_step` for agent handoff consistency.
+- Always include `trust_banner` for corpus-based guidance.
 - Keep `snippet` as `null` when unavailable.
 - Prefer 2 or more evidence entries for non-trivial recommendations.
 
@@ -200,6 +219,7 @@ Fast path for low-latency responses:
 - If the user asks a conceptual or command-reference question and no repo edits are requested, answer directly without tool calls.
 - Include an `Evidence` line that cites the corpus root or specific corpus paths used.
 - State when guidance is corpus-based and may require live verification for current SaaS state.
+- Use human mode wording by default: lead with decision and next action, then include evidence/provenance.
 
 ## Verification
 - Verify every recommendation maps to at least one local corpus file.

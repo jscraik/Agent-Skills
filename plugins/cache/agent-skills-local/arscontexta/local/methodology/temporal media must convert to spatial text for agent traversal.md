@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]"]
 methodology: ["Augmentation Research"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/temporal media must convert to spatial text for agent traversal.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # temporal media must convert to spatial text for agent traversal
 

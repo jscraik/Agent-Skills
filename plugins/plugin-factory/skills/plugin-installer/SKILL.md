@@ -13,12 +13,12 @@ Use this skill when the user asks to:
 - install a contract-valid plugin from GitHub path or repository ref;
 - verify plugin integrity and restore missing plugin visibility.
 
-List mode:
-- list installable third-party plugins from curated or explicit sources.
-- minimum inputs: source catalog/URL query context only (no install path/destination required).
+Dry-run preview mode:
+- preview one requested install without writing files.
+- minimum inputs: source URL plus plugin path (`--url/--repo` and `--path`).
 - examples:
-  - inspect curated plugin sources and shortlist install candidates before writing
-  - `bin/ask plugins install <url> --dry-run --path <plugin-path>` for install-preview style listing
+  - `bin/ask plugins install <url> --dry-run --path <plugin-path>` for install-preview output.
+  - this preview does not enumerate or rank plugin catalogs; it only reports the requested install plan.
 
 Do not use this skill as primary owner for:
 - plugin package authoring or conversion hardening;
@@ -38,6 +38,7 @@ Install mode minimum inputs:
 - trust policy (trusted repo allowlist or explicit override);
 - provenance pin (`--ref` commit SHA unless explicit override);
 - validation policy (`--validation-level strict|compat`).
+- note: repo wrappers such as `ask plugins install` may set a repo-local destination default (for example `plugins/third-party`) to support vendored plugin workflows.
 
 ## Outputs
 

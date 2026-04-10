@@ -3,6 +3,8 @@ description: Distinguishes original thinking from consumed ideas, creating a ver
 kind: research
 topics: ["[[note-design]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/source attribution enables tracing claims to foundations.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # source attribution enables tracing claims to foundations
 

@@ -3,6 +3,8 @@ description: The foundational triangle — wiki links create structure, spreadin
 kind: research
 topics: ["[[note-design]]", "[[graph-structure]]", "[[agent-cognition]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/coherent architecture emerges from wiki links spreading activation and small-world topology.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # coherent architecture emerges from wiki links spreading activation and small-world topology
 

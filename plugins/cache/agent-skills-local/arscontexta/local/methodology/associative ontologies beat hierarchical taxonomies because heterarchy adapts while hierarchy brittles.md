@@ -4,6 +4,8 @@ kind: research
 topics: ["[[graph-structure]]"]
 methodology: ["Evergreen"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/associative ontologies beat hierarchical taxonomies because heterarchy adapts while hierarchy brittles.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # associative ontologies beat hierarchical taxonomies because heterarchy adapts while hierarchy brittles
 

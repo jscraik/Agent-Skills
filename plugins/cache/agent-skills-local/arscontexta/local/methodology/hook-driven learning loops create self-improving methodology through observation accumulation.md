@@ -5,6 +5,8 @@ topics: ["[[agent-cognition]]", "[[processing-workflows]]"]
 methodology: ["Original"]
 source: [[hooks-as-methodology-encoders-research-source]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/hook-driven learning loops create self-improving methodology through observation accumulation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # hook-driven learning loops create self-improving methodology through observation accumulation
 

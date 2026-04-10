@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
+description: Install Codex skills into the canonical git source tree from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
 metadata:
   short-description: Install curated skills from openai/skills or other repos
 ---
@@ -24,7 +24,7 @@ Use the helper scripts based on the task:
 
 - User intent: list mode vs install mode.
 - Source details: `--repo` + `--path`, or GitHub tree URL.
-- Destination details: optional `--dest` override (default `$CODEX_HOME/skills`).
+- Destination details: optional `--dest` override. Defaults to canonical `github/` under repo root and rejects non-canonical destinations.
 - Optional install controls: `--ref`, `--method`, and explicit replacement intent if destination exists.
 
 ## Agent Injection
@@ -50,7 +50,7 @@ bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> -
 ## Outputs
 
 - A clear summary of what was listed or installed.
-- Concrete paths for installed skills (`$CODEX_HOME/skills/<skill-name>`).
+- Concrete paths for installed skills (`<repo-root>/<category>/<skill-name>`).
 - Explicit restart reminder after install: "Restart Codex to pick up new skills."
 - Optional agent-injection summary with the selected role file path.
 - If blocked, exact error and next corrective step.
@@ -126,7 +126,7 @@ Reference details:
 - Defaults to direct download for public GitHub repos.
 - If download fails with auth/permission errors, falls back to git sparse checkout.
 - Aborts if the destination skill directory already exists.
-- Installs into `$CODEX_HOME/skills/<skill-name>` (defaults to `~/.codex/skills`).
+- Installs into repo-canonical `<category>/<skill-name>` under the canonical git source tree.
 - Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
 - Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
 
@@ -134,7 +134,7 @@ Reference details:
 
 - Fail fast: stop at the first failed gate and do not continue to additional install steps.
 - For listing flows, command must exit `0` and return parseable skill rows (or documented JSON output).
-- For install flows, destination must contain `SKILL.md` under `$CODEX_HOME/skills/<skill-name>`.
+- For install flows, destination must contain `SKILL.md` under `<repo-root>/<category>/<skill-name>`.
 - On failures, surface the exact command error and the next minimal retry command.
 
 ## Examples
@@ -159,5 +159,14 @@ python3 scripts/install-skill-from-github.py --url https://github.com/<owner>/<r
 - Private GitHub repos can be accessed via existing git credentials or optional `GITHUB_TOKEN`/`GH_TOKEN` for download.
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
-- Installed annotations come from `$CODEX_HOME/skills`.
+- Installed annotations come from canonical repo category directories (default `github/`).
 - For dedicated role creation during install handoff, use [[codex-agent-builder]].
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skillify]] | Harden source skills into canonical templates before install/distribution |
+| [[skill-creator]] | Author or repair local skill packages before installation |
+
+**Topic map:** [[agent-ops]]

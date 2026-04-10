@@ -19,6 +19,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - [Philosophy](#philosophy)
 - [When to Use](#when-to-use)
 - [Inputs](#inputs)
+- [Execution Modes](#execution-modes)
 - [Outputs](#outputs)
 - [Workflow](#workflow)
 - [Modern Hardening Overlay (2026)](#modern-hardening-overlay-2026)
@@ -57,21 +58,40 @@ Do not use this skill for broad architecture rewrites across untouched areas.
 - Agent runtime that supports spawning parallel workers (preferred).
 - Optional additional focus area from the user (for example JSX nesting or hot-path performance).
 
+## Execution Modes
+
+Choose one mode before review and keep it explicit in the handoff.
+
+- `inline` (default): run all three review lanes in the main thread.
+- `delegated-parallel`: only when the user explicitly requested subagent delegation and true parallel launch is supported.
+- `delegated-serial`: when delegation is requested but true parallel launch is unavailable.
+
 ## Outputs
 
-- `schema_version: 1` result summary.
-- Files reviewed and diff source used.
-- Findings and fixes grouped by reuse, quality, and efficiency.
-- Refactor operations applied (for example: extract-method, rename, guard-clauses, deduplicate helper) when relevant.
-- Skipped findings with brief reason.
-- Validation evidence run after edits.
-- Standardized handoff envelope:
-  - `schema_version`
-  - `summary`
-  - `actions`
-  - `validation`
-  - `risk_note`
-  - `next_step`
+Return a single handoff envelope in this shape:
+
+```yaml
+schema_version: 1
+summary: "<one-paragraph result>"
+execution_mode: "inline|delegated-parallel|delegated-serial"
+diff_source: "staged|unstaged|fallback-files"
+files_reviewed:
+  - "<path>"
+actions:
+  - lane: "reuse|quality|efficiency"
+    finding: "<what was wrong>"
+    fix: "<what changed>"
+    operation: "<optional: extract-method|rename|guard-clauses|deduplicate-helper>"
+skipped:
+  - lane: "reuse|quality|efficiency"
+    reason: "<brief reason>"
+validation:
+  - command: "<exact command>"
+    outcome: "pass|fail|blocked"
+    note: "<optional blocker/failure detail>"
+risk_note: "<residual risk>"
+next_step: "<recommended follow-up>"
+```
 
 ## Workflow
 
@@ -87,9 +107,11 @@ Do not use this skill for broad architecture rewrites across untouched areas.
 
 ### Phase 2: Launch Three Review Agents in Parallel
 
-If and only if the user explicitly requested subagent delegation, launch all three agents concurrently in one delegation step when possible. Give each agent the full diff, file paths, and the same behavior-preservation constraint.
+Run all three lanes against the same diff and behavior-preservation constraint.
 
-If delegation was not explicitly requested, run the same three review passes inline in the main thread. If delegation was requested but the environment does not support true parallel launch, run the three delegated passes sequentially with isolated scopes and keep outputs separate.
+- `inline`: run all lanes in the main thread.
+- `delegated-parallel`: launch all lanes concurrently in one delegation step.
+- `delegated-serial`: launch delegated lanes one by one with isolated scopes.
 
 #### Agent 1: Code Reuse Review
 
@@ -127,7 +149,7 @@ Review for:
 
 ### Phase 3: Fix Issues
 
-1. Wait for all three agents to complete.
+1. Collect outputs from all three lanes.
 2. Aggregate findings, deduplicate overlap, and prioritize by correctness/safety impact.
 3. Apply fixes directly in the changed files.
 4. If a finding is a false positive or low value, skip it without debate and continue.

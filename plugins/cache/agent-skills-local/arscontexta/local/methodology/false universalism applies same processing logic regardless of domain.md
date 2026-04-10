@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[processing-workflows]]"]
 methodology: ["Original", "Systems Theory"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/false universalism applies same processing logic regardless of domain.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # false universalism applies same processing logic regardless of domain
 

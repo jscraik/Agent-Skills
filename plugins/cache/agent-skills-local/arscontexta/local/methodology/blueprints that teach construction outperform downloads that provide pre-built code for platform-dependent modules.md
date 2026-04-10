@@ -6,6 +6,8 @@ confidence: speculative
 methodology: ["Original", "Systems Theory"]
 source: [[composable-knowledge-architecture-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/blueprints that teach construction outperform downloads that provide pre-built code for platform-dependent modules.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # blueprints that teach construction outperform downloads that provide pre-built code for platform-dependent modules
 

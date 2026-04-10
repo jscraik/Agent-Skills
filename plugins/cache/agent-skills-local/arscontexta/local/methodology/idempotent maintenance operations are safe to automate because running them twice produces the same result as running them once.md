@@ -5,6 +5,8 @@ topics: ["[[maintenance-patterns]]", "[[agent-cognition]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[automated-knowledge-maintenance-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/idempotent maintenance operations are safe to automate because running them twice produces the same result as running them once.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # idempotent maintenance operations are safe to automate because running them twice produces the same result as running them once
 

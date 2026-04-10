@@ -10,11 +10,11 @@ triggers:
 inputs:
   - source repository and skill path(s)
   - pinned source ref or explicit unpinned override
-  - destination skill root
+  - optional destination skill root override (defaults to canonical repository category root)
   - install method preference (download, git, auto)
   - optional agent injection mode and source role path
 outputs:
-  - installed skills under CODEX_HOME/skills
+  - installed skills under canonical repository category roots (or explicit override root when provided)
   - provenance manifest with requested ref and resolved commit
   - rollback journal capturing staged and promoted install events
   - optional role-injection outcome with reuse/create decision and validated role file path
@@ -29,14 +29,16 @@ risks:
   - attaching unrelated roles to installed skills; mitigated by explicit source-path checks and role validation via codex-agent-builder scripts
 rollback_procedure: >
   If an install produces an unusable or malicious skill, use the rollback journal artifact to
-  identify the staged install entry and delete the promoted skill directory from CODEX_HOME/skills.
+  identify the staged install entry and delete the promoted skill directory from the canonical repository category root.
   Re-run with the previous pinned ref or a known-good commit SHA. For regressions in skill-installer
-  itself, restore skills-system/skill-installer/SKILL.md from git, re-run the family gate, and
-  verify the provenance manifest and quarantine paths are intact before re-deploying.
+  itself, restore the entire plugins/skill-factory/skills/skill-installer/ asset set (including SKILL.md,
+  scripts/install-skill-from-github.py, and any other runtime scripts) from git, re-run the exact authoring-family
+  gate command (bash scripts/validate_skill_authoring_family.sh) to validate the authoring family before redeploying,
+  and verify the provenance manifest and quarantine paths are intact before re-deploying.
   Do not skip the quarantine-to-promote step during recovery.
 observability: >
   Monitor skill-installer via: (1) provenance manifest presence and ref-resolved-commit fields
   after each install run — missing entries indicate journal drift; (2) quarantine-to-promote
   success rate; installs that stall in quarantine signal validation failures requiring investigation;
-  (3) family gate CI pass/fail for skills-system/skill-installer; (4) supply chain alerts from
+  (3) family gate CI pass/fail for plugins/skill-factory/skills/skill-installer; (4) supply chain alerts from
   openclaw_skill_guard.py --mode security run against newly installed skills.

@@ -12,8 +12,46 @@ from typing import Any
 
 
 MAX_PLUGIN_NAME_LENGTH = 64
-DEFAULT_PLUGIN_PARENT = Path.cwd() / "plugins"
-DEFAULT_MARKETPLACE_PATH = Path.cwd() / ".agents" / "plugins" / "marketplace.json"
+OPENAI_MARKETPLACE_RELATIVE_PATH = ".agents/plugins/marketplace.json"
+LEGACY_MARKETPLACE_RELATIVE_PATH = "plugins/marketplace.json"
+
+
+def _discover_repo_root() -> Path:
+    """
+    Locate the repository root directory based on the script's location.
+
+    Searches the script's ancestor directories for a directory that qualifies as
+    the repository root. A candidate is accepted if it contains a `plugins`
+    directory and either a `.git` entry, or both a `.agents` directory and
+    `plugins/plugin-factory/skills`.
+
+    Returns:
+    	Path: Resolved path to the discovered repository root.
+
+    Raises:
+        RuntimeError: When repository root discovery fails.
+    """
+    def _looks_like_repo_root(candidate: Path) -> bool:
+        if not (candidate / "plugins").is_dir():
+            return False
+        if (candidate / ".git").exists():
+            return True
+        return (candidate / "plugins" / "plugin-factory" / "skills").is_dir() and (
+            candidate / ".agents"
+        ).is_dir()
+
+    for ancestor in Path(__file__).resolve().parents:
+        if _looks_like_repo_root(ancestor):
+            return ancestor
+    raise RuntimeError(
+        "Unable to discover repository root from script location. "
+        "Run from the canonical repository or pass explicit --path and --marketplace-path."
+    )
+
+
+REPO_ROOT = _discover_repo_root()
+DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
+DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
@@ -30,12 +68,17 @@ VALID_INSTALL_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 VALID_AUTH_POLICIES = {"ON_INSTALL", "ON_USE"}
 VALID_POLICY_PRODUCTS = {"CHATGPT", "CODEX", "ATLAS"}
 DEFAULT_POLICY_PRODUCTS = ["CODEX"]
-OPENAI_MARKETPLACE_RELATIVE_PATH = ".agents/plugins/marketplace.json"
-LEGACY_MARKETPLACE_RELATIVE_PATH = "plugins/marketplace.json"
 
 
 def normalize_plugin_name(plugin_name: str) -> str:
-    """Normalize a plugin name to lowercase hyphen-case."""
+    """
+    Convert a plugin name into kebab-case suitable for identifiers and filenames.
+    
+    Converts the input to lowercase, replaces runs of non-alphanumeric characters with a single hyphen, collapses repeated hyphens, and removes leading or trailing hyphens.
+    
+    Returns:
+        str: Kebab-case string containing only lowercase ASCII letters, digits and single hyphens; leading and trailing hyphens are removed.
+    """
     normalized = plugin_name.strip().lower()
     normalized = re.sub(r"[^a-z0-9]+", "-", normalized)
     normalized = normalized.strip("-")
@@ -444,6 +487,14 @@ def validate_lifecycle_scaffold_args(args: argparse.Namespace) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments for creating a plugin scaffold.
+
+    Recognises options to control created surfaces, marketplace update behaviour, policy and governance metadata. Defaults for `--path` and `--marketplace-path` are resolved lazily in main() when not provided.
+
+    Returns:
+    	argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Create a plugin skeleton with either a placeholder plugin.json "
@@ -453,9 +504,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("plugin_name")
     parser.add_argument(
         "--path",
-        default=str(DEFAULT_PLUGIN_PARENT),
+        default=None,
         help=(
-            "Parent directory for plugin creation (defaults to <cwd>/plugins). "
+            "Parent directory for plugin creation "
+            "(defaults to <repo-root>/plugins resolved from this script location). "
             "When using a home-rooted marketplace, use <home>/plugins."
         ),
     )
@@ -475,9 +527,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--marketplace-path",
-        default=str(DEFAULT_MARKETPLACE_PATH),
+        default=None,
         help=(
-            "Path to marketplace.json (defaults to <cwd>/.agents/plugins/marketplace.json). "
+            "Path to marketplace.json "
+            "(defaults to <repo-root>/.agents/plugins/marketplace.json resolved from this script location). "
             "For a home-rooted marketplace, use <home>/.agents/plugins/marketplace.json."
         ),
     )
@@ -535,6 +588,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     validate_lifecycle_scaffold_args(args)
+
+    # Apply defaults if not provided by user
+    if args.path is None:
+        args.path = str(DEFAULT_PLUGIN_PARENT)
+    if args.marketplace_path is None:
+        args.marketplace_path = str(DEFAULT_MARKETPLACE_PATH)
 
     raw_plugin_name = args.plugin_name
     plugin_name = normalize_plugin_name(raw_plugin_name)

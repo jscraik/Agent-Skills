@@ -2,6 +2,8 @@
 description: Cognitive science foundations for agent-operated knowledge systems -- attention, memory, context decay
 type: moc
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/agent-cognition.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # agent-cognition
 

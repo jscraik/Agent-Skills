@@ -4,6 +4,8 @@ kind: research
 topics: ["[[agent-cognition]]"]
 source: TFT research corpus (00_inbox/heinrich/)
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/metacognitive confidence can diverge from retrieval capability.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # metacognitive confidence can diverge from retrieval capability
 

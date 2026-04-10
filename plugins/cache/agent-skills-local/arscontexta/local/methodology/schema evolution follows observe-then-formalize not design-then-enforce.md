@@ -5,6 +5,8 @@ topics: ["[[design-dimensions]]", "[[note-design]]"]
 methodology: ["Systems Theory", "Original"]
 source: [[knowledge-system-derivation-blueprint]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/schema evolution follows observe-then-formalize not design-then-enforce.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # schema evolution follows observe-then-formalize not design-then-enforce
 

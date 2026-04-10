@@ -231,11 +231,11 @@ PY
 			fi
 		done
 
-		if jq -e 'has("simple-git-hooks") or ((.devDependencies // {}) | has("simple-git-hooks"))' "$PACKAGE_JSON_PATH" >/dev/null; then
-			echo "Error: legacy simple-git-hooks metadata must be removed from $PACKAGE_JSON_PATH"
-			echo "Fix: run node scripts/setup-git-hooks.js"
-			exit 1
-		fi
+			if jq -e 'has("simple-git-hooks") or ((.devDependencies // {}) | has("simple-git-hooks"))' "$PACKAGE_JSON_PATH" >/dev/null; then
+				echo "Error: legacy simple-git-hooks metadata must be removed from $PACKAGE_JSON_PATH"
+				echo "Fix: run node scripts/setup-git-hooks.js"
+				exit 1
+			fi
 
 		has_package_marker() {
 			local marker="$1"

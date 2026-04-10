@@ -4,6 +4,8 @@ kind: research
 topics: ["[[discovery-retrieval]]"]
 methodology: ["Original"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/BM25 retrieval fails on full-length descriptions because query term dilution reduces match scores.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # BM25 retrieval fails on full-length descriptions because query term dilution reduces match scores
 

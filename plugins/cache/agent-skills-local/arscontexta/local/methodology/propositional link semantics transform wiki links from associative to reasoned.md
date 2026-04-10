@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Concept Mapping"]
 source: [[tft-research-part2]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/propositional link semantics transform wiki links from associative to reasoned.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # propositional link semantics transform wiki links from associative to reasoned
 

@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Concept Mapping"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/IBIS framework maps claim-based architecture to structured argumentation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # IBIS framework maps claim-based architecture to structured argumentation
 

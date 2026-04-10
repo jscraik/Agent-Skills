@@ -5,6 +5,8 @@ topics: ["[[graph-structure]]"]
 methodology: ["Network Science"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/betweenness centrality identifies bridge notes connecting disparate knowledge domains.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # betweenness centrality identifies bridge notes connecting disparate knowledge domains
 

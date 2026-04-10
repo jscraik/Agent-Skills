@@ -4,6 +4,8 @@ kind: example
 domain: legal
 topics: ["[[domain-compositions]]"]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/legal case management uses precedent chains with regulatory change propagation.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # legal case management uses precedent chains with regulatory change propagation
 

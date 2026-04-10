@@ -5,6 +5,8 @@ topics: ["[[processing-workflows]]"]
 methodology: ["Capture Design"]
 source: [[tft-research-part3]]
 ---
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/methodology/voice capture is the highest-bandwidth channel for agent-delegated knowledge systems.md; DO NOT EDIT PROJECTION COPY. -->
+
 
 # voice capture is the highest-bandwidth channel for agent-delegated knowledge systems
 

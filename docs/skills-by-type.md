@@ -11,15 +11,15 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - `library_api_reference`: 6
 - `product_verification`: 8
-- `data_fetch_analysis`: 5
+- `data_fetch_analysis`: 4
 - `team_automation`: 25
 - `scaffolding_templates`: 23
 - `code_quality_review`: 12
 - `ci_cd_deployment`: 6
-- `runbook`: 4
+- `runbook`: 7
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 94
+- `total_tagged`: 96
 
 ## Semantic Types
 
@@ -48,7 +48,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `insight-report` — `utilities`
 - `notebooklm` — `utilities`
 - `security-ownership-map` — `product/security`
-- `skill-refactor` — `utilities`
 - `spreadsheet` — `utilities`
 
 ### Team Automation
@@ -131,10 +130,13 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Runbook
 
+- `bash-hygiene` — `utilities`
 - `diagram-cli` — `utilities`
+- `npm-workflow-discipline` — `utilities`
 - `recon-workbench` — `utilities`
 - `security-threat-model` — `product/security`
 - `systematic-debugging` — `utilities`
+- `uv-python-project-setup` — `utilities`
 
 ### Infrastructure Ops
 

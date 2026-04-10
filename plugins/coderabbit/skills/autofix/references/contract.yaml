@@ -28,6 +28,9 @@ outputs:
   - name: fix_plan
     type: array
     description: Ordered list of parsed issues and intended fixes.
+  - name: preview_table
+    type: array
+    description: Pre-apply table of proposed patch actions with risk labels.
   - name: applied_changes
     type: array
     description: Files changed with issue linkage.
@@ -47,6 +50,8 @@ outputs:
     type: string
     description: Final PR summary comment text.
 success_criteria:
+  - Output always includes the standard envelope keys: schema_version, summary, actions, validation, risk_note, next_step.
+  - A pre-apply preview table is produced before edits are applied.
   - Only unresolved CodeRabbit threads are used as fix sources.
   - Fixes preserve issue ordering and create one consolidated commit when changes exist.
   - Sensitive values are redacted in all generated output.

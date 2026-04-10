@@ -1,3 +1,5 @@
+<!-- GENERATED PROJECTION: source=plugins/arscontexta/references/arscontexta-conversion-map.md; DO NOT EDIT PROJECTION COPY. -->
+
 # Ars Contexta Conversion Map
 
 Source repository: https://github.com/agenticnotetaking/arscontexta.git  
