@@ -1,0 +1,24 @@
+schema_version: "1.0"
+skill: npm-workflow-discipline
+type: runbook
+purpose: >
+  Provide deterministic npm workflow guidance for lockfile discipline, CI-safe installs,
+  and stable package.json script contracts.
+triggers:
+  - User asks how to use npm reliably in CI or team workflows.
+  - User needs lockfile policy or package script standardization.
+  - User asks to debug lockfile drift between package.json and package-lock.json.
+inputs:
+  - package manifest and lockfile state
+  - execution context (local, CI, release)
+  - required script contract names
+outputs:
+  - exact npm workflow commands for the scenario
+  - lockfile discipline decision and rationale
+  - script contract recommendations
+non_goals:
+  - replacing npm with another package manager
+  - ad hoc guidance without reproducibility constraints
+risks:
+  - mutable installs in CI can create nondeterministic builds
+  - lockfile drift can silently break environments
