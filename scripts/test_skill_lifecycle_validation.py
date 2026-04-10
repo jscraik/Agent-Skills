@@ -410,18 +410,18 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
-                repo_root / "plugins" / "harness-engineering" / "skills" / "ce-work" / "SKILL.md",
+                repo_root / "plugins" / "coderabbit" / "skills" / "autofix" / "SKILL.md",
                 "# plugin skill",
             )
             write_text(
-                repo_root / ".agents" / "skills" / "ce-work" / "SKILL.md",
+                repo_root / ".agents" / "skills" / "autofix" / "SKILL.md",
                 "# flat skill",
             )
 
             result = run_shadow_check(repo_root)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Plugin-shadowing check failed", result.stderr)
-            self.assertIn("- ce-work", result.stderr)
+            self.assertIn("- autofix", result.stderr)
 
     def test_plugin_shadowing_check_allows_router_overlap(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
