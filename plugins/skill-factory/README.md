@@ -27,6 +27,12 @@ Codex plugin package that bundles the skill-authoring family in one installable 
   - `scripts/`
   - `templates/`
   - `workflows/`
+- `skills/skill-refactor/`
+  - `SKILL.md`
+  - `agents/`
+  - `references/`
+  - `scripts/`
+  - `assets/`
 - `skills/skillify/`
   - `SKILL.md`
   - `agents/`
@@ -43,10 +49,12 @@ Codex plugin package that bundles the skill-authoring family in one installable 
   - `plugins/skill-factory/skills/skill-factory/`
   - `plugins/skill-factory/skills/skill-creator/`
   - `plugins/skill-factory/skills/skill-builder/`
+  - `plugins/skill-factory/skills/skill-refactor/`
   - `plugins/skill-factory/skills/skillify/`
   - `plugins/skill-factory/skills/skill-installer/`
 - Compatibility aliases (do not edit directly):
   - `utilities/skill-builder/`
+  - `utilities/skill-refactor/`
   - `utilities/skillify/`
   - `skills-system/skill-creator/`
   - `skills-system/skill-installer/`
@@ -62,6 +70,7 @@ The `skill-factory` plugin helps you:
 - Create new skills and scaffolds (`skill-creator`).
 - Capture completed workflows into reusable skill contracts (`skillify`).
 - Improve and harden skills (`skill-builder`).
+- Audit skill usage/failures and recommend deconflict actions (`skill-refactor`).
 - Install and verify skills from trusted sources (`skill-installer`).
 - Keep scripts, references, and assets shipped with each family skill.
 
@@ -69,7 +78,7 @@ The `skill-factory` plugin helps you:
 Validate the package:
 
 ```sh
-python3 utilities/plugin-builder/scripts/plugin_builder.py validate plugins/skill-factory --require-marketplace --marketplace-path .agents/plugins/marketplace.json --allow-legacy-marketplace-path
+python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py validate plugins/skill-factory --require-marketplace --marketplace-path .agents/plugins/marketplace.json --allow-legacy-marketplace-path
 ```
 
 Validate bundled skills:
@@ -77,6 +86,7 @@ Validate bundled skills:
 ```sh
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-factory
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-builder
+python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-refactor
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-creator
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skillify
 python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-installer

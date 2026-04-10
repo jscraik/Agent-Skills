@@ -152,6 +152,7 @@ python scripts/init_skill.py {skill-name} --category utilities --description "Us
 ```
 
 **Auto-created by default:**
+- `SKILL.md` - rendered from `plugins/skill-factory/skills/skill-creator/templates/scaffold-simple-skill.md.tmpl` or `plugins/skill-factory/skills/skill-creator/templates/scaffold-router-skill.md.tmpl`
 - `references/` - for evals.yaml, contracts, progressive disclosure
 - `assets/` - for templates, icons, static files
 - `agents/openai.yaml` - OpenAI/Codex configuration

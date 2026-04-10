@@ -10,6 +10,25 @@ Use this reference when `hooks/` are requested in a plugin scaffold or conversio
 ## Baseline Revision
 - `openai/codex@8614f92fc433fff20b1bf745be8b23cfb01d3d98` (captured 2026-04-07)
 
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `templates/hooks.json.tmpl`
+- rendered baseline: `references/hooks.template.json`
+
+Render / refresh:
+
+```bash
+python3 plugins/plugin-factory/skills/plugin-builder/scripts/render_plugin_builder_templates.py
+python3 plugins/plugin-factory/skills/plugin-builder/scripts/check_plugin_builder_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/plugin-factory/skills/plugin-builder/scripts/check_plugin_builder_template_drift.py
+```
+
 ## Official source anchors
 - Hooks config model: `codex-rs/hooks/src/engine/config.rs @ 8614f92fc433fff20b1bf745be8b23cfb01d3d98`
   - Defines `hooks` with events `SessionStart` and `Stop`.

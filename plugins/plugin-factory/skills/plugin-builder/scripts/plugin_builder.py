@@ -1031,6 +1031,14 @@ def _load_plugin_payload(plugin_root: Path) -> dict[str, Any] | None:
     return load_json(manifest_path)
 
 
+def _is_local_plugin_package_dir(path: Path) -> bool:
+    return (
+        path.is_dir()
+        and not path.name.startswith(".")
+        and (path / ".codex-plugin" / "plugin.json").exists()
+    )
+
+
 def _normalize_marketplace_entry(
     entry: dict[str, Any],
     marketplace_path: Path,
@@ -1210,7 +1218,7 @@ def _audit_marketplace(
     local_plugin_names = sorted(
         child.name
         for child in plugins_path.iterdir()
-        if child.is_dir() and not child.name.startswith(".")
+        if _is_local_plugin_package_dir(child)
     ) if plugins_path.exists() else []
     for plugin_name in local_plugin_names:
         if plugin_name not in seen_names:
@@ -2076,7 +2084,7 @@ def _collect_existing_plugin_signatures(plugin_parent: Path) -> list[dict[str, A
 
     signatures: list[dict[str, Any]] = []
     for child in sorted(plugin_parent.iterdir()):
-        if not child.is_dir():
+        if not _is_local_plugin_package_dir(child):
             continue
         signature = _load_existing_plugin_signature(child)
         if signature is not None:

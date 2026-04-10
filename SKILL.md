@@ -14,6 +14,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Frontend — Website](#frontend-website)
 - [Github](#github)
 - [Interview](#interview)
+- [Plugins — Arscontexta — Skills](#plugins-arscontexta-skills)
+- [Plugins — Coderabbit — Skills](#plugins-coderabbit-skills)
+- [Plugins — Plugin Factory — Skills](#plugins-plugin-factory-skills)
+- [Plugins — Skill Factory — Skills](#plugins-skill-factory-skills)
 - [Product — Content](#product-content)
 - [Product — Docs](#product-docs)
 - [Product — Domain](#product-domain)
@@ -26,7 +30,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 109
+- `total_skills`: 120
 - `catalog_source`: repository skill scan
 - `visibility`: default
 - `policy_identity`: 7143a36cee91cd17
@@ -94,6 +98,28 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `deep-interview` — Deepen an existing doc or topic through a structured gap-filling interview that adds missing assumptions, edge cases, and approval gates. Use when refining PRDs, ADRs, tickets, notes, or draft specs before planning or execution.
 - `interview-me` — Use this skill to analyze underspecified requests through a short interview and surface missing tradeoffs, assumptions, and approval gates before implementation when a prompt is underdefined and guessing would be risky.
 
+## Plugins — Arscontexta — Skills
+
+- `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
+
+## Plugins — Coderabbit — Skills
+
+- `coderabbit` — Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
+
+## Plugins — Plugin Factory — Skills
+
+- `plugin-builder` — Harden, convert, and validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package and needs contract-grade safety checks, not when standalone skill lifecycle hardening is still unresolved.
+- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+- `plugin-installer` — Install validated plugins with provenance and rollback safety
+
+## Plugins — Skill Factory — Skills
+
+- `skill-builder` — Improve and validate Codex skill quality using automated audits and comparative hardening loops. Use when hardening skill routing, workflows, and safety before release, or when packaging validated standalone skills for distribution, rather than for first-draft scaffolding or pure installation.
+- `skill-creator` — Create or update a skill
+- `skill-factory` — Route to the right skill-authoring lane
+- `skill-installer` — Install curated skills from openai/skills or other repos
+- `skillify` — Capture a completed Codex workflow as a reusable SKILL.md package by analyzing session context, interviewing the user with structured prompts, and writing a validated skill artifact. Use when the user asks to skillify or operationalize a repeatable process.
+
 ## Product — Content
 
 - `changelog` — Create engaging changelogs for recent merges to main branch with a witty, enthusiastic marketing voice. Use when the user wants a daily or weekly engineering summary, release-note style update, or Discord-ready changelog that highlights features, bugs, and gives contributor credit with personality.
@@ -106,7 +132,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Product — Docs
 
 - `agents-md` — Create or refactor AGENTS.md and linked instruction docs using progressive disclosure. Use when the user wants repo-specific agent guidance organized, deduplicated, or routed cleanly, not ordinary product documentation edits.
-- `context7` — Retrieve current third-party library documentation through Context7. Use when the user needs up-to-date API details, version-specific behavior, or dependency troubleshooting for external libraries.
+- `context7` — Retrieve current third-party library docs and Context7 Skill Wizard command guidance; use this skill when users need version-sensitive dependency answers or explicit `ctx7 skills` generate/install/list help.
 - `docs-expert` — Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
 
 ## Product — Domain
@@ -195,6 +221,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `systematic-debugging` — Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.
 - `test-driven-development` — Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.
 - `using-git-worktrees` — Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits.
+- `uv-python-project-setup` — Python project initialization and dependency management with uv. Use when starting new CLI tools or libraries, configuring pyproject.toml, managing virtual environments, or setting up development workflows. Covers project types, dependency commands, and environment synchronization.
 - `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
 - `visual-explainer` — Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 - `writing-plans` — Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.

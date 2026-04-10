@@ -1,1 +1,7 @@
-Catalog check complete. assets=158 healthy=158 degraded=0 blocked=0 duplicates=0
+Lifecycle readiness findings:
+- plugins/plugin-factory/skills/plugin-builder/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+Duplicate skill names:
+- ctx-context-generation-framework: .agent/skills/ctx-context-generation-framework/SKILL.md, .agents/skills/ctx-context-generation-framework/SKILL.md
+- uv-python-project-setup: .agent/skills/uv-python-project-setup/SKILL.md, .agents/skills/uv-python-project-setup/SKILL.md
+Catalog check complete. assets=160 healthy=159 degraded=0 blocked=1 duplicates=2

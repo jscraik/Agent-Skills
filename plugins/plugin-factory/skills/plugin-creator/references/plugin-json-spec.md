@@ -1,5 +1,27 @@
 # Plugin JSON sample spec
 
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `templates/plugin.json.tmpl`
+- `templates/marketplace-entry.json.tmpl`
+- rendered baselines:
+  - `references/plugin-manifest.sample.json`
+  - `references/marketplace-entry.sample.json`
+
+Render / refresh:
+
+```bash
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/render_plugin_creator_templates.py
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/check_plugin_creator_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/plugin-factory/skills/plugin-creator/scripts/check_plugin_creator_template_drift.py
+```
+
 ```json
 {
   "name": "plugin-name",
