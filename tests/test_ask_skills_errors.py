@@ -94,6 +94,11 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
     def test_install_skill_uses_validation_flag_when_supported(self, mock_run, _python_cmd):
+        """
+        Verifies that when the installer advertises `--validation-level` in its usage output, install_skill enables and passes that flag.
+        
+        Mocks subprocess output so the first call returns usage text containing `--validation-level` and the second simulates a successful install. Asserts the result is successful, `result.data["validation_level"] == "compat"`, and the actual install command includes `--validation-level`.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             (repo_root / "github").mkdir(parents=True, exist_ok=True)
@@ -121,6 +126,11 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
     def test_install_skill_remediate_requires_flag_support(self, mock_run, _python_cmd):
+        """
+        Verifies that install_skill errors when remediation is requested but the installer does not support `--remediate`.
+        
+        Sets up a temporary repo with a `github` dest and mocks the installer usage output to omit `--remediate`. Calls install_skill(..., remediate=True) and asserts that the result has status "error", contains an `ERR_VALIDATION` error whose message mentions "does not support --remediate", and that the installer was probed exactly once (no install attempt).
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             (repo_root / "github").mkdir(parents=True, exist_ok=True)

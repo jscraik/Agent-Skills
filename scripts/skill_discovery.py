@@ -58,6 +58,12 @@ def _iter_flat_skill_dirs() -> Iterable[Path]:
 
 
 def _iter_repo_skill_dirs() -> Iterable[Path]:
+    """
+    Discover repository skill directories that contain a SKILL.md under the configured REPO_SCAN_ROOTS, excluding any whose path contains a configured excluded segment.
+    
+    Returns:
+        List[Path]: Paths to each directory containing a SKILL.md found under REPO_ROOT / <root_name> for each name in REPO_SCAN_ROOTS. Scan roots that do not exist are ignored; directories whose relative path contains a segment from EXCLUDED_REPO_SCAN_SEGMENTS are omitted.
+    """
     dirs: List[Path] = []
     for root_name in REPO_SCAN_ROOTS:
         root = REPO_ROOT / root_name
@@ -72,6 +78,14 @@ def _iter_repo_skill_dirs() -> Iterable[Path]:
 
 
 def _iter_plugin_skill_dirs() -> Iterable[Path]:
+    """
+    Return plugin-provided skill directories that contain a SKILL.md file.
+    
+    Searches repository paths that match the policy plugin-skill-root glob and collects the parent directories of any discovered SKILL.md files. Non-directory plugin roots are ignored, and any SKILL.md whose path (relative to the plugin root) contains a segment listed in EXCLUDED_REPO_SCAN_SEGMENTS is excluded.
+    
+    Returns:
+    	list[Path]: Paths to directories containing SKILL.md discovered under plugin roots; an empty list if none are found.
+    """
     dirs: List[Path] = []
     for plugin_root in sorted(REPO_ROOT.glob(POLICY_PLUGIN_SKILL_ROOT_GLOB)):
         if not plugin_root.is_dir():
@@ -85,6 +99,15 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
 
 
 def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
+    """
+    Determine whether the given skill directory is owned by a plugin (i.e. it resides under REPO_ROOT/plugins/.../skills/...).
+    
+    Parameters:
+    	skill_dir (Path): Path to the skill directory to test.
+    
+    Returns:
+    	True if the directory is located inside a `plugins` subtree and contains a `skills` segment before the final path part, `False` otherwise.
+    """
     try:
         rel = skill_dir.resolve().relative_to(REPO_ROOT)
     except ValueError:
@@ -156,11 +179,35 @@ def _parse_frontmatter(skill_md: Path) -> Dict[str, str]:
 
 
 def _normalize_description(text: str) -> str:
+    """
+    Normalises a skill description by collapsing consecutive whitespace to single spaces and trimming surrounding space; returns a fallback when empty.
+    
+    Returns:
+        str: The cleaned description, or "Skill description pending." if the result is empty.
+    """
     normalized = re.sub(r"\s+", " ", text).strip()
     return normalized or "Skill description pending."
 
 
 def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
+    """
+    Discover skill entries from the configured skill sources.
+    
+    Parameters:
+        source (str): Which repository surface to scan. One of:
+            - "auto": prefer flat skills if present, otherwise fall back to repository scan;
+            - "flat": scan only the flat skills directory (optionally augment with plugin lanes in advanced visibility);
+            - "repo": scan repository roots. Default "auto".
+        visibility (str): Visibility mode affecting which skills are included.
+            - "default": hide policy-marked hidden flat skills and hide certain plugin lane skills;
+            - "advanced": include plugin lane skills that are otherwise hidden. Default "default".
+    
+    Returns:
+        List[SkillEntry]: A list of discovered SkillEntry objects, deduplicated by name and sorted by (category, name). Each entry's category is derived from the skill path relative to the repository root and the description is chosen from frontmatter (`metadata.short-description` or `description`) then normalised.
+    
+    Raises:
+        ValueError: If `visibility` is not "default" or "advanced".
+    """
     if visibility not in {"default", "advanced"}:
         raise ValueError(f"Unsupported visibility mode: {visibility}")
 
@@ -229,6 +276,15 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
 
 
 def _category_heading(category: str) -> str:
+    """
+    Format a slash-separated category path into a human-friendly heading.
+    
+    Parameters:
+        category (str): Category path with parts separated by '/', where parts may contain '-' to indicate word breaks.
+    
+    Returns:
+        heading (str): A display heading where each path part has '-' replaced by spaces, is title-cased, and parts are joined with " — ".
+    """
     words: List[str] = []
     for part in category.split("/"):
         words.append(part.replace("-", " ").title())
@@ -236,6 +292,26 @@ def _category_heading(category: str) -> str:
 
 
 def render_index(entries: List[SkillEntry], source: str = "auto", visibility: str = "default") -> str:
+    """
+    Render a Markdown catalogue of the provided skill entries grouped by category.
+    
+    Builds a document containing a title, table of contents, a Summary block
+    (with `total_skills`, `catalog_source`, `visibility`, and `policy_identity`),
+    and a Catalog section where entries are listed under category headings as
+    "`name` — description".
+    
+    Parameters:
+        entries (List[SkillEntry]): Skill entries to include in the index.
+        source (str): Source label used in the Summary; typically "flat", "repo" or "auto".
+            These map to "`.agents/skills` flat runtime view", "repository skill scan"
+            and "auto-resolved catalog source" respectively.
+        visibility (str): Visibility mode included in the Summary; expected values are
+            "default" or "advanced" and influence which skills are presented elsewhere
+            in the discovery process.
+    
+    Returns:
+        str: The complete Markdown document as a single string.
+    """
     categories: Dict[str, List[SkillEntry]] = {}
     for entry in entries:
         categories.setdefault(entry.category, []).append(entry)
@@ -285,6 +361,12 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments for the skill index utility.
+    
+    Returns:
+        argparse.Namespace: Parsed CLI options with attributes `count`, `write_index`, `source`, `visibility` and `policy_identity`.
+    """
     parser = argparse.ArgumentParser(description="Render and count the surfaced skill catalog")
     parser.add_argument("--count", action="store_true", help="Print the current surfaced skill count")
     parser.add_argument("--write-index", type=Path, help="Write the generated root SKILL.md index")
@@ -309,6 +391,14 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    """
+    Parse command-line arguments, discover skill entries, and perform the requested output actions.
+    
+    The function handles the CLI options produced by parse_args(): it discovers skill entries using the chosen source and visibility, prints the total count when requested, prints the policy identity when requested, writes the rendered skill index to a file when a path is provided, and prints the rendered index to stdout when no other output-only options are given. File writes use UTF-8 encoding and append a final newline.
+    
+    Returns:
+        int: Exit code `0` on successful completion.
+    """
     args = parse_args()
     entries = discover_skill_entries(source=args.source, visibility=args.visibility)
 

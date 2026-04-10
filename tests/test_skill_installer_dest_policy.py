@@ -18,6 +18,14 @@ INSTALLER_DIR = INSTALLER_PATH.parent
 
 
 def _load_installer():
+    """
+    Load the installer script as a module named 'skill_installer_dest_policy'.
+    
+    Adds INSTALLER_DIR to sys.path if it is not present, loads the module from INSTALLER_PATH and registers it in sys.modules under the name 'skill_installer_dest_policy'.
+    
+    Returns:
+        module: The loaded module object.
+    """
     if str(INSTALLER_DIR) not in sys.path:
         sys.path.insert(0, str(INSTALLER_DIR))
     module_name = "skill_installer_dest_policy"
@@ -39,6 +47,11 @@ class SkillInstallerDestPolicyTests(unittest.TestCase):
                 installer._resolve_dest_root(None)
 
     def test_resolve_dest_root_defaults_to_canonical_dest(self) -> None:
+        """
+        Verify that passing None defaults the destination root to the installer's canonical repository path.
+        
+        Creates a temporary repository layout, mocks `_canonical_repo_dest` to return that canonical path, calls `_resolve_dest_root(None)`, and asserts the returned path equals the canonical directory's resolved absolute path.
+        """
         with tempfile.TemporaryDirectory(prefix="installer-canonical-") as tmpdir:
             canonical = Path(tmpdir) / "agent-skills" / "github"
             canonical.mkdir(parents=True, exist_ok=True)
@@ -47,6 +60,13 @@ class SkillInstallerDestPolicyTests(unittest.TestCase):
         self.assertEqual(Path(resolved), canonical.resolve())
 
     def test_resolve_dest_root_allows_repo_relative_category(self) -> None:
+        """
+        Verifies that a repo-relative category name resolves to a directory under the repository root.
+        
+        Patches the installer's canonical repository destination to a path ending with `agent-skills/github`
+        and asserts that passing `"utilities"` to `_resolve_dest_root` yields the resolved path
+        `agent-skills/utilities`.
+        """
         with tempfile.TemporaryDirectory(prefix="installer-canonical-") as tmpdir:
             repo_root = Path(tmpdir) / "agent-skills"
             canonical = repo_root / "github"
@@ -56,6 +76,11 @@ class SkillInstallerDestPolicyTests(unittest.TestCase):
         self.assertEqual(Path(resolved), (repo_root / "utilities").resolve())
 
     def test_resolve_dest_root_rejects_destination_outside_repo(self) -> None:
+        """
+        Verifies that providing a destination path outside the canonical repository raises InstallError.
+        
+        Sets the canonical repository location to a temporary agent-skills/github directory and asserts that calling _resolve_dest_root with an absolute path that lies outside that repository raises installer.InstallError.
+        """
         with tempfile.TemporaryDirectory(prefix="installer-canonical-") as tmpdir:
             canonical = Path(tmpdir) / "agent-skills" / "github"
             canonical.mkdir(parents=True, exist_ok=True)

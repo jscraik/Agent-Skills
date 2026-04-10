@@ -8,6 +8,19 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_module(module_name: str, relative_path: str):
+    """
+    Load a Python module from a file path relative to the repository root and return the imported module.
+    
+    Parameters:
+        module_name (str): The name to assign to the loaded module.
+        relative_path (str | os.PathLike): Path relative to the repository root pointing to the module file.
+    
+    Returns:
+        module: The imported module object.
+    
+    Raises:
+        RuntimeError: If the module spec or its loader cannot be created for the resolved file path.
+    """
     module_path = REPO_ROOT / relative_path
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     if spec is None or spec.loader is None:
@@ -64,6 +77,11 @@ class TestParsePlainReview(unittest.TestCase):
 
 class TestFetchUnresolvedThreads(unittest.TestCase):
     def test_extract_filters_resolved_and_non_coderabbit_authors(self) -> None:
+        """
+        Verifies that only unresolved review thread comments authored by `coderabbitai` are extracted.
+        
+        Provides three thread fixtures: an unresolved thread with a `coderabbitai` comment, an unresolved thread with a non-Coderabbit author, and a resolved thread authored by a bot. Asserts that the extractor returns exactly the unresolved `coderabbitai` comment and that its `comment_id` and `path` match the expected values.
+        """
         threads = [
             {
                 "isResolved": False,
@@ -106,6 +124,11 @@ class TestFetchUnresolvedThreads(unittest.TestCase):
         self.assertEqual(results[0]["path"], "src/a.ts")
 
     def test_collect_review_threads_paginates(self) -> None:
+        """
+        Verifies that _collect_review_threads paginates GraphQL responses and aggregates nodes from multiple pages.
+        
+        Patches the GraphQL runner to return two pages of review thread data and asserts that the collected nodes preserve order across pages and that the GraphQL call is invoked once per page.
+        """
         first = {
             "data": {
                 "repository": {

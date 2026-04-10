@@ -66,11 +66,33 @@ PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
 
 
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:
+    """
+    Builds repository scan roots prefixed with "./".
+    
+    Each entry from REPO_SCAN_ROOTS is returned with a "./" prefix to ensure relative-path scanning.
+    
+    Returns:
+    	tuple[str, ...]: Tuple of scan-root strings, each prefixed with "./".
+    """
     return tuple(f"./{root}" for root in REPO_SCAN_ROOTS)
 
 
 def payload() -> dict[str, Any]:
-    """Stable serialization input used to compute policy identity."""
+    """
+    Produce a stable dictionary of all inputs that define the selection policy identity.
+    
+    Tuples are converted to lists to ensure deterministic JSON serialization for hashing and storage.
+    
+    Returns:
+        payload (dict[str, Any]): Mapping with the following keys:
+            - "policy_version": str
+            - "repo_scan_roots": list[str]
+            - "plugin_skill_root_glob": str
+            - "excluded_scan_segments": list[str]
+            - "hidden_flat_skill_names": list[str]
+            - "plugin_visible_router_skill_names": list[str]
+            - "plugin_hidden_lane_skill_names": list[str]
+    """
     return {
         "policy_version": POLICY_VERSION,
         "repo_scan_roots": list(REPO_SCAN_ROOTS),
@@ -93,6 +115,14 @@ def _shell_array(name: str, values: Iterable[str]) -> str:
 
 
 def render_shell() -> str:
+    """
+    Produce a newline-delimited shell fragment defining selection policy variables.
+    
+    The fragment contains a quoted `SELECTION_POLICY_IDENTITY`, shell-array assignments for repo scan roots, excluded segments, hidden flat skills, plugin-visible router skills and plugin-hidden lane skills, and a quoted `SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB`.
+    
+    Returns:
+        shell_fragment (str): Lines joined by newlines representing shell assignments.
+    """
     lines = [
         f"SELECTION_POLICY_IDENTITY={shlex.quote(policy_identity())}",
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),

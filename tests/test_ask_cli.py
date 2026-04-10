@@ -43,7 +43,15 @@ class TestAskCLI(unittest.TestCase):
         self.assertTrue(os.path.isdir(repo_root), f"repo_root is not a directory: {repo_root}")
 
     def test_skills_list(self):
-        """CA1: Verify ask skills list returns a catalog of skills."""
+        """
+        Validate that the CLI `ask skills list --json` exposes a skills catalogue with the expected envelope and fields.
+        
+        Checks:
+        - the process exits successfully (return code 0),
+        - top-level `status` equals "success",
+        - `data.skills` is present and is a list,
+        - if the list is non-empty, the first skill contains `name` and `path`.
+        """
         cmd = ["python3", "bin/ask", "skills", "list", "--json"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         

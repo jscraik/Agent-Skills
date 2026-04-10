@@ -16,11 +16,22 @@ from ask.commands.plugins import harden_plugin, init_plugin, install_plugin
 
 class TestAskPluginsCommands(unittest.TestCase):
     def setUp(self) -> None:
+        """
+        Create an isolated temporary repository for each test.
+        
+        Initialises `self.temp_dir` to a new temporary directory and creates `self.repo_root`
+        as a nested `repo` directory inside it for use by tests.
+        """
         self.temp_dir = Path(tempfile.mkdtemp(prefix="ask-plugins-cmds-"))
         self.repo_root = self.temp_dir / "repo"
         self.repo_root.mkdir(parents=True)
 
     def tearDown(self) -> None:
+        """
+        Remove the temporary repository directory created for the test.
+        
+        This performs a recursive deletion of `self.temp_dir` and its contents, ignoring any filesystem errors that occur during removal.
+        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_init_plugin_creates_manual_companion_folder(self) -> None:
@@ -50,6 +61,11 @@ class TestAskPluginsCommands(unittest.TestCase):
         self.assertNotIn("--with-references", called_cmd)
 
     def test_install_plugin_uses_packaged_installer_fallback(self) -> None:
+        """
+        Ensures the packaged installer script is used as a fallback when installing a plugin.
+        
+        Creates a packaged installer script under the repository, patches `subprocess.run` to simulate a successful install, calls `install_plugin(...)`, and asserts the call succeeds and that the invoked subprocess command runs `python3` with the path to the packaged installer script.
+        """
         installer_script = (
             self.repo_root
             / "plugins"
@@ -82,6 +98,11 @@ class TestAskPluginsCommands(unittest.TestCase):
         self.assertEqual(called_cmd[1], str(installer_script))
 
     def test_harden_plugin_runs_validate_compat_and_marketplace_audit(self) -> None:
+        """
+        Verify that harden_plugin executes the validation, compatibility audit and marketplace audit in sequence and records each step's result.
+        
+        Sets up a plugin-builder script and plugin directory, simulates three successful subprocess outputs (`PASS: validate`, `PASS: compat`, `PASS: marketplace`), and asserts that the returned result has status "success" with exactly three recorded command runs whose steps are, in order: "validate", "audit-compat", "audit-marketplace".
+        """
         builder_script = self.repo_root / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py"
         builder_script.parent.mkdir(parents=True, exist_ok=True)
         builder_script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")

@@ -44,6 +44,14 @@ class InstallError(Exception):
 
 
 def _tmp_root() -> str:
+    """
+    Provide the base temporary directory used by the installer, ensuring it exists.
+    
+    Ensures a directory named `codex` under the system temporary directory exists.
+    
+    Returns:
+        The absolute path to the base temporary directory.
+    """
     base = os.path.join(tempfile.gettempdir(), "codex")
     os.makedirs(base, exist_ok=True)
     return base
@@ -204,6 +212,20 @@ def _prepare_repo(source: Source, method: str, tmp_dir: str) -> str:
 
 
 def _resolve_source(args: Args) -> Source:
+    """
+    Resolve CLI arguments into a Source describing the GitHub repository, ref and repository-relative paths to install.
+    
+    When `args.url` is provided the URL is parsed to determine owner, repo and ref; installation paths are taken from `args.path` if present or from the URL subpath, and at least one path is required. When `args.repo` contains "://", it is treated as a URL and resolved the same way. When `args.repo` is given in `owner/repo` form, `args.path` must be provided and is used as the list of repository-relative paths.
+    
+    Parameters:
+        args (Args): Parsed command-line arguments containing `url`, `repo`, `path`, and `ref`.
+    
+    Returns:
+        Source: Resolved source with `owner`, `repo`, `ref`, and `paths` populated.
+    
+    Raises:
+        InstallError: If neither `--repo` nor `--url` is provided; if `--repo` is not in `owner/repo` format; or if no installation paths are available for the given input.
+    """
     if args.url:
         owner, repo, ref, url_path = _parse_github_url(args.url, args.ref)
         if args.path is not None:
@@ -238,6 +260,14 @@ def _resolve_source(args: Args) -> Source:
 
 
 def _canonical_repo_dest() -> str | None:
+    """
+    Locate the canonical skills destination directory for the local repository or an environment override.
+    
+    If the environment variable `ASK_SKILLS_CANONICAL_DEST` is set and non-empty that value is returned. Otherwise the filesystem is scanned upwards from this script for a repository root that contains a `.git` directory, an `AGENTS.md` file, a `scripts/sync_skills.sh` file and a `plugins` directory; when found, the function returns the path to the `github` directory inside that repository. If no override is set and no repository root is detected, `None` is returned.
+    
+    Returns:
+        str | None: Path to the canonical `github` directory, or `None` if not detected.
+    """
     override = os.environ.get("ASK_SKILLS_CANONICAL_DEST", "").strip()
     if override:
         return override
@@ -252,6 +282,23 @@ def _canonical_repo_dest() -> str | None:
 
 
 def _resolve_dest_root(dest: str | None) -> str:
+    """
+    Resolve the final absolute destination directory within the canonical agent-skills repository.
+    
+    Parameters:
+        dest (str | None): If None, use the detected canonical `<repo>/github` destination.
+            If provided and absolute, it must be inside the canonical repository root.
+            If provided and relative, it is interpreted as a path relative to the canonical repository root
+            and must target a category directory (not the repository root itself).
+    
+    Returns:
+        str: Absolute path to the resolved destination directory.
+    
+    Raises:
+        InstallError: If the canonical destination cannot be detected, if the resolved path lies outside
+            the canonical repository root, or if the resolved path targets the repository root instead of
+            a category directory.
+    """
     canonical = _canonical_repo_dest()
     if not canonical:
         raise InstallError(
@@ -280,6 +327,15 @@ def _resolve_dest_root(dest: str | None) -> str:
 
 
 def _parse_args(argv: list[str]) -> Args:
+    """
+    Parse command-line arguments and populate an Args dataclass.
+    
+    Parameters:
+        argv (list[str]): Command-line arguments (excluding program name).
+    
+    Returns:
+        Args: Parsed arguments with fields: repo, url, path, ref, dest, name, and method.
+    """
     parser = argparse.ArgumentParser(description="Install a skill from GitHub.")
     parser.add_argument("--repo", help="owner/repo")
     parser.add_argument("--url", help="https://github.com/owner/repo[/tree/ref/path]")
@@ -302,6 +358,17 @@ def _parse_args(argv: list[str]) -> Args:
 
 
 def main(argv: list[str]) -> int:
+    """
+    Install one or more skills from a GitHub repository into the canonical repository skill category directories.
+    
+    Parses command-line arguments from `argv`, resolves the GitHub source and destination category, acquires the repository content (by download or git), validates each skill path and name, copies each valid skill into the resolved destination, and cleans up temporary work files. Prints a line "Installed <skill_name> to <dest_dir>" for each successful install; on failure prints an error message to stderr.
+    
+    Parameters:
+        argv (list[str]): Command-line arguments (excluding the program name).
+    
+    Returns:
+        int: Exit status code: `0` on success, `1` on failure.
+    """
     args = _parse_args(argv)
     try:
         source = _resolve_source(args)

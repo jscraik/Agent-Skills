@@ -22,6 +22,14 @@ PLUGIN_NAME_RE = re.compile(r"^[a-z0-9](?:-?[a-z0-9]){0,63}$")
 
 
 def _discover_repo_root() -> Path:
+    """
+    Discover the repository root directory for this project.
+    
+    Searches the ancestor directories of this file and returns the first directory that contains a "plugins" subdirectory and either a ".git" entry or both "plugins/plugin-factory/skills" and ".agents". If no such ancestor is found, returns the current working directory resolved to an absolute Path.
+    
+    Returns:
+        Path: The discovered repository root directory, or the resolved current working directory if no match is found.
+    """
     def _looks_like_repo_root(candidate: Path) -> bool:
         if not (candidate / "plugins").is_dir():
             return False
