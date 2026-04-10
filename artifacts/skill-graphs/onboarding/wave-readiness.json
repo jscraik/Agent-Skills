@@ -1,13 +1,13 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T19:04:45Z",
+  "generated_at": "2026-04-10T20:50:23Z",
   "decision_date": "2026-04-10",
   "summary": {
     "active_skill_count": 74,
     "manual_skill_count": 9,
     "co_pilot_skill_count": 65,
-    "profile_valid_count": 73,
-    "profile_invalid_count": 1,
+    "profile_valid_count": 74,
+    "profile_invalid_count": 0,
     "event_envelope_errors": 16,
     "event_envelope_errors_total": 24,
     "event_envelope_errors_waived": 8,
@@ -32,14 +32,6 @@
         "owner": "release-coordination",
         "due_date": "2026-04-11",
         "escalation_date": "2026-04-13",
-        "acceptance": "pending"
-      },
-      {
-        "wave": "wave-2-co-pilot",
-        "code": "COPILOT_SKILL_VALIDATION",
-        "owner": "copilot-onboarding",
-        "due_date": "2026-04-12",
-        "escalation_date": "2026-04-14",
         "acceptance": "pending"
       },
       {
@@ -102,23 +94,16 @@
     "wave-2-co-pilot": {
       "ready": false,
       "checks": {
-        "co_pilot_profiles_valid": false,
+        "co_pilot_profiles_valid": true,
         "wave_1_ready": false,
         "event_envelope_errors_zero": false,
         "telemetry_freshness_ok": true
       },
       "coverage": {
         "total": 65,
-        "valid": 64
+        "valid": 65
       },
       "blockers": [
-        {
-          "code": "COPILOT_SKILL_VALIDATION",
-          "detail": "Co-pilot skills valid 64/65",
-          "owner": "copilot-onboarding",
-          "due_date": "2026-04-12",
-          "escalation_date": "2026-04-14"
-        },
         {
           "code": "WAVE1_NOT_READY",
           "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",

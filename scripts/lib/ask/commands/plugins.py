@@ -302,6 +302,27 @@ def init_plugin(
 
     if process.returncode == 0:
         plugin_root = _extract_plugin_root_from_output(process.stdout, repo_root, name)
+        plugin_root_missing = not plugin_root.is_dir()
+        plugin_root_empty = False
+        if not plugin_root_missing:
+            try:
+                next(plugin_root.iterdir())
+            except StopIteration:
+                plugin_root_empty = True
+            except OSError:
+                plugin_root_missing = True
+        if plugin_root_missing or plugin_root_empty:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Plugin creator did not materialize a scaffold at '{plugin_root}'.",
+                    fix_suggestion="Inspect creator output and retry with a valid plugin name/path.",
+                )
+            )
+            result.data["raw_output"] = process.stdout
+            result.data["raw_error"] = process.stderr
+            return result
         created_manual_folders: list[str] = []
         for folder in manual_folders:
             target = plugin_root / folder
@@ -503,9 +524,9 @@ def harden_plugin(
     if not plugin_root.is_absolute():
         plugin_root = _to_absolute_path(repo_root / plugin_root)
 
-    if not plugin_root.exists():
+    if not plugin_root.is_dir():
         return _validation_error_result(
-            f"Plugin path '{plugin_root}' does not exist.",
+            f"Plugin path '{plugin_root}' is not a directory.",
             fix_suggestion="Pass a valid plugin directory path (for example: plugins/<name>).",
         )
 

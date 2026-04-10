@@ -10,11 +10,11 @@ triggers:
 inputs:
   - source repository and skill path(s)
   - pinned source ref or explicit unpinned override
-  - destination skill root
+  - optional destination skill root override (defaults to canonical repository category root)
   - install method preference (download, git, auto)
   - optional agent injection mode and source role path
 outputs:
-  - installed skills under canonical repository category roots
+  - installed skills under canonical repository category roots (or explicit override root when provided)
   - provenance manifest with requested ref and resolved commit
   - rollback journal capturing staged and promoted install events
   - optional role-injection outcome with reuse/create decision and validated role file path

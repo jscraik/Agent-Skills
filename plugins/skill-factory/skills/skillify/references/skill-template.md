@@ -49,10 +49,10 @@ context: <fork|inline; omit when inline>
 ## See Also
 | Skill | When to use |
 |---|---|
-| `<adjacent-skill-1>` | <when this neighboring skill is a better fit> |
-| `<adjacent-skill-2>` | <another related skill in the local graph> |
+| [[<adjacent-skill-1>]] | <when this neighboring skill is a better fit> |
+| [[<adjacent-skill-2>]] | <another related skill in the local graph> |
 
-**Topic map:** `[[<topic-name>]]`
+**Topic map:** [[<topic-name>]]
 ```
 
 Notes:

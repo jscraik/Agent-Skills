@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-bash-hygiene",
-  "scope_skill": "utilities/bash-hygiene",
-  "scope_profile": "utilities",
-  "rubric_version": "2026-04-10",
+  "profile_id": "skills-system-imagegen",
+  "scope_skill": "skills-system/imagegen",
+  "scope_profile": "skills-system",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -31,7 +31,7 @@
     },
     {
       "id": "safety",
-      "label": "Safety/compliance",
+      "label": "Safety/compliance compliance",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -41,15 +41,7 @@
     "mode": "co-pilot",
     "human_baseline_minutes": 45.0,
     "ai_process_minutes": 15.0,
-    "probability_of_success": 0.8,
-    "rationale": "Co-pilot mode is appropriate for shell hardening because scripts often touch environment and operational safety boundaries."
-  },
-  "learning_posture": {
-    "supported": [
-      "learn",
-      "guided",
-      "execute"
-    ],
-    "default": "guided"
+    "probability_of_success": 0.75,
+    "rationale": "Co-pilot mode default: image generation/editing guidance is high leverage but still needs user oversight for final asset acceptance."
   }
 }

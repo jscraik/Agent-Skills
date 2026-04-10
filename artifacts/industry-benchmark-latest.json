@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T14:47:18.974257+00:00",
+  "generated_at": "2026-04-10T19:57:48.967025+00:00",
   "mode": "warn",
   "policy_path": "utilities/skill-builder/references/benchmark-policy.json",
-  "skills_scanned": 75,
+  "skills_scanned": 74,
   "uncategorized_skills": [],
   "cluster_results": [
     {
@@ -242,7 +242,7 @@
     {
       "cluster": "utilities_general",
       "description": "General utility and workflow support skills",
-      "skills": 22,
+      "skills": 21,
       "skills_with_any_marker": 0,
       "coverage": 0.0,
       "marker_hits": {

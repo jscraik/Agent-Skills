@@ -49,11 +49,9 @@ def _discover_repo_root() -> Path:
     )
 
 
-# REPO_ROOT, DEFAULT_PLUGIN_PARENT, and DEFAULT_MARKETPLACE_PATH are initialized in main()
-# to allow argparse overrides to work correctly
-REPO_ROOT = None
-DEFAULT_PLUGIN_PARENT = None
-DEFAULT_MARKETPLACE_PATH = None
+REPO_ROOT = _discover_repo_root()
+DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
+DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
@@ -590,13 +588,6 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     validate_lifecycle_scaffold_args(args)
-
-    # Initialize defaults lazily so argparse overrides work correctly
-    global REPO_ROOT, DEFAULT_PLUGIN_PARENT, DEFAULT_MARKETPLACE_PATH
-    if REPO_ROOT is None:
-        REPO_ROOT = _discover_repo_root()
-        DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
-        DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
 
     # Apply defaults if not provided by user
     if args.path is None:

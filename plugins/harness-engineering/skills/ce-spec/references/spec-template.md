@@ -1,11 +1,11 @@
 ---
-title: Symphony Service Specification
-type: feat
-status: draft
-date: 2026-04-10
-origin: docs/brainstorms/symphony-service-brainstorm.md
-risk: high
-spec_depth: full
+title: "Symphony Service Specification"
+type: "feat"
+status: "draft"
+date: "2026-04-10"
+origin: "docs/brainstorms/symphony-service-brainstorm.md"
+risk: "high"
+spec_depth: "full"
 ui_required: false
 ---
 
@@ -293,7 +293,9 @@ Issue is dispatch-eligible only if:
 
 ### 10.1 Launch Contract
 
-- Launch command: `bash -lc <codex.command>`
+- Launch command uses argv semantics:
+  - `["<codex.command>", "<arg1>", "<arg2>", ...]` (default)
+  - optional shell wrapping only when `codex.shell_wrap: true` and the command is trusted
 - Working directory: workspace path
 - Parse protocol messages from stdout line-by-line JSON.
 

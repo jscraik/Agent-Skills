@@ -1,11 +1,11 @@
 ---
-title: {{SPEC_TITLE}}
-type: {{SPEC_TYPE}}
-status: {{SPEC_STATUS}}
-date: {{SPEC_DATE}}
-origin: {{SPEC_ORIGIN}}
-risk: {{SPEC_RISK}}
-spec_depth: {{SPEC_DEPTH}}
+title: "{{SPEC_TITLE}}"
+type: "{{SPEC_TYPE}}"
+status: "{{SPEC_STATUS}}"
+date: "{{SPEC_DATE}}"
+origin: "{{SPEC_ORIGIN}}"
+risk: "{{SPEC_RISK}}"
+spec_depth: "{{SPEC_DEPTH}}"
 ui_required: {{UI_REQUIRED}}
 ---
 
@@ -293,7 +293,9 @@ Issue is dispatch-eligible only if:
 
 ### 10.1 Launch Contract
 
-- Launch command: `bash -lc <codex.command>`
+- Launch command uses argv semantics:
+  - `["<codex.command>", "<arg1>", "<arg2>", ...]` (default)
+  - optional shell wrapping only when `codex.shell_wrap: true` and the command is trusted
 - Working directory: workspace path
 - Parse protocol messages from stdout line-by-line JSON.
 

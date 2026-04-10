@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Pattern
 
 PLACEHOLDER_PATTERN: Pattern[str] = re.compile(r"\{\{\s*([A-Z0-9_]+)\s*\}\}")
+CONTEXT_KEY_PATTERN: Pattern[str] = re.compile(r"^[A-Z0-9_]+$")
 
 
 class TemplateRenderError(RuntimeError):
@@ -18,11 +19,15 @@ class TemplateRenderError(RuntimeError):
 
 def parse_key_value(raw: str) -> tuple[str, str]:
     if "=" not in raw:
-        raise TemplateRenderError(f"Invalid --var value {raw}. Expected KEY=VALUE.")
+        raise TemplateRenderError("Invalid --var value. Expected KEY=VALUE.")
     key, value = raw.split("=", 1)
     key = key.strip()
     if not key:
-        raise TemplateRenderError(f"Invalid --var value {raw}. KEY cannot be empty.")
+        raise TemplateRenderError("Invalid --var value. KEY cannot be empty.")
+    if not CONTEXT_KEY_PATTERN.match(key):
+        raise TemplateRenderError(
+            "Invalid --var key. Expected uppercase KEY with only A-Z, 0-9, and underscore."
+        )
     return key, value
 
 
@@ -36,7 +41,9 @@ def load_json_context(path: Path) -> dict[str, str]:
 
     if not isinstance(payload, dict):
         raise TemplateRenderError(f"JSON context {path} must decode to an object.")
-    return {str(key): str(value) for key, value in payload.items()}
+    context = {str(key): str(value) for key, value in payload.items()}
+    _validate_context_keys(context.keys(), source=f"JSON context {path}")
+    return context
 
 
 def build_context(
@@ -51,6 +58,7 @@ def build_context(
         context.update(default_context)
     context.update(json_context)
     context.update(cli_context)
+    _validate_context_keys(context.keys(), source="template context")
     return context
 
 
@@ -112,7 +120,17 @@ def unified_diff_lines(
 
 
 def print_diff_lines(diff_lines: list[str], *, max_diff_lines: int) -> None:
+    if max_diff_lines < 0:
+        raise TemplateRenderError("max_diff_lines must be non-negative.")
     for line in diff_lines[:max_diff_lines]:
         print(line)
     if len(diff_lines) > max_diff_lines:
         print(f"... truncated {len(diff_lines) - max_diff_lines} diff lines ...")
+
+
+def _validate_context_keys(keys: list[str] | tuple[str, ...] | set[str], *, source: str) -> None:
+    invalid = sorted({key for key in keys if not CONTEXT_KEY_PATTERN.match(str(key))})
+    if invalid:
+        raise TemplateRenderError(
+            f"{source} contains invalid keys {invalid}; expected uppercase KEY names with A-Z, 0-9, and underscore."
+        )
