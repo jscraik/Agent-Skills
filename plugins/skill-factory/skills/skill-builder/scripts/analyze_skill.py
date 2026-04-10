@@ -5,7 +5,7 @@ analyze_skill.py
 Analyze a Codex agent skill (SKILL.md) and emit a quality score + actionable feedback.
 
 Usage:
-    ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>
+    ~/.venvs/pyyaml/bin/python plugins/skill-factory/skills/skill-builder/scripts/analyze_skill.py <path/to/skill-dir-or-SKILL.md>
 
 Examples:
     ~/.venvs/pyyaml/bin/python utilities/skill-builder/scripts/analyze_skill.py github/my-skill

@@ -35,7 +35,15 @@ class TestAskPluginsCommands(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_init_plugin_creates_manual_companion_folder(self) -> None:
-        creator_script = self.repo_root / "skills-system" / "plugin-creator" / "scripts" / "create_basic_plugin.py"
+        creator_script = (
+            self.repo_root
+            / "plugins"
+            / "plugin-factory"
+            / "skills"
+            / "plugin-creator"
+            / "scripts"
+            / "create_basic_plugin.py"
+        )
         creator_script.parent.mkdir(parents=True, exist_ok=True)
         creator_script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
 
@@ -59,6 +67,7 @@ class TestAskPluginsCommands(unittest.TestCase):
         self.assertTrue((plugin_root / "references").is_dir())
         called_cmd = run_mock.call_args[0][0]
         self.assertNotIn("--with-references", called_cmd)
+        self.assertEqual(called_cmd[1], str(creator_script))
 
     def test_install_plugin_uses_packaged_installer_fallback(self) -> None:
         """
@@ -103,7 +112,15 @@ class TestAskPluginsCommands(unittest.TestCase):
         
         Sets up a plugin-builder script and plugin directory, simulates three successful subprocess outputs (`PASS: validate`, `PASS: compat`, `PASS: marketplace`), and asserts that the returned result has status "success" with exactly three recorded command runs whose steps are, in order: "validate", "audit-compat", "audit-marketplace".
         """
-        builder_script = self.repo_root / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py"
+        builder_script = (
+            self.repo_root
+            / "plugins"
+            / "plugin-factory"
+            / "skills"
+            / "plugin-builder"
+            / "scripts"
+            / "plugin_builder.py"
+        )
         builder_script.parent.mkdir(parents=True, exist_ok=True)
         builder_script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
 
@@ -126,6 +143,8 @@ class TestAskPluginsCommands(unittest.TestCase):
         self.assertEqual(runs[0]["step"], "validate")
         self.assertEqual(runs[1]["step"], "audit-compat")
         self.assertEqual(runs[2]["step"], "audit-marketplace")
+        for run in runs:
+            self.assertIn(str(builder_script), run["command"])
 
 
 if __name__ == "__main__":

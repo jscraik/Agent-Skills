@@ -156,7 +156,8 @@ Before writing any code:
 - Design interfaces for testability (dependency injection, return results over side effects)
 - If the user explicitly requests delegation, select reviewer lanes from `references/sub-agent-map.md` before fan-out.
 - List the behaviors to test (not implementation steps)
-- Confirm approval state per `../ce-work/references/approval-flow.md`
+- Confirm approval state:
+  - follow `../shared/references/approval-flow.md`
 
 Ask: "What should the public interface look like? Which behaviors are most important to test?"
 

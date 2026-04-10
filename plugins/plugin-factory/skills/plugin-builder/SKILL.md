@@ -73,7 +73,7 @@ Return one machine-checkable envelope:
 
 ```yaml
 schema_version: 1
-execution_mode: "scaffold|convert|harden"
+execution_mode: "harden" # one of: scaffold|convert|harden
 summary: "<one-paragraph outcome>"
 plugin_path: "<path>"
 actions:
@@ -86,7 +86,7 @@ validation:
 artifacts:
   - "<path to generated/updated artifact>"
 handoff:
-  next_skill: "[[plugin-installer|plugin-creator|skill-builder|mcp-builder]]"
+  next_skill: "[[plugin-installer]]"
   reason: "<why handoff is needed>"
 risk_note: "<residual risk>"
 ```

@@ -19,11 +19,17 @@ LEGACY_MARKETPLACE_RELATIVE_PATH = "plugins/marketplace.json"
 def _discover_repo_root() -> Path:
     """
     Locate the repository root directory based on the script's location.
-    
-    Searches the script's ancestor directories for a directory that qualifies as the repository root. A candidate is accepted if it contains a `plugins` directory and either a `.git` entry, or both a `.agents` directory and `plugins/plugin-factory/skills`. If no ancestor matches, the current working directory resolved to an absolute path is returned.
-    
+
+    Searches the script's ancestor directories for a directory that qualifies as
+    the repository root. A candidate is accepted if it contains a `plugins`
+    directory and either a `.git` entry, or both a `.agents` directory and
+    `plugins/plugin-factory/skills`.
+
     Returns:
-    	Path: Resolved path to the discovered repository root (or the current working directory if none found).
+    	Path: Resolved path to the discovered repository root.
+
+    Raises:
+        RuntimeError: When repository root discovery fails.
     """
     def _looks_like_repo_root(candidate: Path) -> bool:
         if not (candidate / "plugins").is_dir():
@@ -37,7 +43,10 @@ def _discover_repo_root() -> Path:
     for ancestor in Path(__file__).resolve().parents:
         if _looks_like_repo_root(ancestor):
             return ancestor
-    return Path.cwd().resolve()
+    raise RuntimeError(
+        "Unable to discover repository root from script location. "
+        "Run from the canonical repository or pass explicit --path and --marketplace-path."
+    )
 
 
 REPO_ROOT = _discover_repo_root()

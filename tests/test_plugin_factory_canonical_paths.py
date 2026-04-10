@@ -103,7 +103,10 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
 
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
         skill_doc = PLUGIN_CREATOR_SKILL.read_text(encoding="utf-8")
-        self.assertIn("skills-system/plugin-creator/scripts/create_basic_plugin.py", skill_doc)
+        self.assertIn(
+            "plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py",
+            skill_doc,
+        )
         self.assertNotIn(
             ".agents/skills/plugin-creator/scripts/create_basic_plugin.py",
             skill_doc,

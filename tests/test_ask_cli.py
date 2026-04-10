@@ -69,7 +69,7 @@ class TestAskCLI(unittest.TestCase):
     def test_skills_list_advanced_flag(self):
         """CA1: Verify ask skills list --advanced toggles advanced_mode in JSON output."""
         cmd = ["python3", "bin/ask", "skills", "list", "--advanced", "--json"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)

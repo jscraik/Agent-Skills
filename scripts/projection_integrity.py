@@ -304,6 +304,38 @@ def strip_projection_header(text: str, suffix: str) -> tuple[str, bool]:
     return text, False
 
 
+def detect_projection_header(text: str, suffix: str) -> str | None:
+    """
+    Return the current projection header line when present.
+
+    The detection rules mirror `strip_projection_header()` so verification can
+    compare the exact generated header value, not only token presence.
+    """
+    lines = text.splitlines()
+    if not lines:
+        return None
+
+    if suffix == ".md":
+        if lines[0].strip() == "---":
+            for idx in range(1, len(lines)):
+                if lines[idx].strip() == "---":
+                    if idx + 1 < len(lines) and HEADER_TOKEN in lines[idx + 1]:
+                        return lines[idx + 1]
+                    break
+        if HEADER_TOKEN in lines[0]:
+            return lines[0]
+        return None
+
+    if lines[0].startswith("#!"):
+        if len(lines) > 1 and HEADER_TOKEN in lines[1]:
+            return lines[1]
+        return None
+
+    if HEADER_TOKEN in lines[0]:
+        return lines[0]
+    return None
+
+
 def apply_projection_header(text: str, rel_source_path: str, suffix: str) -> str:
     """
     Insert or replace the generated projection header for a given source path into the provided file text.
@@ -621,6 +653,8 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         if rel.suffix not in STAMPABLE_SUFFIXES:
             continue
         projection_file = projection_abs / rel
+        if projection_file.is_symlink():
+            continue
         source_rel = (Path(spec.source_path) / rel).as_posix()
         try:
             original = read_text(projection_file)
@@ -730,8 +764,10 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
                 )
                 continue
 
+            expected_header = projection_header_for((Path(spec.source_path) / rel).as_posix(), rel.suffix)
+            header_line = detect_projection_header(projection_text, rel.suffix)
             normalized_projection, had_header = strip_projection_header(projection_text, rel.suffix)
-            if not had_header:
+            if not had_header or header_line != expected_header:
                 unstamped_files.append(rel_key)
             if source_text != normalized_projection:
                 mismatched_files.append(

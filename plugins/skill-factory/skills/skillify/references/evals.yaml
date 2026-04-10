@@ -24,7 +24,9 @@ cases:
     prompt: "Please capture this repo-specific PR handoff flow as a skill and save it in this repo, not globally."
     acceptance:
       - type: regex
-        value: "(?i)(canonical|category path|github/|utilities/)"
+        value: "(?i)(default|prefer|save).*(canonical|category path)"
+      - type: regex
+        value: "(?i)(github/|utilities/)"
 
   - id: personal-destination-rejected
     name: personal-home destination request is redirected to canonical path
@@ -35,7 +37,9 @@ cases:
     prompt: "This routine is cross-repo. Can you save it as a personal Codex skill under my home skills folder?"
     acceptance:
       - type: regex
-        value: "(?i)(canonical|home destination|not supported|category path)"
+        value: "(?i)(home|personal).*(not supported|cannot|won't|instead)"
+      - type: regex
+        value: "(?i)(canonical|category path|github/|utilities/)"
 
   - id: minimal-interview-for-simple-process
     name: avoid over-questioning simple process

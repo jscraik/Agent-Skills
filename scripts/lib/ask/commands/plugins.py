@@ -15,16 +15,16 @@ _MANUAL_COMPANION_FOLDERS = {"references", "workflows"}
 _PLUGIN_NAME_SANITIZE_RE = re.compile(r"[^a-z0-9]+")
 
 _PLUGIN_CREATOR_SCRIPT_CANDIDATES = (
-    "skills-system/plugin-creator/scripts/create_basic_plugin.py",
     "plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py",
+    "skills-system/plugin-creator/scripts/create_basic_plugin.py",
 )
 _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
-    "skills-system/plugin-installer/scripts/install-plugin-from-github.py",
     "plugins/plugin-factory/skills/plugin-installer/scripts/install-plugin-from-github.py",
+    "skills-system/plugin-installer/scripts/install-plugin-from-github.py",
 )
 _PLUGIN_BUILDER_SCRIPT_CANDIDATES = (
-    "utilities/plugin-builder/scripts/plugin_builder.py",
     "plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py",
+    "utilities/plugin-builder/scripts/plugin_builder.py",
 )
 
 

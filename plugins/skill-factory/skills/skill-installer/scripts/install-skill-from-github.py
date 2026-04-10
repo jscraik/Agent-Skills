@@ -321,8 +321,10 @@ def _resolve_dest_root(dest: str | None) -> str:
             f"Destination must stay inside canonical repository root: {repo_root}"
         ) from exc
 
-    if str(rel) in ("", "."):
-        raise InstallError("Destination must target a category directory under canonical repository root.")
+    if len(rel.parts) != 1:
+        raise InstallError(
+            "Destination must target a single top-level category under canonical repository root."
+        )
     return str(resolved)
 
 

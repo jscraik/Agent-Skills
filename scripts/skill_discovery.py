@@ -12,6 +12,7 @@ from typing import Dict, Iterable, List
 from selection_policy import (
     EXCLUDED_SCAN_SEGMENTS as POLICY_EXCLUDED_SCAN_SEGMENTS,
     HIDDEN_FLAT_SKILL_NAMES as POLICY_HIDDEN_FLAT_SKILL_NAMES,
+    PLUGIN_VISIBLE_ROUTER_SKILL_NAMES as POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
     PLUGIN_SKILL_ROOT_GLOB as POLICY_PLUGIN_SKILL_ROOT_GLOB,
     REPO_SCAN_ROOTS as POLICY_REPO_SCAN_ROOTS,
@@ -29,6 +30,7 @@ EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
 # Keep hidden/internal skills out of runtime discovery. This mirrors
 # scripts/sync_skills.sh hidden_flat_skills.
 HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
 
 
@@ -244,7 +246,9 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         if not name or name in seen:
             continue
         plugin_owned = _is_plugin_owned_skill_dir(source_dir)
-        if name in HIDDEN_FLAT_SKILL_NAMES and not plugin_owned:
+        if name in HIDDEN_FLAT_SKILL_NAMES:
+            continue
+        if visibility != "advanced" and plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
             continue
         if (
             visibility != "advanced"

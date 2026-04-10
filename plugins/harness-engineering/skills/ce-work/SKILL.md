@@ -148,7 +148,8 @@ Before coding:
   - what is not in scope
   - what must be validated before completion
   - what would require a contract update before continuing
-- align approval state before implementation per `references/approval-flow.md`
+- align approval state before implementation:
+  - follow `../shared/references/approval-flow.md`
 
 Then choose the working setup:
 - if already on a feature branch, confirm whether to continue there or create a fresh branch/worktree

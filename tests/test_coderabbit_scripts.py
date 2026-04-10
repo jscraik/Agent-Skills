@@ -163,6 +163,8 @@ class TestFetchUnresolvedThreads(unittest.TestCase):
 
         self.assertEqual([node["id"] for node in result], ["T1", "T2"])
         self.assertEqual(mocked.call_count, 2)
+        # Ensure page-2 fetch uses page-1 endCursor.
+        self.assertIn("CURSOR_1", repr(mocked.call_args_list[1]))
 
 
 if __name__ == "__main__":

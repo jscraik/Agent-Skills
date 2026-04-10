@@ -119,6 +119,21 @@ STARTER_ARCHETYPES = {
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
+
+_SKILL_INSTALLER_SCRIPT_CANDIDATES = (
+    "plugins/skill-factory/skills/skill-installer/scripts/install-skill-from-github.py",
+    "skills-system/skill-installer/scripts/install-skill-from-github.py",
+)
+
+
+def _resolve_skill_installer_script(repo_root: Path) -> str:
+    for rel in _SKILL_INSTALLER_SCRIPT_CANDIDATES:
+        candidate = repo_root / rel
+        if candidate.is_file():
+            return rel
+    # Keep canonical path in the error payload for predictable operator guidance.
+    return _SKILL_INSTALLER_SCRIPT_CANDIDATES[0]
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     """
@@ -449,8 +464,8 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
         raise ValueError("Destination escapes repository root.") from exc
 
     rel_text = str(rel_dest)
-    if rel_text in ("", "."):
-        raise ValueError("Destination must include a category directory under repository root.")
+    if len(rel_dest.parts) != 1:
+        raise ValueError("Destination must be a top-level category directory under repository root.")
     return resolved_dest, rel_text
 
 
@@ -532,9 +547,10 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         return result
 
     python_cmd = _get_python_command(["pyyaml"])
+    installer_script = _resolve_skill_installer_script(repo_root)
     supported_flags = _install_script_supported_flags(repo_root, python_cmd)
     cmd = python_cmd + [
-        "skills-system/skill-installer/scripts/install-skill-from-github.py",
+        installer_script,
         "--url", url,
         "--dest", str(dest_path),
     ]
@@ -609,8 +625,9 @@ def _install_script_supported_flags(repo_root: Path, python_cmd: List[str]) -> s
     Returns:
         supported (set[str]): Set containing any of `"--validation-level"` and `"--remediate"` that appear in the script's help output.
     """
+    installer_script = _resolve_skill_installer_script(repo_root)
     help_cmd = python_cmd + [
-        "skills-system/skill-installer/scripts/install-skill-from-github.py",
+        installer_script,
         "--help",
     ]
     try:
