@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-09T22:46:09.638424+00:00",
+  "generated_at": "2026-04-10T14:47:18.974257+00:00",
   "mode": "warn",
   "policy_path": "utilities/skill-builder/references/benchmark-policy.json",
   "skills_scanned": 75,
@@ -9,9 +9,9 @@
     {
       "cluster": "frontend_ui",
       "description": "Frontend and UI implementation skills",
-      "skills": 18,
+      "skills": 17,
       "skills_with_any_marker": 8,
-      "coverage": 0.4444,
+      "coverage": 0.4706,
       "marker_hits": {
         "react_19": 8,
         "next_16": 6,
@@ -72,9 +72,9 @@
     {
       "cluster": "openai_apps",
       "description": "OpenAI and ChatGPT Apps skills",
-      "skills": 1,
+      "skills": 2,
       "skills_with_any_marker": 1,
-      "coverage": 1.0,
+      "coverage": 0.5,
       "marker_hits": {
         "react_19": 0,
         "next_16": 0,
@@ -87,7 +87,9 @@
         "mcp_spec": 0
       },
       "fails": [],
-      "warns": [],
+      "warns": [
+        "coverage warn: 0.500 < 0.533"
+      ],
       "pass": true
     },
     {
@@ -129,9 +131,7 @@
         "mcp_spec": 1
       },
       "fails": [],
-      "warns": [
-        "coverage warn: 0.500 < 0.666"
-      ],
+      "warns": [],
       "pass": true
     },
     {

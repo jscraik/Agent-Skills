@@ -46,6 +46,9 @@ python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resource
 
 Run this from the repository root where `scripts/init_skill.py` exists. If you are outside that root, call it with `python3 /absolute/path/to/init_skill.py ...`.
 
+Scaffold source of truth:
+- `SKILL.md` is rendered from `templates/scaffold-simple-skill.md.tmpl` in this skill package.
+
 Defaults and naming:
 
 - Use the canonical repository category path (for example `github/<skill-name>`) when no path is provided.

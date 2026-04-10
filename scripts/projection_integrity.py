@@ -47,6 +47,12 @@ SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
         tags=("skill-factory",),
     ),
     SymlinkProjection(
+        name="skill-factory-skill-refactor-alias",
+        alias_path="utilities/skill-refactor",
+        canonical_path="plugins/skill-factory/skills/skill-refactor",
+        tags=("skill-factory",),
+    ),
+    SymlinkProjection(
         name="skill-factory-skillify-alias",
         alias_path="utilities/skillify",
         canonical_path="plugins/skill-factory/skills/skillify",

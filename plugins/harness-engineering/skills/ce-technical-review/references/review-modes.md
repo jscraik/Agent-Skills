@@ -2,6 +2,7 @@
 
 ## Table of Contents
 - [Purpose](#purpose)
+- [Template scaffold workflow](#template-scaffold-workflow)
 - [External evidence rule](#external-evidence-rule)
 - [Code-diff review](#code-diff-review)
 - [Document review](#document-review)
@@ -10,6 +11,25 @@
 
 ## Purpose
 This note preserves the original technical-review prompt mechanics while keeping the main skill concise.
+
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `finding.md.tmpl`
+- rendered baseline: `references/finding-template.md`
+
+Render / refresh:
+
+```bash
+python3 plugins/harness-engineering/skills/ce-technical-review/scripts/render_finding_template.py
+python3 plugins/harness-engineering/skills/ce-technical-review/scripts/check_finding_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/harness-engineering/skills/ce-technical-review/scripts/check_finding_template_drift.py
+```
 
 ## External evidence rule
 Use local evidence first:

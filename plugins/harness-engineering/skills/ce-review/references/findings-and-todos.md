@@ -2,6 +2,7 @@
 
 ## Table of Contents
 - [Purpose](#purpose)
+- [Template scaffold workflow](#template-scaffold-workflow)
 - [When to create todo files](#when-to-create-todo-files)
 - [When to act immediately instead](#when-to-act-immediately-instead)
 - [Naming convention](#naming-convention)
@@ -18,6 +19,25 @@ Use it when:
 - `ce-review` is asked to capture findings into `todos/`
 - the repo already uses the file-based `todos/` workflow
 - review findings are substantial enough that they should become tracked work items
+
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `review-todo.md.tmpl`
+- rendered baseline: `references/review-todo-template.md`
+
+Render / refresh:
+
+```bash
+python3 plugins/harness-engineering/skills/ce-review/scripts/render_review_todo_template.py
+python3 plugins/harness-engineering/skills/ce-review/scripts/check_review_todo_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/harness-engineering/skills/ce-review/scripts/check_review_todo_template_drift.py
+```
 
 ## When to create todo files
 Create a todo when the finding:

@@ -41,6 +41,7 @@ Use this router when the request is broad or mixed, for example:
 Skip this router when the user explicitly requests one lane:
 - [[skill-creator]] for first-draft creation
 - [[skill-builder]] for hardening/evals/quality work
+- [[skill-refactor]] for session-health scans and skill coverage audits
 - [[skillify]] for session-to-skill conversion
 - [[skill-installer]] for installation/import flows
 
@@ -52,7 +53,7 @@ Choose one mode before routing and report it in outputs:
 
 ## Routing workflow
 
-1. Identify primary intent: `create`, `improve`, `install`, or `skillify`.
+1. Identify primary intent: `create`, `improve`, `refactor`, `install`, or `skillify`.
 2. Select execution mode:
    - use `direct` when intent is clear;
    - use `clarify-once` when one answer will remove high-risk ambiguity.
@@ -63,7 +64,7 @@ Choose one mode before routing and report it in outputs:
 ## Required inputs
 
 Collect only the minimum needed to route safely:
-- primary intent (`create|improve|install|skillify`)
+- primary intent (`create|improve|refactor|install|skillify`)
 - target artifact path or source repo/path (if provided)
 - constraints (security, policy, portability, timeline)
 
@@ -74,9 +75,9 @@ Return one compact routing handoff object in this shape:
 ```yaml
 schema_version: 1
 execution_mode: "direct|clarify-once"
-selected_lane: "create|improve|install|skillify"
+selected_lane: "create|improve|refactor|install|skillify"
 reason: "<why this lane was selected>"
-next_skill: "[[skill-creator]]"
+next_skill: "[[skill-creator|skill-builder|skill-refactor|skill-installer|skillify]]"
 handoff_order:
   - "<lane-1>"
   - "<lane-2>"
@@ -91,7 +92,7 @@ confidence: "high|medium|low"
 
 - Confirm the selected lane matches the user's primary intent and constraints.
 - Confirm all required inputs for that lane are either present or explicitly listed as missing.
-- Confirm `next_skill` is one of: `[[skill-creator]]`, `[[skill-builder]]`, `[[skill-installer]]`, `[[skillify]]`.
+- Confirm `next_skill` is one of: `[[skill-creator]]`, `[[skill-builder]]`, `[[skill-refactor]]`, `[[skill-installer]]`, `[[skillify]]`.
 - For skill-authoring family changes (`skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator`), require CI `authoring-family-gate` and script `bash scripts/validate_skill_authoring_family.sh`.
 - Do not run lane-specific scripts from this router.
 - Fail fast: stop at the first failed gate, fix or report the blocker, and do not continue with downstream execution.
@@ -119,6 +120,7 @@ If intent cannot be classified with safe confidence:
 
 - "Create a new skill for release-note drafting." -> `selected_lane=create`, `next_skill=[[skill-creator]]`
 - "Audit and harden this existing skill before rollout." -> `selected_lane=improve`, `next_skill=[[skill-builder]]`
+- "Scan the last 24h of sessions for skill failures and suggest fixes." -> `selected_lane=refactor`, `next_skill=[[skill-refactor]]`
 - "Install two curated skills from openai/skills." -> `selected_lane=install`, `next_skill=[[skill-installer]]`
 - "Turn this debugging session into a reusable skill." -> `selected_lane=skillify`, `next_skill=[[skillify]]`
 
@@ -128,6 +130,7 @@ If intent cannot be classified with safe confidence:
 |---|---|
 | [[skill-creator]] | Create or refactor skill packages |
 | [[skill-builder]] | Run quality gates, evals, and hardening loops |
+| [[skill-refactor]] | Scan Codex sessions for skill failures and coverage gaps |
 | [[skill-installer]] | Install validated skills from trusted sources |
 | [[skillify]] | Capture a completed session as a reusable skill |
 

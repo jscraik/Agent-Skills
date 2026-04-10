@@ -103,6 +103,8 @@ Follow this workflow in order unless the user asks for a scoped shortcut.
 python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
 ```
 
+`scripts/init_skill.py` renders `SKILL.md` from `templates/scaffold-simple-skill.md.tmpl`.
+
 4. Implement reusable resources first, then update `SKILL.md` so it points to those resources.
 5. Generate or refresh `agents/openai.yaml` when needed:
 

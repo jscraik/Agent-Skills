@@ -313,5 +313,18 @@ When creating a new skill, add these files under `references/`:
 - `evals.yaml` -- at least 3 evaluation cases with prompts and acceptance criteria (happy path, edge case, failure mode)
 
 Start from the templates in:
-- `references/contract.template.yaml`
-- `references/evals.template.yaml`
+- `references/contract.template.yaml.tmpl` -> rendered to `references/contract.template.yaml`
+- `references/evals.template.yaml.tmpl` -> rendered to `references/evals.template.yaml`
+
+Render / refresh:
+
+```bash
+python3 plugins/skill-factory/skills/skill-builder/scripts/render_reference_templates.py
+python3 plugins/skill-factory/skills/skill-builder/scripts/check_reference_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 plugins/skill-factory/skills/skill-builder/scripts/check_reference_template_drift.py
+```

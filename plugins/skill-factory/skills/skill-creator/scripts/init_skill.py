@@ -16,99 +16,21 @@ Examples:
 import argparse
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 from generate_openai_yaml import write_openai_yaml
 
 MAX_SKILL_NAME_LENGTH = 64
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
-
-SKILL_TEMPLATE = """---
-name: {skill_name}
-description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
----
-
-# {skill_title}
-
-## Overview
-
-[TODO: 1-2 sentences explaining what this skill enables]
-
-## Structuring This Skill
-
-[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
-
-**1. Workflow-Based** (best for sequential processes)
-- Works well when there are clear step-by-step procedures
-- Example: DOCX skill with "Workflow Decision Tree" -> "Reading" -> "Creating" -> "Editing"
-- Structure: ## Overview -> ## Workflow Decision Tree -> ## Step 1 -> ## Step 2...
-
-**2. Task-Based** (best for tool collections)
-- Works well when the skill offers different operations/capabilities
-- Example: PDF skill with "Quick Start" -> "Merge PDFs" -> "Split PDFs" -> "Extract Text"
-- Structure: ## Overview -> ## Quick Start -> ## Task Category 1 -> ## Task Category 2...
-
-**3. Reference/Guidelines** (best for standards or specifications)
-- Works well for brand guidelines, coding standards, or requirements
-- Example: Brand styling with "Brand Guidelines" -> "Colors" -> "Typography" -> "Features"
-- Structure: ## Overview -> ## Guidelines -> ## Specifications -> ## Usage...
-
-**4. Capabilities-Based** (best for integrated systems)
-- Works well when the skill provides multiple interrelated features
-- Example: Product Management with "Core Capabilities" -> numbered capability list
-- Structure: ## Overview -> ## Core Capabilities -> ### 1. Feature -> ### 2. Feature...
-
-Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
-
-Delete this entire "Structuring This Skill" section when done - it's just guidance.]
-
-## [TODO: Replace with the first main section based on chosen structure]
-
-[TODO: Add content here. See examples in existing skills:
-- Code samples for technical skills
-- Decision trees for complex workflows
-- Concrete examples with realistic user requests
-- References to scripts/templates/references as needed]
-
-## Resources (optional)
-
-Create only the resource directories this skill actually needs. Delete this section if no resources are required.
-
-### scripts/
-Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
-
-**Examples from other skills:**
-- PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
-- DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
-
-**Appropriate for:** Python scripts, shell scripts, or any executable code that performs automation, data processing, or specific operations.
-
-**Note:** Scripts may be executed without loading into context, but can still be read by Codex for patching or environment adjustments.
-
-### references/
-Documentation and reference material intended to be loaded into context to inform Codex's process and thinking.
-
-**Examples from other skills:**
-- Product management: `communication.md`, `context_building.md` - detailed workflow guides
-- BigQuery: API reference documentation and query examples
-- Finance: Schema documentation, company policies
-
-**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Codex should reference while working.
-
-### assets/
-Files not intended to be loaded into context, but rather used within the output Codex produces.
-
-**Examples from other skills:**
-- Brand styling: PowerPoint template files (.pptx), logo files
-- Frontend builder: HTML/React boilerplate project directories
-- Typography: Font files (.ttf, .woff2)
-
-**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
-
----
-
-**Not every skill requires all three types of resources.**
-"""
+SCAFFOLD_TEMPLATE_FILE = "scaffold-simple-skill.md.tmpl"
+DEFAULT_DESCRIPTION = (
+    "TODO: Describe what this skill does and when to use it. Include trigger scenarios and clear non-triggers."
+)
+DEFAULT_LIFECYCLE_STATE = "incubating"
+DEFAULT_MATURITY = "experimental"
+DEFAULT_OWNER = "TODO Owner"
+DEFAULT_REVIEW_CADENCE = "monthly"
 
 EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
 """
@@ -208,6 +130,22 @@ def title_case_skill_name(skill_name):
     return " ".join(word.capitalize() for word in skill_name.split("-"))
 
 
+def load_scaffold_template(*, templates_dir: Path) -> str:
+    template_path = templates_dir / SCAFFOLD_TEMPLATE_FILE
+    if not template_path.exists():
+        raise SystemExit(f"[ERROR] Missing scaffold template: {template_path}")
+    return template_path.read_text(encoding="utf-8")
+
+
+def render_scaffold(*, templates_dir: Path, context: dict[str, str]) -> str:
+    template = load_scaffold_template(templates_dir=templates_dir)
+    try:
+        return template.format(**context)
+    except KeyError as error:
+        missing = error.args[0]
+        raise SystemExit(f"[ERROR] Template placeholder '{{{missing}}}' missing from render context.") from error
+
+
 def parse_resources(raw_resources):
     if not raw_resources:
         return []
@@ -234,7 +172,7 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
         if resource == "scripts":
             if include_examples:
                 example_script = resource_dir / "example.py"
-                example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name))
+                example_script.write_text(EXAMPLE_SCRIPT.format(skill_name=skill_name), encoding="utf-8")
                 example_script.chmod(0o755)
                 print("[OK] Created scripts/example.py")
             else:
@@ -242,20 +180,20 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
         elif resource == "references":
             if include_examples:
                 example_reference = resource_dir / "api_reference.md"
-                example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title))
+                example_reference.write_text(EXAMPLE_REFERENCE.format(skill_title=skill_title), encoding="utf-8")
                 print("[OK] Created references/api_reference.md")
             else:
                 print("[OK] Created references/")
         elif resource == "assets":
             if include_examples:
                 example_asset = resource_dir / "example_asset.txt"
-                example_asset.write_text(EXAMPLE_ASSET)
+                example_asset.write_text(EXAMPLE_ASSET, encoding="utf-8")
                 print("[OK] Created assets/example_asset.txt")
             else:
                 print("[OK] Created assets/")
 
 
-def init_skill(skill_name, path, resources, include_examples, interface_overrides):
+def init_skill(skill_name, path, resources, include_examples, interface_overrides, templates_dir):
     """
     Initialize a new skill directory with template SKILL.md.
 
@@ -286,11 +224,23 @@ def init_skill(skill_name, path, resources, include_examples, interface_override
 
     # Create SKILL.md from template
     skill_title = title_case_skill_name(skill_name)
-    skill_content = SKILL_TEMPLATE.format(skill_name=skill_name, skill_title=skill_title)
+    skill_content = render_scaffold(
+        templates_dir=templates_dir,
+        context={
+            "skill_name": skill_name,
+            "skill_title": skill_title,
+            "description": DEFAULT_DESCRIPTION,
+            "lifecycle_state": DEFAULT_LIFECYCLE_STATE,
+            "maturity": DEFAULT_MATURITY,
+            "owner": DEFAULT_OWNER,
+            "review_cadence": DEFAULT_REVIEW_CADENCE,
+            "last_reviewed": date.today().isoformat(),
+        },
+    )
 
     skill_md_path = skill_dir / "SKILL.md"
     try:
-        skill_md_path.write_text(skill_content)
+        skill_md_path.write_text(skill_content, encoding="utf-8")
         print("[OK] Created SKILL.md")
     except Exception as e:
         print(f"[ERROR] Error creating SKILL.md: {e}")
@@ -378,8 +328,12 @@ def main():
 
     path = args.path
 
+    script_dir = Path(__file__).resolve().parent
+    templates_dir = script_dir.parent / "templates"
+
     print(f"Initializing skill: {skill_name}")
     print(f"   Location: {path}")
+    print(f"   SKILL scaffold template: {templates_dir / SCAFFOLD_TEMPLATE_FILE}")
     if resources:
         print(f"   Resources: {', '.join(resources)}")
         if args.examples:
@@ -388,7 +342,7 @@ def main():
         print("   Resources: none (create as needed)")
     print()
 
-    result = init_skill(skill_name, path, resources, args.examples, args.interface)
+    result = init_skill(skill_name, path, resources, args.examples, args.interface, templates_dir)
 
     if result:
         sys.exit(0)

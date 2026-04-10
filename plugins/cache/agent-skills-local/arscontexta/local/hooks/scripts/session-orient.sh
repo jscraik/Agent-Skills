@@ -140,7 +140,7 @@ fi
 
 # Workboard reconciliation (explicit opt-in only)
 # Never execute workspace-provided scripts by default.
-if [ "${ARSCONTEXTA_TRUST_REPO_SCRIPTS:-false}" = "true" ] && [ -e ops/scripts/reconcile.sh ]; then
+if [ "${ARSCONTEXTA_TRUST_REPO_SCRIPTS:-false}" = "true" ] && [ -f ops/scripts/reconcile.sh ]; then
   bash ops/scripts/reconcile.sh --compact 2>/dev/null
 fi
 

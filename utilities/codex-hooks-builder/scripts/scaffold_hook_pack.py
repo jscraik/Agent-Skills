@@ -304,7 +304,8 @@ def user_prompt_submit_template() -> str:
           "skip|typecheck"
           "without|tests"
           "no|tests"
-          "don.t|validate"
+          "don't|validate"
+          "dont|validate"
           "do not|validate"
           "ship it|without validation"
         )

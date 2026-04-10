@@ -11,7 +11,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - `library_api_reference`: 7
 - `product_verification`: 8
-- `data_fetch_analysis`: 5
+- `data_fetch_analysis`: 4
 - `team_automation`: 25
 - `scaffolding_templates`: 23
 - `code_quality_review`: 12
@@ -19,7 +19,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `runbook`: 4
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 95
+- `total_tagged`: 94
 
 ## Semantic Types
 
@@ -49,7 +49,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `insight-report` — `utilities`
 - `notebooklm` — `utilities`
 - `security-ownership-map` — `product/security`
-- `skill-refactor` — `utilities`
 - `spreadsheet` — `utilities`
 
 ### Team Automation

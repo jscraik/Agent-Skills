@@ -53,7 +53,7 @@ Both modes are evidence-first and privacy-aware.
 Run:
 ```bash
 cd ~/dev/agent-skills
-python3 utilities/skill-refactor/scripts/scan_codex_sessions.py --days 1 --include-otel
+python3 plugins/skill-factory/skills/skill-refactor/scripts/scan_codex_sessions.py --days 1 --include-otel
 ```
 
 ## Philosophy
@@ -154,8 +154,8 @@ python3 utilities/skill-builder/scripts/skill_gate.py <skill-folder>
 - Fail fast: stop at the first failed gate, fix it, then re-run.
 - This skill’s scan script is stdlib-only; run it with `python3`.
 - When changing skill files, validate with:
-  - `python3 utilities/skill-builder/scripts/quick_validate.py utilities/skill-refactor`
-  - `python3 utilities/skill-builder/scripts/skill_gate.py utilities/skill-refactor`
+  - `python3 utilities/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skill-refactor`
+  - `python3 utilities/skill-builder/scripts/skill_gate.py plugins/skill-factory/skills/skill-refactor`
 
 References used by skill-gate:
 - `references/contract.yaml`
