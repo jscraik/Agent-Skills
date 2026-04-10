@@ -77,9 +77,12 @@ for e in entries:
 
     if kind == 'skill':
         small = next((t for t in targets if 'icon-small' in t), None)
-        large = next((t for t in targets if 'icon-large' in t or t.endswith('/imagegen.png')), None)
-        if large and large.endswith('/imagegen.png'):
-            large = large.replace('/imagegen.png', '/icon-large.png')
+        if not small and targets:
+            small = targets[0]
+        large = next((t for t in targets if 'icon-large' in t), None)
+        if not large and len(targets) > 1:
+            # Some skills use canonical large filenames like sora.png/openai.png/slides.png.
+            large = targets[1]
         if not small or not large:
             continue
         if (kind, slug, 'small') in DONE and (kind, slug, 'large') in DONE:

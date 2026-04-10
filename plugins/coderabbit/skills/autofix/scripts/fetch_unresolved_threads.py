@@ -121,6 +121,12 @@ def _is_coderabbit_author(login: Any) -> bool:
     return login.strip().lower() in CODERABBIT_AUTHORS
 
 
+def _dict_nodes(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [node for node in value if isinstance(node, dict)]
+
+
 def _collect_review_threads(owner: str, repo: str, pr: int) -> list[dict[str, Any]]:
     cursor: str | None = None
     threads: list[dict[str, Any]] = []
@@ -144,7 +150,7 @@ def _collect_review_threads(owner: str, repo: str, pr: int) -> list[dict[str, An
         nodes = review_threads.get("nodes", [])
         if not isinstance(nodes, list):
             raise RuntimeError("invalid reviewThreads nodes payload")
-        threads.extend(node for node in nodes if isinstance(node, dict))
+        threads.extend(_dict_nodes(nodes))
 
         page_info = review_threads.get("pageInfo") or {}
         has_next_page = bool(page_info.get("hasNextPage"))
@@ -159,11 +165,7 @@ def _collect_review_threads(owner: str, repo: str, pr: int) -> list[dict[str, An
 
 def _collect_all_comments(thread: dict[str, Any]) -> list[dict[str, Any]]:
     comments_conn = thread.get("comments") or {}
-    nodes = comments_conn.get("nodes", [])
-    if not isinstance(nodes, list):
-        nodes = []
-
-    all_comments: list[dict[str, Any]] = [node for node in nodes if isinstance(node, dict)]
+    all_comments = _dict_nodes(comments_conn.get("nodes", []))
     page_info = comments_conn.get("pageInfo") or {}
     has_next_page = bool(page_info.get("hasNextPage"))
     cursor = page_info.get("endCursor")
@@ -185,9 +187,7 @@ def _collect_all_comments(thread: dict[str, Any]) -> list[dict[str, Any]]:
 
         node = (payload.get("data") or {}).get("node") or {}
         comments = node.get("comments") or {}
-        page_nodes = comments.get("nodes", [])
-        if isinstance(page_nodes, list):
-            all_comments.extend(comment for comment in page_nodes if isinstance(comment, dict))
+        all_comments.extend(_dict_nodes(comments.get("nodes", [])))
 
         page_info = comments.get("pageInfo") or {}
         has_next_page = bool(page_info.get("hasNextPage"))

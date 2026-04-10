@@ -41,7 +41,9 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": "Help me review, simplify, and refine this PR with CodeRabbit workflows.",
-    "brandColor": "#3B82F6"
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png"
   },
   "source": {
     "repo": "https://github.com/coderabbitai/skills.git",

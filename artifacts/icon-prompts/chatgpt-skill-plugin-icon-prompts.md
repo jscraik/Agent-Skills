@@ -189,10 +189,10 @@ Output: square images.
 ```
 
 ### Image Gen (`imagegen`)
-- Category: `frontend/graphics`
+- Category: `skills-system`
 - Style profile: `frontend`
-- Skill path: `frontend/graphics/imagegen`
-- Targets: `frontend/graphics/imagegen/agents/assets/icon-small.png`, `frontend/graphics/imagegen/agents/assets/imagegen.png`
+- Skill path: `skills-system/imagegen`
+- Targets: `skills-system/imagegen/agents/assets/icon-small.png`, `skills-system/imagegen/agents/assets/imagegen.png`
 - Prompt:
 ```text
 Create a clean app-style icon set for a developer skill named "Image Gen".
@@ -2212,4 +2212,3 @@ Background: transparent.
 Composition: one compact icon for composer contexts and one polished logo mark for plugin branding.
 Output: square images.
 ```
-

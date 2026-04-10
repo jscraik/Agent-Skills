@@ -42,6 +42,15 @@ def _extract_bullet(line: str) -> str | None:
     return match.group(1).strip()
 
 
+def _append_tagged_finding(text: str, findings: dict[str, list[str]]) -> str | None:
+    match = TAGGED_FINDING_PATTERN.match(text)
+    if match is None:
+        return None
+    severity = match.group(1).lower()
+    findings[severity].append(match.group(2).strip())
+    return severity
+
+
 def parse_plain_output(text: str) -> dict[str, object]:
     findings: dict[str, list[str]] = {severity: [] for severity in SEVERITIES}
     current: str | None = None
@@ -56,19 +65,15 @@ def parse_plain_output(text: str) -> dict[str, object]:
             current = detected
             continue
 
-        tagged_match = TAGGED_FINDING_PATTERN.match(line)
-        if tagged_match is not None:
-            severity = tagged_match.group(1).lower()
-            findings[severity].append(tagged_match.group(2).strip())
+        severity = _append_tagged_finding(line, findings)
+        if severity is not None:
             current = severity
             continue
 
         bullet = _extract_bullet(line)
         if bullet is not None:
-            bullet_tagged_match = TAGGED_FINDING_PATTERN.match(bullet)
-            if bullet_tagged_match is not None:
-                severity = bullet_tagged_match.group(1).lower()
-                findings[severity].append(bullet_tagged_match.group(2).strip())
+            severity = _append_tagged_finding(bullet, findings)
+            if severity is not None:
                 current = severity
                 continue
         if current is not None and bullet is not None:
