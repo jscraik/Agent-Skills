@@ -14,6 +14,6 @@
 ## [2026-04-09] triage | LLM Wiki Reference
 
 - Intent: `lesson-learned`
-- Status: `verified`
-- Source: /docs/skill-ops-wiki/wiki/sources/llm-wiki.md
-- Note: `/docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md`
+- Status: `pending`
+- Source: docs/skill-ops-wiki/wiki/sources/llm-wiki.md
+- Note: `docs/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md`
