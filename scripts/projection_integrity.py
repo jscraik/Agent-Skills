@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import stat
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -396,7 +397,12 @@ def write_text(path: Path, content: str) -> None:
         path (Path): Destination file path to write.
         content (str): Text content to write to the file.
     """
+    existing_mode = None
+    if path.exists():
+        existing_mode = stat.S_IMODE(path.stat().st_mode)
     path.write_text(content, encoding="utf-8")
+    if existing_mode is not None:
+        path.chmod(existing_mode)
 
 
 def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object]:

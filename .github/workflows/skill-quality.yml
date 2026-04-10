@@ -8,7 +8,7 @@ on:
       - "**/references/contract.yaml"
       - "**/references/task-profile.json"
       - "utilities/skill-builder/scripts/**"
-      - "skills-system/skill-installer/scripts/install-skill-from-github.py"
+      - "plugins/skill-factory/skills/skill-installer/scripts/install-skill-from-github.py"
       - "scripts/validate_skill_authoring_family.sh"
       - "scripts/validate_skill_authoring_family_benchmarks.py"
       - "scripts/projection_integrity.py"
@@ -105,6 +105,8 @@ jobs:
         env:
           SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
         run: bash scripts/validate_skill_authoring_family.sh
+      - name: Sync projection trees (all scopes)
+        run: bash scripts/sync_projection_trees.sh all
       - name: Verify projection integrity (all scopes)
         run: bash scripts/validate_projection_integrity.sh
 

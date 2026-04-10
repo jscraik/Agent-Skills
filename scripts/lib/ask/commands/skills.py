@@ -280,6 +280,8 @@ def list_skills(
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
+        if not advanced and _is_hidden_coderabbit_lane(entry):
+            continue
         if category and category.lower() not in entry.category.lower():
             continue
         skills_data.append({

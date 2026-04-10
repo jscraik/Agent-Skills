@@ -436,9 +436,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_skill_discovery_visibility_hides_plugin_lanes_by_default(self) -> None:
         """
-        Verify that plugin-owned skills are hidden by default but included in advanced visibility.
+        Verify that plugin lane skills are hidden by default while router skills remain visible.
 
-        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` returns no plugin-owned skills while `visibility="advanced"` returns all four skills.
+        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` returns only the router skill while `visibility="advanced"` returns all four skills.
         """
         skill_discovery = load_skill_discovery_module()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -482,7 +482,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         default_names = sorted(entry.name for entry in default_entries)
         advanced_names = sorted(entry.name for entry in advanced_entries)
-        self.assertEqual(default_names, [])
+        self.assertEqual(default_names, ["coderabbit"])
         self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
 
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_hides_them(self) -> None:
