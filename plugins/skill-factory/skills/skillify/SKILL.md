@@ -158,7 +158,7 @@ bash scripts/validate_skill_authoring_family.sh
 | Skill | When to use |
 |---|---|
 | [[skill-creator]] | Create first-draft skill scaffolds before hardening |
-| [[skill-installer]] | Install and surface a validated skill across Codex catalogs |
+| [[skill-factory:skill-installer]] | Install and surface a validated skill across Codex catalogs |
 
 
 **Topic map:** [[agent-ops]]

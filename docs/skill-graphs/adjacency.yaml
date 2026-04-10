@@ -326,12 +326,7 @@ gh-workflow:
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
-imagegen:
-  nano-banana-builder: Integrate imagegen into Nano Banana iterative editing flows
-  og-image-creator: Use generated images as OG image assets
-  sora: Follow static image generation with AI video generation
-  visual-explainer: Embed generated images as hero banners in HTML explainers
-  youtube-titles-thumbnails: Generate thumbnail concept images for YouTube packaging
+imagegen: {}
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -524,13 +519,14 @@ skill-builder:
 skill-creator:
   codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
-  skillify: Refine and package reusable workflows from completed sessions
 skill-refactor:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
   insight-report: Turn session scan findings into a polished usage report
 skillify:
   skill-creator: Create first-draft skill scaffolds before hardening
+  skill-installer: Install and surface a validated skill across Codex catalogs
+skill-installer: {}
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
