@@ -21,7 +21,7 @@ review_after_days: 90
 A long-lived PR branch (`codex/context7-skill-wizard-pr-20260410`) became non-mergeable against its base (`feature/wiki-llm-reference`) while the primary local checkout had extensive unrelated modifications. Resolving conflicts in-place risked contaminating user-owned local changes and made rollback harder.
 
 During reconciliation, repository hooks also blocked normal commit/push flow:
-- commit-time validation failed due projection-integrity drift not caused by the conflict fix;
+- commit-time validation failed due to projection-integrity drift not caused by the conflict fix;
 - pre-push diagnostics repeatedly terminated during `scripts/validate_skill_authoring_family.sh` (`Terminated: 15`), preventing normal push despite a clean conflict resolution.
 
 ## Resolution
@@ -31,8 +31,8 @@ Use this sequence when conflict resolution must be isolated from a dirty working
 1. Create a separate temporary worktree from the PR head branch.
 2. Merge the base branch into that worktree and resolve only files with conflict markers.
 3. Stage conflict files explicitly and verify all conflict markers are removed.
-4. If repo-wide hooks fail or are terminated for unrelated gates, complete the merge commit with `--no-verify` as a bounded exception for conflict-only updates.
-5. Push to the PR head with `--no-verify` only when hook execution is non-deterministically terminated and the branch state is otherwise clean.
+4. Complete the merge commit. Do NOT use `--no-verify` to bypass hooks that run `scripts/validate_skill_authoring_family.sh` or `scripts/diagnose_skill.py`. Use `--no-verify` only in truly exceptional, documented cases where hook execution is non-deterministically terminated for reasons external to the changes.
+5. Push to the PR head. Do NOT normalise `--no-verify` as a fallback. Any change touching the skill authoring family MUST have the `authoring-family-gate` CI job (enforced by `bash scripts/validate_skill_authoring_family.sh`) pass before merge.
 6. Re-check PR mergeability in GitHub immediately after push.
 
 For this incident, the resolved conflict set was:
@@ -67,4 +67,9 @@ The durable rule is: isolate merge-conflict work from unrelated local edits firs
 
 - Investigate why `scripts/validate_skill_authoring_family.sh` intermittently terminates under hook execution even with a clean tree.
 - Keep conflict-only remediation commits narrowly scoped and avoid bundling repo-wide drift fixes in the same PR.
-- If hook bypass is used, record exact blocker text and verify PR mergeability and CI checks immediately afterward.
+- If hook bypass is used in exceptional cases, immediately verify:
+  - Record the exact hook bypass blocker text (referencing `scripts/validate_skill_authoring_family.sh` or other hook scripts)
+  - Confirm PR mergeability on GitHub
+  - Verify that `authoring-family-gate` CI job is green (for authoring-family touches)
+  - Verify that `projection-integrity` CI job is green
+  - Ensure all other CI checks pass before merge
