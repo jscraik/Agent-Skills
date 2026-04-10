@@ -54,6 +54,7 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 
 # Plugin router skills that should be visible in default flat discovery.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+    "arscontexta",
     "ce-brainstorm",
     "ce-compound",
     "ce-compound-refresh",

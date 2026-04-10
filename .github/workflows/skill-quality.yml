@@ -10,6 +10,7 @@ on:
       - "utilities/skill-builder/scripts/**"
       - "plugins/skill-factory/skills/skill-builder/scripts/**"
       - "plugins/skill-factory/skills/skill-installer/scripts/install-skill-from-github.py"
+      - "skills-system/skill-installer/scripts/install-skill-from-github.py"
       - "scripts/validate_skill_authoring_family.sh"
       - "scripts/validate_skill_authoring_family_benchmarks.py"
       - "scripts/projection_integrity.py"

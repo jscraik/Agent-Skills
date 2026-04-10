@@ -1200,8 +1200,20 @@ PY
   done < <(sort -u "$marketplace_keep_file")
 }
 
+sync_plugin_cache_projections() {
+  local projection_script="$repo_root/scripts/projection_integrity.py"
+
+  if [ ! -f "$projection_script" ]; then
+    echo "[WARN] Projection integrity script missing; skipping plugin-cache header sync."
+    return 0
+  fi
+
+  python3 "$projection_script" sync --scope plugin-caches --format text
+}
+
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
 sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
+sync_plugin_cache_projections
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 sync_user_skills "$skills_dir" "$HOME/.claude/skills"

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 import tempfile
 import unittest
@@ -99,7 +100,9 @@ class ProjectionIntegrityTests(unittest.TestCase):
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
-            (source / "script.sh").write_text("#!/usr/bin/env bash\necho hi\n", encoding="utf-8")
+            source_script = source / "script.sh"
+            source_script.write_text("#!/usr/bin/env bash\necho hi\n", encoding="utf-8")
+            source_script.chmod(0o755)
             (projection / "stale.txt").write_text("stale\n", encoding="utf-8")
 
             spec = self.mod.MirrorProjection(
@@ -113,6 +116,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertFalse((projection / "stale.txt").exists())
             readme_text = (projection / "README.md").read_text(encoding="utf-8")
             self.assertIn(self.mod.HEADER_TOKEN, readme_text)
+            script_mode = os.stat(projection / "script.sh").st_mode & 0o777
+            self.assertEqual(script_mode & 0o111, 0o111)
 
             verify_result = self.mod.verify_mirror(repo_root, spec)
             self.assertEqual(verify_result["status"], "pass")
