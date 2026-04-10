@@ -170,6 +170,16 @@ npm run check --if-present
 - Defining scripts inconsistently across projects (`verify` vs `check` vs `ci`) with no contract.
 - Relying on hidden side effects in `pre*` and `post*` scripts.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[coding-harness]] | Validate and enforce repository quality gates in CI and local workflows |
+| [[circleci]] | Align deterministic npm install and script contracts with CircleCI pipeline behavior |
+| [[release]] | Apply package and script contract checks during release readiness and cutover |
+
+**Topic map:** [[agent-ops]]
+
 ## References
 
 - Contract: `references/contract.yaml`
