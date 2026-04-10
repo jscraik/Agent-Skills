@@ -29,19 +29,17 @@ covers:
 
 - [[backend-engineer]] — Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary).
 - [[cli-spec]] — Plan and draft CLI UX and surface area: commands, flags, help text, output formats.
-- [[workers-mcp]] — Create and deploy production-ready MCP servers on Cloudflare Workers with auth, billing, and operational guardrails.
 - [[mcp-builder]] — Create general-purpose MCP servers and tool schemas for standard integrations without OAuth/billing.
 - [[oak-api]] — Build Oak Curriculum API-driven learning experiences, especially for child-facing ChatGPT Apps SDK workflows.
 
 ## MCP Servers
 
-- [[workers-mcp]] — Cloudflare Workers-hosted MCP servers with auth, billing, and ops guardrails.
-- [[mcp-builder]] — General-purpose MCP server scaffolding for standard integrations.
+- [[mcp-builder]] — General-purpose MCP server scaffolding for standard integrations, including Cloudflare-hosted variants.
 - [[chatgpt-apps]] — Build, scaffold, and troubleshoot ChatGPT Apps SDK applications combining an MCP server and widget UI.
 
 ## Cloud & Deployment
 
-- [[cloudflare-deploy]] — Deploy applications to Cloudflare using Workers, Pages, and related platform services.
+- [[production-deployment]] — Deploy and manage production services with verification and rollback safety, including Cloudflare targets.
 - [[cf-crawl]] — Crawl websites with Cloudflare Browser Rendering's /crawl API, export markdown or JSON results.
 - [[bootstrap]] — Bootstrap a local development environment from a GitHub repository URL.
 - [[fix-mise]] — Diagnose and repair mise trust/runtime failures and reconcile `~/.config/mise/config.toml`.
@@ -69,6 +67,6 @@ covers:
 ## Cross-links
 
 - Planning a new backend? [[brainstorming]] → [[backend-engineer]] → [[cli-spec]].
-- Deploying an MCP server? [[mcp-builder]] or [[workers-mcp]] → [[cloudflare-deploy]].
+- Deploying an MCP server? [[mcp-builder]] → [[production-deployment]].
 - Setting up auth? [[create-auth]] → [[best-practices]] → [[1password]] for secrets.
 - Topic maps: [[frontend-ui]] | [[security-ops]] | [[agent-ops]] | [[product-strategy]]
