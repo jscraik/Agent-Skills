@@ -110,7 +110,7 @@ assert_security_eval_contract() {
     :
   fi
 
-  "${python_cmd[@]}" - "$report_file" "$skill_dir" <<'PY'
+  "${python_cmd[@]}" -c '
 import json
 import sys
 
@@ -152,7 +152,7 @@ if blocking:
     sys.exit(1)
 
 print(f"[family-gate] contract/eval/security benchmarks passed: {skill_dir}")
-PY
+' "$report_file" "$skill_dir"
   trap - RETURN
 }
 
