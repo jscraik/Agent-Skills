@@ -33,7 +33,7 @@ The 92 skills are organized into 7 functional topic maps. Each topic map serves 
 | [[product-strategy]] | 11 | Ideation, specs, interviews, research, project analysis |
 | [[security-ops]] | 7 | Threat modeling, security reviews, auth, ownership analysis |
 | [[content-publishing]] | 9 | Video, YouTube, slides, transcripts, written content |
-| [[mobile-native]] | 4 | iOS/macOS, Xcode, Apple platform tooling |
+| [[mobile-native]] | 3 | iOS/macOS, Build iOS Apps plugin workflows, Apple platform automation |
 
 ---
 
@@ -93,10 +93,10 @@ The following skills appear in multiple topic maps or serve cross-cutting concer
 
 ### iOS app launch
 ```
-[[apple-app-creator]] (mobile-native)
-  → [[xcode-makefiles]] (mobile-native)
+Build iOS Apps plugin workflow (mobile-native)
+  → [[test-driven-development]] (agent-ops)
   → [[create-auth]] (security-ops / backend-platform)
-  → [[cloudflare-deploy]] (backend-platform)
+  → [[production-deployment]] (backend-platform)
 ```
 
 ---

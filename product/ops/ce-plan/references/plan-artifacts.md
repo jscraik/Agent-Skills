@@ -303,4 +303,4 @@ Offer the clearest next-step options that fit the mode:
 8. Create an issue in the tracker
 
 Stable-skill note:
-- `ce-plan` keeps issue mutation out of the planning skill itself; prefer handing off the finished plan to `[[linear]]` when available, falling back to the repo's tracker workflow only when Linear is not the governing tracker.
+- `ce-plan` keeps issue mutation out of the planning skill itself; prefer handing off the finished plan to `[[gh-workflow]]` when available, falling back to another installed tracker workflow only when GitHub is not the governing tracker.

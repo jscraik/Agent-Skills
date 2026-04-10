@@ -16,8 +16,11 @@ function tryRead(command, args) {
 	}
 }
 
-function clearLegacyLocalHooksPath() {
-	const configuredPath = tryRead("git", ["config", "--local", "--get", "core.hooksPath"]);
+function readLegacyLocalHooksPath() {
+	return tryRead("git", ["config", "--local", "--get", "core.hooksPath"]);
+}
+
+function clearLegacyLocalHooksPath(configuredPath) {
 	if (!configuredPath) {
 		return;
 	}
@@ -28,15 +31,36 @@ function clearLegacyLocalHooksPath() {
 	});
 }
 
+function restoreLegacyLocalHooksPath(configuredPath) {
+	if (!configuredPath) {
+		return;
+	}
+	execFileSync("git", ["config", "--local", "core.hooksPath", configuredPath], {
+		stdio: "ignore",
+	});
+}
+
 function main() {
-	clearLegacyLocalHooksPath();
+	const legacyHooksPath = readLegacyLocalHooksPath();
+	clearLegacyLocalHooksPath(legacyHooksPath);
 
 	try {
 		execFileSync("prek", ["install"], { stdio: "inherit" });
 		console.info("Installed canonical prek hooks");
-	} catch {
-		console.warn("Warning: `prek` is not available; skipping hook installation.");
-		console.warn("Run `prek install` after bootstrapping the repo toolchain.");
+	} catch (error) {
+		try {
+			restoreLegacyLocalHooksPath(legacyHooksPath);
+		} catch {
+			console.error("Error: failed to restore previous core.hooksPath after hook install failure.");
+		}
+
+		if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+			console.error("Error: `prek` is not available; hook installation failed.");
+			console.error("Install `prek` and re-run scripts/setup-git-hooks.js.");
+		} else {
+			console.error("Error: `prek install` failed.");
+		}
+		process.exit(1);
 	}
 }
 

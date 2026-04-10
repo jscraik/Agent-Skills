@@ -1,7 +1,7 @@
 ---
 type: moc
 name: mobile-native
-description: "Skills for iOS/macOS native app development — Xcode scaffolding, Makefile tooling, and Apple platform workflows."
+description: "Skills for iOS/macOS native app delivery using Build iOS Apps plugin workflows, test-first execution, and Apple platform automation."
 covers:
   - ios
   - macos
@@ -11,7 +11,7 @@ covers:
 
 # Mobile & Native
 
-> Skills for iOS/macOS native app development: Xcode scaffolding, Makefile tooling, and Apple platform workflows.
+> Skills for iOS/macOS native app development: Build iOS Apps plugin workflows, test-first delivery, and Apple platform automation.
 
 ## Table of Contents
 - [App Scaffolding](#app-scaffolding)
@@ -21,11 +21,11 @@ covers:
 
 ## App Scaffolding
 
-- [[apple-app-creator]] — Orchestrate iOS/macOS app scaffolding with XcodeGen and optionally install xcode-makefiles via a guided wizard.
+- `Build iOS Apps` (plugin) — Use simulator-focused project discovery, build, and launch workflows for iOS/macOS app scaffolding and iteration.
 
 ## Build Tooling
 
-- [[xcode-makefiles]] — Install strict Xcode Makefile tooling for iOS/macOS projects: build/run/test scripts with AGENT_NAME-based per-agent isolation under `build/`.
+- `Build iOS Apps` (plugin) — Use `discover_projs`, `build_run_sim`, `test_sim`, and debug helpers for native build/test loops.
 
 ## macOS Automation
 
@@ -36,7 +36,7 @@ covers:
 
 ## Pipelines
 
-- New iOS app: [[apple-app-creator]] → [[xcode-makefiles]] → [[test-driven-development]].
+- New iOS app: `Build iOS Apps` plugin workflow → [[test-driven-development]].
 
 ## Cross-links
 

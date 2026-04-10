@@ -175,7 +175,7 @@ For full execution-mode rules, delegate safeguards, and branch/worktree guidance
 For each implementation unit per `references/execution-workflow.md`:
 - mark task `in_progress`
 - honor execution posture:
-  - `test-first` (TDD): vertical tracer bullets per [[ce-tdd]]; update Linear issue per tracer bullet
+  - `test-first` (TDD): vertical tracer bullets per [[ce-tdd]]; update the tracker issue per tracer bullet
   - `characterization-first`: capture current behavior
   - no special posture: validate continuously
 - implement minimal slice
@@ -272,7 +272,7 @@ See `references/execution-modes.md` for the exact rules.
 After successful execution:
 - technical review or PR review
 - follow-up `ce-work` for remaining units
-- issue creation/update via `[[linear]]` or repo tracker
+- issue creation/update via `[[gh-workflow]]` or repo tracker
 - operational rollout verification
 
 Keep artifact path in handoff for traceability.

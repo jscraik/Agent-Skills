@@ -40,7 +40,7 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - The user wants the missing approval bridge between `ce-review` and `resolve-todo-parallel`.
 
 ## When not to use
-- Do not use for generic product or issue-tracker triage. Use the plugin skill `linear:linear`.
+- Do not use for generic product or issue-tracker triage. Use [`gh-workflow`](/github/gh-workflow/SKILL.md).
 - Do not use to create findings from a review. Use [`ce-review`](/product/ops/ce-review/SKILL.md).
 - Do not use to execute approved todo work. Use [`resolve-todo-parallel`](/product/ops/resolve-todo-parallel/SKILL.md) or `ce-work` for single-item execution.
 - Do not use when the repo has no `todos/` workflow and the user is asking for generic prioritization advice.
@@ -105,7 +105,7 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - Read [`references/overlap-matrix.md`](/product/ops/triage/references/overlap-matrix.md) before widening this skill's trigger wording.
 - Use [`ce-review`](/product/ops/ce-review/SKILL.md) to generate findings and initial pending todo artifacts.
 - Use [`resolve-todo-parallel`](/product/ops/resolve-todo-parallel/SKILL.md) once approved items are `ready`.
-- Use the plugin skill `linear:linear` for team tracker triage and issue updates.
+- Use [`gh-workflow`](/github/gh-workflow/SKILL.md) for team tracker triage and issue updates.
 
 ## Upstream preservation
 - The imported compound-engineering source is preserved in [`references/upstream-triage.md`](/product/ops/triage/references/upstream-triage.md).

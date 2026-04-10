@@ -23,14 +23,14 @@ outputs:
   - explicit validation, rollout, and execution-control guidance
   - carry-forward treatment of any authoritative requirements doc or existing plan when present
   - optional directional technical-design sketches only when they materially reduce planning ambiguity
-  - a recommended next workflow stage, including a `linear` handoff path when the user wants issue creation
+  - a recommended next workflow stage, including a tracker-workflow handoff path (default `gh-workflow`) when the user wants issue creation
 
 non_goals:
   - direct implementation
   - inventing contract-level behavior that belongs in a spec or UI spec
   - skipping the spec step when the source indicates planning is premature
   - producing UI prototypes during the planning stage
-  - mutating Linear directly from the planning skill instead of handing off to `linear`
+  - mutating tracker state directly from the planning skill instead of handing off to a dedicated tracker workflow
 
 risks:
   - planning from weak inputs; mitigate with authoritative-source selection and one focused blocker question

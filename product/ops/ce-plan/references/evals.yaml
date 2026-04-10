@@ -215,18 +215,18 @@ cases:
       - type: regex
         value: "(?i)(reclassif|standard|external contract|CLI|CI)"
 
-  - id: linear-handoff-after-plan
-    name: linear handoff after plan
+  - id: tracker-handoff-after-plan
+    name: tracker handoff after plan
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Write the implementation plan first, then hand it off to the Linear workflow so the finished plan becomes the issue input."
+    prompt: "Write the implementation plan first, then hand it off to the gh-workflow tracker path so the finished plan becomes the issue input."
     acceptance:
       - type: skill_selected
         expected_skill: "ce-plan"
       - type: regex
-        value: "(?i)(\\[\\[linear\\]\\]|hand off|Linear issue|read-before-write|plan artifact)"
+        value: "(?i)(\\[\\[gh-workflow\\]\\]|hand off|tracker issue|read-before-write|plan artifact)"
 
   - id: planning-source-missing
     name: planning source missing

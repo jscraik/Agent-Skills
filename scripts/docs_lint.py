@@ -376,24 +376,90 @@ def _extract_heading_anchors(path: Path) -> set[str]:
     return anchors
 
 
-def _resolve_github_blob_url(repo_root: Path, raw_url: str) -> tuple[Path | None, str]:
+def _local_github_repo_slug(repo_root: Path) -> tuple[str, str] | None:
+    origin_lines = run_git(repo_root, ["remote", "get-url", "origin"])
+    if not origin_lines:
+        return None
+    origin = origin_lines[0]
+    match = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?$", origin)
+    if not match:
+        return None
+    return match.group("owner").lower(), match.group("repo").lower()
+
+
+def _git_ref_exists(repo_root: Path, ref: str, cache: dict[str, bool]) -> bool:
+    if ref in cache:
+        return cache[ref]
+    proc = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", ref],
+        cwd=repo_root,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    exists = proc.returncode == 0
+    cache[ref] = exists
+    return exists
+
+
+def _split_blob_path(repo_root: Path, after_blob: str, ref_cache: dict[str, bool]) -> str | None:
+    segments = [segment for segment in after_blob.split("/") if segment]
+    if len(segments) < 2:
+        return None
+
+    candidates: list[tuple[int, bool, bool, str]] = []
+    for idx in range(1, len(segments)):
+        ref = "/".join(segments[:idx])
+        repo_relative = "/".join(segments[idx:])
+        resolved = (repo_root / repo_relative).resolve()
+        path_exists = resolved.is_relative_to(repo_root) and resolved.exists()
+        ref_exists = _git_ref_exists(repo_root, ref, ref_cache)
+        candidates.append((idx, ref_exists, path_exists, repo_relative))
+
+    ref_and_path = [candidate for candidate in candidates if candidate[1] and candidate[2]]
+    if ref_and_path:
+        return max(ref_and_path, key=lambda candidate: candidate[0])[3]
+
+    ref_only = [candidate for candidate in candidates if candidate[1]]
+    if ref_only:
+        return max(ref_only, key=lambda candidate: candidate[0])[3]
+
+    path_only = [candidate for candidate in candidates if candidate[2]]
+    if path_only:
+        return min(path_only, key=lambda candidate: candidate[0])[3]
+
+    return candidates[0][3]
+
+
+def _resolve_github_blob_url(
+    repo_root: Path, raw_url: str, local_repo_slug: tuple[str, str] | None, ref_cache: dict[str, bool]
+) -> tuple[Path | None, str, bool]:
     parsed = urlparse(raw_url)
     if parsed.scheme not in {"http", "https"} or parsed.netloc.lower() != "github.com":
-        return None, parsed.fragment
-    if "/blob/" not in parsed.path:
-        return None, parsed.fragment
-    after_blob = parsed.path.split("/blob/", 1)[1]
-    if "/" not in after_blob:
-        return None, parsed.fragment
-    _, repo_relative = after_blob.split("/", 1)
-    return (repo_root / repo_relative).resolve(), parsed.fragment
+        return None, parsed.fragment, False
+
+    match = re.match(r"^/([^/]+)/([^/]+)/blob/(.+)$", parsed.path)
+    if not match:
+        return None, parsed.fragment, False
+
+    owner, repo, after_blob = match.groups()
+    if local_repo_slug and (owner.lower(), repo.lower()) != local_repo_slug:
+        return None, parsed.fragment, True
+
+    repo_relative = _split_blob_path(repo_root, after_blob, ref_cache)
+    if not repo_relative:
+        return None, parsed.fragment, False
+    return (repo_root / repo_relative).resolve(), parsed.fragment, False
 
 
 def plugin_manifest_url_issues(repo_root: Path) -> list[Issue]:
     issues: list[Issue] = []
     anchor_cache: dict[Path, set[str]] = {}
+    ref_cache: dict[str, bool] = {}
+    local_repo_slug = _local_github_repo_slug(repo_root)
 
-    for manifest in sorted(repo_root.glob("plugins/**/.codex-plugin/plugin.json")):
+    for manifest in sorted(repo_root.glob("plugins/*/.codex-plugin/plugin.json")):
         rel_manifest = "/" + manifest.relative_to(repo_root).as_posix()
         try:
             payload = json.loads(manifest.read_text(encoding="utf-8"))
@@ -419,7 +485,21 @@ def plugin_manifest_url_issues(repo_root: Path) -> list[Issue]:
             if not isinstance(raw_url, str) or not raw_url.strip():
                 continue
 
-            resolved, anchor = _resolve_github_blob_url(repo_root, raw_url.strip())
+            resolved, anchor, external_repo = _resolve_github_blob_url(
+                repo_root, raw_url.strip(), local_repo_slug, ref_cache
+            )
+            if external_repo:
+                issues.append(
+                    Issue(
+                        code="plugin-interface-url-external-repo",
+                        severity="error",
+                        file=rel_manifest,
+                        line=1,
+                        message=f"{key} must reference this repository, not an external GitHub repo: {raw_url}",
+                        suggestion=f"Update {key} to a repository-local docs URL.",
+                    )
+                )
+                continue
             if resolved is None:
                 continue
             if not resolved.is_relative_to(repo_root):

@@ -59,7 +59,7 @@ covers:
 
 ## Task & Session Management
 
-- [[linear]] — Manage Linear issues, projects, and docs through the Linear MCP workflow.
+- [[gh-workflow]] — Manage GitHub issues and PRs through the repository’s tracker workflow.
 - [[alignment-checkpoint]] — Intent-alignment gate for ambiguous/high-stakes requests; requires explicit `/proceed` approval before tool use.
 
 ## Workflow Planning & Routing
