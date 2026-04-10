@@ -45,6 +45,6 @@
     "defaultPrompt": "Help me skillify this workflow and create, improve, or distribute the resulting Codex skill.",
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
-    "logo": "./assets/logo.png"
+    "logo": "./assets/icon.png"
   }
 }

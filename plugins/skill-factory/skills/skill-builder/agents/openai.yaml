@@ -1,5 +1,5 @@
 interface:
   display_name: "Skill Builder"
   short_description: "Run comparative hardening loops and prep downstream-ready skills"
-  icon_small: "./assets/skill-builder-small.svg"
+  icon_small: "./assets/skill-builder.png"
   icon_large: "./assets/skill-builder.png"

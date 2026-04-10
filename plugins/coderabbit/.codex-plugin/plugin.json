@@ -43,7 +43,7 @@
     "defaultPrompt": "Help me review, simplify, and refine this PR with CodeRabbit workflows.",
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
-    "logo": "./assets/logo.png"
+    "logo": "./assets/icon.png"
   },
   "source": {
     "repo": "https://github.com/coderabbitai/skills.git",

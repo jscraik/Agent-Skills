@@ -1,6 +1,8 @@
 interface:
   display_name: "CE Brainstorm"
   short_description: "Clarify WHAT to build, compare approaches, and capture a right-sized requirements doc before spec, planning, or lightweight direct work."
+  icon_small: "./assets/icon-small.png"
+  icon_large: "./assets/icon-large.png"
 
 policy:
   allow_implicit_invocation: true

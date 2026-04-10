@@ -44,6 +44,6 @@
     "defaultPrompt": "Help me create, harden, and install a Codex plugin package.",
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
-    "logo": "./assets/logo.png"
+    "logo": "./assets/icon.png"
   }
 }

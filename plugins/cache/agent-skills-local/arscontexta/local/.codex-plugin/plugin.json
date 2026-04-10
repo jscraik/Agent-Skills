@@ -34,7 +34,7 @@
     "defaultPrompt": "Help me bootstrap Ars Contexta workflows for this vault.",
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
-    "logo": "./assets/logo.png",
+    "logo": "./assets/icon.png",
     "screenshots": [
       "./assets/screenshot1.png",
       "./assets/screenshot2.png",

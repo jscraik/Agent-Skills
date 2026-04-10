@@ -1,3 +1,5 @@
 interface:
   display_name: "Skill Factory"
   short_description: "Route to create, improve, install, or skillify lanes"
+  icon_small: "./assets/icon-small.png"
+  icon_large: "./assets/icon.png"

@@ -2,3 +2,5 @@ interface:
   display_name: "Plugin Builder"
   short_description: "Harden and validate Codex plugin packages with contract-grade checks"
   default_prompt: "Use $plugin-builder to inspect, convert, scaffold, and validate plugin packages before release."
+  icon_small: "./assets/icon-small.png"
+  icon_large: "./assets/icon.png"
