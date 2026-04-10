@@ -303,7 +303,7 @@ if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --with pytest ... , uv pip install pytest, or brew install python)"
+  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --python 3.12 --with pytest ... , uv pip install pytest, or brew install python)"
 fi
 
 # Track per-skill evidence for the release-ready index

@@ -179,7 +179,7 @@ def _validate_with_schema(
                 f"{fail_code}_NO_JSONSCHEMA",
                 skill_rel,
                 f"jsonschema not installed; skipping schema validation for {context}. "
-                "Install via: uv pip install jsonschema (or run with `uv run --with jsonschema ...`).",
+                "Install via: uv pip install jsonschema (or run with `uv run --python 3.12 --with jsonschema ...`).",
             )
         )
         return findings

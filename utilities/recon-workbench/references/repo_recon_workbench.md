@@ -13,7 +13,7 @@ Source: `~/dev/recon-workbench`
 - `docs/reference/`: gold standard, legal notes, data handling, dependencies, schemas, probe catalog, CI checks.
 
 ## Core commands (CLI)
-- Primary: `uv run python -m rwb <command>`
+- Primary: `uv run --python 3.12 python -m rwb <command>`
 - Wrapper: `./recon <command>` (legacy/extended CLI; see `docs/reference/CLI_REFERENCE.md`)
 
 Common (rwb):
