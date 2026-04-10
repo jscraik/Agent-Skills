@@ -312,3 +312,11 @@ If installation is not possible in this environment, tell the user which depende
 - `references/image-api.md`: fallback-only API/CLI parameter reference.
 - `references/codex-network.md`: fallback-only network/sandbox troubleshooting for CLI mode.
 - `scripts/image_gen.py`: fallback-only CLI implementation. Do not load or use it unless the user explicitly chooses CLI mode.
+
+## See Also
+
+| Skill | Why |
+| --- | --- |
+| [[nano-banana-builder]] | Use when the task needs iterative image generation or editing with Google's Nano Banana APIs. |
+| [[og-image-builder]] | Use when route-specific Open Graph images should be generated directly from an existing web codebase. |
+| [[sora]] | Use when the user needs video generation rather than static raster image output. |
