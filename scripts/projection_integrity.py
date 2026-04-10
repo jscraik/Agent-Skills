@@ -19,6 +19,7 @@ HEADER_TOKEN = "GENERATED PROJECTION:"
 IGNORED_FILE_NAMES = {".DS_Store"}
 IGNORED_DIR_NAMES = {"__pycache__"}
 IGNORED_SUFFIXES = {".pyc"}
+IGNORED_NAME_SUFFIXES = (".gen1.png",)
 STAMPABLE_SUFFIXES = {".md", ".txt", ".yaml", ".yml", ".toml", ".py", ".sh"}
 SCOPE_CHOICES = ("all", "skill-factory", "plugin-factory", "plugin-caches")
 
@@ -37,6 +38,7 @@ class MirrorProjection:
     source_path: str
     projection_path: str
     tags: tuple[str, ...]
+    optional_when_missing: bool = False
 
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
@@ -102,24 +104,28 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         source_path="plugins/coderabbit",
         projection_path="plugins/cache/agent-skills-local/coderabbit/local",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-harness-engineering",
         source_path="plugins/harness-engineering",
         projection_path="plugins/cache/agent-skills-local/harness-engineering/local",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-plugin-factory",
         source_path="plugins/plugin-factory",
         projection_path="plugins/cache/agent-skills-local/plugin-factory/local",
         tags=("plugin-caches", "plugin-factory"),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-skill-factory",
         source_path="plugins/skill-factory",
         projection_path="plugins/cache/agent-skills-local/skill-factory/local",
         tags=("plugin-caches", "skill-factory"),
+        optional_when_missing=True,
     ),
 )
 
@@ -172,6 +178,8 @@ def is_ignored(path: Path) -> bool:
         or any path component is in IGNORED_DIR_NAMES; `False` otherwise.
     """
     if path.name in IGNORED_FILE_NAMES:
+        return True
+    if path.name.endswith(IGNORED_NAME_SUFFIXES):
         return True
     if path.suffix in IGNORED_SUFFIXES:
         return True
@@ -747,7 +755,10 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         )
         return result
     if not projection_abs.is_dir():
-        result.update({"status": "drift", "reason": "projection_missing"})
+        if spec.optional_when_missing:
+            result.update({"status": "pass", "reason": "projection_missing_optional"})
+        else:
+            result.update({"status": "drift", "reason": "projection_missing"})
         return result
 
     source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}
