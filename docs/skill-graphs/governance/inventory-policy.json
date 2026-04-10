@@ -102,6 +102,7 @@
     "utilities/codex-home-audit",
     "utilities/codex-prompt-creator",
     "utilities/skill-refactor",
+    "utilities/skillify",
     "utilities/diagram-context-refresh",
     "utilities/executing-plans",
     "utilities/fix-mise",

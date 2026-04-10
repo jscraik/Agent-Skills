@@ -156,6 +156,8 @@ cases:
     acceptance:
       - type: skill_not_selected
         expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(ce-brainstorm|brainstorm|shape|define|feature)"
 
   - id: spec-request-negative
     name: spec request negative
@@ -167,6 +169,8 @@ cases:
     acceptance:
       - type: skill_not_selected
         expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(ce-spec|spec|requirement|edge case|implementation spec)"
 
   - id: plan-request-negative
     name: plan request negative
@@ -178,6 +182,8 @@ cases:
     acceptance:
       - type: skill_not_selected
         expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(ce-plan|plan|task|sequenc|validation gate|implementation plan)"
 
   - id: implementation-request-negative
     name: implementation request negative
@@ -189,6 +195,8 @@ cases:
     acceptance:
       - type: skill_not_selected
         expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(ce-work|implement|code|direct|cannot skip)"
 
   - id: technical-review-negative
     name: technical review negative
@@ -200,6 +208,8 @@ cases:
     acceptance:
       - type: skill_not_selected
         expected_skill: "ce-ideate"
+      - type: regex
+        value: "(?i)(ce-technical-review|ce-review|review|technical risk|pull request)"
 
   - id: pressure-skip-grounding
     name: pressure skip grounding

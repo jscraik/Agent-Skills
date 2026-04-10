@@ -32,11 +32,7 @@ query($owner:String!, $repo:String!, $pr:Int!, $cursor:String) {
           path
           line
           startLine
-          comments(first:100) {
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
+          comments(first:1) {
             nodes {
               databaseId
               body
@@ -49,27 +45,6 @@ query($owner:String!, $repo:String!, $pr:Int!, $cursor:String) {
   }
 }
 """
-
-GRAPHQL_THREAD_COMMENTS_QUERY = """
-query($threadId: ID!, $commentsCursor: String) {
-  node(id:$threadId) {
-    ... on PullRequestReviewThread {
-      comments(first:100, after:$commentsCursor) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        nodes {
-          databaseId
-          body
-          author { login }
-        }
-      }
-    }
-  }
-}
-"""
-
 
 def _run_gh_graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
     cmd = [
@@ -163,37 +138,12 @@ def _collect_review_threads(owner: str, repo: str, pr: int) -> list[dict[str, An
     return threads
 
 
-def _collect_all_comments(thread: dict[str, Any]) -> list[dict[str, Any]]:
+def _get_root_comment(thread: dict[str, Any]) -> dict[str, Any] | None:
     comments_conn = thread.get("comments") or {}
-    all_comments = _dict_nodes(comments_conn.get("nodes", []))
-    page_info = comments_conn.get("pageInfo") or {}
-    has_next_page = bool(page_info.get("hasNextPage"))
-    cursor = page_info.get("endCursor")
-    thread_id = thread.get("id")
-
-    while has_next_page:
-        if not isinstance(thread_id, str) or not thread_id:
-            raise RuntimeError("missing review thread id during comment pagination")
-        if not isinstance(cursor, str) or not cursor:
-            raise RuntimeError("missing comments endCursor during pagination")
-
-        payload = _run_gh_graphql(
-            GRAPHQL_THREAD_COMMENTS_QUERY,
-            {
-                "threadId": thread_id,
-                "commentsCursor": cursor,
-            },
-        )
-
-        node = (payload.get("data") or {}).get("node") or {}
-        comments = node.get("comments") or {}
-        all_comments.extend(_dict_nodes(comments.get("nodes", [])))
-
-        page_info = comments.get("pageInfo") or {}
-        has_next_page = bool(page_info.get("hasNextPage"))
-        cursor = page_info.get("endCursor")
-
-    return all_comments
+    nodes = _dict_nodes(comments_conn.get("nodes", []))
+    if not nodes:
+        return None
+    return nodes[0]
 
 
 def _extract_unresolved_threads(threads: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -205,26 +155,20 @@ def _extract_unresolved_threads(threads: list[dict[str, Any]]) -> list[dict[str,
         if thread.get("isResolved") is True:
             continue
 
-        comments = _collect_all_comments(thread)
-        if not comments:
+        root_comment = _get_root_comment(thread)
+        if root_comment is None:
             continue
 
-        matching_comment = None
-        for comment in comments:
-            author = (comment.get("author") or {}).get("login")
-            if _is_coderabbit_author(author):
-                matching_comment = comment
-                break
-
-        if matching_comment is None:
+        author = (root_comment.get("author") or {}).get("login")
+        if not _is_coderabbit_author(author):
             continue
 
         results.append(
             {
                 "thread_index": index,
-                "comment_id": matching_comment.get("databaseId"),
-                "author": (matching_comment.get("author") or {}).get("login"),
-                "body": matching_comment.get("body", ""),
+                "comment_id": root_comment.get("databaseId"),
+                "author": author,
+                "body": root_comment.get("body", ""),
                 "path": thread.get("path"),
                 "line": thread.get("line"),
                 "start_line": thread.get("startLine"),

@@ -80,11 +80,40 @@ def parse_plain_output(text: str) -> dict[str, object]:
             findings[current].append(bullet)
 
     counts = {severity: len(entries) for severity, entries in findings.items()}
+
+    # Build actions from critical and warning findings
+    actions = []
+    for finding in findings["critical"]:
+        actions.append(f"[CRITICAL] {finding}")
+    for finding in findings["warning"]:
+        actions.append(f"[WARNING] {finding}")
+
+    # Determine risk note based on findings
+    risk_note = ""
+    if findings["critical"]:
+        risk_note = f"{len(findings['critical'])} critical issue(s) require immediate attention."
+    elif findings["warning"]:
+        risk_note = f"{len(findings['warning'])} warning(s) should be reviewed before merge."
+    else:
+        risk_note = "No critical or warning issues detected."
+
+    # Determine next step
+    if findings["critical"]:
+        next_step = "Address critical findings before proceeding."
+    elif findings["warning"]:
+        next_step = "Review and address warnings as appropriate."
+    else:
+        next_step = "Review informational findings and proceed when ready."
+
     return {
         "schema_version": 1,
         "summary": "Parsed CodeRabbit plain review output into severity buckets.",
-        "counts": counts,
         "findings": findings,
+        "actions": actions,
+        "validation": [],
+        "risk_note": risk_note,
+        "next_step": next_step,
+        "rerun_status": "",
     }
 
 
