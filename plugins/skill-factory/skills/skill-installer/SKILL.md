@@ -161,3 +161,12 @@ python3 scripts/install-skill-from-github.py --url https://github.com/<owner>/<r
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from canonical repo category directories (default `github/`).
 - For dedicated role creation during install handoff, use [[codex-agent-builder]].
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[skillify]] | Harden source skills into canonical templates before install/distribution |
+| [[skill-creator]] | Author or repair local skill packages before installation |
+
+**Topic map:** [[agent-ops]]

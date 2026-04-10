@@ -190,6 +190,9 @@ fi
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
+plugin_router_skill_names=()
+plugin_router_skill_dirs=()
+router_collision_count=0
 # is_hidden_flat_skill_name returns success (exit code 0) if the supplied skill name is listed in the hidden_flat_skills array, failure (exit code 1) otherwise.
 is_hidden_flat_skill_name() {
   local skill_name="$1"
@@ -213,6 +216,26 @@ is_plugin_hidden_lane_skill_name() {
     *" $skill_name "*) return 0 ;;
     *) return 1 ;;
   esac
+}
+register_plugin_router_skill_source() {
+  local skill_name="$1"
+  local discovered_dir="$2"
+  local idx=""
+  for idx in "${!plugin_router_skill_names[@]}"; do
+    if [ "${plugin_router_skill_names[$idx]}" != "$skill_name" ]; then
+      continue
+    fi
+    if [ "${plugin_router_skill_dirs[$idx]}" = "$discovered_dir" ]; then
+      return 0
+    fi
+    echo "[ERROR] Plugin-visible router skill collision: $skill_name" >&2
+    echo "        first:  ${plugin_router_skill_dirs[$idx]}" >&2
+    echo "        second: $discovered_dir" >&2
+    return 1
+  done
+  plugin_router_skill_names+=("$skill_name")
+  plugin_router_skill_dirs+=("$discovered_dir")
+  return 0
 }
 for hidden_skill in "${hidden_flat_skills[@]}"; do
   if [ -e "$skills_dir/$hidden_skill" ]; then
@@ -363,6 +386,8 @@ while IFS= read -r skill_path; do
     echo "Skipping hidden flat skill: $skill_name"
     continue
   fi
+  skill_dir_abs="$repo_root/$skill_dir"
+  discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
   if is_plugin_owned_skill_path "$skill_path"; then
     if is_plugin_hidden_lane_skill_name "$skill_name"; then
       echo "Skipping hidden plugin lane skill: $skill_name"
@@ -372,9 +397,12 @@ while IFS= read -r skill_path; do
       echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
       continue
     fi
+    if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
+      router_collision_count=$((router_collision_count + 1))
+      continue
+    fi
     echo "Including plugin router skill in flat runtime list: $skill_name"
   fi
-  skill_dir_abs="$repo_root/$skill_dir"
   # Relative path from $skills_dir (.agents/skills/) back to the skill source.
   # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
   # then prepend '../..' to escape .agents/skills/ back to repo root.
@@ -402,6 +430,11 @@ while IFS= read -r skill_path; do
   fi
   ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
 done < <(all_skill_files_cmd)
+
+if [ "$router_collision_count" -gt 0 ]; then
+  echo "[ERROR] Aborting sync due to plugin-visible router skill collisions." >&2
+  exit 1
+fi
 
 # Re-expose preserved system skills through the hidden `.system` path without
 # bringing them back into the flat runtime skill list.

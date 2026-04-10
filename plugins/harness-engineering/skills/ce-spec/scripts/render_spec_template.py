@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date
 from pathlib import Path
 from typing import Dict
 
@@ -26,9 +25,7 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
-    print_diff_lines,
     render_from_path,
-    unified_diff_lines,
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "spec.md.tmpl"
@@ -38,7 +35,7 @@ DEFAULT_CONTEXT: Dict[str, str] = {
     "SPEC_TITLE": "Symphony Service Specification",
     "SPEC_TYPE": "feat",
     "SPEC_STATUS": "draft",
-    "SPEC_DATE": date.today().isoformat(),
+    "SPEC_DATE": "2026-04-10",
     "SPEC_ORIGIN": "docs/brainstorms/symphony-service-brainstorm.md",
     "SPEC_RISK": "high",
     "SPEC_DEPTH": "full",

@@ -62,6 +62,13 @@ backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
   writing-plans: Plan backend extensions before implementing
+bash-hygiene:
+  codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
+    safer defaults
+  systematic-debugging: Triage shell failures with evidence-first diagnosis before
+    behavioral changes
+  verification-before-completion: Enforce verification routines after Bash script
+    edits before claiming done
 baseline-ui:
   design-system: Apply design tokens that baseline-ui validates
   fixing-accessibility: Fix accessibility issues found during baseline-ui checks
@@ -264,6 +271,8 @@ docs-expert:
   visual-explainer: Present a complex system, workflow, or docs audit as a visual
     artifact
 evals-router:
+  skill-refactor: Analyze session-derived skill quality signals before redesigning
+    eval plans
   systematic-debugging: When eval pipeline bugs emerge — debug root cause before redesigning
     the eval
   test-driven-development: For the implementation layer of the review tooling or judge
@@ -362,6 +371,11 @@ notebooklm:
   insight-report: Feed session insights into NotebookLM for deeper analysis
   markdown-converter: Convert docs to markdown before uploading to NotebookLM
   video-transcript-downloader: Download transcripts to feed as NotebookLM sources
+npm-workflow-discipline:
+  circleci: Align deterministic npm install and script contracts with CircleCI pipeline
+    behavior
+  coding-harness: Validate and enforce repository quality gates in CI and local workflows
+  release: Apply package and script contract checks during release readiness and cutover
 oak-api:
   chatgpt-apps: Build a ChatGPT App that surfaces Oak curriculum content
   fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
@@ -522,6 +536,8 @@ skill-builder:
 skill-creator:
   codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
+  skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
+    packages
 skill-refactor:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -529,7 +545,9 @@ skill-refactor:
 skillify:
   skill-creator: Create first-draft skill scaffolds before hardening
   skill-installer: Install and surface a validated skill across Codex catalogs
-skill-installer: {}
+skill-installer:
+  skill-creator: Author or repair local skill packages before installation
+  skillify: Harden source skills into canonical templates before install/distribution
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

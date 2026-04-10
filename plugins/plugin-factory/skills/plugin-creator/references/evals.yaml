@@ -56,6 +56,21 @@ cases:
       - type: regex
         value: '(?i)(not set by default|explicit override)'
 
+  - id: edge-adopt-existing-skill-by-move
+    name: edge adopt existing skill by move
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I already created `frontend/ui/my-skill`. Create plugin `my-plugin` and move that skill into the plugin without leaving duplicate canonical copies."
+    acceptance:
+      - type: regex
+        value: '(?i)(move|git mv|adopt)'
+      - type: regex
+        value: '(?i)(no duplicate|single canonical|avoid duplicate)'
+      - type: regex
+        value: '(?i)(sync_skills|sync_projection_trees|projection_integrity|shadowing)'
+
   - id: edge-companion-folder-allowlist
     name: edge companion folder allowlist
     category: edge

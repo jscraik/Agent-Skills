@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T19:04:45Z",
+  "generated_at": "2026-04-10T20:50:23Z",
   "decision_date": "2026-04-10",
   "active_skill_count": 74,
   "expected_count": 74,
   "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 73,
-    "invalid_count": 1,
-    "missing_profile_count": 1,
+    "valid_count": 74,
+    "invalid_count": 0,
+    "missing_profile_count": 0,
     "missing_binding_count": 0,
     "missing_legacy_binding_count": 74,
     "invalid_binding_count": 0,
@@ -588,10 +588,8 @@
       "profile_binding": "references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
-      "status": "invalid",
-      "errors": [
-        "missing profile file `skills-system/imagegen/references/task-profile.json`"
-      ]
+      "status": "valid",
+      "errors": []
     },
     {
       "skill_path": "utilities/1password/SKILL.md",

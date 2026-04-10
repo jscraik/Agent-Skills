@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-10T19:36:57.569007+00:00",
+  "generated_at": "2026-04-10T20:44:30.926508+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -80,8 +80,8 @@
       "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 313,
-      "source_manifest_sha256": "f7c9211273c56f4043503d8deb4804f5d59b4917507468b0568385ad7db6ee99",
-      "projection_manifest_sha256": "f7c9211273c56f4043503d8deb4804f5d59b4917507468b0568385ad7db6ee99",
+      "source_manifest_sha256": "a9ff1f8af5fd97c40b9c969e1774a3844b432d6f2ea1e99e0eb416d483c03dc6",
+      "projection_manifest_sha256": "a9ff1f8af5fd97c40b9c969e1774a3844b432d6f2ea1e99e0eb416d483c03dc6",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -112,8 +112,8 @@
       "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 197,
-      "source_manifest_sha256": "f1c415a115c62d39eb4e737998ab1d927a6d2eec463155d68f4d13406a9b9673",
-      "projection_manifest_sha256": "f1c415a115c62d39eb4e737998ab1d927a6d2eec463155d68f4d13406a9b9673",
+      "source_manifest_sha256": "0aeba2c2c067b3859ca50c708c4d6f6b429e58a7177ca58e469f2e0871d8da1b",
+      "projection_manifest_sha256": "0aeba2c2c067b3859ca50c708c4d6f6b429e58a7177ca58e469f2e0871d8da1b",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -128,8 +128,8 @@
       "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 63,
-      "source_manifest_sha256": "796d71eed6c6f54fff6d6c317965bfc9b9921bddff40fe483a00ab5820e7f055",
-      "projection_manifest_sha256": "796d71eed6c6f54fff6d6c317965bfc9b9921bddff40fe483a00ab5820e7f055",
+      "source_manifest_sha256": "a5966f12097960cf6787027ba7b8d5662819c02e95002ee3d03dea41e79100f9",
+      "projection_manifest_sha256": "a5966f12097960cf6787027ba7b8d5662819c02e95002ee3d03dea41e79100f9",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -144,8 +144,8 @@
       "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 205,
-      "source_manifest_sha256": "61180a11aefc37c68f2c892b68eea1c0fe939389fe35b3cc3cddfe90a4f3cc26",
-      "projection_manifest_sha256": "61180a11aefc37c68f2c892b68eea1c0fe939389fe35b3cc3cddfe90a4f3cc26",
+      "source_manifest_sha256": "95ee1176805654ba717e312f581a10fcc507a41c4eccfd60dd1cfb33ff10dcfb",
+      "projection_manifest_sha256": "95ee1176805654ba717e312f581a10fcc507a41c4eccfd60dd1cfb33ff10dcfb",
       "manifest_mismatch": false,
       "status": "pass"
     }

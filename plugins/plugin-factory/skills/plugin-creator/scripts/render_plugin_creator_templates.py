@@ -19,10 +19,7 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
-    print_diff_lines,
     render_from_path,
-    render_template,
-    unified_diff_lines,
 )
 
 TEMPLATE_DIR = SKILL_DIR / "templates"
@@ -56,13 +53,10 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "INTERFACE_WEBSITE_URL": "https://example.com/plugins/symphony-orchestrator",
     "INTERFACE_PRIVACY_URL": "https://example.com/privacy",
     "INTERFACE_TERMS_URL": "https://example.com/terms",
-    "DEFAULT_PROMPT_1": "Review active issues and dispatch the highest priority task.",
-    "DEFAULT_PROMPT_2": "Summarize running sessions and retry queue risk.",
-    "DEFAULT_PROMPT_3": "Prepare an operator handoff for blocked orchestration runs.",
+    "DEFAULT_PROMPT": "Review active issues and dispatch the highest priority task.",
     "INTERFACE_BRAND_COLOR": "#3B82F6",
     "INSTALL_POLICY": "AVAILABLE",
     "AUTH_POLICY": "ON_INSTALL",
-    "PRODUCT_1": "CODEX",
     "CATEGORY": "Productivity",
 }
 

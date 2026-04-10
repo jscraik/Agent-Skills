@@ -4,12 +4,18 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
+import sys
 from pathlib import Path
 
-from render_reference_templates import (
-    TEMPLATE_TARGETS,
+SCRIPT_DIR = Path(__file__).resolve().parent
+SKILL_DIR = SCRIPT_DIR.parent
+FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
+if str(FAMILY_SKILLS_DIR) not in sys.path:
+    sys.path.insert(0, str(FAMILY_SKILLS_DIR))
+
+from _template_utils import (
     TemplateRenderError,
-    build_context,
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
@@ -17,6 +23,13 @@ from render_reference_templates import (
     render_from_path,
     unified_diff_lines,
 )
+from render_reference_templates import (
+    TEMPLATE_TARGETS,
+    build_context,
+)
+
+REPO_ROOT = SCRIPT_DIR.parents[5]
+BENCHMARK_VALIDATOR = REPO_ROOT / "scripts" / "validate_skill_authoring_family_benchmarks.py"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -52,8 +65,11 @@ def main(argv: list[str] | None = None) -> int:
         for name, (template_path, output_path) in targets:
             expected = _expected_text(template_path, context)
             if args.update:
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                output_path.write_text(expected, encoding="utf-8")
+                try:
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    output_path.write_text(expected, encoding="utf-8")
+                except OSError as exc:
+                    raise TemplateRenderError(f"Failed to write rendered output {output_path}: {exc}") from exc
                 print(f"[OK] Updated {name}: {output_path}")
                 continue
 
@@ -62,7 +78,10 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"[DRIFT] Missing output for {name}: {output_path}")
                 continue
 
-            actual = output_path.read_text(encoding="utf-8")
+            try:
+                actual = output_path.read_text(encoding="utf-8")
+            except OSError as exc:
+                raise TemplateRenderError(f"Failed to read rendered output {output_path}: {exc}") from exc
             if actual == expected:
                 print(f"[OK] No drift for {name}: {output_path}")
                 continue
@@ -79,6 +98,17 @@ def main(argv: list[str] | None = None) -> int:
     except TemplateRenderError as exc:
         print(f"[ERROR] {exc}")
         return 1
+
+    if args.update:
+        benchmark_cmd = [sys.executable, str(BENCHMARK_VALIDATOR), "--format", "text"]
+        benchmark_proc = subprocess.run(benchmark_cmd, cwd=REPO_ROOT)
+        if benchmark_proc.returncode != 0:
+            print(
+                "[ERROR] Updated baselines but family benchmark validation failed. "
+                "Fix benchmark findings before accepting updated templates."
+            )
+            return benchmark_proc.returncode
+        print("[OK] Family benchmark validation passed after template baseline update.")
 
     if drift_found and not args.update:
         print("Run with --update to refresh rendered baselines.")

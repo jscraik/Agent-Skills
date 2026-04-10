@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -20,9 +19,7 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
-    print_diff_lines,
     render_from_path,
-    unified_diff_lines,
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "plan.md.tmpl"
@@ -32,7 +29,7 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "PLAN_TITLE": "Symphony Service Implementation Plan",
     "PLAN_TYPE": "feat",
     "PLAN_STATUS": "active",
-    "PLAN_DATE": date.today().isoformat(),
+    "PLAN_DATE": "2026-04-10",
     "PLAN_ORIGIN": "docs/brainstorms/2026-04-10-symphony-requirements.md",
     "PLAN_SPEC": "docs/specs/2026-04-10-symphony-service-spec.md",
     "PLAN_UI_SPEC": "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md",

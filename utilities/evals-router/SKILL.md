@@ -104,6 +104,7 @@ Keep the route crisp. The goal is not to explain all of evaluation; it is to pic
 
 | Skill | When to use together |
 |---|---|
+| [[skill-refactor]] | Analyze session-derived skill quality signals before redesigning eval plans |
 | [[systematic-debugging]] | When eval pipeline bugs emerge — debug root cause before redesigning the eval |
 | [[verification-before-completion]] | Gate "eval is ready" claims with concrete calibration or human-label evidence |
 | [[test-driven-development]] | For the implementation layer of the review tooling or judge prompt validation tests |

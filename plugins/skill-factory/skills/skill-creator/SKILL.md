@@ -183,5 +183,6 @@ Read these files based on the task:
 | Skill | When to use together |
 |---|---|
 | [[codex-agent-creator]] | Create or update custom agents when skill workflows need dedicated role files |
+| [[skillify]] | Convert hand-authored or rough skills into canonical, graph-aware skill packages |
 
 **Topic map:** [[agent-ops]]

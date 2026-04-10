@@ -274,11 +274,24 @@ def _canonical_repo_dest() -> str | None:
 
     script_path = Path(__file__).resolve()
     for parent in [script_path.parent, *script_path.parents]:
-        if not (parent / ".git").exists():
-            continue
-        if (parent / "AGENTS.md").is_file() and (parent / "scripts" / "sync_skills.sh").is_file() and (parent / "plugins").is_dir():
+        if _is_canonical_repo_root(parent):
             return str(parent / "github")
     return None
+
+
+def _is_canonical_repo_root(path: Path) -> bool:
+    """
+    Return whether *path* matches canonical repository root markers.
+
+    Canonical roots must include: `.git`, `AGENTS.md`, `scripts/sync_skills.sh`,
+    and a `plugins/` directory.
+    """
+    return (
+        (path / ".git").exists()
+        and (path / "AGENTS.md").is_file()
+        and (path / "scripts" / "sync_skills.sh").is_file()
+        and (path / "plugins").is_dir()
+    )
 
 
 def _resolve_dest_root(dest: str | None) -> str:
@@ -299,21 +312,30 @@ def _resolve_dest_root(dest: str | None) -> str:
             the canonical repository root, or if the resolved path targets the repository root instead of
             a category directory.
     """
-    canonical = _canonical_repo_dest()
-    if not canonical:
-        raise InstallError(
-            "Canonical skill destination was not detected. "
-            "Set ASK_SKILLS_CANONICAL_DEST or run inside the canonical agent-skills repository."
-        )
+    requested = Path(dest) if dest else None
 
-    canonical_dest = Path(canonical).resolve()
-    repo_root = canonical_dest.parent
+    if requested and requested.is_absolute():
+        resolved = requested.resolve()
+        repo_root = resolved.parent
+        if not _is_canonical_repo_root(repo_root):
+            raise InstallError(
+                "Absolute --dest must point under a canonical agent-skills repository root "
+                f"(missing markers under '{repo_root}')."
+            )
+    else:
+        canonical = _canonical_repo_dest()
+        if not canonical:
+            raise InstallError(
+                "Canonical skill destination was not detected. "
+                "Set ASK_SKILLS_CANONICAL_DEST or run inside the canonical agent-skills repository."
+            )
 
-    if not dest:
-        return str(canonical_dest)
+        canonical_dest = Path(canonical).resolve()
+        repo_root = canonical_dest.parent
+        if not requested:
+            return str(canonical_dest)
+        resolved = (repo_root / requested).resolve()
 
-    requested = Path(dest)
-    resolved = requested.resolve() if requested.is_absolute() else (repo_root / requested).resolve()
     try:
         rel = resolved.relative_to(repo_root)
     except ValueError as exc:

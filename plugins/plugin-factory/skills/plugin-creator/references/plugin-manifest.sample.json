@@ -25,11 +25,7 @@
     "websiteURL": "https://example.com/plugins/symphony-orchestrator",
     "privacyPolicyURL": "https://example.com/privacy",
     "termsOfServiceURL": "https://example.com/terms",
-    "defaultPrompt": [
-      "Review active issues and dispatch the highest priority task.",
-      "Summarize running sessions and retry queue risk.",
-      "Prepare an operator handoff for blocked orchestration runs."
-    ],
+    "defaultPrompt": "Review active issues and dispatch the highest priority task.",
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png",

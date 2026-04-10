@@ -466,6 +466,8 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
     rel_text = str(rel_dest)
     if len(rel_dest.parts) != 1:
         raise ValueError("Destination must be a top-level category directory under repository root.")
+    if resolved_dest.exists() and not resolved_dest.is_dir():
+        raise ValueError("Destination must resolve to a directory under repository root.")
     return resolved_dest, rel_text
 
 

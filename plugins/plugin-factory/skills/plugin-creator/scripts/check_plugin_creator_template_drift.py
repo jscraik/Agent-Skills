@@ -4,18 +4,27 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
-from render_plugin_creator_templates import (
-    TEMPLATE_TARGETS,
+SCRIPT_DIR = Path(__file__).resolve().parent
+SKILL_DIR = SCRIPT_DIR.parent
+FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
+if str(FAMILY_SKILLS_DIR) not in sys.path:
+    sys.path.insert(0, str(FAMILY_SKILLS_DIR))
+
+from _template_utils import (
     TemplateRenderError,
-    build_context,
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
     print_diff_lines,
     render_from_path,
     unified_diff_lines,
+)
+from render_plugin_creator_templates import (
+    TEMPLATE_TARGETS,
+    build_context,
 )
 
 
@@ -52,8 +61,11 @@ def main(argv: list[str] | None = None) -> int:
         for name, (template_path, output_path) in targets:
             expected = _expected_text(template_path, context)
             if args.update:
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                output_path.write_text(expected, encoding="utf-8")
+                try:
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    output_path.write_text(expected, encoding="utf-8")
+                except OSError as exc:
+                    raise TemplateRenderError(f"Failed to write rendered output {output_path}: {exc}") from exc
                 print(f"[OK] Updated {name}: {output_path}")
                 continue
 
@@ -62,7 +74,10 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"[DRIFT] Missing output for {name}: {output_path}")
                 continue
 
-            actual = output_path.read_text(encoding="utf-8")
+            try:
+                actual = output_path.read_text(encoding="utf-8")
+            except OSError as exc:
+                raise TemplateRenderError(f"Failed to read rendered output {output_path}: {exc}") from exc
             if actual == expected:
                 print(f"[OK] No drift for {name}: {output_path}")
                 continue

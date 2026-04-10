@@ -589,7 +589,9 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     sync_engine = "python"
     changed_files = 0
     deleted_files = 0
-    if projection_abs.exists() and not projection_abs.is_dir():
+    if projection_abs.is_symlink():
+        projection_abs.unlink()
+    elif projection_abs.exists() and not projection_abs.is_dir():
         projection_abs.unlink()
     projection_abs.mkdir(parents=True, exist_ok=True)
 
@@ -720,18 +722,35 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     if not source_abs.is_dir():
         result.update({"status": "drift", "reason": "source_missing"})
         return result
+    if projection_abs.is_symlink():
+        result.update(
+            {
+                "status": "drift",
+                "reason": "projection_symlinked",
+                "projection_symlink_target": os.readlink(projection_abs),
+            }
+        )
+        return result
     if not projection_abs.is_dir():
         result.update({"status": "drift", "reason": "projection_missing"})
         return result
 
     source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}
     projection_files = {rel.as_posix(): rel for rel in iter_files(projection_abs)}
-    source_manifest_hashes = {
-        rel_key: hash_bytes((source_abs / rel).read_bytes()) for rel_key, rel in source_files.items()
-    }
+    source_manifest_hashes: dict[str, str] = {}
+    for rel_key, rel in source_files.items():
+        source_file = source_abs / rel
+        if source_file.is_symlink():
+            source_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(source_file)}")
+        else:
+            source_manifest_hashes[rel_key] = hash_bytes(source_file.read_bytes())
     projection_manifest_hashes: dict[str, str] = {}
     for rel_key, rel in projection_files.items():
-        projection_bytes = (projection_abs / rel).read_bytes()
+        projection_file = projection_abs / rel
+        if projection_file.is_symlink():
+            projection_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(projection_file)}")
+            continue
+        projection_bytes = projection_file.read_bytes()
         if rel.suffix not in STAMPABLE_SUFFIXES:
             projection_manifest_hashes[rel_key] = hash_bytes(projection_bytes)
             continue
@@ -752,6 +771,33 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         rel = source_files[rel_key]
         source_file = source_abs / rel
         projection_file = projection_abs / rel
+
+        if source_file.is_symlink() or projection_file.is_symlink():
+            if source_file.is_symlink() and projection_file.is_symlink():
+                source_target = os.readlink(source_file)
+                projection_target = os.readlink(projection_file)
+                if source_target != projection_target:
+                    mismatched_files.append(
+                        {
+                            "path": rel_key,
+                            "reason": "symlink_target_mismatch",
+                            "source_sha256": hash_text(f"symlink:{source_target}"),
+                            "projection_sha256": hash_text(f"symlink:{projection_target}"),
+                        }
+                    )
+            else:
+                source_kind = "symlink" if source_file.is_symlink() else "file"
+                projection_kind = "symlink" if projection_file.is_symlink() else "file"
+                mismatched_files.append(
+                    {
+                        "path": rel_key,
+                        "reason": "symlink_kind_mismatch",
+                        "source_sha256": hash_text(source_kind),
+                        "projection_sha256": hash_text(projection_kind),
+                    }
+                )
+            continue
+
         source_bytes = source_file.read_bytes()
         projection_bytes = projection_file.read_bytes()
 

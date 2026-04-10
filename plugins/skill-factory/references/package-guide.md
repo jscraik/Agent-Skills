@@ -20,4 +20,6 @@
 ```bash
 python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py audit-compat plugins/skill-factory
 python3 plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py validate plugins/skill-factory --require-marketplace --marketplace-path .agents/plugins/marketplace.json --allow-legacy-marketplace-path
+bash scripts/validate_skill_authoring_family.sh
+python3 scripts/projection_integrity.py verify --scope skill-factory --format text
 ```
