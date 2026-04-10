@@ -58,15 +58,6 @@ atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
   openai-docs: Reference official ChatGPT documentation for Atlas features
-bash-hygiene:
-  bootstrap: Apply safe shell scripting practices when writing bootstrap or setup
-    scripts
-  codex-hooks-builder: Write portable, safe hook scripts that follow shell best
-    practices
-  systematic-debugging: Debug shell script issues with proper error handling and
-    quoting
-  verification-before-completion: Validate shell scripts pass shellcheck before
-    completion
 backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
