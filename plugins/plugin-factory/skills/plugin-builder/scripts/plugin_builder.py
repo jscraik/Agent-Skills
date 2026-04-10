@@ -19,7 +19,25 @@ from typing import Any, Iterable
 
 MAX_PLUGIN_NAME_LENGTH = 64
 PLUGIN_NAME_RE = re.compile(r"^[a-z0-9](?:-?[a-z0-9]){0,63}$")
-REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _discover_repo_root() -> Path:
+    def _looks_like_repo_root(candidate: Path) -> bool:
+        if not (candidate / "plugins").is_dir():
+            return False
+        if (candidate / ".git").exists():
+            return True
+        return (candidate / "plugins" / "plugin-factory" / "skills").is_dir() and (
+            candidate / ".agents"
+        ).is_dir()
+
+    for ancestor in Path(__file__).resolve().parents:
+        if _looks_like_repo_root(ancestor):
+            return ancestor
+    return Path.cwd().resolve()
+
+
+REPO_ROOT = _discover_repo_root()
 DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
 DEFAULT_MARKETPLACE_PATH = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 SKILL_BUILDER_INIT = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "init_skill.py"

@@ -37,9 +37,9 @@ description: Create and scaffold plugin directories for Codex with a required `.
 ```bash
   # Plugin names are normalized to lower-case hyphen-case and must be <= 64 chars.
   # The generated folder and plugin.json name are always the same.
-# Run from repo root (or replace .agents/... with the absolute path to this SKILL).
+# Run from repo root.
 # By default creates in <repo_root>/plugins/<plugin-name>.
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
+python3 skills-system/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
 ```
 
 2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace the sample values with your real plugin metadata.
@@ -48,13 +48,13 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py <plugin-nam
 
 ```bash
 # marketplace.json always lives at <repo-root>/.agents/plugins/marketplace.json
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
+python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
 ```
 
 For a home-local plugin, treat `<home>` as the root and use:
 
 ```bash
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin \
+python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin \
   --path ~/plugins \
   --marketplace-path ~/.agents/plugins/marketplace.json \
   --with-marketplace
@@ -63,7 +63,7 @@ python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin \
 4. Generate/adjust optional companion folders as needed:
 
 ```bash
-python3 .agents/skills/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
+python3 skills-system/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
   --with-skills --with-hooks --with-scripts --with-assets --with-mcp --with-apps --with-marketplace
 ```
 
@@ -181,7 +181,7 @@ For the exact canonical sample JSON for both plugin manifests and marketplace en
 After editing `SKILL.md`, run:
 
 ```bash
-python3 <path-to-skill-creator>/scripts/quick_validate.py .agents/skills/plugin-creator
+python3 skills-system/skill-creator/scripts/quick_validate.py skills-system/plugin-creator
 ```
 
 Fail-fast rule:
