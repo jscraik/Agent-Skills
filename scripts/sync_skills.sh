@@ -1141,6 +1141,18 @@ sync_local_marketplace_cache() {
       find "$target_local_dir" -name '.DS_Store' -type f -delete
     fi
 
+    # Legacy caches stored versioned plugin snapshots (for example `0.1.0`).
+    # Keep only the canonical `local/` projection so runtimes do not discover
+    # duplicate plugin manifests/skills from stale cache variants.
+    while IFS= read -r cache_variant_dir; do
+      [ -n "$cache_variant_dir" ] || continue
+      if [ "$(basename "$cache_variant_dir")" = "local" ]; then
+        continue
+      fi
+      rm -rf -- "$cache_variant_dir"
+      echo "[OK] Removed legacy cache variant: $cache_variant_dir"
+    done < <(find "$target_plugin_dir" -mindepth 1 -maxdepth 1 -type d -print)
+
     # Preserve all plugin-owned skills in cache even when a same-named system
     # skill exists. Modern runtimes namespace plugin skills by plugin id, so
     # cache-time deduplication can incorrectly hide valid plugin surfaces.
