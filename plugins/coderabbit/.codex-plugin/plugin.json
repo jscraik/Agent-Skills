@@ -48,5 +48,6 @@
   "source": {
     "repo": "https://github.com/coderabbitai/skills.git",
     "commit": "e1d42d7a2e0a736824117802b6e03228eadd52f1"
-  }
+  },
+  "icon": "./assets/icon.png"
 }
