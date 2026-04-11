@@ -52,30 +52,9 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skillgrade-setup",
 )
 
-# Plugin router skills that should be visible in default flat discovery.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
-    "arscontexta",
-    "ce-brainstorm",
-    "ce-compound",
-    "ce-compound-refresh",
-    "ce-deepen-plan",
-    "ce-deepen-spec",
-    "ce-ideate",
-    "ce-plan",
-    "ce-reliability-review",
-    "ce-review",
-    "ce-spec",
-    "ce-tdd",
-    "ce-technical-review",
-    "ce-work",
-    "coderabbit",
-    "skill-builder",
-    "skill-creator",
-    "skill-factory",
-    "skill-installer",
-    "skill-refactor",
-    "skillify",
-)
+# Plugin router skills promoted into default flat discovery.
+# Keep empty to avoid duplicate visibility between flat skills and plugin lanes.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills that stay hidden by default unless advanced mode is used.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
