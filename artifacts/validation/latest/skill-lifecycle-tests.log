@@ -1,34 +1,5 @@
-........F.....F..
-======================================================================
-FAIL: test_plugin_shadowing_check_allows_router_overlap (__main__.SkillLifecycleValidationTests.test_plugin_shadowing_check_allows_router_overlap)
+.................
 ----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Users/jamiecraik/dev/agent-skills/scripts/test_skill_lifecycle_validation.py", line 465, in test_plugin_shadowing_check_allows_router_overlap
-    self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
-AssertionError: 1 != 0 : Plugin-shadowing check failed: standalone flat skills overlap plugin-exported skills.
-Overlapping skill names:
-- coderabbit
+Ran 17 tests in 0.410s
 
-Run: bash scripts/sync_skills.sh
-
-
-======================================================================
-FAIL: test_skill_discovery_visibility_hides_plugin_lanes_by_default (__main__.SkillLifecycleValidationTests.test_skill_discovery_visibility_hides_plugin_lanes_by_default)
-Verify that plugin-owned lane skills are hidden by default but included in advanced visibility.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/Users/jamiecraik/dev/agent-skills/scripts/test_skill_lifecycle_validation.py", line 527, in test_skill_discovery_visibility_hides_plugin_lanes_by_default
-    self.assertEqual(default_names, ["coderabbit"])
-AssertionError: Lists differ: [] != ['coderabbit']
-
-Second list contains 1 additional elements.
-First extra element 0:
-'coderabbit'
-
-- []
-+ ['coderabbit']
-
-----------------------------------------------------------------------
-Ran 17 tests in 0.473s
-
-FAILED (failures=2)
+OK

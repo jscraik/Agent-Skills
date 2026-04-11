@@ -53,12 +53,37 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 )
 
 # Plugin router skills promoted into default flat discovery.
-# Keep empty to avoid duplicate visibility between flat skills and plugin lanes.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+    "arscontexta",
+    "coderabbit",
+    "skill-factory",
+)
 
 # Plugin lane skills hidden from default flat discovery.
-# Empty means all installed plugin skills are visible by default.
-PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()
+PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
+    "autofix",
+    "ce-brainstorm",
+    "ce-compound",
+    "ce-compound-refresh",
+    "ce-deepen-plan",
+    "ce-deepen-spec",
+    "ce-ideate",
+    "ce-plan",
+    "ce-reliability-review",
+    "ce-review",
+    "ce-spec",
+    "ce-tdd",
+    "ce-technical-review",
+    "ce-work",
+    "code-review",
+    "plugin-builder",
+    "simplify",
+    "skill-builder",
+    "skill-creator",
+    "skill-installer",
+    "skill-refactor",
+    "skillify",
+)
 
 
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:

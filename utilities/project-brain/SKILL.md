@@ -3,19 +3,23 @@ name: project-brain
 description: Bootstrap and operate Project Brain correctly using the canonical instruction and bootstrap script.
 metadata:
   short-description: Bootstrap and operate Project Brain
+  skill-type: runbook
 ---
 
 # Project Brain
 
 ## Table of Contents
-- [When to Use](#when-to-use)
-- [Inputs](#inputs)
+- [When to use](#when-to-use)
+- [Required inputs](#required-inputs)
 - [Workflow](#workflow)
+- [Harness-Managed Rollout Depth](#harness-managed-rollout-depth)
 - [Guardrails](#guardrails)
-- [Outputs](#outputs)
+- [Deliverables](#deliverables)
+- [Failure mode](#failure-mode)
+- [Gotchas](#gotchas)
 - [References](#references)
 
-## When to Use
+## When to use
 Use this skill when work involves:
 - Bootstrapping Project Brain in a repository that does not yet have `.harness/`
 - Explaining day-to-day Project Brain operation for Codex sessions
@@ -27,7 +31,7 @@ Do not use this skill for:
 - Ad hoc note systems that do not follow the canonical Project Brain instruction and bootstrap script
 - Replacing the canonical bootstrap script with copied local variants
 
-## Inputs
+## Required inputs
 Collect these inputs before acting:
 - Target repository root
 - Whether `.harness/` already exists
@@ -52,8 +56,20 @@ If either source is missing, stop and ask the user where the Project Brain contr
    - `.harness/knowledge/INDEX.md` domain focus
    - `.harness/quality/criteria.md` project checks
    - `.harness/memory/LEARNINGS.md` first repo-specific learning
-8. For ongoing operation, follow [Operating Routine](./references/operating-routine.md).
-9. In handoff, report what initialized, what skipped, and whether indexing was attempted, skipped, or warned.
+8. If the repository is harness-managed and enforces Project Brain via contract/tooling audit, apply the rollout lane in [Harness-Managed Rollout Depth](#harness-managed-rollout-depth) and [Setup and Bootstrap](./references/setup-and-bootstrap.md).
+9. For ongoing operation, follow [Operating Routine](./references/operating-routine.md).
+10. In handoff, report what initialized, what skipped, and whether indexing was attempted, skipped, or warned.
+
+## Harness-Managed Rollout Depth
+Read when the target repository enforces Project Brain using repo-local harness policy and readiness scripts, not bootstrap only.
+
+- Verify `harness.contract.json` includes `toolingPolicy.projectBrainMemoryExtension` with `enabled=true` and repo-accurate `requiredPaths`.
+- Confirm `scripts/check-environment.sh` defines `required_project_brain_paths=(...)` and gates them with `project_brain_memory_extension_enabled=true`.
+- Keep policy and scaffold updates together; do not enable strict enforcement before both are aligned.
+- Run `harness tooling-audit --path <repo-root>` before enabling strict gates so policy drift and readiness-script drift fail early.
+- Validate with each repository documented harness verification commands (at minimum `harness tooling-audit --path <repo-root>` plus the repository fast verify gate).
+- For coding-harness specifically, use the concrete validation lane documented in the rollout reference.
+- For gradual migration, land contract plus scaffold updates first, then turn on strict enforcement.
 
 ## Guardrails
 - Treat `.harness/memory/LEARNINGS.md` as repo-specific and `~/.codex/instructions/Learnings.md` as cross-repo.
@@ -62,13 +78,24 @@ If either source is missing, stop and ask the user where the Project Brain contr
 - Do not claim indexing will succeed. `--index` is best-effort and may skip when local-memory/index hooks are unavailable.
 - Do not add custom bootstrap commands unless backed by canonical sources above.
 
-## Outputs
+## Deliverables
 Produce:
 - The exact bootstrap command used or recommended
 - A short summary of resulting `.harness/` layout
 - Next Project Brain files the user should populate
 - Blockers such as existing `.harness/`, missing canonical sources, or skipped indexing
 
+## Failure mode
+- Missing canonical instruction/script sources: stop and ask for the installed control-plane path before proceeding.
+- Existing `.harness/` with ambiguous rebuild intent: do not overwrite until the user confirms force/rebuild behavior.
+- Harness policy mismatch (contract vs readiness scripts): treat as blocked until policy and scaffold checks are aligned.
+
+## Gotchas
+- `--index` is best-effort; report when indexing is skipped or unavailable instead of presenting it as guaranteed.
+- `init-project-brain.sh` is CLI-only; do not source it and do not switch the shell interpreter from `bash`.
+- Keep repository Project Brain memory files separate from cross-repo `~/.codex` memory files.
+
 ## References
 - [Setup and Bootstrap](./references/setup-and-bootstrap.md)
 - [Operating Routine](./references/operating-routine.md)
+- `/Users/jamiecraik/dev/coding-harness/docs/agents/20-project-brain-memory-extension-rollout.md` (when working in harness-managed repositories)

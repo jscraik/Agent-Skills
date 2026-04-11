@@ -254,13 +254,16 @@ def parse_frontmatter_and_body(path: Path) -> Tuple[Dict[str, str], str]:
 
 def canonical_skill_map(skill_files: List[Path], repo_root: Path) -> Dict[str, Path]:
     mapping: Dict[str, Path] = {}
+    plugin_only_candidates: Dict[str, Path] = {}
     for skill_file in skill_files:
         rel = skill_file.relative_to(repo_root).as_posix()
-        if rel.startswith("plugins/"):
-            continue
         name = parse_frontmatter(skill_file).get("name", "").strip()
-        if name:
-            mapping.setdefault(name, skill_file)
+        if not name:
+            continue
+        if rel.startswith("plugins/"):
+            plugin_only_candidates.setdefault(name, skill_file)
+            continue
+        mapping.setdefault(name, skill_file)
 
     # Some canonical skill aliases are symlinked into non-plugin roots and may not
     # be discovered by rglob() in all environments. Include governed non-plugin
@@ -274,6 +277,11 @@ def canonical_skill_map(skill_files: List[Path], repo_root: Path) -> Dict[str, P
         name = parse_frontmatter(candidate).get("name", "").strip()
         if name:
             mapping.setdefault(name, candidate)
+
+    # Plugin-native skills without a non-plugin canonical counterpart inherit
+    # lifecycle metadata from their plugin source of truth.
+    for name, skill_file in plugin_only_candidates.items():
+        mapping.setdefault(name, skill_file)
     return mapping
 
 

@@ -1,9 +1,5 @@
-ERROR utilities/project-brain/SKILL.md: missing recommended section heading: ## When to use
-ERROR utilities/project-brain/SKILL.md: missing recommended section heading: ## Required inputs
-ERROR utilities/project-brain/SKILL.md: missing recommended section heading: ## Deliverables
-ERROR utilities/project-brain/SKILL.md: missing recommended section heading: ## Failure mode
-ERROR utilities/project-brain/SKILL.md: missing recommended section heading: ## Gotchas
 Checked files: 109
-Errors: 5
+Errors: 0
 Warnings: 0
 Mode: strict
+Progressive disclosure lint passed

@@ -9,6 +9,7 @@
 - [Files Created](#files-created)
 - [Reinitialization and Force](#reinitialization-and-force)
 - [Indexing Behavior](#indexing-behavior)
+- [Harness-Managed Rollout Depth](#harness-managed-rollout-depth)
 - [Next Steps After Bootstrap](#next-steps-after-bootstrap)
 
 ## Purpose
@@ -96,6 +97,26 @@ Script behavior:
 4. Warns and continues when prerequisites are missing
 
 Report indexing as `attempted`, `skipped`, or `warned` based on actual outcome.
+
+## Harness-Managed Rollout Depth
+Read when the repository enforces Project Brain through harness policy and tooling audit surfaces.
+
+Per-repo checklist:
+1. Confirm `harness.contract.json` has `toolingPolicy.projectBrainMemoryExtension`.
+2. Set `enabled=true` only when the repository should enforce Project Brain readiness.
+3. Keep `requiredPaths` aligned with the repository `.harness/**` scaffold.
+4. Re-run scaffold or update flow so `scripts/check-environment.sh` includes both:
+   - `project_brain_memory_extension_enabled=true`
+   - `required_project_brain_paths=(...)`
+5. Verify required Project Brain paths exist in the repository.
+6. Run `harness tooling-audit --path <repo-root>` and fix policy or readiness drift before enabling strict gates.
+
+Validation lane for rollout changes:
+1. Run the repository documented harness checks for policy and readiness drift.
+2. Run the repository fast verification gate.
+3. If the repository is coding-harness, use the concrete command lane from `/Users/jamiecraik/dev/coding-harness/docs/agents/20-project-brain-memory-extension-rollout.md`.
+
+Use this section as a conditional layer over bootstrap, not as a replacement for canonical Project Brain initialization.
 
 ## Next Steps After Bootstrap
 1. Update `.harness/knowledge/INDEX.md` with domain focus

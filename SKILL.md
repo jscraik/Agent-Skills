@@ -14,6 +14,9 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Frontend — Website](#frontend-website)
 - [Github](#github)
 - [Interview](#interview)
+- [Plugins — Arscontexta — Skills](#plugins-arscontexta-skills)
+- [Plugins — Coderabbit — Skills](#plugins-coderabbit-skills)
+- [Plugins — Skill Factory — Skills](#plugins-skill-factory-skills)
 - [Product — Content](#product-content)
 - [Product — Docs](#product-docs)
 - [Product — Domain](#product-domain)
@@ -26,10 +29,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 111
+- `total_skills`: 114
 - `catalog_source`: repository skill scan
 - `visibility`: default
-- `policy_identity`: b9df51d40018831f
+- `policy_identity`: 28ef3f2a34b61c2d
 
 ## Catalog
 
@@ -94,6 +97,18 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `architecture-interview` — Use this skill to analyze architecture alternatives through a structured interview that produces an ADR-style decision record when the user is choosing between system design options and wants tradeoffs surfaced before implementation.
 - `deep-interview` — Deepen an existing doc or topic through a structured gap-filling interview that adds missing assumptions, edge cases, and approval gates. Use when refining PRDs, ADRs, tickets, notes, or draft specs before planning or execution.
 - `interview-me` — Use this skill to analyze underspecified requests through a short interview and surface missing tradeoffs, assumptions, and approval gates before implementation when a prompt is underdefined and guessing would be risky.
+
+## Plugins — Arscontexta — Skills
+
+- `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
+
+## Plugins — Coderabbit — Skills
+
+- `coderabbit` — Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
+
+## Plugins — Skill Factory — Skills
+
+- `skill-factory` — Route to the right skill-authoring lane
 
 ## Product — Content
 
