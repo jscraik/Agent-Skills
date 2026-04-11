@@ -1,5 +1,5 @@
 interface:
   display_name: CodeRabbit Autofix
   short_description: Apply unresolved CodeRabbit review feedback with an approval-aware loop
-  icon_small: "./assets/icon-small.png"
-  icon_large: "./assets/icon.png"
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon.png"

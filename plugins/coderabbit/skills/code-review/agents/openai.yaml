@@ -1,5 +1,5 @@
 interface:
   display_name: CodeRabbit Code Review
   short_description: Run CodeRabbit review and summarize risk-prioritized findings
-  icon_small: "./assets/icon-small.png"
-  icon_large: "./assets/icon.png"
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon.png"

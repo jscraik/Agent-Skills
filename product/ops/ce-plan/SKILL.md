@@ -30,7 +30,6 @@ This workflow produces a durable implementation plan. It does **not** implement 
 - [Handoff guidance](#handoff-guidance)
 - [Validation](#validation)
 - [Anti-patterns](#anti-patterns)
-- [Examples](#examples)
 - [References](#references)
 - [See Also](#see-also)
 - [Gotchas](#gotchas)

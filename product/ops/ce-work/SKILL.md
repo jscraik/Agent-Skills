@@ -19,8 +19,6 @@ This workflow produces implemented, tested, and validated code. It does **not** 
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
-- [Interaction Method](#interaction-method)
-- [Core Principles](#core-principles)
 - [Workflow](#workflow)
 - [Execution modes](#execution-modes)
 - [Handoff guidance](#handoff-guidance)

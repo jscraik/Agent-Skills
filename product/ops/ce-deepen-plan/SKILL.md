@@ -17,14 +17,9 @@ This workflow produces a stronger implementation plan. It does **not** create pl
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
-- [Interaction Method](#interaction-method)
-- [Core Principles](#core-principles)
 - [Workflow](#workflow)
 - [Deepening modes](#deepening-modes)
-- [Rewrite rules](#rewrite-rules)
 - [Handoff guidance](#handoff-guidance)
-- [Validation](#validation)
-- [Anti-patterns](#anti-patterns)
 - [References](#references)
 - [Gotchas](#gotchas)
 
@@ -114,25 +109,10 @@ If critical source context is missing after one concise follow-up, stop and surf
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
 ## Standards snapshot (April 2026)
-- Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
-- Prefer explicit routing, realistic examples, negative examples, and validation over prompt-only procedures.
-- For multi-step agentic work, plan the workflow, keep one current step in focus, and use bounded research instead of unconstrained fan-out by default.
-- Use repo guidance, origin context, and prior learnings before external research, and add external research only when it materially changes planning confidence.
-- When a legacy prompt relied on broad parallelism, preserve that behavior as an explicit mode rather than forcing it as the default.
+Keep routing explicit, apply bounded research, and preserve legacy max-coverage as an explicit mode when requested.
 
 ## Philosophy
-- Deepening should increase justified confidence, not add bulk for its own sake.
-- Use the strongest available evidence source before changing the plan.
-- Prefer targeted improvement of weak sections over whole-document churn.
-- Preserve planning-stage boundaries even when research suggests implementation ideas.
-- Keep the option for exhaustive scrutiny when the user explicitly wants legacy max coverage, but do not assume that is the safest default.
-
-Guiding questions:
-- Does this plan need another pass at all?
-- Which sections are weakest relative to the risk of the work?
-- What evidence would actually change planning quality?
-- Should this run as targeted-confidence or max-coverage?
-- Can the plan be strengthened without changing product intent?
+Deepening should increase justified confidence without changing planning boundaries. Use `references/deepening-modes.md` when deciding `targeted-confidence` vs `max-coverage`.
 
 ## Workflow
 ### Phase 0: Load the plan and decide whether deepening is warranted
@@ -328,29 +308,12 @@ If the plan did not need substantive changes, say so and recommend `ce-work` or 
 - silently deciding product ambiguities instead of surfacing them as open questions
 
 ## Encouraging variation
-IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected deepening mode.
-- Adapt the number of strengthened sections to the real risk and complexity.
-- Adapt research breadth plus rollout depth to the real operational risk and whether the user wants targeted confidence or legacy-style max coverage.
-- No two deepening passes should read the same unless the plans, gaps, and evidence sources are effectively identical.
-
-## Examples
-- User says: "Please deepen `docs/plans/2026-04-07-checkout-retry-rollout-plan.md`; rollout, rollback, and verification still feel weak."
-- User says: "Stress-test this migration plan before implementation and focus only on the genuinely weak sections."
-- User says: "Before we start `ce-work`, tighten sequencing and risk treatment in this plan without rewriting the whole document."
+Vary depth by plan risk and selected mode; avoid template-like rewrites.
 
 ## References
-- Contract: `references/contract.yaml`
-- Evals: `references/evals.yaml`
-- Prompt parity map: `references/source-parity.md`
-- Deepening modes and scoring: `references/deepening-modes.md`
-- Lightweight document-review pass: `references/document-review-pass.md`
-- Rewrite rules and final checks: `references/rewrite-rules.md`
-- Sub-agent routing map: `references/sub-agent-map.md`
+Use `references/contract.yaml`, `references/evals.yaml`, `references/deepening-modes.md`, `references/rewrite-rules.md`, and `references/compaction-context.md`.
 ## See Also
-| Skill | When to use together |
-|---|---|
-| [[ce-plan]] | Use before deepening when the plan does not yet exist |
-| [[ce-spec]] | Use when deepening reveals that the plan is blocked by missing contract-level decisions |
+Use [[ce-plan]] before deepening when the plan does not yet exist.
 **Topic map:** [[product-ops]]
 ## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+- Capture recurring failures as symptom -> cause -> do instead -> check.

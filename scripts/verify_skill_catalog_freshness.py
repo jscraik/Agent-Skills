@@ -46,8 +46,12 @@ VALID_MATURITY_LEVELS = {"experimental", "validated", "canonical"}
 VALID_METADATA_SOURCES = {"frontmatter", "plugin_manifest", "inherited"}
 GOVERNED_SKILL_PATHS = {
     "utilities/coding-harness/SKILL.md",
+    "utilities/plugin-builder/SKILL.md",
     "utilities/skill-builder/SKILL.md",
     "plugins/skill-factory/skills/skill-builder/SKILL.md",
+}
+GOVERNED_PLUGIN_ALIAS_ENFORCED_PATHS = {
+    "utilities/plugin-builder/SKILL.md",
 }
 GOVERNED_PLUGIN_MANIFEST_PATHS = {
     "plugins/skill-factory/.codex-plugin/plugin.json",
@@ -140,15 +144,51 @@ def validate_learning_posture_profile(profile: Dict[str, Any], issues: List[str]
 
 
 def discover_skill_files(repo_root: Path) -> List[Path]:
-    files: List[Path] = []
+    files: Dict[str, Path] = {}
     for path in sorted(repo_root.rglob("SKILL.md")):
         rel = path.relative_to(repo_root)
         if rel.as_posix() == "SKILL.md":
             continue
         if should_skip_skill_path(rel):
             continue
-        files.append(path)
-    return files
+        files[rel.as_posix()] = path
+
+    # Some canonical aliases live under symlinked directories and may not be
+    # traversed by rglob(). Include explicitly governed entries so lifecycle
+    # validation always enforces governed path policy.
+    for governed_rel in sorted(GOVERNED_SKILL_PATHS):
+        candidate = repo_root / governed_rel
+        if not candidate.is_file():
+            continue
+        if (
+            governed_rel not in GOVERNED_PLUGIN_ALIAS_ENFORCED_PATHS
+            and _resolves_into_plugin_tree(candidate, repo_root)
+        ):
+            continue
+        rel = candidate.relative_to(repo_root)
+        if rel.as_posix() == "SKILL.md":
+            continue
+        if should_skip_skill_path(rel):
+            continue
+        files[rel.as_posix()] = candidate
+
+    return [files[key] for key in sorted(files)]
+
+
+def _resolves_into_plugin_tree(path: Path, repo_root: Path) -> bool:
+    """
+    Return True when a path under a symlink alias ultimately resolves into plugins/.
+
+    Governed utility aliases may point at packaged plugin skills; adding both
+    paths to discovery makes strict lifecycle checks regress on valid alias
+    layouts. We only force-include governed paths that remain outside plugins/.
+    """
+    try:
+        resolved = path.resolve(strict=True)
+        rel = resolved.relative_to(repo_root.resolve())
+    except (FileNotFoundError, RuntimeError, ValueError):
+        return False
+    return bool(rel.parts) and rel.parts[0] == "plugins"
 
 
 def should_skip_skill_path(rel: Path) -> bool:

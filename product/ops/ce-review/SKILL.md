@@ -19,9 +19,6 @@ This workflow produces a readiness assessment. It does **not** implement fixes u
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
-- [Interaction Method](#interaction-method)
-- [Severity Scale](#severity-scale)
-- [Action Routing](#action-routing)
 - [Workflow](#workflow)
 - [Review modes](#review-modes)
 - [Handoff guidance](#handoff-guidance)
@@ -39,27 +36,12 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 
 ## Severity Scale
 
-All reviewers use P0-P3:
-
-| Level | Meaning | Action |
-|-------|---------|--------|
-| **P0** | Critical breakage, exploitable vulnerability, data loss/corruption | Must fix before merge |
-| **P1** | High-impact defect likely hit in normal usage, breaking contract | Should fix |
-| **P2** | Moderate issue with meaningful downside (edge case, perf regression, maintainability trap) | Fix if straightforward |
-| **P3** | Low-impact, narrow scope, minor improvement | User's discretion |
+Use P0-P3 severity. See `references/compaction-context.md` for the full scale table and action expectations.
 
 ## Action Routing
 
 Severity answers **urgency**. Routing answers **who acts next** and **whether this skill may mutate the checkout**.
-
-| `autofix_class` | Default owner | Meaning |
-|-----------------|---------------|---------|
-| `safe_auto` | `review-fixer` | Local, deterministic fix suitable for the in-skill fixer when the current mode allows mutation |
-| `gated_auto` | `downstream-resolver` or `human` | Concrete fix exists, but it changes behavior, contracts, permissions, or another sensitive boundary that should not be auto-applied by default |
-| `manual` | `downstream-resolver` or `human` | Actionable work that should be handed off rather than fixed in-skill |
-| `advisory` | `human` or `release` | Report-only output such as learnings, rollout notes, or residual risk |
-
-Routing rules: synthesis owns the final route; choose the more conservative route on disagreement; only `safe_auto -> review-fixer` enters the fixer queue; `requires_verification: true` needs tests or re-review to complete.
+Route `safe_auto` to in-skill fixes; route `gated_auto|manual|advisory` to downstream/human owners. See `references/compaction-context.md` for the full routing table and rules.
 
 ## Working agreement
 - Broad readiness/synthesis stage; `ce-technical-review` for narrow critique
@@ -315,13 +297,12 @@ See `references/ce-anti-patterns.md`:
 
 ## Examples
 - User says: "We’re about to merge PR `#482`; do the broad readiness review and tell me what still blocks safe rollout."
-- User says: "Please review the current branch as a whole package, not just the technical nits, and tell me whether we should run browser verification before shipping."
-- User says: "I need a review of `docs/plans/2026-03-23-001-feat-example-plan.md` that tells me whether it is actually ready for `ce-work` or needs another workflow step first."
 - User says: "Review the latest PR, keep the CE artifact files out of cleanup chatter, and drop the findings into our `todos/` flow if that convention exists here."
 
 ## References
 - `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
 - `references/ce-anti-patterns.md`, `references/style-and-operating-guidance.md`, `references/sub-agent-map.md`, `references/source-parity.md`
+- `references/compaction-context.md` for full severity and routing tables plus extra examples
 ## Gotchas
 - `latest` ambiguous; resolve explicitly
 ## See Also

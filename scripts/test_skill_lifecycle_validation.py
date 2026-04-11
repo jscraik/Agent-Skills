@@ -205,6 +205,32 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("governed plugin manifest missing `governance.owner`", result.stdout)
             self.assertIn("blocked=1", result.stdout)
 
+    def test_governed_symlink_alias_is_enforced_in_strict_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            canonical_dir = repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder"
+            canonical_dir.mkdir(parents=True, exist_ok=True)
+            write_text(
+                canonical_dir / "SKILL.md",
+                """
+                ---
+                name: plugin-builder
+                description: "Canonical plugin-builder skill missing lifecycle metadata."
+                ---
+
+                # Plugin Builder
+                """,
+            )
+
+            alias = repo_root / "utilities" / "plugin-builder"
+            alias.parent.mkdir(parents=True, exist_ok=True)
+            alias.symlink_to("../plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
+
+            result = run_validator(repo_root)
+            self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("utilities/plugin-builder/SKILL.md [skill]", result.stdout)
+            self.assertIn("missing_metadata: governed skill missing `lifecycle_state`", result.stdout)
+
     def test_cached_and_fixture_skills_are_skipped_from_catalog_duplicates(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -410,18 +436,18 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
-                repo_root / "plugins" / "harness-engineering" / "skills" / "ce-work" / "SKILL.md",
+                repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder" / "SKILL.md",
                 "# plugin skill",
             )
             write_text(
-                repo_root / ".agents" / "skills" / "ce-work" / "SKILL.md",
+                repo_root / ".agents" / "skills" / "plugin-builder" / "SKILL.md",
                 "# flat skill",
             )
 
             result = run_shadow_check(repo_root)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Plugin-shadowing check failed", result.stderr)
-            self.assertIn("- ce-work", result.stderr)
+            self.assertIn("- plugin-builder", result.stderr)
 
     def test_plugin_shadowing_check_allows_router_overlap(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

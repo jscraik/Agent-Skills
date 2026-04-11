@@ -49,6 +49,48 @@ if [ "$missing_tools" -ne 0 ]; then
   exit 1
 fi
 
+install_npm_deps() {
+  local package_root="$1"
+  if [ ! -f "${package_root}/package.json" ]; then
+    return 0
+  fi
+
+  if [ -f "${package_root}/package-lock.json" ]; then
+    if [ ! -d "${package_root}/node_modules" ] || [ "${package_root}/package-lock.json" -nt "${package_root}/node_modules" ]; then
+      echo "[codex] installing npm dependencies: ${package_root}"
+      npm --prefix "${package_root}" ci --no-audit --no-fund
+    else
+      echo "[codex] npm dependencies up to date: ${package_root}"
+    fi
+  else
+    echo "[codex] installing npm dependencies (no lockfile): ${package_root}"
+    npm --prefix "${package_root}" install --no-audit --no-fund
+  fi
+}
+
+install_npm_deps "frontend/stitch-react-components"
+install_npm_deps "product/content/video-transcript-downloader"
+
+ensure_python_dependency() {
+  local import_name="$1"
+  local package_name="$2"
+
+  if [ ! -x .venv/bin/python ]; then
+    echo "[codex] creating .venv for Python dependencies"
+    uv venv .venv >/dev/null
+  fi
+
+  if uv run --python .venv/bin/python python3 -c "import ${import_name}" >/dev/null 2>&1; then
+    echo "[codex] python dependency present: ${package_name}"
+    return 0
+  fi
+
+  echo "[codex] installing python dependency: ${package_name}"
+  uv pip install --python .venv/bin/python "${package_name}"
+}
+
+ensure_python_dependency "yaml" "pyyaml"
+
 echo "[codex] environment ready; all required tools present"
 '''
 

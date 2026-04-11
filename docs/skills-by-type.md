@@ -9,23 +9,24 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 6
+- `library_api_reference`: 7
 - `product_verification`: 8
-- `data_fetch_analysis`: 4
-- `team_automation`: 25
-- `scaffolding_templates`: 23
-- `code_quality_review`: 12
+- `data_fetch_analysis`: 5
+- `team_automation`: 35
+- `scaffolding_templates`: 24
+- `code_quality_review`: 26
 - `ci_cd_deployment`: 6
 - `runbook`: 7
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 96
+- `total_tagged`: 123
 
 ## Semantic Types
 
 ### Library Api Reference
 
 - `agent-native-architecture` — `product/domain`
+- `coderabbit` — `plugins/coderabbit/skills`
 - `context7` — `product/docs`
 - `oak-api` — `product/domain`
 - `react-ui-patterns` — `frontend/ui`
@@ -48,6 +49,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `insight-report` — `utilities`
 - `notebooklm` — `utilities`
 - `security-ownership-map` — `product/security`
+- `skill-refactor` — `plugins/skill-factory/skills`
 - `spreadsheet` — `utilities`
 
 ### Team Automation
@@ -56,6 +58,16 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `architecture-interview` — `interview`
 - `atlas` — `utilities`
 - `brainstorming` — `product/strategy`
+- `ce-brainstorm` — `plugins/harness-engineering/skills`
+- `ce-compound-refresh` — `plugins/harness-engineering/skills`
+- `ce-compound` — `plugins/harness-engineering/skills`
+- `ce-deepen-plan` — `plugins/harness-engineering/skills`
+- `ce-deepen-spec` — `plugins/harness-engineering/skills`
+- `ce-ideate` — `plugins/harness-engineering/skills`
+- `ce-plan` — `plugins/harness-engineering/skills`
+- `ce-spec` — `plugins/harness-engineering/skills`
+- `ce-tdd` — `plugins/harness-engineering/skills`
+- `ce-work` — `plugins/harness-engineering/skills`
 - `changelog` — `product/content`
 - `codex-automation-architect` — `utilities`
 - `coding-harness` — `utilities`
@@ -96,6 +108,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `nano-banana-builder` — `frontend/graphics`
 - `og-image-creator` — `frontend/graphics`
 - `shadcn-ui` — `frontend/ui`
+- `skillify` — `plugins/skill-factory/skills`
 - `sora` — `frontend/graphics`
 - `stitch-loop` — `frontend/tools`
 - `stitch-react-components` — `frontend`
@@ -109,15 +122,29 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `agents-md` — `product/docs`
 - `baseline-ui` — `frontend/ui`
 - `best-practices` — `auth`
+- `ce-reliability-review` — `plugins/harness-engineering/skills`
+- `ce-review` — `plugins/harness-engineering/skills`
+- `ce-technical-review` — `plugins/harness-engineering/skills`
 - `codex-home-audit` — `utilities`
 - `docs-expert` — `product/docs`
+- `elixir-pro` — `utilities`
 - `evals-router` — `utilities`
 - `every-style-editor` — `product/content`
 - `fixing-accessibility` — `frontend/website`
 - `fixing-metadata` — `frontend/website`
+- `go` — `utilities`
+- `javascript-pro` — `utilities`
+- `powershell` — `utilities`
+- `rust-pro` — `utilities`
 - `security-best-practices` — `product/security`
+- `skill-builder` — `plugins/skill-factory/skills`
+- `sql-pro` — `utilities`
+- `swift-development` — `utilities`
 - `test-driven-development` — `utilities`
+- `toml` — `utilities`
+- `typescript` — `utilities`
 - `verification-before-completion` — `utilities`
+- `yaml` — `utilities`
 
 ### Ci Cd Deployment
 
