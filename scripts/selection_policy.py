@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-10.v3"
+POLICY_VERSION = "2026-04-11.v4"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -56,12 +56,9 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 # Keep empty to avoid duplicate visibility between flat skills and plugin lanes.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
-# Plugin lane skills that stay hidden by default unless advanced mode is used.
-PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
-    "autofix",
-    "code-review",
-    "simplify",
-)
+# Plugin lane skills hidden from default flat discovery.
+# Empty means all installed plugin skills are visible by default.
+PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()
 
 
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:

@@ -117,6 +117,15 @@ OPTIONAL_INTERFACE_STRING_FIELDS = [
 # NOTE: interface.defaultPrompt is intentionally excluded from OPTIONAL_INTERFACE_STRING_FIELDS.
 # It is validated separately because the contract allows either a string or an array of strings.
 OPTIONAL_INTERFACE_PATH_FIELDS = ["composerIcon", "logo"]
+CANONICAL_STANDALONE_SKILL_ROOTS = (
+    "utilities",
+    "product",
+    "frontend",
+    "backend",
+    "auth",
+    "interview",
+    "skills-system",
+)
 
 CLAUDE_TO_CODEX_TERMINOLOGY = {
     "commands/": "skills/ plus optional interface.defaultPrompt",
@@ -2631,6 +2640,47 @@ def _check_plugin_skill_surface(plugin_root: Path, payload: dict[str, Any]) -> l
     ]
 
 
+def _check_duplicate_skill_ownership(plugin_root: Path, payload: dict[str, Any]) -> list[str]:
+    skills_value = payload.get("skills")
+    if not _is_relative_plugin_path(skills_value):
+        return []
+
+    skills_root = (plugin_root / skills_value[2:]).resolve()
+    if not skills_root.exists() or not skills_root.is_dir():
+        return []
+
+    plugin_skill_names = {path.parent.name for path in skills_root.glob("*/SKILL.md")}
+    if not plugin_skill_names:
+        return []
+
+    conflicts: dict[str, list[str]] = {}
+    for skill_name in sorted(plugin_skill_names):
+        for root_name in CANONICAL_STANDALONE_SKILL_ROOTS:
+            root = REPO_ROOT / root_name
+            if not root.exists():
+                continue
+            for match in sorted(root.rglob(f"{skill_name}/SKILL.md")):
+                # Compatibility aliases are expected as symlinks back to plugin-owned canon.
+                if match.parent.is_symlink():
+                    continue
+                rel = str(match.parent.relative_to(REPO_ROOT))
+                conflicts.setdefault(skill_name, []).append(rel)
+
+    if not conflicts:
+        return []
+
+    rendered: list[str] = []
+    for skill_name, paths in sorted(conflicts.items()):
+        unique_paths = sorted(set(paths))
+        rendered.append(f"{skill_name}: {', '.join(unique_paths)}")
+
+    return [
+        "Plugin-owned skill names must be canonical in one lane only. "
+        f"Standalone duplicates detected ({'; '.join(rendered)}). "
+        "Move the standalone skill under `plugins/<plugin>/skills/<name>` or rename it."
+    ]
+
+
 def _check_plugin_agent_surface(plugin_root: Path) -> list[str]:
     agents_root = plugin_root / "agents"
     if not agents_root.exists() or not agents_root.is_dir():
@@ -2759,6 +2809,7 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
         )
 
     failures.extend(_check_plugin_skill_surface(plugin_root, payload))
+    failures.extend(_check_duplicate_skill_ownership(plugin_root, payload))
     failures.extend(_check_plugin_agent_surface(plugin_root))
 
     return failures

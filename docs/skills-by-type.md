@@ -16,10 +16,10 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `scaffolding_templates`: 24
 - `code_quality_review`: 26
 - `ci_cd_deployment`: 6
-- `runbook`: 8
+- `runbook`: 9
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 124
+- `total_tagged`: 125
 
 ## Semantic Types
 
@@ -162,6 +162,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `npm-workflow-discipline` — `utilities`
 - `prek-pro` — `github`
 - `recon-workbench` — `utilities`
+- `scaffolding-expert` — `utilities`
 - `security-threat-model` — `product/security`
 - `systematic-debugging` — `utilities`
 - `uv-python-project-setup` — `utilities`

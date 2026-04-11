@@ -2,6 +2,7 @@
 set -euo pipefail
 
 timeout_seconds="${SYNC_SKILLS_TIMEOUT_SECONDS:-300}"
+sync_scope="${SYNC_SKILLS_SCOPE:-workspace}"
 lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
 lock_owned=0
@@ -10,7 +11,7 @@ watchdog_pid=""
 usage() {
   cat <<'USAGE'
 Usage:
-  scripts/sync_skills.sh [--timeout-seconds <int>]
+  scripts/sync_skills.sh [--timeout-seconds <int>] [--project-local|--workspace]
 
 Regenerates skill/plugin symlinks and SKILL.md index for this repository.
 USAGE
@@ -21,6 +22,14 @@ while [[ $# -gt 0 ]]; do
     --timeout-seconds)
       timeout_seconds="${2:-}"
       shift 2
+      ;;
+    --project-local)
+      sync_scope="project-local"
+      shift
+      ;;
+    --workspace)
+      sync_scope="workspace"
+      shift
       ;;
     -h|--help)
       usage
@@ -36,6 +45,11 @@ done
 
 if ! [[ "$timeout_seconds" =~ ^[0-9]+$ ]] || [[ "$timeout_seconds" -lt 30 ]]; then
   echo "Invalid --timeout-seconds value: $timeout_seconds (expected integer >= 30)" >&2
+  exit 2
+fi
+
+if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
+  echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
   exit 2
 fi
 
@@ -393,15 +407,11 @@ while IFS= read -r skill_path; do
       echo "Skipping hidden plugin lane skill: $skill_name"
       continue
     fi
-    if ! is_plugin_visible_router_skill_name "$skill_name"; then
-      echo "Skipping plugin-owned skill from flat runtime list: $skill_name"
-      continue
-    fi
     if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
       router_collision_count=$((router_collision_count + 1))
       continue
     fi
-    echo "Including plugin router skill in flat runtime list: $skill_name"
+    echo "Including plugin-owned skill in flat runtime list: $skill_name"
   fi
   # Relative path from $skills_dir (.agents/skills/) back to the skill source.
   # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
@@ -726,9 +736,6 @@ HEADER
       if is_plugin_hidden_lane_skill_name "$skill_name"; then
         continue
       fi
-      if ! is_plugin_visible_router_skill_name "$skill_name"; then
-        continue
-      fi
     fi
     category="$(dirname "$skill_dir" | sed 's|^\./||; s|^\.||')"
     safe_category="$(echo "$category" | tr '/' '_')"
@@ -813,9 +820,6 @@ generate_skill_type_index() {
     fi
     if is_plugin_owned_skill_path "$skill_path"; then
       if is_plugin_hidden_lane_skill_name "$skill_name"; then
-        continue
-      fi
-      if ! is_plugin_visible_router_skill_name "$skill_name"; then
         continue
       fi
     fi
@@ -1228,17 +1232,21 @@ sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache
 sync_plugin_cache_projections
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
-sync_user_skills "$skills_dir" "$HOME/.claude/skills"
-sync_user_skills "$skills_dir" "$HOME/.agents/skills"
-sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
-sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
-sync_user_skills "$skills_dir" "$HOME/.codex/skills"
-sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
-# Antigravity app requires a flat copy (no symlinks) in its own config dir
-sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
-sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
-sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
-sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
+if [[ "$sync_scope" == "workspace" ]]; then
+  sync_user_skills "$skills_dir" "$HOME/.claude/skills"
+  sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+  sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
+  sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
+  sync_user_skills "$skills_dir" "$HOME/.codex/skills"
+  sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
+  # Antigravity app requires a flat copy (no symlinks) in its own config dir
+  sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
+  sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
+  sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
+  sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
+else
+  echo "Project-local scope: skipped home runtime projections."
+fi
 
 chmod +x "$repo_root/scripts/sync_skills.sh"
 

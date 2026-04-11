@@ -1,1 +1,10 @@
-Catalog check complete. assets=162 healthy=162 degraded=0 blocked=0 duplicates=0
+Lifecycle readiness findings:
+- plugins/harness-engineering/skills/ce-reliability-review/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+- plugins/harness-engineering/skills/ce-tdd/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+- plugins/plugin-factory/skills/plugin-builder/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+- plugins/skill-factory/skills/skill-builder/SKILL.md [packaged_skill] -> blocked
+  - representation_split_brain: packaged skill has no canonical source skill for inheritance
+Catalog check complete. assets=162 healthy=158 degraded=0 blocked=4 duplicates=0

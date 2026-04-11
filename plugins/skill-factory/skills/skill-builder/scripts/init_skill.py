@@ -40,6 +40,15 @@ ALLOWED_RESOURCES = {"scripts", "references", "assets", "workflows"}
 STRUCTURES = {"simple", "router"}
 VALID_LIFECYCLE_STATES = ("incubating", "active", "maintenance", "deprecated")
 VALID_MATURITY_LEVELS = ("experimental", "validated", "canonical")
+CANONICAL_STANDALONE_SKILL_ROOTS = (
+    "utilities",
+    "product",
+    "frontend",
+    "backend",
+    "auth",
+    "interview",
+    "skills-system",
+)
 
 SCAFFOLD_TEMPLATE_FILES = {
     "simple": "scaffold-simple-skill.md.tmpl",
@@ -225,6 +234,40 @@ def find_repo_root(start: Path) -> Path:
         return start.resolve().parent if start.is_file() else start.resolve()
 
 
+def _is_plugin_owned_skill_output(out_dir: Path, repo_root: Path) -> bool:
+    try:
+        rel = out_dir.resolve().relative_to(repo_root)
+    except ValueError:
+        return False
+    return len(rel.parts) >= 3 and rel.parts[0] == "plugins" and rel.parts[2] == "skills"
+
+
+def _find_cross_lane_skill_conflicts(*, repo_root: Path, out_dir: Path, skill_name: str) -> List[str]:
+    conflicts: List[str] = []
+    plugin_owned_output = _is_plugin_owned_skill_output(out_dir=out_dir, repo_root=repo_root)
+
+    if plugin_owned_output:
+        for root_name in CANONICAL_STANDALONE_SKILL_ROOTS:
+            root = repo_root / root_name
+            if not root.exists():
+                continue
+            for match in sorted(root.rglob(f"{skill_name}/SKILL.md")):
+                conflicts.append(str(match.parent.relative_to(repo_root)))
+    else:
+        plugins_root = repo_root / "plugins"
+        if plugins_root.exists():
+            for match in sorted(plugins_root.glob(f"*/skills/{skill_name}/SKILL.md")):
+                conflicts.append(str(match.parent.relative_to(repo_root)))
+
+    deduped: List[str] = []
+    seen: set[str] = set()
+    for path in conflicts:
+        if path not in seen:
+            deduped.append(path)
+            seen.add(path)
+    return deduped
+
+
 def load_scaffold_template(*, structure: str, templates_dir: Path) -> str:
     template_name = SCAFFOLD_TEMPLATE_FILES.get(structure)
     if not template_name:
@@ -323,6 +366,23 @@ def init_skill(
     skill_dir = out_dir.resolve() / skill_name
     if skill_dir.exists():
         print(f"[ERROR] Skill directory already exists: {skill_dir}", file=sys.stderr)
+        return None
+
+    repo_root = find_repo_root(Path(__file__).resolve().parent)
+    cross_lane_conflicts = _find_cross_lane_skill_conflicts(
+        repo_root=repo_root,
+        out_dir=out_dir.resolve(),
+        skill_name=skill_name,
+    )
+    if cross_lane_conflicts:
+        target_lane = "plugin-owned" if _is_plugin_owned_skill_output(out_dir=out_dir, repo_root=repo_root) else "standalone"
+        rendered = ", ".join(cross_lane_conflicts)
+        print(
+            "[ERROR] Canonical skill ownership violation: "
+            f"cannot create '{skill_name}' in {target_lane} lane because it already exists in {rendered}. "
+            "Keep one canonical location per skill name.",
+            file=sys.stderr,
+        )
         return None
 
     if dry_run:

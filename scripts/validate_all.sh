@@ -141,6 +141,7 @@ fi
 run_check warn plan-graphs "📊 Validating plan graphs..." ./scripts/validate_plan_graphs.sh
 run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${recursive_artifacts_cmd[@]}"
 run_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" scripts/docs_lint.py --mode block --config docs-policy.json
+run_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" scripts/verify_verify_work_scope_flags.py
 run_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" scripts/verify_question_lifecycle_contract.py
 run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" scripts/test_skill_lifecycle_validation.py
 run_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" scripts/verify_skill_catalog_freshness.py --strict

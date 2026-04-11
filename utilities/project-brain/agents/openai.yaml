@@ -1,0 +1,7 @@
+interface:
+  display_name: Project Brain
+  short_description: Bootstrap and operate Project Brain correctly
+  default_prompt: Use $project-brain to bootstrap or maintain Project Brain in this repository using the canonical instruction and bootstrap script.
+
+policy:
+  allow_implicit_invocation: true

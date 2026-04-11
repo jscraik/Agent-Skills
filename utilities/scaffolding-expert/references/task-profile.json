@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-bash-hygiene",
-  "scope_skill": "utilities/bash-hygiene",
+  "profile_id": "utilities-scaffolding-expert",
+  "scope_skill": "utilities/scaffolding-expert",
   "scope_profile": "utilities",
-  "rubric_version": "2026-04-10",
+  "rubric_version": "2026-04-11",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -42,7 +42,7 @@
     "human_baseline_minutes": 45.0,
     "ai_process_minutes": 15.0,
     "probability_of_success": 0.8,
-    "rationale": "Co-pilot mode is appropriate for shell hardening because scripts often touch environment and operational safety boundaries."
+    "rationale": "Scaffolding decisions benefit from structured agent analysis with human sign-off on governance tradeoffs."
   },
   "learning_posture": {
     "supported": [
