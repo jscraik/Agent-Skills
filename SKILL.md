@@ -29,7 +29,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 129
+- `total_skills`: 130
 - `catalog_source`: repository skill scan
 - `visibility`: default
 - `policy_identity`: d04ed8da9c9da822
@@ -89,6 +89,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Github
 
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
+- `prek-pro` — Provide docs-backed guidance for configuring and troubleshooting `prek` hooks when users need to edit `prek.toml`, install shims, validate hook behavior, or migrate from pre-commit.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
 
 ## Interview

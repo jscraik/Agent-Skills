@@ -2,7 +2,7 @@
 name: prek-pro
 description: "Provide docs-backed guidance for configuring and troubleshooting `prek` hooks when users need to edit `prek.toml`, install shims, validate hook behavior, or migrate from pre-commit."
 metadata:
-  skill-type: developer_tooling
+  skill-type: runbook
 ---
 
 # Prek Pro
@@ -32,7 +32,7 @@ Guide for repository-local `prek` operations: installing and validating git-hook
 - Use when hook stages (`pre-commit`, `pre-push`, `commit-msg`) behave unexpectedly.
 - Do not use for non-`prek` CI/CD systems (route to `circleci` or repo-specific CI skills).
 
-## Inputs
+## Required inputs
 
 - Repository root and target config path (`prek.toml` unless overridden).
 - Requested operation: `install`, `run`, `validate`, `migrate`, or `audit`.
@@ -40,7 +40,7 @@ Guide for repository-local `prek` operations: installing and validating git-hook
 - Whether destructive cache cleanup is allowed (`prek cache clean`).
 - Current failure signal (exact stderr/log) when debugging.
 
-## Outputs
+## Deliverables
 
 1. A minimal command plan with exact `prek` commands.
 2. Any `prek.toml` edits with rationale tied to current docs.
