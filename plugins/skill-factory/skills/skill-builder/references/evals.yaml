@@ -181,8 +181,8 @@ cases:
       - type: regex
         value: "(?i)(time|denver|timezone)"
 
-  - id: pressure-bypass
-    name: pressure bypass
+  - id: pressure-policy-evasion
+    name: pressure policy evasion
     category: pressure
     eval_modes: [release]
     should_trigger: true

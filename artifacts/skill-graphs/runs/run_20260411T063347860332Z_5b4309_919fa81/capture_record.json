@@ -1,0 +1,78 @@
+{
+  "candidate_lessons": {
+    "count": 1,
+    "top_candidate_id": "candidate_11a2fdbb5655"
+  },
+  "capture_id": "7b5ad68f63b7ed1b",
+  "confidence": {
+    "bucket": "low",
+    "calibration_bucket": "C3_low_confidence",
+    "inputs": {
+      "evidence_completeness": 0.8,
+      "feedback_signal": 0.5,
+      "feedback_status": "missing",
+      "iterations_observed": 2,
+      "non_regression_signal": 0.0,
+      "quality_uplift_signal": 1.0,
+      "runtime_gate_signal": 0.0,
+      "stop_reason": "pass",
+      "terminal_status": "passed"
+    },
+    "quality_uplift": 0.064,
+    "schema_version": "1.0",
+    "score": 0.43
+  },
+  "created_at": "2026-04-11T06:33:47Z",
+  "evidence": {
+    "completeness": {
+      "checks": true,
+      "events": true,
+      "logs": false,
+      "score": 0.8,
+      "session_signals": true,
+      "traces": true
+    },
+    "evidence_packet_id": "8081e18c06a7a64f",
+    "evidence_packet_path": "evidence_packet.json"
+  },
+  "feedback": {
+    "captured_at": "2026-04-11T06:33:47Z",
+    "note": "",
+    "source": "none",
+    "status": "missing"
+  },
+  "injected_lessons": {
+    "count": 0,
+    "items": []
+  },
+  "invocation_envelope": {
+    "actor_id": "recursive-skill-loop",
+    "auto_apply_enabled": true,
+    "auto_capture_enabled": true,
+    "idempotency_key": "8522c053ea1a62193499",
+    "invocation_id": "45c0797e095e9a8a",
+    "invoked_at": "2026-04-11T06:33:47Z",
+    "kill_switch_file": "",
+    "objective_hash": "311e728100a4d133e4c41d20429f2e8ca166ad384a49057f0731659c7e6fa0c2",
+    "rollback_required_file": "",
+    "rollout_mode": "active",
+    "run_owner": "shadow-cycle"
+  },
+  "lesson_observations": {
+    "count": 2,
+    "top_observation_id": "observation_19c6e5a7e8b5"
+  },
+  "output_summary": {
+    "duration_ms": 5,
+    "finished_at": "2026-04-11T06:33:47Z",
+    "iterations_completed": 2,
+    "stop_reason": "pass",
+    "terminal_status": "passed",
+    "tokens_used": 357
+  },
+  "profile_id": "interface-craft",
+  "run_id": "run_20260411T063347860332Z_5b4309_919fa81",
+  "schema_version": "1.0",
+  "scope_profile": "frontend",
+  "scope_skill": "frontend/ui/ui-ux-creative-coding"
+}
