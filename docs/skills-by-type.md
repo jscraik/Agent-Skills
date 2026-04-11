@@ -3,6 +3,7 @@
 Generated from `metadata.skill-type` tags in skill frontmatter. This index complements the directory-based catalog in `SKILL.md`.
 
 ## Table of Contents
+
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -177,4 +178,3 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 ## Validation Notes
 
 - No invalid semantic type tags detected.
-
