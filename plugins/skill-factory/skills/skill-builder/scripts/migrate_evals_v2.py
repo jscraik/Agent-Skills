@@ -186,6 +186,11 @@ def normalize_existing_evals(obj: Dict[str, Any], skill_name: str) -> Dict[str, 
             continue
         if "id" not in case:
             case["id"] = slug(str(case.get("name", "")), f"case-{idx:02d}")
+        # Normalize legacy pressure-bypass to canonical pressure-policy-evasion
+        if case.get("id") == "pressure-bypass":
+            case["id"] = "pressure-policy-evasion"
+            if case.get("name") == "pressure bypass":
+                case["name"] = "pressure policy evasion"
         if "category" not in case:
             case["category"] = default_categories[idx - 1] if idx <= len(default_categories) else "edge"
         if "prepend_skill" not in case:
