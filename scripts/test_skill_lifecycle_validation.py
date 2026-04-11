@@ -205,6 +205,32 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("governed plugin manifest missing `governance.owner`", result.stdout)
             self.assertIn("blocked=1", result.stdout)
 
+    def test_governed_symlink_alias_is_enforced_in_strict_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            canonical_dir = repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder"
+            canonical_dir.mkdir(parents=True, exist_ok=True)
+            write_text(
+                canonical_dir / "SKILL.md",
+                """
+                ---
+                name: plugin-builder
+                description: "Canonical plugin-builder skill missing lifecycle metadata."
+                ---
+
+                # Plugin Builder
+                """,
+            )
+
+            alias = repo_root / "utilities" / "plugin-builder"
+            alias.parent.mkdir(parents=True, exist_ok=True)
+            alias.symlink_to("../plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
+
+            result = run_validator(repo_root)
+            self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("utilities/plugin-builder/SKILL.md [skill]", result.stdout)
+            self.assertIn("missing_metadata: governed skill missing `lifecycle_state`", result.stdout)
+
     def test_cached_and_fixture_skills_are_skipped_from_catalog_duplicates(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -364,8 +390,12 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 ---
                 name: skill-builder
                 description: "Packaged skill representation mirrored from canonical source."
-                metadata:
-                  owner: Agent Skills Team
+                lifecycle_state: incubating
+                maturity: experimental
+                owner: Agent Skills Team
+                review_cadence: monthly
+                last_reviewed: {iso_days_ago(7)}
+                metadata_source: frontmatter
                 ---
 
                 # Skill Builder
@@ -374,6 +404,24 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             write_text(
                 repo_root / "plugins" / "skill-factory" / "skills" / "skill-builder" / "SKILL.md",
                 packaged_skill,
+            )
+            write_text(
+                repo_root
+                / "plugins"
+                / "skill-factory"
+                / "skills"
+                / "skill-builder"
+                / "references"
+                / "task-profile.json",
+                """
+                {
+                  "delegation": { "mode": "manual" },
+                  "learning_posture": {
+                    "supported": ["learn", "guided", "execute"],
+                    "default": "learn"
+                  }
+                }
+                """,
             )
 
             utilities_dir = repo_root / "utilities"

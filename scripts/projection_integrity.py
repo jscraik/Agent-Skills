@@ -754,11 +754,14 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             }
         )
         return result
-    if not projection_abs.is_dir():
+    if not projection_abs.exists():
         if spec.optional_when_missing:
             result.update({"status": "pass", "reason": "projection_missing_optional"})
         else:
             result.update({"status": "drift", "reason": "projection_missing"})
+        return result
+    if not projection_abs.is_dir():
+        result.update({"status": "drift", "reason": "projection_not_directory"})
         return result
 
     source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}

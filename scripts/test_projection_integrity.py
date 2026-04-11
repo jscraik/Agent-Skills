@@ -105,6 +105,13 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertEqual(result["status"], "pass")
             self.assertEqual(result["reason"], "projection_missing_optional")
 
+            projection_file = repo_root / "plugins" / "cache" / "demo" / "local"
+            projection_file.parent.mkdir(parents=True, exist_ok=True)
+            projection_file.write_text("not-a-directory\n", encoding="utf-8")
+            result = self.mod.verify_mirror(repo_root, spec)
+            self.assertEqual(result["status"], "drift")
+            self.assertEqual(result["reason"], "projection_not_directory")
+
     def test_verify_mirror_ignores_generated_asset_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
