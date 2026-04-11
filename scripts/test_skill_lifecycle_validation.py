@@ -224,7 +224,10 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
             alias = repo_root / "utilities" / "plugin-builder"
             alias.parent.mkdir(parents=True, exist_ok=True)
-            alias.symlink_to("../plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
+            try:
+                alias.symlink_to("../plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("Filesystem does not support directory symlinks in this environment.")
 
             result = run_validator(repo_root)
             self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)

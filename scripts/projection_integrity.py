@@ -618,22 +618,22 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     if rsync_bin:
         sync_engine = "rsync"
         before_files = {rel.as_posix() for rel in iter_files(projection_abs)}
-        subprocess.run(
-            [
-                rsync_bin,
-                "-a",
-                "--delete",
-                "--exclude",
-                "__pycache__/",
-                "--exclude",
-                "*.pyc",
-                "--exclude",
-                ".DS_Store",
-                f"{source_abs}/",
-                f"{projection_abs}/",
-            ],
-            check=True,
-        )
+        rsync_args = [
+            rsync_bin,
+            "-a",
+            "--delete",
+            "--exclude",
+            "__pycache__/",
+            "--exclude",
+            "*.pyc",
+            "--exclude",
+            ".DS_Store",
+        ]
+        # Translate IGNORED_NAME_SUFFIXES to rsync exclude patterns for consistency with iter_files().
+        for suffix in IGNORED_NAME_SUFFIXES:
+            rsync_args.extend(["--exclude", f"*{suffix}"])
+        rsync_args.extend([f"{source_abs}/", f"{projection_abs}/"])
+        subprocess.run(rsync_args, check=True)
         after_files = {rel.as_posix() for rel in iter_files(projection_abs)}
         deleted_files = len(before_files - after_files)
         changed_files = -1
