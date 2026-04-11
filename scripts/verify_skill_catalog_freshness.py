@@ -26,6 +26,7 @@ SKIP_DIRS = {
 }
 SKIP_PATH_PREFIXES = {
     ("plugins", "cache"),
+    (".agents", "plugins-runtime", "cache"),
     (".codex", ".tmp"),
     (".codex", "skills", ".system"),
 }
