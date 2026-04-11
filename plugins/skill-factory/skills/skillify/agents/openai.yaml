@@ -1,7 +1,7 @@
 interface:
   display_name: "Skillify (Codex)"
   short_description: "Turn a completed Codex workflow into a reusable skill package"
-  icon_small: "./assets/icon-small.png"
-  icon_large: "./assets/icon.png"
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon.png"
 policy:
   allow_implicit_invocation: false

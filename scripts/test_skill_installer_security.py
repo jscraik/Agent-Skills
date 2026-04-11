@@ -128,7 +128,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
 
     def test_main_installs_skill_into_top_level_category(self) -> None:
         pinned_ref = "a" * 40
-        source = installer.Source(owner="octocat", repo="skills", ref=pinned_ref, paths=["skills/demo"])
+        source = installer.Source(owner="openai", repo="skills", ref=pinned_ref, paths=["skills/demo"])
 
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir) / "repo"
@@ -141,7 +141,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
 
             args = [
                 "--repo",
-                "octocat/skills",
+                "openai/skills",
                 "--path",
                 "skills/demo",
                 "--ref",
@@ -152,10 +152,26 @@ class SkillInstallerSecurityTests(unittest.TestCase):
 
             with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": str(canonical)}, clear=False):
                 with patch.object(installer, "_resolve_source", return_value=source):
-                    with patch.object(installer, "_prepare_repo", return_value=str(repo_root)):
-                        stderr_buffer = io.StringIO()
-                        with contextlib.redirect_stderr(stderr_buffer):
-                            exit_code = installer.main(args)
+                    with patch.object(
+                        installer,
+                        "_resolve_commit_provenance",
+                        return_value=(
+                            pinned_ref,
+                            {"verified": True, "reason": "valid"},
+                            {
+                                "emails": [],
+                                "logins": [],
+                                "attested_emails": [],
+                                "attested_logins": [],
+                                "metadata_emails": [],
+                                "metadata_logins": [],
+                            },
+                        ),
+                    ):
+                        with patch.object(installer, "_prepare_repo", return_value=str(repo_root)):
+                            stderr_buffer = io.StringIO()
+                            with contextlib.redirect_stderr(stderr_buffer):
+                                exit_code = installer.main(args)
 
             self.assertEqual(exit_code, 0)
             self.assertTrue((canonical / "demo" / "SKILL.md").is_file())

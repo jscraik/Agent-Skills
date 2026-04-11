@@ -17,15 +17,11 @@ This workflow produces an implementation-grade specification. It does **not** pr
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
-- [Interaction Method](#interaction-method)
 - [Workflow](#workflow)
 - [Spec modes](#spec-modes)
 - [Artifact contracts](#artifact-contracts)
 - [Handoff guidance](#handoff-guidance)
-- [Validation](#validation)
-- [Anti-patterns](#anti-patterns)
 - [References](#references)
-- [Gotchas](#gotchas)
 
 ## Interaction Method
 
@@ -113,9 +109,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 ## Standards snapshot (April 2026)
 - Keep each skill scoped to one reusable job and make the description say what it does and when to use it.
 - Prefer explicit routing, examples, negative examples, and validation over prompt-only procedures.
-- Use repo guidance and prior learnings before external research, and add external research only when it materially changes the contract.
-- For UI work, specify interaction states, accessibility, design constraints, and measurable UX outcomes explicitly.
-- For long-running or failure-prone systems, specify state, recovery, observability, and trust boundaries instead of leaving them implicit.
+- Use repo guidance and prior learnings before external research; add external research only when it materially changes the contract.
 
 ## Core Principles
 
@@ -126,11 +120,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 5. **System/UI separation with explicit bridge** - Keep system and UI contracts separate, but their relationship explicit when both are needed.
 
 ## Philosophy
-- Use the strongest available source artifact and surface blockers instead of guessing.
-- Prefer concrete entities, fields, defaults, and error cases over broad prose.
-- Use bounded research to ground the contract in repo reality before proposing new structure.
-
-Guiding questions: What is the most authoritative source? Does this need a spec or go straight to planning? What must be true over time? What can fail and how is recovery defined? Does this need a companion UI contract before planning?
+Use the strongest available source artifact, keep boundaries explicit, and surface blockers instead of guessing.
 
 ## Workflow
 ### Phase 0: Choose the spec baseline
@@ -321,33 +311,10 @@ If the user wants planning next, treat the written spec as the canonical plannin
 - implementing or prototyping during the spec stage
 
 ## Encouraging variation
-IMPORTANT: Outputs should vary based on spec mode, risk, system complexity, and UI scope.
-- Adapt the depth to the real level of operational or design risk.
-- Adapt the UI specificity to whether the work needs a companion UI contract or a full dedicated UI spec.
-- For service or orchestrator work, prefer richer lifecycle, state, and failure modeling.
-- No two specs should read the same unless the requirements, constraints, and source artifacts are effectively identical.
-
-## Examples
-- "Turn `docs/brainstorms/2026-04-07-checkout-retry-requirements.md` into an implementation-grade spec with retry caps, idempotency keys, and failure telemetry before `ce-plan`."
-- "Revise `docs/specs/2026-03-21-session-rotation-spec.md` so token expiry behavior, rollback conditions, and observability events are explicit."
-- "This billing settings feature needs a companion UI contract before planning; write the UI spec with loading, empty, and error states plus `VAC` IDs."
-- "Convert this duplicate-webhook bug report into a spec with acceptance IDs and concrete validation steps that `ce-plan` can execute without inventing behavior."
+- Adapt depth to operational/design risk and whether a companion UI spec is required.
 ## References
-- Contract: `references/contract.yaml`
-- Evals: `references/evals.yaml`
-- Prompt parity map: `references/source-parity.md`
-- Spec mode matrix: `references/spec-modes.md`
-- Spec artifact templates: `references/spec-artifacts.md`
-## See Also
-| Skill | When to use together |
-|---|---|
-| [[ce-ideate]] | Use when ranked improvement directions are needed before specification |
-| [[ce-brainstorm]] | Use first when the work still needs WHAT and WHY clarification |
-| [[ce-deepen-spec]] | Use when an existing spec lacks rigor, edge cases, or operational detail |
-| [[ce-technical-review]] | Use for engineering critique of the spec before planning |
-| [[ce-plan]] | Use after spec completion when the contract is ready for execution sequencing |
-| [[ce-tdd]] | Use when the spec declares test-first execution posture |
+Use `references/contract.yaml`, `references/evals.yaml`, `references/spec-modes.md`, `references/spec-artifacts.md`, and `references/compaction-context.md`; use [[ce-brainstorm]] before first-pass specs and [[ce-plan]] after the contract is complete.
 
 **Topic map:** [[product-ops]]
 ## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+- Capture recurring failures as symptom -> cause -> do instead -> check.

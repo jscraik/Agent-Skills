@@ -1,5 +1,5 @@
 interface:
   display_name: CodeRabbit Reference
   short_description: Retrieve local CodeRabbit docs and configuration guidance
-  icon_small: "./assets/icon-small.png"
-  icon_large: "./assets/icon.png"
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon.png"

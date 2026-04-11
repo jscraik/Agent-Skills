@@ -112,32 +112,6 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertEqual(result["status"], "drift")
             self.assertEqual(result["reason"], "projection_not_directory")
 
-    def test_verify_mirror_ignores_generated_asset_suffixes(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
-            source.mkdir(parents=True, exist_ok=True)
-            projection.mkdir(parents=True, exist_ok=True)
-            (source / "assets").mkdir(parents=True, exist_ok=True)
-            (projection / "assets").mkdir(parents=True, exist_ok=True)
-            (source / "assets" / "logo.gen1.png").write_bytes(b"png")
-            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
-            (projection / "README.md").write_text(
-                self.mod.apply_projection_header("# Demo\n", "plugins/demo/README.md", ".md"),
-                encoding="utf-8",
-            )
-
-            spec = self.mod.MirrorProjection(
-                name="demo-assets",
-                source_path="plugins/demo",
-                projection_path="plugins/cache/demo/local",
-                tags=("plugin-caches",),
-            )
-            result = self.mod.verify_mirror(repo_root, spec)
-            self.assertEqual(result["status"], "pass", result)
-            self.assertEqual(result["missing_in_projection"], [])
-
     def test_sync_mirror_removes_stale_files_and_stamps_headers(self) -> None:
         """
         Ensure syncing a mirror removes stale files, copies source files into the projection with the required projection header, and results in a subsequent verification pass.

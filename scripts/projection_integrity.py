@@ -19,7 +19,6 @@ HEADER_TOKEN = "GENERATED PROJECTION:"
 IGNORED_FILE_NAMES = {".DS_Store"}
 IGNORED_DIR_NAMES = {"__pycache__"}
 IGNORED_SUFFIXES = {".pyc"}
-IGNORED_NAME_SUFFIXES = (".gen1.png",)
 STAMPABLE_SUFFIXES = {".md", ".txt", ".yaml", ".yml", ".toml", ".py", ".sh"}
 SCOPE_CHOICES = ("all", "skill-factory", "plugin-factory", "plugin-caches")
 
@@ -104,28 +103,24 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         source_path="plugins/coderabbit",
         projection_path="plugins/cache/agent-skills-local/coderabbit/local",
         tags=("plugin-caches",),
-        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-harness-engineering",
         source_path="plugins/harness-engineering",
         projection_path="plugins/cache/agent-skills-local/harness-engineering/local",
         tags=("plugin-caches",),
-        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-plugin-factory",
         source_path="plugins/plugin-factory",
         projection_path="plugins/cache/agent-skills-local/plugin-factory/local",
         tags=("plugin-caches", "plugin-factory"),
-        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-skill-factory",
         source_path="plugins/skill-factory",
         projection_path="plugins/cache/agent-skills-local/skill-factory/local",
         tags=("plugin-caches", "skill-factory"),
-        optional_when_missing=True,
     ),
 )
 
@@ -178,8 +173,6 @@ def is_ignored(path: Path) -> bool:
         or any path component is in IGNORED_DIR_NAMES; `False` otherwise.
     """
     if path.name in IGNORED_FILE_NAMES:
-        return True
-    if path.name.endswith(IGNORED_NAME_SUFFIXES):
         return True
     if path.suffix in IGNORED_SUFFIXES:
         return True
@@ -618,22 +611,22 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     if rsync_bin:
         sync_engine = "rsync"
         before_files = {rel.as_posix() for rel in iter_files(projection_abs)}
-        rsync_args = [
-            rsync_bin,
-            "-a",
-            "--delete",
-            "--exclude",
-            "__pycache__/",
-            "--exclude",
-            "*.pyc",
-            "--exclude",
-            ".DS_Store",
-        ]
-        # Translate IGNORED_NAME_SUFFIXES to rsync exclude patterns for consistency with iter_files().
-        for suffix in IGNORED_NAME_SUFFIXES:
-            rsync_args.extend(["--exclude", f"*{suffix}"])
-        rsync_args.extend([f"{source_abs}/", f"{projection_abs}/"])
-        subprocess.run(rsync_args, check=True)
+        subprocess.run(
+            [
+                rsync_bin,
+                "-a",
+                "--delete",
+                "--exclude",
+                "__pycache__/",
+                "--exclude",
+                "*.pyc",
+                "--exclude",
+                ".DS_Store",
+                f"{source_abs}/",
+                f"{projection_abs}/",
+            ],
+            check=True,
+        )
         after_files = {rel.as_posix() for rel in iter_files(projection_abs)}
         deleted_files = len(before_files - after_files)
         changed_files = -1

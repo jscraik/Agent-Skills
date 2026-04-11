@@ -7,7 +7,6 @@ metadata:
   maturity: canonical
   owner: Agent Skills Team
   review_cadence: quarterly
-  last_reviewed: 2026-04-10
   metadata_source: frontmatter
 ---
 

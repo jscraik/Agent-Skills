@@ -224,10 +224,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
             alias = repo_root / "utilities" / "plugin-builder"
             alias.parent.mkdir(parents=True, exist_ok=True)
-            try:
-                alias.symlink_to("../plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
-            except (OSError, NotImplementedError):
-                self.skipTest("Filesystem does not support directory symlinks in this environment.")
+            alias.symlink_to("../plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
 
             result = run_validator(repo_root)
             self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)
@@ -393,12 +390,8 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 ---
                 name: skill-builder
                 description: "Packaged skill representation mirrored from canonical source."
-                lifecycle_state: incubating
-                maturity: experimental
-                owner: Agent Skills Team
-                review_cadence: monthly
-                last_reviewed: {iso_days_ago(7)}
-                metadata_source: frontmatter
+                metadata:
+                  owner: Agent Skills Team
                 ---
 
                 # Skill Builder
@@ -407,24 +400,6 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             write_text(
                 repo_root / "plugins" / "skill-factory" / "skills" / "skill-builder" / "SKILL.md",
                 packaged_skill,
-            )
-            write_text(
-                repo_root
-                / "plugins"
-                / "skill-factory"
-                / "skills"
-                / "skill-builder"
-                / "references"
-                / "task-profile.json",
-                """
-                {
-                  "delegation": { "mode": "manual" },
-                  "learning_posture": {
-                    "supported": ["learn", "guided", "execute"],
-                    "default": "learn"
-                  }
-                }
-                """,
             )
 
             utilities_dir = repo_root / "utilities"
@@ -461,18 +436,18 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
-                repo_root / "plugins" / "coderabbit" / "skills" / "autofix" / "SKILL.md",
+                repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder" / "SKILL.md",
                 "# plugin skill",
             )
             write_text(
-                repo_root / ".agents" / "skills" / "autofix" / "SKILL.md",
+                repo_root / ".agents" / "skills" / "plugin-builder" / "SKILL.md",
                 "# flat skill",
             )
 
             result = run_shadow_check(repo_root)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Plugin-shadowing check failed", result.stderr)
-            self.assertIn("- autofix", result.stderr)
+            self.assertIn("- plugin-builder", result.stderr)
 
     def test_plugin_shadowing_check_allows_router_overlap(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

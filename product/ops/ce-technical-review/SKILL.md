@@ -19,8 +19,6 @@ This workflow produces severity-ranked engineering issues. It does **not** produ
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
-- [Interaction Method](#interaction-method)
-- [Severity Scale](#severity-scale)
 - [Workflow](#workflow)
 - [Review modes](#review-modes)
 - [Handoff guidance](#handoff-guidance)
@@ -277,30 +275,13 @@ When the target is a document, preserve the score and readiness recommendation i
 
 ## Dependency Review Gate (when dependencies changed)
 If the diff includes `package.json`, `Cargo.toml`, `requirements.txt`, `go.mod`, or lockfile changes:
-
-1. **Use Coderabbit CLI or CircleCI MCP** to check:
-   - No known CVEs in added/updated dependencies
-   - License compatibility with project
-   - Supply chain attestation when available
-
-2. **Manual checks for critical dependencies:**
-   - Review changelog for breaking changes
-   - Verify maintenance status (not abandoned)
-   - Check for malicious patterns in new dependencies
-
-3. **Flag for security review if:**
-   - New dependency has < 1000 weekly downloads
-   - Binary/native code introduced
-   - Network/request capabilities added
-   - Proprietary license in previously open-source project
+- Check CVEs, license compatibility, and changelog maintenance risk.
+- Flag security review for low-trust packages, native/binary additions, or new network-capable dependencies.
 
 ## Examples
 - "When the user asks for a technical review of a risky billing change, inspect the diff, linked plan, and tests first, then call out duplicate-charge risk, rollback gaps, and missing validation."
 - "Please technical-review the current branch diff for the Stripe retry change. I care most about duplicate-charge risk, missing integration coverage, and whether the rollback story is believable."
-- "Review GitHub PR `#482` before merge. The change touches `app/models/invoice.rb`, `app/services/billing/retry_payment.rb`, and `spec/requests/api/invoices_spec.rb`; give me the important engineering risks first."
 - "Score `docs/specs/2026-03-23-auth-session-rotation-spec.md` for planning readiness, especially lifecycle handling, failure recovery, and observability."
-- "Review `docs/plans/2026-03-23-auth-session-rotation-plan.md` against its linked spec and tell me whether execution can proceed safely or if the sequencing still leaves implementers guessing."
-- "Do a technical review of `app/services/sync_user.rb` plus the related tests. I suspect the implementation missed callback behavior and idempotency coverage."
 
 ## References
 - [Review Modes](./references/review-modes.md)

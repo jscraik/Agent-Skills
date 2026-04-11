@@ -25,17 +25,9 @@ This workflow produces severity-ranked reliability findings and resilience recom
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
-- [Constraints](#constraints)
-- [Acceptance criteria](#acceptance-criteria)
-- [Interaction Method](#interaction-method)
-- [Severity Scale](#severity-scale)
-- [Core Principles](#core-principles)
-- [Philosophy](#philosophy)
 - [Workflow](#workflow)
 - [Review dimensions](#review-dimensions)
 - [Handoff guidance](#handoff-guidance)
-- [Validation](#validation)
-- [Anti-patterns](#anti-patterns)
 - [Encouraging variation](#encouraging-variation)
 - [Examples](#examples)
 - [References](#references)
@@ -304,27 +296,14 @@ When handing off, preserve the dependency failure matrix and resilience coverage
 - claiming operational readiness when critical dependencies have no failure protection
 
 ## Encouraging variation
-IMPORTANT: Outputs should vary based on the architecture, dependency profile, and operational context.
-- Vary review depth by service criticality: user-facing payment services need more depth than internal batch jobs.
-- Adapt resilience recommendations to the actual scale and traffic patterns.
-- Customize failure scenarios to the specific technology stack and cloud platform.
-- Use different emphasis for greenfield services (design patterns) versus mature services (gap analysis).
-- Monoliths have different failure domains than microservices; adjust accordingly.
-- Do not apply a cookie-cutter resilience checklist when context-specific analysis is safer.
+Vary depth by service criticality and dependency profile; avoid cookie-cutter resilience checklists.
 
 ## Examples
-- User says: "Review this new payment service for reliability risks before go-live. I care most about Stripe outage behavior and transaction durability."
-- User says: "Run a reliability review on my current branch; we just added an external tax API and I need the failure story."
-- User says: "Check whether circuit breaker and timeout coverage is complete for the checkout dependency chain."
-- User says: "Review `docs/specs/2026-04-01-event-pipeline-spec.md` for reliability gaps before I move to planning."
-- User says: "Under sustained load, what fails first in this service? Focus on pool exhaustion and back-pressure."
-- User says: "We split into three microservices; map cascading-failure risk across the dependency chain."
+See `references/compaction-context.md` for expanded trigger examples.
 
 ## References
-- [Resilience Patterns](./references/resilience-patterns.md)
-- [Contract](./references/contract.yaml)
-- [Evals](./references/evals.yaml)
-- [Sub-Agent Map](./references/sub-agent-map.md)
+Use `references/resilience-patterns.md`, `references/contract.yaml`, and `references/evals.yaml`.
+Use `references/compaction-context.md` for expanded variation guidance and gotchas.
 
 ## See Also
 
@@ -335,13 +314,7 @@ IMPORTANT: Outputs should vary based on the architecture, dependency profile, an
 | [[ce-plan]] | Plan reliability implementation units from review findings |
 | [[ce-deepen-spec]] | Strengthen spec with reliability requirements from review |
 | [[security-threat-model]] | Security-specific threat modeling complement to reliability |
-| [[production-deployment]] | Deploy with reliability verification gates |
-
 **Topic map:** [[agent-ops]]
 
 ## Gotchas
-- A service with retry logic is not retry-safe unless operations are idempotent. Always check both.
-- Circuit breakers without health checks just delay the failure discovery.
-- "Graceful degradation" in the spec must match what actually happens in the code. Verify, don't assume.
-- Cloud provider SLAs are not your SLOs. Your application reliability compounds on top of infrastructure reliability.
-- Connection pool exhaustion is one of the most common cascading failure triggers. Always check pool sizes and timeouts.
+Use `references/compaction-context.md` for gotchas. Keep idempotency and pool-exhaustion checks explicit in final findings.

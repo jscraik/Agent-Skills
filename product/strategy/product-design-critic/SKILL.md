@@ -21,8 +21,6 @@ user goal
 
 ## Table of Contents
 - [When to use](#when-to-use)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
 - [Constraints](#constraints)
 - [Philosophy](#philosophy)
 - [Standards baseline (March 2026)](#standards-baseline-march-2026)
@@ -30,16 +28,8 @@ user goal
 - [Persona Stress Test](#persona-stress-test)
 - [Use this skill to](#use-this-skill-to)
 - [Workflow](#workflow)
-- [Interaction rules](#interaction-rules)
-- [Explanation layer](#explanation-layer)
-- [Output pattern](#output-pattern)
-- [Variation](#variation)
-- [Validation](#validation)
-- [Anti-patterns](#anti-patterns)
 - [Examples](#examples)
 - [References](#references)
-- [Success standard](#success-standard)
-- [Decision feedback protocol](#decision-feedback-protocol)
 
 ## When to use
 Use this skill when:
@@ -103,8 +93,6 @@ Use this lens when the interface asks users to choose, compare, or decide under 
 
 - Check whether the interface preserves a single clear focus per moment.
 - Check whether related choices are chunked into digestible groups instead of being dumped into one visual field.
-- Check whether the user has to remember information from another screen, panel, or earlier step to finish the current decision.
-- Check whether the surface hides necessary context in a different panel, modal, or tab, forcing unnecessary context switching.
 - Treat more than 4 simultaneous meaningful options at one decision point as a likely overload signal unless there is strong grouping and recommendation support.
 
 Reference: [references/cognitive-load.md](references/cognitive-load.md).
@@ -118,13 +106,7 @@ When critiquing an interface, pressure-test it through 2-3 relevant user lenses 
 - Use this as a probe for hidden failure modes, not as a substitute for the main recommendation.
 
 ## Use this skill to
-- Critique a UI or workflow.
-- Design a new product surface, card, side panel, or chat experience.
-- Decide what belongs inline versus in a secondary surface.
-- Translate product intent into hierarchy and interaction design.
-- Pressure-test governance, approvals, provenance, and trust cues.
-- Map jobs-to-be-done and turn them into concrete interface behavior.
-- Tear down competitor products with an eye for reusable design moves.
+See `references/compaction-context.md` for the expanded capability list.
 
 ## Workflow
 ### 1. Anchor on the job
@@ -308,44 +290,31 @@ Adapt depth and tradeoff framing by context:
 
 - Triggering prompt: "Our SOC2 reviewers flagged our admin approval flow because users cannot tell scope, actor, or rollback. Critique this and recommend a safer redesign."
 - Triggering prompt: "We are shipping a chat-based production change workflow next quarter. Decide what belongs in chat versus side panel and what trust signals must be inline."
-- Triggering prompt: "Use official standards, not opinion alone. Evaluate this healthcare consent UI and explain tradeoffs with references."
-- Triggering prompt: "Can you inspect this permission-change flow and help me validate it against official standards before we build the final version?"
-- Triggering prompt: "When the user asks for a competitor teardown, user says they need a recommendation we can migrate into our product this sprint."
 - Non-triggering prompt: "Implement the retry logic in this API client."
+See `references/compaction-context.md` for additional trigger examples.
 
 ## References
 
-- Read [references/design-principles.md](references/design-principles.md) when you need reusable design canons, mental models, and anti-patterns.
-- Read [references/critique-rubric.md](references/critique-rubric.md) when you need a sharper review checklist, teardown structure, or scoring lens.
-- Read [references/interface-polish.md](references/interface-polish.md) when you want a final-pass craft checklist for details that make strong interfaces feel more refined.
-- Read [references/gold-standards-2026.md](references/gold-standards-2026.md) for official standards and design-system references current as of March 2026.
-- Use [assets/critique-output-template.md](assets/critique-output-template.md) when a stable response skeleton helps maintain quality and speed.
+Use `references/design-principles.md`, `references/critique-rubric.md`, and `references/gold-standards-2026.md`. Use `assets/critique-output-template.md` when you need a consistent response skeleton.
+Use `references/compaction-context.md` for expanded cognitive-load checks and full feedback protocol detail.
 
 ## Success standard
-
 This skill succeeds when the next design decision becomes clearer, more opinionated, and more trustworthy, not just more visually refined.
 
-## Decision feedback protocol
-
 ## See Also
-
 | Skill | When to use together |
 |---|---|
 | [[product-spec]] | Critique the product surface after speccing, before build |
 | [[brainstorming]] | Explore design alternatives before critical review |
-| [[frontend-ui-design]] | Apply critique findings to UI component implementation |
 | [[interview-me]] | Run a requirements interview before critiquing the surface |
 | [[visual-explainer]] | Present critique findings as a visual explainer page |
 
 **Topic map:** [[product-strategy]]
 <!-- decision-feedback-protocol:v2 -->
-- Question timing is runtime-owned. Do not make the skill itself decide when feedback is asked.
-- If post-run feedback capture is enabled, emit a non-blocking `post_run_feedback` event via Codex `request_user_input` after result delivery.
-- Capture `decision`, `outcome`, and `confidence`.
-- Persist feedback with `python3 scripts/record_skill_feedback.py`.
+- If post-run feedback capture is enabled, emit `post_run_feedback` via `request_user_input` and persist with `python3 scripts/record_skill_feedback.py`.
 
 ## Gotchas
-- None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+- Capture recurring failures as symptom -> cause -> do instead -> check.
 
 ## Failure mode
 - If the product surface, user goal, or evaluation frame is unclear, stop, surface the missing context, and fall back to a smaller critique slice rather than inventing product requirements.
