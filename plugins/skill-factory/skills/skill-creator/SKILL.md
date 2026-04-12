@@ -71,6 +71,8 @@ When the new skill needs a dedicated subagent path, handle role wiring during sc
 bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
 ```
 
+Note: the canonical skill route is `[[codex-agent-builder]]`; the helper scripts still live under the legacy directory name `utilities/codex-agent-creator/`.
+
 4. If the user asks to install the role, run:
 
 ```bash

@@ -102,6 +102,80 @@ brainstorming:
     brainstorm
   product-spec: Hand off the chosen direction to this skill to produce implementation-ready
     specs
+ce-brainstorm:
+  brainstorming: Use when the user needs a broader, non-compound brainstorming workflow
+  ce-plan: Hand off low-risk, well-resolved brainstorm outputs into implementation
+    planning
+  ce-spec: Hand off medium or high-risk brainstorm outputs into a durable spec
+ce-compound:
+  ce-brainstorm: WHAT/WHY clarity first
+  ce-plan: Implementation planning
+  ce-review: Merge/readiness review
+  ce-work: Ready for execution
+ce-compound-refresh:
+  ce-compound: Capture new issues before/after refresh
+  ce-review: Validate implementation readiness
+  ce-technical-review: Audit technical correctness
+ce-deepen-plan:
+  ce-plan: Use before deepening when the plan does not yet exist
+  ce-spec: Use when deepening reveals that the plan is blocked by missing contract-level
+    decisions
+ce-deepen-spec:
+  ce-deepen-plan: Strengthen the implementation plan after the spec contract is solid
+  ce-spec: Draft or tighten the base compound-engineering spec before a deepening
+    pass
+  product-spec: Use the broader planning-spec pipeline instead of the narrower CE
+    contract path
+ce-ideate:
+  ce-brainstorm: Take one selected survivor from ranked ideation into clarified problem
+    framing and approach shaping
+  ce-compound: Route broader CE lifecycle work or preserve learning after implementation
+    rather than before exploration
+  ce-plan: Use only after a brainstormed direction has been selected and specified
+    enough to plan
+ce-plan:
+  ce-brainstorm: Clarify WHAT/WHY
+  product-spec: Product contract
+ce-reliability-review:
+  ce-deepen-spec: Strengthen spec with reliability requirements from review
+  ce-plan: Plan reliability implementation units from review findings
+  ce-review: Package-level readiness synthesis including reliability
+  ce-technical-review: Broader code quality and engineering findings beyond reliability
+  production-deployment: Deploy with reliability verification gates
+  security-threat-model: Security-specific threat modeling complement to reliability
+ce-review:
+  agent-native-audit: Audit agent-operability vs merge-readiness
+  ce-technical-review: Severity-ranked engineering issues
+  ce-work: Execute approved work
+  gh-workflow: GitHub merge readiness
+ce-spec:
+  ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
+  ce-deepen-spec: Use when an existing spec lacks rigor, edge cases, or operational
+    detail
+  ce-ideate: Use when ranked improvement directions are needed before specification
+  ce-plan: Use after spec completion when the contract is ready for execution sequencing
+  ce-tdd: Use when the spec declares test-first execution posture
+  ce-technical-review: Use for engineering critique of the spec before planning
+ce-tdd:
+  ce-plan: 'ce-plan specifies TDD posture via `Execution note: test-first`'
+  ce-work: ce-tdd is the test-first execution posture inside ce-work
+  systematic-debugging: Run the TDD loop inside debugging workflow for each fix
+  test-driven-development: Standalone TDD discipline for non-CE contexts
+  verification-before-completion: Verify the full test suite is green before claiming
+    done
+ce-technical-review:
+  agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
+    engineering risk
+  ce-review: Return a broader readiness verdict and next-step synthesis instead of
+    a findings-first issue list
+  gh-workflow: Gate merge readiness in GitHub after the technical review is complete
+  systematic-debugging: Investigate root cause first when the risky behavior is not
+    yet well understood
+ce-work:
+  ce-compound: Preserve learnings
+  ce-plan: Build execution-ready plan
+  ce-review: Review after execution
+  test-browser: Browser verification
 changelog:
   every-style-editor: Polish the final changelog for a branded external audience
   feature-video: Pair a release-note summary with a visual walkthrough artifact
@@ -123,6 +197,11 @@ cli-spec:
   agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
+coderabbit:
+  circleci: Pair CodeRabbit guidance with broader CircleCI migration and policy workflows
+  context7: Cross-check third-party library docs when CodeRabbit guidance references
+    external tools
+  gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
 codex-agent-builder:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
@@ -332,6 +411,11 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
+plugin-builder:
+  plugin-creator: Scaffold a minimal plugin shell before hardening and compatibility
+    checks
+  plugin-installer: Install validated plugin packages after build-time hardening is
+    complete
 plugin-creator:
   plugin-builder: Harden scaffolded plugins, run compatibility checks, and emit deconflict
     evidence before release
@@ -393,8 +477,8 @@ react-ui-patterns:
   design-system: Keep typography, spacing, and icon guidance aligned to canonical
     token governance
   frontend-ui-design: Apply React patterns to components being designed
-  shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
   react-components: Use patterns when converting Stitch screens to React
+  shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
   ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
 recon-workbench:
   security-best-practices: Turn recon findings into concrete secure-by-default implementation
@@ -465,6 +549,10 @@ shadcn-ui:
   design-system: Override shadcn/ui tokens with design-system aliases
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
+simplify:
+  autofix: Resolve unresolved CodeRabbit PR review comments in guided or batch mode
+  code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
+    fix work
 skill-builder:
   codex-agent-builder: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
@@ -477,9 +565,22 @@ skill-creator:
     role files
   skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
     packages
+skill-factory:
+  skill-builder: Run quality gates, evals, and hardening loops
+  skill-creator: Create or refactor skill packages
+  skill-installer: Install validated skills from trusted sources
+  skill-refactor: Scan Codex sessions for skill failures and coverage gaps
+  skillify: Capture a completed session as a reusable skill
 skill-installer:
   skill-creator: Author or repair local skill packages before installation
   skillify: Harden source skills into canonical templates before install/distribution
+skill-refactor:
+  codex-home-audit: Run alongside a full home directory audit
+  evals-router: Route evaluation work for under-performing skills
+  insight-report: Turn session scan findings into a polished usage report
+skillify:
+  skill-creator: Create first-draft skill scaffolds before hardening
+  skill-installer: Install and surface a validated skill across Codex catalogs
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds

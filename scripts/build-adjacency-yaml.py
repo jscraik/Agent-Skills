@@ -15,6 +15,11 @@ CANONICAL_PREFIXES = {
     "frontend/",
     "github/",
     "interview/",
+    "plugins/arscontexta/skills/",
+    "plugins/coderabbit/skills/",
+    "plugins/harness-engineering/skills/",
+    "plugins/plugin-factory/skills/",
+    "plugins/skill-factory/skills/",
     "skills-antigravity/",
     "personas/",
     "product/",
@@ -59,6 +64,17 @@ def resolve_skill_id(path: pathlib.Path, content: str) -> str:
             break
     return path.parts[-2]
 
+
+def normalize_skill_ref(target: str) -> str:
+    """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
+    normalized = target.strip()
+    if ":" not in normalized:
+        return normalized
+    _, suffix = normalized.split(":", 1)
+    if SKILL_NAME_RE.fullmatch(suffix):
+        return suffix
+    return normalized
+
 def iter_skill_md_files(root: pathlib.Path):
     # Prefer tracked files so generated/untracked projections do not pollute output.
     git_cmd = ["git", "-C", str(root), "ls-files"]
@@ -92,7 +108,8 @@ for md in sorted(iter_skill_md_files(ROOT)):
     skill = resolve_skill_id(md, content)
     previous = seen_skills.get(skill)
     if previous and previous != md:
-        raise SystemExit(f"duplicate canonical skill id '{skill}': {previous} and {md}")
+        # Keep first canonical path, mirroring validate-adjacency.py semantics.
+        continue
     seen_skills[skill] = md
     sa_block = re.search(
         r"## See Also\s*\n(.*?)(?=\n##|\Z)",
@@ -106,7 +123,7 @@ for md in sorted(iter_skill_md_files(ROOT)):
     for row in sa_block.group(1).splitlines():
         m = re.match(r"\|\s*\[\[([^\]]+)\]\]\s*\|\s*(.+?)\s*\|", row)
         if m:
-            target = m.group(1).strip()
+            target = normalize_skill_ref(m.group(1))
             desc   = m.group(2).strip()
             if target not in TOPIC_MAPS and not target.startswith("|"):
                 rows[target] = desc

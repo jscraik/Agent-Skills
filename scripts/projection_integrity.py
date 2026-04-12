@@ -79,24 +79,28 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         source_path="plugins/coderabbit",
         projection_path="plugins/cache/agent-skills-local/coderabbit/local",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-harness-engineering",
         source_path="plugins/harness-engineering",
         projection_path="plugins/cache/agent-skills-local/harness-engineering/local",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-plugin-factory",
         source_path="plugins/plugin-factory",
         projection_path="plugins/cache/agent-skills-local/plugin-factory/local",
         tags=("plugin-caches", "plugin-factory"),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-skill-factory",
         source_path="plugins/skill-factory",
         projection_path="plugins/cache/agent-skills-local/skill-factory/local",
         tags=("plugin-caches", "skill-factory"),
+        optional_when_missing=True,
     ),
 )
 

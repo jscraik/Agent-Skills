@@ -1358,7 +1358,10 @@ sync_codex_profile_homes() {
       # <profile-home>/plugins/<plugin-name> for local plugin installs.
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
     fi
-  done < <(find "$HOME" -maxdepth 1 -mindepth 1 -type d -name '.codex-*' | sort)
+  done < <({
+    [ -d "$HOME/.codex" ] && printf '%s\n' "$HOME/.codex"
+    find "$HOME" -maxdepth 1 -mindepth 1 -type d -name '.codex-*'
+  } | sort -u)
 }
 
 cleanup_legacy_local_marketplace_cache() {
@@ -1393,8 +1396,6 @@ if [[ "$sync_scope" == "workspace" ]]; then
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
-  sync_user_skills "$skills_dir" "$HOME/.codex/skills"
-  sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
   sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
   # Antigravity app requires a flat copy (no symlinks) in its own config dir
   sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy

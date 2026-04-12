@@ -228,9 +228,14 @@ try:
 except Exception:
     raise SystemExit(0)
 
-for name in data.get("plugin_visible_router_skill_names", []):
-    if isinstance(name, str) and name.strip():
-        print(name.strip())
+seen = set()
+for key in ("plugin_visible_router_skill_names", "system_bridge_skill_names"):
+    for name in data.get(key, []):
+        if isinstance(name, str):
+            name = name.strip()
+            if name and name not in seen:
+                seen.add(name)
+                print(name)
 PY
 fi
 
