@@ -278,7 +278,9 @@ Parity gates must compare deterministic fields emitted by the same build paths i
 Promotion rule:
 - no new blocker ids/classes/severity regressions;
 - allowlisted baseline blockers may remain only if unchanged and explicitly listed in baseline artifact.
-- `baseline.json` is immutable after Phase 0 except for explicit `planned_deltas` entries reviewed in migration PRs.
+- `baseline.json` is immutable after Phase 0 except for:
+  - explicit per-slice `planned_deltas` entries reviewed in migration PRs; and
+  - explicit phase-level control-plane baseline deltas reviewed in phase-promotion PRs (`phase_baseline_deltas`).
 - each slice must declare `planned_deltas` with: `command`, `json_paths`, `allowed_old_to_new`, and `expiry_condition`.
 
 ## Inventory completeness contract
@@ -326,7 +328,7 @@ Control-plane ownership rules:
   - record a Phase 0 baseline artifact before migration work, capturing outputs of:
     - `bin/ask repo status`
     - `bin/ask skills list --json`
-    - `bin/ask plugins status --json`
+    - targeted baseline plugin status checks from declared slices: `bin/ask plugins status <plugin> --json`
     - `bin/ask plugins doctor --json`
     - `bin/ask repo validate`
     - `bash scripts/verify-work.sh --project-governance`
@@ -351,6 +353,9 @@ Control-plane ownership rules:
   - audit repo consumers for direct reads of legacy canonical roots and route them through policy-backed discovery APIs using generated inventories as the authoritative allowlist source;
   - wire manifest validation into `bash scripts/validate_all.sh` and `bin/ask repo validate`;
   - add required policy/discovery identity parity tests and wrapper contract tests.
+  - run Phase 0 in two sub-gates:
+    - `phase_0a_control_plane`: baseline/inventory/schema/comparator/wrapper-contract machinery;
+    - `phase_0b_pilot_slice`: one declared pilot slice must prove `pre_activation -> migrated` cutover and rollback evidence via slice representative commands and lifecycle checks.
 - Exit criteria:
   - policy identity and discovery identity remain aligned against the baseline artifact;
   - duplicate, freshness, and shadowing validators all import the shared identity helper and reject `runtime_name`/`metadata_name` drift;
@@ -366,7 +371,8 @@ Control-plane ownership rules:
 - Actions:
   - enforce boundaries via `scripts/check_path_ownership_boundaries.sh`;
   - publish ownership and projection-read-only policy in docs under `GOVERNANCE/**` and agent docs;
-  - freeze projection contract for `.agents/**`, `.agent/skills/**`, `runtime/**`, `skills-antigravity/**`, and plugin runtime cache surfaces (allowed writers, precedence, and negative tests).
+  - freeze external compatibility invariants only for `.agents/**`, `.agent/skills/**`, `runtime/**`, `skills-antigravity/**`, and plugin runtime cache surfaces (allowed writers, discovery/precedence, visibility, and negative tests).
+  - defer internal projection-generation behavior freeze until Phase B wrapper/mechanics extraction evidence is green.
 - Exit criteria:
   - path-ownership gates block direct runtime/projection edits, including alias-path writes.
   - governance authority docs are generated and validated from manifest inventories.

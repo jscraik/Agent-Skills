@@ -1,5 +1,5 @@
 schema_version: "2.0"
-skill_name: "codex-agent-builder"
+skill_name: "codex-agent-creator"
 cases:
   - name: smoke discovery round one
     id: smoke-discovery-round-one

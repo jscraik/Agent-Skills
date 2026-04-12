@@ -108,6 +108,11 @@ Launch these helpers in parallel. They return text only.
    - suggest the filename slug
    - return: final path and filename
 
+6. Session Historian (optional, explicit opt-in only)
+   - only run when the user explicitly asks for session-history enrichment
+   - gather relevant prior-session context that materially helps the current solved-problem capture
+   - return: concise supporting context with provenance markers
+
 ### Phase 2: Assembly and write
 
 Wait for all Phase 1 helpers to complete.
@@ -157,6 +162,21 @@ Example arguments:
 - `/ce:compound-refresh payments`
 - `/ce:compound-refresh performance-issues`
 - `/ce:compound-refresh critical-patterns`
+
+### Phase 2.75: Discoverability check (instruction docs)
+
+After writing the final solution doc, verify whether root instruction docs make `docs/solutions/` discoverable to future agents.
+
+1. Check root instruction files (`AGENTS.md`, `CLAUDE.md`) and identify whether one is a shim include pointing to the other.
+2. Assess whether the substantive instruction doc clearly communicates:
+   - a searchable solution knowledge store exists
+   - category structure and frontmatter semantics are present
+   - when the store should be consulted during implementation/debugging
+3. If discoverability is unclear:
+   - ask for explicit user consent before editing instruction docs
+   - propose the smallest natural addition in existing instruction sections
+4. In `compact-safe` mode or autonomous/non-interactive runs:
+   - prefer recording a recommendation over editing instruction docs
 
 ### Phase 3: Optional enhancement
 
