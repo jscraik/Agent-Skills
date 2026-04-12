@@ -136,9 +136,10 @@ unknown_targets: set[tuple] = set()
 known_skill_refs: set[str] = set()
 
 for md in iter_skill_md_files(ROOT):
+    if not is_canonical_skill_md(md):
+        continue
     content = md.read_text(encoding="utf-8", errors="replace")
     known_skill_refs.add(normalize_skill_ref(resolve_skill_id(md, content)))
-    known_skill_refs.add(normalize_skill_ref(md.parts[-2]))
 
 if ADJ_YAML.exists() and HAS_YAML:
     adj = yaml.safe_load(ADJ_YAML.read_text()) or {}

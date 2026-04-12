@@ -64,8 +64,8 @@ If either source is missing, stop and ask the user where the Project Brain contr
 ## Harness-Managed Rollout Depth
 Read when the target repository enforces Project Brain using repo-local harness policy and readiness scripts, not bootstrap only.
 
-- If the target repository has opted into Project Brain enforcement, verify `harness.contract.json` exposes `toolingPolicy.projectBrainMemoryExtension` with repo-accurate `requiredPaths`.
-- If the repo readiness script exposes Project Brain gates, confirm those keys and required paths stay aligned before enabling strict enforcement.
+- If the target repository has opted into Project Brain enforcement, verify `harness.contract.json` uses the active memory contract keys (`memoryPolicy`, `memoryMaintenancePolicy`, `memoryEvalPolicy`) with repo-accurate required paths.
+- If the repo readiness scripts expose Project Brain gates, confirm those checks and required paths stay aligned before enabling strict enforcement.
 - Keep policy and scaffold updates together; do not enable strict enforcement before both are aligned.
 - Run `harness tooling-audit --path <repo-root>` before enabling strict gates so policy drift and readiness-script drift fail early.
 - Validate with each repository's documented harness verification commands (at minimum `harness tooling-audit --path <repo-root>` plus the repository fast verify gate).
@@ -107,4 +107,4 @@ Produce:
 ## References
 - [Setup and Bootstrap](./references/setup-and-bootstrap.md)
 - [Operating Routine](./references/operating-routine.md)
-- `/Users/jamiecraik/dev/coding-harness/docs/agents/20-project-brain-memory-extension-rollout.md` (when working in harness-managed repositories)
+- `${CODING_HARNESS_ROOT}/docs/agents/20-project-brain-memory-extension-rollout.md` (set `CODING_HARNESS_ROOT` to your local coding-harness checkout when working in harness-managed repositories)

@@ -30,6 +30,28 @@ from datetime import date
 from pathlib import Path
 from typing import Iterable, List, Optional
 
+
+def _discover_repo_root_for_contract() -> Path:
+    for ancestor in Path(__file__).resolve().parents:
+        if (ancestor / ".git").exists():
+            return ancestor
+    try:
+        return Path(__file__).resolve().parents[5]
+    except Exception:  # pragma: no cover - defensive fallback
+        return Path.cwd().resolve()
+
+
+_REPO_ROOT_FOR_CONTRACT = _discover_repo_root_for_contract()
+_SHARED_SKILL_CONTRACT_DIR = _REPO_ROOT_FOR_CONTRACT / "scripts"
+if str(_SHARED_SKILL_CONTRACT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_SKILL_CONTRACT_DIR))
+
+from canonical_skill_roots import (  # noqa: E402
+    CANONICAL_STANDALONE_SKILL_ROOTS,
+    find_plugin_skill_root_for_output,
+    iter_declared_plugin_skill_roots,
+)
+
 TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "claude": 64}
 TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "claude": 1024}
 DEFAULT_TARGET = "codex"
@@ -40,19 +62,6 @@ ALLOWED_RESOURCES = {"scripts", "references", "assets", "workflows"}
 STRUCTURES = {"simple", "router"}
 VALID_LIFECYCLE_STATES = ("incubating", "active", "maintenance", "deprecated")
 VALID_MATURITY_LEVELS = ("experimental", "validated", "canonical")
-CANONICAL_STANDALONE_SKILL_ROOTS = (
-    "utilities",
-    "product",
-    "frontend",
-    "backend",
-    "auth",
-    "design",
-    "github",
-    "interview",
-    "ops",
-    "personas",
-    "skills-system",
-)
 
 SCAFFOLD_TEMPLATE_FILES = {
     "simple": "scaffold-simple-skill.md.tmpl",
@@ -239,18 +248,14 @@ def find_repo_root(start: Path) -> Path:
 
 
 def _is_plugin_owned_skill_output(out_dir: Path, repo_root: Path) -> bool:
-    try:
-        rel = out_dir.resolve().relative_to(repo_root)
-    except ValueError:
-        return False
-    return len(rel.parts) >= 3 and rel.parts[0] == "plugins" and rel.parts[2] == "skills"
+    return find_plugin_skill_root_for_output(out_dir=out_dir, repo_root=repo_root) is not None
 
 
 def _find_cross_lane_skill_conflicts(*, repo_root: Path, out_dir: Path, skill_name: str) -> List[str]:
     conflicts: List[str] = []
-    plugin_owned_output = _is_plugin_owned_skill_output(out_dir=out_dir, repo_root=repo_root)
+    plugin_skill_root = find_plugin_skill_root_for_output(out_dir=out_dir, repo_root=repo_root)
 
-    if plugin_owned_output:
+    if plugin_skill_root is not None:
         for root_name in CANONICAL_STANDALONE_SKILL_ROOTS:
             root = repo_root / root_name
             if not root.exists():
@@ -258,9 +263,8 @@ def _find_cross_lane_skill_conflicts(*, repo_root: Path, out_dir: Path, skill_na
             for match in sorted(root.rglob(f"{skill_name}/SKILL.md")):
                 conflicts.append(str(match.parent.relative_to(repo_root)))
     else:
-        plugins_root = repo_root / "plugins"
-        if plugins_root.exists():
-            for match in sorted(plugins_root.glob(f"*/skills/{skill_name}/SKILL.md")):
+        for plugin_owned_root in iter_declared_plugin_skill_roots(repo_root):
+            for match in sorted(plugin_owned_root.glob(f"{skill_name}/SKILL.md")):
                 conflicts.append(str(match.parent.relative_to(repo_root)))
 
     deduped: List[str] = []

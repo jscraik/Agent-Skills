@@ -102,7 +102,7 @@ Report indexing as `attempted`, `skipped`, or `warned` based on actual outcome.
 Read when the repository enforces Project Brain through harness policy and tooling audit surfaces.
 
 Per-repo checklist:
-1. Confirm `harness.contract.json` has `toolingPolicy.projectBrainMemoryExtension`.
+1. Confirm `harness.contract.json` has the active memory contract keys (`memoryPolicy`, `memoryMaintenancePolicy`, `memoryEvalPolicy`).
 2. Set `enabled=true` only when the repository should enforce Project Brain readiness.
 3. Keep `requiredPaths` aligned with the repository `.harness/**` scaffold.
 4. Re-run scaffold or update flow so `scripts/check-environment.sh` includes both:
@@ -114,7 +114,7 @@ Per-repo checklist:
 Validation lane for rollout changes:
 1. Run the repository documented harness checks for policy and readiness drift.
 2. Run the repository fast verification gate.
-3. If the repository is coding-harness, use the concrete command lane from `/Users/jamiecraik/dev/coding-harness/docs/agents/20-project-brain-memory-extension-rollout.md`.
+3. If the repository is coding-harness, use the concrete command lane from `${CODING_HARNESS_ROOT}/docs/agents/20-project-brain-memory-extension-rollout.md` (set `CODING_HARNESS_ROOT` to your local coding-harness checkout).
 
 Use this section as a conditional layer over bootstrap, not as a replacement for canonical Project Brain initialization.
 

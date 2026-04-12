@@ -49,6 +49,11 @@ REPO_ROOT = _discover_repo_root()
 DEFAULT_PLUGIN_PARENT = REPO_ROOT / "plugins"
 DEFAULT_MARKETPLACE_PATH = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
 SKILL_BUILDER_INIT = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "init_skill.py"
+SHARED_SKILL_CONTRACT_DIR = REPO_ROOT / "scripts"
+if str(SHARED_SKILL_CONTRACT_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_SKILL_CONTRACT_DIR))
+from canonical_skill_roots import CANONICAL_STANDALONE_SKILL_ROOTS  # noqa: E402
+
 CODEX_AGENT_WRITER = (
     REPO_ROOT / "utilities" / "codex-agent-creator" / "scripts" / "write_role_config.sh"
 )
@@ -117,19 +122,6 @@ OPTIONAL_INTERFACE_STRING_FIELDS = [
 # NOTE: interface.defaultPrompt is intentionally excluded from OPTIONAL_INTERFACE_STRING_FIELDS.
 # It is validated separately because the contract allows either a string or an array of strings.
 OPTIONAL_INTERFACE_PATH_FIELDS = ["composerIcon", "logo"]
-CANONICAL_STANDALONE_SKILL_ROOTS = (
-    "utilities",
-    "product",
-    "frontend",
-    "backend",
-    "auth",
-    "design",
-    "github",
-    "interview",
-    "ops",
-    "personas",
-    "skills-system",
-)
 
 CLAUDE_TO_CODEX_TERMINOLOGY = {
     "commands/": "skills/ plus optional interface.defaultPrompt",

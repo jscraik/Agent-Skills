@@ -24,6 +24,8 @@ def _run_help(repo_root: Path) -> str:
         )
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError("verify-work help command timed out after 30s") from exc
+    except OSError as exc:
+        raise RuntimeError(f"verify-work help command could not start: {exc}") from exc
     if completed.returncode != 0:
         stderr = completed.stderr.strip()
         stdout = completed.stdout.strip()

@@ -32,7 +32,7 @@ SKILL_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 
 adjacency = {}   # skill -> {related_skill: description}
-seen_skills: set[str] = set()   # deduplicate by skill name, not resolved path
+seen_skills: dict[str, pathlib.Path] = {}   # canonical skill id -> first source path
 
 
 def is_canonical_skill_md(path: pathlib.Path) -> bool:
@@ -90,9 +90,10 @@ for md in sorted(iter_skill_md_files(ROOT)):
         continue
     content = md.read_text(encoding="utf-8", errors="replace")
     skill = resolve_skill_id(md, content)
-    if skill in seen_skills:         # first SKILL.md wins (alphabetical sort = utilities/ before skills-antigravity/ typically)
-        continue
-    seen_skills.add(skill)
+    previous = seen_skills.get(skill)
+    if previous and previous != md:
+        raise SystemExit(f"duplicate canonical skill id '{skill}': {previous} and {md}")
+    seen_skills[skill] = md
     sa_block = re.search(
         r"## See Also\s*\n(.*?)(?=\n##|\Z)",
         content,
