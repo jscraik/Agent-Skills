@@ -62,6 +62,12 @@ backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
   writing-plans: Plan backend extensions before implementing
+baseline-ui:
+  design-system: Apply design tokens that baseline-ui validates
+  fixing-accessibility: Fix accessibility issues found during baseline-ui checks
+  frontend-ui-design: Implement UI components that baseline-ui governs
+  shadcn-ui: Validate shadcn/ui components against baseline rules
+  ui-visual-regression: Combine with visual regression to catch visual drift
 bash-hygiene:
   codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
     safer defaults
@@ -69,12 +75,6 @@ bash-hygiene:
     behavioral changes
   verification-before-completion: Enforce verification routines after Bash script
     edits before claiming done
-baseline-ui:
-  design-system: Apply design tokens that baseline-ui validates
-  fixing-accessibility: Fix accessibility issues found during baseline-ui checks
-  frontend-ui-design: Implement UI components that baseline-ui governs
-  shadcn-ui: Validate shadcn/ui components against baseline rules
-  ui-visual-regression: Combine with visual regression to catch visual drift
 beautiful-mermaid:
   diagram-cli: Generate .mmd source files before rendering with Beautiful Mermaid
   docs-expert: Add rendered diagrams to repository documentation
@@ -102,80 +102,6 @@ brainstorming:
     brainstorm
   product-spec: Hand off the chosen direction to this skill to produce implementation-ready
     specs
-ce-brainstorm:
-  brainstorming: Use when the user needs a broader, non-compound brainstorming workflow
-  ce-plan: Hand off low-risk, well-resolved brainstorm outputs into implementation
-    planning
-  ce-spec: Hand off medium or high-risk brainstorm outputs into a durable spec
-ce-compound:
-  ce-brainstorm: WHAT/WHY clarity first
-  ce-plan: Implementation planning
-  ce-review: Merge/readiness review
-  ce-work: Ready for execution
-ce-compound-refresh:
-  ce-compound: Capture new issues before/after refresh
-  ce-review: Validate implementation readiness
-  ce-technical-review: Audit technical correctness
-ce-deepen-plan:
-  ce-plan: Use before deepening when the plan does not yet exist
-  ce-spec: Use when deepening reveals that the plan is blocked by missing contract-level
-    decisions
-ce-deepen-spec:
-  ce-deepen-plan: Strengthen the implementation plan after the spec contract is solid
-  ce-spec: Draft or tighten the base compound-engineering spec before a deepening
-    pass
-  product-spec: Use the broader planning-spec pipeline instead of the narrower CE
-    contract path
-ce-ideate:
-  ce-brainstorm: Take one selected survivor from ranked ideation into clarified problem
-    framing and approach shaping
-  ce-compound: Route broader CE lifecycle work or preserve learning after implementation
-    rather than before exploration
-  ce-plan: Use only after a brainstormed direction has been selected and specified
-    enough to plan
-ce-plan:
-  ce-brainstorm: Clarify WHAT/WHY
-  product-spec: Product contract
-ce-reliability-review:
-  ce-deepen-spec: Strengthen spec with reliability requirements from review
-  ce-plan: Plan reliability implementation units from review findings
-  ce-review: Package-level readiness synthesis including reliability
-  ce-technical-review: Broader code quality and engineering findings beyond reliability
-  production-deployment: Deploy with reliability verification gates
-  security-threat-model: Security-specific threat modeling complement to reliability
-ce-review:
-  agent-native-audit: Audit agent-operability vs merge-readiness
-  ce-technical-review: Severity-ranked engineering issues
-  ce-work: Execute approved work
-  gh-workflow: GitHub merge readiness
-ce-spec:
-  ce-brainstorm: Use first when the work still needs WHAT and WHY clarification
-  ce-deepen-spec: Use when an existing spec lacks rigor, edge cases, or operational
-    detail
-  ce-ideate: Use when ranked improvement directions are needed before specification
-  ce-plan: Use after spec completion when the contract is ready for execution sequencing
-  ce-tdd: Use when the spec declares test-first execution posture
-  ce-technical-review: Use for engineering critique of the spec before planning
-ce-tdd:
-  ce-plan: 'ce-plan specifies TDD posture via `Execution note: test-first`'
-  ce-work: ce-tdd is the test-first execution posture inside ce-work
-  systematic-debugging: Run the TDD loop inside debugging workflow for each fix
-  test-driven-development: Standalone TDD discipline for non-CE contexts
-  verification-before-completion: Verify the full test suite is green before claiming
-    done
-ce-technical-review:
-  agent-native-audit: Review agent-operability or workflow autonomy rather than code-level
-    engineering risk
-  ce-review: Return a broader readiness verdict and next-step synthesis instead of
-    a findings-first issue list
-  gh-workflow: Gate merge readiness in GitHub after the technical review is complete
-  systematic-debugging: Investigate root cause first when the risky behavior is not
-    yet well understood
-ce-work:
-  ce-compound: Preserve learnings
-  ce-plan: Build execution-ready plan
-  ce-review: Review after execution
-  test-browser: Browser verification
 changelog:
   every-style-editor: Polish the final changelog for a branded external audience
   feature-video: Pair a release-note summary with a visual walkthrough artifact
@@ -336,9 +262,11 @@ gh-workflow:
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
 imagegen:
-  nano-banana-builder: Use Nano Banana when iterative prompt-image editing is required
-  og-image-builder: Generate route-aware OG images when output needs metadata tag integration
-  sora: Extend still-image workflows into AI-generated video
+  nano-banana-builder: Use when the task needs iterative image generation or editing
+    with Google's Nano Banana APIs.
+  og-image-builder: Use when route-specific Open Graph images should be generated
+    directly from an existing web codebase.
+  sora: Use when the user needs video generation rather than static raster image output.
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -381,7 +309,7 @@ oak-api:
   fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
   mcp-builder: Expose Oak API as MCP tools for agent workflows
   product-spec: Spec the learning experience before implementing
-og-image-builder:
+og-image-creator:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
@@ -404,20 +332,15 @@ playwright-interactive:
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
-plugin-builder:
-  plugin-creator: Create the initial plugin scaffold before hardening/conversion workflows
-  plugin-installer: Handle downstream installation, provenance, and rollback after
-    package validation
 plugin-creator:
-  plugin-builder: Harden a scaffolded plugin package before publishing or validation-heavy
-    handoff
-  plugin-installer: Install and verify a contract-valid plugin after packaging is
-    complete
+  plugin-builder: Harden scaffolded plugins, run compatibility checks, and emit deconflict
+    evidence before release
+  plugin-installer: Install and verify a contract-valid plugin after packaging work
+    is complete
 plugin-installer:
-  plugin-builder: Run package hardening and contract checks before install/provenance
-    execution
-  plugin-creator: Scaffold a new local plugin before moving into install or visibility
-    repair
+  plugin-builder: Harden or convert plugin packages before installation and activation
+  plugin-creator: Scaffold a fresh local plugin package before install/distribution
+    workflows
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -426,7 +349,6 @@ process-watch:
     done
 product-design-critic:
   brainstorming: Explore design alternatives before critical review
-  frontend-ui-design: Apply critique findings to UI component implementation
   interview-me: Run a requirements interview before critiquing the surface
   product-spec: Critique the product surface after speccing, before build
   visual-explainer: Present critique findings as a visual explainer page
@@ -443,6 +365,13 @@ product-spec:
 production-deployment:
   1password: Inject deployment secrets via 1Password CLI
   release: Orchestrate the release flow before deployment
+project-brain:
+  codex-home-audit: Pair when the user wants Codex control-plane drift analysis across
+    agents, hooks, skills, and memory surfaces.
+  coding-harness: Use when Project Brain rollout must align with harness contracts,
+    gates, and tooling audits in a managed repository.
+  docs-expert: Use for follow-on documentation hardening after Project Brain bootstrap
+    or rollout changes land.
 project-improver:
   architecture-interview: Validate architectural improvements via structured interview
   brainstorming: Brainstorm improvement ideas before running the improver
@@ -502,6 +431,11 @@ resolve-todo-parallel:
   orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and an
     explicit user delegation request allow it
   triage: Review pending todo findings before execution begins
+scaffolding-expert:
+  bash-hygiene: Shell-policy and quoting/interpreter hardening
+  context7: External docs grounding for version-sensitive dependencies
+  npm-workflow-discipline: Lockfile discipline and script contract normalization
+  uv-python-project-setup: uv-managed Python project and execution contract setup
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
   create-auth: Security review often surfaces auth issues — use this for implementation
@@ -531,6 +465,10 @@ skill-builder:
     for skill-linked delegation flows
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
+  plugin-builder: Package a contract-valid standalone skill when the deliverable explicitly
+    becomes a plugin
+  skill-installer: Install, import, or repair runtime visibility when the skill package
+    is already valid
   skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
     instead of authoring doctrine alone
 skill-creator:
@@ -538,13 +476,6 @@ skill-creator:
     role files
   skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
     packages
-skill-refactor:
-  codex-home-audit: Run alongside a full home directory audit
-  evals-router: Route evaluation work for under-performing skills
-  insight-report: Turn session scan findings into a polished usage report
-skillify:
-  skill-creator: Create first-draft skill scaffolds before hardening
-  skill-installer: Install and surface a validated skill across Codex catalogs
 skill-installer:
   skill-creator: Author or repair local skill packages before installation
   skillify: Harden source skills into canonical templates before install/distribution
@@ -639,6 +570,11 @@ using-git-worktrees:
   gh-workflow: Manage PRs across multiple worktrees
   systematic-debugging: Debug issues isolated to a specific worktree
   verification-before-completion: Verify each worktree independently before merging
+uv-python-project-setup:
+  test-driven-development: Pair uv-managed environments with behavior-first testing
+    workflows
+  verification-before-completion: Enforce final verification before declaring setup
+    complete
 verification-before-completion:
   evals-router: Verify LLM eval pipelines pass before claiming eval work is complete
   gh-workflow: 'Gate PR merges: verification must pass before PR language is used'

@@ -17,6 +17,7 @@ metadata:
 - [Deliverables](#deliverables)
 - [Failure mode](#failure-mode)
 - [Gotchas](#gotchas)
+- [See Also](#see-also)
 - [References](#references)
 
 ## When to use
@@ -94,6 +95,14 @@ Produce:
 - `--index` is best-effort; report when indexing is skipped or unavailable instead of presenting it as guaranteed.
 - `init-project-brain.sh` is CLI-only; do not source it and do not switch the shell interpreter from `bash`.
 - Keep repository Project Brain memory files separate from cross-repo `~/.codex` memory files.
+
+## See Also
+
+| Skill | Why |
+| --- | --- |
+| [[coding-harness]] | Use when Project Brain rollout must align with harness contracts, gates, and tooling audits in a managed repository. |
+| [[codex-home-audit]] | Pair when the user wants Codex control-plane drift analysis across agents, hooks, skills, and memory surfaces. |
+| [[docs-expert]] | Use for follow-on documentation hardening after Project Brain bootstrap or rollout changes land. |
 
 ## References
 - [Setup and Bootstrap](./references/setup-and-bootstrap.md)
