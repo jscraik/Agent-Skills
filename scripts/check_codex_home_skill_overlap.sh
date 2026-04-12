@@ -49,38 +49,6 @@ expand_home_path() {
   esac
 }
 
-collect_manifest_skill_names() {
-  local market_dir="$1"
-
-  python3 - "$market_dir" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-market_dir = Path(sys.argv[1])
-for manifest_path in sorted(market_dir.rglob(".codex-plugin/plugin.json")):
-    try:
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        continue
-
-    skills_value = payload.get("skills")
-    declared_relative = "skills"
-    if isinstance(skills_value, str) and skills_value.startswith("./") and len(skills_value) > 2:
-        declared_relative = skills_value[2:].rstrip("/")
-    if not declared_relative:
-        continue
-
-    skills_root = manifest_path.parent.parent / declared_relative
-    if not skills_root.is_dir():
-        continue
-
-    for skill_md in sorted(skills_root.glob("*/SKILL.md")):
-        if skill_md.is_file():
-            print(skill_md.parent.name)
-PY
-}
-
 while (($# > 0)); do
   case "${1:-}" in
     --codex-home)
@@ -137,21 +105,6 @@ codex_home="$(expand_home_path "$codex_home")"
 flat_root="$codex_home/skills"
 cache_root="$codex_home/$cache_rel"
 
-is_safe_codex_path() {
-  local path_value="$1"
-  [[ -n "$path_value" ]] || return 1
-  [[ "$path_value" = /* ]] || return 1
-  [[ "$path_value" != "/" ]] || return 1
-  case "$path_value" in
-    "$HOME"/.codex*|*/.codex/*|*/.codex)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-}
-
 flat_names_file="$(mktemp "${TMPDIR:-/tmp}/codex-flat-skills.XXXXXX")"
 plugin_names_file="$(mktemp "${TMPDIR:-/tmp}/codex-plugin-skills.XXXXXX")"
 overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/codex-overlap-skills.XXXXXX")"
@@ -183,15 +136,6 @@ fi
 
 : > "$plugin_names_file"
 if [[ "$remediate_cache_skills" -eq 1 ]]; then
-  if ! is_safe_codex_path "$codex_home"; then
-    echo "Refusing remediation for unexpected --codex-home: $codex_home" >&2
-    exit 2
-  fi
-  if ! is_safe_codex_path "$cache_root"; then
-    echo "Refusing remediation for unexpected cache root: $cache_root" >&2
-    exit 2
-  fi
-
   while IFS= read -r marketplace_name; do
     [[ -n "$marketplace_name" ]] || continue
     market_dir="$cache_root/$marketplace_name"
@@ -199,10 +143,6 @@ if [[ "$remediate_cache_skills" -eq 1 ]]; then
     while IFS= read -r plugin_dir; do
       [[ -n "$plugin_dir" ]] || continue
       [[ -d "$plugin_dir" ]] || continue
-      if [[ "$plugin_dir" != "$cache_root/"* ]]; then
-        echo "Refusing remediation for plugin dir outside cache root: $plugin_dir" >&2
-        exit 2
-      fi
       if [[ -f "$plugin_dir/.codex-plugin/plugin.json" ]]; then
         continue
       fi
@@ -221,10 +161,6 @@ if [[ "$remediate_cache_skills" -eq 1 ]]; then
       fi
 
       [[ -n "$candidate_dir" ]] || continue
-      if [[ "$candidate_dir" != "$plugin_dir/"* ]]; then
-        echo "Refusing remediation for candidate dir outside plugin dir: $candidate_dir" >&2
-        exit 2
-      fi
       if [[ "$candidate_dir" == "$plugin_dir/"* ]]; then
         tmp_copy_dir="$(mktemp -d "${TMPDIR:-/tmp}/codex-cache-fix.XXXXXX")"
         cp -R "$candidate_dir"/. "$tmp_copy_dir"/
@@ -264,7 +200,8 @@ while IFS= read -r marketplace_name; do
   [[ -n "$marketplace_name" ]] || continue
   market_dir="$cache_root/$marketplace_name"
   [[ -d "$market_dir" ]] || continue
-  collect_manifest_skill_names "$market_dir" >> "$plugin_names_file"
+  find -L "$market_dir" -type f -name 'SKILL.md' \
+    | awk -F/ '$(NF-2)=="skills" {print $(NF-1)}' >> "$plugin_names_file"
 done < "$selected_markets_file"
 sort -u "$plugin_names_file" -o "$plugin_names_file"
 
@@ -291,14 +228,10 @@ try:
 except Exception:
     raise SystemExit(0)
 
-seen = set()
 for key in ("plugin_visible_router_skill_names", "system_bridge_skill_names"):
     for name in data.get(key, []):
-        if isinstance(name, str):
-            name = name.strip()
-            if name and name not in seen:
-                seen.add(name)
-                print(name)
+        if isinstance(name, str) and name.strip():
+            print(name.strip())
 PY
 fi
 
