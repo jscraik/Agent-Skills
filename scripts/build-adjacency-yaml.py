@@ -28,6 +28,9 @@ TOPIC_MAPS = {
     "mobile-native", "index",
 }
 
+SKILL_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
+
 adjacency = {}   # skill -> {related_skill: description}
 seen_skills: set[str] = set()   # deduplicate by skill name, not resolved path
 
@@ -40,6 +43,21 @@ def is_canonical_skill_md(path: pathlib.Path) -> bool:
     if rel == "SKILL.md":
         return False
     return any(rel.startswith(prefix) for prefix in CANONICAL_PREFIXES)
+
+
+def resolve_skill_id(path: pathlib.Path, content: str) -> str:
+    frontmatter = FRONTMATTER_RE.match(content)
+    if frontmatter:
+        for raw_line in frontmatter.group(1).splitlines():
+            line = raw_line.strip()
+            if not line.startswith("name:"):
+                continue
+            _, value = line.split(":", 1)
+            candidate = value.strip().strip("'\"")
+            if SKILL_NAME_RE.fullmatch(candidate):
+                return candidate
+            break
+    return path.parts[-2]
 
 def iter_skill_md_files(root: pathlib.Path):
     # Prefer tracked files so generated/untracked projections do not pollute output.
@@ -70,12 +88,11 @@ def iter_skill_md_files(root: pathlib.Path):
 for md in sorted(iter_skill_md_files(ROOT)):
     if not is_canonical_skill_md(md):
         continue
-    skill = md.parts[-2]
+    content = md.read_text(encoding="utf-8", errors="replace")
+    skill = resolve_skill_id(md, content)
     if skill in seen_skills:         # first SKILL.md wins (alphabetical sort = utilities/ before skills-antigravity/ typically)
         continue
     seen_skills.add(skill)
-
-    content = md.read_text(encoding="utf-8", errors="replace")
     sa_block = re.search(
         r"## See Also\s*\n(.*?)(?=\n##|\Z)",
         content,

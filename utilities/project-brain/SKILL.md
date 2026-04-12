@@ -64,12 +64,12 @@ If either source is missing, stop and ask the user where the Project Brain contr
 ## Harness-Managed Rollout Depth
 Read when the target repository enforces Project Brain using repo-local harness policy and readiness scripts, not bootstrap only.
 
-- Verify `harness.contract.json` includes `toolingPolicy.projectBrainMemoryExtension` with `enabled=true` and repo-accurate `requiredPaths`.
-- Confirm `scripts/check-environment.sh` defines `required_project_brain_paths=(...)` and gates them with `project_brain_memory_extension_enabled=true`.
+- If the target repository has opted into Project Brain enforcement, verify `harness.contract.json` exposes `toolingPolicy.projectBrainMemoryExtension` with repo-accurate `requiredPaths`.
+- If the repo readiness script exposes Project Brain gates, confirm those keys and required paths stay aligned before enabling strict enforcement.
 - Keep policy and scaffold updates together; do not enable strict enforcement before both are aligned.
 - Run `harness tooling-audit --path <repo-root>` before enabling strict gates so policy drift and readiness-script drift fail early.
-- Validate with each repository documented harness verification commands (at minimum `harness tooling-audit --path <repo-root>` plus the repository fast verify gate).
-- For coding-harness specifically, use the concrete validation lane documented in the rollout reference.
+- Validate with each repository's documented harness verification commands (at minimum `harness tooling-audit --path <repo-root>` plus the repository fast verify gate).
+- For coding-harness specifically, run `bash scripts/verify-work.sh` (project-local scope) and `bash scripts/verify-work.sh --workspace-governance` (workspace scope).
 - For gradual migration, land contract plus scaffold updates first, then turn on strict enforcement.
 
 ## Guardrails

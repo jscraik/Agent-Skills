@@ -68,7 +68,6 @@ PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
     "ce-deepen-plan",
     "ce-deepen-spec",
     "ce-ideate",
-    "ce-plan",
     "ce-reliability-review",
     "ce-review",
     "ce-spec",

@@ -13,13 +13,17 @@ def _repo_root() -> Path:
 
 def _run_help(repo_root: Path) -> str:
     cmd = ["bash", "scripts/verify-work.sh", "--help"]
-    completed = subprocess.run(
-        cmd,
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            cmd,
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError("verify-work help command timed out after 30s") from exc
     if completed.returncode != 0:
         stderr = completed.stderr.strip()
         stdout = completed.stdout.strip()
@@ -45,9 +49,11 @@ def main() -> int:
     required_tokens = [
         "--project-governance",
         "--workspace-governance",
+        "--persistent-artifacts",
         "project-local scope (default)",
         "Validation artifacts are ephemeral.",
         "Validation artifacts are persistent.",
+        "Backward-compatible alias for --workspace-governance",
     ]
     for token in required_tokens:
         _assert_contains(help_text, token, failures)

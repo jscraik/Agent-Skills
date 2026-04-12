@@ -46,7 +46,11 @@ CANONICAL_STANDALONE_SKILL_ROOTS = (
     "frontend",
     "backend",
     "auth",
+    "design",
+    "github",
     "interview",
+    "ops",
+    "personas",
     "skills-system",
 )
 

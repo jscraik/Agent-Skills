@@ -123,7 +123,7 @@ cli-spec:
   agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
-codex-agent-creator:
+codex-agent-builder:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
     agents
@@ -309,7 +309,7 @@ oak-api:
   fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
   mcp-builder: Expose Oak API as MCP tools for agent workflows
   product-spec: Spec the learning experience before implementing
-og-image-creator:
+og-image-builder:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
@@ -383,6 +383,11 @@ rclone:
   feature-video: Upload generated demo artifacts after rendering or capture
   video-transcript-downloader: Transfer downloaded media or transcripts to long-term
     storage
+react-components:
+  baseline-ui: Validate converted components against baseline UI rules
+  design-system: Align converted components with the design-system token layer
+  react-ui-patterns: Apply React composition patterns to converted components
+  stitch-loop: Generate the Stitch screens that this skill converts
 react-ui-patterns:
   baseline-ui: Validate React component patterns against baseline rules
   design-system: Keep typography, spacing, and icon guidance aligned to canonical
@@ -465,10 +470,6 @@ skill-builder:
     for skill-linked delegation flows
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
-  plugin-builder: Package a contract-valid standalone skill when the deliverable explicitly
-    becomes a plugin
-  skill-installer: Install, import, or repair runtime visibility when the skill package
-    is already valid
   skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
     instead of authoring doctrine alone
 skill-creator:
@@ -500,11 +501,6 @@ stitch-loop:
   stitch-react-components: Convert Stitch outputs to React components
   stitch-remotion: Turn Stitch screens into narrated video walkthroughs
   ui-cloner: Clone a UI design into Stitch for iterative generation
-stitch-react-components:
-  baseline-ui: Validate converted components against baseline UI rules
-  design-system: Align converted components with the design-system token layer
-  react-ui-patterns: Apply React composition patterns to converted components
-  stitch-loop: Generate the Stitch screens that this skill converts
 stitch-remotion:
   design-system: Keep overlay and caption styling aligned with canonical token and
     typography governance
