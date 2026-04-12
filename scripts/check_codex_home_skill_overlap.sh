@@ -49,6 +49,38 @@ expand_home_path() {
   esac
 }
 
+collect_manifest_skill_names() {
+  local market_dir="$1"
+
+  python3 - "$market_dir" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+market_dir = Path(sys.argv[1])
+for manifest_path in sorted(market_dir.rglob(".codex-plugin/plugin.json")):
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        continue
+
+    skills_value = payload.get("skills")
+    declared_relative = "skills"
+    if isinstance(skills_value, str) and skills_value.startswith("./") and len(skills_value) > 2:
+        declared_relative = skills_value[2:].rstrip("/")
+    if not declared_relative:
+        continue
+
+    skills_root = manifest_path.parent.parent / declared_relative
+    if not skills_root.is_dir():
+        continue
+
+    for skill_md in sorted(skills_root.glob("*/SKILL.md")):
+        if skill_md.is_file():
+            print(skill_md.parent.name)
+PY
+}
+
 while (($# > 0)); do
   case "${1:-}" in
     --codex-home)
@@ -232,8 +264,7 @@ while IFS= read -r marketplace_name; do
   [[ -n "$marketplace_name" ]] || continue
   market_dir="$cache_root/$marketplace_name"
   [[ -d "$market_dir" ]] || continue
-  find -L "$market_dir" -type f -name 'SKILL.md' \
-    | awk -F/ '$(NF-2)=="skills" {print $(NF-1)}' >> "$plugin_names_file"
+  collect_manifest_skill_names "$market_dir" >> "$plugin_names_file"
 done < "$selected_markets_file"
 sort -u "$plugin_names_file" -o "$plugin_names_file"
 

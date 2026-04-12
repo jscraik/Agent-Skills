@@ -967,11 +967,15 @@ remove_legacy_symlink() {
   fi
 }
 
-# Remove old/legacy symlinks from unsupported locations
-remove_legacy_symlink "$HOME/.copilot/skills"
-remove_legacy_symlink "$HOME/.config/agents/skills"
-remove_legacy_symlink "$HOME/.cursor/skills"
-remove_legacy_symlink "$HOME/.gemini/skills"
+# Remove old/legacy symlinks from unsupported locations.
+# Keep this workspace-only so project-local sync stays side-effect free outside
+# the repository checkout.
+remove_legacy_home_skill_symlinks() {
+  remove_legacy_symlink "$HOME/.copilot/skills"
+  remove_legacy_symlink "$HOME/.config/agents/skills"
+  remove_legacy_symlink "$HOME/.cursor/skills"
+  remove_legacy_symlink "$HOME/.gemini/skills"
+}
 
 # Sync to user-level tool directories (Claude Code + OpenAI Codex/Agents)
 sync_user_skills() {
@@ -1400,6 +1404,7 @@ sync_plugin_cache_projections
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 if [[ "$sync_scope" == "workspace" ]]; then
+  remove_legacy_home_skill_symlinks
   sync_user_skills "$skills_dir" "$HOME/.claude/skills"
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"

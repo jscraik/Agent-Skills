@@ -37,6 +37,12 @@ def _is_relative_plugin_path(value: object) -> bool:
     return all(segment not in {"", ".", ".."} for segment in segments)
 
 
+def _normalize_relative_plugin_path(value: str) -> str:
+    # Accept plugin manifests that spell the skills surface as "./skills/".
+    # The trailing slash is layout noise, not a different root.
+    return value[2:].rstrip("/")
+
+
 def resolve_declared_plugin_skill_root(plugin_root: Path) -> Path | None:
     """Return the plugin-owned skills directory declared by plugin.json, when valid."""
     manifest_path = plugin_root / _PLUGIN_MANIFEST
@@ -53,7 +59,7 @@ def resolve_declared_plugin_skill_root(plugin_root: Path) -> Path | None:
     if skills_value is None:
         declared_relative = _DEFAULT_PLUGIN_SKILLS_RELATIVE
     elif _is_relative_plugin_path(skills_value):
-        declared_relative = skills_value[2:]
+        declared_relative = _normalize_relative_plugin_path(skills_value)
     else:
         return None
 
