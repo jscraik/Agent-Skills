@@ -26,27 +26,55 @@ _DEFAULT_PLUGIN_SKILLS_RELATIVE = "skills"
 
 
 def _is_relative_plugin_path(value: object) -> bool:
-    return isinstance(value, str) and value.startswith("./") and len(value) > 2
+    if not isinstance(value, str) or not value.startswith("./") or len(value) <= 2:
+        return False
+    relative = value[2:]
+    if relative.startswith("/") or relative.endswith("/") or "//" in relative:
+        return False
+    segments = relative.split("/")
+    if not segments:
+        return False
+    return all(segment not in {"", ".", ".."} for segment in segments)
 
 
 def resolve_declared_plugin_skill_root(plugin_root: Path) -> Path | None:
     """Return the plugin-owned skills directory declared by plugin.json, when valid."""
-    declared_relative = _DEFAULT_PLUGIN_SKILLS_RELATIVE
     manifest_path = plugin_root / _PLUGIN_MANIFEST
-    if manifest_path.exists():
-        try:
-            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            payload = None
-        if isinstance(payload, dict):
-            skills_value = payload.get("skills")
-            if _is_relative_plugin_path(skills_value):
-                declared_relative = skills_value[2:]
+    if not manifest_path.exists():
+        return None
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+
+    skills_value = payload.get("skills")
+    if skills_value is None:
+        declared_relative = _DEFAULT_PLUGIN_SKILLS_RELATIVE
+    elif _is_relative_plugin_path(skills_value):
+        declared_relative = skills_value[2:]
+    else:
+        return None
 
     candidate = (plugin_root / declared_relative).resolve()
+    try:
+        candidate.relative_to(plugin_root.resolve())
+    except ValueError:
+        return None
     if candidate.is_dir():
         return candidate
     return None
+
+
+def iter_canonical_standalone_skill_roots(repo_root: Path) -> list[Path]:
+    """Return existing canonical standalone roots under repo_root."""
+    roots: list[Path] = []
+    for root_name in CANONICAL_STANDALONE_SKILL_ROOTS:
+        root_path = (repo_root / root_name).resolve()
+        if root_path.is_dir():
+            roots.append(root_path)
+    return roots
 
 
 def iter_declared_plugin_skill_roots(repo_root: Path) -> list[Path]:

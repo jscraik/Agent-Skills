@@ -47,8 +47,8 @@ if str(_SHARED_SKILL_CONTRACT_DIR) not in sys.path:
     sys.path.insert(0, str(_SHARED_SKILL_CONTRACT_DIR))
 
 from canonical_skill_roots import (  # noqa: E402
-    CANONICAL_STANDALONE_SKILL_ROOTS,
     find_plugin_skill_root_for_output,
+    iter_canonical_standalone_skill_roots,
     iter_declared_plugin_skill_roots,
 )
 
@@ -251,15 +251,32 @@ def _is_plugin_owned_skill_output(out_dir: Path, repo_root: Path) -> bool:
     return find_plugin_skill_root_for_output(out_dir=out_dir, repo_root=repo_root) is not None
 
 
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _is_repo_managed_skill_output(out_dir: Path, repo_root: Path) -> bool:
+    resolved_out_dir = out_dir.resolve()
+    if not _path_is_within(resolved_out_dir, repo_root):
+        return False
+    if find_plugin_skill_root_for_output(out_dir=resolved_out_dir, repo_root=repo_root) is not None:
+        return True
+    return any(
+        _path_is_within(resolved_out_dir, standalone_root)
+        for standalone_root in iter_canonical_standalone_skill_roots(repo_root)
+    )
+
+
 def _find_cross_lane_skill_conflicts(*, repo_root: Path, out_dir: Path, skill_name: str) -> List[str]:
     conflicts: List[str] = []
-    plugin_skill_root = find_plugin_skill_root_for_output(out_dir=out_dir, repo_root=repo_root)
+    plugin_skill_root = find_plugin_skill_root_for_output(out_dir=out_dir.resolve(), repo_root=repo_root)
 
     if plugin_skill_root is not None:
-        for root_name in CANONICAL_STANDALONE_SKILL_ROOTS:
-            root = repo_root / root_name
-            if not root.exists():
-                continue
+        for root in iter_canonical_standalone_skill_roots(repo_root):
             for match in sorted(root.rglob(f"{skill_name}/SKILL.md")):
                 conflicts.append(str(match.parent.relative_to(repo_root)))
     else:
@@ -377,13 +394,16 @@ def init_skill(
         return None
 
     repo_root = find_repo_root(Path(__file__).resolve().parent)
-    cross_lane_conflicts = _find_cross_lane_skill_conflicts(
-        repo_root=repo_root,
-        out_dir=out_dir.resolve(),
-        skill_name=skill_name,
-    )
+    resolved_out_dir = out_dir.resolve()
+    cross_lane_conflicts: List[str] = []
+    if _is_repo_managed_skill_output(resolved_out_dir, repo_root):
+        cross_lane_conflicts = _find_cross_lane_skill_conflicts(
+            repo_root=repo_root,
+            out_dir=resolved_out_dir,
+            skill_name=skill_name,
+        )
     if cross_lane_conflicts:
-        target_lane = "plugin-owned" if _is_plugin_owned_skill_output(out_dir=out_dir, repo_root=repo_root) else "standalone"
+        target_lane = "plugin-owned" if _is_plugin_owned_skill_output(out_dir=resolved_out_dir, repo_root=repo_root) else "standalone"
         rendered = ", ".join(cross_lane_conflicts)
         print(
             "[ERROR] Canonical skill ownership violation: "

@@ -413,6 +413,10 @@ while IFS= read -r skill_path; do
       echo "Skipping hidden plugin lane skill: $skill_name"
       continue
     fi
+    if ! is_plugin_visible_router_skill_name "$skill_name"; then
+      echo "Skipping non-router plugin skill in flat runtime list: $skill_name"
+      continue
+    fi
     if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
       router_collision_count=$((router_collision_count + 1))
       continue

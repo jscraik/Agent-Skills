@@ -56,10 +56,19 @@ if [ -z "$selection_policy_shell" ]; then
 fi
 eval "$selection_policy_shell"
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
+plugin_system_bridge_skills=("${SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS[@]}")
 
 is_allowlisted_router_skill_name() {
   local skill_name="$1"
   case " ${plugin_visible_router_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_allowlisted_system_bridge_skill_name() {
+  local skill_name="$1"
+  case " ${plugin_system_bridge_skills[*]} " in
     *" $skill_name "*) return 0 ;;
     *) return 1 ;;
   esac
@@ -81,7 +90,9 @@ shadowed_count=0
 if [ -s "$plugin_names_file" ] && [ -s "$flat_names_file" ]; then
   comm -12 "$plugin_names_file" "$flat_names_file" | sed '/^$/d' > "$overlap_names_file"
   while IFS= read -r overlap_name; do
-    if [ -z "$overlap_name" ] || is_allowlisted_router_skill_name "$overlap_name"; then
+    if [ -z "$overlap_name" ] \
+      || is_allowlisted_router_skill_name "$overlap_name" \
+      || is_allowlisted_system_bridge_skill_name "$overlap_name"; then
       continue
     fi
     printf '%s\n' "$overlap_name" >> "$shadowed_names_file"

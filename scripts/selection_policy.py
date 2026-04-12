@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-12.v8"
+POLICY_VERSION = "2026-04-12.v9"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -52,6 +52,9 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 # Plugin router skills promoted into default flat discovery.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
     "arscontexta",
+    "ce-plan",
+    "ce-review",
+    "ce-work",
     "coderabbit",
     "skill-factory",
 )

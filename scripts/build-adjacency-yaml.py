@@ -33,7 +33,7 @@ TOPIC_MAPS = {
     "mobile-native", "index",
 }
 
-SKILL_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 
 adjacency = {}   # skill -> {related_skill: description}
@@ -59,7 +59,7 @@ def resolve_skill_id(path: pathlib.Path, content: str) -> str:
                 continue
             _, value = line.split(":", 1)
             candidate = value.strip().strip("'\"")
-            if SKILL_NAME_RE.fullmatch(candidate):
+            if SKILL_REF_RE.fullmatch(candidate):
                 return candidate
             break
     return path.parts[-2]
@@ -71,7 +71,7 @@ def normalize_skill_ref(target: str) -> str:
     if ":" not in normalized:
         return normalized
     _, suffix = normalized.split(":", 1)
-    if SKILL_NAME_RE.fullmatch(suffix):
+    if SKILL_REF_RE.fullmatch(suffix):
         return suffix
     return normalized
 
@@ -108,7 +108,11 @@ for md in sorted(iter_skill_md_files(ROOT)):
     skill = resolve_skill_id(md, content)
     previous = seen_skills.get(skill)
     if previous and previous != md:
-        # Keep first canonical path, mirroring validate-adjacency.py semantics.
+        print(
+            "warning: duplicate canonical skill id "
+            f"'{skill}': keeping {previous.as_posix()}, ignoring {md.as_posix()}",
+            file=sys.stderr,
+        )
         continue
     seen_skills[skill] = md
     sa_block = re.search(

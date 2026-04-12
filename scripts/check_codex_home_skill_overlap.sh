@@ -105,6 +105,21 @@ codex_home="$(expand_home_path "$codex_home")"
 flat_root="$codex_home/skills"
 cache_root="$codex_home/$cache_rel"
 
+is_safe_codex_path() {
+  local path_value="$1"
+  [[ -n "$path_value" ]] || return 1
+  [[ "$path_value" = /* ]] || return 1
+  [[ "$path_value" != "/" ]] || return 1
+  case "$path_value" in
+    "$HOME"/.codex*|*/.codex/*|*/.codex)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 flat_names_file="$(mktemp "${TMPDIR:-/tmp}/codex-flat-skills.XXXXXX")"
 plugin_names_file="$(mktemp "${TMPDIR:-/tmp}/codex-plugin-skills.XXXXXX")"
 overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/codex-overlap-skills.XXXXXX")"
@@ -136,6 +151,15 @@ fi
 
 : > "$plugin_names_file"
 if [[ "$remediate_cache_skills" -eq 1 ]]; then
+  if ! is_safe_codex_path "$codex_home"; then
+    echo "Refusing remediation for unexpected --codex-home: $codex_home" >&2
+    exit 2
+  fi
+  if ! is_safe_codex_path "$cache_root"; then
+    echo "Refusing remediation for unexpected cache root: $cache_root" >&2
+    exit 2
+  fi
+
   while IFS= read -r marketplace_name; do
     [[ -n "$marketplace_name" ]] || continue
     market_dir="$cache_root/$marketplace_name"
@@ -143,6 +167,10 @@ if [[ "$remediate_cache_skills" -eq 1 ]]; then
     while IFS= read -r plugin_dir; do
       [[ -n "$plugin_dir" ]] || continue
       [[ -d "$plugin_dir" ]] || continue
+      if [[ "$plugin_dir" != "$cache_root/"* ]]; then
+        echo "Refusing remediation for plugin dir outside cache root: $plugin_dir" >&2
+        exit 2
+      fi
       if [[ -f "$plugin_dir/.codex-plugin/plugin.json" ]]; then
         continue
       fi
@@ -161,6 +189,10 @@ if [[ "$remediate_cache_skills" -eq 1 ]]; then
       fi
 
       [[ -n "$candidate_dir" ]] || continue
+      if [[ "$candidate_dir" != "$plugin_dir/"* ]]; then
+        echo "Refusing remediation for candidate dir outside plugin dir: $candidate_dir" >&2
+        exit 2
+      fi
       if [[ "$candidate_dir" == "$plugin_dir/"* ]]; then
         tmp_copy_dir="$(mktemp -d "${TMPDIR:-/tmp}/codex-cache-fix.XXXXXX")"
         cp -R "$candidate_dir"/. "$tmp_copy_dir"/
