@@ -5,6 +5,7 @@ Read when: you need the exact currently documented Codex hooks surface before sc
 ## Table of Contents
 - [Why this matters](#why-this-matters)
 - [Docs snapshot](#docs-snapshot)
+- [Release and schema sweep](#release-and-schema-sweep)
 - [Runtime surface](#runtime-surface)
 - [Field support and caveats](#field-support-and-caveats)
 - [Design implications](#design-implications)
@@ -15,7 +16,25 @@ Codex hooks are contract-sensitive. This skill should scaffold only what is expl
 
 ## Docs snapshot
 - Primary source checked: `https://developers.openai.com/codex/hooks`.
-- Verification date for this skill: April 9, 2026.
+- Verification date for this skill: April 12, 2026.
+- Latest stable release checked: `rust-v0.120.0` (published April 11, 2026).
+- Latest alpha release checked: `rust-v0.121.0-alpha.2` (published April 11, 2026).
+
+## Release and schema sweep
+Hook-related changes confirmed from current release stream and schema/source checks:
+- `#17073` Support clear SessionStart source:
+  - current schema enum is `startup`, `resume`, `clear`.
+  - scaffold matchers should include all three values.
+- `#15118` turn_id extension for `Stop` and `UserPromptSubmit`:
+  - `turn_id` is required in current input schemas for `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, and `Stop`.
+- `#14532` stop continuation and `stop_hook_active` mechanics:
+  - `stop_hook_active` is required in current `Stop` input schema and should be honored to avoid re-block loops.
+- `#15211` and `#15531` non-streaming shell-only `PreToolUse` and `PostToolUse` support:
+  - current input schema remains shell-only with `tool_name: "Bash"`.
+- `#17266` improved hook status rendering:
+  - `statusMessage` remains worth setting on slower hooks for visibility.
+- `#17268` removed Windows gate that disabled hooks:
+  - do not assume hooks are disabled on Windows in current release stream.
 
 ## Runtime surface
 `hooks.json` is discovered from active config-layer folders.
@@ -31,7 +50,10 @@ Documented handler type:
 - `type: "command"`
 
 Matcher behavior:
-- `SessionStart.matcher` matches `source` (`startup` or `resume` in the current documented runtime).
+- `SessionStart.matcher` matches `source`:
+  - docs page currently lists `startup` and `resume`;
+  - latest release notes and generated schema show `startup`, `resume`, and `clear`;
+  - this skill should scaffold `^(startup|resume|clear)$` and treat docs-only values as stale until docs catch up.
 - `PreToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
 - `PostToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
 - `UserPromptSubmit.matcher` is currently not used.
@@ -59,24 +81,28 @@ Event-specific behavior:
 - `SessionStart`
   - plain text on stdout is added as context.
   - JSON supports `hookSpecificOutput.additionalContext`.
-  - current documented runtime values are `startup` and `resume`; do not rely on undocumented extra source values in generated matchers.
+  - docs currently mention `startup` and `resume`, while current Codex release/schema also supports `clear`; generated matchers should include all three values.
 - `PreToolUse`
   - currently supports Bash tool interception only.
+  - current schema requires `turn_id` in input.
   - JSON supports `hookSpecificOutput.permissionDecision: "deny"` and `permissionDecisionReason`.
   - legacy block shape (`decision: "block"` + `reason`) and exit code `2` are accepted.
   - `permissionDecision: "allow"`/`"ask"` and several extra fields are parsed but currently fail open.
 - `PostToolUse`
   - currently supports Bash tool results only.
+  - current schema requires `turn_id` in input.
   - cannot undo side effects from the command that already ran.
   - JSON supports `systemMessage`, `decision: "block"` feedback shape, and `hookSpecificOutput.additionalContext`.
   - `continue: false` can stop normal processing of the original tool result.
   - `updatedMCPToolOutput` and `suppressOutput` are parsed but currently fail open.
 - `UserPromptSubmit`
   - plain text on stdout is added as extra developer context.
+  - current schema requires `turn_id` in input.
   - JSON supports `hookSpecificOutput.additionalContext`.
   - prompt blocking supports `decision: "block"` + `reason` (or exit code `2` + stderr).
 - `Stop`
   - expects JSON on stdout when exiting `0`; plain text is invalid.
+  - current schema requires both `turn_id` and `stop_hook_active` in input.
   - `decision: "block"` creates a continuation prompt rather than rejecting the turn.
   - if any matching `Stop` hook returns `continue: false`, that takes precedence.
 
@@ -104,14 +130,29 @@ Official documentation:
 - Hooks reference and runtime behavior:
   - `https://developers.openai.com/codex/hooks`
 
+Release notes:
+- Stable:
+  - `https://github.com/openai/codex/releases/tag/rust-v0.120.0`
+- Alpha:
+  - `https://github.com/openai/codex/releases/tag/rust-v0.121.0-alpha.2`
+
 Codex repo schema source:
 - Generated hook schemas:
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/schema/generated`
   - includes `pre-tool-use`, `post-tool-use`, `session-start`, `user-prompt-submit`, and `stop` command input/output schemas.
+  - `session-start.command.input.schema.json` currently lists `source` enum values `startup`, `resume`, and `clear`.
 - Runtime selection and matcher behavior:
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/events/common.rs`
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/engine/discovery.rs`
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/engine/config.rs`
+
+Local codex source verification:
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/events/session_start.rs`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/session-start.command.input.schema.json`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/pre-tool-use.command.input.schema.json`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/post-tool-use.command.input.schema.json`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/user-prompt-submit.command.input.schema.json`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/stop.command.input.schema.json`
 
 Cross-runtime compatibility reference:
 - `https://github.com/anthropics/claude-code/blob/main/src/entrypoints/sdk/coreSchemas.ts`

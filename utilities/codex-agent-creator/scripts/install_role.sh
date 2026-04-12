@@ -9,8 +9,11 @@ Usage:
 Options:
   --scope global|project   Install target scope (default: global)
   --project-root PATH      Project root for --scope project (default: current directory)
+  --canonical-root PATH    Canonical global Codex root (default: ~/dev/configs/codex)
   --agents-dir PATH        Override target agents directory
   --config PATH            Override target config.toml for optional [agents] limits
+  --allow-noncanonical-global-paths
+                          Allow global installs outside <canonical-root> (off by default)
   --allow-project-config-write
                           Allow writing <project>/.codex/config.toml when --scope project
   --nickname-candidates CSV
@@ -27,6 +30,7 @@ USAGE
 
 scope="global"
 project_root="$(pwd)"
+canonical_root="${CODEX_CANONICAL_ROOT:-${HOME}/dev/configs/codex}"
 config_path=""
 agents_dir=""
 agent_name=""
@@ -35,16 +39,14 @@ nickname_candidates_csv=""
 update_existing="false"
 deprecated_disable_multi_agent="false"
 allow_project_config_write="false"
+allow_noncanonical_global_paths="false"
 max_threads=""
 max_depth=""
 job_max_runtime_seconds=""
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 normalize_path() {
   local raw_path="$1"
-  if command -v realpath >/dev/null 2>&1; then
-    realpath -m "$raw_path"
-    return 0
-  fi
   python3 - "$raw_path" <<'PY'
 import os
 import sys
@@ -52,6 +54,22 @@ import sys
 value = sys.argv[1]
 print(os.path.normpath(os.path.realpath(os.path.abspath(value))))
 PY
+}
+
+validate_agent_name() {
+  local candidate="$1"
+  if [[ -z "$candidate" ]]; then
+    echo "Agent name cannot be empty." >&2
+    exit 1
+  fi
+  if [[ "$candidate" == *"/"* || "$candidate" == *"\\"* || "$candidate" == "." || "$candidate" == ".." ]]; then
+    echo "Invalid agent name '$candidate': path separators and traversal markers are not allowed." >&2
+    exit 1
+  fi
+  if ! [[ "$candidate" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+    echo "Invalid agent name '$candidate': expected pattern ^[A-Za-z0-9][A-Za-z0-9_-]*$." >&2
+    exit 1
+  fi
 }
 
 require_option_value() {
@@ -71,12 +89,17 @@ while [[ $# -gt 0 ]]; do
     --project-root)
       require_option_value "$1" "${2:-}"
       project_root="$2"; shift 2 ;;
+    --canonical-root)
+      require_option_value "$1" "${2:-}"
+      canonical_root="$2"; shift 2 ;;
     --agents-dir)
       require_option_value "$1" "${2:-}"
       agents_dir="$2"; shift 2 ;;
     --config)
       require_option_value "$1" "${2:-}"
       config_path="$2"; shift 2 ;;
+    --allow-noncanonical-global-paths)
+      allow_noncanonical_global_paths="true"; shift ;;
     --allow-project-config-write)
       allow_project_config_write="true"; shift ;;
     --agent-name|--role-name)
@@ -115,6 +138,8 @@ if [[ -z "$agent_name" || -z "$agent_file" ]]; then
   usage
   exit 2
 fi
+
+validate_agent_name "$agent_name"
 
 case "$scope" in
   global|project) ;;
@@ -169,19 +194,49 @@ if [[ "$declared_name" != "$agent_name" ]]; then
   exit 1
 fi
 
+validate_agent_name "$declared_name"
+
+validate_role_script="${script_dir}/validate_role.sh"
+if [[ ! -x "$validate_role_script" ]]; then
+  echo "Missing executable validator script: $validate_role_script" >&2
+  exit 1
+fi
+bash "$validate_role_script" --agent-name "$agent_name" --agent-file "$agent_file"
+
+canonical_root="$(normalize_path "$canonical_root")"
+canonical_agents_dir="${canonical_root%/}/agents"
+canonical_config_path="${canonical_root%/}/config.toml"
+
 if [[ -n "$agents_dir" ]]; then
   target_agents_dir="$agents_dir"
 elif [[ "$scope" == "global" ]]; then
-  target_agents_dir="${HOME}/.codex/agents"
+  target_agents_dir="$canonical_agents_dir"
 else
   target_agents_dir="${project_root}/.codex/agents"
 fi
 
 if [[ -z "$config_path" ]]; then
   if [[ "$scope" == "global" ]]; then
-    config_path="${HOME}/.codex/config.toml"
+    config_path="$canonical_config_path"
   else
     config_path="${project_root}/.codex/config.toml"
+  fi
+fi
+
+if [[ "$scope" == "global" && "$allow_noncanonical_global_paths" != "true" ]]; then
+  effective_agents_dir="$(normalize_path "$target_agents_dir")"
+  effective_config_path="$(normalize_path "$config_path")"
+  if [[ "$effective_agents_dir" != "$(normalize_path "$canonical_agents_dir")" ]]; then
+    echo "Refusing non-canonical global agents dir: $target_agents_dir" >&2
+    echo "Expected canonical path under: $canonical_agents_dir" >&2
+    echo "Use --allow-noncanonical-global-paths only for explicit compatibility overrides." >&2
+    exit 1
+  fi
+  if [[ "$effective_config_path" != "$(normalize_path "$canonical_config_path")" ]]; then
+    echo "Refusing non-canonical global config path: $config_path" >&2
+    echo "Expected canonical path: $canonical_config_path" >&2
+    echo "Use --allow-noncanonical-global-paths only for explicit compatibility overrides." >&2
+    exit 1
   fi
 fi
 
@@ -192,7 +247,7 @@ if [[ -n "$max_threads" || -n "$max_depth" || -n "$job_max_runtime_seconds" ]]; 
     effective_config_path="$(normalize_path "$config_path")"
     if [[ "$effective_config_path" == "$project_codex_config" || "$effective_config_path" == "$cwd_codex_config" ]]; then
       echo "Refusing to write project-scoped Codex config: $config_path" >&2
-      echo "Use --allow-project-config-write to opt in explicitly, or pass --config ~/.codex/config.toml." >&2
+      echo "Use --allow-project-config-write to opt in explicitly, or pass --config to a global Codex config path." >&2
       exit 1
     fi
   fi
@@ -217,6 +272,9 @@ if [[ -n "$nickname_candidates_csv" ]]; then
   mv "$tmp_toml" "$target_agent_file"
   rm -f "$tmp_json"
 fi
+
+# Re-validate the installed file after any post-copy mutation (for example nickname injection).
+bash "$validate_role_script" --agent-name "$agent_name" --agent-file "$target_agent_file"
 
 if [[ -n "$max_threads" || -n "$max_depth" || -n "$job_max_runtime_seconds" ]]; then
   mkdir -p "$(dirname "$config_path")"
@@ -255,6 +313,10 @@ fi
 
 if [[ "$deprecated_disable_multi_agent" == "true" ]]; then
   echo "Warning: --disable-multi-agent is deprecated and ignored. Subagent availability is controlled by current Codex runtime behavior." >&2
+fi
+
+if [[ "$scope" == "global" && "$allow_noncanonical_global_paths" == "true" ]]; then
+  echo "Warning: non-canonical global install override enabled." >&2
 fi
 
 echo "Installed custom agent '$agent_name' to $target_agent_file"

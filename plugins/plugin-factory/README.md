@@ -38,7 +38,7 @@ Codex plugin package that bundles the plugin-authoring family in one installable
   - `skills-system/plugin-creator/`
   - `skills-system/plugin-installer/`
 - Generated projection cache (do not edit directly):
-  - `plugins/cache/agent-skills-local/plugin-factory/local/`
+  - `.agents/plugins-runtime/cache/agent-skills-local/plugin-factory/local/`
 - Repo: `https://github.com/jscraik/Agent-Skills`
 
 When updating family logic, edit plugin paths first and regenerate projections.

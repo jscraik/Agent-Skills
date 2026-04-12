@@ -11,7 +11,7 @@ inputs:
   - target environment (codex, claude, portable)
   - conformance profile (native or imported)
   - prompt coverage (happy, edge, should-not-trigger)
-  - optional agent injection strategy (`reuse-existing` from `/Users/jamiecraik/dev/configs/codex/agents` or `create-purpose-built` via `codex-agent-builder`)
+  - optional agent injection strategy (`reuse-existing` from `/Users/jamiecraik/dev/configs/codex/agents` or `create-purpose-built` via `codex-agent-builder`, with global installs targeting `/Users/jamiecraik/dev/configs/codex/config.toml`)
 outputs:
   - scoped response with required headings
   - implementation plan or concrete file edits
@@ -50,7 +50,7 @@ risks:
 rollback_procedure: >
   If skill-builder produces degraded output (missing required headings, incorrect mode routing, or
   invalid validator evidence), revert to the previous SKILL.md by restoring the last known-good git
-  commit for utilities/skill-builder/SKILL.md. Re-run the family gate
+  commit for plugins/skill-factory/skills/skill-builder/SKILL.md. Re-run the family gate
   (bash scripts/validate_skill_authoring_family.sh) to confirm the rollback candidate passes all
   structural checks before re-deploying. If the regression is in a validator script, revert the
   relevant script and re-run: python utilities/skill-builder/scripts/skill_gate.py <skill> --format text.

@@ -34,7 +34,7 @@ Codex plugin package for CodeRabbit review operations: reference guidance, CLI r
   - `plugins/coderabbit/skills/autofix/`
   - `plugins/coderabbit/skills/simplify/`
 - Packaged cache mirror:
-  - `plugins/cache/agent-skills-local/coderabbit/local/`
+  - `.agents/plugins-runtime/cache/agent-skills-local/coderabbit/local/`
 
 When updating this plugin, keep source and packaged mirror behaviorally aligned.
 

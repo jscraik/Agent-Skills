@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Fail if verify-work help text drifts from governance scope contract."""
+"""Fail if verify-work usage contract drifts from governance scope contract."""
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 
@@ -12,26 +11,25 @@ def _repo_root() -> Path:
 
 
 def _run_help(repo_root: Path) -> str:
-    cmd = ["bash", "scripts/verify-work.sh", "--help"]
+    script_path = repo_root / "scripts/verify-work.sh"
     try:
-        completed = subprocess.run(
-            cmd,
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=30,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError("verify-work help command timed out after 30s") from exc
+        script_text = script_path.read_text(encoding="utf-8")
     except OSError as exc:
-        raise RuntimeError(f"verify-work help command could not start: {exc}") from exc
-    if completed.returncode != 0:
-        stderr = completed.stderr.strip()
-        stdout = completed.stdout.strip()
-        detail = stderr or stdout or "no output"
-        raise RuntimeError(f"verify-work help command failed: {detail}")
-    return completed.stdout
+        raise RuntimeError(f"could not read {script_path}: {exc}") from exc
+
+    marker = "cat <<'USAGE'"
+    start_marker = script_text.find(marker)
+    if start_marker < 0:
+        raise RuntimeError("verify-work usage block start marker not found")
+    start = script_text.find("\n", start_marker)
+    if start < 0:
+        raise RuntimeError("verify-work usage block start line is malformed")
+    start += 1
+
+    end = script_text.find("\nUSAGE", start)
+    if end < 0:
+        raise RuntimeError("verify-work usage block end marker not found")
+    return script_text[start:end]
 
 
 def _assert_contains(help_text: str, needle: str, failures: list[str]) -> None:

@@ -14,9 +14,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Frontend — Website](#frontend-website)
 - [Github](#github)
 - [Interview](#interview)
-- [Plugins — Arscontexta — Skills](#plugins-arscontexta-skills)
-- [Plugins — Coderabbit — Skills](#plugins-coderabbit-skills)
-- [Plugins — Skill Factory — Skills](#plugins-skill-factory-skills)
 - [Product — Content](#product-content)
 - [Product — Docs](#product-docs)
 - [Product — Domain](#product-domain)
@@ -29,10 +26,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 114
+- `total_skills`: 112
 - `catalog_source`: repository skill scan
 - `visibility`: default
-- `policy_identity`: 28ef3f2a34b61c2d
+- `policy_identity`: b380bfd98ba54e86
 
 ## Catalog
 
@@ -98,18 +95,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `deep-interview` — Deepen an existing doc or topic through a structured gap-filling interview that adds missing assumptions, edge cases, and approval gates. Use when refining PRDs, ADRs, tickets, notes, or draft specs before planning or execution.
 - `interview-me` — Use this skill to analyze underspecified requests through a short interview and surface missing tradeoffs, assumptions, and approval gates before implementation when a prompt is underdefined and guessing would be risky.
 
-## Plugins — Arscontexta — Skills
-
-- `arscontexta` — Analyze Ars Contexta vault state in Codex and recommend setup, health, and next-command actions. Use this skill when users ask for Ars Contexta help, routing, or health triage.
-
-## Plugins — Coderabbit — Skills
-
-- `coderabbit` — Answer CodeRabbit setup, configuration, knowledge-base, review-command, tool, and rollout questions by retrieving evidence from the local crawl corpus. Use when a user needs repository-local CodeRabbit documentation to decide how to configure, operate, or troubleshoot CodeRabbit, not when they need generic CI authoring or live SaaS state changes.
-
-## Plugins — Skill Factory — Skills
-
-- `skill-factory` — Route to the right skill-authoring lane
-
 ## Product — Content
 
 - `changelog` — Create engaging changelogs for recent merges to main branch with a witty, enthusiastic marketing voice. Use when the user wants a daily or weekly engineering summary, release-note style update, or Discord-ready changelog that highlights features, bugs, and gives contributor credit with personality.
@@ -124,6 +109,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `agents-md` — Create or refactor AGENTS.md and linked instruction docs using progressive disclosure. Use when the user wants repo-specific agent guidance organized, deduplicated, or routed cleanly, not ordinary product documentation edits.
 - `context7` — Analyze current external library/API documentation and generate Context7 CLI guidance when the user asks for version-sensitive dependency behavior, library API references, or Context7 skills/setup/auth command help.
 - `docs-expert` — Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
+- `llm-wiki` — Create and maintain an LLM-managed markdown wiki that incrementally compiles source material into a persistent, queryable knowledge base; use this skill when users ask for persistent wiki architecture, ingest/query/lint workflows, or schema governance.
 
 ## Product — Domain
 
@@ -176,7 +162,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `bootstrap` — Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
 - `circleci` — Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
 - `claude-alias` — Diagnose, repair, and harden Claude wrapper alias routing (`ck`, `cz`, `cc`) when provider configs drift or auth/model conflicts return the wrong backend.
-- `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone `.codex/agents/*.toml` files with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+- `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/*.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 - `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
 - `codex-home-audit` — Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.
 - `codex-hooks-builder` — Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs. Use when the user wants hook runtime files or hook-script hardening, not general agent role creation.

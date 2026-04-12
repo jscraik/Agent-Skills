@@ -147,6 +147,7 @@ run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests
 run_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" scripts/verify_skill_catalog_freshness.py --strict
 run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash scripts/check_plugin_skill_shadowing.sh
 run_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash scripts/validate_projection_integrity.sh
+run_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." bash scripts/check_path_ownership_boundaries.sh
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict

@@ -11,17 +11,24 @@ inputs:
   - model_reasoning_effort
   - developer_instructions
   - optional nickname_candidates for spawned-agent display labels
-  - install scope (global or project)
+  - install scope (global by default; project only when explicitly requested)
   - target standalone custom-agent file path
-  - optional global limits: agents.max_threads, agents.max_depth, agents.job_max_runtime_seconds
+  - canonical global targets (`~/dev/configs/codex/agents/`, `~/dev/configs/codex/config.toml`) unless explicit override is approved
+  - optional global limits (agents.max_threads, agents.max_depth, agents.job_max_runtime_seconds)
 outputs:
-  - updated standalone custom-agent file
+  - updated standalone custom-agent file in canonical path by default
   - optional updated [agents] global limits
   - validation result summary
+observability: >
+  Record exact command outcomes (pass|fail|blocked) for write/validate/install commands,
+  and include effective target paths for the installed agent file and config in handoff summaries.
+rollback_procedure: >
+  Restore any config backup emitted by install_role.sh when limits are changed, remove
+  incorrectly installed agent files, and rerun validation before reattempting install.
 non_goals:
   - editing unrelated codex config sections beyond requested [agents] runtime-limit keys
   - guessing missing required custom-agent inputs
 risks:
-  - missing required standalone keys (name/description/developer_instructions); mitigated by explicit key validation
+  - missing required standalone keys (name/description/developer_instructions/model/model_reasoning_effort); mitigated by explicit key validation
   - path mistakes; mitigated by explicit path confirmation
   - over-constraining agent runtime globally; mitigated by explicit user confirmation before setting limits

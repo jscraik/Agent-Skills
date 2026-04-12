@@ -2,7 +2,7 @@
 """Tests for scaffold_hook_pack.py changes introduced in this PR.
 
 Covers:
-- build_hooks_json(): SessionStart matcher changed from ^(startup|resume|clear)$ to ^(startup|resume)$
+- build_hooks_json(): SessionStart matcher includes startup, resume, and clear
 - ensure_writeable(): file-existence and force-flag behavior
 - write_text(): directory creation and content writing
 - main() integration: project vs user scope, file permissions, timeout bounds
@@ -30,7 +30,7 @@ import scaffold_hook_pack  # noqa: E402
 
 
 class TestBuildHooksJsonMatcher(unittest.TestCase):
-    """Verify SessionStart matcher reflects the PR change (removed |clear)."""
+    """Verify SessionStart matcher includes startup, resume, and clear."""
 
     def _make_paths(self) -> tuple[Path, Path, Path]:
         """
@@ -66,18 +66,18 @@ class TestBuildHooksJsonMatcher(unittest.TestCase):
         )
         return json.loads(raw)
 
-    def test_session_start_matcher_is_startup_resume_only(self) -> None:
-        """Matcher must be exactly ^(startup|resume)$ — 'clear' must not appear."""
+    def test_session_start_matcher_is_startup_resume_clear(self) -> None:
+        """Matcher must be exactly ^(startup|resume|clear)$."""
         payload = self._parse()
         hooks = payload["hooks"]["SessionStart"]
         self.assertEqual(len(hooks), 1)
         matcher = hooks[0]["matcher"]
-        self.assertEqual(matcher, "^(startup|resume)$")
+        self.assertEqual(matcher, "^(startup|resume|clear)$")
 
-    def test_session_start_matcher_does_not_include_clear(self) -> None:
+    def test_session_start_matcher_includes_clear(self) -> None:
         payload = self._parse()
         matcher = payload["hooks"]["SessionStart"][0]["matcher"]
-        self.assertNotIn("clear", matcher)
+        self.assertIn("clear", matcher)
 
     def test_session_start_matcher_includes_startup(self) -> None:
         payload = self._parse()
@@ -369,11 +369,9 @@ class TestMainProjectScope(unittest.TestCase):
             mode = script.stat().st_mode
             self.assertTrue(mode & stat.S_IXUSR)
 
-    def test_project_scope_hooks_json_matcher_is_startup_resume(self) -> None:
+    def test_project_scope_hooks_json_matcher_is_startup_resume_clear(self) -> None:
         """
-        Verify that a project-scoped hooks.json defines the SessionStart matcher exactly as ^(startup|resume)$.
-        
-        Asserts the generated .codex/hooks.json contains a SessionStart hook whose first matcher equals "^(startup|resume)$" (ensuring it does not include "clear").
+        Verify that a project-scoped hooks.json defines the SessionStart matcher exactly as ^(startup|resume|clear)$.
         """
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -381,23 +379,20 @@ class TestMainProjectScope(unittest.TestCase):
             hooks_json = root / ".codex" / "hooks.json"
             payload = json.loads(hooks_json.read_text(encoding="utf-8"))
             matcher = payload["hooks"]["SessionStart"][0]["matcher"]
-            self.assertEqual(matcher, "^(startup|resume)$")
+            self.assertEqual(matcher, "^(startup|resume|clear)$")
 
-    def test_project_scope_hooks_json_matcher_excludes_clear(self) -> None:
+    def test_project_scope_hooks_json_matcher_includes_clear(self) -> None:
         """
-        Ensure the generated SessionStart hook matcher for project scope excludes the string "clear".
-        
-        This protects against templates or matcher-generation logic that would treat a terminal clear event as a recognised hook source; the test runs the scaffolding for a project target and asserts the serialized `SessionStart` matcher does not contain `"clear"`.
+        Ensure the generated SessionStart hook matcher for project scope includes the string "clear".
         """
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._run_main(root)
             hooks_json = root / ".codex" / "hooks.json"
             content = hooks_json.read_text(encoding="utf-8")
-            # 'clear' must not appear in matcher context
             payload = json.loads(content)
             matcher = payload["hooks"]["SessionStart"][0]["matcher"]
-            self.assertNotIn("clear", matcher)
+            self.assertIn("clear", matcher)
 
     def test_project_scope_summary_has_correct_scope(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -499,7 +494,7 @@ class TestMainUserScope(unittest.TestCase):
 
     def test_user_scope_hooks_json_matcher_correct(self) -> None:
         """
-        Ensure that when scaffolding hooks for user scope the SessionStart hook's matcher is exactly "^(startup|resume)$".
+        Ensure that when scaffolding hooks for user scope the SessionStart hook's matcher is exactly "^(startup|resume|clear)$".
         
         This protects against regressions that would alter the required session-start matcher in the generated hooks.json for user-scoped installations.
         """
@@ -509,7 +504,7 @@ class TestMainUserScope(unittest.TestCase):
             hooks_json = root / "hooks.json"
             payload = json.loads(hooks_json.read_text(encoding="utf-8"))
             matcher = payload["hooks"]["SessionStart"][0]["matcher"]
-            self.assertEqual(matcher, "^(startup|resume)$")
+            self.assertEqual(matcher, "^(startup|resume|clear)$")
 
 
 # ---------------------------------------------------------------------------

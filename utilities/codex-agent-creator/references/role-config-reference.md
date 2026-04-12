@@ -1,4 +1,4 @@
-# Custom Agent Config Reference (Codex Subagents, March 2026)
+# Custom Agent Config Reference (Codex Subagents, April 2026)
 
 ## Table of Contents
 - [Canonical sources](#canonical-sources)
@@ -10,19 +10,30 @@
 - [Configuration categories with examples](#configuration-categories-with-examples)
 - [Inheritance rule of thumb](#inheritance-rule-of-thumb)
 - [Compatibility note](#compatibility-note)
+- [Upstream alignment snapshot](#upstream-alignment-snapshot)
 
 ## Canonical sources
 
 - Codex subagents guide: <https://developers.openai.com/codex/subagents/>
 - Codex subagent concepts: <https://developers.openai.com/codex/concepts/subagents/>
 - Codex config reference: <https://developers.openai.com/codex/config-reference/>
+- Local codex fork deep dive: `~/dev/codex/codex-rs/core/src/config/agent_roles.rs` and `~/dev/codex/docs/config.md`
+- Codex release feed for latest checks: <https://github.com/openai/codex/releases>
 
 ## Preferred authoring model
 
-As of March 2026 guidance, custom subagents should be authored as standalone TOML files under:
+As of April 12, 2026 guidance, custom subagents should be authored as standalone TOML files.
+
+In this workspace, the canonical source-of-truth path is:
+
+- `~/dev/configs/codex/agents/` for global/shared custom agents
+
+Runtime/project projections may still exist at:
 
 - `~/.codex/agents/` for personal/global agents
 - `.codex/agents/` for project-scoped agents
+
+Treat runtime/project projections as compatibility and discovery surfaces. In this workspace, new writes default to the canonical source-of-truth path above.
 
 Each file defines exactly one custom agent.
 
@@ -33,14 +44,12 @@ Every standalone custom-agent file must define:
 - `name`
 - `description`
 - `developer_instructions`
-
-The builder keeps `model` and `model_reasoning_effort` explicit by default for predictable behavior and easier review.
+- `model`
+- `model_reasoning_effort`
 
 Optional fields can include:
 
 - `nickname_candidates`
-- `model`
-- `model_reasoning_effort`
 - `sandbox_mode`
 - `mcp_servers`
 - `skills.config`
@@ -55,6 +64,8 @@ developer_instructions = """
 Review code like an owner.
 Prioritize correctness, security, behavior regressions, and missing test coverage.
 """
+model = "gpt-5.4-mini"
+model_reasoning_effort = "medium"
 ```
 
 ### Recommended minimal working profile
@@ -81,7 +92,7 @@ Prioritize correctness, security, behavior regressions, and missing test coverag
 
 ## Global agent runtime controls
 
-Global spawned-agent limits belong under `[agents]` in `config.toml`:
+Global spawned-agent limits belong under `[agents]` in the canonical Codex config (`~/dev/configs/codex/config.toml` by default):
 
 - `agents.max_threads`
 - `agents.max_depth`
@@ -101,7 +112,7 @@ job_max_runtime_seconds = 1800
 For this skill, validation must assert:
 
 1. standalone agent file exists at the expected path
-2. `name`, `description`, and `developer_instructions` are present and non-empty
+2. `name`, `description`, `developer_instructions`, `model`, and `model_reasoning_effort` are present and non-empty
 3. `name` matches the intended installed agent name
 4. optional `nickname_candidates`, if present, is unique and uses allowed characters
 5. optional global limits match requested values when limit assertions are provided
@@ -115,7 +126,7 @@ From current subagents guidance:
 - Codex only spawns new subagents when explicitly asked.
 - Subagents inherit parent sandbox and approval policy defaults.
 - Parent turn runtime overrides are reapplied to children (including interactive override choices).
-- Custom-agent defaults still matter, but they do not bypass parent runtime controls.
+- Custom-agent defaults still matter, but they do not supersede parent runtime controls.
 - If a custom agent name collides with a built-in one, the custom definition takes precedence.
 
 Practical implication: keep instructions narrow and deterministic, and prefer explicit safety boundaries over hidden assumptions.
@@ -154,6 +165,8 @@ Lead with concrete findings and reproduction guidance.
 ```toml
 name = "reviewer"
 description = "PR reviewer focused on correctness and tests."
+model = "gpt-5.4-mini"
+model_reasoning_effort = "medium"
 developer_instructions = "Review code like an owner."
 nickname_candidates = ["Atlas", "Delta", "Echo"]
 ```
@@ -166,4 +179,12 @@ nickname_candidates = ["Atlas", "Delta", "Echo"]
 
 ## Compatibility note
 
-`config-reference` still documents `agents.<name>.description`, `agents.<name>.config_file`, and `agents.<name>.nickname_candidates`. Treat that pattern as legacy compatibility for existing deployments. The default builder path for new work should be standalone custom-agent files under `.codex/agents/` or `~/.codex/agents/`.
+`config-reference` still documents `agents.<name>.description`, `agents.<name>.config_file`, and `agents.<name>.nickname_candidates`. Treat that pattern as legacy compatibility for existing deployments. In this workspace, default builder output targets standalone custom-agent files under `~/dev/configs/codex/agents/`; `.codex/agents/` and `~/.codex/agents/` are compatibility/runtime projections and require explicit override intent before writes.
+
+## Upstream alignment snapshot
+
+- Latest stable release observed: `openai/codex` `0.120.0` (published 2026-04-11 UTC).
+- Latest alpha release observed: `openai/codex` `0.121.0-alpha.2` (published 2026-04-11 UTC).
+- OpenAI Codex config reference still documents default user config path `~/.codex/config.toml`.
+- Local fork deep dive confirms role discovery from each config-layer `agents/` directory and strict validation of `description`, `developer_instructions`, and `nickname_candidates` hygiene.
+- Repository policy decision for this skill: write new global agents and `[agents]` runtime keys to `~/dev/configs/codex/agents/` and `~/dev/configs/codex/config.toml` by default.

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 timeout_seconds="${SYNC_SKILLS_TIMEOUT_SECONDS:-300}"
+lock_stale_after_seconds="${SYNC_SKILLS_LOCK_STALE_AFTER_SECONDS:-900}"
 sync_scope="${SYNC_SKILLS_SCOPE:-workspace}"
 lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
@@ -47,6 +48,10 @@ if ! [[ "$timeout_seconds" =~ ^[0-9]+$ ]] || [[ "$timeout_seconds" -lt 30 ]]; th
   echo "Invalid --timeout-seconds value: $timeout_seconds (expected integer >= 30)" >&2
   exit 2
 fi
+if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seconds" -lt 30 ]]; then
+  echo "Invalid SYNC_SKILLS_LOCK_STALE_AFTER_SECONDS: $lock_stale_after_seconds (expected integer >= 30)" >&2
+  exit 2
+fi
 
 if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
   echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
@@ -66,6 +71,10 @@ fi
 eval "$selection_policy_shell"
 
 acquire_sync_lock() {
+  local existing_pid=""
+  local lock_mtime=""
+  local lock_age_seconds=0
+
   if mkdir "$lock_dir" 2>/dev/null; then
     printf '%s\n' "$$" > "$lock_pid_file"
     lock_owned=1
@@ -78,8 +87,38 @@ acquire_sync_lock() {
       echo "sync_skills already running (pid=$existing_pid); exiting without duplicate work."
       exit 0
     fi
+    echo "Reclaiming stale sync lock from pid=${existing_pid:-unknown}."
+    rm -rf -- "$lock_dir"
+    if mkdir "$lock_dir" 2>/dev/null; then
+      printf '%s\n' "$$" > "$lock_pid_file"
+      lock_owned=1
+      return 0
+    fi
+    echo "Unable to acquire sync lock at $lock_dir" >&2
+    exit 1
   fi
 
+  # A lock directory without a pid file can occur briefly while another
+  # process initializes ownership. Treat fresh locks as in-progress and avoid
+  # forcing concurrent sync runs.
+  sleep 1
+  if [[ -f "$lock_pid_file" ]]; then
+    existing_pid="$(cat "$lock_pid_file" 2>/dev/null || true)"
+    if [[ -n "$existing_pid" ]] && kill -0 "$existing_pid" 2>/dev/null; then
+      echo "sync_skills already running (pid=$existing_pid); exiting without duplicate work."
+      exit 0
+    fi
+  fi
+  lock_mtime="$(stat -f '%m' "$lock_dir" 2>/dev/null || true)"
+  if [[ -n "$lock_mtime" ]]; then
+    lock_age_seconds="$(( $(date +%s) - lock_mtime ))"
+    if (( lock_age_seconds < lock_stale_after_seconds )); then
+      echo "sync_skills lock is still initializing (age=${lock_age_seconds}s); exiting without duplicate work."
+      exit 0
+    fi
+  fi
+
+  echo "Reclaiming stale sync lock without pid file (age=${lock_age_seconds}s)."
   rm -rf -- "$lock_dir"
   if mkdir "$lock_dir" 2>/dev/null; then
     printf '%s\n' "$$" > "$lock_pid_file"
@@ -1095,19 +1134,13 @@ sync_home_plugin_mirrors() {
       fi
     fi
   done < <(
-    python3 - "$marketplace_file" <<'PY'
-import json
-import sys
-
-path = sys.argv[1]
-with open(path, "r", encoding="utf-8") as fh:
-    data = json.load(fh)
-
-for plugin in data.get("plugins", []):
-    name = plugin.get("name")
-    if isinstance(name, str) and name.strip():
-        print(name.strip())
-PY
+    jq -r '
+      .plugins[]?
+      | .name?
+      | select(type == "string")
+      | gsub("^\\s+|\\s+$"; "")
+      | select(length > 0)
+    ' "$marketplace_file"
   )
 }
 
@@ -1120,6 +1153,8 @@ sync_local_marketplace_cache() {
   local cache_state_dir=""
   local keep_file=""
   local marketplace_keep_file=""
+  local plugin_rows_file=""
+  local tracked_marketplaces_file=""
   local marketplace_name=""
   local plugin_name=""
   local source_path=""
@@ -1139,8 +1174,26 @@ sync_local_marketplace_cache() {
   cleanup_paths+=("$cache_state_dir")
   keep_file="$cache_state_dir/cache.keep"
   marketplace_keep_file="$cache_state_dir/marketplace.keep"
+  plugin_rows_file="$cache_state_dir/plugin_rows.tsv"
+  tracked_marketplaces_file="$cache_state_dir/tracked_marketplaces.txt"
   : > "$keep_file"
   : > "$marketplace_keep_file"
+  : > "$plugin_rows_file"
+  : > "$tracked_marketplaces_file"
+
+  jq -r '
+    def trim: gsub("^\\s+|\\s+$"; "");
+    (.name // "local-marketplace" | tostring | trim) as $market
+    | .plugins[]?
+    | select(type == "object")
+    | .name as $name
+    | .source as $source
+    | select(($name | type) == "string")
+    | select(($source | type) == "object")
+    | select($source.source == "local")
+    | select(($source.path | type) == "string")
+    | "\($market)\t\($name | trim)\t\($source.path | trim)"
+  ' "$marketplace_file" > "$plugin_rows_file"
 
   while IFS=$'\t' read -r marketplace_name plugin_name source_path; do
     [ -n "$marketplace_name" ] || continue
@@ -1198,42 +1251,12 @@ sync_local_marketplace_cache() {
         echo "[OK] Removed nested cache variant: $child_dir"
       fi
     done < <(find "$target_plugin_dir" -mindepth 1 -maxdepth 1 -type d -print)
-  done < <(
-    python3 - "$marketplace_file" <<'PY'
-import json
-import sys
-
-path = sys.argv[1]
-with open(path, "r", encoding="utf-8") as fh:
-    data = json.load(fh)
-
-marketplace_name = data.get("name")
-if not isinstance(marketplace_name, str) or not marketplace_name.strip():
-    marketplace_name = "local-marketplace"
-marketplace_name = marketplace_name.strip()
-
-for plugin in data.get("plugins", []):
-    if not isinstance(plugin, dict):
-        continue
-    name = plugin.get("name")
-    if not isinstance(name, str) or not name.strip():
-        continue
-    source = plugin.get("source")
-    if not isinstance(source, dict):
-        continue
-    source_type = source.get("source")
-    source_path = source.get("path")
-    if source_type != "local":
-        continue
-    if not isinstance(source_path, str) or not source_path.strip():
-        continue
-    print(f"{marketplace_name}\t{name.strip()}\t{source_path.strip()}")
-PY
-  )
+  done < "$plugin_rows_file"
 
   # Prune stale local-cache plugin dirs only inside marketplaces represented in
   # this marketplace file. Do not touch other cache families (for example
   # openai-curated snapshots).
+  sort -u "$marketplace_keep_file" > "$tracked_marketplaces_file"
   while IFS= read -r tracked_marketplace_dir; do
     [ -n "$tracked_marketplace_dir" ] || continue
     [ -d "$tracked_marketplace_dir" ] || continue
@@ -1249,7 +1272,7 @@ PY
       rm -rf -- "$tracked_marketplace_dir"
       echo "[OK] Removed empty marketplace cache dir: $tracked_marketplace_dir"
     fi
-  done < <(sort -u "$marketplace_keep_file")
+  done < "$tracked_marketplaces_file"
 }
 
 sync_repo_cache_snapshots_to_runtime_cache() {

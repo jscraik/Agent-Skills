@@ -22,6 +22,7 @@ This workflow produces a requirements document that clarifies WHAT to build and 
 - [Acceptance criteria](#acceptance-criteria)
 - [Core Principles](#core-principles)
 - [Interaction Rules](#interaction-rules)
+- [Discovery interview](#discovery-interview)
 - [Workflow](#workflow)
 - [Output summary](#output-summary)
 - [Validation](#validation)
@@ -92,6 +93,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - do not auto-advance to planning or spec without user confirmation
 - keep implementation details such as libraries, schemas, endpoints, and file layouts out of the requirements doc unless the brainstorm is inherently about a technical or architectural decision
 - keep outputs concise and use repo-relative paths when referencing files
+- generated document paths must stay repo-relative (for example, `docs/brainstorms/...`), never absolute paths, because absolute paths break portability across machines and worktrees
 - **PII/Secrets redaction**: redact all personal data, tokens, credentials, API keys, and sensitive values from requirements docs, examples, and summaries
 
 ## Acceptance criteria
@@ -118,6 +120,16 @@ Read when: you need facilitation philosophy, April 2026 standards context, or ou
 3. **Use multi-select rarely and intentionally** - Use it only for compatible sets such as goals, constraints, non-goals, or success criteria that can all coexist. If prioritization matters, follow up by asking which selected item is primary.
 4. **Use the platform's question tool when available** - When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
+## Discovery interview
+Use discovery rounds when the request is underspecified and you need minimum safe context before producing durable requirements.
+- Ask one round at a time and wait for the user reply before moving to the next round.
+- Start each round with one plain-language question.
+- Include a short `Why this matters:` line so the user understands why the round matters.
+- Avoid dumping the full interview plan at once; keep each round focused and progressive.
+- Skip already-answered rounds and stop when confidence is high enough to proceed safely.
+- Before requirement capture, summarize confirmed facts, assumptions, and the approval checkpoint.
+Read when: you need reusable interview templates and payload examples -> `references/discovery-interview.md`.
+
 ## Workflow
 
 ### Phase 0: Resume, Assess, and Route
@@ -130,8 +142,9 @@ If the user references an existing brainstorm topic or document, or there is an 
 
 #### 0.1b Classify Task Domain
 Before Phase 0.2, classify the request:
-- **Software**: references code, repositories, APIs, databases, or asks to build/modify/debug/deploy software. Continue this CE workflow.
-- **Non-software brainstorming**: no software signals and the user wants to explore/decide in another domain. Route to `brainstorming` and stop this CE workflow.
+- Treat this as a software workflow only when the user is asking to build, modify, debug, deploy, or architect software; topical mentions of software alone are not enough.
+- **Software**: asks to build/modify/debug/deploy/architect software, including concrete code/repository/API/database change requests. Continue this CE workflow.
+- **Non-software brainstorming**: does not ask for software changes and the user wants to explore/decide in another domain (even if technical terms are mentioned as context). Route to `brainstorming` and stop this CE workflow.
 - **Neither**: quick factual question, direct task, or error triage that does not need brainstorming. Respond directly and skip brainstorm phases.
 
 If domain is ambiguous, ask one targeted question before proceeding.
@@ -294,6 +307,7 @@ Use the closeout templates in `references/brainstorm-workflow-details.md`.
 - Requirements artifact guide: `references/requirements-artifact-guide.md`
 - Visual communication guide: `references/visual-communication-guide.md`
 - Workflow details: `references/brainstorm-workflow-details.md`
+- Discovery interview templates: `references/discovery-interview.md`
 - Style and philosophy: `references/style-and-philosophy.md`
 - Bounded subagent support: `references/bounded-subagent-support.md`
 - Lightweight document-review pass: `references/document-review-pass.md`

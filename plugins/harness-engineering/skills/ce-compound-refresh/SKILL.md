@@ -78,6 +78,8 @@ If the user gives no scope hint:
 - one classification per processed artifact or overlap cluster: `Keep | Update | Consolidate | Replace | Archive | Stale`
 - applied in-place refreshes, consolidation merges, successor creation, stale marking, or archival changes when evidence supports them
 - a full markdown report covering:
+  - an `Applied` section for actions successfully written
+  - a `Recommended` section for actions that could not be written
   - scanned artifact counts
   - per-file or per-cluster evidence
   - actions applied
@@ -146,6 +148,8 @@ Discover candidate artifacts under `docs/solutions/`, excluding:
 - `README.md`
 - anything under `docs/solutions/_archived/`
 
+If `docs/solutions/_archived/` exists, flag it in the report as a legacy directory that should be reviewed for restore-or-delete cleanup.
+
 Use the narrowest successful scope match in this order:
 1. directory match
 2. frontmatter match on `module`, `component`, or `tags`
@@ -189,7 +193,7 @@ After the underlying learnings are classified, inspect any affected pattern docs
 
 Treat patterns as derived guidance:
 - stronger stale risk
-- same five primary outcomes
+- same six primary outcomes, including `Stale` when evidence is insufficient for a trustworthy change
 - no new generalized rules without evidence from refreshed learnings
 
 ### Phase 5: Classify the maintenance action

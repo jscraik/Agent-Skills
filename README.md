@@ -158,6 +158,12 @@ agent-skills/
 └── ops/metrics/graph/        # Skill relationship data
 ```
 
+Ownership boundaries:
+- Canonical authoring: domain folders plus `plugins/<plugin>/skills/**`
+- Factory mechanics: `scripts/**`, validation/governance contracts
+- Runtime/projection surfaces: `.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `plugins/cache/**`, `runtime/**` (read-only by policy)
+- Full policy: [docs/agents/14-path-ownership-boundaries.md](docs/agents/14-path-ownership-boundaries.md)
+
 ## Documentation
 
 - **[CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
