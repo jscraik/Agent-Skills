@@ -1,30 +1,38 @@
 # Daily Skill Health
 
-- Generated at: `2026-04-11T06:33:48Z`
-- Window: `2026-04-05..2026-04-11`
-- Baseline source: `bootstrap pending`
-- Baseline window: `n/a`
-- Runs total: `40`
+- Generated at: `2026-04-12T06:44:20Z`
+- Window: `2026-04-06..2026-04-12`
+- Baseline source: `frozen_snapshot`
+- Baseline window: `2026-04-05..2026-04-11`
+- Runs total: `48`
 - Decision: `HOLD`
 - Critical non-regression compliance: `37.5%`
 - Terminal non-regression compliance: `100.0%`
 - Non-regression recovered: `62.5%` (intermediate failures recovered)
 - Budget compliance: `100.0%`
-- Capture coverage: `100.0%` (40/40)
-- Confidence buckets: `high=0` `medium=15` `low=25` `unknown=0`
-- Injection usage: `25.0%` (10/40)
+- Capture coverage: `100.0%` (48/48)
+- Confidence buckets: `high=0` `medium=18` `low=30` `unknown=0`
+- Injection usage: `25.0%` (12/48)
 - Injection suppressed by controls: `0`
-- Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=40`
-- Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=40`
-- Event envelope errors: `24`
-- Event envelope errors total: `32`
+- Uplift promotion decisions: `pass=0` `hold=0` `insufficient_data=48`
+- Uplift auto-apply decisions: `pass=0` `hold=0` `insufficient_data=48`
+- Event envelope errors: `32`
+- Event envelope errors total: `40`
 - Event envelope errors waived: `8`
-- Event envelope errors unresolved: `24`
+- Event envelope errors unresolved: `32`
 
 - Event envelope waiver file: `artifacts/skill-graphs/pilot/artifact-parity-waivers.json`
 
 ## Event envelope errors (unresolved)
 
+- run_20260411T063348089335Z_1c1272_91ead51: missing events.jsonl
+- run_20260411T063348205332Z_50ef7d_920f024: missing events.jsonl
+- run_20260411T063348323211Z_c6442d_92382bd: missing events.jsonl
+- run_20260411T063348436763Z_f93d59_9251174: missing events.jsonl
+- run_20260411T063347630118Z_4270e1_91480eb: missing events.jsonl
+- run_20260411T063347744899Z_cbb8d4_916c4e9: missing events.jsonl
+- run_20260411T063347860332Z_5b4309_919fa81: missing events.jsonl
+- run_20260411T063347973328Z_04dd5b_91bd06e: missing events.jsonl
 - run_20260410T065025010349Z_5b4309_916fa81: missing events.jsonl
 - run_20260410T065025126723Z_04dd5b_918d06e: missing events.jsonl
 - run_20260410T065025246860Z_1c1272_91bad51: missing events.jsonl

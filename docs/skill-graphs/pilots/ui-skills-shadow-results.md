@@ -18,19 +18,19 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 ## Window summary
 
-- Window: `2026-04-05..2026-04-11`
-- Baseline source: `bootstrap pending`
-- Runs total: `40`
+- Window: `2026-04-06..2026-04-12`
+- Baseline source: `frozen_snapshot` (`2026-04-05..2026-04-11`)
+- Runs total: `48`
 - Runs by profile:
-  - `ui-ux-creative-coding`: `10`
-  - `interface-craft`: `10`
-  - `frontend-ui-design`: `10`
-  - `react-ui-patterns`: `10`
+  - `ui-ux-creative-coding`: `12`
+  - `interface-craft`: `12`
+  - `frontend-ui-design`: `12`
+  - `react-ui-patterns`: `12`
 
 ### KPI snapshot
 
-- Repeat failure pattern rate: `25.0%` (delta vs baseline: `n/a`)
-- First-pass acceptance: `0.0%` (delta vs baseline: `n/a`)
+- Repeat failure pattern rate: `25.0%` (delta vs baseline: `+0.0pp`)
+- First-pass acceptance: `0.0%` (delta vs baseline: `+0.0pp`)
 - Iterations median / p90: `2.00` / `5.00`
 - Quality uplift median: `0.165`; positive uplift rate: `100.0%`
 - Critical non-regression compliance: `37.5%`
@@ -38,16 +38,24 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 - Non-regression recovered: `62.5%`
 - Budget compliance: `100.0%`
 - Evaluator flip rate: `8.8%`
-- Capture coverage: `100.0%` (`40/40` runs with capture artifacts)
-- Confidence bucket distribution: `high=0` `medium=15` `low=25` `unknown=0`
-- Injection usage rate: `25.0%` (`10/40` runs, total lessons `10`, suppressed-by-controls runs `0`)
-- Rollout mode distribution: `active=40` `observe_only=0` `off=0` `other=0`
-- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=40/40` `regressed=0/0`
+- Capture coverage: `100.0%` (`48/48` runs with capture artifacts)
+- Confidence bucket distribution: `high=0` `medium=18` `low=30` `unknown=0`
+- Injection usage rate: `25.0%` (`12/48` runs, total lessons `12`, suppressed-by-controls runs `0`)
+- Rollout mode distribution: `active=48` `observe_only=0` `off=0` `other=0`
+- Uplift gate decisions (promotion/auto-apply): `pass=0/0` `insufficient_data=48/48` `regressed=0/0`
 
 ## Run log
 
 | Run | Profile | Status | Stop reason | Iterations | Uplift | Non-regression | Tokens |
 |---|---|---|---|---:|---:|:---:|---:|
+| run_20260412T064420106973Z_50ef7d_925f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
+| run_20260412T064420226688Z_c6442d_92882bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260412T064420341042Z_f93d59_92a1174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
+| run_20260412T064419504123Z_4270e1_91980eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260412T064419624036Z_cbb8d4_91bc4e9 | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
+| run_20260412T064419747082Z_5b4309_91efa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260412T064419865434Z_04dd5b_920d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
+| run_20260412T064419988886Z_1c1272_923ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
 | run_20260411T063348089335Z_1c1272_91ead51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
 | run_20260411T063348205332Z_50ef7d_920f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
 | run_20260411T063348323211Z_c6442d_92382bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
@@ -80,14 +88,6 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 | run_20260408T064526656356Z_5b4309_93efa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
 | run_20260408T064526774193Z_04dd5b_940d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
 | run_20260408T064526894446Z_1c1272_943ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
-| run_20260407T064405056266Z_04dd5b_8e4d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
-| run_20260407T064405159287Z_1c1272_8e7ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
-| run_20260407T064405259532Z_50ef7d_8e9f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
-| run_20260407T064405363942Z_c6442d_8ec82bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
-| run_20260407T064405465228Z_f93d59_8ee1174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
-| run_20260407T064404758172Z_4270e1_8dc80eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
-| run_20260407T064404855416Z_cbb8d4_8dec4e9 | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
-| run_20260407T064404953569Z_5b4309_8e1fa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
 
 ## Exit gate checks
 
