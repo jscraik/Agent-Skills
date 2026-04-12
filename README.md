@@ -1,12 +1,12 @@
 # Agent Skills
 
-A governed repository of **109 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **112 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 
 - **One place for skills** – Author in Markdown, sync to any runtime
 - **Quality gates** – Structural, security, and behavioral validation for every skill
-- **Living skill graph** – Browse 109 skills across 7 topic clusters with relationship mapping
+- **Living skill graph** – Browse 112 skills across 7 topic clusters with relationship mapping
 - **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
 ## Quick start
@@ -125,7 +125,7 @@ ask repo validate --ephemeral
 
 ## Skill graph (manual topic clusters, non-canonical)
 
-This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **109** skills.
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **112** skills.
 
 | Topic              | Skills | Examples                                       |
 | ------------------ | ------ | ---------------------------------------------- |
@@ -168,7 +168,7 @@ Ownership boundaries:
 
 - **[CLI Specification](docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
 - **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
-- **[Skill Index](SKILL.md)** – All 109 skills by category
+- **[Skill Index](SKILL.md)** – All 112 skills by category
 - **[Implementation Review](docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Privacy and Data Handling
@@ -178,6 +178,6 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 109 canonical total (manual cluster table above is non-canonical)
+- **Skills:** 112 canonical total (manual cluster table above is non-canonical)
 - **Validation:** 10+ automated checks via `ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity
