@@ -50,14 +50,9 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 )
 
 # Plugin router skills promoted into default flat discovery.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
-    "arscontexta",
-    "ce-plan",
-    "ce-review",
-    "ce-work",
-    "coderabbit",
-    "skill-factory",
-)
+# Keep this empty by default: plugin-authorized skills should surface from
+# plugin scopes, not duplicated into the personal flat picker lane.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills hidden from default flat discovery.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()

@@ -409,6 +409,10 @@ while IFS= read -r skill_path; do
   skill_dir_abs="$repo_root/$skill_dir"
   discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
   if is_plugin_owned_skill_path "$skill_path"; then
+    if ! is_plugin_visible_router_skill_name "$skill_name"; then
+      echo "Skipping plugin-owned skill from flat projection: $skill_name"
+      continue
+    fi
     if is_plugin_hidden_lane_skill_name "$skill_name"; then
       echo "Skipping hidden plugin lane skill: $skill_name"
       continue

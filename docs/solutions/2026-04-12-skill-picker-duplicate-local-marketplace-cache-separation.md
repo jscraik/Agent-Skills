@@ -37,7 +37,7 @@ Apply a runtime/cache separation rule plus runtime-compatible plugin-root materi
 5. For non-symlinked profile plugin directories (for example `~/.codex-red/plugins` as a real directory), also project plugin source mirrors at `~/.codex-red/plugins/<plugin>` so marketplace `source.path` values like `./plugins/<plugin>` resolve correctly.
 6. Force-prune stale nested version/cache directories during rsync sync (`--delete --force`) so obsolete `0.1.0/` trees cannot survive cache refreshes and create loader ambiguity.
 7. Keep the system bridge explicit and narrow: only `skill-creator`, `skill-installer`, `plugin-creator`, and `plugin-installer` are routed through `.agents/skills/.system/*`; all other plugin-family skills stay routed through canonical plugin paths.
-8. Keep plugin-authorized skills visible in flat `.agents/skills` for picker reliability; control duplicates with overlap audits and cache-layout repair, not by hiding plugin families from flat projection.
+8. Enforce plugin-owned skill gating during sync: only names explicitly allowlisted by `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES` may project to flat `.agents/skills` (default is none), while the four `.system` bridge skills remain the only intentional flat/plugin overlap.
 
 This preserves canonical source ownership while keeping plugin runtime paths loadable.
 
@@ -56,7 +56,7 @@ This preserves canonical source ownership while keeping plugin runtime paths loa
 - Keep local marketplace mirrors in hidden runtime paths only; do not reintroduce `plugins/cache/agent-skills-local`.
 - Keep rsync cache sync paths on `--delete --force` in both runtime projection and overlap-remediation scripts so stale nested version folders cannot persist.
 - Keep `system_bridge_skill_names` scoped to the approved four skills only; do not add additional bridge skills without explicit policy approval.
-- Keep plugin-authorized skills visible in flat projection (`.agents/skills`) for picker reliability in Codex profiles.
+- Keep plugin families sourced from plugin scope in Codex profiles; do not reintroduce broad plugin-family projection into flat `.agents/skills`.
 - In profile homes where `plugins/` is not symlinked, verify both `plugins/marketplace.json` and `plugins/<plugin>` source mirrors are present after sync.
 - If a router-skill exception is needed, add it explicitly to `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES`, rerun `bash scripts/check_plugin_skill_shadowing.sh`, and record why overlap is acceptable.
 - Use `bash scripts/check_codex_home_skill_overlap.sh --codex-home <home> --strict --show-overlap` as the one-command runtime audit for Codex profiles (`~/.codex`, `~/.codex-red`, and others); add `--remediate-cache-skills` to repair nested cache layouts before overlap checks.
