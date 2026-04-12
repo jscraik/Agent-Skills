@@ -120,6 +120,7 @@ start_watchdog
 
 skills_dir="$repo_root/.agents/skills"
 plugins_dir="$repo_root/plugins"
+runtime_cache_root="$repo_root/.agents/plugins-runtime/cache"
 system_skills_dir="$repo_root/skills-system"
 antigravity_skills_dir="$repo_root/skills-antigravity"
 antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
@@ -204,6 +205,11 @@ fi
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
+if declare -p SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS >/dev/null 2>&1; then
+  system_bridge_skills=("${SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS[@]}")
+else
+  system_bridge_skills=("plugin-creator" "plugin-installer" "skill-creator" "skill-installer")
+fi
 plugin_router_skill_names=()
 plugin_router_skill_dirs=()
 router_collision_count=0
@@ -253,7 +259,7 @@ register_plugin_router_skill_source() {
 }
 for hidden_skill in "${hidden_flat_skills[@]}"; do
   if [ -e "$skills_dir/$hidden_skill" ]; then
-    if rm -rf -- "$skills_dir/$hidden_skill"; then
+    if rm -rf -- "${skills_dir:?}/${hidden_skill:?}"; then
       echo "Removed hidden flat skill: $hidden_skill"
     else
       echo "[WARN] Could not remove hidden skill $hidden_skill at $skills_dir (continuing anyway)."
@@ -429,7 +435,7 @@ while IFS= read -r skill_path; do
     # copies so the loader view stays aligned with the source-of-truth skill.
     if [ -d "$skills_dir/$skill_name" ] && [ "${skill_dir#./.agents/skills/}" = "$skill_dir" ]; then
       echo "Replacing conflicting flat skill dir: $skill_name -> $skill_dir_rel"
-      if ! rm -rf -- "$skills_dir/$skill_name"; then
+      if ! rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
         echo "[WARN] Could not replace existing $skill_name in $skills_dir; skipping $skill_dir_rel."
         continue
       fi
@@ -453,6 +459,26 @@ if [ -e "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
 elif [ ! -e "$skills_dir/.system" ]; then
   ln -s "../../skills-system" "$skills_dir/.system"
 fi
+
+# Keep only the approved bridge skills routed through the hidden `.system`
+# lane so these four remain available while avoiding direct top-level plugin
+# path coupling in profile homes.
+for bridge_skill in "${system_bridge_skills[@]}"; do
+  bridge_source=".system/$bridge_skill"
+  if [ ! -e "$skills_dir/$bridge_source" ]; then
+    echo "[WARN] Missing system bridge source: $skills_dir/$bridge_source"
+    continue
+  fi
+
+  if [ -L "$skills_dir/$bridge_skill" ]; then
+    rm -f "$skills_dir/$bridge_skill"
+  elif [ -e "$skills_dir/$bridge_skill" ]; then
+    rm -rf -- "${skills_dir:?}/${bridge_skill:?}"
+  fi
+
+  ln -s "$bridge_source" "$skills_dir/$bridge_skill"
+  echo "Routed bridge skill through .system: $bridge_skill -> $bridge_source"
+done
 
 # Build a strict Antigravity-compatible projection:
 # - flat first-level skill folders only
@@ -874,9 +900,11 @@ HEADER
   if [ -f "$temp_dir/__invalid__" ]; then
     invalid_count="$(wc -l < "$temp_dir/__invalid__" | tr -d '[:space:]')"
   fi
-  echo "- \`invalid\`: $invalid_count" >> "$index_file"
-  echo "- \`total_tagged\`: $tagged_count" >> "$index_file"
-  echo "" >> "$index_file"
+  {
+    echo "- \`invalid\`: $invalid_count"
+    echo "- \`total_tagged\`: $tagged_count"
+    echo ""
+  } >> "$index_file"
 
   {
     echo "## Semantic Types"
@@ -951,7 +979,7 @@ sync_user_skills() {
     mkdir -p "$target_dir"
 
     if command -v rsync >/dev/null 2>&1; then
-      rsync -a "$source_dir/" "$target_dir/" --delete
+      rsync -a --delete --force "$source_dir/" "$target_dir/"
       return 0
     fi
 
@@ -1073,7 +1101,7 @@ PY
 
 # Keep repo-local plugin caches aligned with the marketplace so Codex surfaces
 # freshly updated plugin skills immediately in runtime discovery.
-# Cache layout: plugins/cache/<marketplace-name>/<plugin-name>/local
+# Runtime cache layout: <cache-root>/<marketplace-name>/<plugin-name>/...
 sync_local_marketplace_cache() {
   local marketplace_file="$1"
   local cache_root="$2"
@@ -1086,9 +1114,7 @@ sync_local_marketplace_cache() {
   local source_dir=""
   local marketplace_dir=""
   local target_plugin_dir=""
-  local target_local_dir=""
-  local cached_skill_dir=""
-  local skill_name=""
+  local child_dir=""
   local tracked_marketplace_dir=""
 
   if [ ! -f "$marketplace_file" ]; then
@@ -1124,44 +1150,42 @@ sync_local_marketplace_cache() {
 
     target_plugin_dir="$cache_root/$marketplace_name/$plugin_name"
     marketplace_dir="$cache_root/$marketplace_name"
-    target_local_dir="$target_plugin_dir/local"
     printf '%s\n' "$marketplace_dir" >> "$marketplace_keep_file"
-    mkdir -p "$target_local_dir"
+    if [ -L "$target_plugin_dir" ]; then
+      rm -f "$target_plugin_dir"
+    fi
+    mkdir -p "$target_plugin_dir"
     printf '%s\n' "$target_plugin_dir" >> "$keep_file"
 
     if command -v rsync >/dev/null 2>&1; then
       rsync -a \
         --delete \
+        --force \
         --exclude '.git' \
         --exclude 'node_modules' \
         --exclude '__pycache__' \
         --exclude '.DS_Store' \
-        "$source_dir/" "$target_local_dir/"
+        "$source_dir/" "$target_plugin_dir/"
     else
-      rm -rf -- "$target_local_dir"
-      mkdir -p "$target_local_dir"
-      cp -R "$source_dir"/. "$target_local_dir"/
-      rm -rf -- "$target_local_dir/.git" "$target_local_dir/node_modules" "$target_local_dir/__pycache__"
-      find "$target_local_dir" -name '.DS_Store' -type f -delete
+      rm -rf -- "$target_plugin_dir"
+      mkdir -p "$target_plugin_dir"
+      cp -R "$source_dir"/. "$target_plugin_dir"/
+      rm -rf -- "$target_plugin_dir/.git" "$target_plugin_dir/node_modules" "$target_plugin_dir/__pycache__"
+      find "$target_plugin_dir" -name '.DS_Store' -type f -delete
     fi
 
-    # Legacy caches stored versioned plugin snapshots (for example `0.1.0`).
-    # Keep only the canonical `local/` projection so runtimes do not discover
-    # duplicate plugin manifests/skills from stale cache variants.
-    while IFS= read -r cache_variant_dir; do
-      [ -n "$cache_variant_dir" ] || continue
-      if [ "$(basename "$cache_variant_dir")" = "local" ]; then
+    # Remove stale nested cache variants (for example `local` or `0.1.0`) so
+    # plugin roots resolve directly at <cache>/<marketplace>/<plugin>.
+    while IFS= read -r child_dir; do
+      [ -n "$child_dir" ] || continue
+      if [ "$child_dir" = "$target_plugin_dir/.codex-plugin" ]; then
         continue
       fi
-      rm -rf -- "$cache_variant_dir"
-      echo "[OK] Removed legacy cache variant: $cache_variant_dir"
+      if [ -f "$child_dir/.codex-plugin/plugin.json" ]; then
+        rm -rf -- "$child_dir"
+        echo "[OK] Removed nested cache variant: $child_dir"
+      fi
     done < <(find "$target_plugin_dir" -mindepth 1 -maxdepth 1 -type d -print)
-
-    # Preserve all plugin-owned skills in cache even when a same-named system
-    # skill exists. Modern runtimes namespace plugin skills by plugin id, so
-    # cache-time deduplication can incorrectly hide valid plugin surfaces.
-    # Flat runtime deduplication remains enforced separately via
-    # is_plugin_owned_skill_path() above.
   done < <(
     python3 - "$marketplace_file" <<'PY'
 import json
@@ -1216,6 +1240,135 @@ PY
   done < <(sort -u "$marketplace_keep_file")
 }
 
+sync_repo_cache_snapshots_to_runtime_cache() {
+  local source_cache_root="$1"
+  local target_cache_root="$2"
+
+  if [ ! -d "$source_cache_root" ]; then
+    return 0
+  fi
+
+  mkdir -p "$target_cache_root"
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -a --delete --force "$source_cache_root/" "$target_cache_root/"
+  else
+    rm -rf -- "$target_cache_root"
+    mkdir -p "$target_cache_root"
+    cp -R "$source_cache_root"/. "$target_cache_root"/
+  fi
+}
+
+materialize_plugin_cache_roots() {
+  local cache_root="$1"
+  local marketplace_dir=""
+  local plugin_dir=""
+  local candidate_dir=""
+  local child_dir=""
+
+  [ -d "$cache_root" ] || return 0
+
+  while IFS= read -r marketplace_dir; do
+    [ -n "$marketplace_dir" ] || continue
+    while IFS= read -r plugin_dir; do
+      [ -n "$plugin_dir" ] || continue
+      if [ -f "$plugin_dir/.codex-plugin/plugin.json" ]; then
+        continue
+      fi
+
+      candidate_dir=""
+      if [ -f "$plugin_dir/local/.codex-plugin/plugin.json" ]; then
+        candidate_dir="$plugin_dir/local"
+      else
+        while IFS= read -r child_dir; do
+          [ -n "$child_dir" ] || continue
+          if [ -f "$child_dir/.codex-plugin/plugin.json" ]; then
+            candidate_dir="$child_dir"
+            break
+          fi
+        done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -type d | sort)
+      fi
+
+      if [ -z "$candidate_dir" ]; then
+        continue
+      fi
+
+      if [[ "$candidate_dir" == "$plugin_dir/"* ]]; then
+        local tmp_copy_dir=""
+        tmp_copy_dir="$(mktemp -d)"
+        cleanup_paths+=("$tmp_copy_dir")
+        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
+        while IFS= read -r child_dir; do
+          [ -n "$child_dir" ] || continue
+          rm -rf -- "$child_dir"
+        done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
+        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
+      elif command -v rsync >/dev/null 2>&1; then
+        rsync -a --delete --force "$candidate_dir/" "$plugin_dir/"
+      else
+        local tmp_copy_dir=""
+        tmp_copy_dir="$(mktemp -d)"
+        cleanup_paths+=("$tmp_copy_dir")
+        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
+        while IFS= read -r child_dir; do
+          [ -n "$child_dir" ] || continue
+          rm -rf -- "$child_dir"
+        done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
+        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
+      fi
+
+      while IFS= read -r child_dir; do
+        [ -n "$child_dir" ] || continue
+        if [ "$child_dir" = "$plugin_dir/.codex-plugin" ]; then
+          continue
+        fi
+        if [ -f "$child_dir/.codex-plugin/plugin.json" ]; then
+          rm -rf -- "$child_dir"
+          echo "[OK] Flattened plugin cache root: $plugin_dir (removed $child_dir)"
+        fi
+      done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -type d -print)
+    done < <(find "$marketplace_dir" -mindepth 1 -maxdepth 1 -type d -print)
+  done < <(find "$cache_root" -mindepth 1 -maxdepth 1 -type d -print)
+}
+
+sync_codex_profile_homes() {
+  local cache_source="$1"
+  local marketplace_file="$2"
+  local profile_home=""
+  local profile_plugins=""
+
+  while IFS= read -r profile_home; do
+    [ -n "$profile_home" ] || continue
+    [ -d "$profile_home" ] || continue
+
+    sync_user_skills "$skills_dir" "$profile_home/skills"
+
+    profile_plugins="$profile_home/plugins"
+    mkdir -p "$profile_plugins"
+    if [ -L "$profile_plugins" ]; then
+      echo "[WARN] Skipping profile plugin-cache projection for symlinked path: $profile_plugins"
+      continue
+    fi
+
+    sync_user_skills "$cache_source" "$profile_plugins/cache" 0 copy
+    materialize_plugin_cache_roots "$profile_plugins/cache"
+    if [ -f "$marketplace_file" ]; then
+      cp "$marketplace_file" "$profile_plugins/marketplace.json"
+      echo "[OK] Synced profile marketplace manifest: $profile_plugins/marketplace.json"
+      # Keep profile-local marketplace source paths resolvable at
+      # <profile-home>/plugins/<plugin-name> for local plugin installs.
+      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
+    fi
+  done < <(find "$HOME" -maxdepth 1 -mindepth 1 -type d -name '.codex-*' | sort)
+}
+
+cleanup_legacy_local_marketplace_cache() {
+  local legacy_cache_root="$1"
+  if [ -d "$legacy_cache_root" ] || [ -L "$legacy_cache_root" ]; then
+    rm -rf -- "$legacy_cache_root"
+    echo "[OK] Removed legacy visible local marketplace cache: $legacy_cache_root"
+  fi
+}
+
 sync_plugin_cache_projections() {
   local projection_script="$repo_root/scripts/projection_integrity.py"
 
@@ -1228,7 +1381,10 @@ sync_plugin_cache_projections() {
 }
 
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
-sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
+sync_repo_cache_snapshots_to_runtime_cache "$plugins_dir/cache" "$runtime_cache_root"
+sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$runtime_cache_root"
+materialize_plugin_cache_roots "$runtime_cache_root"
+cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"
 sync_plugin_cache_projections
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
@@ -1239,6 +1395,7 @@ if [[ "$sync_scope" == "workspace" ]]; then
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
   sync_user_skills "$skills_dir" "$HOME/.codex/skills"
   sync_user_skills "$plugins_dir" "$HOME/.codex/plugins" 1
+  sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
   # Antigravity app requires a flat copy (no symlinks) in its own config dir
   sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
   sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
