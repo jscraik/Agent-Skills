@@ -195,7 +195,7 @@ If critical inputs are missing, ask only the minimum needed to proceed safely.
 When the request includes skill-linked subagent support, wire it explicitly during `create`, `improve`, or `install-distribute`:
 
 1. Reuse-first discovery: check repo-shared agents in `./configs/codex/agents/` when present, then project/global `.codex/agents/`.
-2. If no suitable role exists, hand off role creation to [[codex-agent-creator]] and request a purpose-built agent with explicit `model`, `model_reasoning_effort`, and scope.
+2. If no suitable role exists, hand off role creation to [[codex-agent-builder]] and request a purpose-built agent with explicit `model`, `model_reasoning_effort`, and scope.
 3. Validate candidate role files: `bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>`.
 4. Install/update role files only when requested: `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]`.
 5. Record route as `reuse-existing` or `create-purpose-built` in the handoff summary.
@@ -342,7 +342,7 @@ Reference files:
 |---|---|
 | [[decide-build-primitive]] | Decide whether the capability should be a skill, prompt, or agent before authoring it |
 | [[skill-refactor]] | Audit skill coverage, failures, and overlap using real session evidence instead of authoring doctrine alone |
-| [[codex-agent-creator]] | Reuse existing agent TOMLs or create role-specific custom agents for skill-linked delegation flows |
+| [[codex-agent-builder]] | Reuse existing agent TOMLs or create role-specific custom agents for skill-linked delegation flows |
 
 **Topic map:** [[agent-ops]]
 

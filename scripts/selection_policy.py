@@ -52,31 +52,8 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 # Plugin router skills promoted into default flat discovery.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
     "arscontexta",
-    "autofix",
-    "ce-brainstorm",
-    "ce-compound-refresh",
-    "ce-compound",
-    "ce-deepen-plan",
-    "ce-deepen-spec",
-    "ce-ideate",
-    "ce-reliability-review",
-    "ce-review",
-    "ce-spec",
-    "ce-tdd",
-    "ce-technical-review",
-    "ce-work",
-    "code-review",
     "coderabbit",
-    "plugin-builder",
-    "plugin-creator",
-    "plugin-installer",
-    "simplify",
-    "skill-builder",
-    "skill-creator",
     "skill-factory",
-    "skill-installer",
-    "skill-refactor",
-    "skillify",
 )
 
 # Plugin lane skills hidden from default flat discovery.

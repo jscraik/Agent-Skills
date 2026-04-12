@@ -177,7 +177,7 @@ Required gates:
 ## See Also
 | Skill | When to use |
 |---|---|
-| [[codex-agent-creator]] | Create or update the agent roles that the orchestration plan needs |
+| [[codex-agent-builder]] | Create or update the agent roles that the orchestration plan needs |
 | [[using-git-worktrees]] | Split write-heavy parallel work into isolated worktrees instead of a shared checkout |
 | [[ce-work]] | Execute a plan once the orchestration decision is made and the task is implementation-ready |
 | [[resolve-pr-parallel]] | Apply bounded parallelism to PR review resolution rather than general subagent orchestration |

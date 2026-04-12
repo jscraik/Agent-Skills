@@ -39,7 +39,7 @@ agentation:
   visual-explainer: Turn the integration state machine or failure path into a visual
     handoff artifact
 agents-md:
-  codex-agent-creator: Create agent roles that AGENTS.md will reference
+  codex-agent-builder: Create agent roles that AGENTS.md will reference
   codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
   docs-expert: Apply docs polish and community-health guidance to AGENTS.md
 alignment-checkpoint:
@@ -131,7 +131,7 @@ codex-agent-builder:
     or automation first
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
-  codex-agent-creator: Create the agent role the automation will run under
+  codex-agent-builder: Create the agent role the automation will run under
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
@@ -142,7 +142,7 @@ codex-home-audit:
   skill-refactor: Run a skill health scan alongside the home audit
   verification-before-completion: Verify fixes before marking the audit complete
 codex-hooks-builder:
-  codex-agent-creator: Create or update agent roles that the hooks should invoke or
+  codex-agent-builder: Create or update agent roles that the hooks should invoke or
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
@@ -321,7 +321,7 @@ openai-docs:
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
-  codex-agent-creator: Create or update the agent roles that the orchestration plan
+  codex-agent-builder: Create or update the agent roles that the orchestration plan
     needs
   resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
     general subagent orchestration
@@ -394,7 +394,7 @@ react-ui-patterns:
     token governance
   frontend-ui-design: Apply React patterns to components being designed
   shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
-  stitch-react-components: Use patterns when converting Stitch screens to React
+  react-components: Use patterns when converting Stitch screens to React
   ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
 recon-workbench:
   security-best-practices: Turn recon findings into concrete secure-by-default implementation
@@ -466,14 +466,14 @@ shadcn-ui:
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
 skill-builder:
-  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
+  codex-agent-builder: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
   skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
     instead of authoring doctrine alone
 skill-creator:
-  codex-agent-creator: Create or update custom agents when skill workflows need dedicated
+  codex-agent-builder: Create or update custom agents when skill workflows need dedicated
     role files
   skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
     packages
@@ -498,7 +498,7 @@ spreadsheet:
   visual-explainer: Present spreadsheet data as a styled HTML table
 stitch-loop:
   frontend-ui-design: Review and polish Stitch-generated UI
-  stitch-react-components: Convert Stitch outputs to React components
+  react-components: Convert Stitch outputs to React components
   stitch-remotion: Turn Stitch screens into narrated video walkthroughs
   ui-cloner: Clone a UI design into Stitch for iterative generation
 stitch-remotion:
@@ -560,7 +560,7 @@ ui-visual-regression:
   design-system: Resolve confirmed token, typography, spacing, or icon drift at the
     system layer
   playwright-interactive: Capture screenshots for regression via Playwright
-  stitch-react-components: Catch visual regressions after Stitch-to-React conversion
+  react-components: Catch visual regressions after Stitch-to-React conversion
 using-git-worktrees:
   ce-plan: Plan parallel workstreams across worktrees
   gh-workflow: Manage PRs across multiple worktrees

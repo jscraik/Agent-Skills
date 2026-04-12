@@ -210,7 +210,7 @@ bash scripts/lint_skill_types.sh
 | Skill | When to use |
 |---|---|
 | [[codex-home-audit]] | Audit an existing Codex home installation for hook drift or unsafe config |
-| [[codex-agent-creator]] | Create or update agent roles that the hooks should invoke or govern |
+| [[codex-agent-builder]] | Create or update agent roles that the hooks should invoke or govern |
 | [[gh-workflow]] | Ship and review hook-pack changes through the GitHub lifecycle |
 
 **Topic map:** [[agent-ops]]
