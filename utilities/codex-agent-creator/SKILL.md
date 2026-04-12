@@ -1,33 +1,34 @@
 ---
 name: codex-agent-builder
-description: Create, install, and validate Codex custom subagents as standalone `.codex/agents/*.toml` files with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+description: Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
   maturity: canonical
   owner: Agent Skills Team
   review_cadence: quarterly
-  last_reviewed: 2026-03-31
+  last_reviewed: 2026-04-12
   metadata_source: frontmatter
 ---
 
 # Codex Agent Creator
 
 ## When to use
-- User asks to create, update, or troubleshoot a custom subagent file in `.codex/agents/` or `~/.codex/agents/`.
-- User needs project or global custom-agent installation with explicit developer instructions.
+- User asks to create, update, or troubleshoot a custom subagent file in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml`).
+- User needs global custom-agent installation with explicit developer instructions.
 - User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
 - User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
 
 ## Scope and triggers
 - Focus on standalone custom-agent authoring, installation, and validation for Codex.
+- Default to canonical global write targets in this workspace (`~/dev/configs/codex/agents/`, `~/dev/configs/codex/config.toml`).
 - Do not use this skill for orchestrating active subagent threads or deciding whether the capability should be a skill, prompt, or automation.
 
 ## Required inputs
 - Agent name and short description.
 - Model and reasoning profile.
 - Desired developer instructions.
-- Scope: `global` or `project`.
+- Scope (default `global`; `project` only when explicitly requested).
 - Confirmed target custom-agent file path.
 - Optional `nickname_candidates` override for display-friendly spawned-agent labels.
 - Optional runtime limits and approval mode.
@@ -36,7 +37,7 @@ metadata:
 - Confirmed custom-agent configuration plan.
 - Generated or updated standalone custom-agent TOML path.
 - Validation result with explicit success/failure reasons.
-- Optional summary of global runtime limits configured in `config.toml`.
+- Optional summary of global runtime limits configured in `~/dev/configs/codex/config.toml` (or explicitly provided override).
 - Include `schema_version` whenever output is machine-validated.
 
 ## Procedure
@@ -45,20 +46,29 @@ metadata:
 - Validate that requested limits and path edits are intentional.
 
 ### 2) Minimal custom-agent generation
-- Generate a standalone custom-agent TOML with required fields: `name`, `description`, `developer_instructions`.
-- Keep model controls explicit by default: `model`, `model_reasoning_effort`.
+- Generate a standalone custom-agent TOML with required fields: `name`, `description`, `developer_instructions`, `model`, `model_reasoning_effort`.
+- Treat `model` and `model_reasoning_effort` as mandatory for this repository contract.
 - Add `nickname_candidates` only when requested or when display labels are explicitly desired.
 - Keep optional behavior strict and explicit.
 - Treat legacy `[agents.<name>]` declaration flows as compatibility-only, not the default authoring path.
 
 ### 3) Validation-first execution
 - Run custom-agent script checks before declaring completion.
-- Never skip required-key checks when `name`/`description`/`developer_instructions` are updated.
+- Never skip required-key checks when `name`/`description`/`developer_instructions`/`model`/`model_reasoning_effort` are updated.
 
 ### 4) Install and handoff
-- Install global or project scope only after validation by writing into the correct `.codex/agents/` directory.
-- If the user requests runtime limits, update only `[agents]` global keys in `config.toml`.
+- Install only after validation by writing into the correct agents directory.
+- In this workspace, install to canonical global paths by default: `~/dev/configs/codex/agents/` and `~/dev/configs/codex/config.toml`.
+- For global installs, ensure runtime discoverability by updating `[agents.<name>].config_file` to the installed canonical agent file path.
+- Treat non-canonical global paths as compatibility overrides that require explicit opt-in.
+- If the user requests runtime limits, update only `[agents]` global keys in the selected global `config.toml`.
 - Return next-step verification command and residual risk.
+
+### 5) Upstream alignment checkpoint
+- Verify current Codex guidance from OpenAI docs before recommending config keys (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`, `model_reasoning_effort`).
+- Verify current `openai/codex` release track before stating "latest" release details.
+- Use the local fork (`~/dev/codex`) to confirm role-loader behavior (discovery from each config-layer `agents/` directory and standalone role validation requirements).
+- Record the checked sources in the delivery summary and route deep details to `references/upstream-alignment-2026-04-12.md`.
 
 ## Scope focus guardrails
 - Start with the **smallest viable package boundary**: one custom agent file and one validation pass.
@@ -87,7 +97,7 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 - NEVER ship a config change without write + validate evidence.
 - Avoid the common pitfall of broad, speculative config changes before the baseline flow passes.
 - Treating legacy `[agents.<name>]` role declarations as the primary contract when standalone custom-agent files are available.
-- Omitting required standalone fields (`name`, `description`, `developer_instructions`).
+- Omitting required standalone fields (`name`, `description`, `developer_instructions`, `model`, `model_reasoning_effort`).
 - Assuming required inputs from defaults.
 - Reporting success without evidence from validation commands.
 - Reusing generic or repetitive template output without adapting to the user’s context and constraints.
@@ -126,6 +136,7 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 
 ## References
 - Policy references: `references/role-config-reference.md`, `references/contract.yaml`, `references/evals.yaml`, `references/task-profile.json`, `references/discovery-interview.md`.
+- Upstream alignment snapshot: `references/upstream-alignment-2026-04-12.md`.
 - Scripts: `scripts/write_role_config.sh`, `scripts/install_role.sh`, `scripts/validate_role.sh`.
 - Compatibility and governance notes in `references/task-profile.json`.
 

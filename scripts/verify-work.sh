@@ -6,7 +6,8 @@ cd "$repo_root"
 
 skip_preflight=0
 skip_sync=0
-validate_output_mode="${VERIFY_WORK_VALIDATE_MODE:-persistent}"
+governance_scope="project-local"
+validate_output_mode="${VERIFY_WORK_VALIDATE_MODE:-}"
 
 usage() {
   cat <<'USAGE'
@@ -17,9 +18,14 @@ Repository-local verification runner for agent-skills.
 Options:
   --skip-preflight   Skip scripts/codex-preflight.sh
   --skip-sync        Skip scripts/sync_skills.sh
+  --project-governance
+                     Run checks in project-local scope (default).
+                     Validation artifacts are ephemeral.
+  --workspace-governance
+                     Run checks in workspace scope.
+                     Validation artifacts are persistent.
   --persistent-artifacts
-                     Run repo validation in persistent artifact mode
-                     (this is the default; use VERIFY_WORK_VALIDATE_MODE=ephemeral to opt out)
+                     Backward-compatible alias for --workspace-governance
   -h, --help         Show this help text
 USAGE
 }
@@ -34,8 +40,16 @@ while (($# > 0)); do
       skip_sync=1
       shift
       ;;
+    --project-governance)
+      governance_scope="project-local"
+      shift
+      ;;
+    --workspace-governance)
+      governance_scope="workspace"
+      shift
+      ;;
     --persistent-artifacts)
-      validate_output_mode="persistent"
+      governance_scope="workspace"
       shift
       ;;
     -h|--help)
@@ -50,9 +64,21 @@ while (($# > 0)); do
   esac
 done
 
-if [[ "$validate_output_mode" != "ephemeral" && "$validate_output_mode" != "persistent" ]]; then
+if [[ -n "$validate_output_mode" && "$validate_output_mode" != "ephemeral" && "$validate_output_mode" != "persistent" ]]; then
   echo "[verify-work] invalid VERIFY_WORK_VALIDATE_MODE='${validate_output_mode}' (expected ephemeral or persistent)" >&2
   exit 2
+fi
+
+if [[ "$governance_scope" == "project-local" ]]; then
+  if [[ "${validate_output_mode:-}" == "persistent" ]]; then
+    echo "[verify-work] ignoring VERIFY_WORK_VALIDATE_MODE=persistent in project-local scope" >&2
+  fi
+  validate_output_mode="ephemeral"
+else
+  if [[ "${validate_output_mode:-}" == "ephemeral" ]]; then
+    echo "[verify-work] ignoring VERIFY_WORK_VALIDATE_MODE=ephemeral in workspace scope" >&2
+  fi
+  validate_output_mode="persistent"
 fi
 
 declare -a passed_checks=()
@@ -83,6 +109,7 @@ skip_check() {
 }
 
 run_skill_sync_check() {
+  local -a sync_args=("$@")
   local sync_log
   local sync_start
   local sync_end
@@ -91,7 +118,7 @@ run_skill_sync_check() {
   sync_start="$(date +%s)"
   echo
   echo "==> skill-sync"
-  if bash "scripts/sync_skills.sh" >"${sync_log}" 2>&1; then
+  if bash "scripts/sync_skills.sh" "${sync_args[@]}" >"${sync_log}" 2>&1; then
     sync_end="$(date +%s)"
     sync_elapsed="$((sync_end - sync_start))"
     passed_checks+=("skill-sync")
@@ -127,6 +154,8 @@ run_skill_sync_check() {
 }
 
 echo "[verify-work] repo root: $repo_root"
+echo "[verify-work] governance scope: $governance_scope"
+echo "[verify-work] validation artifact mode: $validate_output_mode"
 
 if [[ "$skip_preflight" -eq 0 ]]; then
   run_check "codex-preflight" bash "scripts/codex-preflight.sh" --stack auto --mode required
@@ -135,7 +164,11 @@ else
 fi
 
 if [[ "$skip_sync" -eq 0 ]]; then
-  run_skill_sync_check
+  if [[ "$governance_scope" == "project-local" ]]; then
+    run_skill_sync_check --project-local
+  else
+    run_skill_sync_check --workspace
+  fi
 else
   skip_check "skill-sync" "disabled by --skip-sync"
 fi

@@ -1,28 +1,5 @@
-WARN  product/ops/ce-deepen-plan/SKILL.md: SKILL.md exceeds target length (lines=356, target=320)
-WARN  product/ops/ce-deepen-spec/SKILL.md: SKILL.md exceeds target length (lines=349, target=320)
-WARN  product/ops/ce-plan/SKILL.md: SKILL.md exceeds target length (lines=321, target=320)
-WARN  product/ops/ce-reliability-review/SKILL.md: SKILL.md exceeds target length (lines=347, target=320)
-WARN  product/ops/ce-review/SKILL.md: SKILL.md exceeds target length (lines=334, target=320)
-WARN  product/ops/ce-spec/SKILL.md: SKILL.md exceeds target length (lines=353, target=320)
-WARN  product/ops/ce-technical-review/SKILL.md: SKILL.md exceeds target length (lines=326, target=320)
-WARN  product/ops/ce-work/SKILL.md: SKILL.md exceeds target length (lines=322, target=320)
-WARN  product/strategy/product-design-critic/SKILL.md: SKILL.md exceeds target length (lines=351, target=320)
-ERROR utilities/bash-hygiene/SKILL.md: many code fences (16) but scripts/ directory is missing
-ERROR utilities/bash-hygiene/SKILL.md: missing recommended section heading: ## Required inputs
-ERROR utilities/bash-hygiene/SKILL.md: missing recommended section heading: ## Deliverables
-ERROR utilities/bash-hygiene/SKILL.md: missing recommended section heading: ## Gotchas
-WARN  utilities/circleci/SKILL.md: consider moving embedded mechanics to scripts/ (code fences=4)
-ERROR utilities/npm-workflow-discipline/SKILL.md: many code fences (14) but scripts/ directory is missing
-ERROR utilities/npm-workflow-discipline/SKILL.md: missing recommended section heading: ## Required inputs
-ERROR utilities/npm-workflow-discipline/SKILL.md: missing recommended section heading: ## Deliverables
-ERROR utilities/npm-workflow-discipline/SKILL.md: missing recommended section heading: ## Gotchas
-ERROR utilities/uv-python-project-setup/SKILL.md: many code fences (12) but scripts/ directory is missing
-ERROR utilities/uv-python-project-setup/SKILL.md: missing recommended section heading: ## When to use
-ERROR utilities/uv-python-project-setup/SKILL.md: missing recommended section heading: ## Required inputs
-ERROR utilities/uv-python-project-setup/SKILL.md: missing recommended section heading: ## Deliverables
-ERROR utilities/uv-python-project-setup/SKILL.md: missing recommended section heading: ## Failure mode
-ERROR utilities/uv-python-project-setup/SKILL.md: missing recommended section heading: ## Gotchas
 Checked files: 109
-Errors: 14
-Warnings: 10
+Errors: 0
+Warnings: 0
 Mode: strict
+Progressive disclosure lint passed

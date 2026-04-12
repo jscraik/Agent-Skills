@@ -102,9 +102,13 @@ For reusable scaffolding inside this repository, use:
 - Do treat `SessionStart`, `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, and `Stop` as the currently documented event surface.
 - Do use `type: "command"` because command hooks are the documented and supported handler type.
 - Do apply matcher semantics by event because matching differs across events:
-  - `SessionStart.matcher` matches `source`, and current documented runtime values are `startup` and `resume`;
+  - `SessionStart.matcher` matches `source`; docs currently list `startup` and `resume`, but current Codex release/schema also includes `clear`, so starter matchers should include all three;
   - `PreToolUse.matcher` and `PostToolUse.matcher` match `tool_name`; current Codex runtime emits `Bash`, so command-class filtering belongs inside the script, not in the matcher;
   - `UserPromptSubmit.matcher` and `Stop.matcher` are ignored by the current runtime.
+- Do run a release-and-schema hook sweep when the user asks for “latest” hook behavior because docs can lag runtime:
+  - check latest stable and alpha release notes for hook-related changes;
+  - cross-check generated schemas under `codex-rs/hooks/schema/generated`;
+  - prefer scaffold defaults based on release+schema evidence, then document doc-lag deltas in `references/runtime-contract.md`.
 - Do keep timeout behavior explicit because `timeout` defaults to `600` seconds and `timeoutSec` is an accepted alias.
 - Do prefer short starter timeouts and event-appropriate policy: narrow `PreToolUse` safety gates may block, while `PostToolUse` feedback hooks should usually warn and continue.
 - Do include short `statusMessage` strings for hooks that can take noticeable time because this makes hook latency visible in the UI.
@@ -204,13 +208,13 @@ bash scripts/lint_skill_types.sh
 - `PreToolUse` and `PostToolUse` match on `Bash`, not command intent -> use script-side command classification for commit, push, edit, or scaffold policies -> keep matchers simple and explicit.
 - Relative hook commands fail from nested working directories -> command execution uses session cwd, not the config folder -> emit absolute script paths in `hooks.json` -> inspect the generated JSON before install.
 - `Stop` can block its own retry loop -> the same incomplete message gets re-checked -> honor `stop_hook_active` and fail open on the second pass -> dry-run the `Stop` payload twice when tuning.
-- `SessionStart` currently documents `startup` and `resume` only -> do not rely on undocumented extra source values in generated matchers -> keep starter packs aligned to the documented set.
+- `SessionStart` docs can lag release/schema updates -> cross-check docs, current release notes, and `codex-rs/hooks/schema/generated/session-start.command.input.schema.json` before locking matcher values -> keep starter packs current without guessing.
 
 ## See Also
 | Skill | When to use |
 |---|---|
 | [[codex-home-audit]] | Audit an existing Codex home installation for hook drift or unsafe config |
-| [[codex-agent-creator]] | Create or update agent roles that the hooks should invoke or govern |
+| [[codex-agent-builder]] | Create or update agent roles that the hooks should invoke or govern |
 | [[gh-workflow]] | Ship and review hook-pack changes through the GitHub lifecycle |
 
 **Topic map:** [[agent-ops]]

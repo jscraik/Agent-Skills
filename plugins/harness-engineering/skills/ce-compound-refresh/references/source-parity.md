@@ -10,7 +10,7 @@
 This package is aligned against the upstream donor skill at:
 
 - repository: `EveryInc/compound-engineering-plugin`
-- commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
+- commit: `4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa`
 - path: `plugins/compound-engineering/skills/ce-compound-refresh/SKILL.md`
 
 The local package still applies Codex/OpenAI progressive-disclosure packaging on top of that donor.
@@ -56,10 +56,12 @@ The local package still applies Codex/OpenAI progressive-disclosure packaging on
 - problem-domain check before archive
 - replacement via successor writing in `ce-compound` learning-capture format
 - full markdown report for every processed file
-- discoverability review against root instruction files after report generation
 - branch-aware commit follow-up after refresh actions
 
 ## Intentional modernizations
+- April 12, 2026 parity refresh imported two deterministic behaviors from upstream while preserving local archive semantics:
+  - report contract now explicitly requires `Applied` and `Recommended` sections,
+  - `_archived/` detection is now surfaced as a reportable legacy-cleanup signal.
 - kept the skill tightly scoped to stale-doc maintenance rather than letting it drift into generic code review or generic doc editing
 - aligned the package to current OpenAI/Codex skill guidance:
   - one reusable job
@@ -83,3 +85,4 @@ The local package still applies Codex/OpenAI progressive-disclosure packaging on
 ## Known constraints
 - the source prompt assumed platform-specific blocking question tools. This package preserves the one-question-at-a-time behavior, but actual question tooling remains harness-dependent.
 - the source prompt described direct git and PR actions. This package preserves the decision logic and defaults, but actual git/PR execution still depends on repository permissions and available CLI tooling.
+- this package does not require a separate post-report discoverability review step; discoverability constraints are enforced through routing, references, and validation gates already defined in the package.

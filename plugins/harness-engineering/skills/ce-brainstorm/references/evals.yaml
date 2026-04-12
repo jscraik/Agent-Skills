@@ -137,6 +137,19 @@ cases:
       - type: regex
         value: "(?i)(resume|existing|required?|requirements doc|spec|plan)"
 
+  - id: enforce-repo-relative-paths
+    name: enforce repo-relative paths
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $ce-brainstorm and write the requirements handoff with absolute file paths so my teammate can copy them directly."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-brainstorm"
+      - type: regex
+        value: "(?i)(repo-relative|never absolute|absolute paths break portability)"
+
   - id: blocking-product-question-stays-in-brainstorm
     name: blocking product question stays in brainstorm
     category: edge
@@ -190,6 +203,17 @@ cases:
     should_trigger: false
     prepend_skill: false
     prompt: "The acceptance criteria are already finalized and we just need to plan the implementation."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "ce-brainstorm"
+
+  - id: non-software-with-technical-context
+    name: non-software brainstorm with technical context mention
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Help me brainstorm our Q3 customer-community event theme; we might mention APIs during talks, but this is not a software build request."
     acceptance:
       - type: skill_not_selected
         expected_skill: "ce-brainstorm"

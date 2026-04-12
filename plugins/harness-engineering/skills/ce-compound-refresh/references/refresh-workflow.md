@@ -77,6 +77,8 @@ Search `docs/solutions/` for `.md` files, excluding:
 - `README.md`
 - `docs/solutions/_archived/`
 
+If `docs/solutions/_archived/` exists, record it in the report as a legacy directory to review for restore-or-delete cleanup.
+
 When a scope hint exists, try these strategies in order and stop at the first that yields matches:
 1. directory match
 2. frontmatter match on `module`, `component`, or `tags`
@@ -93,6 +95,10 @@ If there are no candidate docs at all, report:
 No candidate docs found in docs/solutions/.
 Run `ce:compound` after solving problems to start building your knowledge base.
 ```
+
+Regardless of run mode, keep report sections explicit:
+- `Applied`: actions successfully written
+- `Recommended`: actions that were not written, with rationale
 
 ## Route by scope
 
@@ -372,6 +378,7 @@ Patterns use the same outcomes, but evaluate them as derived guidance:
 - `Consolidate`: two patterns now teach the same lesson and should become one canonical pattern
 - `Replace`: the generalized rule is misleading and refreshed learnings support a different synthesis
 - `Archive`: the pattern is no longer valid, no longer recurring, or fully subsumed by a stronger pattern
+- `Stale`: evidence is not strong enough for archive, replace, or update, but leaving the pattern as trustworthy would be misleading
 
 If "archive" feels too strong but the pattern should no longer be elevated, reduce its prominence only if the docs structure explicitly supports that.
 
@@ -459,7 +466,6 @@ Updated: Y
 Consolidated: C
 Replaced: Z
 Archived: W
-Skipped: V
 Marked stale: S
 ```
 

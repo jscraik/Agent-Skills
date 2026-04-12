@@ -16,6 +16,7 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 - [Shell Scripting](#shell-scripting)
 - [Git Workflow](#git-workflow)
 - [Configuration Files](#configuration-files)
+- [Path Ownership](#path-ownership)
 - [Code Review Fixes](#code-review-fixes)
 - [Refactoring](#refactoring)
 - [Documentation](#documentation)
@@ -80,6 +81,10 @@ For shared git workflow guidance, see [Workflow and Safety Guidance](./docs/agen
 ## Configuration Files
 
 For shared configuration-file guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#configuration-files).
+
+## Path Ownership
+
+For canonical source vs runtime/projection edit boundaries, see [Path Ownership Boundaries](./docs/agents/14-path-ownership-boundaries.md).
 
 ## Code Review Fixes
 

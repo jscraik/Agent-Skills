@@ -1,0 +1,28 @@
+schema_version: "1.0"
+skill: scaffolding-expert
+type: runbook
+purpose: >
+  Help developers pick the right scaffold tier and audit existing implementations
+  for drift/conflict, with minimal-change remediation, style-aware alignment from
+  local git project patterns, and lane-specific validation.
+triggers:
+  - User asks how much scaffolding/framework governance a repo should adopt.
+  - User asks to review existing scaffold implementation for drift or conflict.
+  - User needs recommendations that reconcile npm/Bash/uv workflow policies.
+  - User asks for recommendations aligned to their normal `~/dev` project style.
+inputs:
+  - target repo path or structure snapshot
+  - stack lane(s): npm, bash, uv-python, or mixed
+  - project risk/complexity/team signals
+  - optional workspace style root (default `~/dev`) for `.git` project profiling
+outputs:
+  - tier recommendation (lite|growth|strict) with rationale
+  - workspace style-profile summary and alignment note
+  - drift/conflict findings with file-level evidence
+  - prioritized remediation plan with validation commands
+non_goals:
+  - feature implementation unrelated to scaffolding decisions
+  - full platform architecture redesign without scaffolding scope
+risks:
+  - over-scaffolding can slow delivery and increase maintenance cost
+  - under-scaffolding can hide ownership and validation failures

@@ -39,7 +39,7 @@ agentation:
   visual-explainer: Turn the integration state machine or failure path into a visual
     handoff artifact
 agents-md:
-  codex-agent-creator: Create agent roles that AGENTS.md will reference
+  codex-agent-builder: Create agent roles that AGENTS.md will reference
   codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
   docs-expert: Apply docs polish and community-health guidance to AGENTS.md
 alignment-checkpoint:
@@ -62,6 +62,12 @@ backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
   writing-plans: Plan backend extensions before implementing
+baseline-ui:
+  design-system: Apply design tokens that baseline-ui validates
+  fixing-accessibility: Fix accessibility issues found during baseline-ui checks
+  frontend-ui-design: Implement UI components that baseline-ui governs
+  shadcn-ui: Validate shadcn/ui components against baseline rules
+  ui-visual-regression: Combine with visual regression to catch visual drift
 bash-hygiene:
   codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
     safer defaults
@@ -69,12 +75,6 @@ bash-hygiene:
     behavioral changes
   verification-before-completion: Enforce verification routines after Bash script
     edits before claiming done
-baseline-ui:
-  design-system: Apply design tokens that baseline-ui validates
-  fixing-accessibility: Fix accessibility issues found during baseline-ui checks
-  frontend-ui-design: Implement UI components that baseline-ui governs
-  shadcn-ui: Validate shadcn/ui components against baseline rules
-  ui-visual-regression: Combine with visual regression to catch visual drift
 beautiful-mermaid:
   diagram-cli: Generate .mmd source files before rendering with Beautiful Mermaid
   docs-expert: Add rendered diagrams to repository documentation
@@ -197,7 +197,12 @@ cli-spec:
   agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
-codex-agent-creator:
+coderabbit:
+  circleci: Pair CodeRabbit guidance with broader CircleCI migration and policy workflows
+  context7: Cross-check third-party library docs when CodeRabbit guidance references
+    external tools
+  gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
+codex-agent-builder:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
     agents
@@ -205,7 +210,7 @@ codex-agent-creator:
     or automation first
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
-  codex-agent-creator: Create the agent role the automation will run under
+  codex-agent-builder: Create the agent role the automation will run under
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
@@ -216,7 +221,7 @@ codex-home-audit:
   skill-refactor: Run a skill health scan alongside the home audit
   verification-before-completion: Verify fixes before marking the audit complete
 codex-hooks-builder:
-  codex-agent-creator: Create or update agent roles that the hooks should invoke or
+  codex-agent-builder: Create or update agent roles that the hooks should invoke or
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
@@ -336,9 +341,11 @@ gh-workflow:
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
 imagegen:
-  nano-banana-builder: Use Nano Banana when iterative prompt-image editing is required
-  og-image-builder: Generate route-aware OG images when output needs metadata tag integration
-  sora: Extend still-image workflows into AI-generated video
+  nano-banana-builder: Use when the task needs iterative image generation or editing
+    with Google's Nano Banana APIs.
+  og-image-builder: Use when route-specific Open Graph images should be generated
+    directly from an existing web codebase.
+  sora: Use when the user needs video generation rather than static raster image output.
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -393,7 +400,7 @@ openai-docs:
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
-  codex-agent-creator: Create or update the agent roles that the orchestration plan
+  codex-agent-builder: Create or update the agent roles that the orchestration plan
     needs
   resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
     general subagent orchestration
@@ -405,19 +412,19 @@ playwright-interactive:
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
 plugin-builder:
-  plugin-creator: Create the initial plugin scaffold before hardening/conversion workflows
-  plugin-installer: Handle downstream installation, provenance, and rollback after
-    package validation
-plugin-creator:
-  plugin-builder: Harden a scaffolded plugin package before publishing or validation-heavy
-    handoff
-  plugin-installer: Install and verify a contract-valid plugin after packaging is
+  plugin-creator: Scaffold a minimal plugin shell before hardening and compatibility
+    checks
+  plugin-installer: Install validated plugin packages after build-time hardening is
     complete
+plugin-creator:
+  plugin-builder: Harden scaffolded plugins, run compatibility checks, and emit deconflict
+    evidence before release
+  plugin-installer: Install and verify a contract-valid plugin after packaging work
+    is complete
 plugin-installer:
-  plugin-builder: Run package hardening and contract checks before install/provenance
-    execution
-  plugin-creator: Scaffold a new local plugin before moving into install or visibility
-    repair
+  plugin-builder: Harden or convert plugin packages before installation and activation
+  plugin-creator: Scaffold a fresh local plugin package before install/distribution
+    workflows
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -426,7 +433,6 @@ process-watch:
     done
 product-design-critic:
   brainstorming: Explore design alternatives before critical review
-  frontend-ui-design: Apply critique findings to UI component implementation
   interview-me: Run a requirements interview before critiquing the surface
   product-spec: Critique the product surface after speccing, before build
   visual-explainer: Present critique findings as a visual explainer page
@@ -443,6 +449,13 @@ product-spec:
 production-deployment:
   1password: Inject deployment secrets via 1Password CLI
   release: Orchestrate the release flow before deployment
+project-brain:
+  codex-home-audit: Pair when the user wants Codex control-plane drift analysis across
+    agents, hooks, skills, and memory surfaces.
+  coding-harness: Use when Project Brain rollout must align with harness contracts,
+    gates, and tooling audits in a managed repository.
+  docs-expert: Use for follow-on documentation hardening after Project Brain bootstrap
+    or rollout changes land.
 project-improver:
   architecture-interview: Validate architectural improvements via structured interview
   brainstorming: Brainstorm improvement ideas before running the improver
@@ -454,13 +467,18 @@ rclone:
   feature-video: Upload generated demo artifacts after rendering or capture
   video-transcript-downloader: Transfer downloaded media or transcripts to long-term
     storage
+react-components:
+  baseline-ui: Validate converted components against baseline UI rules
+  design-system: Align converted components with the design-system token layer
+  react-ui-patterns: Apply React composition patterns to converted components
+  stitch-loop: Generate the Stitch screens that this skill converts
 react-ui-patterns:
   baseline-ui: Validate React component patterns against baseline rules
   design-system: Keep typography, spacing, and icon guidance aligned to canonical
     token governance
   frontend-ui-design: Apply React patterns to components being designed
+  react-components: Use patterns when converting Stitch screens to React
   shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
-  stitch-react-components: Use patterns when converting Stitch screens to React
   ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
 recon-workbench:
   security-best-practices: Turn recon findings into concrete secure-by-default implementation
@@ -502,6 +520,11 @@ resolve-todo-parallel:
   orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and an
     explicit user delegation request allow it
   triage: Review pending todo findings before execution begins
+scaffolding-expert:
+  bash-hygiene: Shell-policy and quoting/interpreter hardening
+  context7: External docs grounding for version-sensitive dependencies
+  npm-workflow-discipline: Lockfile discipline and script contract normalization
+  uv-python-project-setup: uv-managed Python project and execution contract setup
 security-best-practices:
   1password: Findings involving secrets management — use for secure injection patterns
   create-auth: Security review often surfaces auth issues — use this for implementation
@@ -526,18 +549,31 @@ shadcn-ui:
   design-system: Override shadcn/ui tokens with design-system aliases
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
+simplify:
+  autofix: Resolve unresolved CodeRabbit PR review comments in guided or batch mode
+  code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
+    fix work
 skill-builder:
-  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
+  codex-agent-builder: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
   skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
     instead of authoring doctrine alone
 skill-creator:
-  codex-agent-creator: Create or update custom agents when skill workflows need dedicated
+  codex-agent-builder: Create or update custom agents when skill workflows need dedicated
     role files
   skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
     packages
+skill-factory:
+  skill-builder: Run quality gates, evals, and hardening loops
+  skill-creator: Create or refactor skill packages
+  skill-installer: Install validated skills from trusted sources
+  skill-refactor: Scan Codex sessions for skill failures and coverage gaps
+  skillify: Capture a completed session as a reusable skill
+skill-installer:
+  skill-creator: Author or repair local skill packages before installation
+  skillify: Harden source skills into canonical templates before install/distribution
 skill-refactor:
   codex-home-audit: Run alongside a full home directory audit
   evals-router: Route evaluation work for under-performing skills
@@ -545,9 +581,6 @@ skill-refactor:
 skillify:
   skill-creator: Create first-draft skill scaffolds before hardening
   skill-installer: Install and surface a validated skill across Codex catalogs
-skill-installer:
-  skill-creator: Author or repair local skill packages before installation
-  skillify: Harden source skills into canonical templates before install/distribution
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
   imagegen: Generate illustrative images for slide backgrounds
@@ -566,14 +599,9 @@ spreadsheet:
   visual-explainer: Present spreadsheet data as a styled HTML table
 stitch-loop:
   frontend-ui-design: Review and polish Stitch-generated UI
-  stitch-react-components: Convert Stitch outputs to React components
+  react-components: Convert Stitch outputs to React components
   stitch-remotion: Turn Stitch screens into narrated video walkthroughs
   ui-cloner: Clone a UI design into Stitch for iterative generation
-stitch-react-components:
-  baseline-ui: Validate converted components against baseline UI rules
-  design-system: Align converted components with the design-system token layer
-  react-ui-patterns: Apply React composition patterns to converted components
-  stitch-loop: Generate the Stitch screens that this skill converts
 stitch-remotion:
   design-system: Keep overlay and caption styling aligned with canonical token and
     typography governance
@@ -633,12 +661,17 @@ ui-visual-regression:
   design-system: Resolve confirmed token, typography, spacing, or icon drift at the
     system layer
   playwright-interactive: Capture screenshots for regression via Playwright
-  stitch-react-components: Catch visual regressions after Stitch-to-React conversion
+  react-components: Catch visual regressions after Stitch-to-React conversion
 using-git-worktrees:
   ce-plan: Plan parallel workstreams across worktrees
   gh-workflow: Manage PRs across multiple worktrees
   systematic-debugging: Debug issues isolated to a specific worktree
   verification-before-completion: Verify each worktree independently before merging
+uv-python-project-setup:
+  test-driven-development: Pair uv-managed environments with behavior-first testing
+    workflows
+  verification-before-completion: Enforce final verification before declaring setup
+    complete
 verification-before-completion:
   evals-router: Verify LLM eval pipelines pass before claiming eval work is complete
   gh-workflow: 'Gate PR merges: verification must pass before PR language is used'

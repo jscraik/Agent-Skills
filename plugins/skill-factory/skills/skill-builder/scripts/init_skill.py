@@ -30,6 +30,28 @@ from datetime import date
 from pathlib import Path
 from typing import Iterable, List, Optional
 
+
+def _discover_repo_root_for_contract() -> Path:
+    for ancestor in Path(__file__).resolve().parents:
+        if (ancestor / ".git").exists():
+            return ancestor
+    try:
+        return Path(__file__).resolve().parents[5]
+    except Exception:  # pragma: no cover - defensive fallback
+        return Path.cwd().resolve()
+
+
+_REPO_ROOT_FOR_CONTRACT = _discover_repo_root_for_contract()
+_SHARED_SKILL_CONTRACT_DIR = _REPO_ROOT_FOR_CONTRACT / "scripts"
+if str(_SHARED_SKILL_CONTRACT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SHARED_SKILL_CONTRACT_DIR))
+
+from canonical_skill_roots import (  # noqa: E402
+    find_plugin_skill_root_for_output,
+    iter_canonical_standalone_skill_roots,
+    iter_declared_plugin_skill_roots,
+)
+
 TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "claude": 64}
 TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "claude": 1024}
 DEFAULT_TARGET = "codex"
@@ -225,6 +247,52 @@ def find_repo_root(start: Path) -> Path:
         return start.resolve().parent if start.is_file() else start.resolve()
 
 
+def _is_plugin_owned_skill_output(out_dir: Path, repo_root: Path) -> bool:
+    return find_plugin_skill_root_for_output(out_dir=out_dir, repo_root=repo_root) is not None
+
+
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _is_repo_managed_skill_output(out_dir: Path, repo_root: Path) -> bool:
+    resolved_out_dir = out_dir.resolve()
+    if not _path_is_within(resolved_out_dir, repo_root):
+        return False
+    if find_plugin_skill_root_for_output(out_dir=resolved_out_dir, repo_root=repo_root) is not None:
+        return True
+    return any(
+        _path_is_within(resolved_out_dir, standalone_root)
+        for standalone_root in iter_canonical_standalone_skill_roots(repo_root)
+    )
+
+
+def _find_cross_lane_skill_conflicts(*, repo_root: Path, out_dir: Path, skill_name: str) -> List[str]:
+    conflicts: List[str] = []
+    plugin_skill_root = find_plugin_skill_root_for_output(out_dir=out_dir.resolve(), repo_root=repo_root)
+
+    if plugin_skill_root is not None:
+        for root in iter_canonical_standalone_skill_roots(repo_root):
+            for match in sorted(root.rglob(f"{skill_name}/SKILL.md")):
+                conflicts.append(str(match.parent.relative_to(repo_root)))
+    else:
+        for plugin_owned_root in iter_declared_plugin_skill_roots(repo_root):
+            for match in sorted(plugin_owned_root.glob(f"{skill_name}/SKILL.md")):
+                conflicts.append(str(match.parent.relative_to(repo_root)))
+
+    deduped: List[str] = []
+    seen: set[str] = set()
+    for path in conflicts:
+        if path not in seen:
+            deduped.append(path)
+            seen.add(path)
+    return deduped
+
+
 def load_scaffold_template(*, structure: str, templates_dir: Path) -> str:
     template_name = SCAFFOLD_TEMPLATE_FILES.get(structure)
     if not template_name:
@@ -323,6 +391,26 @@ def init_skill(
     skill_dir = out_dir.resolve() / skill_name
     if skill_dir.exists():
         print(f"[ERROR] Skill directory already exists: {skill_dir}", file=sys.stderr)
+        return None
+
+    repo_root = find_repo_root(Path(__file__).resolve().parent)
+    resolved_out_dir = out_dir.resolve()
+    cross_lane_conflicts: List[str] = []
+    if _is_repo_managed_skill_output(resolved_out_dir, repo_root):
+        cross_lane_conflicts = _find_cross_lane_skill_conflicts(
+            repo_root=repo_root,
+            out_dir=resolved_out_dir,
+            skill_name=skill_name,
+        )
+    if cross_lane_conflicts:
+        target_lane = "plugin-owned" if _is_plugin_owned_skill_output(out_dir=resolved_out_dir, repo_root=repo_root) else "standalone"
+        rendered = ", ".join(cross_lane_conflicts)
+        print(
+            "[ERROR] Canonical skill ownership violation: "
+            f"cannot create '{skill_name}' in {target_lane} lane because it already exists in {rendered}. "
+            "Keep one canonical location per skill name.",
+            file=sys.stderr,
+        )
         return None
 
     if dry_run:

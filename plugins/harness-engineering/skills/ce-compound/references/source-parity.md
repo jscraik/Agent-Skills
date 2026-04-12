@@ -9,7 +9,7 @@ This package preserves and restructures the following source prompt families:
 3. upstream `compound-docs` schema-driven capture workflow
 4. upstream donor snapshot:
    - repo: `EveryInc/compound-engineering-plugin`
-   - commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
+   - commit: `4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa`
    - path: `plugins/compound-engineering/skills/ce-compound/SKILL.md`
 
 ## Preserved from `workflow-compound.md`

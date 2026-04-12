@@ -1,6 +1,6 @@
 # YAML Frontmatter Schema
 
-`schema.yaml` in this directory is the canonical contract for `docs/solutions/` frontmatter written by `ce:compound`.
+`schema.yaml` in this directory is the canonical contract for `docs/solutions/` frontmatter written by `ce-compound`.
 
 Use this file as the quick reference for:
 - required fields
@@ -23,7 +23,7 @@ The `problem_type` determines which **track** applies. Each track has different 
 - **module**: Module or area affected
 - **date**: ISO date in `YYYY-MM-DD`
 - **problem_type**: One of the values listed in the Tracks table above
-- **component**: One of `rails_model`, `rails_controller`, `rails_view`, `service_object`, `background_job`, `database`, `frontend_stimulus`, `hotwire_turbo`, `email_processing`, `authentication`, `payments`, `development_workflow`, `testing_framework`, `documentation`, `tooling`
+- **component**: One of `rails_model`, `rails_controller`, `rails_view`, `service_object`, `background_job`, `database`, `frontend_stimulus`, `hotwire_turbo`, `email_processing`, `brief_system`, `assistant`, `authentication`, `payments`, `development_workflow`, `testing_framework`, `documentation`, `tooling`
 - **severity**: One of `critical`, `high`, `medium`, `low`
 
 ## Bug Track Fields
@@ -46,6 +46,10 @@ No additional required fields beyond the shared ones. All fields below are optio
 
 - **related_components**: Other components involved
 - **tags**: Search keywords, lowercase and hyphen-separated
+
+## Optional Fields (bug track only)
+
+- **rails_version**: Rails version in `X.Y.Z` format
 
 ## Backward Compatibility
 
@@ -82,3 +86,4 @@ Docs created before the track system may have `symptoms`/`root_cause`/`resolutio
 6. Enum fields must match the allowed values exactly.
 7. Array fields must respect min/max item counts.
 8. `date` must match `YYYY-MM-DD`.
+9. `rails_version`, if present, must match `X.Y.Z` and only applies to bug-track docs.

@@ -45,7 +45,8 @@ plugin_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-skill-names.XXXXXX")"
 flat_names_file="$(mktemp "${TMPDIR:-/tmp}/flat-skill-names.XXXXXX")"
 overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-flat-overlap.XXXXXX")"
 shadowed_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-shadowed-overlap.XXXXXX")"
-trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file"' EXIT
+system_bridge_names_file="$(mktemp "${TMPDIR:-/tmp}/system-bridge-skill-names.XXXXXX")"
+trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file"' EXIT
 
 selection_policy_shell="$(
   python3 "$selection_policy_path" --format shell
@@ -57,13 +58,37 @@ fi
 eval "$selection_policy_shell"
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 
-is_allowlisted_router_skill_name() {
+is_allowlisted_overlap_skill_name() {
   local skill_name="$1"
   case " ${plugin_visible_router_skills[*]} " in
     *" $skill_name "*) return 0 ;;
-    *) return 1 ;;
   esac
+  case " ${system_bridge_skill_names[*]} " in
+    *" $skill_name "*) return 0 ;;
+  esac
+  return 1
 }
+
+# Only treat bridge names as intentional when the top-level skill path is a
+# real symlink into `.system/<name>`; a plain directory with the same name
+# should still count as shadowing.
+if [ -d .agents/skills/.system ]; then
+  while IFS= read -r bridge_path; do
+    [ -n "$bridge_path" ] || continue
+    if [ -L "$bridge_path" ]; then
+      bridge_name="$(basename "$bridge_path")"
+      bridge_target="$(readlink "$bridge_path" 2>/dev/null || true)"
+      if [ "$bridge_target" = ".system/$bridge_name" ]; then
+        printf '%s\n' "$bridge_name" >> "$system_bridge_names_file"
+      fi
+    fi
+  done < <(find .agents/skills -mindepth 1 -maxdepth 1 -type l 2>/dev/null | sort)
+fi
+
+system_bridge_skill_names=()
+if [ -s "$system_bridge_names_file" ]; then
+  mapfile -t system_bridge_skill_names < "$system_bridge_names_file"
+fi
 
 find -L plugins -type f -path '*/skills/*/SKILL.md' 2>/dev/null \
   | awk -F/ '{print $(NF-1)}' \
@@ -81,7 +106,7 @@ shadowed_count=0
 if [ -s "$plugin_names_file" ] && [ -s "$flat_names_file" ]; then
   comm -12 "$plugin_names_file" "$flat_names_file" | sed '/^$/d' > "$overlap_names_file"
   while IFS= read -r overlap_name; do
-    if [ -z "$overlap_name" ] || is_allowlisted_router_skill_name "$overlap_name"; then
+    if [ -z "$overlap_name" ] || is_allowlisted_overlap_skill_name "$overlap_name"; then
       continue
     fi
     printf '%s\n' "$overlap_name" >> "$shadowed_names_file"

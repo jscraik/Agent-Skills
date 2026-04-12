@@ -436,30 +436,48 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
-                repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder" / "SKILL.md",
+                repo_root / "plugins" / "demo-plugin" / "skills" / "demo-shadow" / "SKILL.md",
                 "# plugin skill",
             )
             write_text(
-                repo_root / ".agents" / "skills" / "plugin-builder" / "SKILL.md",
+                repo_root / ".agents" / "skills" / "demo-shadow" / "SKILL.md",
                 "# flat skill",
             )
 
             result = run_shadow_check(repo_root)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Plugin-shadowing check failed", result.stderr)
-            self.assertIn("- plugin-builder", result.stderr)
+            self.assertIn("- demo-shadow", result.stderr)
 
-    def test_plugin_shadowing_check_allows_router_overlap(self) -> None:
+    def test_plugin_shadowing_check_allows_allowlisted_overlap(self) -> None:
+        selection_policy = load_selection_policy_module()
+        allowlisted = tuple(
+            selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
+        ) or tuple(selection_policy.SYSTEM_BRIDGE_SKILL_NAMES)
+        if not allowlisted:
+            self.skipTest("No overlap allowlist configured in selection policy.")
+
+        router_skill = allowlisted[0]
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
-                repo_root / "plugins" / "coderabbit" / "skills" / "coderabbit" / "SKILL.md",
+                repo_root / "plugins" / "demo-plugin" / "skills" / router_skill / "SKILL.md",
                 "# plugin skill",
             )
-            write_text(
-                repo_root / ".agents" / "skills" / "coderabbit" / "SKILL.md",
-                "# flat skill",
-            )
+            if router_skill in selection_policy.SYSTEM_BRIDGE_SKILL_NAMES:
+                system_skill_dir = repo_root / "skills-system" / router_skill
+                write_text(system_skill_dir / "SKILL.md", "# bridge skill")
+                flat_root = repo_root / ".agents" / "skills"
+                flat_root.mkdir(parents=True, exist_ok=True)
+                (flat_root / ".system").symlink_to(
+                    "../../skills-system", target_is_directory=True
+                )
+                (flat_root / router_skill).symlink_to(f".system/{router_skill}")
+            else:
+                write_text(
+                    repo_root / ".agents" / "skills" / router_skill / "SKILL.md",
+                    "# flat skill",
+                )
 
             result = run_shadow_check(repo_root)
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
@@ -476,17 +494,22 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
-    def test_skill_discovery_visibility_hides_plugin_lanes_by_default(self) -> None:
+    def test_skill_discovery_visibility_respects_router_allowlist(self) -> None:
         """
-        Verify that plugin-owned lane skills are hidden by default but included in advanced visibility.
+        Verify default visibility only includes allowlisted plugin router skills.
 
-        Creates flat SKILL.md entries for `coderabbit`, `autofix`, `code-review` and `simplify`, patches `skill_discovery.REPO_ROOT`, `FLAT_SKILLS_DIR` and `_is_plugin_owned_skill_dir` to treat those dirs as plugin-owned, then asserts that discovery with `visibility="default"` keeps the router skill while hiding lane skills and that `visibility="advanced"` returns all four skills.
+        Creates flat SKILL.md entries for plugin-owned skills (`coderabbit`,
+        `autofix`, `code-review`, `simplify`), then patches discovery to treat
+        those dirs as plugin-owned. Default visibility should return only names
+        present in `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES`; advanced visibility
+        should return all plugin-owned skills.
         """
         skill_discovery = load_skill_discovery_module()
+        skill_names = ("coderabbit", "autofix", "code-review", "simplify")
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir).resolve()
             flat_root = repo_root / ".agents" / "skills"
-            for name in ("coderabbit", "autofix", "code-review", "simplify"):
+            for name in skill_names:
                 write_text(
                     flat_root / name / "SKILL.md",
                     f"""
@@ -505,12 +528,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 mock.patch.object(
                     skill_discovery,
                     "_is_plugin_owned_skill_dir",
-                    side_effect=lambda skill_dir: skill_dir.name in {
-                        "coderabbit",
-                        "autofix",
-                        "code-review",
-                        "simplify",
-                    },
+                    side_effect=lambda skill_dir: skill_dir.name in set(skill_names),
                 ),
             ):
                 default_entries = skill_discovery.discover_skill_entries(
@@ -524,17 +542,19 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         default_names = sorted(entry.name for entry in default_entries)
         advanced_names = sorted(entry.name for entry in advanced_entries)
-        self.assertEqual(default_names, ["coderabbit"])
-        self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit", "simplify"])
+        expected_default = sorted(
+            name for name in skill_names if name in skill_discovery.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
+        )
+        self.assertEqual(default_names, expected_default)
+        self.assertEqual(advanced_names, sorted(skill_names))
 
-    def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_hides_them(self) -> None:
+    def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_missing_them(self) -> None:
         """
-        Ensure advanced discovery merges plugin lane skills when flat projection hides them.
+        Ensure advanced discovery can merge plugin lanes when flat projection is missing them.
         
-        Sets up a repository where the runtime (flat) projection exposes only a router skill (`coderabbit`)
-        while the plugin canonical source contains lane skills (`autofix`, `code-review`, `simplify`).
-        Asserts that discovery with `visibility="default"` returns only the router skill and that
-        `visibility="advanced"` returns the merged set including the plugin lane skills.
+        Sets up a repository where the runtime (flat) projection exposes only `coderabbit` while the
+        plugin canonical source contains lane skills (`autofix`, `code-review`, `simplify`). Asserts that
+        default visibility returns what flat projects and advanced visibility merges in plugin lanes.
         """
         skill_discovery = load_skill_discovery_module()
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -602,6 +622,21 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
         self.assertIn("projection_integrity.py", content)
+
+    def test_sync_script_projects_profile_plugin_source_mirrors(self) -> None:
+        """
+        Ensure profile-home sync keeps marketplace source paths resolvable.
+
+        Codex profile homes (for example ~/.codex-red) receive a copied
+        marketplace.json. This test enforces that sync_skills also mirrors
+        plugin source dirs into <profile>/plugins/<name> so marketplace
+        source.path entries like ./plugins/<name> remain valid.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn(
+            'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"',
+            content,
+        )
 
 
 if __name__ == "__main__":

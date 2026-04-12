@@ -93,6 +93,21 @@ cases:
         expected_skill: "ce-compound-refresh"
       - type: regex
         value: "(?i)(Consolidate|canonical doc|overlap|retrieval value|payment retry)"
+      - type: regex
+        value: "(?i)(Archive|_archived|archive metadata)"
+
+  - id: legacy-archived-cleanup-signal
+    name: legacy archived directory cleanup signal
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run ce:compound-refresh and if docs/solutions/_archived is present, call it out as legacy cleanup in the report."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-compound-refresh"
+      - type: regex
+        value: "(?i)(_archived|legacy directory|restore-or-delete|cleanup)"
 
   - id: auto-memory-signal
     name: auto memory handled as supplementary
@@ -192,7 +207,7 @@ cases:
         value: "(?i)(cannot comply|report|stale|evidence|docs/solutions)"
 
 metadata:
-  last_updated: "2026-03-30"
+  last_updated: "2026-04-12"
   author: "Codex"
   review_status: "draft"
   fail_fast_skill_gate_criteria:

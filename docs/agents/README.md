@@ -25,6 +25,7 @@
 - [11-ai-review-governance](/docs/agents/11-ai-review-governance.md)
 - [12-ci-required-checks](/docs/agents/12-ci-required-checks.md)
 - [13-workflow-and-safety-guidance](/docs/agents/13-workflow-and-safety-guidance.md)
+- [14-path-ownership-boundaries](/docs/agents/14-path-ownership-boundaries.md)
 
 ## Quick picks
 
@@ -34,3 +35,4 @@
 | Validation order and checks | [/docs/agents/04-validation.md](/docs/agents/04-validation.md) |
 | Security and governance | [/docs/agents/06-security-and-governance.md](/docs/agents/06-security-and-governance.md) |
 | Release and risky git controls | [/docs/agents/08-release-and-change-control.md](/docs/agents/08-release-and-change-control.md) |
+| Canonical vs runtime edit ownership | [/docs/agents/14-path-ownership-boundaries.md](/docs/agents/14-path-ownership-boundaries.md) |

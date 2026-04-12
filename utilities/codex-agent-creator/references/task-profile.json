@@ -3,6 +3,7 @@
   "profile_id": "utilities-codex-agent-creator",
   "scope_skill": "utilities/codex-agent-creator",
   "scope_profile": "utilities",
+  "learning_posture": "manual",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

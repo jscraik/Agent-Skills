@@ -23,7 +23,7 @@ For most repos, start with three hooks:
 1. `SessionStart`
 - Add a short repo-aware context string.
 - Mention dirty worktree state, branch, and validation hints.
-- Use `matcher: "^(startup|resume)$"` so the starter matches the current documented runtime without depending on undocumented extra source values.
+- Use `matcher: "^(startup|resume|clear)$"` so the starter aligns to current release/schema behavior while docs text catches up.
 
 2. `UserPromptSubmit`
 - Block direct attempts to waive higher-priority system, developer, or repo instructions.

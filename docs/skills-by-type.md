@@ -13,13 +13,13 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `product_verification`: 8
 - `data_fetch_analysis`: 5
 - `team_automation`: 35
-- `scaffolding_templates`: 24
-- `code_quality_review`: 26
+- `scaffolding_templates`: 25
+- `code_quality_review`: 27
 - `ci_cd_deployment`: 6
-- `runbook`: 8
+- `runbook`: 10
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 124
+- `total_tagged`: 128
 
 ## Semantic Types
 
@@ -104,6 +104,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `favicon-generator` — `frontend/graphics`
 - `frontend-design` — `frontend/ui`
 - `frontend-ui-design` — `frontend/ui`
+- `llm-wiki` — `product/docs`
 - `mcp-builder` — `backend`
 - `nano-banana-builder` — `frontend/graphics`
 - `og-image-creator` — `frontend/graphics`
@@ -134,6 +135,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `fixing-metadata` — `frontend/website`
 - `go` — `utilities`
 - `javascript-pro` — `utilities`
+- `plugin-builder` — `plugins/plugin-factory/skills`
 - `powershell` — `utilities`
 - `rust-pro` — `utilities`
 - `security-best-practices` — `product/security`
@@ -161,7 +163,9 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `diagram-cli` — `utilities`
 - `npm-workflow-discipline` — `utilities`
 - `prek-pro` — `github`
+- `project-brain` — `utilities`
 - `recon-workbench` — `utilities`
+- `scaffolding-expert` — `utilities`
 - `security-threat-model` — `product/security`
 - `systematic-debugging` — `utilities`
 - `uv-python-project-setup` — `utilities`

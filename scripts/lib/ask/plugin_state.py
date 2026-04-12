@@ -108,7 +108,14 @@ def _activation_state(
                     ((entry.get("source") or {}).get("path")) if isinstance(entry, dict) else None
                 ),
                 "workspace_plugin_path": item.get("path"),
-                "cache_present": (repo_root / "plugins" / "cache" / "agent-skills-local" / str(name)).exists(),
+                "cache_present": (
+                    repo_root
+                    / ".agents"
+                    / "plugins-runtime"
+                    / "cache"
+                    / "agent-skills-local"
+                    / str(name)
+                ).exists(),
             }
         )
 

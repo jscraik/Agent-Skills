@@ -10,12 +10,12 @@ Read when: you need to verify that `ce-brainstorm` preserves the legacy brainsto
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `ce-brainstorm` skill to the local skill at `product/ops/ce-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
+This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `ce-brainstorm` skill to the local skill at `plugins/harness-engineering/skills/ce-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
 
 ## Source inputs
 - legacy prompt: `configs/codex/prompts/workflow-brainstorm.md`
-- upstream donor skill: `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/plugins/compound-engineering/skills/ce-brainstorm/SKILL.md`
-- migration target: `product/ops/ce-brainstorm/`
+- upstream donor skill (current review baseline): `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa/plugins/compound-engineering/skills/ce-brainstorm/SKILL.md`
+- migration target: `plugins/harness-engineering/skills/ce-brainstorm/`
 - lightweight review doctrine adapted locally in `references/document-review-pass.md`
 
 ## Parity mapping
@@ -43,6 +43,9 @@ This document maps the legacy brainstorm prompt plus the upstream `compound-engi
 
 
 ## Intentional modernizations
+- The April 12, 2026 source review kept local advanced workflow structure and selectively pulled two durable upstream clarifications:
+  - explicit prohibition on absolute file paths in generated artifacts to preserve cross-machine/worktree portability,
+  - clearer software-domain classification language so topical software mentions do not misroute non-software brainstorms.
 - Prompt-only control syntax such as `argument-hint` and slash-command handoffs were translated into durable skill guidance plus local `ce-spec`, `ce-plan`, and `ce-work` handoff language.
 - The upstream `requirements doc` contract was adopted for new substantial work because local `ce-plan` already prefers `docs/brainstorms/*-requirements.md` as the primary planning source.
 - Legacy `docs/brainstorms/*-brainstorm.md` artifacts remain supported for resume-in-place compatibility rather than forced renames.

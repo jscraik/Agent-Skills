@@ -7,7 +7,7 @@ metadata:
   maturity: canonical
   owner: Agent Skills Team
   review_cadence: quarterly
-  last_reviewed: 2026-03-24
+  last_reviewed: 2026-04-12
   metadata_source: frontmatter
 ---
 
@@ -194,10 +194,10 @@ If critical inputs are missing, ask only the minimum needed to proceed safely.
 ## Agent injection
 When the request includes skill-linked subagent support, wire it explicitly during `create`, `improve`, or `install-distribute`:
 
-1. Reuse-first discovery: check repo-shared agents in `./configs/codex/agents/` when present, then project/global `.codex/agents/`.
-2. If no suitable role exists, hand off role creation to [[codex-agent-creator]] and request a purpose-built agent with explicit `model`, `model_reasoning_effort`, and scope.
+1. Reuse-first discovery: check `/Users/jamiecraik/dev/configs/codex/agents/` first; treat `.codex/agents/` as a compatibility projection, not the default write target.
+2. If no suitable role exists, hand off role creation to [[codex-agent-creator]] and request a purpose-built agent with explicit `model`, `model_reasoning_effort`, and canonical global targets.
 3. Validate candidate role files: `bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>`.
-4. Install/update role files only when requested: `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope project|global [--update-existing]`.
+4. Install/update role files only when requested: `bash utilities/codex-agent-creator/scripts/install_role.sh --agent-name <name> --agent-file <path> --scope global --canonical-root ~/dev/configs/codex --config ~/dev/configs/codex/config.toml [--update-existing]`.
 5. Record route as `reuse-existing` or `create-purpose-built` in the handoff summary.
 
 ## Discovery interview

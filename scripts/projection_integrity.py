@@ -42,24 +42,6 @@ class MirrorProjection:
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
     SymlinkProjection(
-        name="skill-factory-skill-builder-alias",
-        alias_path="utilities/skill-builder",
-        canonical_path="plugins/skill-factory/skills/skill-builder",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
-        name="skill-factory-skill-refactor-alias",
-        alias_path="utilities/skill-refactor",
-        canonical_path="plugins/skill-factory/skills/skill-refactor",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
-        name="skill-factory-skillify-alias",
-        alias_path="utilities/skillify",
-        canonical_path="plugins/skill-factory/skills/skillify",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
         name="skill-factory-skill-creator-alias",
         alias_path="skills-system/skill-creator",
         canonical_path="plugins/skill-factory/skills/skill-creator",
@@ -70,12 +52,6 @@ SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
         alias_path="skills-system/skill-installer",
         canonical_path="plugins/skill-factory/skills/skill-installer",
         tags=("skill-factory",),
-    ),
-    SymlinkProjection(
-        name="plugin-factory-plugin-builder-alias",
-        alias_path="utilities/plugin-builder",
-        canonical_path="plugins/plugin-factory/skills/plugin-builder",
-        tags=("plugin-factory",),
     ),
     SymlinkProjection(
         name="plugin-factory-plugin-creator-alias",
@@ -95,32 +71,36 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
     MirrorProjection(
         name="cache-arscontexta",
         source_path="plugins/arscontexta",
-        projection_path="plugins/cache/agent-skills-local/arscontexta/local",
+        projection_path=".agents/plugins-runtime/cache/agent-skills-local/arscontexta",
         tags=("plugin-caches",),
     ),
     MirrorProjection(
         name="cache-coderabbit",
         source_path="plugins/coderabbit",
-        projection_path="plugins/cache/agent-skills-local/coderabbit/local",
+        projection_path=".agents/plugins-runtime/cache/agent-skills-local/coderabbit",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-harness-engineering",
         source_path="plugins/harness-engineering",
-        projection_path="plugins/cache/agent-skills-local/harness-engineering/local",
+        projection_path=".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-plugin-factory",
         source_path="plugins/plugin-factory",
-        projection_path="plugins/cache/agent-skills-local/plugin-factory/local",
+        projection_path=".agents/plugins-runtime/cache/agent-skills-local/plugin-factory",
         tags=("plugin-caches", "plugin-factory"),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-skill-factory",
         source_path="plugins/skill-factory",
-        projection_path="plugins/cache/agent-skills-local/skill-factory/local",
+        projection_path=".agents/plugins-runtime/cache/agent-skills-local/skill-factory",
         tags=("plugin-caches", "skill-factory"),
+        optional_when_missing=True,
     ),
 )
 

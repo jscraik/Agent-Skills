@@ -9,12 +9,18 @@
 - [Failure handling](#failure-handling)
 
 ## Repository checks
-- `bash scripts/verify-work.sh`
+- `bash scripts/verify-work.sh` (project-local default scope)
+- `bash scripts/verify-work.sh --workspace-governance` (explicit workspace scope)
+- `bash scripts/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `plugins/cache/**`, and `runtime/**`)
+  - projection-refresh exception only: `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 bash scripts/check_path_ownership_boundaries.sh`
+  - default scope is staged diff locally and base-ref diff in CI; override with `PATH_OWNERSHIP_GUARD_SCOPE`.
 - `bash scripts/sync_skills.sh`
 - `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
 - `just validate` (or `bash scripts/validate_all.sh`)
 - `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
+- Scope policy reference: [hook-governance-scope-defaults.md](/Users/jamiecraik/dev/agent-skills/docs/guides/hook-governance-scope-defaults.md).
+- Path ownership policy: [14-path-ownership-boundaries.md](/Users/jamiecraik/dev/agent-skills/docs/agents/14-path-ownership-boundaries.md).
 
 ### Managed asset lifecycle baseline
 - When work touches lifecycle metadata, packaged-skill inheritance, plugin manifests, or `docs/solutions/` governance:

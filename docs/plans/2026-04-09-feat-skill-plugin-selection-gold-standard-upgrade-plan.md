@@ -548,7 +548,7 @@ P4 | completed | codex | Validation gates promoted and passing in persistent lan
 
 - Governing requirements: `docs/brainstorms/2026-04-09-skill-plugin-selection-gold-standard-requirements.md`
 - Governing spec: `docs/specs/2026-04-09-feat-skill-plugin-selection-gold-standard-spec.md`
-- Plan artifact template: `plugins/cache/agent-skills-local/harness-engineering/local/skills/ce-plan/references/plan-artifacts.md`
+- Plan artifact template: `.agents/plugins-runtime/cache/agent-skills-local/harness-engineering/local/skills/ce-plan/references/plan-artifacts.md`
 - CLI entrypoint: `bin/ask`
 - Skills commands: `scripts/lib/ask/commands/skills.py`
 - Repo diagnostics commands: `scripts/lib/ask/commands/repo.py`

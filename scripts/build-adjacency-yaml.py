@@ -15,6 +15,11 @@ CANONICAL_PREFIXES = {
     "frontend/",
     "github/",
     "interview/",
+    "plugins/arscontexta/skills/",
+    "plugins/coderabbit/skills/",
+    "plugins/harness-engineering/skills/",
+    "plugins/plugin-factory/skills/",
+    "plugins/skill-factory/skills/",
     "skills-antigravity/",
     "personas/",
     "product/",
@@ -28,8 +33,19 @@ TOPIC_MAPS = {
     "mobile-native", "index",
 }
 
+ALLOWED_DUPLICATE_SKILL_IDS = {
+    "plugin-creator",
+    "plugin-installer",
+    "skill-creator",
+    "skill-installer",
+    "skill-builder",
+}
+
+SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
+
 adjacency = {}   # skill -> {related_skill: description}
-seen_skills: set[str] = set()   # deduplicate by skill name, not resolved path
+seen_skills: dict[str, pathlib.Path] = {}   # canonical skill id -> first source path
 
 
 def is_canonical_skill_md(path: pathlib.Path) -> bool:
@@ -40,6 +56,32 @@ def is_canonical_skill_md(path: pathlib.Path) -> bool:
     if rel == "SKILL.md":
         return False
     return any(rel.startswith(prefix) for prefix in CANONICAL_PREFIXES)
+
+
+def resolve_skill_id(path: pathlib.Path, content: str) -> str:
+    frontmatter = FRONTMATTER_RE.match(content)
+    if frontmatter:
+        for raw_line in frontmatter.group(1).splitlines():
+            line = raw_line.strip()
+            if not line.startswith("name:"):
+                continue
+            _, value = line.split(":", 1)
+            candidate = value.strip().strip("'\"")
+            if SKILL_REF_RE.fullmatch(candidate):
+                return candidate
+            break
+    return path.parts[-2]
+
+
+def normalize_skill_ref(target: str) -> str:
+    """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
+    normalized = target.strip()
+    if ":" not in normalized:
+        return normalized
+    _, suffix = normalized.split(":", 1)
+    if SKILL_REF_RE.fullmatch(suffix):
+        return suffix
+    return normalized
 
 def iter_skill_md_files(root: pathlib.Path):
     # Prefer tracked files so generated/untracked projections do not pollute output.
@@ -70,12 +112,22 @@ def iter_skill_md_files(root: pathlib.Path):
 for md in sorted(iter_skill_md_files(ROOT)):
     if not is_canonical_skill_md(md):
         continue
-    skill = md.parts[-2]
-    if skill in seen_skills:         # first SKILL.md wins (alphabetical sort = utilities/ before skills-antigravity/ typically)
-        continue
-    seen_skills.add(skill)
-
     content = md.read_text(encoding="utf-8", errors="replace")
+    skill = resolve_skill_id(md, content)
+    previous = seen_skills.get(skill)
+    if previous and previous != md:
+        if skill not in ALLOWED_DUPLICATE_SKILL_IDS:
+            raise RuntimeError(
+                f"duplicate canonical skill id '{skill}': "
+                f"existing={previous.as_posix()} conflicting={md.as_posix()}"
+            )
+        print(
+            "warning: duplicate canonical skill id "
+            f"'{skill}': keeping {previous.as_posix()}, ignoring {md.as_posix()}",
+            file=sys.stderr,
+        )
+        continue
+    seen_skills[skill] = md
     sa_block = re.search(
         r"## See Also\s*\n(.*?)(?=\n##|\Z)",
         content,
@@ -88,7 +140,7 @@ for md in sorted(iter_skill_md_files(ROOT)):
     for row in sa_block.group(1).splitlines():
         m = re.match(r"\|\s*\[\[([^\]]+)\]\]\s*\|\s*(.+?)\s*\|", row)
         if m:
-            target = m.group(1).strip()
+            target = normalize_skill_ref(m.group(1))
             desc   = m.group(2).strip()
             if target not in TOPIC_MAPS and not target.startswith("|"):
                 rows[target] = desc

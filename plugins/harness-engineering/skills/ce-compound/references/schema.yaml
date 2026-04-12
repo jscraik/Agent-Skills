@@ -71,6 +71,8 @@ required_fields:
       - frontend_stimulus
       - hotwire_turbo
       - email_processing
+      - brief_system
+      - assistant
       - authentication
       - payments
       - development_workflow
@@ -190,6 +192,13 @@ optional_fields:
     max_items: 8
     description: "Search keywords, lowercase and hyphen-separated"
 
+# --- Fields optional for bug track only -------------------------------------
+bug_optional_fields:
+  rails_version:
+    type: string
+    pattern: '^\d+\.\d+\.\d+$'
+    description: "Rails version in X.Y.Z format. Only relevant for bug-track docs."
+
 # --- Backward compatibility --------------------------------------------------
 # Docs created before the track system was introduced may have bug-track
 # fields (symptoms, root_cause, resolution_type) on knowledge-type
@@ -209,4 +218,5 @@ validation_rules:
   - "Enum fields must match allowed values exactly"
   - "Array fields must respect min_items/max_items when specified"
   - "date must match YYYY-MM-DD format"
+  - "rails_version, if provided, must match X.Y.Z format and only applies to bug-track docs"
   - "tags should be lowercase and hyphen-separated"

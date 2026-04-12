@@ -23,14 +23,26 @@ Index for repository automation, validation, and maintenance scripts.
 - `validate_skill_authoring_family.sh`
 - `validate_skill_authoring_family_benchmarks.py`
 - `validate_projection_integrity.sh`
+- `check_path_ownership_boundaries.sh`
+  - Guardrails:
+    - default local scope checks staged diff only;
+    - blocks direct edits to derived runtime/projection surfaces (`.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `plugins/cache/**`, `runtime/**`);
+    - set `PATH_OWNERSHIP_GUARD_SCOPE=working` for full working-tree checks;
+    - set `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1` only for explicit projection-refresh lanes.
 - `projection_integrity.py`
 - `check_plugin_skill_shadowing.sh`
+- `check_codex_home_skill_overlap.sh`
+  - Audits overlap between flat runtime skills (`<codex-home>/skills`) and plugin-cache skills (`<codex-home>/plugins/cache/...`).
+  - Default target: `~/.codex`; use `--codex-home ~/.codex-red` for alternate profiles.
+  - Add `--strict --show-overlap` for CI-style fail-fast behavior with explicit overlap names.
+  - Use `--remediate-cache-skills` to repair cache plugin-root layout when plugin caches are nested under `local/` or version/hash directories.
 - `verify_skill_catalog_freshness.py`
 - `verify_recursive_skill_graph_artifacts.py`
 - `wiki_lint.py`
 
 ## Sync and projection
 - `sync_skills.sh`
+  - Projects repaired plugin caches into Codex profile homes and, for non-symlinked `~/.codex-*` profiles, creates `plugins/<plugin>` source mirrors so profile `marketplace.json` entries with `./plugins/<name>` remain resolvable.
 - `sync_skills_sandbox_safe.sh`
 - `sync_plugin_factory_family.sh`
 - `sync_projection_trees.sh`

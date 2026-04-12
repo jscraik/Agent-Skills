@@ -145,7 +145,7 @@ Run a deterministic visual regression loop so we can separate expected UI change
 | [[baseline-ui]] | Run baseline UI checks alongside visual regression |
 | [[design-system]] | Resolve confirmed token, typography, spacing, or icon drift at the system layer |
 | [[agent-browser]] | Use agent-browser snapshots as regression inputs |
-| [[stitch-react-components]] | Catch visual regressions after Stitch-to-React conversion |
+| [[react-components]] | Catch visual regressions after Stitch-to-React conversion |
 
 **Topic map:** [[frontend-ui]]
 

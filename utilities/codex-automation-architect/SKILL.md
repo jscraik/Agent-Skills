@@ -134,7 +134,7 @@ For non-trivial outputs, return this compact structure:
 
 | Skill | When to use together |
 |---|---|
-| [[codex-agent-creator]] | Create the agent role the automation will run under |
+| [[codex-agent-builder]] | Create the agent role the automation will run under |
 | [[decide-build-primitive]] | Confirm automation is the right primitive before building |
 | [[ce-plan]] | Plan the automation contract before implementing |
 | [[verification-before-completion]] | Validate automation output before declaring done |

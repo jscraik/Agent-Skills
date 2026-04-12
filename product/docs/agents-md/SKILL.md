@@ -271,7 +271,7 @@ Do not overload either level. The agent sees all merged AGENTS files. Keep each 
 | Skill | When to use together |
 |---|---|
 | [[codex-home-audit]] | Audit the full Codex home dir after AGENTS.md refactors |
-| [[codex-agent-creator]] | Create agent roles that AGENTS.md will reference |
+| [[codex-agent-builder]] | Create agent roles that AGENTS.md will reference |
 | [[docs-expert]] | Apply docs polish and community-health guidance to AGENTS.md |
 
 **Topic map:** [[agent-ops]]

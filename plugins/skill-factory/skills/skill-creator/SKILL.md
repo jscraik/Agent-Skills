@@ -64,12 +64,14 @@ Assumptions and requirements:
 When the new skill needs a dedicated subagent path, handle role wiring during scaffold creation:
 
 1. Check for reusable role TOMLs in `./configs/codex/agents/` when present, then fall back to project/global `.codex/agents/`.
-2. If no reusable role exists, invoke [[codex-agent-creator]] to create a purpose-built agent file.
+2. If no reusable role exists, invoke [[codex-agent-builder]] to create a purpose-built agent file.
 3. Validate the selected/generated role file:
 
 ```bash
 bash utilities/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>
 ```
+
+Note: the canonical skill route is `[[codex-agent-builder]]`; the helper scripts still live under the legacy directory name `utilities/codex-agent-creator/`.
 
 4. If the user asks to install the role, run:
 
@@ -182,7 +184,7 @@ Read these files based on the task:
 
 | Skill | When to use together |
 |---|---|
-| [[codex-agent-creator]] | Create or update custom agents when skill workflows need dedicated role files |
+| [[codex-agent-builder]] | Create or update custom agents when skill workflows need dedicated role files |
 | [[skillify]] | Convert hand-authored or rough skills into canonical, graph-aware skill packages |
 
 **Topic map:** [[agent-ops]]

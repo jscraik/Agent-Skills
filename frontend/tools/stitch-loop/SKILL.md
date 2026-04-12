@@ -94,7 +94,7 @@ Run a baton-driven Stitch website build loop where each pass produces one cohere
 
 | Skill | When to use together |
 |---|---|
-| [[stitch-react-components]] | Convert Stitch outputs to React components |
+| [[react-components]] | Convert Stitch outputs to React components |
 | [[stitch-remotion]] | Turn Stitch screens into narrated video walkthroughs |
 | [[ui-cloner]] | Clone a UI design into Stitch for iterative generation |
 | [[frontend-ui-design]] | Review and polish Stitch-generated UI |

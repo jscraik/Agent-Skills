@@ -1,0 +1,3 @@
+interface:
+  display_name: "LLM Wiki"
+  short_description: "Design and run persistent LLM wiki workflows"

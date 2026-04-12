@@ -31,6 +31,11 @@ CANONICAL_PREFIXES = {
     "github/",
     "interview/",
     "personas/",
+    "plugins/arscontexta/skills/",
+    "plugins/coderabbit/skills/",
+    "plugins/harness-engineering/skills/",
+    "plugins/plugin-factory/skills/",
+    "plugins/skill-factory/skills/",
     "product/",
     "skills-antigravity/",
     "skills-system/",
@@ -44,6 +49,7 @@ TOPIC_MAPS = {
 }
 
 SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 
 
 def normalize_skill_ref(target: str) -> str:
@@ -55,6 +61,21 @@ def normalize_skill_ref(target: str) -> str:
     if SKILL_REF_RE.match(suffix):
         return suffix
     return normalized
+
+
+def resolve_skill_id(path: pathlib.Path, content: str) -> str:
+    frontmatter = FRONTMATTER_RE.match(content)
+    if frontmatter:
+        for raw_line in frontmatter.group(1).splitlines():
+            line = raw_line.strip()
+            if not line.startswith("name:"):
+                continue
+            _, value = line.split(":", 1)
+            candidate = value.strip().strip("'\"")
+            if SKILL_REF_RE.fullmatch(candidate):
+                return candidate
+            break
+    return path.parts[-2]
 
 # ── 1. Extract SKILL.md edges ─────────────────────────────────────────────────
 skill_edges: set[tuple] = set()
@@ -99,12 +120,11 @@ def iter_skill_md_files(root: pathlib.Path):
 for md in sorted(iter_skill_md_files(ROOT)):
     if not is_canonical_skill_md(md):
         continue
-    skill = md.parts[-2]
+    content = md.read_text(encoding="utf-8", errors="replace")
+    skill = resolve_skill_id(md, content)
     if skill in seen_skills:          # first path wins (same as builder)
         continue
     seen_skills.add(skill)
-
-    content = md.read_text(encoding="utf-8", errors="replace")
     sa_block = re.search(r"## See Also\s*\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
     if not sa_block:
         continue
@@ -118,12 +138,21 @@ for md in sorted(iter_skill_md_files(ROOT)):
 # ── 2. Load adjacency.yaml edges ──────────────────────────────────────────────
 yaml_edges: set[tuple] = set()
 unknown_targets: set[tuple] = set()
+known_skill_refs: set[str] = set()
+
+for md in iter_skill_md_files(ROOT):
+    if not is_canonical_skill_md(md):
+        continue
+    content = md.read_text(encoding="utf-8", errors="replace")
+    known_skill_refs.add(normalize_skill_ref(resolve_skill_id(md, content)))
+
 if ADJ_YAML.exists() and HAS_YAML:
     adj = yaml.safe_load(ADJ_YAML.read_text()) or {}
     defined_nodes = {
         normalize_skill_ref(skill) for skill, refs in adj.items()
         if isinstance(refs, dict)
     }
+    known_skill_refs.update(defined_nodes)
     for skill, refs in adj.items():
         if not isinstance(refs, dict):
             continue
@@ -132,7 +161,7 @@ if ADJ_YAML.exists() and HAS_YAML:
             target_ref = normalize_skill_ref(target)
             if target_ref not in TOPIC_MAPS:
                 yaml_edges.add((skill_ref, target_ref))
-                if target_ref not in defined_nodes:
+                if target_ref not in known_skill_refs:
                     unknown_targets.add((skill_ref, target_ref))
 elif not HAS_YAML:
     print("WARNING: pyyaml not installed — skipping adjacency.yaml validation", file=sys.stderr)

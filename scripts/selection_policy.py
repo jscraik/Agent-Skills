@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-10.v3"
+POLICY_VERSION = "2026-04-12.v9"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -45,22 +45,25 @@ EXCLUDED_SCAN_SEGMENTS: tuple[str, ...] = (
 # Internal skills intentionally hidden from flat runtime discovery.
 HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "linear",
-    "plugin-builder",
-    "plugin-creator",
-    "plugin-installer",
     "skillgrade-graders",
     "skillgrade-setup",
 )
 
 # Plugin router skills promoted into default flat discovery.
-# Keep empty to avoid duplicate visibility between flat skills and plugin lanes.
+# Keep this empty by default: plugin-authorized skills should surface from
+# plugin scopes, not duplicated into the personal flat picker lane.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
-# Plugin lane skills that stay hidden by default unless advanced mode is used.
-PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
-    "autofix",
-    "code-review",
-    "simplify",
+# Plugin lane skills hidden from default flat discovery.
+PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()
+
+# Skills intentionally routed through the hidden `.system` lane while still
+# remaining plugin-owned in source. This keeps the bridge explicit and narrow.
+SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
+    "plugin-creator",
+    "plugin-installer",
+    "skill-creator",
+    "skill-installer",
 )
 
 
@@ -91,6 +94,7 @@ def payload() -> dict[str, Any]:
             - "hidden_flat_skill_names": list[str]
             - "plugin_visible_router_skill_names": list[str]
             - "plugin_hidden_lane_skill_names": list[str]
+            - "system_bridge_skill_names": list[str]
     """
     return {
         "policy_version": POLICY_VERSION,
@@ -100,6 +104,7 @@ def payload() -> dict[str, Any]:
         "hidden_flat_skill_names": list(HIDDEN_FLAT_SKILL_NAMES),
         "plugin_visible_router_skill_names": list(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
         "plugin_hidden_lane_skill_names": list(PLUGIN_HIDDEN_LANE_SKILL_NAMES),
+        "system_bridge_skill_names": list(SYSTEM_BRIDGE_SKILL_NAMES),
     }
 
 
@@ -134,6 +139,10 @@ def render_shell() -> str:
         _shell_array(
             "SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS",
             PLUGIN_HIDDEN_LANE_SKILL_NAMES,
+        ),
+        _shell_array(
+            "SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS",
+            SYSTEM_BRIDGE_SKILL_NAMES,
         ),
         f"SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB={shlex.quote(PLUGIN_SKILL_ROOT_GLOB)}",
     ]
