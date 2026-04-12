@@ -29,9 +29,9 @@ def _is_relative_plugin_path(value: object) -> bool:
     if not isinstance(value, str) or not value.startswith("./") or len(value) <= 2:
         return False
     relative = value[2:]
-    if relative.startswith("/") or relative.endswith("/") or "//" in relative:
+    if relative.startswith("/") or "//" in relative:
         return False
-    segments = relative.split("/")
+    segments = relative.rstrip("/").split("/")
     if not segments:
         return False
     return all(segment not in {"", ".", ".."} for segment in segments)

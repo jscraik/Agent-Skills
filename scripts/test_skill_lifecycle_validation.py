@@ -464,10 +464,20 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 repo_root / "plugins" / "demo-plugin" / "skills" / router_skill / "SKILL.md",
                 "# plugin skill",
             )
-            write_text(
-                repo_root / ".agents" / "skills" / router_skill / "SKILL.md",
-                "# flat skill",
-            )
+            if router_skill in selection_policy.SYSTEM_BRIDGE_SKILL_NAMES:
+                system_skill_dir = repo_root / "skills-system" / router_skill
+                write_text(system_skill_dir / "SKILL.md", "# bridge skill")
+                flat_root = repo_root / ".agents" / "skills"
+                flat_root.mkdir(parents=True, exist_ok=True)
+                (flat_root / ".system").symlink_to(
+                    "../../skills-system", target_is_directory=True
+                )
+                (flat_root / router_skill).symlink_to(f".system/{router_skill}")
+            else:
+                write_text(
+                    repo_root / ".agents" / "skills" / router_skill / "SKILL.md",
+                    "# flat skill",
+                )
 
             result = run_shadow_check(repo_root)
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)

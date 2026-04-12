@@ -73,7 +73,7 @@ eval "$selection_policy_shell"
 acquire_sync_lock() {
   local existing_pid=""
   local lock_mtime=""
-  local lock_age_seconds=0
+  local lock_age_seconds="unknown"
 
   if mkdir "$lock_dir" 2>/dev/null; then
     printf '%s\n' "$$" > "$lock_pid_file"
@@ -109,7 +109,9 @@ acquire_sync_lock() {
       exit 0
     fi
   fi
-  lock_mtime="$(stat -f '%m' "$lock_dir" 2>/dev/null || true)"
+  lock_mtime="$(
+    stat -f '%m' "$lock_dir" 2>/dev/null || stat -c '%Y' "$lock_dir" 2>/dev/null || true
+  )"
   if [[ -n "$lock_mtime" ]]; then
     lock_age_seconds="$(( $(date +%s) - lock_mtime ))"
     if (( lock_age_seconds < lock_stale_after_seconds )); then
