@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import base64
+import binascii
 import json
 import os
 from pathlib import Path
@@ -253,7 +253,7 @@ def _decode_and_write(images: List[str], outputs: List[Path], force: bool) -> No
         if out_path.exists() and not force:
             _die(f"Output already exists: {out_path} (use --force to overwrite)")
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(base64.b64decode(image_b64))
+        out_path.write_bytes(binascii.a2b_base64(image_b64))
         print(f"Wrote {out_path}")
 
 
@@ -314,7 +314,7 @@ def _decode_write_and_downscale(
             _die(f"Output already exists: {out_path} (use --force to overwrite)")
         out_path.parent.mkdir(parents=True, exist_ok=True)
 
-        raw = base64.b64decode(image_b64)
+        raw = binascii.a2b_base64(image_b64)
         out_path.write_bytes(raw)
         print(f"Wrote {out_path}")
 
@@ -810,9 +810,8 @@ class _SingleFile:
         if self._handle:
             try:
                 self._handle.close()
-            except OSError:
-                # Best-effort close during teardown; preserve caller's control flow.
-                return False
+            except Exception:
+                pass
         return False
 
 
@@ -829,9 +828,8 @@ class _FileBundle:
         for handle in self._handles:
             try:
                 handle.close()
-            except OSError:
-                # Best-effort close during teardown; preserve caller's control flow.
-                continue
+            except Exception:
+                pass
         return False
 
 

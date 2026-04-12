@@ -1,6 +1,6 @@
 ---
 name: "imagegen"
-description: "Generate or edit raster images when a task needs bitmap outputs such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use for net-new images, edits to existing images, or variants from references. Prefer repo-native SVG/code workflows for vector icon/logo systems or deterministic code-built graphics."
+description: "Generate or edit raster images when a task needs AI-created bitmap outputs such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a new image, transform an existing image, or derive variants from references and the deliverable is bitmap output, not repo-native vector or code visuals. Do not use when existing SVG/vector/code-native assets are the right tool."
 ---
 
 # Image Generation Skill
@@ -88,6 +88,7 @@ Fallback-only docs/resources for CLI mode:
 - Saving final project assets only to temporary/default generated image paths.
 
 ## Validation
+- Apply fail-fast validation: stop at the first failed gate, fix it, and rerun before continuing.
 - Confirm request classification: `generate` vs `edit`, plus single vs batch strategy.
 - Validate output against invariants: subject correctness, composition, text accuracy, and avoid-list compliance.
 - Verify filesystem outcome for project-bound assets: correct workspace path and non-destructive naming.
