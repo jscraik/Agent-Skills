@@ -33,6 +33,14 @@ TOPIC_MAPS = {
     "mobile-native", "index",
 }
 
+ALLOWED_DUPLICATE_SKILL_IDS = {
+    "plugin-creator",
+    "plugin-installer",
+    "skill-creator",
+    "skill-installer",
+    "skill-builder",
+}
+
 SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 
@@ -108,6 +116,11 @@ for md in sorted(iter_skill_md_files(ROOT)):
     skill = resolve_skill_id(md, content)
     previous = seen_skills.get(skill)
     if previous and previous != md:
+        if skill not in ALLOWED_DUPLICATE_SKILL_IDS:
+            raise RuntimeError(
+                f"duplicate canonical skill id '{skill}': "
+                f"existing={previous.as_posix()} conflicting={md.as_posix()}"
+            )
         print(
             "warning: duplicate canonical skill id "
             f"'{skill}': keeping {previous.as_posix()}, ignoring {md.as_posix()}",
