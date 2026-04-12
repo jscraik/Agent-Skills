@@ -9,6 +9,7 @@ Usage:
 Optional:
   --config PATH
   --schema PATH                           (optional compatibility arg; not required)
+  --allow-unsafe-config                   (allow danger-full-access, allow_login_shell=true, web_search=live)
   --expect-max-threads N
   --expect-max-depth N
   --expect-job-max-runtime-seconds N
@@ -22,6 +23,7 @@ schema_path=""
 expect_max_threads=""
 expect_max_depth=""
 expect_job_max_runtime_seconds=""
+allow_unsafe_config="false"
 
 require_option_value() {
   local opt="$1"
@@ -46,6 +48,8 @@ while [[ $# -gt 0 ]]; do
     --schema)
       require_option_value "$1" "${2:-}"
       schema_path="$2"; shift 2 ;;
+    --allow-unsafe-config)
+      allow_unsafe_config="true"; shift ;;
     --expect-max-threads)
       require_option_value "$1" "${2:-}"
       expect_max_threads="$2"; shift 2 ;;
@@ -68,6 +72,16 @@ if [[ -z "$agent_name" || -z "$agent_file" ]]; then
   echo "Missing required arguments." >&2
   usage
   exit 2
+fi
+
+if [[ "$agent_name" == *"/"* || "$agent_name" == *"\\"* || "$agent_name" == "." || "$agent_name" == ".." ]]; then
+  echo "Invalid --agent-name '$agent_name': path separators and traversal markers are not allowed." >&2
+  exit 1
+fi
+
+if ! [[ "$agent_name" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+  echo "Invalid --agent-name '$agent_name': expected pattern ^[A-Za-z0-9][A-Za-z0-9_-]*$." >&2
+  exit 1
 fi
 
 for pair in \
@@ -119,6 +133,16 @@ if [[ "$actual_name" != "$agent_name" ]]; then
   exit 1
 fi
 
+if [[ "$actual_name" == *"/"* || "$actual_name" == *"\\"* || "$actual_name" == "." || "$actual_name" == ".." ]]; then
+  echo "Invalid name field '$actual_name': path separators and traversal markers are not allowed." >&2
+  exit 1
+fi
+
+if ! [[ "$actual_name" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]]; then
+  echo "Invalid name field '$actual_name': expected pattern ^[A-Za-z0-9][A-Za-z0-9_-]*$." >&2
+  exit 1
+fi
+
 reasoning="$(yq -p=toml -o=json '.model_reasoning_effort // ""' "$agent_file")"
 reasoning="${reasoning%\"}"
 reasoning="${reasoning#\"}"
@@ -128,6 +152,30 @@ case "$reasoning" in
     echo "Invalid model_reasoning_effort value: $reasoning" >&2
     exit 1 ;;
 esac
+
+if [[ "$allow_unsafe_config" != "true" ]]; then
+  sandbox_mode="$(yq -p=toml -o=json '.sandbox_mode // ""' "$agent_file")"
+  sandbox_mode="${sandbox_mode%\"}"
+  sandbox_mode="${sandbox_mode#\"}"
+  if [[ "$sandbox_mode" == "danger-full-access" ]]; then
+    echo "Unsafe config blocked: sandbox_mode=danger-full-access (use --allow-unsafe-config to override intentionally)." >&2
+    exit 1
+  fi
+
+  allow_login_shell="$(yq -p=toml -o=json '.allow_login_shell // false' "$agent_file")"
+  if [[ "$allow_login_shell" == "true" ]]; then
+    echo "Unsafe config blocked: allow_login_shell=true (use --allow-unsafe-config to override intentionally)." >&2
+    exit 1
+  fi
+
+  web_search_mode="$(yq -p=toml -o=json '.web_search // ""' "$agent_file")"
+  web_search_mode="${web_search_mode%\"}"
+  web_search_mode="${web_search_mode#\"}"
+  if [[ "$web_search_mode" == "live" ]]; then
+    echo "Unsafe config blocked: web_search=live (use --allow-unsafe-config to override intentionally)." >&2
+    exit 1
+  fi
+fi
 
 nickname_candidates_present="$(yq -p=toml -o=json '.nickname_candidates != null' "$agent_file")"
 if [[ "$nickname_candidates_present" == "true" ]]; then

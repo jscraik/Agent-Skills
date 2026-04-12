@@ -8,6 +8,7 @@
 - [Task graph](#task-graph)
 - [Canonical identity contract](#canonical-identity-contract)
 - [Migration mechanism contract](#migration-mechanism-contract)
+- [Forwarder type contract](#forwarder-type-contract)
 - [Compatibility state machine](#compatibility-state-machine)
 - [Path contract compatibility](#path-contract-compatibility)
 - [Plugin activation contract](#plugin-activation-contract)
@@ -118,7 +119,7 @@ Per slice, compatibility is modeled on two independent axes:
 - `path_compatibility`: `resolver_only`, `filesystem_forwarder`, or `combined`.
 
 Rules:
-- `dual_read` is allowed only while `activation_state` is one of `pre_activation`, `activating`, or `rollback_pending`;
+- `dual_read` is allowed only while `activation_state` is one of `pre_activation` or `rollback_pending`;
 - `filesystem_forwarder` entries are compatibility artifacts and never discoverable roots;
 - the commit that flips `activation_state` from `pre_activation` to `migrated` must simultaneously remove the legacy canonical source or replace it with a declared forwarder;
 - no post-activation commit may leave both legacy and catalog canonical sources readable;
@@ -130,30 +131,44 @@ Rules:
 - plugin package-root slices that must preserve `source.path=./plugins/<plugin>` are not cleanup-eligible in this plan and remain `path_compatibility=filesystem_forwarder` in `migrated` state until a separate marketplace-contract migration;
 - if a lane requires `filesystem_forwarder`, record forwarder type and validator coverage in the slice manifest before promotion.
 
+## Forwarder type contract
+
+`filesystem_forwarder` is a closed taxonomy. Allowed `forwarder_type` values:
+- `resolver_alias`: no on-disk mirror; resolver maps legacy path requests to canonical targets.
+- `directory_projection`: generated directory mirror for legacy read compatibility; generated artifacts only.
+- `package_root_projection`: generated compatibility package root at `plugins/<plugin>` for marketplace `source.path` compatibility while canonical package content lives at `catalog/plugins/<plugin>`.
+- `wrapper_index`: wrapper/index indirection for command/path compatibility without legacy content ownership.
+
+Rules:
+- every slice using `path_compatibility` containing `filesystem_forwarder` must declare exactly one allowed `forwarder_type`;
+- each `forwarder_type` must have explicit validator coverage in slice checks;
+- unlisted forwarder implementations are forbidden;
+- symlink-based forwarders are forbidden unless explicitly allowlisted by policy for antigravity sync-source compatibility.
+
 ## Compatibility state machine
 
 Each slice must use this lifecycle:
 - `declared`: slice defined in manifest; no path behavior changes.
 - `pre_activation`: dual-read and path compatibility are enabled by declared compatibility fields.
-- `activating`: commit window where activation checks run and source/forwarder switch occurs.
 - `migrated`: catalog canonical source active; legacy canonical source removed or forwarded.
 - `rollback_pending`: activation failed or regression found; rollback commands required.
 - `rolled_back`: slice restored to previous state and validated.
 - `cleanup_complete`: cleanup-eligible slice forwarders removed after resolver coverage and exit checks are complete.
 
 Allowed transitions:
-- `declared -> pre_activation -> activating -> migrated -> cleanup_complete`
-- `declared -> pre_activation -> activating -> migrated` for plugin package-root slices that retain compatibility package roots in this plan
-- `activating -> rollback_pending -> rolled_back`
+- `declared -> pre_activation -> migrated -> cleanup_complete`
+- `declared -> pre_activation -> migrated` for plugin package-root slices that retain compatibility package roots in this plan
 - `migrated -> rollback_pending -> rolled_back`
 - `rolled_back -> pre_activation` only after root cause is documented.
+
+Activation execution model:
+- `activating` is an execution substep inside the `pre_activation -> migrated` transition and is not persisted as an `activation_state` value in `slices.yaml`.
 
 State transition gate:
 - every transition is advanced by one reviewed migration state change in a PR and must include transition-specific validation evidence.
 - one reviewed migration state change may advance at most one `activation_state` step for a given slice.
 - transition semantics are strict:
   - `pre_activation`: `discovery_compatibility=dual_read` is required.
-  - `activating`: `discovery_compatibility=dual_read` remains slice-wide until cutover commit.
   - `migrated`: same commit must set `discovery_compatibility=catalog_only` and complete source-to-forwarder cutover.
   - `rollback_pending`: `dual_read` may be temporarily restored only through declared `rollback_commands`.
   - once a slice enters `pre_activation`, all write flows for that slice must resolve to `authoritative_write_root`; legacy paths may remain readable/forwarded but are not directly writable except declared forwarder generation.
@@ -184,6 +199,13 @@ Plugin canonical relocation must preserve plugin activation semantics during and
 - no command may treat `plugins/<plugin>` as an authoritative write root;
 - legacy `plugins/<plugin>` paths are compatibility directories only and may not remain canonical package sources;
 - phase promotion is blocked if baseline comparator output reports plugin activation/status parity regressions for unchanged plugins, including package-relative asset resolution parity.
+
+Package-root resolution contract:
+- canonical package root is `catalog/plugins/<plugin>`;
+- `plugins/<plugin>` is a generated `forwarder_type=package_root_projection` compatibility root and never an authoritative source root;
+- marketplace `source.path=./plugins/<plugin>` resolves to the generated projection during compatibility mode;
+- manifest-relative asset resolution is defined against canonical package content and must remain parity-equivalent in the generated projection for all manifest-declared relative assets (`skills/**`, `agents/**`, `hooks/**`, MCP metadata, templates, install scripts, and manifest-referenced docs);
+- direct edits under `plugins/<plugin>` are forbidden except declared projection generation writers.
 
 ## Derived artifact lifecycle contract
 
@@ -249,8 +271,9 @@ Parity gates must compare deterministic fields emitted by the same build paths i
 - `bash scripts/validate_runtime_separation_profile_home.sh` must emit the same fields for profile-home evaluation under the same JSON paths.
 - `policy_identity` is the deterministic hash over exported canonical root sets, discovery precedence, overlap allowlists, and writer-authority assignments after manifest expansion.
 - `discovery_identity` is the deterministic hash over discovery-surface exports: visible runtime identities per surface, precedence order, and overlap-class allowlists after manifest expansion.
-- `canonical_root_digest` is `sha256` over the sorted active authoritative canonical root set after path normalization and symlink resolution.
+- `canonical_root_digest` is `sha256` over sorted lane-independent logical canonical root identities exported by policy (root ids/templates), not absolute filesystem paths.
 - promotion and rollback parity checks compare those emitted fields only; prose summaries are non-authoritative.
+- absolute-path and symlink-resolution checks remain local invariants and are validated separately from cross-lane parity identity.
 
 Promotion rule:
 - no new blocker ids/classes/severity regressions;
@@ -363,16 +386,16 @@ Control-plane ownership rules:
 - Exit criteria:
   - wrappers remain contract-compatible and mechanics tests pass from wrapper entrypoints;
   - wrapper fixture contract checks pass with unchanged argv/exit/output behavior.
-  - writer surfaces cannot write legacy canonical roots for slices in `pre_activation`, `activating`, or `migrated`.
+  - writer surfaces cannot write legacy canonical roots for slices in `pre_activation` or `migrated`.
   - writer mutation suite passes with writes constrained to `authoritative_write_root`.
 
 3. Phase C: first-party canonical relocation (`catalog/skills/**`)
 - Entry criteria:
-  - consumer audit is green for first-party canonical roots.
+  - consumer audit is green for targeted first-party slices in this PR.
   - path-consumer inventory for targeted slices is complete in `GOVERNANCE/runtime-separation/path-consumers.yaml`.
 - Actions:
   - move first-party sources slice-by-slice;
-  - require `discovery_compatibility=dual_read` in `pre_activation` and `activating`, and set `discovery_compatibility=catalog_only` in the same commit that sets `activation_state=migrated`;
+  - require `discovery_compatibility=dual_read` in `pre_activation`, and set `discovery_compatibility=catalog_only` in the same commit that sets `activation_state=migrated`;
   - on activation commit, switch to `activation_state=migrated` and remove legacy canonical source or replace it with declared forwarder in the same change;
   - update discovery precedence for migrated slices according to manifest `discovery_precedence`;
   - enforce duplicate identity checks keyed by runtime identity contract.
@@ -381,13 +404,13 @@ Control-plane ownership rules:
 
 4. Phase D: plugin canonical relocation (`catalog/plugins/**`)
 - Entry criteria:
-  - consumer audit is green for plugin canonical roots.
+  - consumer audit is green for targeted plugin slices in this PR.
   - path-consumer inventory for targeted plugin slices is complete in `GOVERNANCE/runtime-separation/path-consumers.yaml`.
 - Actions:
   - move plugin canonical sources plugin-by-plugin;
   - migrate canonical plugin manifests to `catalog/plugins/<plugin>/.codex-plugin/plugin.json` and keep `plugins/<plugin>` as compatibility directory until marketplace contract version update;
   - migrate plugin discovery/activation readers to policy-backed canonical roots that include `catalog/plugins/**`, while preserving `source.path=./plugins/<plugin>` compatibility contract;
-  - preserve plugin activation semantics for unchanged plugins (`bin/ask plugins status` parity gate);
+  - preserve plugin activation semantics for unchanged plugins through targeted `plugin_lifecycle_checks`, including `bin/ask plugins status <plugin> --json` checks for affected plugin slices;
   - execute targeted-slice `plugin_lifecycle_checks` where `applies_to_phase` contains `phase_d` or `all`; evaluate each selected check against `expected_exit_code` and `normalized_assertions` (install/sync/cache/profile-home reprojection and related lifecycle checks);
   - ensure workspace/profile projection and plugin runtime cache generation use policy-exported roots only;
   - preserve hidden runtime cache contract (`.agents/plugins-runtime/cache/**`);
@@ -427,7 +450,7 @@ Control-plane ownership rules:
 | --- | --- | --- | --- |
 | First-party skill sources | `catalog/skills/<category>/<skill>/SKILL.md` | `discovery_compatibility: dual_read -> catalog_only`; `path_compatibility: combined -> filesystem_forwarder -> resolver_only` | runtime-identity duplicate checks + freshness strict |
 | Plugin skill sources | `catalog/plugins/<plugin>/skills/<category>/<skill>/SKILL.md` | `discovery_compatibility: dual_read -> catalog_only`; `path_compatibility: combined -> filesystem_forwarder` (resolver-only deferred until marketplace-contract migration) | plugin shadowing + runtime-identity duplicate checks + activation/status parity |
-| Plugin package manifest | `catalog/plugins/<plugin>/.codex-plugin/plugin.json` | compatibility directory at `plugins/<plugin>` while `source.path=./plugins/<plugin>` remains contract-required | `plugins status --json` parity + marketplace `source.path` parity + lifecycle write/generation parity |
+| Plugin package manifest | `catalog/plugins/<plugin>/.codex-plugin/plugin.json` | generated compatibility package-root projection at `plugins/<plugin>` while `source.path=./plugins/<plugin>` remains contract-required | targeted `plugin_lifecycle_checks` (`plugins status <plugin> --json`) + marketplace `source.path` parity + manifest-asset parity |
 | Mechanics commands | `factory/**` internals + `scripts/*` wrappers | wrapper delegation only | command-contract compatibility gates |
 | Runtime projection tree | `runtime/**`, `.agents/**`, and `.agent/skills/**` derived outputs | no direct compatibility writes | path-ownership guard blocks source edits |
 | Local marketplace cache | `.agents/plugins-runtime/cache/**` | canonical hidden cache only | block reintroduction of `plugins/cache/agent-skills-local/**` |
@@ -440,8 +463,8 @@ Every phase promotion requires these user-visible flows to pass against the reco
 - comparator enforces slice-scoped `planned_deltas` only (no undeclared field/value changes permitted).
 - `bin/ask repo status --json` remains baseline-compatible for comparator fields.
 - `bin/ask skills list --json` remains baseline-compatible for comparator fields.
-- `bin/ask plugins status --json` remains baseline-compatible for comparator fields.
 - `bin/ask plugins doctor --json` remains baseline-compatible for comparator fields.
+- targeted `plugin_lifecycle_checks` provide baseline-compatible `bin/ask plugins status <plugin> --json` evidence for promoted plugin slices.
 - slice `representative_commands` in `slices.yaml` pass for each promoted slice using the full structured tuple (`command`, `comparison_mode`, `args_legacy`, `args_canonical`, `expected_exit_code`, `normalized_assertions`, `expected_result_ref`) while compatibility artifacts exist.
 - `bash scripts/validate_projection_integrity.sh` reports no projection-integrity regressions.
 - `bash scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap` reports no local-marketplace-cache regressions.
@@ -460,8 +483,8 @@ Phase 0 bootstrap ladder (before new validators exist):
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash scripts/check_path_ownership_boundaries.sh`
 - `bash scripts/verify-work.sh --project-governance`
 - `bin/ask skills list --json`
-- `bin/ask plugins status --json`
 - `bin/ask plugins doctor --json`
+- targeted baseline plugin status checks from declared slices: `bin/ask plugins status <plugin> --json`
 - `bin/ask repo validate`
 - `bin/ask repo doctor-catalog --strict`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`
@@ -470,6 +493,7 @@ Phase 0 bootstrap ladder (before new validators exist):
 - `bash scripts/validate_projection_integrity.sh`
 
 Phase A-F per-PR mandatory lane (after Phase 0 deliverables land):
+- core lane (all migration PRs):
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash scripts/check_path_ownership_boundaries.sh`
 - `bash scripts/verify-work.sh --project-governance`
 - purge stale derived artifacts for affected slices.
@@ -483,10 +507,11 @@ Phase A-F per-PR mandatory lane (after Phase 0 deliverables land):
 - `bash scripts/verify_wrapper_contract_fixtures.sh --runtime-separation`
 - `python3 scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current GOVERNANCE/runtime-separation/current.json`
 - `bash scripts/verify_runtime_separation_writer_mutations.sh --strict`
-- `bin/ask plugins status --json`
+- plugin lane (required when affected slices include plugins or plugin projections):
 - `bin/ask plugins doctor --json`
+- targeted-slice `plugin_lifecycle_checks` selected by active phase key (`applies_to_phase` contains promoted phase key or `all`) with full tuple evaluation (`expected_exit_code` + `normalized_assertions`), including `bin/ask plugins status <plugin> --json` where declared.
 - `bash scripts/validate_runtime_separation_profile_home.sh`
-- targeted-slice `plugin_lifecycle_checks` selected by active phase key (`applies_to_phase` contains promoted phase key or `all`) with full tuple evaluation (`expected_exit_code` + `normalized_assertions`).
+- runtime/cache lane (required when affected slices touch runtime or cache projections):
 - `bash scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
 
 Phase A-F phase-promotion exhaustive lane:
@@ -538,10 +563,9 @@ Mandatory rollback validation:
 - `bin/ask repo validate`
 - `bin/ask repo doctor-catalog --strict`
 - `bash scripts/validate_projection_integrity.sh`
-- `bin/ask plugins status --json`
 - `bin/ask plugins doctor --json`
+- affected-slice `plugin_lifecycle_checks` with `applies_to_rollback=true`, each with full tuple evaluation (`expected_exit_code` + `normalized_assertions`), including `bin/ask plugins status <plugin> --json` where declared
 - full `representative_commands` sweep for affected slices using `comparison_mode`, `expected_exit_code`, and `normalized_assertions`.
-- affected-slice `plugin_lifecycle_checks` with `applies_to_rollback=true`, each with full tuple evaluation (`expected_exit_code` + `normalized_assertions`)
 - `bash scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
 - `bash scripts/validate_runtime_separation_profile_home.sh`
 - `python3 scripts/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`

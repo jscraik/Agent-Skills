@@ -24,9 +24,10 @@
 
 As of April 12, 2026 guidance, custom subagents should be authored as standalone TOML files.
 
-In this workspace, the canonical source-of-truth path is:
+In this workspace, the canonical source-of-truth paths are:
 
-- `~/dev/configs/codex/agents/` for global/shared custom agents
+- `~/dev/configs/codex/agents/<name>/<name>.toml` for global/shared custom agents
+- `~/dev/configs/codex/config.toml` for `[agents.<name>]` mappings and global runtime limits
 
 Runtime/project projections may still exist at:
 
@@ -35,7 +36,7 @@ Runtime/project projections may still exist at:
 
 Treat runtime/project projections as compatibility and discovery surfaces. In this workspace, new writes default to the canonical source-of-truth path above.
 
-Each file defines exactly one custom agent.
+Each file defines exactly one custom agent. For global installs, include an explicit `[agents.<name>].config_file` mapping so runtime discovery remains deterministic even when active user config layers are symlinked.
 
 ## Required custom-agent file fields
 
@@ -179,7 +180,7 @@ nickname_candidates = ["Atlas", "Delta", "Echo"]
 
 ## Compatibility note
 
-`config-reference` still documents `agents.<name>.description`, `agents.<name>.config_file`, and `agents.<name>.nickname_candidates`. Treat that pattern as legacy compatibility for existing deployments. In this workspace, default builder output targets standalone custom-agent files under `~/dev/configs/codex/agents/`; `.codex/agents/` and `~/.codex/agents/` are compatibility/runtime projections and require explicit override intent before writes.
+`config-reference` still documents `agents.<name>.description`, `agents.<name>.config_file`, and `agents.<name>.nickname_candidates`. In this workspace, keep standalone custom-agent files as canonical source under `~/dev/configs/codex/agents/`, and keep explicit `[agents.<name>]` mappings in `~/dev/configs/codex/config.toml` for runtime discoverability. `.codex/agents/` and `~/.codex/agents/` are compatibility/runtime projections and require explicit override intent before writes.
 
 ## Upstream alignment snapshot
 

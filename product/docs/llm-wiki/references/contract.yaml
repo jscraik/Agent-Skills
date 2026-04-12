@@ -25,6 +25,9 @@ outputs:
   - append-only parseable log heading convention (## [YYYY-MM-DD] ingest|query|lint | summary)
   - privacy-controls plan covering classification, minimization, and redaction
   - risk and hygiene checklist for contradictions, staleness, and orphan pages
+  - lifecycle model with confidence, supersession, and retention policy when scale demands it
+  - graph/search strategy covering typed relations and hybrid retrieval expectations
+  - automation and quality-governance hooks for ingestion, linting, and contradiction handling
 output_contract:
   schema_version: "1.0"
   required_fields:
@@ -39,9 +42,16 @@ output_contract:
     - log_append_only
     - log_heading_pattern
     - privacy_controls
+    - lifecycle_model
+    - graph_model
+    - search_strategy
+    - automation_hooks
+    - quality_controls
   optional_fields:
     - lint_checklist
     - follow_up_questions
+    - collaboration_scope
+    - crystallization_policy
 non_goals:
   - one-off summarization with no persistent wiki maintenance
   - implementing full vector retrieval infrastructure by default
@@ -50,6 +60,9 @@ risks:
   - stale claims can persist without regular lint passes
   - weak provenance if citations are omitted during updates
   - wiki sprawl from missing index and cross-link hygiene
+  - conflicting claims can silently persist without explicit supersession rules
+  - low-signal memory accumulation without retention and consolidation policy
+  - sensitive data leakage when ingest lacks classification and minimization gates
 rollback_procedure: >
   If guidance changes introduce confusion or regress strict audits, restore
   product/docs/llm-wiki/SKILL.md and references files from the previous known-good

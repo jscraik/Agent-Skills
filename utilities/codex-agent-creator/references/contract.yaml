@@ -16,7 +16,8 @@ inputs:
   - canonical global targets (`~/dev/configs/codex/agents/`, `~/dev/configs/codex/config.toml`) unless explicit override is approved
   - optional global limits (agents.max_threads, agents.max_depth, agents.job_max_runtime_seconds)
 outputs:
-  - updated standalone custom-agent file in canonical path by default
+  - updated standalone custom-agent file in canonical path by default (`~/dev/configs/codex/agents/<name>/<name>.toml`)
+  - updated `[agents.<name>].config_file` mapping in canonical `config.toml` for runtime discoverability
   - optional updated [agents] global limits
   - validation result summary
 observability: >

@@ -1,6 +1,6 @@
 ---
 name: codex-agent-builder
-description: Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/*.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+description: Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
@@ -14,7 +14,7 @@ metadata:
 # Codex Agent Creator
 
 ## When to use
-- User asks to create, update, or troubleshoot a custom subagent file in canonical Codex control-plane paths (`~/dev/configs/codex/agents/`).
+- User asks to create, update, or troubleshoot a custom subagent file in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml`).
 - User needs global custom-agent installation with explicit developer instructions.
 - User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
 - User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
@@ -59,6 +59,7 @@ metadata:
 ### 4) Install and handoff
 - Install only after validation by writing into the correct agents directory.
 - In this workspace, install to canonical global paths by default: `~/dev/configs/codex/agents/` and `~/dev/configs/codex/config.toml`.
+- For global installs, ensure runtime discoverability by updating `[agents.<name>].config_file` to the installed canonical agent file path.
 - Treat non-canonical global paths as compatibility overrides that require explicit opt-in.
 - If the user requests runtime limits, update only `[agents]` global keys in the selected global `config.toml`.
 - Return next-step verification command and residual risk.
