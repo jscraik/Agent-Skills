@@ -18,8 +18,8 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 ## Window summary
 
-- Window: `2026-04-06..2026-04-12`
-- Baseline source: `frozen_snapshot` (`2026-04-05..2026-04-11`)
+- Window: `2026-04-07..2026-04-13`
+- Baseline source: `rolling_window` (`2026-04-07..2026-04-07`)
 - Runs total: `48`
 - Runs by profile:
   - `ui-ux-creative-coding`: `12`
@@ -48,6 +48,14 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 
 | Run | Profile | Status | Stop reason | Iterations | Uplift | Non-regression | Tokens |
 |---|---|---|---|---:|---:|:---:|---:|
+| run_20260413T081921163303Z_c6442d_91e82bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
+| run_20260413T081921414441Z_f93d59_9201174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
+| run_20260413T081920417414Z_4270e1_90f80eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
+| run_20260413T081920519358Z_cbb8d4_911c4e9 | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
+| run_20260413T081920625530Z_5b4309_914fa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
+| run_20260413T081920731856Z_04dd5b_916d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
+| run_20260413T081920845569Z_1c1272_919ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
+| run_20260413T081920967414Z_50ef7d_91bf024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
 | run_20260412T064420106973Z_50ef7d_925f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
 | run_20260412T064420226688Z_c6442d_92882bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
 | run_20260412T064420341042Z_f93d59_92a1174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
@@ -80,14 +88,6 @@ Shadow mode runs evaluator + checkpoint adversarial checks without automatic imp
 | run_20260409T064532619060Z_c6442d_92682bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
 | run_20260409T064532730733Z_f93d59_9291174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
 | run_20260409T064531946744Z_4270e1_91780eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
-| run_20260408T064527014926Z_50ef7d_946f024 | frontend-ui-design | escalated | evaluator_conflict | 5 | +0.278 | ❌ | 5685 |
-| run_20260408T064527137168Z_c6442d_94982bd | react-ui-patterns | passed | pass | 2 | +0.158 | ❌ | 389 |
-| run_20260408T064527254102Z_f93d59_94b1174 | react-ui-patterns | passed | pass | 2 | +0.172 | ✅ | 399 |
-| run_20260408T064526421324Z_4270e1_93980eb | ui-ux-creative-coding | passed | pass | 2 | +0.179 | ✅ | 394 |
-| run_20260408T064526538395Z_cbb8d4_93bc4e9 | ui-ux-creative-coding | passed | pass | 2 | +0.046 | ❌ | 378 |
-| run_20260408T064526656356Z_5b4309_93efa81 | interface-craft | passed | pass | 2 | +0.064 | ❌ | 357 |
-| run_20260408T064526774193Z_04dd5b_940d06e | interface-craft | escalated | evaluator_conflict | 1 | +0.113 | ✅ | 157 |
-| run_20260408T064526894446Z_1c1272_943ad51 | frontend-ui-design | passed | pass | 4 | +0.249 | ❌ | 4407 |
 
 ## Exit gate checks
 

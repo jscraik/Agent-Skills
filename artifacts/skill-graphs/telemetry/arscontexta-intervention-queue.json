@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-12T06:44:20Z",
-  "current_window": "2026-04-06..2026-04-12",
+  "generated_at": "2026-04-13T08:19:21Z",
+  "current_window": "2026-04-07..2026-04-13",
   "source_artifacts": {
     "dashboard_json": "artifacts/skill-graphs/pilot/shadow-dashboard.json",
     "failure_patterns_jsonl": "artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl",
@@ -23,12 +23,12 @@
       "objective": "Shadow evaluation run N for frontend-ui-design: produce production-ready frontend UI design guidance for a web screen with one clear primary action, explicit default/loading/empty/error/disabled states, token-backed primitives, keyboard-focus-contrast-reduced-motion behavior, restrained composition without decorative overload, and a concrete verification checklist.",
       "arscontexta_stage": "documentation",
       "metrics": {
-        "runs_total": 12,
+        "runs_total": 14,
         "clean_runs": 0,
-        "terminal_pass_runs": 6,
-        "recovered_runs": 12,
-        "evaluator_conflicts": 6,
-        "low_confidence_runs": 12,
+        "terminal_pass_runs": 7,
+        "recovered_runs": 14,
+        "evaluator_conflicts": 7,
+        "low_confidence_runs": 14,
         "median_iterations": 4.5,
         "median_quality_uplift": 0.264,
         "mean_flip_rate": 0.1
@@ -38,19 +38,19 @@
           {
             "criterion_id": "restraint_and_composition",
             "label": "Restraint and composition",
-            "count": 42,
+            "count": 49,
             "threshold": 0.85
           },
           {
             "criterion_id": "accessibility_contract",
             "label": "Accessibility contract",
-            "count": 30,
+            "count": 35,
             "threshold": 0.86
           },
           {
             "criterion_id": "state_completeness",
             "label": "State completeness",
-            "count": 12,
+            "count": 14,
             "threshold": 0.78
           }
         ],
@@ -58,13 +58,13 @@
           {
             "criterion_id": "accessibility_contract",
             "label": "Accessibility contract",
-            "count": 6,
+            "count": 7,
             "threshold": 0.86
           },
           {
             "criterion_id": "state_completeness",
             "label": "State completeness",
-            "count": 6,
+            "count": 7,
             "threshold": 0.78
           }
         ],
@@ -72,17 +72,23 @@
           {
             "criterion_id": "restraint_and_composition",
             "label": "Restraint and composition",
-            "count": 6,
+            "count": 7,
             "threshold": 0.85
           },
           {
             "criterion_id": "visual_distinction",
             "label": "Visual distinction",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           }
         ],
         "failure_candidates": [
+          {
+            "run_id": "run_20260413T081920967414Z_50ef7d_91bf024",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.278
+          },
           {
             "run_id": "run_20260412T064420106973Z_50ef7d_925f024",
             "stop_reason": "evaluator_conflict",
@@ -106,17 +112,11 @@
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
             "quality_uplift": 0.278
-          },
-          {
-            "run_id": "run_20260408T064527014926Z_50ef7d_946f024",
-            "stop_reason": "evaluator_conflict",
-            "terminal_status": "escalated",
-            "quality_uplift": 0.278
           }
         ]
       },
       "recommendations": [
-        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and State completeness, using run_20260412T064420106973Z_50ef7d_925f024, run_20260411T063348205332Z_50ef7d_920f024, run_20260410T065025360237Z_50ef7d_91df024 as the seed evidence set.",
+        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and State completeness, using run_20260413T081920967414Z_50ef7d_91bf024, run_20260412T064420106973Z_50ef7d_925f024, run_20260411T063348205332Z_50ef7d_920f024 as the seed evidence set.",
         "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Accessibility contract and State completeness; treat that as search refinement, not failure.",
         "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
       ],
@@ -137,7 +137,7 @@
           "terminal_non_regression_passed"
         ]
       },
-      "unstable_score": 54.0
+      "unstable_score": 63.0
     },
     {
       "profile_id": "interface-craft",
@@ -147,12 +147,12 @@
       "objective": "Shadow evaluation run N for interface-craft: produce folded interface-craft guidance for a polished React interaction surface with clear motion boundaries, concrete implementation notes, explicit safety constraints, and testable validation steps.",
       "arscontexta_stage": "documentation",
       "metrics": {
-        "runs_total": 12,
-        "clean_runs": 6,
-        "terminal_pass_runs": 6,
-        "recovered_runs": 6,
-        "evaluator_conflicts": 6,
-        "low_confidence_runs": 6,
+        "runs_total": 14,
+        "clean_runs": 7,
+        "terminal_pass_runs": 7,
+        "recovered_runs": 7,
+        "evaluator_conflicts": 7,
+        "low_confidence_runs": 7,
         "median_iterations": 1.5,
         "median_quality_uplift": 0.088,
         "mean_flip_rate": 0.0
@@ -162,19 +162,19 @@
           {
             "criterion_id": "safety",
             "label": "Safety/compliance compliance",
-            "count": 18,
+            "count": 21,
             "threshold": 0.85
           },
           {
             "criterion_id": "specificity",
             "label": "Concrete implementation detail",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           },
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           }
         ],
@@ -182,7 +182,7 @@
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           }
         ],
@@ -190,17 +190,23 @@
           {
             "criterion_id": "safety",
             "label": "Safety/compliance compliance",
-            "count": 6,
+            "count": 7,
             "threshold": 0.85
           },
           {
             "criterion_id": "specificity",
             "label": "Concrete implementation detail",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           }
         ],
         "failure_candidates": [
+          {
+            "run_id": "run_20260413T081920731856Z_04dd5b_916d06e",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.113
+          },
           {
             "run_id": "run_20260412T064419865434Z_04dd5b_920d06e",
             "stop_reason": "evaluator_conflict",
@@ -224,17 +230,11 @@
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
             "quality_uplift": 0.113
-          },
-          {
-            "run_id": "run_20260408T064526774193Z_04dd5b_940d06e",
-            "stop_reason": "evaluator_conflict",
-            "terminal_status": "escalated",
-            "quality_uplift": 0.113
           }
         ]
       },
       "recommendations": [
-        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Concrete implementation detail, and Instructional clarity, using run_20260412T064419865434Z_04dd5b_920d06e, run_20260411T063347973328Z_04dd5b_91bd06e, run_20260410T065025126723Z_04dd5b_918d06e as the seed evidence set.",
+        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Concrete implementation detail, and Instructional clarity, using run_20260413T081920731856Z_04dd5b_916d06e, run_20260412T064419865434Z_04dd5b_920d06e, run_20260411T063347973328Z_04dd5b_91bd06e as the seed evidence set.",
         "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Instructional clarity; treat that as search refinement, not failure.",
         "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
       ],
@@ -255,7 +255,7 @@
           "terminal_non_regression_passed"
         ]
       },
-      "unstable_score": 33.0
+      "unstable_score": 38.5
     },
     {
       "profile_id": "react-ui-patterns",
@@ -265,12 +265,12 @@
       "objective": "Shadow evaluation run N for react-ui-patterns: produce concrete React UI composition guidance for a TypeScript plus Tailwind plus Radix screen with file-path-specific component structure, explicit state ownership, accessibility rules, and measurable verification checks.",
       "arscontexta_stage": "documentation",
       "metrics": {
-        "runs_total": 12,
-        "clean_runs": 6,
-        "terminal_pass_runs": 12,
-        "recovered_runs": 6,
+        "runs_total": 14,
+        "clean_runs": 7,
+        "terminal_pass_runs": 14,
+        "recovered_runs": 7,
         "evaluator_conflicts": 0,
-        "low_confidence_runs": 6,
+        "low_confidence_runs": 7,
         "median_iterations": 2.0,
         "median_quality_uplift": 0.165,
         "mean_flip_rate": 0.0
@@ -280,19 +280,19 @@
           {
             "criterion_id": "safety",
             "label": "Safety/compliance compliance",
-            "count": 18,
+            "count": 21,
             "threshold": 0.85
           },
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 18,
+            "count": 21,
             "threshold": 0.72
           },
           {
             "criterion_id": "specificity",
             "label": "Concrete implementation detail",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           }
         ],
@@ -300,7 +300,7 @@
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           }
         ],
@@ -308,13 +308,13 @@
           {
             "criterion_id": "specificity",
             "label": "Concrete implementation detail",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           },
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           }
         ],
@@ -342,7 +342,7 @@
           "terminal_non_regression_passed"
         ]
       },
-      "unstable_score": 21.0
+      "unstable_score": 24.5
     },
     {
       "profile_id": "ui-ux-creative-coding",
@@ -352,12 +352,12 @@
       "objective": "Shadow evaluation run N for ui-ux-creative-coding: produce implementation-ready UI polish guidance for an existing React or Tauri surface with one clear interaction thesis, reduced-motion parity, concrete accessibility constraints, and measurable validation checks.",
       "arscontexta_stage": "documentation",
       "metrics": {
-        "runs_total": 12,
-        "clean_runs": 6,
-        "terminal_pass_runs": 12,
-        "recovered_runs": 6,
+        "runs_total": 14,
+        "clean_runs": 7,
+        "terminal_pass_runs": 14,
+        "recovered_runs": 7,
         "evaluator_conflicts": 0,
-        "low_confidence_runs": 6,
+        "low_confidence_runs": 7,
         "median_iterations": 2.0,
         "median_quality_uplift": 0.112,
         "mean_flip_rate": 0.25
@@ -367,19 +367,19 @@
           {
             "criterion_id": "safety",
             "label": "Safety/compliance compliance",
-            "count": 18,
+            "count": 21,
             "threshold": 0.85
           },
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           },
           {
             "criterion_id": "specificity",
             "label": "Concrete implementation detail",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           }
         ],
@@ -387,13 +387,13 @@
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           },
           {
             "criterion_id": "specificity",
             "label": "Concrete implementation detail",
-            "count": 6,
+            "count": 7,
             "threshold": 0.68
           }
         ],
@@ -401,13 +401,13 @@
           {
             "criterion_id": "clarity",
             "label": "Instructional clarity",
-            "count": 6,
+            "count": 7,
             "threshold": 0.72
           },
           {
             "criterion_id": "safety",
             "label": "Safety/compliance compliance",
-            "count": 6,
+            "count": 7,
             "threshold": 0.85
           }
         ],
@@ -435,7 +435,7 @@
           "terminal_non_regression_passed"
         ]
       },
-      "unstable_score": 21.0
+      "unstable_score": 24.5
     }
   ]
 }
