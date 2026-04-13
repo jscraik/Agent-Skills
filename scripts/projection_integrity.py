@@ -700,7 +700,7 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         stale.unlink()
         deleted_files += 1
 
-    def normalize_stamped_content(content: bytes, path: Path) -> str | None:
+    def _normalize_stamped_text(content: bytes, path: Path) -> str | None:
         if path.suffix not in STAMPABLE_SUFFIXES:
             return None
         try:
@@ -730,11 +730,11 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             continue
 
         source_bytes = source_file.read_bytes()
-        normalized_source = normalize_stamped_content(source_bytes, source_file)
-        if projection_file.exists() and projection_file.is_file():
+        normalized_source = _normalize_stamped_text(source_bytes, source_file)
+        if projection_file.exists() and projection_file.is_file() and not projection_file.is_symlink():
             projection_bytes = projection_file.read_bytes()
             if normalized_source is not None:
-                normalized_projection = normalize_stamped_content(projection_bytes, projection_file)
+                normalized_projection = _normalize_stamped_text(projection_bytes, projection_file)
                 if normalized_projection is not None and normalized_projection == normalized_source:
                     continue
             elif projection_bytes == source_bytes:

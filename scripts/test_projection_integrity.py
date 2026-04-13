@@ -249,6 +249,35 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertEqual(result["status"], "synced")
             self.assertTrue((projection / "README.md").is_file())
 
+    def test_sync_mirror_replaces_projection_symlink_with_file(self) -> None:
+        """
+        Verify sync_mirror replaces a stray symlink projection with a real file.
+
+        This regression test ensures symlinks don't pass the fast-path equality check
+        and instead fall through to the Python fallback that clears symlink_kind_mismatch states.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            source = repo_root / "plugins" / "demo"
+            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source.mkdir(parents=True, exist_ok=True)
+            projection.mkdir(parents=True, exist_ok=True)
+
+            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
+            stale_symlink = projection / "README.md"
+            stale_symlink.symlink_to("/dev/null")
+
+            spec = self.mod.MirrorProjection(
+                name="demo",
+                source_path="plugins/demo",
+                projection_path="plugins/cache/demo/local",
+                tags=("plugin-caches",),
+            )
+            result = self.mod.sync_mirror(repo_root, spec)
+            self.assertEqual(result["status"], "synced")
+            self.assertTrue((projection / "README.md").is_file())
+            self.assertFalse((projection / "README.md").is_symlink())
+
     def test_verify_symlink_reports_missing_canonical_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
