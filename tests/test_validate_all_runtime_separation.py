@@ -10,7 +10,6 @@ These tests cover the new code block introduced in the PR:
 import os
 import stat
 import subprocess
-import sys
 import tempfile
 import textwrap
 import unittest
@@ -611,7 +610,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             paths = self._setup_tmpdir(tmpdir)
             os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
 
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
+            self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
 
             args_log = os.path.join(paths["args_log_dir"], "build_runtime_separation_current.py.args.json")
             if not os.path.exists(args_log):
@@ -641,7 +640,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             paths = self._setup_tmpdir(tmpdir)
             os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
 
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
+            self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
 
             args_log = os.path.join(
                 paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
@@ -668,7 +667,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             args_log = os.path.join(
                 paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
@@ -697,7 +696,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     if mode == "persistent":
                         os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
 
-                    result = self._run_validate_all(tmpdir, paths["python_stub"], mode)
+                    self._run_validate_all(tmpdir, paths["python_stub"], mode)
 
                     args_log = os.path.join(
                         paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
@@ -721,7 +720,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             args_log = os.path.join(
                 paths["args_log_dir"], "verify_runtime_separation_reader_compat.py.args.json"
@@ -765,7 +764,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     if mode == "persistent":
                         os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
 
-                    result = self._run_validate_all(tmpdir, paths["python_stub"], mode)
+                    self._run_validate_all(tmpdir, paths["python_stub"], mode)
 
                     args_log = os.path.join(
                         paths["args_log_dir"], "compare_runtime_separation_baseline.py.args.json"
@@ -801,7 +800,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             args_log = os.path.join(
                 paths["args_log_dir"], "validate_runtime_separation_manifest.py.args.json"
@@ -848,7 +847,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             # The bash stub writes args to a file
             args_file = os.path.join(
@@ -872,7 +871,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             args_file = os.path.join(
                 paths["args_log_dir"], "verify_runtime_separation_writer_mutations.sh.args"
@@ -897,7 +896,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             args_file = os.path.join(
                 paths["args_log_dir"], "validate_runtime_separation_profile_home.sh.args"
@@ -922,7 +921,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
             paths = self._setup_tmpdir(tmpdir)
-            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+            self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
 
             args_file = os.path.join(
                 paths["args_log_dir"], "validate_runtime_separation_profile_home.sh.args"
