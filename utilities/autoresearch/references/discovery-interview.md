@@ -15,9 +15,9 @@ Read when: required loop controls are missing (stop condition, success goal, tar
   - Why this matters: bounded runs preserve operator control and auditability.
 - Round 4:
   - Question: `What success goal should count as a win?`
-  - Why this matters: explicit goals keep keep/discard decisions objective.
+  - Why this matters: explicit goals keep/discard decisions objective.
 
-## Copy paste payload examples
+## Copy and paste payload examples
 
 - Example payload 1:
   - `What should this skill help you do?`
@@ -28,10 +28,9 @@ Read when: required loop controls are missing (stop condition, success goal, tar
 - Example payload 4:
   - `What success goal should count as a win?`
 
-## Round 6: Confirmation
+## Round 5: Confirmation
 
 - Confirmation question:
   - `Does this capture the docs work well enough for me to implement?`
 - Final check:
   - `Anything to add or change before I implement it?`
-

@@ -161,6 +161,56 @@ run_check required selection-contract "🎯 Verifying selection contract fixture
 run_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" scripts/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields
 run_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${python_cmd[@]}" scripts/verify_ask_cli_modularity.py
 
+runtime_artifact_targets=(
+  "GOVERNANCE/runtime-separation/current.json"
+  "GOVERNANCE/runtime-separation/readers.sha256"
+  "GOVERNANCE/runtime-separation/path-consumers.sha256"
+)
+runtime_artifact_backup_manifest="$run_dir/runtime-separation-artifact-backups.tsv"
+
+# prepare_runtime_artifact_backups snapshots canonical runtime-separation artifacts before
+# runtime checks so persistent-mode failures can restore the previous repository state.
+prepare_runtime_artifact_backups() {
+  if [[ "$output_mode" != "persistent" ]]; then
+    return 0
+  fi
+
+  : > "$runtime_artifact_backup_manifest"
+
+  local target=""
+  local backup_name=""
+  for target in "${runtime_artifact_targets[@]}"; do
+    backup_name="$(echo "$target" | tr '/' '__').bak"
+    if [[ -f "$target" ]]; then
+      cp "$target" "$run_dir/$backup_name"
+      printf '%s\tpresent\t%s\n' "$target" "$backup_name" >> "$runtime_artifact_backup_manifest"
+    else
+      printf '%s\tmissing\t-\n' "$target" >> "$runtime_artifact_backup_manifest"
+    fi
+  done
+}
+
+# restore_runtime_artifact_backups restores canonical runtime-separation artifacts to
+# their pre-run state when a persistent-mode validation run fails.
+restore_runtime_artifact_backups() {
+  if [[ "$output_mode" != "persistent" || ! -f "$runtime_artifact_backup_manifest" ]]; then
+    return 0
+  fi
+
+  local target=""
+  local state=""
+  local backup_name=""
+  while IFS=$'\t' read -r target state backup_name; do
+    if [[ "$state" == "present" ]]; then
+      cp "$run_dir/$backup_name" "$target"
+    else
+      rm -f "$target"
+    fi
+  done < "$runtime_artifact_backup_manifest"
+}
+
+prepare_runtime_artifact_backups
+
 runtime_separation_current="$run_dir/runtime-separation-current.json"
 if [[ "$output_mode" == "persistent" ]]; then
   runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
@@ -196,6 +246,7 @@ echo "- logs: $run_dir"
 echo "- selection_gate_severity: $run_dir/selection-gate-severity.json"
 
 if [ "$required_failures" -gt 0 ]; then
+  restore_runtime_artifact_backups
   echo ""
   echo "❌ Validation failed. Review the logs above for exact command output."
   cleanup_ephemeral_logs=0
