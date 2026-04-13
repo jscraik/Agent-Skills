@@ -11,20 +11,20 @@ Use this page to record expansion-gate evidence after pilot runs.
 
 ## Readout metadata
 
-- Window: `2026-04-05..2026-04-11`
-- Baseline: `_bootstrap pending_`
-- Total runs: `40`
+- Window: `2026-04-07..2026-04-13`
+- Baseline: `2026-04-07..2026-04-07` via `rolling_window`
+- Total runs: `48`
 - Runs per profile:
-  - `ui-ux-creative-coding`: `10`
-  - `interface-craft`: `10`
-  - `frontend-ui-design`: `10`
-  - `react-ui-patterns`: `10`
+  - `ui-ux-creative-coding`: `12`
+  - `interface-craft`: `12`
+  - `frontend-ui-design`: `12`
+  - `react-ui-patterns`: `12`
 - Reviewer(s): `_pending_`
 
 ## Scorecard
 
-- Repeat failure pattern rate delta: `n/a` (target: `<= -35.0pp` reduction)
-- First-pass acceptance delta: `n/a` (target: `>= +20.0pp`)
+- Repeat failure pattern rate delta: `+0.0pp` (target: `<= -35.0pp` reduction)
+- First-pass acceptance delta: `+0.0pp` (target: `>= +20.0pp`)
 - Iterations median / p90: `2.00` / `5.00` (target: `<=2 / <=4`)
 - Quality uplift median: `0.165` (target: `>= +0.120`)
 - Critical non-regression compliance: `37.5%` (target: `100.0%`)
@@ -40,7 +40,8 @@ Use this page to record expansion-gate evidence after pilot runs.
 - Decision: `HOLD`
 - Reason:
   - critical non-regression compliance below 100%
-  - baseline window unavailable for delta KPIs
+  - first-pass acceptance delta below +20pp
+  - repeat failure pattern reduction below 35%
 
 ## Follow-ups
 

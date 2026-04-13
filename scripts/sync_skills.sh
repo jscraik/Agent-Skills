@@ -58,6 +58,11 @@ if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
   exit 2
 fi
 
+if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
+  echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
+  exit 2
+fi
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
@@ -164,7 +169,7 @@ plugins_dir="$repo_root/plugins"
 runtime_cache_root="$repo_root/.agents/plugins-runtime/cache"
 system_skills_dir="$repo_root/skills-system"
 antigravity_skills_dir="$repo_root/skills-antigravity"
-antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
+antigravity_skills_txt=""
 
 mkdir -p "$skills_dir"
 mkdir -p "$plugins_dir"
