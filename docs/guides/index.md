@@ -11,7 +11,7 @@ Good guide topics for this repo:
 - Add a new skill folder and `SKILL.md`
 - Run `scripts/sync_skills.sh` and confirm `/SKILL.md` updates
 - Validate a skill before you open a PR
-- Apply governance scope defaults: [hook-governance-scope-defaults.md](/Users/jamiecraik/dev/agent-skills/docs/guides/hook-governance-scope-defaults.md)
+- Apply governance scope defaults: [hook-governance-scope-defaults.md](/docs/guides/hook-governance-scope-defaults.md)
 - Run the recursive skill loop MVP: [recursive-skill-loop.md](/docs/guides/recursive-skill-loop.md)
 - Run the human promotion gate: [recursive-promotion-gate.md](/docs/guides/recursive-promotion-gate.md)
 - Cut a release (if/when the repo starts versioning skills)

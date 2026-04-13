@@ -182,8 +182,20 @@
         "normalized_fields": {
           "command": "repo status --json",
           "is_git": true,
-          "repo_root": "/Users/jamiecraik/dev/agent-skills",
+          "repo_root": ".",
           "skills_synced": true,
+          "status": "success"
+        },
+        "returncode": 0,
+        "subject_id": "repo"
+      },
+      "repo_validate": {
+        "blocker_id": null,
+        "command": "bin/ask repo validate --json",
+        "drift_class": null,
+        "evidence_ref": null,
+        "normalized_fields": {
+          "command": "repo validate --json",
           "status": "success"
         },
         "returncode": 0,

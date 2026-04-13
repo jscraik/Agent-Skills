@@ -19,8 +19,8 @@
 - `just validate` (or `bash scripts/validate_all.sh`)
 - `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
-- Scope policy reference: [hook-governance-scope-defaults.md](/Users/jamiecraik/dev/agent-skills/docs/guides/hook-governance-scope-defaults.md).
-- Path ownership policy: [14-path-ownership-boundaries.md](/Users/jamiecraik/dev/agent-skills/docs/agents/14-path-ownership-boundaries.md).
+- Scope policy reference: [hook-governance-scope-defaults.md](/docs/guides/hook-governance-scope-defaults.md).
+- Path ownership policy: [14-path-ownership-boundaries.md](/docs/agents/14-path-ownership-boundaries.md).
 
 ### Managed asset lifecycle baseline
 - When work touches lifecycle metadata, packaged-skill inheritance, plugin manifests, or `docs/solutions/` governance:

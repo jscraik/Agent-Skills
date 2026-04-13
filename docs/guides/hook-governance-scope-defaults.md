@@ -14,7 +14,7 @@
 
 This document defines how governance-oriented commands in this repository should scope mutations and validation outputs.
 
-- Local developer workflows default to project-local scope.
+- Local developer workflows default to project-local scope (exception: `scripts/sync_skills.sh` defaults to workspace scope unless `--project-local` is specified).
 - Workspace or home projection updates remain available as an explicit mode.
 - Standalone scripts should require explicit inputs where scope affects data sources or output destinations.
 
@@ -39,7 +39,7 @@ These defaults are mandatory when an agent is asked to implement changes in this
 
 2. `scripts/sync_skills.sh`
 - Added explicit scope flags: `--project-local` and `--workspace`.
-- Default behavior remains workspace-capable for direct invocation.
+- Default behavior remains workspace-capable for direct invocation. Note: Unlike the project-local default stated above, `scripts/sync_skills.sh` intentionally defaults to workspace scope unless `--project-local` is explicitly passed.
 - `--project-local` keeps sync mutations inside the repository and skips home runtime projections.
 
 3. Standalone hook-governance scripts in this repository
