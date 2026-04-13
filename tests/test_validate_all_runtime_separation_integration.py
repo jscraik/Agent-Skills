@@ -81,15 +81,15 @@ class TestRuntimeSeparationCurrentPath(unittest.TestCase):
     def _eval_path(self, output_mode: str, run_dir: str) -> str:
         """
         Compute the resolved runtime_separation_current path for the given output mode and run directory.
-        
+
         Evaluates the same bash conditional used by scripts/validate_all.sh: when `output_mode` is exactly "persistent"
         the governance canonical path `GOVERNANCE/runtime-separation/current.json` is used; otherwise the path is
         `<run_dir>/runtime-separation-current.json`.
-        
+
         Parameters:
             output_mode (str): The output mode string to evaluate (exact match against "persistent").
             run_dir (str): The run directory used to construct the ephemeral path when not persistent.
-        
+
         Returns:
             runtime_separation_current (str): The resolved path for the runtime separation "current" file.
         """
@@ -109,6 +109,7 @@ class TestRuntimeSeparationCurrentPath(unittest.TestCase):
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
         self.assertEqual(result.returncode, 0, f"bash fragment failed: {result.stderr}")
         return result.stdout.strip()
@@ -166,15 +167,15 @@ class TestRuntimeConsumerScanCommand(unittest.TestCase):
     def _build_cmd(self, output_mode: str, python_bin: str = "python3") -> list[str]:
         """
         Construct the runtime_consumer_scan_cmd array for a given output mode and return its elements.
-        
+
         Builds the command array consisting of the Python executable, the consumer scan script path and the base flags
         `--emit-readers`, `--emit-path-consumers` and `--strict`. When `output_mode` is exactly "persistent" the
         flag `--emit-digests` is appended as the final element.
-        
+
         Parameters:
             output_mode (str): The output mode to evaluate; only the exact string "persistent" triggers `--emit-digests`.
             python_bin (str): Python executable to use as the first element of the command (defaults to "python3").
-        
+
         Returns:
             list[str]: The command elements in order; `--emit-digests` is included and last only when `output_mode == "persistent"`.
         """
@@ -200,6 +201,7 @@ class TestRuntimeConsumerScanCommand(unittest.TestCase):
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
         self.assertEqual(result.returncode, 0, f"bash fragment failed: {result.stderr}")
         return [line for line in result.stdout.splitlines() if line]
@@ -385,6 +387,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             cwd=tmpdir,
             env=env,
             timeout=60,
+            check=False,
         )
         return result
 
