@@ -652,6 +652,32 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     }
 
 
+def normalize_stamped_content(content: bytes, path: Path) -> bytes:
+    """
+    Strip projection headers from stampable files to enable content comparison.
+
+    For files with stampable suffixes (.md, .py, .sh, etc.), attempts to decode as UTF-8
+    and remove the generated projection header. Returns the normalized bytes or the original
+    bytes if decoding fails or the suffix is not stampable.
+
+    Parameters:
+        content (bytes): File content to normalize.
+        path (Path): File path (used to determine suffix for header detection).
+
+    Returns:
+        bytes: Normalized content with projection header removed for stampable files,
+               or original content for non-stampable files or when normalization fails.
+    """
+    if path.suffix not in STAMPABLE_SUFFIXES:
+        return content
+    try:
+        text = content.decode("utf-8")
+        normalized, _ = strip_projection_header(text, path.suffix)
+        return normalized.encode("utf-8")
+    except UnicodeDecodeError:
+        return content
+
+
 def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, int]:
     """
     Synchronise projection contents using pure-Python copy and delete operations.
@@ -691,8 +717,12 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             continue
 
         source_bytes = source_file.read_bytes()
-        if projection_file.exists() and projection_file.is_file() and projection_file.read_bytes() == source_bytes:
-            continue
+        if projection_file.exists() and projection_file.is_file():
+            projection_bytes = projection_file.read_bytes()
+            normalized_source = normalize_stamped_content(source_bytes, source_file)
+            normalized_projection = normalize_stamped_content(projection_bytes, projection_file)
+            if normalized_source == normalized_projection:
+                continue
         if projection_file.exists() or projection_file.is_symlink():
             if projection_file.is_dir() and not projection_file.is_symlink():
                 shutil.rmtree(projection_file)
