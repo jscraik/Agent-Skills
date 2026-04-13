@@ -120,3 +120,11 @@ npx @biomejs/biome ci
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/context7-notes.md`
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[pnpm-manager]] | Target Biome checks to changed workspaces before broad runs |
+| [[npm-workflow-discipline]] | Keep npm/pnpm script contracts aligned with Biome gates |
+| [[typescript]] | Pair lint remediation with type-safety guidance in TS repos |

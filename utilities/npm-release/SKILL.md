@@ -124,3 +124,11 @@ npm profile enable-2fa auth-and-writes
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/context7-notes.md`
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[npm-workflow-discipline]] | Enforce deterministic npm install/release contracts |
+| [[pnpm-manager]] | Coordinate monorepo package prep before npm publish |
+| [[mise-tooling]] | Pin runtime/tool versions before release commands |

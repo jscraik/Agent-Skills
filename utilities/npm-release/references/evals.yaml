@@ -11,7 +11,13 @@ cases:
     prompt: "I need to publish version 1.2.0 of @acme/widgets to latest from CI with npm. Give me the safest release sequence."
     acceptance:
       - type: regex
-        value: "(?i)(npm version|npm publish|latest|verify)"
+        value: "(?i)\\bnpm version\\b"
+      - type: regex
+        value: "(?i)\\bnpm publish\\b"
+      - type: regex
+        value: "(?i)\\b(latest|dist-tag)\\b"
+      - type: regex
+        value: "(?i)\\b(verify|npm view|dist-tag ls)\\b"
 
   - id: npm-release-beta-tag
     name: beta channel publish
@@ -22,7 +28,7 @@ cases:
     prompt: "Publish a release candidate to the beta tag while keeping latest on stable."
     acceptance:
       - type: regex
-        value: "(?i)(--tag beta|prerelease|dist-tag)"
+        value: "(?i)\\bnpm publish\\b.*\\b(--tag\\s*=?\\s*beta|dist-tag)\\b"
 
   - id: npm-release-otp
     name: otp required flow
@@ -33,7 +39,7 @@ cases:
     prompt: "Our npm publish failed due to OTP requirements. What exact command path should we run now?"
     acceptance:
       - type: regex
-        value: "(?i)(otp|2fa|auth-and-writes|dist-tag)"
+        value: "(?i)\\bnpm publish\\b.*\\b(--otp\\b|otp|2fa)\\b"
 
   - id: npm-release-provenance
     name: provenance publish
@@ -44,7 +50,11 @@ cases:
     prompt: "This is the first public release. Include provenance and access flags in the publish command."
     acceptance:
       - type: regex
-        value: "(?i)(--provenance|--access public|npm publish)"
+        value: "(?i)\\bnpm publish\\b"
+      - type: regex
+        value: "(?i)\\b--provenance\\b"
+      - type: regex
+        value: "(?i)\\b--access\\s+public\\b"
 
   - id: npm-release-command-guard
     name: risky command guard

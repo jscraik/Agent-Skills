@@ -120,3 +120,11 @@ eval "$(mise env -s bash)"
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/context7-notes.md`
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[fix-mise]] | Deep-dive broken trust, shim, or runtime-resolution states |
+| [[pnpm-manager]] | Run workspace commands under the pinned runtime |
+| [[npm-release]] | Ensure release commands execute on the intended Node toolchain |

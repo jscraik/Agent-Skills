@@ -11,7 +11,7 @@ cases:
     prompt: "Run tests only for workspace packages changed since the default branch ref using pnpm filters."
     acceptance:
       - type: regex
-        value: "(?i)(--filter|default branch|base-ref|test)"
+        value: "(?i)(pnpm\\s+--filter\\s+['\\\"]?\\.{3}\\[[^\\]]+\\]['\\\"]?\\s+test\\b|default branch|base-ref)"
 
   - id: pnpm-recursive-install
     name: recursive install
@@ -44,7 +44,7 @@ cases:
     prompt: "Build only changed packages in packages/** since the repository default branch ref."
     acceptance:
       - type: regex
-        value: "(?i)(packages/\\*\\*|--filter|default branch|base-ref)"
+        value: "(?i)(pnpm\\s+--filter\\s+['\\\"]?\\{packages/\\*\\*\\}\\[[^\\]]+\\]['\\\"]?|default branch|base-ref)"
 
   - id: pnpm-command-guard
     name: risky command guard
@@ -83,4 +83,4 @@ cases:
     prompt: "How do I publish to npm with dist-tags and provenance?"
     acceptance:
       - type: not_regex
-        value: "(?i)(pnpm --filter|pnpm -r)"
+        value: "(?i)\\bpnpm\\b"

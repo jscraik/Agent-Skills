@@ -111,3 +111,11 @@ pnpm -r publish
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/context7-notes.md`
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[npm-workflow-discipline]] | Keep workspace install/publish contracts deterministic |
+| [[npm-release]] | Hand off package publish lanes after workspace validation |
+| [[mise-tooling]] | Ensure runtime/tool versions are pinned before pnpm execution |

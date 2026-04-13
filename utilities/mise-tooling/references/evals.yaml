@@ -11,7 +11,11 @@ cases:
     prompt: "Pin Node 24 for this project with mise and show how to confirm the active binary path inside the repo shell."
     acceptance:
       - type: regex
-        value: "(?i)(mise use node@24|mise exec|mise current|which)"
+        value: "(?i)\\bmise use\\s+node@24\\b"
+      - type: regex
+        value: "(?i)\\bmise (current|exec)\\b"
+      - type: regex
+        value: "(?i)\\b(which|command -v)\\b"
 
   - id: mise-global-pin
     name: global default pinning
@@ -22,7 +26,9 @@ cases:
     prompt: "Set a global default Node version with mise for my machine and show the safest validation commands."
     acceptance:
       - type: regex
-        value: "(?i)(mise use --global|mise current|validate)"
+        value: "(?i)\\bmise use\\s+--global\\b"
+      - type: regex
+        value: "(?i)\\bmise current\\b"
 
   - id: mise-trust-gate
     name: trust prompt handling
