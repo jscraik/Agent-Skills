@@ -696,6 +696,7 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         try:
             os.chmod(projection_file, source_file.stat().st_mode & 0o777)
         except OSError:
+            # Best-effort permission copy: content sync is still valid if chmod is unsupported or denied.
             pass
         changed_files += 1
 
