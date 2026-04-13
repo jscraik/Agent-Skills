@@ -589,68 +589,37 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
 
     rsync_bin = shutil.which("rsync")
     if rsync_bin:
-        sync_engine = "rsync"
         before_files = {rel.as_posix() for rel in iter_files(projection_abs)}
-        subprocess.run(
-            [
-                rsync_bin,
-                "-a",
-                "--delete",
-                "--exclude",
-                "__pycache__/",
-                "--exclude",
-                "*.pyc",
-                "--exclude",
-                ".DS_Store",
-                f"{source_abs}/",
-                f"{projection_abs}/",
-            ],
-            check=True,
-        )
-        after_files = {rel.as_posix() for rel in iter_files(projection_abs)}
-        deleted_files = len(before_files - after_files)
-        changed_files = -1
+        try:
+            subprocess.run(
+                [
+                    rsync_bin,
+                    "-a",
+                    "--delete",
+                    "--exclude",
+                    "__pycache__/",
+                    "--exclude",
+                    "*.pyc",
+                    "--exclude",
+                    ".DS_Store",
+                    f"{source_abs}/",
+                    f"{projection_abs}/",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            sync_engine = "rsync"
+            after_files = {rel.as_posix() for rel in iter_files(projection_abs)}
+            deleted_files = len(before_files - after_files)
+            changed_files = -1
+        except subprocess.CalledProcessError as error:
+            if _is_rsync_permission_failure(error):
+                changed_files, deleted_files = _sync_mirror_python(source_abs, projection_abs)
+            else:
+                raise
     else:
-        source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}
-        projection_files = {rel.as_posix(): rel for rel in iter_files(projection_abs)}
-
-        for rel_key in sorted(set(projection_files) - set(source_files)):
-            stale = projection_abs / projection_files[rel_key]
-            stale.unlink()
-            deleted_files += 1
-
-        for rel in source_files.values():
-            source_file = source_abs / rel
-            projection_file = projection_abs / rel
-            projection_file.parent.mkdir(parents=True, exist_ok=True)
-            if source_file.is_symlink():
-                source_target = os.readlink(source_file)
-                if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
-                    continue
-                if projection_file.exists() or projection_file.is_symlink():
-                    projection_file.unlink()
-                projection_file.symlink_to(source_target)
-                changed_files += 1
-                continue
-
-            source_bytes = source_file.read_bytes()
-            if projection_file.exists() and projection_file.is_file() and projection_file.read_bytes() == source_bytes:
-                continue
-            if projection_file.exists() or projection_file.is_symlink():
-                projection_file.unlink()
-            projection_file.write_bytes(source_bytes)
-            try:
-                os.chmod(projection_file, source_file.stat().st_mode & 0o777)
-            except OSError:
-                pass
-            changed_files += 1
-
-        for path in sorted(projection_abs.rglob("*"), reverse=True):
-            if path.is_dir() and not path.is_symlink():
-                try:
-                    path.rmdir()
-                except OSError:
-                    continue
+        changed_files, deleted_files = _sync_mirror_python(source_abs, projection_abs)
 
     stamped_files = 0
     for rel in iter_files(projection_abs):
@@ -680,6 +649,83 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         "deleted_files": deleted_files,
         "stamped_files": stamped_files,
     }
+
+
+def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, int]:
+    """
+    Synchronise projection contents using pure-Python copy and delete operations.
+
+    Parameters:
+        source_abs (Path): Absolute source directory path.
+        projection_abs (Path): Absolute projection directory path.
+
+    Returns:
+        tuple[int, int]: `(changed_files, deleted_files)`.
+    """
+    changed_files = 0
+    deleted_files = 0
+    source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}
+    projection_files = {rel.as_posix(): rel for rel in iter_files(projection_abs)}
+
+    for rel_key in sorted(set(projection_files) - set(source_files)):
+        stale = projection_abs / projection_files[rel_key]
+        stale.unlink()
+        deleted_files += 1
+
+    for rel in source_files.values():
+        source_file = source_abs / rel
+        projection_file = projection_abs / rel
+        projection_file.parent.mkdir(parents=True, exist_ok=True)
+        if source_file.is_symlink():
+            source_target = os.readlink(source_file)
+            if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
+                continue
+            if projection_file.exists() or projection_file.is_symlink():
+                projection_file.unlink()
+            projection_file.symlink_to(source_target)
+            changed_files += 1
+            continue
+
+        source_bytes = source_file.read_bytes()
+        if projection_file.exists() and projection_file.is_file() and projection_file.read_bytes() == source_bytes:
+            continue
+        if projection_file.exists() or projection_file.is_symlink():
+            projection_file.unlink()
+        projection_file.write_bytes(source_bytes)
+        try:
+            os.chmod(projection_file, source_file.stat().st_mode & 0o777)
+        except OSError:
+            pass
+        changed_files += 1
+
+    for path in sorted(projection_abs.rglob("*"), reverse=True):
+        if path.is_dir() and not path.is_symlink():
+            try:
+                path.rmdir()
+            except OSError:
+                continue
+    return changed_files, deleted_files
+
+
+def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
+    """
+    Return True when rsync failed with a permission-style error suitable for Python fallback.
+
+    Parameters:
+        error (subprocess.CalledProcessError): rsync failure.
+
+    Returns:
+        bool: True when stderr/stdout indicates a permission restriction.
+    """
+    output = "\n".join(
+        part for part in (error.stderr, error.stdout) if isinstance(part, str) and part
+    ).lower()
+    if not output:
+        return False
+    return any(
+        marker in output
+        for marker in ("operation not permitted", "permission denied", "mkstemp")
+    )
 
 
 def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
