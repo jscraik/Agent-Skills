@@ -38,6 +38,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 repo_file="$tmp_dir/repos.txt"
 score_file="$tmp_dir/repo_scores.txt"
 package_file="$tmp_dir/package_files.txt"
+: > "$score_file"
 
 if command -v fd >/dev/null 2>&1; then
   fd -H -t d '^\.git$' "$ROOT" | sed -E 's#/\.git/?$##' | sort -u > "$repo_file"

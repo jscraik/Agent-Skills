@@ -169,7 +169,7 @@ plugins_dir="$repo_root/plugins"
 runtime_cache_root="$repo_root/.agents/plugins-runtime/cache"
 system_skills_dir="$repo_root/skills-system"
 antigravity_skills_dir="$repo_root/skills-antigravity"
-antigravity_skills_txt=""
+antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
 
 mkdir -p "$skills_dir"
 mkdir -p "$plugins_dir"
@@ -1096,6 +1096,49 @@ sync_skill_path_file() {
   echo "[OK] Wrote skill path file: $target_file -> $rendered_dir"
 }
 
+# is_safe_path_component validates marketplace/plugin path components before they
+# are interpolated into destructive sync paths.
+is_safe_path_component() {
+  local value="$1"
+  [[ "$value" =~ ^[A-Za-z0-9._-]+$ ]]
+}
+
+# resolve_marketplace_source_dir returns a canonical source directory for a
+# marketplace source.path only when it resolves inside repo_root/plugins.
+resolve_marketplace_source_dir() {
+  local source_path="$1"
+  local candidate=""
+  local resolved=""
+
+  case "$source_path" in
+    ./*) ;;
+    *) return 1 ;;
+  esac
+  if [[ "$source_path" == *".."* ]]; then
+    return 1
+  fi
+  case "$source_path" in
+    ./plugins/*) ;;
+    *) return 1 ;;
+  esac
+
+  candidate="$repo_root/${source_path#./}"
+  resolved="$(cd "$candidate" 2>/dev/null && pwd -P || true)"
+  if [ -z "$resolved" ]; then
+    return 1
+  fi
+
+  case "$resolved" in
+    "$repo_root_real"/plugins/*)
+      printf '%s\n' "$resolved"
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 # Keep home-level plugin source paths aligned with the canonical repo plugins.
 # Some plugin installers resolve marketplace relative paths (./plugins/<name>)
 # against $HOME, so this mirror prevents "path is not a directory" failures.
@@ -1116,13 +1159,10 @@ sync_home_plugin_mirrors() {
 
   while IFS= read -r plugin_name; do
     [ -n "$plugin_name" ] || continue
-
-    # Validate plugin_name to prevent path traversal
-    if [[ ! "$plugin_name" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$plugin_name" =~ \.\. ]] || [[ "$plugin_name" =~ / ]]; then
-      echo "[ERROR] Invalid plugin_name in marketplace (path traversal risk): $plugin_name" >&2
+    if ! is_safe_path_component "$plugin_name"; then
+      echo "[WARN] Invalid plugin name in marketplace: $plugin_name"
       continue
     fi
-
     source_dir="$canonical_plugins_dir/$plugin_name"
     target_dir="$home_plugins_dir/$plugin_name"
 
@@ -1221,24 +1261,19 @@ sync_local_marketplace_cache() {
     [ -n "$marketplace_name" ] || continue
     [ -n "$plugin_name" ] || continue
     [ -n "$source_path" ] || continue
-
-    # Validate marketplace_name and plugin_name to prevent path traversal
-    if [[ ! "$marketplace_name" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$marketplace_name" =~ \.\. ]] || [[ "$marketplace_name" =~ / ]]; then
-      echo "[ERROR] Invalid marketplace_name (path traversal risk): $marketplace_name" >&2
+    if ! is_safe_path_component "$marketplace_name"; then
+      echo "[WARN] Invalid marketplace name in marketplace.json: $marketplace_name"
       continue
     fi
-    if [[ ! "$plugin_name" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$plugin_name" =~ \.\. ]] || [[ "$plugin_name" =~ / ]]; then
-      echo "[ERROR] Invalid plugin_name (path traversal risk): $plugin_name" >&2
+    if ! is_safe_path_component "$plugin_name"; then
+      echo "[WARN] Invalid plugin name in marketplace.json: $plugin_name"
       continue
     fi
-
-    case "$source_path" in
-      ./*) source_dir="$repo_root/${source_path#./}" ;;
-      *)
-        echo "[WARN] Unsupported marketplace source.path for $plugin_name: $source_path (expected ./... path)"
-        continue
-        ;;
-    esac
+    source_dir="$(resolve_marketplace_source_dir "$source_path" || true)"
+    if [ -z "$source_dir" ]; then
+      echo "[WARN] Unsupported marketplace source.path for $plugin_name: $source_path"
+      continue
+    fi
 
     if [ ! -d "$source_dir" ]; then
       echo "[WARN] Cache source plugin directory missing for $plugin_name: $source_dir"

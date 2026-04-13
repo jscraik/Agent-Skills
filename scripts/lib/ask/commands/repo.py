@@ -19,7 +19,7 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
         CallResult: A CallResult with `status` set to `"success"` and the metadata above stored in `data`.
     """
     result = CallResult()
-    result.data["repo_root"] = str(repo_root)
+    result.data["repo_root"] = str(repo_root.resolve())
     result.data["is_git"] = (repo_root / ".git").exists()
     
     # Check if .agents/skills is synced

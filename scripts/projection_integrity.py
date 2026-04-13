@@ -682,7 +682,7 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
                 continue
             if projection_file.exists() or projection_file.is_symlink():
-                if projection_file.is_dir():
+                if projection_file.is_dir() and not projection_file.is_symlink():
                     shutil.rmtree(projection_file)
                 else:
                     projection_file.unlink()
@@ -694,7 +694,7 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         if projection_file.exists() and projection_file.is_file() and projection_file.read_bytes() == source_bytes:
             continue
         if projection_file.exists() or projection_file.is_symlink():
-            if projection_file.is_dir():
+            if projection_file.is_dir() and not projection_file.is_symlink():
                 shutil.rmtree(projection_file)
             else:
                 projection_file.unlink()

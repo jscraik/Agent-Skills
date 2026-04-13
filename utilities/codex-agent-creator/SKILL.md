@@ -62,6 +62,9 @@ metadata:
 - Install only after validation by writing into the correct agents directory.
 - In this workspace, install to canonical global paths by default: `~/dev/configs/codex/agents/` and `~/dev/configs/codex/config.toml`.
 - For global installs, ensure runtime discoverability by updating `[agents.{name}].config_file` to the installed canonical agent file path.
+- Scope path contract:
+- `--scope global`: write `~/dev/configs/codex/agents/{name}/{name}.toml` and update `~/dev/configs/codex/config.toml`.
+- `--scope project`: write `${project_root}/.codex/agents/{name}/{name}.toml` and update or create `${project_root}/.codex/config.toml`.
 - Treat non-canonical global paths as compatibility overrides that require explicit opt-in.
 - If the user requests runtime limits, update only `[agents]` global keys in the selected global `config.toml`.
 - Return next-step verification command and residual risk.
