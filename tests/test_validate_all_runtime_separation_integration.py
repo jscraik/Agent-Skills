@@ -608,11 +608,11 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             self.assertIn("runtime-separation-current.json", output_path)
             # In ephemeral mode, path should NOT be the GOVERNANCE canonical path
             self.assertNotEqual(output_path, "GOVERNANCE/runtime-separation/current.json")
-            if run_dir:
-                self.assertTrue(
-                    output_path.startswith(run_dir) or "runtime-separation-current.json" in output_path,
-                    f"Output path '{output_path}' not under run_dir '{run_dir}'",
-                )
+            self.assertTrue(run_dir, "run_dir was not found in validate_all.sh stdout")
+            self.assertTrue(
+                output_path.startswith(run_dir),
+                f"Output path '{output_path}' not under run_dir '{run_dir}'",
+            )
 
     def test_python_stub_receives_build_current_output_flag_persistent(self):
         """build_runtime_separation_current.py must be called with --output pointing to GOVERNANCE path in persistent mode."""
@@ -786,7 +786,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     if mode == "persistent":
                         os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
 
-                    self._run_validate_all(tmpdir, paths["python_stub"], mode)
+                    result = self._run_validate_all(tmpdir, paths["python_stub"], mode)
 
                     args_log = os.path.join(
                         paths["args_log_dir"], "compare_runtime_separation_baseline.py.args.json"
@@ -815,6 +815,16 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     if mode == "persistent":
                         self.assertEqual(current_path, "GOVERNANCE/runtime-separation/current.json")
                     else:
+                        run_dir = None
+                        for line in result.stdout.splitlines():
+                            if "Validation logs:" in line:
+                                run_dir = line.split("Validation logs:")[-1].strip()
+                                break
+                        self.assertTrue(run_dir, "run_dir was not found in validate_all.sh stdout")
+                        self.assertTrue(
+                            current_path.startswith(run_dir),
+                            f"Current path '{current_path}' not under run_dir '{run_dir}'",
+                        )
                         self.assertIn("runtime-separation-current.json", current_path)
                         self.assertNotEqual(current_path, "GOVERNANCE/runtime-separation/current.json")
 
