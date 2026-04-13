@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
-"""Tests for the runtime-separation block added to scripts/validate_all.sh.
+"""Tests for the runtime-separation checks added to validate_all.sh.
 
-Covers the logic introduced in the PR:
-- runtime_separation_current path selection based on output_mode
-- runtime_consumer_scan_cmd array construction (with/without --emit-digests)
-- All 8 run_check invocations with correct slugs, modes, and argument shapes
-- Ordering of the new checks relative to each other and to the surrounding checks
-- Both --ephemeral and --persistent (default) modes
+These tests focus exclusively on the new code block in validate_all.sh that
+was introduced in the PR: the runtime_separation_current path selection logic,
+the runtime_consumer_scan_cmd construction, and the eight new run_check calls
+for runtime-separation validation steps.
 """
 
 from __future__ import annotations
 
+import json
 import os
+import re
 import subprocess
-import tempfile
+import stat
 import textwrap
-import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
+import unittest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATE_ALL_SH = REPO_ROOT / "scripts" / "validate_all.sh"
 
-# Slugs introduced by the PR, in declaration order.
+# Slugs introduced by the new code block, in order.
 RUNTIME_SEPARATION_SLUGS = [
     "runtime-separation-manifest",
     "runtime-separation-consumers",
@@ -34,900 +36,873 @@ RUNTIME_SEPARATION_SLUGS = [
 ]
 
 
-def _bash(snippet: str, env: dict | None = None, cwd: str | None = None) -> subprocess.CompletedProcess:
-    """Execute *snippet* under ``bash -c`` and return the completed process."""
-    base_env = dict(os.environ)
-    if env:
-        base_env.update(env)
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _run(*cmd: str, cwd: Path, env: dict | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["bash", "-c", snippet],
-        capture_output=True,
+        list(cmd),
+        cwd=cwd,
         text=True,
-        env=base_env,
-        cwd=cwd or str(REPO_ROOT),
+        capture_output=True,
+        check=False,
+        env=env,
     )
 
 
-def _make_stub_script(directory: Path, name: str, exit_code: int = 0, extra: str = "") -> Path:
-    """Write an executable stub script that exits with *exit_code* and optionally runs *extra* code."""
-    script = directory / name
-    content = textwrap.dedent(f"""\
+def _make_executable(path: Path) -> None:
+    path.chmod(path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
+def _write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(textwrap.dedent(content), encoding="utf-8")
+
+
+def _make_python_stub(path: Path, *, exit_code: int = 0) -> None:
+    """Create a Python stub that records its argv.
+
+    The exit code is determined by checking for a companion
+    ``<path>.exit_code`` file; if present its content is used, otherwise
+    *exit_code* is the default.
+    """
+    _write(
+        path,
+        f"""\
+        #!/usr/bin/env python3
+        import json, sys
+        from pathlib import Path
+        me = Path(__file__)
+        me.with_suffix(me.suffix + ".recorded_args.json").write_text(
+            json.dumps(sys.argv), encoding="utf-8"
+        )
+        ec_file = me.with_suffix(me.suffix + ".exit_code")
+        code = int(ec_file.read_text().strip()) if ec_file.exists() else {exit_code}
+        sys.exit(code)
+        """,
+    )
+    _make_executable(path)
+
+
+def _make_bash_stub(path: Path, *, exit_code: int = 0) -> None:
+    """Create a bash stub that records its args.
+
+    The exit code is determined by checking for a companion
+    ``<path without .sh>.exit_code`` file; if present its content is used,
+    otherwise *exit_code* is the default.
+    """
+    _write(
+        path,
+        f"""\
         #!/usr/bin/env bash
-        {extra}
+        printf '%s\\n' "$@" > "${{0%.*}}.recorded_args.txt"
+        ec_file="${{0%.*}}.exit_code"
+        if [[ -f "$ec_file" ]]; then
+          exit "$(cat "$ec_file")"
+        fi
         exit {exit_code}
-    """)
-    script.write_text(content, encoding="utf-8")
-    script.chmod(0o755)
-    return script
-
-
-def _run_validate_all_with_stubs(
-    output_mode: str,
-    stub_exit_code: int = 0,
-    extra_env: dict | None = None,
-) -> tuple[subprocess.CompletedProcess, Path, Path]:
-    """
-    Run validate_all.sh in a controlled environment with stubbed external scripts.
-
-    Returns (proc, run_dir, check_results_file_path).
-    The caller is responsible for cleanup.
-    """
-    tmp = Path(tempfile.mkdtemp())
-
-    # Create stub directory that shadows the real scripts directory
-    stubs_dir = tmp / "stubs"
-    stubs_dir.mkdir()
-
-    # Create stub python3 that records its arguments and exits cleanly
-    py_stub = stubs_dir / "python3"
-    py_stub_log = tmp / "python3_calls.log"
-    py_stub.write_text(
-        textwrap.dedent(f"""\
-            #!/usr/bin/env bash
-            printf '%s\\n' "$*" >> "{py_stub_log}"
-            exit {stub_exit_code}
-        """),
-        encoding="utf-8",
+        """,
     )
-    py_stub.chmod(0o755)
+    _make_executable(path)
 
-    # Create stub bash that records invocations
-    bash_stub_log = tmp / "bash_calls.log"
 
-    # Stub all external shell scripts referenced in the new block
-    for script_name in [
-        "verify_wrapper_contract_fixtures.sh",
-        "verify_runtime_separation_writer_mutations.sh",
-        "validate_runtime_separation_profile_home.sh",
-    ]:
-        stub = stubs_dir / script_name
-        stub.write_text(
-            textwrap.dedent(f"""\
-                #!/usr/bin/env bash
-                printf '%s\\n' "{script_name} $*" >> "{bash_stub_log}"
-                exit {stub_exit_code}
-            """),
-            encoding="utf-8",
-        )
-        stub.chmod(0o755)
+def _make_recording_python_dispatcher(path: Path) -> None:
+    """Create a Python dispatcher used as PYTHON_BIN.
 
-    # Stub all Python scripts referenced in the new block
-    for py_script_name in [
-        "validate_runtime_separation_manifest.py",
-        "scan_runtime_separation_consumers.py",
-        "verify_runtime_separation_reader_compat.py",
-        "build_runtime_separation_current.py",
-        "compare_runtime_separation_baseline.py",
-    ]:
-        stub = stubs_dir / py_script_name
-        stub.write_text(
-            textwrap.dedent(f"""\
-                #!/usr/bin/env python3
-                import sys
-                with open("{tmp / 'python_script_calls.log'}", "a") as f:
-                    f.write("{py_script_name} " + " ".join(sys.argv[1:]) + "\\n")
-                sys.exit({stub_exit_code})
-            """),
-            encoding="utf-8",
-        )
-        stub.chmod(0o755)
+    When called as ``$PYTHON_BIN scripts/foo.py <args>`` it:
 
-    # Build and run a self-contained snippet that sources validate_all.sh's logic
-    # but uses the stubs directory for external scripts.  We also need to set up
-    # the required environment that validate_all.sh expects.
-    if output_mode == "ephemeral":
-        mode_flag = "--ephemeral"
-    else:
-        mode_flag = "--persistent"
+    * records ``sys.argv`` to ``<scripts_dir>/foo.py.recorded_args.json``
+    * checks for a ``<scripts_dir>/foo.py.exit_code`` file and uses it if
+      present
+    * otherwise exits 0
+    """
+    _write(
+        path,
+        """\
+        #!/usr/bin/env python3
+        import json, sys
+        from pathlib import Path
 
-    # We run the actual script via bash, forcing PYTHON_BIN to our stub
-    # and ensuring the stubs for bash scripts come first in PATH.
-    env: dict = {
-        "PYTHON_BIN": str(py_stub),
-        "PATH": f"{stubs_dir}:{os.environ.get('PATH', '/usr/bin:/bin')}",
-        # Redirect artifact output to tmp so we don't pollute the real repo
-        "VALIDATE_ALL_OUTPUT_MODE": output_mode,
-    }
-    if extra_env:
-        env.update(extra_env)
-
-    # Patch the script on-the-fly: replace all `bash scripts/` references in the
-    # new block with `bash {stubs_dir}/` so the bash-invoked scripts hit our stubs.
-    # We do this by constructing a wrapper that overrides the relevant things.
-    # The cleanest approach for testing just the new block is to:
-    # 1. Create a minimal harness that defines run_check and the required vars
-    # 2. Then evaluates just the new code block
-    harness = textwrap.dedent(f"""\
-        #!/usr/bin/env bash
-        set -u
-
-        # ---- Minimal harness mirroring validate_all.sh's preamble ----
-        output_mode="{output_mode}"
-        run_dir="{tmp}/run_dir"
-        mkdir -p "$run_dir"
-
-        check_results_file="$run_dir/check-results.tsv"
-        : > "$check_results_file"
-
-        python_cmd=("{py_stub}")
-
-        run_check() {{
-            local mode="$1"
-            local slug="$2"
-            local label="$3"
-            shift 3
-            local log_file="$run_dir/${{slug}}.log"
-            local outcome="pass"
-            if "$@" >"$log_file" 2>&1; then
-                outcome="pass"
-            else
-                outcome="fail"
-            fi
-            printf '%s\\t%s\\t%s\\t%s\\n' "$slug" "$mode" "$outcome" "$log_file" >> "$check_results_file"
-        }}
-
-        # ---- New code block under test ----
-        runtime_separation_current="$run_dir/runtime-separation-current.json"
-        if [[ "$output_mode" == "persistent" ]]; then
-          runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
-        fi
-
-        runtime_consumer_scan_cmd=(
-          "${{python_cmd[@]}}"
-          scripts/scan_runtime_separation_consumers.py
-          --emit-readers
-          --emit-path-consumers
-          --strict
-        )
-        if [[ "$output_mode" == "persistent" ]]; then
-          runtime_consumer_scan_cmd+=(--emit-digests)
-        fi
-
-        run_check required runtime-separation-manifest "Validating runtime-separation manifest..." "${{python_cmd[@]}}" scripts/validate_runtime_separation_manifest.py --strict
-        run_check required runtime-separation-consumers "Scanning runtime-separation consumer inventories..." "${{runtime_consumer_scan_cmd[@]}}"
-        run_check required runtime-separation-reader-compat "Verifying runtime-separation reader compatibility..." "${{python_cmd[@]}}" scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
-        run_check required runtime-separation-current "Building runtime-separation current artifact..." "${{python_cmd[@]}}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current"
-        run_check required runtime-separation-wrapper-fixtures "Verifying runtime-separation wrapper fixtures..." bash {stubs_dir}/verify_wrapper_contract_fixtures.sh --runtime-separation
-        run_check required runtime-separation-baseline-compare "Comparing runtime-separation baseline..." "${{python_cmd[@]}}" scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
-        run_check required runtime-separation-writer-mutations "Verifying runtime-separation writer authority..." bash {stubs_dir}/verify_runtime_separation_writer_mutations.sh --strict
-        run_check required runtime-separation-profile-home "Building runtime-separation profile-home artifact..." bash {stubs_dir}/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
-
-        # Emit key variable values for test assertions
-        printf 'RUNTIME_SEPARATION_CURRENT=%s\\n' "$runtime_separation_current"
-        printf 'RUNTIME_CONSUMER_SCAN_CMD=%s\\n' "${{runtime_consumer_scan_cmd[*]}}"
-    """)
-
-    harness_path = tmp / "harness.sh"
-    harness_path.write_text(harness, encoding="utf-8")
-    harness_path.chmod(0o755)
-
-    proc = subprocess.run(
-        ["bash", str(harness_path)],
-        capture_output=True,
-        text=True,
-        env={**dict(os.environ), **env},
-        cwd=str(REPO_ROOT),
+        argv = sys.argv  # [dispatcher_path, script_path, ...args]
+        if len(argv) >= 2:
+            script_path = Path(argv[1])
+            record = script_path.with_suffix(script_path.suffix + ".recorded_args.json")
+            record.parent.mkdir(parents=True, exist_ok=True)
+            record.write_text(json.dumps(argv), encoding="utf-8")
+            ec_file = script_path.with_suffix(script_path.suffix + ".exit_code")
+            if ec_file.exists():
+                sys.exit(int(ec_file.read_text().strip()))
+        sys.exit(0)
+        """,
     )
-
-    check_results_path = tmp / "run_dir" / "check-results.tsv"
-    return proc, tmp, check_results_path
+    _make_executable(path)
 
 
-def _parse_tsv(path: Path) -> list[dict]:
-    """Parse the check-results TSV into a list of dicts."""
-    if not path.exists():
-        return []
+def _extract_run_dir(stdout: str) -> Path | None:
+    """Parse the ephemeral run_dir from validate_all.sh stdout."""
+    for line in stdout.splitlines():
+        m = re.search(r"Validation logs:\s+(\S+)", line)
+        if m:
+            return Path(m.group(1))
+    return None
+
+
+def _parse_check_results_tsv(tsv_path: Path) -> list[dict[str, str]]:
     rows = []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in tsv_path.read_text(encoding="utf-8").splitlines():
         parts = line.split("\t")
-        if len(parts) >= 3:
-            rows.append({"slug": parts[0], "mode": parts[1], "outcome": parts[2]})
+        if len(parts) == 4:
+            rows.append(
+                {
+                    "slug": parts[0],
+                    "mode": parts[1],
+                    "outcome": parts[2],
+                    "log_file": parts[3],
+                }
+            )
     return rows
 
 
-# ---------------------------------------------------------------------------
-# TestRuntimeSeparationCurrentPath
-# ---------------------------------------------------------------------------
+class FakeRepo:
+    """Minimal fake repository layout for running validate_all.sh in isolation.
+
+    All scripts that validate_all.sh calls are replaced with recording stubs
+    so the test can inspect which arguments were forwarded to each script.
+    """
+
+    # Python scripts called via $python_cmd
+    _PY_SCRIPTS = [
+        "scripts/verify_recursive_skill_graph_artifacts.py",
+        "scripts/docs_lint.py",
+        "scripts/verify_verify_work_scope_flags.py",
+        "scripts/verify_question_lifecycle_contract.py",
+        "scripts/test_skill_lifecycle_validation.py",
+        "scripts/verify_skill_catalog_freshness.py",
+        "scripts/gotcha_pipeline.py",
+        "scripts/verify_selection_contract.py",
+        "scripts/verify_router_schema.py",
+        "scripts/verify_ask_cli_modularity.py",
+        "scripts/validate_runtime_separation_manifest.py",
+        "scripts/scan_runtime_separation_consumers.py",
+        "scripts/verify_runtime_separation_reader_compat.py",
+        "scripts/build_runtime_separation_current.py",
+        "scripts/compare_runtime_separation_baseline.py",
+        "scripts/verify_selection_gate_severity.py",
+    ]
+
+    # Bash scripts called directly via `bash scripts/...`
+    _BASH_SCRIPTS = [
+        "scripts/validate_plan_graphs.sh",
+        "scripts/check_plugin_skill_shadowing.sh",
+        "scripts/validate_projection_integrity.sh",
+        "scripts/check_path_ownership_boundaries.sh",
+        "scripts/lint_skill_types.sh",
+        "scripts/lint_openai_skill_format.sh",
+        "scripts/lint_progressive_disclosure.sh",
+        "scripts/validate_skill_authoring_family.sh",
+        "scripts/verify_wrapper_contract_fixtures.sh",
+        "scripts/verify_runtime_separation_writer_mutations.sh",
+        "scripts/validate_runtime_separation_profile_home.sh",
+    ]
+
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        self._dispatcher = root / "bin" / "python_stub"
+        self._last_run_dir: Path | None = None
+        self._build()
+
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
+
+    def _build(self) -> None:
+        # Python dispatcher used as PYTHON_BIN
+        self._dispatcher.parent.mkdir(parents=True, exist_ok=True)
+        _make_recording_python_dispatcher(self._dispatcher)
+
+        # Stub all Python scripts
+        for rel in self._PY_SCRIPTS:
+            _make_python_stub(self.root / rel)
+
+        # Stub all Bash scripts
+        for rel in self._BASH_SCRIPTS:
+            _make_bash_stub(self.root / rel)
+
+        # Copy the real validate_all.sh (read-only; we don't modify it)
+        dst = self.root / "scripts" / "validate_all.sh"
+        dst.write_bytes(VALIDATE_ALL_SH.read_bytes())
+        _make_executable(dst)
+
+        # Directories referenced by validate_all.sh
+        (self.root / "GOVERNANCE" / "runtime-separation" / "fixtures").mkdir(
+            parents=True, exist_ok=True
+        )
+        # Dummy files referenced by reader-compat check
+        (self.root / "GOVERNANCE" / "runtime-separation" / "slices.yaml").write_text(
+            "{}\n", encoding="utf-8"
+        )
+        (
+            self.root
+            / "GOVERNANCE"
+            / "runtime-separation"
+            / "fixtures"
+            / "schema-prev.yaml"
+        ).write_text("{}\n", encoding="utf-8")
+        (self.root / "GOVERNANCE" / "runtime-separation" / "baseline.json").write_text(
+            "{}\n", encoding="utf-8"
+        )
+
+    # ------------------------------------------------------------------
+    # Run helpers
+    # ------------------------------------------------------------------
+
+    def run(self, *extra_args: str) -> subprocess.CompletedProcess[str]:
+        env = {**os.environ, "PYTHON_BIN": str(self._dispatcher)}
+        proc = _run(
+            "bash", "scripts/validate_all.sh", *extra_args,
+            cwd=self.root,
+            env=env,
+        )
+        self._last_run_dir = _extract_run_dir(proc.stdout)
+        return proc
+
+    def set_script_exit_code(self, script_rel: str, code: int) -> None:
+        """Make a stub exit with *code* on next invocation.
+
+        Works for both Python (``scripts/foo.py``) and bash
+        (``scripts/foo.sh``) stubs.
+        """
+        p = self.root / script_rel
+        if script_rel.endswith(".sh"):
+            ec_path = p.with_suffix("").with_suffix(".exit_code")
+        else:
+            ec_path = p.with_suffix(p.suffix + ".exit_code")
+        ec_path.write_text(str(code), encoding="utf-8")
+
+    # ------------------------------------------------------------------
+    # Query helpers
+    # ------------------------------------------------------------------
+
+    def check_results(self) -> list[dict[str, str]]:
+        """Parse check-results.tsv from the most recent run."""
+        if self._last_run_dir and (self._last_run_dir / "check-results.tsv").exists():
+            return _parse_check_results_tsv(self._last_run_dir / "check-results.tsv")
+        # Fallback: search under repo root (persistent mode)
+        for tsv in self.root.rglob("check-results.tsv"):
+            return _parse_check_results_tsv(tsv)
+        return []
+
+    def recorded_args_for(self, script_name: str) -> list[str] | None:
+        """Return the recorded argv list for a Python script stub, or None."""
+        p = self.root / script_name
+        record_path = p.with_suffix(p.suffix + ".recorded_args.json")
+        if not record_path.exists():
+            return None
+        return json.loads(record_path.read_text(encoding="utf-8"))
+
+    def recorded_bash_args_for(self, script_name: str) -> list[str] | None:
+        """Return the recorded args list for a bash script stub, or None."""
+        p = self.root / script_name
+        record_path = p.with_suffix("").with_suffix(".recorded_args.txt")
+        if not record_path.exists():
+            return None
+        return record_path.read_text(encoding="utf-8").splitlines()
 
 
-class TestRuntimeSeparationCurrentPath(unittest.TestCase):
-    """Verify runtime_separation_current is set to the correct path based on output_mode."""
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+
+class RuntimeSeparationCurrentPathTests(unittest.TestCase):
+    """Verify runtime_separation_current path selection logic."""
 
     def test_ephemeral_mode_uses_run_dir_path(self) -> None:
-        """In ephemeral mode, runtime_separation_current must be inside the run_dir temp directory."""
-        proc, tmp, _ = _run_validate_all_with_stubs("ephemeral")
-        try:
-            self.assertEqual(proc.returncode, 0, f"Harness failed:\nstdout={proc.stdout}\nstderr={proc.stderr}")
-            # Extract value from harness output
-            current_val = None
-            for line in proc.stdout.splitlines():
-                if line.startswith("RUNTIME_SEPARATION_CURRENT="):
-                    current_val = line.split("=", 1)[1]
-                    break
-            self.assertIsNotNone(current_val, "RUNTIME_SEPARATION_CURRENT was not printed")
+        """In ephemeral mode runtime_separation_current must be inside the temp run_dir."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/build_runtime_separation_current.py")
+            self.assertIsNotNone(args, "build_runtime_separation_current.py was not called")
+            output_idx = args.index("--output") + 1
+            output_path = args[output_idx]
+            self.assertNotIn(
+                "GOVERNANCE",
+                output_path,
+                "Ephemeral mode must not use GOVERNANCE path for runtime_separation_current",
+            )
             self.assertTrue(
-                current_val.endswith("/runtime-separation-current.json"),
-                f"Expected path ending with runtime-separation-current.json, got: {current_val!r}",
+                output_path.endswith("runtime-separation-current.json"),
+                f"Expected output path to end with runtime-separation-current.json, got {output_path!r}",
             )
-            # Must NOT be the GOVERNANCE path
-            self.assertNotEqual(
-                current_val,
-                "GOVERNANCE/runtime-separation/current.json",
-                "Ephemeral mode must not use the GOVERNANCE path",
-            )
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
 
     def test_persistent_mode_uses_governance_path(self) -> None:
-        """In persistent mode, runtime_separation_current must point to GOVERNANCE/runtime-separation/current.json."""
-        proc, tmp, _ = _run_validate_all_with_stubs("persistent")
-        try:
-            self.assertEqual(proc.returncode, 0, f"Harness failed:\nstdout={proc.stdout}\nstderr={proc.stderr}")
-            current_val = None
-            for line in proc.stdout.splitlines():
-                if line.startswith("RUNTIME_SEPARATION_CURRENT="):
-                    current_val = line.split("=", 1)[1]
-                    break
-            self.assertIsNotNone(current_val, "RUNTIME_SEPARATION_CURRENT was not printed")
+        """In persistent mode runtime_separation_current must be GOVERNANCE/.../current.json."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            (repo.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+            repo.run("--persistent")
+            args = repo.recorded_args_for("scripts/build_runtime_separation_current.py")
+            self.assertIsNotNone(args, "build_runtime_separation_current.py was not called")
+            output_idx = args.index("--output") + 1
+            output_path = args[output_idx]
             self.assertEqual(
-                current_val,
+                output_path,
                 "GOVERNANCE/runtime-separation/current.json",
-                f"Persistent mode must use the GOVERNANCE path, got: {current_val!r}",
+                f"Persistent mode must use GOVERNANCE path, got {output_path!r}",
             )
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
 
-    def test_ephemeral_current_path_is_different_from_persistent(self) -> None:
-        """The ephemeral and persistent current paths must be distinct values."""
-        proc_e, tmp_e, _ = _run_validate_all_with_stubs("ephemeral")
-        proc_p, tmp_p, _ = _run_validate_all_with_stubs("persistent")
-        try:
-            def _extract(proc: subprocess.CompletedProcess) -> str | None:
-                for line in proc.stdout.splitlines():
-                    if line.startswith("RUNTIME_SEPARATION_CURRENT="):
-                        return line.split("=", 1)[1]
-                return None
-
-            val_e = _extract(proc_e)
-            val_p = _extract(proc_p)
-            self.assertIsNotNone(val_e)
-            self.assertIsNotNone(val_p)
-            self.assertNotEqual(val_e, val_p, "Ephemeral and persistent paths must differ")
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp_e), ignore_errors=True)
-            shutil.rmtree(str(tmp_p), ignore_errors=True)
+    def test_ephemeral_and_persistent_current_paths_differ(self) -> None:
+        """Ephemeral and persistent modes must produce different runtime_separation_current paths."""
+        with TemporaryDirectory() as tmp1, TemporaryDirectory() as tmp2:
+            repo_e = FakeRepo(Path(tmp1))
+            repo_p = FakeRepo(Path(tmp2))
+            (repo_p.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+            repo_e.run("--ephemeral")
+            repo_p.run("--persistent")
+            args_e = repo_e.recorded_args_for("scripts/build_runtime_separation_current.py")
+            args_p = repo_p.recorded_args_for("scripts/build_runtime_separation_current.py")
+            self.assertIsNotNone(args_e)
+            self.assertIsNotNone(args_p)
+            path_e = args_e[args_e.index("--output") + 1]
+            path_p = args_p[args_p.index("--output") + 1]
+            self.assertNotEqual(path_e, path_p)
 
 
-# ---------------------------------------------------------------------------
-# TestRuntimeConsumerScanCmd
-# ---------------------------------------------------------------------------
+class RuntimeConsumerScanCmdTests(unittest.TestCase):
+    """Verify runtime_consumer_scan_cmd construction."""
 
+    def test_ephemeral_mode_omits_emit_digests(self) -> None:
+        """In ephemeral mode --emit-digests must NOT appear in scan_runtime_separation_consumers args."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/scan_runtime_separation_consumers.py")
+            self.assertIsNotNone(args, "scan_runtime_separation_consumers.py was not called")
+            self.assertNotIn(
+                "--emit-digests",
+                args,
+                "Ephemeral mode must not pass --emit-digests to scan_runtime_separation_consumers.py",
+            )
 
-class TestRuntimeConsumerScanCmd(unittest.TestCase):
-    """Verify runtime_consumer_scan_cmd is constructed correctly for each output_mode."""
-
-    def _get_scan_cmd(self, output_mode: str) -> str:
-        proc, tmp, _ = _run_validate_all_with_stubs(output_mode)
-        try:
-            self.assertEqual(proc.returncode, 0, f"Harness failed: {proc.stderr}")
-            for line in proc.stdout.splitlines():
-                if line.startswith("RUNTIME_CONSUMER_SCAN_CMD="):
-                    return line.split("=", 1)[1]
-            return ""
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_ephemeral_mode_includes_emit_readers(self) -> None:
-        """runtime_consumer_scan_cmd must include --emit-readers in ephemeral mode."""
-        cmd = self._get_scan_cmd("ephemeral")
-        self.assertIn("--emit-readers", cmd)
-
-    def test_ephemeral_mode_includes_emit_path_consumers(self) -> None:
-        """runtime_consumer_scan_cmd must include --emit-path-consumers in ephemeral mode."""
-        cmd = self._get_scan_cmd("ephemeral")
-        self.assertIn("--emit-path-consumers", cmd)
-
-    def test_ephemeral_mode_includes_strict(self) -> None:
-        """runtime_consumer_scan_cmd must include --strict in ephemeral mode."""
-        cmd = self._get_scan_cmd("ephemeral")
-        self.assertIn("--strict", cmd)
-
-    def test_ephemeral_mode_excludes_emit_digests(self) -> None:
-        """runtime_consumer_scan_cmd must NOT include --emit-digests in ephemeral mode."""
-        cmd = self._get_scan_cmd("ephemeral")
-        self.assertNotIn("--emit-digests", cmd, "--emit-digests must not be added in ephemeral mode")
-
-    def test_persistent_mode_includes_emit_readers(self) -> None:
-        """runtime_consumer_scan_cmd must include --emit-readers in persistent mode."""
-        cmd = self._get_scan_cmd("persistent")
-        self.assertIn("--emit-readers", cmd)
-
-    def test_persistent_mode_includes_emit_path_consumers(self) -> None:
-        """runtime_consumer_scan_cmd must include --emit-path-consumers in persistent mode."""
-        cmd = self._get_scan_cmd("persistent")
-        self.assertIn("--emit-path-consumers", cmd)
-
-    def test_persistent_mode_includes_strict(self) -> None:
-        """runtime_consumer_scan_cmd must include --strict in persistent mode."""
-        cmd = self._get_scan_cmd("persistent")
-        self.assertIn("--strict", cmd)
+    def test_ephemeral_mode_includes_required_flags(self) -> None:
+        """In ephemeral mode the scan command must include --emit-readers, --emit-path-consumers, --strict."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/scan_runtime_separation_consumers.py")
+            self.assertIsNotNone(args)
+            self.assertIn("--emit-readers", args)
+            self.assertIn("--emit-path-consumers", args)
+            self.assertIn("--strict", args)
 
     def test_persistent_mode_includes_emit_digests(self) -> None:
-        """runtime_consumer_scan_cmd must include --emit-digests in persistent mode."""
-        cmd = self._get_scan_cmd("persistent")
-        self.assertIn("--emit-digests", cmd, "--emit-digests must be appended in persistent mode")
+        """In persistent mode --emit-digests must be passed to scan_runtime_separation_consumers.py."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            (repo.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+            repo.run("--persistent")
+            args = repo.recorded_args_for("scripts/scan_runtime_separation_consumers.py")
+            self.assertIsNotNone(args, "scan_runtime_separation_consumers.py was not called")
+            self.assertIn(
+                "--emit-digests",
+                args,
+                "Persistent mode must pass --emit-digests to scan_runtime_separation_consumers.py",
+            )
 
-    def test_persistent_adds_emit_digests_not_ephemeral(self) -> None:
-        """--emit-digests appears in persistent but not ephemeral — a negative regression guard."""
-        cmd_e = self._get_scan_cmd("ephemeral")
-        cmd_p = self._get_scan_cmd("persistent")
-        self.assertNotIn("--emit-digests", cmd_e)
-        self.assertIn("--emit-digests", cmd_p)
+    def test_persistent_mode_retains_required_flags(self) -> None:
+        """In persistent mode the base flags must still be present alongside --emit-digests."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            (repo.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+            repo.run("--persistent")
+            args = repo.recorded_args_for("scripts/scan_runtime_separation_consumers.py")
+            self.assertIsNotNone(args)
+            self.assertIn("--emit-readers", args)
+            self.assertIn("--emit-path-consumers", args)
+            self.assertIn("--strict", args)
+            self.assertIn("--emit-digests", args)
+
+    def test_scan_cmd_script_name_is_scan_runtime_separation_consumers(self) -> None:
+        """The consumer scan check must invoke scan_runtime_separation_consumers.py (not a different script)."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/scan_runtime_separation_consumers.py")
+            self.assertIsNotNone(
+                args,
+                "scan_runtime_separation_consumers.py must be the script invoked for the consumers check",
+            )
+            # argv[1] is the script path
+            self.assertIn("scan_runtime_separation_consumers.py", args[1])
 
 
-# ---------------------------------------------------------------------------
-# TestRuntimeSeparationRunChecks
-# ---------------------------------------------------------------------------
+class RuntimeSeparationCheckResultsTests(unittest.TestCase):
+    """Verify all 8 runtime-separation run_check calls appear in check-results.tsv.
 
+    Uses --persistent mode so check-results.tsv is written to
+    artifacts/validation/<run_id>/ which persists across the run (unlike
+    --ephemeral mode which deletes the run_dir on success).
+    """
 
-class TestRuntimeSeparationRunChecks(unittest.TestCase):
-    """Verify all 8 runtime-separation checks are registered in check-results.tsv."""
+    def _run_persistent(self, tmpdir: str) -> tuple[FakeRepo, list[dict[str, str]]]:
+        repo = FakeRepo(Path(tmpdir))
+        (repo.root / "artifacts" / "validation").mkdir(parents=True, exist_ok=True)
+        repo.run("--persistent")
+        return repo, repo.check_results()
 
-    def _rows(self, output_mode: str) -> list[dict]:
-        proc, tmp, check_results_path = _run_validate_all_with_stubs(output_mode)
-        try:
-            self.assertEqual(proc.returncode, 0, f"Harness failed: {proc.stderr}")
-            return _parse_tsv(check_results_path)
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
+    def test_all_eight_slugs_present(self) -> None:
+        """All 8 runtime-separation slugs must appear in check-results.tsv."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            recorded_slugs = {r["slug"] for r in rows}
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                self.assertIn(
+                    slug,
+                    recorded_slugs,
+                    f"Expected slug {slug!r} in check-results.tsv",
+                )
 
-    def test_all_8_slugs_present_in_ephemeral_mode(self) -> None:
-        """All 8 runtime-separation check slugs must appear in check-results.tsv (ephemeral)."""
-        rows = self._rows("ephemeral")
-        slugs = {r["slug"] for r in rows}
-        for expected_slug in RUNTIME_SEPARATION_SLUGS:
-            self.assertIn(expected_slug, slugs, f"Missing slug in ephemeral results: {expected_slug!r}")
-
-    def test_all_8_slugs_present_in_persistent_mode(self) -> None:
-        """All 8 runtime-separation check slugs must appear in check-results.tsv (persistent)."""
-        rows = self._rows("persistent")
-        slugs = {r["slug"] for r in rows}
-        for expected_slug in RUNTIME_SEPARATION_SLUGS:
-            self.assertIn(expected_slug, slugs, f"Missing slug in persistent results: {expected_slug!r}")
-
-    def test_exactly_8_runtime_separation_slugs(self) -> None:
-        """Exactly 8 distinct runtime-separation slugs must be registered (no duplicates, no missing)."""
-        rows = self._rows("ephemeral")
-        runtime_slugs = [r["slug"] for r in rows if r["slug"].startswith("runtime-separation-")]
-        self.assertEqual(len(runtime_slugs), 8, f"Expected 8 runtime-separation checks, got {runtime_slugs}")
-
-    def test_all_checks_registered_as_required(self) -> None:
-        """Every runtime-separation check must be registered with mode='required'."""
-        rows = self._rows("ephemeral")
-        for row in rows:
-            if row["slug"].startswith("runtime-separation-"):
+    def test_all_eight_slugs_registered_as_required(self) -> None:
+        """All runtime-separation checks must be registered with mode=required."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            slug_to_row = {r["slug"]: r for r in rows}
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                self.assertIn(slug, slug_to_row)
                 self.assertEqual(
-                    row["mode"],
+                    slug_to_row[slug]["mode"],
                     "required",
-                    f"Check {row['slug']!r} must use mode='required', got {row['mode']!r}",
+                    f"Expected {slug!r} to have mode=required",
+                )
+
+    def test_all_eight_slugs_pass_with_stubs(self) -> None:
+        """When all stubs exit 0, all runtime-separation checks must record outcome=pass."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            slug_to_row = {r["slug"]: r for r in rows}
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                self.assertIn(slug, slug_to_row)
+                self.assertEqual(
+                    slug_to_row[slug]["outcome"],
+                    "pass",
+                    f"Expected {slug!r} to have outcome=pass when stub exits 0",
+                )
+
+    def test_runtime_separation_checks_follow_ask_cli_modularity(self) -> None:
+        """runtime-separation checks must appear after ask-cli-modularity in the TSV."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            slugs_in_order = [r["slug"] for r in rows]
+            self.assertIn("ask-cli-modularity", slugs_in_order, "ask-cli-modularity must be in check-results.tsv")
+            ask_cli_idx = slugs_in_order.index("ask-cli-modularity")
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                rt_idx = slugs_in_order.index(slug)
+                self.assertGreater(
+                    rt_idx,
+                    ask_cli_idx,
+                    f"{slug!r} must appear after ask-cli-modularity in check-results.tsv",
+                )
+
+    def test_runtime_separation_checks_precede_selection_gate_severity(self) -> None:
+        """runtime-separation checks must appear before selection-gate-severity in the TSV."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            slugs_in_order = [r["slug"] for r in rows]
+            self.assertIn("selection-gate-severity", slugs_in_order, "selection-gate-severity must be in check-results.tsv")
+            gate_idx = slugs_in_order.index("selection-gate-severity")
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                rt_idx = slugs_in_order.index(slug)
+                self.assertLess(
+                    rt_idx,
+                    gate_idx,
+                    f"{slug!r} must appear before selection-gate-severity in check-results.tsv",
+                )
+
+    def test_runtime_separation_slugs_appear_in_declared_order(self) -> None:
+        """The eight slugs must appear in the exact order declared in the script."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            slugs_in_order = [r["slug"] for r in rows if r["slug"] in RUNTIME_SEPARATION_SLUGS]
+            self.assertEqual(
+                slugs_in_order,
+                RUNTIME_SEPARATION_SLUGS,
+                "runtime-separation slugs must appear in the exact order declared in validate_all.sh",
+            )
+
+    def test_each_runtime_separation_check_has_a_log_file_path(self) -> None:
+        """Each runtime-separation entry in the TSV must have a non-empty log_file path."""
+        with TemporaryDirectory() as tmpdir:
+            _, rows = self._run_persistent(tmpdir)
+            slug_to_row = {r["slug"]: r for r in rows}
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                self.assertIn(slug, slug_to_row)
+                log_file = slug_to_row[slug]["log_file"]
+                self.assertTrue(
+                    log_file.endswith(f"{slug}.log"),
+                    f"Expected log_file for {slug!r} to end with {slug}.log, got {log_file!r}",
                 )
 
 
-# ---------------------------------------------------------------------------
-# TestRuntimeSeparationCheckOrder
-# ---------------------------------------------------------------------------
+class RuntimeSeparationFailurePropagationTests(unittest.TestCase):
+    """Verify that a failing runtime-separation check causes validate_all.sh to exit 1."""
+
+    def test_manifest_failure_causes_exit_1(self) -> None:
+        """A failure in runtime-separation-manifest must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/validate_runtime_separation_manifest.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(
+                proc.returncode,
+                1,
+                "validate_all.sh must exit 1 when runtime-separation-manifest fails",
+            )
+
+    def test_consumers_failure_causes_exit_1(self) -> None:
+        """A failure in runtime-separation-consumers must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/scan_runtime_separation_consumers.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_reader_compat_failure_causes_exit_1(self) -> None:
+        """A failure in runtime-separation-reader-compat must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/verify_runtime_separation_reader_compat.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_baseline_compare_failure_causes_exit_1(self) -> None:
+        """A failure in runtime-separation-baseline-compare must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/compare_runtime_separation_baseline.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_manifest_failure_records_fail_in_tsv(self) -> None:
+        """A failing runtime-separation check must be recorded as outcome=fail in the TSV."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/validate_runtime_separation_manifest.py", 1)
+            repo.run("--ephemeral")
+            rows = repo.check_results()
+            slug_to_row = {r["slug"]: r for r in rows}
+            self.assertEqual(
+                slug_to_row.get("runtime-separation-manifest", {}).get("outcome"),
+                "fail",
+                "Failed check must record outcome=fail in check-results.tsv",
+            )
+
+    def test_only_failed_check_records_fail_others_pass(self) -> None:
+        """When only one runtime-separation check fails, the others must still record pass."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/validate_runtime_separation_manifest.py", 1)
+            repo.run("--ephemeral")
+            rows = repo.check_results()
+            slug_to_row = {r["slug"]: r for r in rows}
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                if slug == "runtime-separation-manifest":
+                    continue
+                self.assertEqual(
+                    slug_to_row.get(slug, {}).get("outcome"),
+                    "pass",
+                    f"{slug!r} should still pass when only runtime-separation-manifest fails",
+                )
+
+    def test_multiple_runtime_separation_failures_are_all_recorded(self) -> None:
+        """Multiple failing runtime-separation checks are all recorded as fail in the TSV."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/validate_runtime_separation_manifest.py", 1)
+            repo.set_script_exit_code("scripts/compare_runtime_separation_baseline.py", 1)
+            repo.run("--ephemeral")
+            rows = repo.check_results()
+            slug_to_row = {r["slug"]: r for r in rows}
+            self.assertEqual(slug_to_row["runtime-separation-manifest"]["outcome"], "fail")
+            self.assertEqual(slug_to_row["runtime-separation-baseline-compare"]["outcome"], "fail")
 
 
-class TestRuntimeSeparationCheckOrder(unittest.TestCase):
-    """Verify the relative ordering of the 8 new checks."""
-
-    def _slugs_in_order(self, output_mode: str) -> list[str]:
-        proc, tmp, check_results_path = _run_validate_all_with_stubs(output_mode)
-        try:
-            rows = _parse_tsv(check_results_path)
-            return [r["slug"] for r in rows]
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_manifest_before_consumers(self) -> None:
-        """runtime-separation-manifest must run before runtime-separation-consumers."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertIn("runtime-separation-manifest", slugs)
-        self.assertIn("runtime-separation-consumers", slugs)
-        self.assertLess(
-            slugs.index("runtime-separation-manifest"),
-            slugs.index("runtime-separation-consumers"),
-            "manifest must precede consumers",
-        )
-
-    def test_consumers_before_reader_compat(self) -> None:
-        """runtime-separation-consumers must run before runtime-separation-reader-compat."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertLess(
-            slugs.index("runtime-separation-consumers"),
-            slugs.index("runtime-separation-reader-compat"),
-            "consumers must precede reader-compat",
-        )
-
-    def test_reader_compat_before_current(self) -> None:
-        """runtime-separation-reader-compat must run before runtime-separation-current."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertLess(
-            slugs.index("runtime-separation-reader-compat"),
-            slugs.index("runtime-separation-current"),
-            "reader-compat must precede current",
-        )
-
-    def test_current_before_wrapper_fixtures(self) -> None:
-        """runtime-separation-current must run before runtime-separation-wrapper-fixtures."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertLess(
-            slugs.index("runtime-separation-current"),
-            slugs.index("runtime-separation-wrapper-fixtures"),
-            "current must precede wrapper-fixtures",
-        )
-
-    def test_wrapper_fixtures_before_baseline_compare(self) -> None:
-        """runtime-separation-wrapper-fixtures must run before runtime-separation-baseline-compare."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertLess(
-            slugs.index("runtime-separation-wrapper-fixtures"),
-            slugs.index("runtime-separation-baseline-compare"),
-            "wrapper-fixtures must precede baseline-compare",
-        )
-
-    def test_baseline_compare_before_writer_mutations(self) -> None:
-        """runtime-separation-baseline-compare must run before runtime-separation-writer-mutations."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertLess(
-            slugs.index("runtime-separation-baseline-compare"),
-            slugs.index("runtime-separation-writer-mutations"),
-            "baseline-compare must precede writer-mutations",
-        )
-
-    def test_writer_mutations_before_profile_home(self) -> None:
-        """runtime-separation-writer-mutations must run before runtime-separation-profile-home."""
-        slugs = self._slugs_in_order("ephemeral")
-        self.assertLess(
-            slugs.index("runtime-separation-writer-mutations"),
-            slugs.index("runtime-separation-profile-home"),
-            "writer-mutations must precede profile-home",
-        )
-
-    def test_full_order_matches_declaration(self) -> None:
-        """The 8 slugs must appear in exactly the declared order (no reordering)."""
-        slugs = self._slugs_in_order("ephemeral")
-        runtime_slugs = [s for s in slugs if s.startswith("runtime-separation-")]
-        self.assertEqual(
-            runtime_slugs,
-            RUNTIME_SEPARATION_SLUGS,
-            "Runtime-separation checks appeared in unexpected order",
-        )
-
-
-# ---------------------------------------------------------------------------
-# TestRuntimeSeparationCommandArgs
-# ---------------------------------------------------------------------------
-
-
-class TestRuntimeSeparationCommandArgs(unittest.TestCase):
-    """Verify specific arguments passed to each runtime-separation check command."""
-
-    def _harness_output(self, output_mode: str) -> tuple[str, list[dict]]:
-        """Return (stdout, tsv_rows) for the harness run."""
-        proc, tmp, check_results_path = _run_validate_all_with_stubs(output_mode)
-        try:
-            rows = _parse_tsv(check_results_path)
-            return proc.stdout, rows
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def _read_python_stub_log(self, output_mode: str, log_name: str = "python3_calls.log") -> str:
-        """Run harness and return the python stub call log content."""
-        proc, tmp, _ = _run_validate_all_with_stubs(output_mode)
-        try:
-            log_path = tmp / log_name
-            return log_path.read_text(encoding="utf-8") if log_path.exists() else ""
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def _read_check_log(self, output_mode: str, slug: str) -> str:
-        """Return the content of the per-check log file for a given slug."""
-        proc, tmp, check_results_path = _run_validate_all_with_stubs(output_mode)
-        try:
-            run_dir = tmp / "run_dir"
-            log_file = run_dir / f"{slug}.log"
-            return log_file.read_text(encoding="utf-8") if log_file.exists() else ""
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
+class RuntimeSeparationSpecificArgTests(unittest.TestCase):
+    """Verify specific arguments forwarded to individual runtime-separation scripts."""
 
     def test_manifest_check_uses_strict_flag(self) -> None:
         """validate_runtime_separation_manifest.py must be called with --strict."""
-        log = self._read_python_stub_log("ephemeral")
-        self.assertIn("validate_runtime_separation_manifest.py", log)
-        # Find the line for the manifest script
-        manifest_lines = [l for l in log.splitlines() if "validate_runtime_separation_manifest.py" in l]
-        self.assertTrue(manifest_lines, "No call to validate_runtime_separation_manifest.py found")
-        self.assertIn("--strict", manifest_lines[0])
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/validate_runtime_separation_manifest.py")
+            self.assertIsNotNone(args, "validate_runtime_separation_manifest.py was not called")
+            self.assertIn("--strict", args)
 
-    def test_reader_compat_uses_schema_current_flag(self) -> None:
-        """verify_runtime_separation_reader_compat.py must be called with --schema-current."""
-        log = self._read_python_stub_log("ephemeral")
-        compat_lines = [l for l in log.splitlines() if "verify_runtime_separation_reader_compat.py" in l]
-        self.assertTrue(compat_lines, "No call to verify_runtime_separation_reader_compat.py found")
-        self.assertIn("--schema-current", compat_lines[0])
-
-    def test_reader_compat_uses_schema_prev_flag(self) -> None:
-        """verify_runtime_separation_reader_compat.py must be called with --schema-prev."""
-        log = self._read_python_stub_log("ephemeral")
-        compat_lines = [l for l in log.splitlines() if "verify_runtime_separation_reader_compat.py" in l]
-        self.assertTrue(compat_lines, "No call to verify_runtime_separation_reader_compat.py found")
-        self.assertIn("--schema-prev", compat_lines[0])
-
-    def test_reader_compat_schema_current_path(self) -> None:
-        """verify_runtime_separation_reader_compat.py --schema-current must point to slices.yaml."""
-        log = self._read_python_stub_log("ephemeral")
-        compat_lines = [l for l in log.splitlines() if "verify_runtime_separation_reader_compat.py" in l]
-        self.assertTrue(compat_lines)
-        self.assertIn("GOVERNANCE/runtime-separation/slices.yaml", compat_lines[0])
-
-    def test_reader_compat_schema_prev_path(self) -> None:
-        """verify_runtime_separation_reader_compat.py --schema-prev must point to schema-prev.yaml."""
-        log = self._read_python_stub_log("ephemeral")
-        compat_lines = [l for l in log.splitlines() if "verify_runtime_separation_reader_compat.py" in l]
-        self.assertTrue(compat_lines)
-        self.assertIn("GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml", compat_lines[0])
-
-    def test_build_current_uses_output_flag_ephemeral(self) -> None:
-        """build_runtime_separation_current.py must be called with --output pointing to run_dir in ephemeral mode."""
-        log = self._read_python_stub_log("ephemeral")
-        build_lines = [l for l in log.splitlines() if "build_runtime_separation_current.py" in l]
-        self.assertTrue(build_lines, "No call to build_runtime_separation_current.py found")
-        self.assertIn("--output", build_lines[0])
-        self.assertIn("runtime-separation-current.json", build_lines[0])
-        # Must NOT use GOVERNANCE path in ephemeral mode
-        self.assertNotIn("GOVERNANCE", build_lines[0])
-
-    def test_build_current_uses_governance_output_persistent(self) -> None:
-        """build_runtime_separation_current.py must use GOVERNANCE output path in persistent mode."""
-        log = self._read_python_stub_log("persistent")
-        build_lines = [l for l in log.splitlines() if "build_runtime_separation_current.py" in l]
-        self.assertTrue(build_lines, "No call to build_runtime_separation_current.py found")
-        self.assertIn("--output", build_lines[0])
-        self.assertIn("GOVERNANCE/runtime-separation/current.json", build_lines[0])
-
-    def test_baseline_compare_uses_baseline_flag(self) -> None:
-        """compare_runtime_separation_baseline.py must be called with --baseline."""
-        log = self._read_python_stub_log("ephemeral")
-        compare_lines = [l for l in log.splitlines() if "compare_runtime_separation_baseline.py" in l]
-        self.assertTrue(compare_lines, "No call to compare_runtime_separation_baseline.py found")
-        self.assertIn("--baseline", compare_lines[0])
-
-    def test_baseline_compare_uses_correct_baseline_path(self) -> None:
-        """compare_runtime_separation_baseline.py --baseline must point to baseline.json."""
-        log = self._read_python_stub_log("ephemeral")
-        compare_lines = [l for l in log.splitlines() if "compare_runtime_separation_baseline.py" in l]
-        self.assertTrue(compare_lines)
-        self.assertIn("GOVERNANCE/runtime-separation/baseline.json", compare_lines[0])
-
-    def test_baseline_compare_current_matches_runtime_separation_current_ephemeral(self) -> None:
-        """compare_runtime_separation_baseline.py --current must match runtime_separation_current in ephemeral mode."""
-        log = self._read_python_stub_log("ephemeral")
-        compare_lines = [l for l in log.splitlines() if "compare_runtime_separation_baseline.py" in l]
-        self.assertTrue(compare_lines)
-        self.assertIn("--current", compare_lines[0])
-        # In ephemeral mode, current path ends with runtime-separation-current.json (in run_dir)
-        self.assertIn("runtime-separation-current.json", compare_lines[0])
-        self.assertNotIn("GOVERNANCE/runtime-separation/current.json", compare_lines[0])
-
-    def test_baseline_compare_current_matches_runtime_separation_current_persistent(self) -> None:
-        """compare_runtime_separation_baseline.py --current must be GOVERNANCE path in persistent mode."""
-        log = self._read_python_stub_log("persistent")
-        compare_lines = [l for l in log.splitlines() if "compare_runtime_separation_baseline.py" in l]
-        self.assertTrue(compare_lines)
-        self.assertIn("--current", compare_lines[0])
-        self.assertIn("GOVERNANCE/runtime-separation/current.json", compare_lines[0])
-
-    def test_wrapper_fixtures_uses_runtime_separation_flag(self) -> None:
-        """verify_wrapper_contract_fixtures.sh must be called with --runtime-separation."""
-        proc, tmp, _ = _run_validate_all_with_stubs("ephemeral")
-        try:
-            bash_log = tmp / "bash_calls.log"
-            log_content = bash_log.read_text(encoding="utf-8") if bash_log.exists() else ""
-            fixture_lines = [l for l in log_content.splitlines() if "verify_wrapper_contract_fixtures.sh" in l]
-            self.assertTrue(fixture_lines, "No call to verify_wrapper_contract_fixtures.sh logged")
-            self.assertIn("--runtime-separation", fixture_lines[0])
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_writer_mutations_uses_strict_flag(self) -> None:
-        """verify_runtime_separation_writer_mutations.sh must be called with --strict."""
-        proc, tmp, _ = _run_validate_all_with_stubs("ephemeral")
-        try:
-            bash_log = tmp / "bash_calls.log"
-            log_content = bash_log.read_text(encoding="utf-8") if bash_log.exists() else ""
-            mutation_lines = [l for l in log_content.splitlines() if "verify_runtime_separation_writer_mutations.sh" in l]
-            self.assertTrue(mutation_lines, "No call to verify_runtime_separation_writer_mutations.sh logged")
-            self.assertIn("--strict", mutation_lines[0])
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_profile_home_uses_repo_current_flag(self) -> None:
-        """validate_runtime_separation_profile_home.sh must be called with --repo-current."""
-        proc, tmp, _ = _run_validate_all_with_stubs("ephemeral")
-        try:
-            bash_log = tmp / "bash_calls.log"
-            log_content = bash_log.read_text(encoding="utf-8") if bash_log.exists() else ""
-            profile_lines = [l for l in log_content.splitlines() if "validate_runtime_separation_profile_home.sh" in l]
-            self.assertTrue(profile_lines, "No call to validate_runtime_separation_profile_home.sh logged")
-            self.assertIn("--repo-current", profile_lines[0])
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_profile_home_uses_correct_repo_current_path_ephemeral(self) -> None:
-        """validate_runtime_separation_profile_home.sh --repo-current must use run_dir path in ephemeral mode."""
-        proc, tmp, _ = _run_validate_all_with_stubs("ephemeral")
-        try:
-            bash_log = tmp / "bash_calls.log"
-            log_content = bash_log.read_text(encoding="utf-8") if bash_log.exists() else ""
-            profile_lines = [l for l in log_content.splitlines() if "validate_runtime_separation_profile_home.sh" in l]
-            self.assertTrue(profile_lines)
-            # Must contain runtime-separation-current.json but NOT GOVERNANCE path
-            self.assertIn("runtime-separation-current.json", profile_lines[0])
-            self.assertNotIn("GOVERNANCE/runtime-separation/current.json", profile_lines[0])
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_profile_home_uses_governance_repo_current_persistent(self) -> None:
-        """validate_runtime_separation_profile_home.sh --repo-current must use GOVERNANCE path in persistent mode."""
-        proc, tmp, _ = _run_validate_all_with_stubs("persistent")
-        try:
-            bash_log = tmp / "bash_calls.log"
-            log_content = bash_log.read_text(encoding="utf-8") if bash_log.exists() else ""
-            profile_lines = [l for l in log_content.splitlines() if "validate_runtime_separation_profile_home.sh" in l]
-            self.assertTrue(profile_lines)
-            self.assertIn("GOVERNANCE/runtime-separation/current.json", profile_lines[0])
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_profile_home_uses_output_flag(self) -> None:
-        """validate_runtime_separation_profile_home.sh must be called with --output pointing to run_dir."""
-        proc, tmp, _ = _run_validate_all_with_stubs("ephemeral")
-        try:
-            bash_log = tmp / "bash_calls.log"
-            log_content = bash_log.read_text(encoding="utf-8") if bash_log.exists() else ""
-            profile_lines = [l for l in log_content.splitlines() if "validate_runtime_separation_profile_home.sh" in l]
-            self.assertTrue(profile_lines)
-            self.assertIn("--output", profile_lines[0])
-            self.assertIn("runtime-separation-profile-home.json", profile_lines[0])
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_consumers_check_uses_scan_script(self) -> None:
-        """runtime-separation-consumers check must invoke scan_runtime_separation_consumers.py."""
-        log = self._read_python_stub_log("ephemeral")
-        self.assertIn("scan_runtime_separation_consumers.py", log)
-
-
-# ---------------------------------------------------------------------------
-# TestRuntimeSeparationFailurePropagation
-# ---------------------------------------------------------------------------
-
-
-class TestRuntimeSeparationFailurePropagation(unittest.TestCase):
-    """Verify that a failing runtime-separation check is recorded as 'fail' in check-results.tsv."""
-
-    def test_failing_check_recorded_as_fail(self) -> None:
-        """When a stub exits non-zero, the corresponding slug must appear with outcome='fail'."""
-        proc, tmp, check_results_path = _run_validate_all_with_stubs("ephemeral", stub_exit_code=1)
-        try:
-            rows = _parse_tsv(check_results_path)
-            outcomes = {r["slug"]: r["outcome"] for r in rows}
-            # All runtime-separation slugs should be in results
-            for slug in RUNTIME_SEPARATION_SLUGS:
-                self.assertIn(slug, outcomes, f"Slug {slug!r} missing from results on failure")
-                self.assertEqual(
-                    outcomes[slug],
-                    "fail",
-                    f"Slug {slug!r} should be 'fail' when stub exits 1, got {outcomes[slug]!r}",
-                )
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_passing_check_recorded_as_pass(self) -> None:
-        """When stubs exit 0, every runtime-separation slug must have outcome='pass'."""
-        proc, tmp, check_results_path = _run_validate_all_with_stubs("ephemeral", stub_exit_code=0)
-        try:
-            rows = _parse_tsv(check_results_path)
-            outcomes = {r["slug"]: r["outcome"] for r in rows}
-            for slug in RUNTIME_SEPARATION_SLUGS:
-                self.assertIn(slug, outcomes)
-                self.assertEqual(
-                    outcomes[slug],
-                    "pass",
-                    f"Slug {slug!r} should be 'pass' when stub exits 0, got {outcomes[slug]!r}",
-                )
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-    def test_harness_continues_after_failure(self) -> None:
-        """run_check must always return 0; all checks run even when one fails."""
-        proc, tmp, check_results_path = _run_validate_all_with_stubs("ephemeral", stub_exit_code=1)
-        try:
-            rows = _parse_tsv(check_results_path)
-            slugs_recorded = [r["slug"] for r in rows]
-            for slug in RUNTIME_SEPARATION_SLUGS:
-                self.assertIn(slug, slugs_recorded, f"Slug {slug!r} was not reached after earlier failure")
-        finally:
-            import shutil
-            shutil.rmtree(str(tmp), ignore_errors=True)
-
-
-# ---------------------------------------------------------------------------
-# TestRuntimeSeparationBoundaryPositions
-# ---------------------------------------------------------------------------
-
-
-class TestRuntimeSeparationBoundaryPositions(unittest.TestCase):
-    """Verify new checks slot between ask-cli-modularity and future checks as intended.
-
-    The harness in these tests injects boundary sentinel checks before and after
-    the runtime-separation block to assert relative positioning.
-    """
-
-    def _run_with_sentinels(self, output_mode: str) -> list[str]:
-        """Run harness that records before/after sentinel slugs and returns slug order."""
-        import shutil
-
-        tmp = Path(tempfile.mkdtemp())
-        stubs_dir = tmp / "stubs"
-        stubs_dir.mkdir()
-
-        # Python3 stub
-        py_stub = stubs_dir / "python3"
-        py_stub.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
-        py_stub.chmod(0o755)
-
-        # Bash script stubs
-        for script_name in [
-            "verify_wrapper_contract_fixtures.sh",
-            "verify_runtime_separation_writer_mutations.sh",
-            "validate_runtime_separation_profile_home.sh",
-        ]:
-            stub = stubs_dir / script_name
-            stub.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
-            stub.chmod(0o755)
-
-        harness = textwrap.dedent(f"""\
-            #!/usr/bin/env bash
-            set -u
-            output_mode="{output_mode}"
-            run_dir="{tmp}/run_dir"
-            mkdir -p "$run_dir"
-            check_results_file="$run_dir/check-results.tsv"
-            : > "$check_results_file"
-            python_cmd=("{py_stub}")
-
-            run_check() {{
-                local mode="$1"
-                local slug="$2"
-                local label="$3"
-                shift 3
-                local log_file="$run_dir/${{slug}}.log"
-                local outcome="pass"
-                "$@" >"$log_file" 2>&1 || outcome="fail"
-                printf '%s\\t%s\\t%s\\t%s\\n' "$slug" "$mode" "$outcome" "$log_file" >> "$check_results_file"
-            }}
-
-            # Sentinel: represents ask-cli-modularity (last check before new block)
-            run_check required ask-cli-modularity "sentinel-before" true
-
-            # --- New block under test ---
-            runtime_separation_current="$run_dir/runtime-separation-current.json"
-            if [[ "$output_mode" == "persistent" ]]; then
-              runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
-            fi
-
-            runtime_consumer_scan_cmd=(
-              "${{python_cmd[@]}}"
-              scripts/scan_runtime_separation_consumers.py
-              --emit-readers
-              --emit-path-consumers
-              --strict
-            )
-            if [[ "$output_mode" == "persistent" ]]; then
-              runtime_consumer_scan_cmd+=(--emit-digests)
-            fi
-
-            run_check required runtime-separation-manifest "x" "${{python_cmd[@]}}" scripts/validate_runtime_separation_manifest.py --strict
-            run_check required runtime-separation-consumers "x" "${{runtime_consumer_scan_cmd[@]}}"
-            run_check required runtime-separation-reader-compat "x" "${{python_cmd[@]}}" scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
-            run_check required runtime-separation-current "x" "${{python_cmd[@]}}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current"
-            run_check required runtime-separation-wrapper-fixtures "x" bash {stubs_dir}/verify_wrapper_contract_fixtures.sh --runtime-separation
-            run_check required runtime-separation-baseline-compare "x" "${{python_cmd[@]}}" scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
-            run_check required runtime-separation-writer-mutations "x" bash {stubs_dir}/verify_runtime_separation_writer_mutations.sh --strict
-            run_check required runtime-separation-profile-home "x" bash {stubs_dir}/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
-
-            # Sentinel: represents selection-gate-severity (first check after new block)
-            run_check required selection-gate-severity "sentinel-after" true
-        """)
-
-        harness_path = tmp / "harness.sh"
-        harness_path.write_text(harness, encoding="utf-8")
-        harness_path.chmod(0o755)
-
-        proc = subprocess.run(
-            ["bash", str(harness_path)],
-            capture_output=True,
-            text=True,
-            cwd=str(REPO_ROOT),
-        )
-
-        check_results_path = tmp / "run_dir" / "check-results.tsv"
-        rows = _parse_tsv(check_results_path)
-        shutil.rmtree(str(tmp), ignore_errors=True)
-        return [r["slug"] for r in rows]
-
-    def test_all_runtime_checks_after_ask_cli_modularity(self) -> None:
-        """All runtime-separation checks must appear after ask-cli-modularity."""
-        slugs = self._run_with_sentinels("ephemeral")
-        sentinel_idx = slugs.index("ask-cli-modularity")
-        for slug in RUNTIME_SEPARATION_SLUGS:
-            self.assertIn(slug, slugs)
-            self.assertGreater(
-                slugs.index(slug),
-                sentinel_idx,
-                f"{slug!r} must come after ask-cli-modularity",
+    def test_reader_compat_receives_schema_current_arg(self) -> None:
+        """verify_runtime_separation_reader_compat.py must receive --schema-current."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/verify_runtime_separation_reader_compat.py")
+            self.assertIsNotNone(args, "verify_runtime_separation_reader_compat.py was not called")
+            self.assertIn("--schema-current", args)
+            sc_idx = args.index("--schema-current") + 1
+            self.assertIn(
+                "slices.yaml",
+                args[sc_idx],
+                "--schema-current value must reference slices.yaml",
             )
 
-    def test_all_runtime_checks_before_selection_gate_severity(self) -> None:
-        """All runtime-separation checks must appear before selection-gate-severity."""
-        slugs = self._run_with_sentinels("ephemeral")
-        gate_idx = slugs.index("selection-gate-severity")
-        for slug in RUNTIME_SEPARATION_SLUGS:
-            self.assertIn(slug, slugs)
-            self.assertLess(
-                slugs.index(slug),
-                gate_idx,
-                f"{slug!r} must come before selection-gate-severity",
+    def test_reader_compat_receives_schema_prev_arg(self) -> None:
+        """verify_runtime_separation_reader_compat.py must receive --schema-prev."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/verify_runtime_separation_reader_compat.py")
+            self.assertIsNotNone(args)
+            self.assertIn("--schema-prev", args)
+            sp_idx = args.index("--schema-prev") + 1
+            self.assertIn(
+                "schema-prev.yaml",
+                args[sp_idx],
+                "--schema-prev value must reference schema-prev.yaml",
             )
+
+    def test_reader_compat_schema_current_references_governance_path(self) -> None:
+        """--schema-current must reference the GOVERNANCE/runtime-separation/slices.yaml path."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/verify_runtime_separation_reader_compat.py")
+            self.assertIsNotNone(args)
+            sc_idx = args.index("--schema-current") + 1
+            self.assertIn("GOVERNANCE/runtime-separation/slices.yaml", args[sc_idx])
+
+    def test_reader_compat_schema_prev_references_fixtures_path(self) -> None:
+        """--schema-prev must reference the GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml path."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/verify_runtime_separation_reader_compat.py")
+            self.assertIsNotNone(args)
+            sp_idx = args.index("--schema-prev") + 1
+            self.assertIn(
+                "GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml",
+                args[sp_idx],
+            )
+
+    def test_baseline_compare_receives_baseline_arg(self) -> None:
+        """compare_runtime_separation_baseline.py must receive --baseline."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/compare_runtime_separation_baseline.py")
+            self.assertIsNotNone(args, "compare_runtime_separation_baseline.py was not called")
+            self.assertIn("--baseline", args)
+            bl_idx = args.index("--baseline") + 1
+            self.assertIn(
+                "baseline.json",
+                args[bl_idx],
+                "--baseline value must reference baseline.json",
+            )
+
+    def test_baseline_compare_baseline_references_governance_path(self) -> None:
+        """--baseline must reference the GOVERNANCE/runtime-separation/baseline.json path."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/compare_runtime_separation_baseline.py")
+            self.assertIsNotNone(args)
+            bl_idx = args.index("--baseline") + 1
+            self.assertIn("GOVERNANCE/runtime-separation/baseline.json", args[bl_idx])
+
+    def test_baseline_compare_receives_current_arg(self) -> None:
+        """compare_runtime_separation_baseline.py must receive --current."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/compare_runtime_separation_baseline.py")
+            self.assertIsNotNone(args)
+            self.assertIn("--current", args)
+            curr_idx = args.index("--current") + 1
+            current_val = args[curr_idx]
+            self.assertTrue(
+                current_val.endswith("runtime-separation-current.json"),
+                f"--current must point to runtime-separation-current.json, got {current_val!r}",
+            )
+
+    def test_build_current_receives_output_arg(self) -> None:
+        """build_runtime_separation_current.py must receive --output."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_args_for("scripts/build_runtime_separation_current.py")
+            self.assertIsNotNone(args, "build_runtime_separation_current.py was not called")
+            self.assertIn("--output", args)
+
+    def test_baseline_compare_current_path_matches_build_output_path(self) -> None:
+        """The --current arg of baseline_compare must equal the --output of build_current."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            build_args = repo.recorded_args_for("scripts/build_runtime_separation_current.py")
+            compare_args = repo.recorded_args_for("scripts/compare_runtime_separation_baseline.py")
+            self.assertIsNotNone(build_args)
+            self.assertIsNotNone(compare_args)
+            build_output = build_args[build_args.index("--output") + 1]
+            compare_current = compare_args[compare_args.index("--current") + 1]
+            self.assertEqual(
+                build_output,
+                compare_current,
+                "The --output of build_runtime_separation_current must equal the --current of compare_runtime_separation_baseline",
+            )
+
+    def test_profile_home_receives_repo_current_and_output_args(self) -> None:
+        """validate_runtime_separation_profile_home.sh must receive --repo-current and --output."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_bash_args_for("scripts/validate_runtime_separation_profile_home.sh")
+            self.assertIsNotNone(
+                args,
+                "validate_runtime_separation_profile_home.sh was not called",
+            )
+            self.assertIn("--repo-current", args)
+            self.assertIn("--output", args)
+
+    def test_writer_mutations_receives_strict_flag(self) -> None:
+        """verify_runtime_separation_writer_mutations.sh must receive --strict."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_bash_args_for("scripts/verify_runtime_separation_writer_mutations.sh")
+            self.assertIsNotNone(
+                args,
+                "verify_runtime_separation_writer_mutations.sh was not called",
+            )
+            self.assertIn("--strict", args)
+
+    def test_wrapper_fixtures_receives_runtime_separation_flag(self) -> None:
+        """verify_wrapper_contract_fixtures.sh must receive --runtime-separation."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_bash_args_for("scripts/verify_wrapper_contract_fixtures.sh")
+            self.assertIsNotNone(
+                args,
+                "verify_wrapper_contract_fixtures.sh was not called",
+            )
+            self.assertIn("--runtime-separation", args)
+
+
+class RuntimeSeparationProfileHomePathTests(unittest.TestCase):
+    """Verify the output path for the profile-home artifact."""
+
+    def test_profile_home_output_in_run_dir_ephemeral(self) -> None:
+        """In ephemeral mode, profile-home --output must point into the run_dir temp directory."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            args = repo.recorded_bash_args_for("scripts/validate_runtime_separation_profile_home.sh")
+            self.assertIsNotNone(args)
+            output_idx = args.index("--output") + 1
+            output_val = args[output_idx]
+            self.assertTrue(
+                output_val.endswith("runtime-separation-profile-home.json"),
+                f"--output must end with runtime-separation-profile-home.json, got {output_val!r}",
+            )
+            # The path must NOT be a static GOVERNANCE path
+            self.assertNotIn("GOVERNANCE", output_val)
+
+    def test_profile_home_repo_current_matches_runtime_separation_current(self) -> None:
+        """profile-home --repo-current must be the same path as runtime_separation_current."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.run("--ephemeral")
+            profile_home_args = repo.recorded_bash_args_for(
+                "scripts/validate_runtime_separation_profile_home.sh"
+            )
+            build_current_args = repo.recorded_args_for(
+                "scripts/build_runtime_separation_current.py"
+            )
+            self.assertIsNotNone(profile_home_args)
+            self.assertIsNotNone(build_current_args)
+            repo_current = profile_home_args[profile_home_args.index("--repo-current") + 1]
+            build_output = build_current_args[build_current_args.index("--output") + 1]
+            self.assertEqual(
+                repo_current,
+                build_output,
+                "--repo-current of profile_home must match --output of build_runtime_separation_current",
+            )
+
+
+class RuntimeSeparationOverallExitCodeTests(unittest.TestCase):
+    """Verify validate_all.sh overall exit code when runtime-separation checks pass/fail."""
+
+    def test_exit_0_when_all_runtime_separation_checks_pass(self) -> None:
+        """validate_all.sh must exit 0 when all runtime-separation checks succeed."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            proc = repo.run("--ephemeral")
+            self.assertEqual(
+                proc.returncode,
+                0,
+                f"Expected exit 0 with all stubs passing.\nstdout: {proc.stdout}\nstderr: {proc.stderr}",
+            )
+
+    def test_exit_1_when_writer_mutations_fails(self) -> None:
+        """A failure in runtime-separation-writer-mutations must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/verify_runtime_separation_writer_mutations.sh", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_exit_1_when_wrapper_fixtures_fails(self) -> None:
+        """A failure in runtime-separation-wrapper-fixtures must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/verify_wrapper_contract_fixtures.sh", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_exit_1_when_profile_home_fails(self) -> None:
+        """A failure in runtime-separation-profile-home must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/validate_runtime_separation_profile_home.sh", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_exit_1_when_reader_compat_fails(self) -> None:
+        """A failure in runtime-separation-reader-compat must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/verify_runtime_separation_reader_compat.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_exit_1_when_build_current_fails(self) -> None:
+        """A failure in runtime-separation-current (build step) must cause exit code 1."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/build_runtime_separation_current.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertEqual(proc.returncode, 1)
+
+    def test_exit_1_when_manifest_fails_regression(self) -> None:
+        """Regression: manifest check failure must bubble up to exit 1 (required mode check)."""
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            repo.set_script_exit_code("scripts/validate_runtime_separation_manifest.py", 1)
+            proc = repo.run("--ephemeral")
+            self.assertNotEqual(
+                proc.returncode,
+                0,
+                "Manifest failure must not be silently swallowed",
+            )
+            self.assertEqual(proc.returncode, 1)
 
 
 if __name__ == "__main__":
