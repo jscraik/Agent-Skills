@@ -1,6 +1,6 @@
 ---
 name: codex-agent-builder
-description: Create, install, and validate Codex custom subagents as standalone agent TOMLs. With `--scope global`, installs to `~/dev/configs/codex/agents/<name>/<name>.toml` and updates `~/dev/configs/codex/config.toml`. With `--scope project`, installs to `${project_root}/.codex/agents/<name>/<name>.toml` and updates or creates `${project_root}/.codex/config.toml`. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+description: Create, install, and validate Codex custom subagents as standalone agent TOMLs. With `--scope global`, installs to `~/dev/configs/codex/agents/{name}/{name}.toml` and updates `~/dev/configs/codex/config.toml`. With `--scope project`, installs to `${project_root}/.codex/agents/{name}/{name}.toml` and updates or creates `${project_root}/.codex/config.toml`. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
