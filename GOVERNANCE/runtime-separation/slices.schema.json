@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/runtime-separation-slices.schema.json",
+  "title": "Runtime Separation Slice Manifest",
+  "type": "object",
+  "required": ["schema_version", "reader_min_version", "policy_export_version", "slices"],
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "reader_min_version": {"type": "integer", "minimum": 1},
+    "policy_export_version": {"type": "string", "minLength": 1},
+    "slices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "phase",
+          "owner_lane",
+          "activation_state",
+          "discovery_compatibility",
+          "path_compatibility",
+          "discovery_precedence",
+          "forwarder_type",
+          "overlap_class",
+          "authoritative_write_root",
+          "inventory_selector",
+          "path_consumer_inventory_ref",
+          "path_consumer_inventory_digest",
+          "reader_inventory_ref",
+          "reader_inventory_digest",
+          "policy_export_version",
+          "canonical_paths",
+          "legacy_paths",
+          "planned_deltas",
+          "representative_commands",
+          "plugin_lifecycle_checks",
+          "entry_checks",
+          "exit_checks",
+          "rollback_commands"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "phase": {"type": "string", "minLength": 1},
+          "owner_lane": {"enum": ["skills", "plugins"]},
+          "activation_state": {
+            "enum": ["declared", "pre_activation", "migrated", "rollback_pending", "rolled_back", "cleanup_complete"]
+          },
+          "discovery_compatibility": {"enum": ["catalog_only", "dual_read"]},
+          "path_compatibility": {
+            "oneOf": [
+              {"enum": ["resolver_only", "filesystem_forwarder", "combined"]},
+              {
+                "type": "array",
+                "items": {"enum": ["resolver_only", "filesystem_forwarder", "combined"]},
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            ]
+          },
+          "discovery_precedence": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "forwarder_type": {"enum": ["resolver_alias", "directory_projection", "package_root_projection", "wrapper_index"]},
+          "overlap_class": {"type": "string"},
+          "authoritative_write_root": {"type": "string"},
+          "inventory_selector": {"type": "object"},
+          "path_consumer_inventory_ref": {"type": "string"},
+          "path_consumer_inventory_digest": {"type": "string"},
+          "reader_inventory_ref": {"type": "string"},
+          "reader_inventory_digest": {"type": "string"},
+          "policy_export_version": {"type": "string"},
+          "canonical_paths": {"type": "array", "items": {"type": "string"}},
+          "legacy_paths": {"type": "array", "items": {"type": "string"}},
+          "planned_deltas": {"type": "array"},
+          "representative_commands": {"type": "array"},
+          "plugin_lifecycle_checks": {"type": "array"},
+          "entry_checks": {"type": "array", "items": {"type": "string"}},
+          "exit_checks": {"type": "array", "items": {"type": "string"}},
+          "rollback_commands": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/runtime-separation-baseline.schema.json",
+  "title": "Runtime Separation Baseline",
+  "type": "object",
+  "required": ["schema_version", "status", "summary"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "status": {"type": "string"},
+    "issues": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "accepted_preexisting_blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "owner", "drift_class", "rationale"],
+        "properties": {
+          "id": {"type": "string"},
+          "owner": {"type": "string"},
+          "drift_class": {"type": "string"},
+          "source_command": {"type": "string"},
+          "rationale": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["policy_identity", "discovery_identity", "canonical_root_digest"],
+      "properties": {
+        "policy_identity": {"type": "string"},
+        "discovery_identity": {"type": "string"},
+        "canonical_root_digest": {"type": "string"},
+        "command_checks": {"type": "object"},
+        "command_checks_digest": {"type": "string"},
+        "plugin_package_root_parity": {"type": "array"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
