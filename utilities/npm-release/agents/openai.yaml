@@ -1,0 +1,3 @@
+interface:
+  display_name: "NPM Release"
+  short_description: "npm version/publish/dist-tag release runbook"
