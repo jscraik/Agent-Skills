@@ -428,7 +428,7 @@ def main() -> int:
             issues.append(f"{check_name} exited {check.get('returncode')}")
     for plugin, check in plugins_status_checks.items():
         if check.get("returncode") != 0:
-            issues.append(f"plugins_status.{plugin} exited {check.get(returncode)}")
+            issues.append(f"plugins_status.{plugin} exited {check.get('returncode')}")
 
     status = "healthy" if not issues else "degraded"
     payload = {
