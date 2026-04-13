@@ -12,14 +12,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `library_api_reference`: 7
 - `product_verification`: 8
 - `data_fetch_analysis`: 5
-- `team_automation`: 35
+- `team_automation`: 36
 - `scaffolding_templates`: 25
 - `code_quality_review`: 27
 - `ci_cd_deployment`: 6
 - `runbook`: 10
 - `infrastructure_ops`: 5
 - `invalid`: 0
-- `total_tagged`: 128
+- `total_tagged`: 129
 
 ## Semantic Types
 
@@ -57,6 +57,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `alignment-checkpoint` — `utilities`
 - `architecture-interview` — `interview`
 - `atlas` — `utilities`
+- `autoresearch` — `utilities`
 - `brainstorming` — `product/strategy`
 - `ce-brainstorm` — `plugins/harness-engineering/skills`
 - `ce-compound-refresh` — `plugins/harness-engineering/skills`

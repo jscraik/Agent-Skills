@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import shutil
+import contextlib
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -592,7 +593,7 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     if rsync_bin:
         before_files = {rel.as_posix() for rel in iter_files(projection_abs)}
         try:
-            subprocess.run(
+            subprocess.run(  # noqa: S603
                 [
                     rsync_bin,
                     "-a",
@@ -699,6 +700,16 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         stale.unlink()
         deleted_files += 1
 
+    def normalize_stamped_content(content: bytes, path: Path) -> str | None:
+        if path.suffix not in STAMPABLE_SUFFIXES:
+            return None
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            return None
+        normalized, _ = strip_projection_header(text, path.suffix)
+        return normalized
+
     for rel in source_files.values():
         source_file = source_abs / rel
         projection_file = projection_abs / rel
@@ -708,7 +719,9 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
                 continue
             if projection_file.exists() or projection_file.is_symlink():
-                if projection_file.is_dir() and not projection_file.is_symlink():
+                if projection_file.is_symlink():
+                    projection_file.unlink()
+                elif projection_file.is_dir():
                     shutil.rmtree(projection_file)
                 else:
                     projection_file.unlink()
@@ -717,23 +730,26 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             continue
 
         source_bytes = source_file.read_bytes()
+        normalized_source = normalize_stamped_content(source_bytes, source_file)
         if projection_file.exists() and projection_file.is_file():
             projection_bytes = projection_file.read_bytes()
-            normalized_source = normalize_stamped_content(source_bytes, source_file)
-            normalized_projection = normalize_stamped_content(projection_bytes, projection_file)
-            if normalized_source == normalized_projection:
+            if normalized_source is not None:
+                normalized_projection = normalize_stamped_content(projection_bytes, projection_file)
+                if normalized_projection is not None and normalized_projection == normalized_source:
+                    continue
+            elif projection_bytes == source_bytes:
                 continue
         if projection_file.exists() or projection_file.is_symlink():
-            if projection_file.is_dir() and not projection_file.is_symlink():
+            if projection_file.is_symlink():
+                projection_file.unlink()
+            elif projection_file.is_dir():
                 shutil.rmtree(projection_file)
             else:
                 projection_file.unlink()
         projection_file.write_bytes(source_bytes)
-        try:
-            os.chmod(projection_file, source_file.stat().st_mode & 0o777)
-        except OSError:
+        with contextlib.suppress(OSError):
             # Best-effort permission copy: content sync remains valid if chmod is denied.
-            pass
+            os.chmod(projection_file, source_file.stat().st_mode & 0o777)
         changed_files += 1
 
     for path in sorted(projection_abs.rglob("*"), reverse=True):

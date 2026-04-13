@@ -26,7 +26,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Utilities](#utilities)
 
 ## Summary
-- `total_skills`: 112
+- `total_skills`: 113
 - `catalog_source`: repository skill scan
 - `visibility`: default
 - `policy_identity`: b380bfd98ba54e86
@@ -157,12 +157,13 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `agent-browser` — Inspect and automate browser pages deterministically with the `agent-browser` CLI. Use when the user wants ref-based navigation, extraction, clicks, fills, or screenshots, not general browsing advice.
 - `alignment-checkpoint` — Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use.
 - `atlas` — Control the ChatGPT Atlas desktop app on macOS via AppleScript. Use when and only when the user explicitly wants Atlas tabs, bookmarks, or history manipulated on macOS, not general browser automation.
+- `autoresearch` — Analyze and improve this repo's skills and plugin packages through bounded experiment loops. Use this skill when users request autonomous research passes with hypothesis-validation-keep/discard decisions.
 - `bash-hygiene` — Write and review Bash scripts with safe structure and portability guardrails. Use when shell work needs strict mode defaults, robust quoting, and interpreter-compatible behavior.
 - `beautiful-mermaid` — Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when the user asks to render or convert Mermaid diagrams into images.
 - `bootstrap` — Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
 - `circleci` — Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
 - `claude-alias` — Diagnose, repair, and harden Claude wrapper alias routing (`ck`, `cz`, `cc`) when provider configs drift or auth/model conflicts return the wrong backend.
-- `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone agent TOMLs. With `--scope global`, installs to `~/dev/configs/codex/agents/{name}/{name}.toml` and updates `~/dev/configs/codex/config.toml`. With `--scope project`, installs to `${project_root}/.codex/agents/{name}/{name}.toml` and updates or creates `${project_root}/.codex/config.toml`. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+- `codex-agent-creator` — Create, install, and validate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
 - `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
 - `codex-home-audit` — Audit a Codex home directory for control-plane drift, risky state, and cleanup opportunities across config, agents, hooks, skills, plugins, and telemetry. Use when the user wants a dated Codex home health review.
 - `codex-hooks-builder` — Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs. Use when the user wants hook runtime files or hook-script hardening, not general agent role creation.
@@ -201,3 +202,4 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `visual-explainer` — Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.
 - `writing-plans` — Compatibility wrapper for generic implementation planning. Use when the user asks for a general plan and route the work to `ce-plan` in `generic-plan` mode.
 - `yaml` — Write and review YAML files with safe indentation, schema-aware structure, and low-surprise serialization.
+

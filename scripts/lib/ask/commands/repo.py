@@ -11,7 +11,8 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     Collect basic repository metadata and whether agent skills appear to be synced.
     
     The returned CallResult's `data` includes:
-    - `repo_root` (str): the repository root path as a string.
+    - `repo_root` (str): contract-preserving repository root marker (`"."`).
+    - `repo_root_resolved` (str): absolute resolved repository root path.
     - `is_git` (bool): `True` if a `.git` directory exists at `repo_root`, `False` otherwise.
     - `skills_synced` (bool): `True` if `.agents/skills` exists and contains at least one entry, `False` otherwise.
     
@@ -20,6 +21,7 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """
     result = CallResult()
     result.data["repo_root"] = "."
+    result.data["repo_root_resolved"] = str(repo_root.resolve())
     result.data["is_git"] = (repo_root / ".git").exists()
     
     # Check if .agents/skills is synced

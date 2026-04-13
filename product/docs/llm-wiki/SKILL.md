@@ -7,7 +7,7 @@ metadata:
   maturity: experimental
   owner: agent-skills
   review_cadence: monthly
-  last_reviewed: 2026-04-12
+  last_reviewed: 2026-04-13
   metadata_source: frontmatter
 ---
 
@@ -42,7 +42,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
   - explicit schema/governance layer
 - Concrete ingest/query/lint playbook with command-level or step-level procedures.
 - Initial seed files (`index.md`, `log.md`, and category pages) or upgrade guidance for existing wikis.
-- Append-only, parseable `log.md` event format guidance (for example `## [YYYY-MM-DD] ingest|query|lint | summary`).
+- Append-only, parseable `log.md` event format guidance (for example `## [YYYY-MM-DD] <kind> | <summary>`, where `<kind>` is `ingest`, `query`, or `lint`).
 - Risk notes (contradictions, stale claims, orphan pages, unsupported assertions) and mitigation workflow.
 - Include `schema_version` in schema-bound output contracts.
 - A privacy-controls plan covering classification, minimization, and redaction rules for sensitive corpora.
@@ -86,7 +86,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
   - retention decay and consolidation tiers (working, episodic, semantic, procedural).
 - Add structural semantics when flat pages are insufficient:
   - entity extraction with typed attributes;
-  - typed relations such as `uses`, `depends_on`, `contradicts`, `supersedes`;
+  - typed relations (example, non-exhaustive): `uses`, `depends_on`, `caused`, `fixed`, `contradicts`, `supersedes`;
   - graph traversal for impact analysis.
 - Add retrieval semantics when `index.md` no longer scales:
   - combine keyword (BM25), vector similarity, and graph traversal;
@@ -105,6 +105,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
    - Keep first pass tight: start with 2-3 focused surfaces (`index.md`, `log.md`, and one category folder) before broad expansion.
    - Confirm `raw/`, `wiki/`, and `schema` ownership boundaries.
    - Create or validate `wiki/index.md` and `wiki/log.md`.
+   - Keep `index.md` entries structured as link + one-line summary (optional metadata such as date or source count).
 3. Define schema rules:
    - Capture ingest/query/lint procedures in `AGENTS.md` or `CLAUDE.md`.
    - Specify citation, page naming, and cross-linking conventions.
