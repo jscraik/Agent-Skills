@@ -149,9 +149,9 @@ class TestRuntimeSeparationCurrentPath(unittest.TestCase):
 
     def test_other_output_mode_not_treated_as_persistent(self):
         """Modes other than 'persistent' should fall through to the ephemeral path."""
-        run_dir = "/tmp/run"
+        run_dir = "/var/run/validate-fallback"
         # Simulate an unexpected mode value - should not use the governance path
-        path = self._eval_path("ephemeral", run_dir)
+        path = self._eval_path("unexpected", run_dir)
         self.assertNotEqual(path, "GOVERNANCE/runtime-separation/current.json")
 
     def test_governance_path_does_not_use_run_dir_prefix(self):
@@ -412,7 +412,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     entries.append((parts[0], parts[1], parts[2]))
         return entries
 
-    def _get_tsv_from_stdout(self, stdout: str, tmpdir: str, mode: str) -> list[tuple[str, str, str]]:
+    def _get_tsv_from_stdout(self, stdout: str, tmpdir: str, _mode: str) -> list[tuple[str, str, str]]:
         """
         Locate the "Validation logs" run directory from stdout, read its check-results.tsv, and return each row as a (slug, check_mode, outcome) tuple.
         
@@ -504,15 +504,20 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
             entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
             tsv_map = {slug: (check_mode, outcome) for slug, check_mode, outcome in entries}
+            runtime_rows = [slug for slug in tsv_map if slug in RUNTIME_SEPARATION_SLUGS]
+            self.assertCountEqual(
+                runtime_rows,
+                RUNTIME_SEPARATION_SLUGS,
+                f"Missing runtime-separation rows. Expected {RUNTIME_SEPARATION_SLUGS}, got {runtime_rows}",
+            )
 
             for slug in RUNTIME_SEPARATION_SLUGS:
-                if slug in tsv_map:
-                    check_mode, _ = tsv_map[slug]
-                    self.assertEqual(
-                        check_mode,
-                        "required",
-                        f"Slug '{slug}' has mode '{check_mode}', expected 'required'",
-                    )
+                check_mode, _ = tsv_map[slug]
+                self.assertEqual(
+                    check_mode,
+                    "required",
+                    f"Slug '{slug}' has mode '{check_mode}', expected 'required'",
+                )
 
     def test_new_checks_ordering_in_tsv(self):
         """
@@ -529,14 +534,11 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
             # Filter to only the new runtime-separation slugs
             runtime_slugs_in_tsv = [s for s in all_slugs if s in RUNTIME_SEPARATION_SLUGS]
-
-            # They should appear in the same relative order as RUNTIME_SEPARATION_SLUGS
-            expected_order = [s for s in RUNTIME_SEPARATION_SLUGS if s in runtime_slugs_in_tsv]
             self.assertEqual(
                 runtime_slugs_in_tsv,
-                expected_order,
+                RUNTIME_SEPARATION_SLUGS,
                 f"Runtime-separation slugs appear out of order.\n"
-                f"Expected order: {expected_order}\n"
+                f"Expected order: {RUNTIME_SEPARATION_SLUGS}\n"
                 f"Actual order in TSV: {runtime_slugs_in_tsv}",
             )
 
@@ -548,15 +550,20 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
             entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
             tsv_map = {slug: outcome for slug, _, outcome in entries}
+            runtime_rows = [slug for slug in tsv_map if slug in RUNTIME_SEPARATION_SLUGS]
+            self.assertCountEqual(
+                runtime_rows,
+                RUNTIME_SEPARATION_SLUGS,
+                f"Missing runtime-separation rows. Expected {RUNTIME_SEPARATION_SLUGS}, got {runtime_rows}",
+            )
 
             for slug in RUNTIME_SEPARATION_SLUGS:
-                if slug in tsv_map:
-                    self.assertEqual(
-                        tsv_map[slug],
-                        "pass",
-                        f"Slug '{slug}' has outcome '{tsv_map[slug]}', expected 'pass'.\n"
-                        f"This means the stub did not exit 0 or was not found.",
-                    )
+                self.assertEqual(
+                    tsv_map[slug],
+                    "pass",
+                    f"Slug '{slug}' has outcome '{tsv_map[slug]}', expected 'pass'.\n"
+                    f"This means the stub did not exit 0 or was not found.",
+                )
 
     def test_python_stub_receives_build_current_output_flag_ephemeral(self):
         """
@@ -583,8 +590,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 
             # Find the args log for build_runtime_separation_current.py
             args_log = os.path.join(paths["args_log_dir"], "build_runtime_separation_current.py.args.json")
-            if not os.path.exists(args_log):
-                self.skipTest("build_runtime_separation_current.py stub log not found - check may have failed")
+            self.assertTrue(
+                os.path.exists(args_log),
+                "build_runtime_separation_current.py was not invoked in ephemeral mode",
+            )
 
             with open(args_log) as fh:
                 recorded_args = json.load(fh)
@@ -613,8 +622,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
 
             args_log = os.path.join(paths["args_log_dir"], "build_runtime_separation_current.py.args.json")
-            if not os.path.exists(args_log):
-                self.skipTest("build_runtime_separation_current.py stub log not found - check may have failed")
+            self.assertTrue(
+                os.path.exists(args_log),
+                "build_runtime_separation_current.py was not invoked in persistent mode",
+            )
 
             with open(args_log) as fh:
                 recorded_args = json.load(fh)
@@ -645,8 +656,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_log = os.path.join(
                 paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
             )
-            if not os.path.exists(args_log):
-                self.skipTest("scan_runtime_separation_consumers.py stub log not found")
+            self.assertTrue(
+                os.path.exists(args_log),
+                "scan_runtime_separation_consumers.py was not invoked in persistent mode",
+            )
 
             with open(args_log) as fh:
                 recorded_args = json.load(fh)
@@ -672,8 +685,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_log = os.path.join(
                 paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
             )
-            if not os.path.exists(args_log):
-                self.skipTest("scan_runtime_separation_consumers.py stub log not found")
+            self.assertTrue(
+                os.path.exists(args_log),
+                "scan_runtime_separation_consumers.py was not invoked in ephemeral mode",
+            )
 
             with open(args_log) as fh:
                 recorded_args = json.load(fh)
@@ -701,8 +716,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     args_log = os.path.join(
                         paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
                     )
-                    if not os.path.exists(args_log):
-                        self.skipTest(f"scan stub log not found for mode={mode}")
+                    self.assertTrue(
+                        os.path.exists(args_log),
+                        f"scan_runtime_separation_consumers.py was not invoked for mode={mode}",
+                    )
 
                     with open(args_log) as fh:
                         recorded_args = json.load(fh)
@@ -725,8 +742,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_log = os.path.join(
                 paths["args_log_dir"], "verify_runtime_separation_reader_compat.py.args.json"
             )
-            if not os.path.exists(args_log):
-                self.skipTest("verify_runtime_separation_reader_compat.py stub log not found")
+            self.assertTrue(
+                os.path.exists(args_log),
+                "verify_runtime_separation_reader_compat.py was not invoked",
+            )
 
             with open(args_log) as fh:
                 recorded_args = json.load(fh)
@@ -769,8 +788,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
                     args_log = os.path.join(
                         paths["args_log_dir"], "compare_runtime_separation_baseline.py.args.json"
                     )
-                    if not os.path.exists(args_log):
-                        self.skipTest(f"compare baseline stub log not found for mode={mode}")
+                    self.assertTrue(
+                        os.path.exists(args_log),
+                        f"compare_runtime_separation_baseline.py was not invoked for mode={mode}",
+                    )
 
                     with open(args_log) as fh:
                         recorded_args = json.load(fh)
@@ -805,8 +826,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_log = os.path.join(
                 paths["args_log_dir"], "validate_runtime_separation_manifest.py.args.json"
             )
-            if not os.path.exists(args_log):
-                self.skipTest("validate_runtime_separation_manifest.py stub log not found")
+            self.assertTrue(
+                os.path.exists(args_log),
+                "validate_runtime_separation_manifest.py was not invoked",
+            )
 
             with open(args_log) as fh:
                 recorded_args = json.load(fh)
@@ -853,8 +876,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_file = os.path.join(
                 paths["args_log_dir"], "verify_wrapper_contract_fixtures.sh.args"
             )
-            if not os.path.exists(args_file):
-                self.skipTest("verify_wrapper_contract_fixtures.sh stub args file not found")
+            self.assertTrue(
+                os.path.exists(args_file),
+                "verify_wrapper_contract_fixtures.sh was not invoked",
+            )
 
             args_content = Path(args_file).read_text()
             self.assertIn(
@@ -876,8 +901,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_file = os.path.join(
                 paths["args_log_dir"], "verify_runtime_separation_writer_mutations.sh.args"
             )
-            if not os.path.exists(args_file):
-                self.skipTest("verify_runtime_separation_writer_mutations.sh stub args file not found")
+            self.assertTrue(
+                os.path.exists(args_file),
+                "verify_runtime_separation_writer_mutations.sh was not invoked",
+            )
 
             args_content = Path(args_file).read_text()
             self.assertIn(
@@ -901,8 +928,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_file = os.path.join(
                 paths["args_log_dir"], "validate_runtime_separation_profile_home.sh.args"
             )
-            if not os.path.exists(args_file):
-                self.skipTest("validate_runtime_separation_profile_home.sh stub args file not found")
+            self.assertTrue(
+                os.path.exists(args_file),
+                "validate_runtime_separation_profile_home.sh was not invoked",
+            )
 
             args_content = Path(args_file).read_text()
             self.assertIn(
@@ -926,8 +955,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
             args_file = os.path.join(
                 paths["args_log_dir"], "validate_runtime_separation_profile_home.sh.args"
             )
-            if not os.path.exists(args_file):
-                self.skipTest("validate_runtime_separation_profile_home.sh stub args file not found")
+            self.assertTrue(
+                os.path.exists(args_file),
+                "validate_runtime_separation_profile_home.sh was not invoked",
+            )
 
             args_content = Path(args_file).read_text()
             self.assertIn(
@@ -945,75 +976,96 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
 class TestValidateAllOutputModeEnvVar(unittest.TestCase):
     """Tests the VALIDATE_ALL_OUTPUT_MODE environment variable and CLI arg interaction."""
 
+    def _run_validate_all_from_env_mode(self, mode: str) -> tuple[list[str], list[str]]:
+        """
+        Run validate_all.sh without CLI mode flags and drive output mode via VALIDATE_ALL_OUTPUT_MODE.
+
+        Returns:
+            tuple[list[str], list[str]]: Recorded args for build_runtime_separation_current.py
+            and scan_runtime_separation_consumers.py, respectively.
+        """
+        import json
+
+        harness = TestRuntimeSeparationIntegration(methodName="runTest")
+        with tempfile.TemporaryDirectory(prefix="validate-all-env-mode-") as tmpdir:
+            paths = harness._setup_tmpdir(tmpdir)
+            if mode == "persistent":
+                os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
+
+            env = os.environ.copy()
+            env["PYTHON_BIN"] = paths["python_stub"]
+            env["VALIDATE_ALL_OUTPUT_MODE"] = mode
+
+            result = subprocess.run(
+                ["/bin/bash", str(VALIDATE_ALL_SH)],
+                capture_output=True,
+                text=True,
+                cwd=tmpdir,
+                env=env,
+                timeout=60,
+                check=False,
+            )
+
+            build_args_log = os.path.join(
+                paths["args_log_dir"], "build_runtime_separation_current.py.args.json"
+            )
+            scan_args_log = os.path.join(
+                paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
+            )
+
+            self.assertTrue(
+                os.path.exists(build_args_log),
+                "build_runtime_separation_current.py was not invoked when reading VALIDATE_ALL_OUTPUT_MODE "
+                f"for mode={mode!r}. returncode={result.returncode}",
+            )
+            self.assertTrue(
+                os.path.exists(scan_args_log),
+                "scan_runtime_separation_consumers.py was not invoked when reading VALIDATE_ALL_OUTPUT_MODE "
+                f"for mode={mode!r}. returncode={result.returncode}",
+            )
+
+            with open(build_args_log) as fh:
+                build_args = json.load(fh)
+            with open(scan_args_log) as fh:
+                scan_args = json.load(fh)
+
+        return build_args, scan_args
+
     def test_runtime_separation_current_path_logic_from_env_mode(self):
-        """Verify path logic is correct when output_mode comes from VALIDATE_ALL_OUTPUT_MODE."""
-        # Test the bash logic directly - the env var sets the mode
-        for mode, expected_suffix in [
-            ("ephemeral", "runtime-separation-current.json"),
-            ("persistent", "GOVERNANCE/runtime-separation/current.json"),
-        ]:
+        """Validate --output path behavior when mode is sourced from VALIDATE_ALL_OUTPUT_MODE."""
+        for mode in ("ephemeral", "persistent"):
             with self.subTest(mode=mode):
-                script = textwrap.dedent(f"""\
-                    output_mode="{mode}"
-                    run_dir="/tmp/test-run"
-
-                    runtime_separation_current="$run_dir/runtime-separation-current.json"
-                    if [[ "$output_mode" == "persistent" ]]; then
-                      runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
-                    fi
-
-                    echo "$runtime_separation_current"
-                """)
-                result = subprocess.run(
-                    ["bash", "-c", script],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                )
-                self.assertEqual(result.returncode, 0)
-                if mode == "ephemeral":
-                    self.assertIn(expected_suffix, result.stdout)
+                build_args, _ = self._run_validate_all_from_env_mode(mode)
+                self.assertIn("--output", build_args, f"--output missing from args: {build_args}")
+                output_idx = build_args.index("--output")
+                output_path = build_args[output_idx + 1]
+                if mode == "persistent":
+                    self.assertEqual(output_path, "GOVERNANCE/runtime-separation/current.json")
                 else:
-                    self.assertEqual(result.stdout.strip(), expected_suffix)
+                    self.assertIn("runtime-separation-current.json", output_path)
+                    self.assertNotEqual(output_path, "GOVERNANCE/runtime-separation/current.json")
 
     def test_emit_digests_conditional_matches_output_mode_precisely(self):
-        """
-        Verify that the `--emit-digests` flag is appended only when `output_mode` equals exactly "persistent".
-        
-        Runs the bash snippet that constructs `runtime_consumer_scan_cmd` for several non-exact variants of "persistent" and asserts `--emit-digests` is not present for each variant.
-        """
-        non_persistent_modes = ["Persistent", "PERSISTENT", "persist", "persistent_extra", ""]
-        for mode in non_persistent_modes:
+        """Verify --emit-digests is present only when env mode equals exactly 'persistent'."""
+        cases = [
+            ("persistent", True),
+            ("Persistent", False),
+            ("PERSISTENT", False),
+            ("persist", False),
+            ("persistent_extra", False),
+            ("", True),
+        ]
+        for mode, should_emit in cases:
             with self.subTest(mode=repr(mode)):
-                script = textwrap.dedent(f"""\
-                    output_mode={mode!r}
-                    python_cmd=(python3)
-
-                    runtime_consumer_scan_cmd=(
-                      "${{python_cmd[@]}}"
-                      scripts/scan_runtime_separation_consumers.py
-                      --emit-readers
-                      --emit-path-consumers
-                      --strict
+                _, scan_args = self._run_validate_all_from_env_mode(mode)
+                if should_emit:
+                    self.assertIn("--emit-digests", scan_args)
+                else:
+                    self.assertNotIn(
+                        "--emit-digests",
+                        scan_args,
+                        f"--emit-digests should not appear for output_mode={mode!r}",
                     )
-                    if [[ "$output_mode" == "persistent" ]]; then
-                      runtime_consumer_scan_cmd+=(--emit-digests)
-                    fi
-
-                    printf '%s\\n' "${{runtime_consumer_scan_cmd[@]}}"
-                """)
-                result = subprocess.run(
-                    ["bash", "-c", script],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                )
-                self.assertEqual(result.returncode, 0)
-                self.assertNotIn(
-                    "--emit-digests",
-                    result.stdout.splitlines(),
-                    f"--emit-digests should not appear for output_mode={mode!r}",
-                )
 
 
 if __name__ == "__main__":

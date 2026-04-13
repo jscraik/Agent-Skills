@@ -212,7 +212,7 @@ class FakeRepo:
     """
 
     # Python scripts called via $python_cmd
-    _PY_SCRIPTS = [
+    _PY_SCRIPTS: tuple[str, ...] = (
         "scripts/verify_recursive_skill_graph_artifacts.py",
         "scripts/docs_lint.py",
         "scripts/verify_verify_work_scope_flags.py",
@@ -229,10 +229,10 @@ class FakeRepo:
         "scripts/build_runtime_separation_current.py",
         "scripts/compare_runtime_separation_baseline.py",
         "scripts/verify_selection_gate_severity.py",
-    ]
+    )
 
     # Bash scripts called directly via `bash scripts/...`
-    _BASH_SCRIPTS = [
+    _BASH_SCRIPTS: tuple[str, ...] = (
         "scripts/validate_plan_graphs.sh",
         "scripts/check_plugin_skill_shadowing.sh",
         "scripts/validate_projection_integrity.sh",
@@ -244,7 +244,7 @@ class FakeRepo:
         "scripts/verify_wrapper_contract_fixtures.sh",
         "scripts/verify_runtime_separation_writer_mutations.sh",
         "scripts/validate_runtime_separation_profile_home.sh",
-    ]
+    )
 
     def __init__(self, root: Path) -> None:
         """
