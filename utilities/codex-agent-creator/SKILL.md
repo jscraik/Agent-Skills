@@ -14,7 +14,7 @@ metadata:
 # Codex Agent Creator
 
 ## When to use
-- User asks to create, update, or troubleshoot a custom subagent file in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml`).
+- User asks to create, update, or troubleshoot a custom subagent file in canonical Codex control-plane paths (`~/dev/configs/codex/agents/{name}/{name}.toml`).
 - User needs global custom-agent installation with explicit developer instructions.
 - User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
 - User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
@@ -50,7 +50,7 @@ metadata:
 - Treat `model` and `model_reasoning_effort` as mandatory for this repository contract.
 - Add `nickname_candidates` only when requested or when display labels are explicitly desired.
 - Keep optional behavior strict and explicit.
-- Treat legacy `[agents.<name>]` declaration flows as compatibility-only, not the default authoring path.
+- Treat legacy `[agents.{name}]` declaration flows as compatibility-only, not the default authoring path.
 
 ### 3) Validation-first execution
 - Run custom-agent script checks before declaring completion.
@@ -59,7 +59,7 @@ metadata:
 ### 4) Install and handoff
 - Install only after validation by writing into the correct agents directory.
 - In this workspace, install to canonical global paths by default: `~/dev/configs/codex/agents/` and `~/dev/configs/codex/config.toml`.
-- For global installs, ensure runtime discoverability by updating `[agents.<name>].config_file` to the installed canonical agent file path.
+- For global installs, ensure runtime discoverability by updating `[agents.{name}].config_file` to the installed canonical agent file path.
 - Treat non-canonical global paths as compatibility overrides that require explicit opt-in.
 - If the user requests runtime limits, update only `[agents]` global keys in the selected global `config.toml`.
 - Return next-step verification command and residual risk.
@@ -93,10 +93,10 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 - Return blocked state when any validation error appears.
 
 ## Anti-patterns
-- DO NOT default to legacy `[agents.<name>]` declaration-first authoring when standalone files are supported.
+- DO NOT default to legacy `[agents.{name}]` declaration-first authoring when standalone files are supported.
 - NEVER ship a config change without write + validate evidence.
 - Avoid the common pitfall of broad, speculative config changes before the baseline flow passes.
-- Treating legacy `[agents.<name>]` role declarations as the primary contract when standalone custom-agent files are available.
+- Treating legacy `[agents.{name}]` role declarations as the primary contract when standalone custom-agent files are available.
 - Omitting required standalone fields (`name`, `description`, `developer_instructions`, `model`, `model_reasoning_effort`).
 - Assuming required inputs from defaults.
 - Reporting success without evidence from validation commands.

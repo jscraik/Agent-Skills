@@ -682,7 +682,10 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
                 continue
             if projection_file.exists() or projection_file.is_symlink():
-                projection_file.unlink()
+                if projection_file.is_dir():
+                    shutil.rmtree(projection_file)
+                else:
+                    projection_file.unlink()
             projection_file.symlink_to(source_target)
             changed_files += 1
             continue
@@ -691,7 +694,10 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         if projection_file.exists() and projection_file.is_file() and projection_file.read_bytes() == source_bytes:
             continue
         if projection_file.exists() or projection_file.is_symlink():
-            projection_file.unlink()
+            if projection_file.is_dir():
+                shutil.rmtree(projection_file)
+            else:
+                projection_file.unlink()
         projection_file.write_bytes(source_bytes)
         try:
             os.chmod(projection_file, source_file.stat().st_mode & 0o777)

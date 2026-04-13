@@ -1116,6 +1116,13 @@ sync_home_plugin_mirrors() {
 
   while IFS= read -r plugin_name; do
     [ -n "$plugin_name" ] || continue
+
+    # Validate plugin_name to prevent path traversal
+    if [[ ! "$plugin_name" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$plugin_name" =~ \.\. ]] || [[ "$plugin_name" =~ / ]]; then
+      echo "[ERROR] Invalid plugin_name in marketplace (path traversal risk): $plugin_name" >&2
+      continue
+    fi
+
     source_dir="$canonical_plugins_dir/$plugin_name"
     target_dir="$home_plugins_dir/$plugin_name"
 
@@ -1142,11 +1149,14 @@ sync_home_plugin_mirrors() {
     fi
   done < <(
     jq -r '
+      def trim: gsub("^\\s+|\\s+$"; "");
+      def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
       .plugins[]?
       | .name?
       | select(type == "string")
-      | gsub("^\\s+|\\s+$"; "")
+      | trim
       | select(length > 0)
+      | select(is_safe_identifier)
     ' "$marketplace_file"
   )
 }
@@ -1190,6 +1200,7 @@ sync_local_marketplace_cache() {
 
   jq -r '
     def trim: gsub("^\\s+|\\s+$"; "");
+    def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
     (.name // "local-marketplace" | tostring | trim) as $market
     | .plugins[]?
     | select(type == "object")
@@ -1199,13 +1210,27 @@ sync_local_marketplace_cache() {
     | select(($source | type) == "object")
     | select($source.source == "local")
     | select(($source.path | type) == "string")
-    | "\($market)\t\($name | trim)\t\($source.path | trim)"
+    | ($name | trim) as $clean_name
+    | ($source.path | trim) as $clean_path
+    | select($market | is_safe_identifier)
+    | select($clean_name | is_safe_identifier)
+    | "\($market)\t\($clean_name)\t\($clean_path)"
   ' "$marketplace_file" > "$plugin_rows_file"
 
   while IFS=$'\t' read -r marketplace_name plugin_name source_path; do
     [ -n "$marketplace_name" ] || continue
     [ -n "$plugin_name" ] || continue
     [ -n "$source_path" ] || continue
+
+    # Validate marketplace_name and plugin_name to prevent path traversal
+    if [[ ! "$marketplace_name" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$marketplace_name" =~ \.\. ]] || [[ "$marketplace_name" =~ / ]]; then
+      echo "[ERROR] Invalid marketplace_name (path traversal risk): $marketplace_name" >&2
+      continue
+    fi
+    if [[ ! "$plugin_name" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$plugin_name" =~ \.\. ]] || [[ "$plugin_name" =~ / ]]; then
+      echo "[ERROR] Invalid plugin_name (path traversal risk): $plugin_name" >&2
+      continue
+    fi
 
     case "$source_path" in
       ./*) source_dir="$repo_root/${source_path#./}" ;;
