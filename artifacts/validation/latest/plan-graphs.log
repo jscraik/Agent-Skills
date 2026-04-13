@@ -34,4 +34,6 @@
 [OK] docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md: task graph lint passed (1 graph block(s)).
 [plan-graph] lint docs/plans/2026-04-09-feat-skill-plugin-selection-gold-standard-upgrade-plan.md
 [OK] docs/plans/2026-04-09-feat-skill-plugin-selection-gold-standard-upgrade-plan.md: task graph lint passed (1 graph block(s)).
+[plan-graph] lint docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md
+[OK] docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md: task graph lint passed (1 graph block(s)).
 [plan-graph] all plan files passed

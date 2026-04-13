@@ -270,6 +270,14 @@ def _collect_plugin_targets(baseline: dict[str, Any]) -> list[str]:
 
 
 def main() -> int:
+    """
+    Builds a runtime-separation current JSON artifact by running repository CLI checks, normalising their outputs, computing digests and parity/blocker metadata, and writing the final payload to the specified output path.
+    
+    The function resolves paths (repo root, baseline, output), imports the selection policy from the repository's scripts, executes a set of `bin/ask ... --json` commands (repo status, skills list, plugins doctor, per-plugin plugins status, repo doctor-catalog), normalises each command's JSON output into stable check records, computes evidence and digests, derives plugin activation and package-root parity, assembles a summary and issues list, writes the resulting JSON payload to the output file (creating parent directories as required), and prints a completion message.
+    
+    Returns:
+        int: Process exit code; `0` on success.
+    """
     args = parse_args()
     repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[1]
     if not repo_root.is_absolute():
@@ -428,7 +436,7 @@ def main() -> int:
             issues.append(f"{check_name} exited {check.get('returncode')}")
     for plugin, check in plugins_status_checks.items():
         if check.get("returncode") != 0:
-            issues.append(f"plugins_status.{plugin} exited {check.get(returncode)}")
+            issues.append(f"plugins_status.{plugin} exited {check.get('returncode')}")
 
     status = "healthy" if not issues else "degraded"
     payload = {
