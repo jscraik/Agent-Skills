@@ -73,6 +73,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         source_path="plugins/arscontexta",
         projection_path=".agents/plugins-runtime/cache/agent-skills-local/arscontexta",
         tags=("plugin-caches",),
+        optional_when_missing=True,
     ),
     MirrorProjection(
         name="cache-coderabbit",
