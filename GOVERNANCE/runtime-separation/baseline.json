@@ -299,7 +299,6 @@
       "plugins_status.skill-factory",
       "repo_doctor_catalog",
       "repo_status",
-      "repo_validate",
       "skills_list"
     ],
     "visible_cache_absent": false,
@@ -313,7 +312,6 @@
       ],
       "repo_doctor_catalog": "catalog",
       "repo_status": "repo",
-      "repo_validate": "repo",
       "skills_list": "skills"
     }
   }
