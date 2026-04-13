@@ -655,19 +655,19 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
 
 def normalize_stamped_content(content: bytes, path: Path) -> bytes:
     """
-    Strip projection headers from stampable files to enable content comparison.
-
-    For files with stampable suffixes (.md, .py, .sh, etc.), attempts to decode as UTF-8
-    and remove the generated projection header. Returns the normalized bytes or the original
-    bytes if decoding fails or the suffix is not stampable.
-
+    Normalise content of stampable files by removing a generated projection header.
+    
+    If the file's suffix is listed in STAMPABLE_SUFFIXES and the bytes decode as UTF‑8,
+    the returned bytes are the UTF‑8 encoding of the text with any projection header removed.
+    If the suffix is not stampable or UTF‑8 decoding fails, the original bytes are returned.
+    
     Parameters:
-        content (bytes): File content to normalize.
-        path (Path): File path (used to determine suffix for header detection).
-
+        content (bytes): File content to normalise.
+        path (Path): File path used to determine the file suffix for stampable detection.
+    
     Returns:
-        bytes: Normalized content with projection header removed for stampable files,
-               or original content for non-stampable files or when normalization fails.
+        bytes: Normalised bytes with the projection header removed for stampable UTF‑8 text files,
+               or the original bytes otherwise.
     """
     if path.suffix not in STAMPABLE_SUFFIXES:
         return content
@@ -681,14 +681,16 @@ def normalize_stamped_content(content: bytes, path: Path) -> bytes:
 
 def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, int]:
     """
-    Synchronise projection contents using pure-Python copy and delete operations.
-
+    Synchronise a projection directory to match a source directory using pure-Python file operations.
+    
+    Performs file-by-file sync: deletes projection files that are absent from source, copies regular files, replicates symlinks, treats files with stampable suffixes as equal when their contents match after stripping a generated projection header, preserves permission bits on a best-effort basis, and removes now-empty directories in the projection.
+    
     Parameters:
-        source_abs (Path): Absolute source directory path.
-        projection_abs (Path): Absolute projection directory path.
-
+        source_abs (Path): Absolute path to the source directory to mirror.
+        projection_abs (Path): Absolute path to the projection directory to update.
+    
     Returns:
-        tuple[int, int]: `(changed_files, deleted_files)`.
+        tuple[int, int]: A pair `(changed_files, deleted_files)` where `changed_files` is the number of files created or updated in the projection and `deleted_files` is the number of projection files removed because they no longer exist in the source.
     """
     changed_files = 0
     deleted_files = 0
@@ -701,6 +703,17 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         deleted_files += 1
 
     def _normalize_stamped_text(content: bytes, path: Path) -> str | None:
+        """
+        Return UTF-8 decoded text with any projection header removed for stampable files.
+        
+        Parameters:
+            content (bytes): Raw file bytes to decode and normalise.
+            path (Path): File path used to determine stampable suffix.
+        
+        Returns:
+            str | None: The decoded text with a projection header stripped when the file
+            suffix is in STAMPABLE_SUFFIXES and decoding succeeds; `None` otherwise.
+        """
         if path.suffix not in STAMPABLE_SUFFIXES:
             return None
         try:
@@ -763,13 +776,13 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
 
 def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
     """
-    Return True when rsync failed with a permission-style error suitable for Python fallback.
-
+    Detect whether an rsync CalledProcessError indicates a permission-style failure appropriate for falling back to a Python sync.
+    
     Parameters:
-        error (subprocess.CalledProcessError): rsync failure.
-
+        error (subprocess.CalledProcessError): The exception raised by a failed rsync invocation; its stdout/stderr will be inspected.
+    
     Returns:
-        bool: True when stderr/stdout indicates a permission restriction.
+        bool: `True` if the combined stdout/stderr contains permission-related messages such as "operation not permitted" or "permission denied", `False` otherwise.
     """
     output = "\n".join(
         part for part in (error.stderr, error.stdout) if isinstance(part, str) and part

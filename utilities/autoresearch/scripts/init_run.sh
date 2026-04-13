@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# usage prints the help message showing the expected CLI format and options: required --tag, required --targets and optional --out.
 usage() {
   cat <<'EOF'
 Usage:

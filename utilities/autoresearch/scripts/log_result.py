@@ -12,10 +12,38 @@ HEADER = (
 
 
 def _sanitize(value: str) -> str:
+    """
+    Normalises a text field for TSV output by replacing tabs, collapsing line breaks into single spaces, and trimming surrounding whitespace.
+    
+    Parameters:
+        value (str): Input text to normalise.
+    
+    Returns:
+        sanitised (str): The input with tabs replaced by spaces, all line breaks collapsed into single spaces, and leading/trailing whitespace removed.
+    """
     return " ".join(value.replace("\t", " ").splitlines()).strip()
 
 
 def main() -> int:
+    """
+    Append a single normalized TSV row to an autoresearch run's results.tsv file.
+    
+    Parameters:
+        --run-dir (str): Path to the run directory created by init_run.sh; must be under the repository's artifacts/autoresearch tree.
+        --iteration (int): Iteration number to record.
+        --target (str): Target identifier; will be sanitized to remove tabs and collapse line breaks.
+        --decision (str): One of "keep", "discard", "blocked".
+        --score (float): Numeric score; recorded with two decimal places.
+        --status (str): One of "pass", "fail", "blocked".
+        --change-summary (str): Human-readable summary of changes; will be sanitized.
+        --validation-evidence (str): Validation notes or evidence; will be sanitized.
+    
+    Returns:
+        int: Exit code 0 on success.
+    
+    Raises:
+        SystemExit: If run-dir is not under the expected artifacts/autoresearch root, does not exist, is missing required files (results.tsv, journal.md, targets.txt), or if results.tsv does not begin with the expected header.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", required=True, help="Run directory from init_run.sh")
     parser.add_argument("--iteration", required=True, type=int)

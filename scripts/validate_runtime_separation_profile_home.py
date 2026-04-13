@@ -12,6 +12,17 @@ from typing import Any
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Builds and parses the command-line arguments for the script.
+    
+    The parser recognises three options used by the script to locate inputs and control output.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes:
+            - output (str): Path to write the generated artifact (required).
+            - repo_current (str): Path to the runtime-separation current artifact; empty string if not provided (defaults to GOVERNANCE/runtime-separation/current.json when empty).
+            - repo_root (str): Repository root override; empty string if not provided (defaults to the script's parent directory when empty).
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, help="Output artifact path")
     parser.add_argument(
@@ -28,10 +39,31 @@ def parse_args() -> argparse.Namespace:
 
 
 def _json_digest(value: Any) -> str:
+    """
+    Compute a SHA-256 hex digest of the canonical JSON serialization of a value.
+    
+    Parameters:
+        value (Any): JSON-serialisable Python object; keys are sorted and compact separators are used during serialization.
+    
+    Returns:
+        str: Hexadecimal SHA-256 digest of the UTF-8 encoded JSON serialization.
+    """
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
 def _load_json(path: Path) -> dict[str, Any]:
+    """
+    Load and return a JSON object from the given filesystem path.
+    
+    Parameters:
+        path (Path): Filesystem path to a UTF-8 encoded JSON file.
+    
+    Returns:
+        dict[str, Any]: The parsed JSON object.
+    
+    Raises:
+        ValueError: If the JSON root is not an object.
+    """
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"JSON root must be an object: {path}")
@@ -39,6 +71,17 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def main() -> int:
+    """
+    Generate a runtime-separation profile-home JSON artifact from an existing "current" artifact and write it to the specified output path.
+    
+    Resolves repository and input/output paths, loads and validates the current artifact's `summary` object, normalises and derives required summary fields (including computing SHA-256 JSON digests when absent), constructs the profile-home payload with schema version `runtime-separation.profile-home.v1`, and writes the resulting JSON file to the provided output path.
+    
+    Returns:
+        int: Exit code (0 on success).
+    
+    Raises:
+        SystemExit: If the current artifact is missing a valid `summary` object.
+    """
     args = parse_args()
 
     repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[1]

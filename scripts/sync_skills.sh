@@ -75,6 +75,7 @@ if [ -z "$selection_policy_shell" ]; then
 fi
 eval "$selection_policy_shell"
 
+# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to ensure only one sync run runs at a time, waits briefly for in-progress initialisation, and reclaims stale locks (with PID or based on directory mtime) before failing.
 acquire_sync_lock() {
   local existing_pid=""
   local lock_mtime=""
@@ -283,6 +284,8 @@ is_plugin_hidden_lane_skill_name() {
     *) return 1 ;;
   esac
 }
+# register_plugin_router_skill_source registers a mapping from a router-visible plugin skill name to its discovered directory and detects name collisions.
+# Returns 0 on success; returns 1 and prints collision details to stderr if the same skill name is already registered with a different directory.
 register_plugin_router_skill_source() {
   local skill_name="$1"
   local discovered_dir="$2"
@@ -866,7 +869,7 @@ HEADER
 }
 
 # generate_skill_type_index generates a skills-by-type markdown index from `metadata.skill-type` tags, grouping discovered skills into canonical semantic types, emitting counts, per-type lists and validation notes.
-# generate_skill_type_index takes a single argument: the path to the output index file.
+# generate_skill_type_index generates a skills-by-type index at the specified output path by scanning all SKILL.md files and grouping entries by the canonical `metadata.skill-type` values.
 generate_skill_type_index() {
   local index_file="$1"
   local temp_dir=""
@@ -1004,7 +1007,7 @@ HEADER
 python3 "$repo_root/scripts/skill_catalog.py" --source repo --write-index "$repo_root/SKILL.md"
 generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
-# Remove legacy tool symlinks (no longer supported)
+# remove_legacy_symlink removes the symlink at the given path if it exists and echoes a confirmation.
 remove_legacy_symlink() {
   local target_dir="$1"
   if [ -L "$target_dir" ]; then
@@ -1015,7 +1018,7 @@ remove_legacy_symlink() {
 
 # Remove old/legacy symlinks from unsupported locations.
 # Keep this workspace-only so project-local sync stays side-effect free outside
-# the repository checkout.
+# remove_legacy_home_skill_symlinks removes legacy per-user skill symlinks from common home locations if they exist.
 remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.copilot/skills"
   remove_legacy_symlink "$HOME/.config/agents/skills"
@@ -1023,13 +1026,14 @@ remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.gemini/skills"
 }
 
-# Sync to user-level tool directories (Claude Code + OpenAI Codex/Agents)
+# sync_user_skills synchronises a source skills directory into a user's target directory by creating or updating a symlink (default) or by copying contents, with optional force replacement of existing non-symlink targets.
 sync_user_skills() {
   local source_dir="$1"
   local target_dir="$2"
   local force="${3:-0}"
   local mode="${4:-symlink}"
 
+  # sync_dir_copy copies the contents of source_dir into target_dir, preserving file metadata and mirroring the source (removing extraneous files); it prefers `rsync -a --delete --force` when available and falls back to removing first-level entries and using `cp -a` otherwise.
   sync_dir_copy() {
     local source_dir="$1"
     local target_dir="$2"
@@ -1087,6 +1091,7 @@ sync_user_skills() {
   fi
 }
 
+# sync_skill_path_file writes a small file at the specified target containing the canonicalised source directory path with a trailing slash to support loaders that expect a directory-path file.
 sync_skill_path_file() {
   local source_dir="$1"
   local target_file="$2"
@@ -1097,14 +1102,15 @@ sync_skill_path_file() {
 }
 
 # is_safe_path_component validates marketplace/plugin path components before they
-# are interpolated into destructive sync paths.
+# is_safe_path_component returns success if the given value is a single safe path component containing only ASCII letters, digits, dot, underscore or hyphen.
 is_safe_path_component() {
   local value="$1"
   [[ "$value" =~ ^[A-Za-z0-9._-]+$ ]]
 }
 
 # resolve_marketplace_source_dir returns a canonical source directory for a
-# marketplace source.path only when it resolves inside repo_root/plugins.
+# resolve_marketplace_source_dir resolves a relative './plugins/...' marketplace `source.path` to its canonical absolute directory under the repository `plugins` tree and prints that path.
+# It rejects paths that are not relative, contain `..`, do not start with `./plugins/`, cannot be resolved to an existing directory, or resolve outside `$repo_root_real/plugins/`, returning non‑zero in those cases.
 resolve_marketplace_source_dir() {
   local source_path="$1"
   local candidate=""
@@ -1141,7 +1147,7 @@ resolve_marketplace_source_dir() {
 
 # Keep home-level plugin source paths aligned with the canonical repo plugins.
 # Some plugin installers resolve marketplace relative paths (./plugins/<name>)
-# against $HOME, so this mirror prevents "path is not a directory" failures.
+# sync_home_plugin_mirrors creates or updates symlinks in a home plugins directory for local plugins listed in a marketplace JSON file, skipping unsafe plugin names and leaving existing non-symlink targets untouched.
 sync_home_plugin_mirrors() {
   local marketplace_file="$1"
   local canonical_plugins_dir="$2"
@@ -1205,7 +1211,7 @@ sync_home_plugin_mirrors() {
 
 # Keep repo-local plugin caches aligned with the marketplace so Codex surfaces
 # freshly updated plugin skills immediately in runtime discovery.
-# Runtime cache layout: <cache-root>/<marketplace-name>/<plugin-name>/...
+# sync_local_marketplace_cache synchronises local marketplace plugins listed in a marketplace JSON into the runtime cache at <cache-root>/<marketplace-name>/<plugin-name>, copying validated local plugin sources, flattening nested variants, and pruning stale entries.
 sync_local_marketplace_cache() {
   local marketplace_file="$1"
   local cache_root="$2"
@@ -1353,6 +1359,7 @@ sync_local_marketplace_cache() {
   done < "$tracked_marketplaces_file"
 }
 
+# sync_repo_cache_snapshots_to_runtime_cache syncs repository plugin cache snapshots from the source directory into the runtime cache directory, ensuring the target exists and replacing its contents.
 sync_repo_cache_snapshots_to_runtime_cache() {
   local source_cache_root="$1"
   local target_cache_root="$2"
@@ -1371,6 +1378,7 @@ sync_repo_cache_snapshots_to_runtime_cache() {
   fi
 }
 
+# materialize_plugin_cache_roots ensures each plugin directory under the given cache_root has a flattened `.codex-plugin` root by locating a nested candidate (preferentially `local/`), copying or rsyncing that candidate into the plugin directory, and removing nested duplicate plugin roots.
 materialize_plugin_cache_roots() {
   local cache_root="$1"
   local marketplace_dir=""
@@ -1443,6 +1451,8 @@ materialize_plugin_cache_roots() {
   done < <(find "$cache_root" -mindepth 1 -maxdepth 1 -type d -print)
 }
 
+# sync_codex_profile_homes synchronises skills, plugin runtime cache and marketplace metadata into each Codex profile home found under $HOME.
+# It accepts two arguments: a cache source directory and a marketplace JSON file path; for each profile home it ensures skills are projected, copies the plugin cache (mode=copy), materialises plugin cache roots, installs the marketplace manifest to <profile>/plugins/marketplace.json, and creates home plugin mirrors so local plugin installs resolve against <profile>/plugins/<plugin-name>.
 sync_codex_profile_homes() {
   local cache_source="$1"
   local marketplace_file="$2"
@@ -1477,6 +1487,7 @@ sync_codex_profile_homes() {
   } | sort -u)
 }
 
+# cleanup_legacy_local_marketplace_cache removes a legacy local marketplace cache directory or symlink if it exists.
 cleanup_legacy_local_marketplace_cache() {
   local legacy_cache_root="$1"
   if [ -d "$legacy_cache_root" ] || [ -L "$legacy_cache_root" ]; then
@@ -1485,6 +1496,7 @@ cleanup_legacy_local_marketplace_cache() {
   fi
 }
 
+# sync_plugin_cache_projections runs scripts/projection_integrity.py to synchronise plugin-cache projections; if the script is missing it logs a warning and skips.
 sync_plugin_cache_projections() {
   local projection_script="$repo_root/scripts/projection_integrity.py"
 

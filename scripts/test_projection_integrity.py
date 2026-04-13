@@ -116,9 +116,9 @@ class ProjectionIntegrityTests(unittest.TestCase):
 
     def test_sync_mirror_removes_stale_files_and_stamps_headers(self) -> None:
         """
-        Ensure syncing a mirror removes stale files, copies source files into the projection with the required projection header, and results in a subsequent verification pass.
+        Verify syncing a mirror removes stale files, stamps projection headers on copied files, preserves executable mode, and yields a passing verification.
         
-        This test creates a source tree with a README.md and shell script, places a stale file in the projection, runs sync_mirror(...) and asserts the stale file is deleted and the projected README contains HEADER_TOKEN, then verifies that verify_mirror(...) reports "pass".
+        Sets up a source tree with README.md and an executable shell script, places a stale file in the projection, runs sync_mirror(...), and asserts that the stale file is deleted, the projected README contains HEADER_TOKEN, the script retains executable bits, and a subsequent verify_mirror(...) returns "pass".
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
@@ -150,6 +150,11 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertEqual(verify_result["status"], "pass")
 
     def test_sync_mirror_falls_back_when_rsync_hits_permission_error(self) -> None:
+        """
+        Ensure sync_mirror falls back to the Python sync engine when rsync fails with a mkstemp permission error.
+        
+        Simulates rsync being available but raising subprocess.CalledProcessError (return code 23) with stderr containing a mkstemp "Operation not permitted" message, and asserts the function reports a successful sync using the "python" engine and that the projected README.md is created.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             source = repo_root / "plugins" / "demo"
