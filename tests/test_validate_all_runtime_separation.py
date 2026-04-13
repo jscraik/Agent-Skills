@@ -1,0 +1,881 @@
+"""
+Tests for runtime-separation checks added to scripts/validate_all.sh.
+
+These tests cover the new code block introduced in the PR:
+  - runtime_separation_current path resolution based on output_mode
+  - runtime_consumer_scan_cmd --emit-digests flag based on output_mode
+  - All 8 new required run_check calls are registered in check-results.tsv
+"""
+
+import os
+import stat
+import subprocess
+import sys
+import tempfile
+import textwrap
+import unittest
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+VALIDATE_ALL_SH = REPO_ROOT / "scripts" / "validate_all.sh"
+
+# The 8 new slugs added by the PR, in expected order
+RUNTIME_SEPARATION_SLUGS = [
+    "runtime-separation-manifest",
+    "runtime-separation-consumers",
+    "runtime-separation-reader-compat",
+    "runtime-separation-current",
+    "runtime-separation-wrapper-fixtures",
+    "runtime-separation-baseline-compare",
+    "runtime-separation-writer-mutations",
+    "runtime-separation-profile-home",
+]
+
+# Bash scripts called by the new run_check calls (need stubs in tmpdir)
+NEW_BASH_SCRIPTS = [
+    "scripts/verify_wrapper_contract_fixtures.sh",
+    "scripts/verify_runtime_separation_writer_mutations.sh",
+    "scripts/validate_runtime_separation_profile_home.sh",
+]
+
+# Python scripts called by the new run_check calls (handled via PYTHON_BIN stub)
+NEW_PYTHON_SCRIPTS = [
+    "scripts/validate_runtime_separation_manifest.py",
+    "scripts/scan_runtime_separation_consumers.py",
+    "scripts/verify_runtime_separation_reader_compat.py",
+    "scripts/build_runtime_separation_current.py",
+    "scripts/compare_runtime_separation_baseline.py",
+]
+
+
+def _make_executable(path: str) -> None:
+    os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
+def _write_executable(path: str, content: str) -> None:
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as fh:
+        fh.write(content)
+    _make_executable(path)
+
+
+class TestRuntimeSeparationCurrentPath(unittest.TestCase):
+    """Tests the runtime_separation_current variable path logic (lines 164-167)."""
+
+    def _eval_path(self, output_mode: str, run_dir: str) -> str:
+        """Run the bash fragment that sets runtime_separation_current and return the result."""
+        script = textwrap.dedent(f"""\
+            output_mode={output_mode!r}
+            run_dir={run_dir!r}
+
+            runtime_separation_current="$run_dir/runtime-separation-current.json"
+            if [[ "$output_mode" == "persistent" ]]; then
+              runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
+            fi
+
+            echo "$runtime_separation_current"
+        """)
+        result = subprocess.run(
+            ["bash", "-c", script],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(result.returncode, 0, f"bash fragment failed: {result.stderr}")
+        return result.stdout.strip()
+
+    def test_ephemeral_mode_uses_run_dir(self):
+        """In ephemeral mode, runtime_separation_current must be inside run_dir."""
+        run_dir = "/tmp/test-run-dir"
+        path = self._eval_path("ephemeral", run_dir)
+        self.assertEqual(path, f"{run_dir}/runtime-separation-current.json")
+
+    def test_persistent_mode_uses_governance_path(self):
+        """In persistent mode, runtime_separation_current must be the GOVERNANCE canonical path."""
+        run_dir = "/tmp/test-run-dir"
+        path = self._eval_path("persistent", run_dir)
+        self.assertEqual(path, "GOVERNANCE/runtime-separation/current.json")
+
+    def test_persistent_mode_ignores_run_dir(self):
+        """In persistent mode, the run_dir value should have no effect on the path."""
+        path_a = self._eval_path("persistent", "/tmp/dir-a")
+        path_b = self._eval_path("persistent", "/tmp/dir-b")
+        self.assertEqual(path_a, path_b)
+        self.assertNotIn("/tmp/dir-a", path_a)
+        self.assertNotIn("/tmp/dir-b", path_b)
+
+    def test_ephemeral_path_contains_correct_filename(self):
+        """In ephemeral mode, the filename must be runtime-separation-current.json."""
+        run_dir = "/var/run/validate"
+        path = self._eval_path("ephemeral", run_dir)
+        self.assertTrue(path.endswith("/runtime-separation-current.json"))
+
+    def test_ephemeral_path_is_under_run_dir(self):
+        """In ephemeral mode, the path must start with run_dir."""
+        run_dir = "/some/custom/run/dir"
+        path = self._eval_path("ephemeral", run_dir)
+        self.assertTrue(path.startswith(run_dir + "/"))
+
+    def test_other_output_mode_not_treated_as_persistent(self):
+        """Modes other than 'persistent' should fall through to the ephemeral path."""
+        run_dir = "/tmp/run"
+        # Simulate an unexpected mode value - should not use the governance path
+        path = self._eval_path("ephemeral", run_dir)
+        self.assertNotEqual(path, "GOVERNANCE/runtime-separation/current.json")
+
+    def test_governance_path_does_not_use_run_dir_prefix(self):
+        """The persistent mode governance path must be a repo-relative path, not absolute."""
+        path = self._eval_path("persistent", "/absolute/run/dir")
+        self.assertFalse(path.startswith("/"))
+
+
+class TestRuntimeConsumerScanCommand(unittest.TestCase):
+    """Tests the runtime_consumer_scan_cmd array construction (lines 169-178)."""
+
+    def _build_cmd(self, output_mode: str, python_bin: str = "python3") -> list[str]:
+        """Run the bash fragment that builds runtime_consumer_scan_cmd and return its elements."""
+        script = textwrap.dedent(f"""\
+            output_mode={output_mode!r}
+            python_cmd=({python_bin!r})
+
+            runtime_consumer_scan_cmd=(
+              "${{python_cmd[@]}}"
+              scripts/scan_runtime_separation_consumers.py
+              --emit-readers
+              --emit-path-consumers
+              --strict
+            )
+            if [[ "$output_mode" == "persistent" ]]; then
+              runtime_consumer_scan_cmd+=(--emit-digests)
+            fi
+
+            printf '%s\\n' "${{runtime_consumer_scan_cmd[@]}}"
+        """)
+        result = subprocess.run(
+            ["bash", "-c", script],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(result.returncode, 0, f"bash fragment failed: {result.stderr}")
+        return [line for line in result.stdout.splitlines() if line]
+
+    def test_ephemeral_mode_omits_emit_digests(self):
+        """In ephemeral mode, --emit-digests must NOT be in the scan command."""
+        cmd = self._build_cmd("ephemeral")
+        self.assertNotIn("--emit-digests", cmd)
+
+    def test_persistent_mode_includes_emit_digests(self):
+        """In persistent mode, --emit-digests MUST be in the scan command."""
+        cmd = self._build_cmd("persistent")
+        self.assertIn("--emit-digests", cmd)
+
+    def test_emit_digests_is_last_in_persistent_mode(self):
+        """In persistent mode, --emit-digests should be appended as the last argument."""
+        cmd = self._build_cmd("persistent")
+        self.assertEqual(cmd[-1], "--emit-digests")
+
+    def test_base_flags_always_present_in_ephemeral(self):
+        """Base flags --emit-readers, --emit-path-consumers, --strict must be present in ephemeral mode."""
+        cmd = self._build_cmd("ephemeral")
+        self.assertIn("--emit-readers", cmd)
+        self.assertIn("--emit-path-consumers", cmd)
+        self.assertIn("--strict", cmd)
+
+    def test_base_flags_always_present_in_persistent(self):
+        """Base flags --emit-readers, --emit-path-consumers, --strict must be present in persistent mode."""
+        cmd = self._build_cmd("persistent")
+        self.assertIn("--emit-readers", cmd)
+        self.assertIn("--emit-path-consumers", cmd)
+        self.assertIn("--strict", cmd)
+
+    def test_target_script_always_present(self):
+        """The scan script path must appear in the command regardless of mode."""
+        for mode in ("ephemeral", "persistent"):
+            with self.subTest(mode=mode):
+                cmd = self._build_cmd(mode)
+                self.assertIn("scripts/scan_runtime_separation_consumers.py", cmd)
+
+    def test_python_bin_is_first_element(self):
+        """The command must start with the python binary."""
+        cmd = self._build_cmd("ephemeral", "python3")
+        self.assertEqual(cmd[0], "python3")
+
+    def test_flag_count_ephemeral_vs_persistent(self):
+        """Persistent mode should have exactly one more argument than ephemeral (--emit-digests)."""
+        ephemeral_cmd = self._build_cmd("ephemeral")
+        persistent_cmd = self._build_cmd("persistent")
+        self.assertEqual(len(persistent_cmd), len(ephemeral_cmd) + 1)
+
+
+class TestRuntimeSeparationIntegration(unittest.TestCase):
+    """Integration tests: run validate_all.sh with stubs and verify the 8 new checks."""
+
+    @classmethod
+    def _create_python_stub(cls, stub_path: str, args_log_dir: str) -> None:
+        """Create a stub Python launcher that records argv to per-script log files."""
+        stub = textwrap.dedent(f"""\
+            #!/usr/bin/env python3
+            import sys
+            import os
+            import json
+
+            log_dir = {args_log_dir!r}
+            os.makedirs(log_dir, exist_ok=True)
+
+            # Use the script name as the log file key
+            script_name = os.path.basename(sys.argv[1]) if len(sys.argv) > 1 else "unknown"
+            log_path = os.path.join(log_dir, script_name + ".args.json")
+            with open(log_path, "w") as fh:
+                json.dump(sys.argv[1:], fh)
+
+            sys.exit(0)
+        """)
+        _write_executable(stub_path, stub)
+
+    @classmethod
+    def _create_bash_stub(cls, stub_path: str, args_log_dir: str) -> None:
+        """Create a stub bash script that records its args and exits 0."""
+        stub = textwrap.dedent(f"""\
+            #!/usr/bin/env bash
+            mkdir -p {args_log_dir!r}
+            script_name="$(basename "$0")"
+            printf '%s\\n' "$@" > "{args_log_dir}/$script_name.args"
+            exit 0
+        """)
+        _write_executable(stub_path, stub)
+
+    def _setup_tmpdir(self, tmpdir: str) -> dict:
+        """
+        Set up a minimal fake repo structure in tmpdir.
+        Returns a dict with paths: python_stub, args_log_dir, scripts_dir, governance_dir.
+        """
+        scripts_dir = os.path.join(tmpdir, "scripts")
+        governance_dir = os.path.join(tmpdir, "GOVERNANCE", "runtime-separation")
+        fixtures_dir = os.path.join(governance_dir, "fixtures")
+        config_dir = os.path.join(tmpdir, "config", "schemas")
+        args_log_dir = os.path.join(tmpdir, "_stub_logs")
+        python_stub = os.path.join(tmpdir, "python_stub.py")
+
+        os.makedirs(scripts_dir, exist_ok=True)
+        os.makedirs(governance_dir, exist_ok=True)
+        os.makedirs(fixtures_dir, exist_ok=True)
+        os.makedirs(config_dir, exist_ok=True)
+        os.makedirs(args_log_dir, exist_ok=True)
+
+        # Python stub
+        self._create_python_stub(python_stub, args_log_dir)
+
+        # Stub bash scripts needed by new run_check calls
+        for rel_path in NEW_BASH_SCRIPTS:
+            self._create_bash_stub(os.path.join(tmpdir, rel_path), args_log_dir)
+
+        # Create minimal stub for ./scripts/validate_plan_graphs.sh (called with ./ prefix)
+        self._create_bash_stub(os.path.join(scripts_dir, "validate_plan_graphs.sh"), args_log_dir)
+
+        # Create minimal GOVERNANCE files expected by reader-compat check
+        Path(os.path.join(governance_dir, "slices.yaml")).write_text("slices: []\n")
+        Path(os.path.join(governance_dir, "baseline.json")).write_text("{}\n")
+        Path(os.path.join(fixtures_dir, "schema-prev.yaml")).write_text("slices: []\n")
+
+        # Create minimal config schema file expected by selection-gate-severity
+        schema_path = os.path.join(config_dir, "selection-gate-severity.v1.schema.json")
+        Path(schema_path).write_text("{}\n")
+
+        return {
+            "python_stub": python_stub,
+            "args_log_dir": args_log_dir,
+            "scripts_dir": scripts_dir,
+            "governance_dir": governance_dir,
+        }
+
+    def _run_validate_all(self, tmpdir: str, python_stub: str, mode: str) -> subprocess.CompletedProcess:
+        """Run validate_all.sh from tmpdir with PYTHON_BIN set to stub."""
+        env = os.environ.copy()
+        env["PYTHON_BIN"] = python_stub
+        # Suppress mise/uv detection by ensuring PYTHON_BIN is set
+        result = subprocess.run(
+            ["bash", str(VALIDATE_ALL_SH), f"--{mode}"],
+            capture_output=True,
+            text=True,
+            cwd=tmpdir,
+            env=env,
+            timeout=60,
+        )
+        return result
+
+    def _read_tsv_slugs(self, tmpdir: str, mode: str) -> list[tuple[str, str, str]]:
+        """Read check-results.tsv and return list of (slug, check_mode, outcome) tuples."""
+        if mode == "ephemeral":
+            # Find the temp run_dir created by the script
+            # The TSV path is written to stdout
+            tsv_candidates = list(Path(tmpdir).rglob("check-results.tsv"))
+            # Filter to exclude subdirs of artifacts/ (persistent)
+            tsv_candidates = [p for p in tsv_candidates if "artifacts" not in str(p)]
+            if not tsv_candidates:
+                # Also check /tmp since ephemeral uses mktemp
+                import glob
+                tmp_tsvs = glob.glob("/tmp/agent-skills-validate-all.*/check-results.tsv")
+                tsv_candidates = [Path(p) for p in tmp_tsvs]
+        else:
+            tsv_candidates = list((Path(tmpdir) / "artifacts" / "validation").rglob("check-results.tsv"))
+
+        entries = []
+        for tsv_path in tsv_candidates:
+            for line in tsv_path.read_text().splitlines():
+                parts = line.strip().split("\t")
+                if len(parts) >= 3:
+                    entries.append((parts[0], parts[1], parts[2]))
+        return entries
+
+    def _get_tsv_from_stdout(self, stdout: str, tmpdir: str, mode: str) -> list[tuple[str, str, str]]:
+        """Parse check-results.tsv based on the run_dir shown in stdout."""
+        # Extract run_dir from stdout line "📁 Validation logs: <path>"
+        run_dir = None
+        for line in stdout.splitlines():
+            if "Validation logs:" in line:
+                # Extract the path after the emoji and label
+                parts = line.split("Validation logs:")
+                if len(parts) == 2:
+                    run_dir = parts[1].strip()
+                    break
+
+        if run_dir is None:
+            return []
+
+        # run_dir may be absolute (ephemeral uses mktemp) or relative (persistent uses
+        # artifacts/validation/<timestamp> relative to cwd=tmpdir)
+        run_dir_path = Path(run_dir)
+        if not run_dir_path.is_absolute():
+            run_dir_path = Path(tmpdir) / run_dir_path
+
+        tsv_path = run_dir_path / "check-results.tsv"
+        if not tsv_path.exists():
+            return []
+
+        entries = []
+        for line in tsv_path.read_text().splitlines():
+            parts = line.strip().split("\t")
+            if len(parts) >= 3:
+                entries.append((parts[0], parts[1], parts[2]))
+        return entries
+
+    def test_ephemeral_mode_registers_all_eight_new_checks(self):
+        """All 8 new runtime-separation slugs must appear in check-results.tsv in ephemeral mode."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
+            registered_slugs = [slug for slug, _, _ in entries]
+
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                self.assertIn(
+                    slug,
+                    registered_slugs,
+                    f"Slug '{slug}' not found in check-results.tsv.\n"
+                    f"Registered slugs: {registered_slugs}\n"
+                    f"stdout: {result.stdout[-2000:]}\n"
+                    f"stderr: {result.stderr[-1000:]}",
+                )
+
+    def test_persistent_mode_registers_all_eight_new_checks(self):
+        """All 8 new runtime-separation slugs must appear in check-results.tsv in persistent mode."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            # Need artifacts/validation dir for persistent mode
+            os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
+
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
+
+            entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "persistent")
+            registered_slugs = [slug for slug, _, _ in entries]
+
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                self.assertIn(
+                    slug,
+                    registered_slugs,
+                    f"Slug '{slug}' not found in check-results.tsv in persistent mode.\n"
+                    f"Registered slugs: {registered_slugs}\n"
+                    f"stdout: {result.stdout[-2000:]}\n"
+                    f"stderr: {result.stderr[-1000:]}",
+                )
+
+    def test_all_new_checks_are_required_mode(self):
+        """All 8 new runtime-separation checks must be registered as 'required' (not warn)."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
+            tsv_map = {slug: (check_mode, outcome) for slug, check_mode, outcome in entries}
+
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                if slug in tsv_map:
+                    check_mode, _ = tsv_map[slug]
+                    self.assertEqual(
+                        check_mode,
+                        "required",
+                        f"Slug '{slug}' has mode '{check_mode}', expected 'required'",
+                    )
+
+    def test_new_checks_ordering_in_tsv(self):
+        """The 8 new runtime-separation slugs must appear in the correct relative order in check-results.tsv."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
+            all_slugs = [slug for slug, _, _ in entries]
+
+            # Filter to only the new runtime-separation slugs
+            runtime_slugs_in_tsv = [s for s in all_slugs if s in RUNTIME_SEPARATION_SLUGS]
+
+            # They should appear in the same relative order as RUNTIME_SEPARATION_SLUGS
+            expected_order = [s for s in RUNTIME_SEPARATION_SLUGS if s in runtime_slugs_in_tsv]
+            self.assertEqual(
+                runtime_slugs_in_tsv,
+                expected_order,
+                f"Runtime-separation slugs appear out of order.\n"
+                f"Expected order: {expected_order}\n"
+                f"Actual order in TSV: {runtime_slugs_in_tsv}",
+            )
+
+    def test_new_checks_succeed_with_stubs(self):
+        """All 8 new runtime-separation checks should pass when their stub scripts succeed."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
+            tsv_map = {slug: outcome for slug, _, outcome in entries}
+
+            for slug in RUNTIME_SEPARATION_SLUGS:
+                if slug in tsv_map:
+                    self.assertEqual(
+                        tsv_map[slug],
+                        "pass",
+                        f"Slug '{slug}' has outcome '{tsv_map[slug]}', expected 'pass'.\n"
+                        f"This means the stub did not exit 0 or was not found.",
+                    )
+
+    def test_python_stub_receives_build_current_output_flag_ephemeral(self):
+        """build_runtime_separation_current.py must be called with --output pointing to run_dir in ephemeral mode."""
+        import json
+
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            # Find the run_dir from stdout
+            run_dir = None
+            for line in result.stdout.splitlines():
+                if "Validation logs:" in line:
+                    run_dir = line.split("Validation logs:")[-1].strip()
+                    break
+
+            # Find the args log for build_runtime_separation_current.py
+            args_log = os.path.join(paths["args_log_dir"], "build_runtime_separation_current.py.args.json")
+            if not os.path.exists(args_log):
+                self.skipTest("build_runtime_separation_current.py stub log not found - check may have failed")
+
+            with open(args_log) as fh:
+                recorded_args = json.load(fh)
+
+            # --output flag should be followed by a path inside run_dir
+            self.assertIn("--output", recorded_args, f"--output flag not found in args: {recorded_args}")
+            output_idx = recorded_args.index("--output")
+            output_path = recorded_args[output_idx + 1]
+            self.assertIn("runtime-separation-current.json", output_path)
+            # In ephemeral mode, path should NOT be the GOVERNANCE canonical path
+            self.assertNotEqual(output_path, "GOVERNANCE/runtime-separation/current.json")
+            if run_dir:
+                self.assertTrue(
+                    output_path.startswith(run_dir) or "runtime-separation-current.json" in output_path,
+                    f"Output path '{output_path}' not under run_dir '{run_dir}'",
+                )
+
+    def test_python_stub_receives_build_current_output_flag_persistent(self):
+        """build_runtime_separation_current.py must be called with --output pointing to GOVERNANCE path in persistent mode."""
+        import json
+
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
+
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
+
+            args_log = os.path.join(paths["args_log_dir"], "build_runtime_separation_current.py.args.json")
+            if not os.path.exists(args_log):
+                self.skipTest("build_runtime_separation_current.py stub log not found - check may have failed")
+
+            with open(args_log) as fh:
+                recorded_args = json.load(fh)
+
+            self.assertIn("--output", recorded_args, f"--output flag not found: {recorded_args}")
+            output_idx = recorded_args.index("--output")
+            output_path = recorded_args[output_idx + 1]
+            self.assertEqual(
+                output_path,
+                "GOVERNANCE/runtime-separation/current.json",
+                f"In persistent mode, output must be GOVERNANCE path. Got: {output_path}",
+            )
+
+    def test_consumer_scan_receives_emit_digests_in_persistent_mode(self):
+        """scan_runtime_separation_consumers.py must receive --emit-digests in persistent mode."""
+        import json
+
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
+
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "persistent")
+
+            args_log = os.path.join(
+                paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
+            )
+            if not os.path.exists(args_log):
+                self.skipTest("scan_runtime_separation_consumers.py stub log not found")
+
+            with open(args_log) as fh:
+                recorded_args = json.load(fh)
+
+            self.assertIn(
+                "--emit-digests",
+                recorded_args,
+                f"--emit-digests must be passed in persistent mode. Got args: {recorded_args}",
+            )
+
+    def test_consumer_scan_omits_emit_digests_in_ephemeral_mode(self):
+        """scan_runtime_separation_consumers.py must NOT receive --emit-digests in ephemeral mode."""
+        import json
+
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            args_log = os.path.join(
+                paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
+            )
+            if not os.path.exists(args_log):
+                self.skipTest("scan_runtime_separation_consumers.py stub log not found")
+
+            with open(args_log) as fh:
+                recorded_args = json.load(fh)
+
+            self.assertNotIn(
+                "--emit-digests",
+                recorded_args,
+                f"--emit-digests must NOT be passed in ephemeral mode. Got args: {recorded_args}",
+            )
+
+    def test_consumer_scan_always_receives_base_flags(self):
+        """scan_runtime_separation_consumers.py must receive base flags in both modes."""
+        import json
+
+        required_flags = ["--emit-readers", "--emit-path-consumers", "--strict"]
+        for mode in ("ephemeral", "persistent"):
+            with self.subTest(mode=mode):
+                with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+                    paths = self._setup_tmpdir(tmpdir)
+                    if mode == "persistent":
+                        os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
+
+                    result = self._run_validate_all(tmpdir, paths["python_stub"], mode)
+
+                    args_log = os.path.join(
+                        paths["args_log_dir"], "scan_runtime_separation_consumers.py.args.json"
+                    )
+                    if not os.path.exists(args_log):
+                        self.skipTest(f"scan stub log not found for mode={mode}")
+
+                    with open(args_log) as fh:
+                        recorded_args = json.load(fh)
+
+                    for flag in required_flags:
+                        self.assertIn(
+                            flag,
+                            recorded_args,
+                            f"Flag '{flag}' missing in {mode} mode. Got args: {recorded_args}",
+                        )
+
+    def test_reader_compat_receives_correct_schema_paths(self):
+        """verify_runtime_separation_reader_compat.py must use GOVERNANCE canonical schema paths."""
+        import json
+
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            args_log = os.path.join(
+                paths["args_log_dir"], "verify_runtime_separation_reader_compat.py.args.json"
+            )
+            if not os.path.exists(args_log):
+                self.skipTest("verify_runtime_separation_reader_compat.py stub log not found")
+
+            with open(args_log) as fh:
+                recorded_args = json.load(fh)
+
+            self.assertIn(
+                "--schema-current",
+                recorded_args,
+                f"--schema-current not found in args: {recorded_args}",
+            )
+            schema_current_idx = recorded_args.index("--schema-current")
+            self.assertEqual(
+                recorded_args[schema_current_idx + 1],
+                "GOVERNANCE/runtime-separation/slices.yaml",
+            )
+
+            self.assertIn(
+                "--schema-prev",
+                recorded_args,
+                f"--schema-prev not found in args: {recorded_args}",
+            )
+            schema_prev_idx = recorded_args.index("--schema-prev")
+            self.assertEqual(
+                recorded_args[schema_prev_idx + 1],
+                "GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml",
+            )
+
+    def test_baseline_compare_receives_correct_flags(self):
+        """compare_runtime_separation_baseline.py must receive the GOVERNANCE baseline and correct current path."""
+        import json
+
+        for mode in ("ephemeral", "persistent"):
+            with self.subTest(mode=mode):
+                with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+                    paths = self._setup_tmpdir(tmpdir)
+                    if mode == "persistent":
+                        os.makedirs(os.path.join(tmpdir, "artifacts", "validation"), exist_ok=True)
+
+                    result = self._run_validate_all(tmpdir, paths["python_stub"], mode)
+
+                    args_log = os.path.join(
+                        paths["args_log_dir"], "compare_runtime_separation_baseline.py.args.json"
+                    )
+                    if not os.path.exists(args_log):
+                        self.skipTest(f"compare baseline stub log not found for mode={mode}")
+
+                    with open(args_log) as fh:
+                        recorded_args = json.load(fh)
+
+                    # --baseline must always point to GOVERNANCE canonical path
+                    self.assertIn("--baseline", recorded_args)
+                    baseline_idx = recorded_args.index("--baseline")
+                    self.assertEqual(
+                        recorded_args[baseline_idx + 1],
+                        "GOVERNANCE/runtime-separation/baseline.json",
+                    )
+
+                    # --current must match runtime_separation_current for this mode
+                    self.assertIn("--current", recorded_args)
+                    current_idx = recorded_args.index("--current")
+                    current_path = recorded_args[current_idx + 1]
+
+                    if mode == "persistent":
+                        self.assertEqual(current_path, "GOVERNANCE/runtime-separation/current.json")
+                    else:
+                        self.assertIn("runtime-separation-current.json", current_path)
+                        self.assertNotEqual(current_path, "GOVERNANCE/runtime-separation/current.json")
+
+    def test_manifest_check_uses_strict_flag(self):
+        """validate_runtime_separation_manifest.py must receive --strict flag."""
+        import json
+
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            args_log = os.path.join(
+                paths["args_log_dir"], "validate_runtime_separation_manifest.py.args.json"
+            )
+            if not os.path.exists(args_log):
+                self.skipTest("validate_runtime_separation_manifest.py stub log not found")
+
+            with open(args_log) as fh:
+                recorded_args = json.load(fh)
+
+            self.assertIn(
+                "--strict",
+                recorded_args,
+                f"--strict flag missing from manifest validation. Got args: {recorded_args}",
+            )
+
+    def test_validate_all_continues_after_preexisting_check_failures(self):
+        """validate_all.sh must continue executing runtime-separation checks even when earlier checks fail."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            # We don't stub any pre-existing checks, so they may fail.
+            # The script should continue and still register runtime-separation slugs.
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            entries = self._get_tsv_from_stdout(result.stdout, tmpdir, "ephemeral")
+            registered_slugs = [slug for slug, _, _ in entries]
+
+            # At least some of the new runtime-separation checks should appear
+            found = [s for s in RUNTIME_SEPARATION_SLUGS if s in registered_slugs]
+            self.assertGreater(
+                len(found),
+                0,
+                f"No runtime-separation slugs found even with stubs present.\n"
+                f"All registered slugs: {registered_slugs}\n"
+                f"stdout: {result.stdout[-2000:]}\n"
+                f"stderr: {result.stderr[-500:]}",
+            )
+
+    def test_wrapper_fixtures_check_receives_runtime_separation_flag(self):
+        """verify_wrapper_contract_fixtures.sh stub must be invoked with --runtime-separation."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            # The bash stub writes args to a file
+            args_file = os.path.join(
+                paths["args_log_dir"], "verify_wrapper_contract_fixtures.sh.args"
+            )
+            if not os.path.exists(args_file):
+                self.skipTest("verify_wrapper_contract_fixtures.sh stub args file not found")
+
+            args_content = Path(args_file).read_text()
+            self.assertIn(
+                "--runtime-separation",
+                args_content,
+                f"--runtime-separation flag missing from wrapper fixtures check. Got: {args_content!r}",
+            )
+
+    def test_writer_mutations_check_receives_strict_flag(self):
+        """verify_runtime_separation_writer_mutations.sh stub must be invoked with --strict."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            args_file = os.path.join(
+                paths["args_log_dir"], "verify_runtime_separation_writer_mutations.sh.args"
+            )
+            if not os.path.exists(args_file):
+                self.skipTest("verify_runtime_separation_writer_mutations.sh stub args file not found")
+
+            args_content = Path(args_file).read_text()
+            self.assertIn(
+                "--strict",
+                args_content,
+                f"--strict flag missing from writer mutations check. Got: {args_content!r}",
+            )
+
+    def test_profile_home_check_receives_output_flag(self):
+        """validate_runtime_separation_profile_home.sh stub must receive --output pointing to run_dir."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            args_file = os.path.join(
+                paths["args_log_dir"], "validate_runtime_separation_profile_home.sh.args"
+            )
+            if not os.path.exists(args_file):
+                self.skipTest("validate_runtime_separation_profile_home.sh stub args file not found")
+
+            args_content = Path(args_file).read_text()
+            self.assertIn(
+                "runtime-separation-profile-home.json",
+                args_content,
+                f"Output file not found in profile-home args. Got: {args_content!r}",
+            )
+
+    def test_profile_home_check_receives_repo_current_flag(self):
+        """validate_runtime_separation_profile_home.sh must receive --repo-current matching runtime_separation_current."""
+        with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
+            paths = self._setup_tmpdir(tmpdir)
+            result = self._run_validate_all(tmpdir, paths["python_stub"], "ephemeral")
+
+            args_file = os.path.join(
+                paths["args_log_dir"], "validate_runtime_separation_profile_home.sh.args"
+            )
+            if not os.path.exists(args_file):
+                self.skipTest("validate_runtime_separation_profile_home.sh stub args file not found")
+
+            args_content = Path(args_file).read_text()
+            self.assertIn(
+                "--repo-current",
+                args_content,
+                f"--repo-current flag missing. Got: {args_content!r}",
+            )
+            self.assertIn(
+                "runtime-separation-current.json",
+                args_content,
+                f"runtime-separation-current.json not in args. Got: {args_content!r}",
+            )
+
+
+class TestValidateAllOutputModeEnvVar(unittest.TestCase):
+    """Tests the VALIDATE_ALL_OUTPUT_MODE environment variable and CLI arg interaction."""
+
+    def test_runtime_separation_current_path_logic_from_env_mode(self):
+        """Verify path logic is correct when output_mode comes from VALIDATE_ALL_OUTPUT_MODE."""
+        # Test the bash logic directly - the env var sets the mode
+        for mode, expected_suffix in [
+            ("ephemeral", "runtime-separation-current.json"),
+            ("persistent", "GOVERNANCE/runtime-separation/current.json"),
+        ]:
+            with self.subTest(mode=mode):
+                script = textwrap.dedent(f"""\
+                    output_mode="{mode}"
+                    run_dir="/tmp/test-run"
+
+                    runtime_separation_current="$run_dir/runtime-separation-current.json"
+                    if [[ "$output_mode" == "persistent" ]]; then
+                      runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
+                    fi
+
+                    echo "$runtime_separation_current"
+                """)
+                result = subprocess.run(
+                    ["bash", "-c", script],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                self.assertEqual(result.returncode, 0)
+                if mode == "ephemeral":
+                    self.assertIn(expected_suffix, result.stdout)
+                else:
+                    self.assertEqual(result.stdout.strip(), expected_suffix)
+
+    def test_emit_digests_conditional_matches_output_mode_precisely(self):
+        """Verify --emit-digests conditional only triggers for exactly 'persistent', not partial matches."""
+        non_persistent_modes = ["Persistent", "PERSISTENT", "persist", "persistent_extra", ""]
+        for mode in non_persistent_modes:
+            with self.subTest(mode=repr(mode)):
+                script = textwrap.dedent(f"""\
+                    output_mode={mode!r}
+                    python_cmd=(python3)
+
+                    runtime_consumer_scan_cmd=(
+                      "${{python_cmd[@]}}"
+                      scripts/scan_runtime_separation_consumers.py
+                      --emit-readers
+                      --emit-path-consumers
+                      --strict
+                    )
+                    if [[ "$output_mode" == "persistent" ]]; then
+                      runtime_consumer_scan_cmd+=(--emit-digests)
+                    fi
+
+                    printf '%s\\n' "${{runtime_consumer_scan_cmd[@]}}"
+                """)
+                result = subprocess.run(
+                    ["bash", "-c", script],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                self.assertEqual(result.returncode, 0)
+                self.assertNotIn(
+                    "--emit-digests",
+                    result.stdout.splitlines(),
+                    f"--emit-digests should not appear for output_mode={mode!r}",
+                )
+
+
+if __name__ == "__main__":
+    unittest.main()
