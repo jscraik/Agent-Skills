@@ -28,7 +28,7 @@ cases:
     prompt: "Publish a release candidate to the beta tag while keeping latest on stable."
     acceptance:
       - type: regex
-        value: "(?i)\\bnpm publish\\b.*\\b(--tag\\s*=?\\s*beta|dist-tag)\\b"
+        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*(--tag\\s*=?\\s*beta|dist-tag\\s+(add|set|ls)))"
 
   - id: npm-release-otp
     name: otp required flow
@@ -39,7 +39,7 @@ cases:
     prompt: "Our npm publish failed due to OTP requirements. What exact command path should we run now?"
     acceptance:
       - type: regex
-        value: "(?i)\\bnpm publish\\b.*\\b(--otp\\b|otp|2fa)\\b"
+        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*\\b--otp(?:\\s*=?\\s*\\d+)?\\b)"
 
   - id: npm-release-provenance
     name: provenance publish
@@ -50,11 +50,7 @@ cases:
     prompt: "This is the first public release. Include provenance and access flags in the publish command."
     acceptance:
       - type: regex
-        value: "(?i)\\bnpm publish\\b"
-      - type: regex
-        value: "(?i)\\b--provenance\\b"
-      - type: regex
-        value: "(?i)\\b--access\\s+public\\b"
+        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*\\b--provenance\\b)(?=.*\\b--access\\s+public\\b)"
 
   - id: npm-release-command-guard
     name: risky command guard
