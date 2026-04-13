@@ -1234,11 +1234,13 @@ sync_plugin_cache_projections() {
 }
 
 # Sync to Claude Code, OpenAI Codex/Agents, and Gemini loaders.
-sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
+marketplace_file="$plugins_dir/marketplace.json"
+sync_local_marketplace_cache "$marketplace_file" "$plugins_dir/cache"
 sync_plugin_cache_projections
 sync_user_skills "$skills_dir" "$repo_root/skills" 1
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 if [[ "$sync_scope" == "workspace" ]]; then
+  profile_plugins="$HOME/plugins"
   antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
   sync_user_skills "$skills_dir" "$HOME/.claude/skills"
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
@@ -1250,7 +1252,7 @@ if [[ "$sync_scope" == "workspace" ]]; then
   sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
   sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
   sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
-  sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
+  sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
 else
   echo "Project-local scope: skipped home runtime projections."
 fi
