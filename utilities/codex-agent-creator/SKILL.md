@@ -1,6 +1,6 @@
 ---
 name: codex-agent-builder
-description: Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+description: Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/{name}/{name}.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
