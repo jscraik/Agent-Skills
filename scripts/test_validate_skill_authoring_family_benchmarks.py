@@ -158,6 +158,60 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
 
             self.assertEqual(deduped, ("utilities/skillify",))
 
+    def test_validate_skill_reports_scope_resolver_failures(self) -> None:
+        """
+        Ensures resolver execution errors surface as explicit FAIL findings.
+
+        Creates a minimal skill fixture and patches the shared scope resolver to raise.
+        The benchmark validator must emit TASK_PROFILE_SCOPE_RESOLVER instead of silently
+        accepting the fallback path.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_rel = "plugins/skill-factory/skills/skill-builder"
+            skill_dir = root / skill_rel
+            refs = skill_dir / "references"
+            refs.mkdir(parents=True, exist_ok=True)
+            (skill_dir / "SKILL.md").write_text("# skill-builder\n", encoding="utf-8")
+            (refs / "task-profile.json").write_text(
+                """{
+  "schema_version": "1.0",
+  "profile_id": "plugins-skill-factory-skills-skill-builder",
+  "scope_skill": "plugins/skill-factory/skills/skill-builder",
+  "scope_profile": "plugins",
+  "rubric_version": "2026-04-08",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {},
+  "criteria": [],
+  "delegation": {},
+  "learning_posture": {}
+}
+""",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.object(self.module, "REPO_ROOT", root),
+                mock.patch.object(self.module, "_validate_contract", return_value=[]),
+                mock.patch.object(self.module, "_validate_evals", return_value=[]),
+                mock.patch.object(self.module, "_validate_reference_pi", return_value=[]),
+                mock.patch.object(self.module, "_load_scope_skill_resolver", return_value=lambda _p: (_ for _ in ()).throw(ValueError("boom"))),
+            ):
+                findings = self.module._validate_skill(skill_rel)
+
+            resolver_failures = [f for f in findings if f.code == "TASK_PROFILE_SCOPE_RESOLVER"]
+            self.assertEqual(len(resolver_failures), 1)
+
+    def test_scope_resolver_supports_versioned_harness_cache_paths(self) -> None:
+        """
+        Ensures harness cache aliases resolve regardless of cache plugin version segment.
+        """
+        resolved = self.module._resolve_scope_skill_for_path(
+            "plugins/cache/agent-skills-local/harness-engineering/9.9.9/skills/ce-spec"
+        )
+        self.assertEqual(resolved, "product/ops/ce-spec")
+
 
 if __name__ == "__main__":
     unittest.main()

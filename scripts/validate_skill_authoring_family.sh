@@ -287,9 +287,17 @@ fi
 # ---------------------------------------------------------------------------
 # P1.x: pytest unit gate — run validator unit tests
 # ---------------------------------------------------------------------------
+pytest_cmd=()
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${python_cmd[@]}" -m pytest)
+elif command -v uv >/dev/null 2>&1 && uv run --python 3.12 --with pytest python -m pytest --version >/dev/null 2>&1; then
+  pytest_cmd=(uv run --python 3.12 --with pytest python -m pytest)
+  echo "[family-gate] using uv ephemeral pytest runner"
+fi
+
+if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   echo "[family-gate] running pytest unit tests..."
-  if "${python_cmd[@]}" -m pytest \
+  if "${pytest_cmd[@]}" \
       utilities/skill-builder/scripts/test_skill_gate.py \
       scripts/test_validate_skill_authoring_family_benchmarks.py \
       scripts/test_projection_integrity.py \
@@ -300,7 +308,14 @@ if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
     exit 2
   fi
 else
-  echo "[family-gate] WARN: pytest not found; skipping unit tests (install via: uv run --python 3.12 --with pytest ... , uv pip install pytest, or brew install python)"
+  if [[ "${SKILL_FAMILY_ALLOW_PYTEST_SKIP:-0}" == "1" ]]; then
+    echo "[family-gate] WARN: pytest not found; skipping unit tests due to SKILL_FAMILY_ALLOW_PYTEST_SKIP=1"
+  else
+    echo "[family-gate] ERROR: pytest not found; unit tests are required for this gate"
+    echo "[family-gate] install via: uv run --python 3.12 --with pytest ... , uv pip install pytest, or brew install python"
+    echo "[family-gate] set SKILL_FAMILY_ALLOW_PYTEST_SKIP=1 only for emergency lanes with explicit approval"
+    exit 2
+  fi
 fi
 
 # Track per-skill evidence for the release-ready index

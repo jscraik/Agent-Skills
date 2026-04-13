@@ -1,18 +1,22 @@
-schema_version: "1.1"
-purpose: "Convert the current Codex session into a reusable skill package by extracting process steps, interviewing for missing details, and writing a reviewed SKILL.md."
+schema_version: "1.2"
+purpose: "Convert the current Codex session into a reusable skill package by extracting process steps, optionally corroborating with session-collector evidence, interviewing for missing details, and writing a reviewed SKILL.md."
 triggers:
   - user asks to turn a completed workflow into a skill
   - user says skillify this session or capture this process as reusable
   - repeated guidance in a session should be preserved as a skill contract
 inputs:
   - optional process description from the user
-  - preferred save destination (repo local or personal Codex skills)
+  - preferred save destination under canonical repository category paths
   - preferred execution style (inline or fork) when the process demands it
   - session context containing ordered steps, corrections, and constraints
+  - confirmed category (1-9), target environment (`codex|claude|portable`), and compatibility posture (`learn|guided|execute`)
+  - optional session-collector artifact (`session-collector.json`) plus freshness signal (`generated_at` and input window cutoff)
 outputs:
   - reviewed SKILL.md draft with clear success criteria per step
   - saved skill path plus invocation syntax
   - concise assumptions list when gaps were filled by inference
+  - explicit evidence provenance (`thread_only` or `thread_plus_session_collector`)
+  - non-trivial summary payload fields include schema_version, mode, skill_path, findings, validations, security, next_step
 non_goals:
   - do not write ambiguous template-only skills with unresolved TODO markers
   - do not skip user confirmation before saving the final SKILL.md
@@ -21,6 +25,7 @@ risks:
   - overfitting to one session can produce brittle skills; mitigated by confirming reusable triggers and arguments
   - long interviews can frustrate users; mitigated by keeping rounds minimal and stopping once the contract is complete
   - incorrect destination can hide skills from expected scope; mitigated by explicit destination confirmation before writes
+  - stale telemetry can mis-order steps; mitigated by validating `generated_at`/cutoff before using session-collector defaults
 rollback_procedure: >
   If the generated SKILL.md is malformed, mismatched to the user intent, or saved to the wrong
   location, discard the generated files and regenerate from the latest confirmed interview
@@ -29,4 +34,5 @@ rollback_procedure: >
 observability: >
   Monitor quality through (1) quick_validate pass rate for generated skill packages, (2) strict
   ask skills audit outcomes, (3) frequency of user-requested rewrites after draft review, and
-  (4) recurring destination mistakes between repo-local and personal save paths.
+  (4) recurring destination mistakes between canonical category paths, and
+  (5) how often session-collector evidence changes draft ordering versus thread-only extraction.

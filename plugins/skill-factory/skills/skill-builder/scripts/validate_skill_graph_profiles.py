@@ -42,6 +42,8 @@ class SkillEntry:
     skill_md: Path
     skill_dir: Path
     relative_skill_dir: str
+    source_skill_dirs: tuple[str, ...]
+    scope_skill: str
     inventory_slice: str
     profile_path: Path
     expected_mode: str
@@ -80,13 +82,16 @@ def discover_active_skills(
         skill_md = row.skill_md
         skill_dir = skill_md.parent
         rel_dir = row.relative_skill_dir
-        mode = "manual" if rel_dir in MANUAL_SKILL_PATHS else "co-pilot"
+        scope_skill = row.scope_skill
+        mode = "manual" if scope_skill in MANUAL_SKILL_PATHS else "co-pilot"
         wave = "wave-1-manual" if mode == "manual" else "wave-2-co-pilot"
         entries.append(
             SkillEntry(
                 skill_md=skill_md,
                 skill_dir=skill_dir,
                 relative_skill_dir=rel_dir,
+                source_skill_dirs=row.source_skill_dirs or (rel_dir,),
+                scope_skill=scope_skill,
                 inventory_slice=row.inventory_slice,
                 profile_path=skill_dir / "references" / "task-profile.json",
                 expected_mode=mode,
@@ -98,6 +103,14 @@ def discover_active_skills(
 
 def add_error(errors: List[str], message: str) -> None:
     errors.append(message)
+
+
+def display_path(path: Path, repo_root: Path) -> str:
+    """Render path relative to repo_root when possible, otherwise absolute."""
+    try:
+        return str(path.relative_to(repo_root))
+    except ValueError:
+        return str(path)
 
 
 def parse_frontmatter_binding(skill_md: Path) -> Optional[str]:
@@ -130,14 +143,14 @@ def validate_profile(entry: SkillEntry, payload: Dict[str, Any], errors: List[st
         if not isinstance(value, expected_type) or not str(value).strip():
             add_error(errors, f"missing/invalid `{field}`")
 
-    expected_profile_id = entry.relative_skill_dir.replace("/", "-")
+    expected_profile_id = entry.scope_skill.replace("/", "-")
     if str(payload.get("profile_id", "")).strip() != expected_profile_id:
         add_error(errors, f"profile_id must equal `{expected_profile_id}`")
 
-    if str(payload.get("scope_skill", "")).strip() != entry.relative_skill_dir:
-        add_error(errors, f"scope_skill must equal `{entry.relative_skill_dir}`")
+    if str(payload.get("scope_skill", "")).strip() != entry.scope_skill:
+        add_error(errors, f"scope_skill must equal `{entry.scope_skill}`")
 
-    expected_scope_profile = entry.relative_skill_dir.split("/", 1)[0]
+    expected_scope_profile = entry.scope_skill.split("/", 1)[0]
     if str(payload.get("scope_profile", "")).strip() != expected_scope_profile:
         add_error(errors, f"scope_profile must equal `{expected_scope_profile}`")
 
@@ -533,13 +546,15 @@ def main() -> int:
         profile_rows.append(
             {
                 "skill_path": entry.skill_md.relative_to(repo_root).as_posix(),
-                "scope_skill": entry.relative_skill_dir,
+                "scope_skill": entry.scope_skill,
+                "selected_skill_dir": entry.relative_skill_dir,
+                "source_skill_dirs": list(entry.source_skill_dirs),
                 "wave": entry.wave,
                 "profile_path": entry.profile_path.relative_to(repo_root).as_posix(),
                 "profile_binding": resolved_binding,
                 "profile_binding_mode": binding_mode,
                 "delegation_mode": entry.expected_mode,
-                "status": "valid" if not errors else "invalid",
+                "task_profile_status": "valid" if not errors else "invalid",
                 "errors": errors,
             }
         )
@@ -878,8 +893,8 @@ def main() -> int:
                 "wave_0_ready": wave0_ready,
                 "wave_1_ready": wave1_ready,
                 "wave_2_ready": wave2_ready,
-                "profile_index_out": str(profile_index_path.relative_to(repo_root)),
-                "wave_readiness_out": str(readiness_path.relative_to(repo_root)),
+                "profile_index_out": display_path(profile_index_path, repo_root),
+                "wave_readiness_out": display_path(readiness_path, repo_root),
             },
             indent=2,
         )

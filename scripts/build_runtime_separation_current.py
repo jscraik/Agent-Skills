@@ -233,6 +233,14 @@ def _normalize_repo_validate(payload: dict[str, Any] | None) -> dict[str, Any]:
     }
 
 
+def _normalize_repo_validate_skipped() -> dict[str, Any]:
+    return {
+        "command": "repo validate --json",
+        "status": "not_run_recursive_guard",
+        "skip_reason": "recursive_validation_guard",
+    }
+
+
 def _command_check(
     *,
     command: str,
@@ -343,14 +351,14 @@ def main() -> int:
     command_checks["plugins_status"] = plugins_status_checks
 
     # Avoid recursive validation fan-out: `repo validate` calls validate_all.sh, which
-    # now invokes this runtime-separation lane.
-    rc, payload, evidence = _run_json(repo_root, ["bin/ask", "repo", "status", "--json"])
+    # now invokes this runtime-separation lane. Emit explicit skipped semantics instead
+    # of shadowing with repo status output.
     command_checks["repo_validate"] = _command_check(
-        command="bin/ask repo status --json",
+        command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
         subject_id="repo",
-        returncode=rc,
-        normalized_fields=_normalize_repo_validate(payload),
-        evidence_ref=evidence,
+        returncode=0,
+        normalized_fields=_normalize_repo_validate_skipped(),
+        evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
     )
 
     rc, payload, evidence = _run_json(

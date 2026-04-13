@@ -152,6 +152,7 @@ run_check required skill-types "🏷️  Linting semantic skill-type tags..." ba
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict
 run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash scripts/validate_skill_authoring_family.sh
+run_check required skill-graph-profiles "🕸️  Validating skill graph profile contracts..." "${python_cmd[@]}" plugins/skill-factory/skills/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0 --profile-index-out "$run_dir/skill-graph-profile-index.json" --wave-readiness-out "$run_dir/skill-graph-wave-readiness.json"
 run_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" scripts/gotcha_pipeline.py validate
 selection_contract_cmd=("${python_cmd[@]}" scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
 if [[ "$output_mode" == "persistent" ]]; then
