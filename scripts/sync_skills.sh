@@ -1192,6 +1192,8 @@ sync_home_plugin_mirrors() {
       def trim: gsub("^\\s+|\\s+$"; "");
       def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
       .plugins[]?
+      | select(type == "object")
+      | select(.source.source == "local")
       | .name?
       | select(type == "string")
       | trim
@@ -1241,7 +1243,7 @@ sync_local_marketplace_cache() {
   jq -r '
     def trim: gsub("^\\s+|\\s+$"; "");
     def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
-    (.name // "local-marketplace" | tostring | trim) as $market
+    (.name // "agent-skills-local" | tostring | trim) as $market
     | .plugins[]?
     | select(type == "object")
     | .name as $name
@@ -1283,9 +1285,18 @@ sync_local_marketplace_cache() {
     target_plugin_dir="$cache_root/$marketplace_name/$plugin_name"
     marketplace_dir="$cache_root/$marketplace_name"
     printf '%s\n' "$marketplace_dir" >> "$marketplace_keep_file"
+
+    # Remove any existing non-directory entries before mkdir
+    if [ -e "$marketplace_dir" ] && [ ! -d "$marketplace_dir" ]; then
+      rm -f "$marketplace_dir"
+    fi
+
     if [ -L "$target_plugin_dir" ]; then
       rm -f "$target_plugin_dir"
+    elif [ -e "$target_plugin_dir" ] && [ ! -d "$target_plugin_dir" ]; then
+      rm -f "$target_plugin_dir"
     fi
+
     mkdir -p "$target_plugin_dir"
     printf '%s\n' "$target_plugin_dir" >> "$keep_file"
 
