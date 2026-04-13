@@ -160,6 +160,32 @@ fi
 run_check required selection-contract "🎯 Verifying selection contract fixtures..." "${selection_contract_cmd[@]}"
 run_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" scripts/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields
 run_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${python_cmd[@]}" scripts/verify_ask_cli_modularity.py
+
+runtime_separation_current="$run_dir/runtime-separation-current.json"
+if [[ "$output_mode" == "persistent" ]]; then
+  runtime_separation_current="GOVERNANCE/runtime-separation/current.json"
+fi
+
+runtime_consumer_scan_cmd=(
+  "${python_cmd[@]}"
+  scripts/scan_runtime_separation_consumers.py
+  --emit-readers
+  --emit-path-consumers
+  --strict
+)
+if [[ "$output_mode" == "persistent" ]]; then
+  runtime_consumer_scan_cmd+=(--emit-digests)
+fi
+
+run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" scripts/validate_runtime_separation_manifest.py --strict
+run_check required runtime-separation-consumers "🧪 Scanning runtime-separation consumer inventories..." "${runtime_consumer_scan_cmd[@]}"
+run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
+run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." "${python_cmd[@]}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current"
+run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash scripts/verify_wrapper_contract_fixtures.sh --runtime-separation
+run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
+run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash scripts/verify_runtime_separation_writer_mutations.sh --strict
+run_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash scripts/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
+
 run_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" scripts/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
 
 echo ""
