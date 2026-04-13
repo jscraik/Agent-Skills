@@ -732,7 +732,7 @@ def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
         return False
     return any(
         marker in output
-        for marker in ("operation not permitted", "permission denied", "mkstemp")
+        for marker in ("operation not permitted", "permission denied")
     )
 
 
