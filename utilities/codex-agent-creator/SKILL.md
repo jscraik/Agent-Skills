@@ -1,6 +1,6 @@
 ---
 name: codex-agent-builder
-description: Create, install, and validate Codex custom subagents as standalone agent TOMLs in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml` + `~/dev/configs/codex/config.toml`) with safe minimal-change updates. Use when the user wants custom agent definitions created or upgraded, not orchestration of running agent threads.
+description: Create, install, and validate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
@@ -28,7 +28,9 @@ metadata:
 - Agent name and short description.
 - Model and reasoning profile.
 - Desired developer instructions.
-- Scope (default `global`; `project` only when explicitly requested).
+- Scope (default `global`; `project` only when explicitly requested):
+  - `--scope global`: installs to `~/dev/configs/codex/agents/<name>/<name>.toml` and updates `~/dev/configs/codex/config.toml`
+  - `--scope project`: installs to `${project_root}/.codex/agents/<name>/<name>.toml` and only updates or creates `${project_root}/.codex/config.toml` when runtime limits are supplied or when `--allow-project-config-write` is explicitly provided; otherwise the installer does not mutate project config
 - Confirmed target custom-agent file path.
 - Optional `nickname_candidates` override for display-friendly spawned-agent labels.
 - Optional runtime limits and approval mode.
@@ -60,6 +62,9 @@ metadata:
 - Install only after validation by writing into the correct agents directory.
 - In this workspace, install to canonical global paths by default: `~/dev/configs/codex/agents/` and `~/dev/configs/codex/config.toml`.
 - For global installs, ensure runtime discoverability by updating `[agents.<name>].config_file` to the installed canonical agent file path.
+- Scope path contract:
+- `--scope global`: write `~/dev/configs/codex/agents/<name>/<name>.toml` and update `~/dev/configs/codex/config.toml`.
+- `--scope project`: write `${project_root}/.codex/agents/<name>/<name>.toml` and only update or create `${project_root}/.codex/config.toml` when runtime limits are supplied or when `--allow-project-config-write` is explicitly provided; otherwise the installer does not mutate project config.
 - Treat non-canonical global paths as compatibility overrides that require explicit opt-in.
 - If the user requests runtime limits, update only `[agents]` global keys in the selected global `config.toml`.
 - Return next-step verification command and residual risk.

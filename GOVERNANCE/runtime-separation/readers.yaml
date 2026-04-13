@@ -1,0 +1,719 @@
+row_count: 74
+rows:
+  -
+    consumer_path: bin/ask
+    is_executable: true
+    line_numbers:
+      - 537
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: bin/ask
+    is_executable: true
+    line_numbers:
+      - 510
+      - 536
+      - 537
+      - 1514
+      - 1515
+    match_count: 5
+    root: plugins
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py"
+    is_executable: true
+    line_numbers:
+      - 75
+      - 793
+      - 794
+      - 806
+      - 826
+      - 1385
+      - 3589
+      - 3594
+      - 3609
+      - 3663
+      - 3734
+      - 3759
+      - 3775
+    match_count: 13
+    root: .agents
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py"
+    is_executable: true
+    line_numbers:
+      - 28
+      - 75
+      - 396
+      - 793
+      - 799
+      - 805
+      - 806
+      - 826
+      - 1385
+      - 1448
+      - 2683
+      - 3589
+      - 3594
+      - 3609
+      - 3663
+      - 3734
+      - 3759
+      - 3775
+    match_count: 24
+    root: plugins
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py"
+    is_executable: true
+    line_numbers:
+      - 1376
+    match_count: 1
+    root: runtime
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py"
+    is_executable: true
+    line_numbers:
+      - 15
+      - 329
+      - 330
+      - 338
+      - 525
+      - 533
+      - 534
+      - 552
+    match_count: 8
+    root: .agents
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py"
+    is_executable: true
+    line_numbers:
+      - 15
+      - 16
+      - 26
+      - 109
+      - 329
+      - 338
+      - 339
+      - 525
+      - 533
+      - 534
+      - 551
+      - 552
+    match_count: 12
+    root: plugins
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-creator/scripts/render_plugin_creator_templates.py"
+    is_executable: true
+    line_numbers:
+      - 43
+      - 53
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: "plugins/plugin-factory/skills/plugin-installer/scripts/install-plugin-from-github.py"
+    is_executable: true
+    line_numbers:
+      - 861
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: "plugins/skill-factory/skills/skill-builder/scripts/analyze_skill.py"
+    is_executable: true
+    line_numbers:
+      - 8
+      - 11
+      - 12
+      - 817
+    match_count: 4
+    root: plugins
+  -
+    consumer_path: "plugins/skill-factory/skills/skill-builder/scripts/build_arscontexta_intervention_queue.py"
+    is_executable: true
+    line_numbers:
+      - 21
+      - 22
+      - 23
+      - 24
+    match_count: 4
+    root: plugins
+  -
+    consumer_path: "plugins/skill-factory/skills/skill-builder/scripts/skill_gate.py"
+    is_executable: true
+    line_numbers:
+      - 23
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: "plugins/skill-factory/skills/skill-builder/scripts/skill_graph_inventory.py"
+    is_executable: true
+    line_numbers:
+      - 12
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: "plugins/skill-factory/skills/skill-creator/scripts/render_handoff_package_template.py"
+    is_executable: true
+    line_numbers:
+      - 45
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: "plugins/skill-factory/skills/skill-refactor/scripts/scan_codex_sessions.py"
+    is_executable: true
+    line_numbers:
+      - 170
+      - 359
+      - 626
+      - 748
+      - 754
+    match_count: 5
+    root: .agents
+  -
+    consumer_path: "scripts/build-adjacency-yaml.py"
+    is_executable: true
+    line_numbers:
+      - 18
+      - 19
+      - 20
+      - 21
+    match_count: 4
+    root: plugins
+  -
+    consumer_path: "scripts/build-adjacency-yaml.py"
+    is_executable: true
+    line_numbers:
+      - 22
+    match_count: 1
+    root: "skills-antigravity"
+  -
+    consumer_path: scripts/build_runtime_separation_current.py
+    is_executable: true
+    line_numbers:
+      - 310
+    match_count: 1
+    root: catalog/plugins
+  -
+    consumer_path: scripts/build_runtime_separation_current.py
+    is_executable: true
+    line_numbers:
+      - 310
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/build_skill_state_map.py
+    is_executable: true
+    line_numbers:
+      - 27
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: scripts/check_codex_home_skill_overlap.sh
+    is_executable: true
+    line_numbers:
+      - 5
+      - 25
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: scripts/check_path_ownership_boundaries.sh
+    is_executable: true
+    line_numbers:
+      - 116
+    match_count: 1
+    root: .agent/skills
+  -
+    consumer_path: scripts/check_path_ownership_boundaries.sh
+    is_executable: true
+    line_numbers:
+      - 116
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: scripts/check_path_ownership_boundaries.sh
+    is_executable: true
+    line_numbers:
+      - 119
+      - 125
+      - 128
+      - 134
+      - 137
+      - 164
+    match_count: 6
+    root: plugins
+  -
+    consumer_path: scripts/check_path_ownership_boundaries.sh
+    is_executable: true
+    line_numbers:
+      - 119
+      - 125
+      - 134
+    match_count: 3
+    root: plugins/cache
+  -
+    consumer_path: scripts/check_path_ownership_boundaries.sh
+    is_executable: true
+    line_numbers:
+      - 116
+      - 155
+    match_count: 2
+    root: runtime
+  -
+    consumer_path: scripts/check_path_ownership_boundaries.sh
+    is_executable: true
+    line_numbers:
+      - 116
+    match_count: 1
+    root: "skills-antigravity"
+  -
+    consumer_path: scripts/check_plugin_skill_shadowing.sh
+    is_executable: true
+    line_numbers:
+      - 10
+      - 75
+      - 85
+      - 97
+      - 98
+    match_count: 5
+    root: .agents
+  -
+    consumer_path: scripts/check_plugin_skill_shadowing.sh
+    is_executable: true
+    line_numbers:
+      - 11
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/docs_lint.py
+    is_executable: true
+    line_numbers:
+      - 462
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/lib/ask/commands/plugins.py
+    is_executable: true
+    line_numbers:
+      - 479
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: scripts/lib/ask/commands/plugins.py
+    is_executable: true
+    line_numbers:
+      - 18
+      - 22
+      - 26
+      - 152
+      - 281
+      - 344
+      - 402
+      - 479
+      - 508
+      - 522
+    match_count: 10
+    root: plugins
+  -
+    consumer_path: scripts/lib/ask/commands/repo.py
+    is_executable: true
+    line_numbers:
+      - 16
+      - 25
+    match_count: 2
+    root: .agents
+  -
+    consumer_path: scripts/lib/ask/commands/skills.py
+    is_executable: true
+    line_numbers:
+      - 124
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/lib/ask/plugin_state.py
+    is_executable: true
+    line_numbers:
+      - 53
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/lib/ask/plugin_state.py
+    is_executable: true
+    line_numbers:
+      - 53
+    match_count: 1
+    root: plugins/cache
+  -
+    consumer_path: scripts/projection_integrity.py
+    is_executable: true
+    line_numbers:
+      - 74
+      - 81
+      - 88
+      - 95
+    match_count: 4
+    root: .agents
+  -
+    consumer_path: scripts/projection_integrity.py
+    is_executable: true
+    line_numbers:
+      - 47
+      - 53
+      - 59
+      - 65
+      - 73
+      - 80
+      - 87
+      - 94
+    match_count: 8
+    root: plugins
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 32
+    match_count: 1
+    root: .agent/skills
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 31
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 27
+    match_count: 1
+    root: catalog/plugins
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 26
+    match_count: 1
+    root: catalog/skills
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 27
+      - 28
+      - 29
+    match_count: 4
+    root: plugins
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 29
+    match_count: 1
+    root: plugins/cache
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 30
+    match_count: 1
+    root: runtime
+  -
+    consumer_path: scripts/scan_runtime_separation_consumers.py
+    is_executable: true
+    line_numbers:
+      - 33
+    match_count: 1
+    root: "skills-antigravity"
+  -
+    consumer_path: scripts/selection_policy.py
+    is_executable: true
+    line_numbers:
+      - 30
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/skill_discovery.py
+    is_executable: true
+    line_numbers:
+      - 312
+      - 329
+      - 340
+    match_count: 3
+    root: .agents
+  -
+    consumer_path: scripts/skill_discovery.py
+    is_executable: true
+    line_numbers:
+      - 105
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: scripts/sync_skills.sh
+    is_executable: true
+    line_numbers:
+      - 162
+      - 164
+      - 342
+      - 347
+      - 472
+      - 474
+      - 486
+      - 796
+      - 1480
+      - 1484
+      - 1485
+      - 1486
+    match_count: 12
+    root: .agents
+  -
+    consumer_path: scripts/sync_skills.sh
+    is_executable: true
+    line_numbers:
+      - 420
+      - 435
+      - 1096
+      - 1441
+    match_count: 4
+    root: plugins
+  -
+    consumer_path: scripts/sync_skills_sandbox_safe.sh
+    is_executable: true
+    line_numbers:
+      - 11
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: scripts/test_plugin_builder_marketplace_paths.py
+    is_executable: true
+    line_numbers:
+      - 59
+      - 123
+      - 137
+      - 184
+      - 187
+      - 224
+      - 245
+      - 287
+    match_count: 8
+    root: plugins
+  -
+    consumer_path: scripts/test_plugin_creator_marketplace_security.py
+    is_executable: true
+    line_numbers:
+      - 41
+      - 77
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: scripts/test_plugin_installer_security.py
+    is_executable: true
+    line_numbers:
+      - 65
+      - 297
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: scripts/test_projection_integrity.py
+    is_executable: true
+    line_numbers:
+      - 49
+      - 61
+      - 83
+      - 84
+      - 101
+      - 102
+      - 137
+      - 138
+      - 163
+      - 164
+      - 190
+      - 191
+      - 209
+      - 214
+      - 238
+    match_count: 15
+    root: plugins
+  -
+    consumer_path: scripts/test_projection_integrity.py
+    is_executable: true
+    line_numbers:
+      - 84
+      - 102
+      - 138
+      - 164
+      - 191
+    match_count: 5
+    root: plugins/cache
+  -
+    consumer_path: scripts/test_skill_installer_security.py
+    is_executable: true
+    line_numbers:
+      - 81
+      - 119
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: scripts/test_skill_lifecycle_validation.py
+    is_executable: true
+    line_numbers:
+      - 342
+    match_count: 1
+    root: .agents
+  -
+    consumer_path: scripts/test_skill_lifecycle_validation.py
+    is_executable: true
+    line_numbers:
+      - 227
+      - 342
+      - 409
+      - 632
+      - 633
+    match_count: 5
+    root: plugins
+  -
+    consumer_path: scripts/test_validate_skill_authoring_family_benchmarks.py
+    is_executable: true
+    line_numbers:
+      - 36
+      - 44
+      - 49
+      - 56
+      - 66
+      - 70
+      - 83
+      - 92
+      - 108
+      - 123
+      - 125
+      - 133
+      - 138
+      - 144
+      - 152
+      - 156
+    match_count: 18
+    root: plugins
+  -
+    consumer_path: "scripts/validate-adjacency.py"
+    is_executable: true
+    line_numbers:
+      - 34
+      - 35
+      - 36
+      - 37
+    match_count: 4
+    root: plugins
+  -
+    consumer_path: "scripts/validate-adjacency.py"
+    is_executable: true
+    line_numbers:
+      - 39
+    match_count: 1
+    root: "skills-antigravity"
+  -
+    consumer_path: scripts/validate_skill_authoring_family.sh
+    is_executable: true
+    line_numbers:
+      - 51
+      - 52
+      - 53
+      - 54
+      - 57
+      - 58
+      - 59
+    match_count: 7
+    root: plugins
+  -
+    consumer_path: scripts/validate_skill_authoring_family_benchmarks.py
+    is_executable: true
+    line_numbers:
+      - 5
+      - 6
+      - 7
+      - 8
+      - 72
+      - 73
+      - 74
+      - 75
+    match_count: 8
+    root: plugins
+  -
+    consumer_path: scripts/verify_skill_catalog_freshness.py
+    is_executable: true
+    line_numbers:
+      - 52
+      - 58
+      - 181
+      - 185
+      - 207
+      - 263
+      - 272
+      - 335
+    match_count: 8
+    root: plugins
+  -
+    consumer_path: tests/test_ask_plugins_commands.py
+    is_executable: true
+    line_numbers:
+      - 100
+      - 138
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: tests/test_ask_plugins_state.py
+    is_executable: true
+    line_numbers:
+      - 70
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: tests/test_ask_skills_starter.py
+    is_executable: true
+    line_numbers:
+      - 23
+      - 24
+      - 43
+      - 49
+      - 55
+      - 61
+      - 67
+      - 93
+      - 99
+    match_count: 9
+    root: plugins
+  -
+    consumer_path: tests/test_coderabbit_scripts.py
+    is_executable: true
+    line_numbers:
+      - 35
+      - 39
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: tests/test_plugin_factory_canonical_paths.py
+    is_executable: true
+    line_numbers:
+      - 107
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: tmp/imagegen/build_next_icon_batch.py
+    is_executable: true
+    line_numbers:
+      - 54
+    match_count: 1
+    root: plugins
+  -
+    consumer_path: "utilities/codex-home-audit/scripts/audit_codex_home.py"
+    is_executable: true
+    line_numbers:
+      - 1395
+    match_count: 2
+    root: plugins
+  -
+    consumer_path: "utilities/insight-report/scripts/run_insight_report.py"
+    is_executable: true
+    line_numbers:
+      - 9
+    match_count: 1
+    root: .agents
+schema_version: "runtime-separation.inventory.v1"
+strict: true
+title: "runtime-separation readers"

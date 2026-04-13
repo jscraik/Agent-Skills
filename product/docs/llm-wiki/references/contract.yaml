@@ -22,12 +22,12 @@ outputs:
   - ingest/query/lint playbook with explicit steps
   - starter layout guidance with required index.md/log.md control files
   - file layout guidance including index/log conventions
-  - append-only parseable log heading convention (## [YYYY-MM-DD] ingest|query|lint | summary)
+  - append-only parseable log heading convention (## [YYYY-MM-DD] <kind> | <summary>, where <kind> is ingest/query/lint)
   - privacy-controls plan covering classification, minimization, and redaction
   - risk and hygiene checklist for contradictions, staleness, and orphan pages
   - lifecycle model with confidence, supersession, and retention policy when scale demands it
-  - graph/search strategy covering typed relations and hybrid retrieval expectations
-  - automation and quality-governance hooks for ingestion, linting, and contradiction handling
+  - graph/search strategy covering typed relations and hybrid retrieval expectations when scale demands it
+  - automation and quality-governance hooks for ingestion, linting, and contradiction handling when explicitly requested
 output_contract:
   schema_version: "1.0"
   required_fields:
@@ -42,16 +42,23 @@ output_contract:
     - log_append_only
     - log_heading_pattern
     - privacy_controls
-    - lifecycle_model
-    - graph_model
-    - search_strategy
-    - automation_hooks
-    - quality_controls
   optional_fields:
     - lint_checklist
     - follow_up_questions
     - collaboration_scope
     - crystallization_policy
+    - lifecycle_model
+    - graph_model
+    - search_strategy
+    - automation_hooks
+    - quality_controls
+  conditional_required_fields:
+    advanced_operating_profile_requested:
+      - lifecycle_model
+      - graph_model
+      - search_strategy
+      - automation_hooks
+      - quality_controls
 non_goals:
   - one-off summarization with no persistent wiki maintenance
   - implementing full vector retrieval infrastructure by default

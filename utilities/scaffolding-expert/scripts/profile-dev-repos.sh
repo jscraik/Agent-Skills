@@ -50,6 +50,7 @@ repo_count="$(wc -l < "$repo_file" | tr -d ' ')"
 
 markers=(
   "AGENTS.md"
+  "scripts/check-environment.sh"
   ".codex/environments/environment.toml"
   "scripts/codex-preflight.sh"
   "scripts/verify-work.sh"

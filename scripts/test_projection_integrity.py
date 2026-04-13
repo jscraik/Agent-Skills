@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -114,9 +116,9 @@ class ProjectionIntegrityTests(unittest.TestCase):
 
     def test_sync_mirror_removes_stale_files_and_stamps_headers(self) -> None:
         """
-        Ensure syncing a mirror removes stale files, copies source files into the projection with the required projection header, and results in a subsequent verification pass.
+        Verify syncing a mirror removes stale files, stamps projection headers on copied files, preserves executable mode, and yields a passing verification.
         
-        This test creates a source tree with a README.md and shell script, places a stale file in the projection, runs sync_mirror(...) and asserts the stale file is deleted and the projected README contains HEADER_TOKEN, then verifies that verify_mirror(...) reports "pass".
+        Sets up a source tree with README.md and an executable shell script, places a stale file in the projection, runs sync_mirror(...), and asserts that the stale file is deleted, the projected README contains HEADER_TOKEN, the script retains executable bits, and a subsequent verify_mirror(...) returns "pass".
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
@@ -146,6 +148,140 @@ class ProjectionIntegrityTests(unittest.TestCase):
 
             verify_result = self.mod.verify_mirror(repo_root, spec)
             self.assertEqual(verify_result["status"], "pass")
+
+    def test_sync_mirror_falls_back_when_rsync_hits_permission_error(self) -> None:
+        """
+        Ensure sync_mirror falls back to the Python sync engine when rsync fails with a mkstemp permission error.
+        
+        Simulates rsync being available but raising subprocess.CalledProcessError (return code 23) with stderr containing a mkstemp "Operation not permitted" message, and asserts the function reports a successful sync using the "python" engine and that the projected README.md is created.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            source = repo_root / "plugins" / "demo"
+            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source.mkdir(parents=True, exist_ok=True)
+            projection.mkdir(parents=True, exist_ok=True)
+            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
+
+            spec = self.mod.MirrorProjection(
+                name="demo",
+                source_path="plugins/demo",
+                projection_path="plugins/cache/demo/local",
+                tags=("plugin-caches",),
+            )
+            rsync_error = subprocess.CalledProcessError(
+                returncode=23,
+                cmd=["rsync"],
+                stderr="rsync: mkstemp \"/tmp/foo\" failed: Operation not permitted (1)\n",
+            )
+            with mock.patch.object(self.mod.shutil, "which", return_value="/usr/bin/rsync"):
+                with mock.patch.object(self.mod.subprocess, "run", side_effect=rsync_error):
+                    result = self.mod.sync_mirror(repo_root, spec)
+            self.assertEqual(result["status"], "synced")
+            self.assertEqual(result["sync_engine"], "python")
+            self.assertTrue((projection / "README.md").exists())
+
+    def test_sync_mirror_raises_non_permission_rsync_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            source = repo_root / "plugins" / "demo"
+            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source.mkdir(parents=True, exist_ok=True)
+            projection.mkdir(parents=True, exist_ok=True)
+            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
+
+            spec = self.mod.MirrorProjection(
+                name="demo",
+                source_path="plugins/demo",
+                projection_path="plugins/cache/demo/local",
+                tags=("plugin-caches",),
+            )
+            rsync_error = subprocess.CalledProcessError(
+                returncode=2,
+                cmd=["rsync"],
+                stderr="rsync error: syntax or usage error\n",
+            )
+            with mock.patch.object(self.mod.shutil, "which", return_value="/usr/bin/rsync"):
+                with mock.patch.object(self.mod.subprocess, "run", side_effect=rsync_error):
+                    with self.assertRaises(subprocess.CalledProcessError):
+                        self.mod.sync_mirror(repo_root, spec)
+
+    def test_sync_mirror_raises_when_mkstemp_lacks_permission_phrase(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            source = repo_root / "plugins" / "demo"
+            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source.mkdir(parents=True, exist_ok=True)
+            projection.mkdir(parents=True, exist_ok=True)
+            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
+
+            spec = self.mod.MirrorProjection(
+                name="demo",
+                source_path="plugins/demo",
+                projection_path="plugins/cache/demo/local",
+                tags=("plugin-caches",),
+            )
+            rsync_error = subprocess.CalledProcessError(
+                returncode=23,
+                cmd=["rsync"],
+                stderr="rsync: mkstemp \"/tmp/foo\" failed: Read-only file system (30)\n",
+            )
+            with mock.patch.object(self.mod.shutil, "which", return_value="/usr/bin/rsync"):
+                with mock.patch.object(self.mod.subprocess, "run", side_effect=rsync_error):
+                    with self.assertRaises(subprocess.CalledProcessError):
+                        self.mod.sync_mirror(repo_root, spec)
+
+    def test_sync_mirror_replaces_projection_directory_with_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            source = repo_root / "plugins" / "demo"
+            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source.mkdir(parents=True, exist_ok=True)
+            projection.mkdir(parents=True, exist_ok=True)
+
+            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
+            stale_dir = projection / "README.md"
+            stale_dir.mkdir(parents=True, exist_ok=True)
+            (stale_dir / "stale.txt").write_text("stale\n", encoding="utf-8")
+
+            spec = self.mod.MirrorProjection(
+                name="demo",
+                source_path="plugins/demo",
+                projection_path="plugins/cache/demo/local",
+                tags=("plugin-caches",),
+            )
+            result = self.mod.sync_mirror(repo_root, spec)
+            self.assertEqual(result["status"], "synced")
+            self.assertTrue((projection / "README.md").is_file())
+
+    def test_sync_mirror_replaces_projection_symlink_with_file(self) -> None:
+        """
+        Verify sync_mirror replaces a stray symlink projection with a real file.
+
+        This regression test ensures symlinks don't pass the fast-path equality check
+        and instead fall through to the Python fallback that clears symlink_kind_mismatch states.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            source = repo_root / "plugins" / "demo"
+            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source.mkdir(parents=True, exist_ok=True)
+            projection.mkdir(parents=True, exist_ok=True)
+
+            (source / "README.md").write_text("# Demo\n", encoding="utf-8")
+            stale_symlink = projection / "README.md"
+            stale_symlink.symlink_to("/dev/null")
+
+            spec = self.mod.MirrorProjection(
+                name="demo",
+                source_path="plugins/demo",
+                projection_path="plugins/cache/demo/local",
+                tags=("plugin-caches",),
+            )
+            result = self.mod.sync_mirror(repo_root, spec)
+            self.assertEqual(result["status"], "synced")
+            self.assertTrue((projection / "README.md").is_file())
+            self.assertFalse((projection / "README.md").is_symlink())
 
     def test_verify_symlink_reports_missing_canonical_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

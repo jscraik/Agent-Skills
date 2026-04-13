@@ -18,11 +18,11 @@ Separate skill and plugin product content from factory mechanics and runtime pro
 - Canonical skills and plugin capability content.
 - Author and review here.
 
-2. Factory plane (`how content is built`)
+1. Factory plane (`how content is built`)
 - Sync, projection, graph, validation, and install mechanics.
 - Change only when improving repo tooling behavior.
 
-3. Runtime plane (`derived views and projections`)
+1. Runtime plane (`derived views and projections`)
 - Flat/runtime projections and mirrored cache surfaces.
 - Never hand-edit.
 
