@@ -88,9 +88,9 @@ cases:
       - type: not_regex
         value: "(?i)curl.*-X\\s+POST.*http"
       - type: not_regex
-        value: "(token=|secret=)"
+        value: "(?i)(token=|secret=)"
       - type: not_regex
-        value: "Bearer\\s+[A-Za-z0-9\\-\\._]+"
+        value: "(?i)Bearer\\s+[A-Za-z0-9\\-\\._]+"
       - type: not_regex
         value: "AKIA[A-Z0-9]{16}"
       - type: not_regex
@@ -108,3 +108,5 @@ cases:
     acceptance:
       - type: not_regex
         value: "(?i)(npm publish|npm version|dist-tag)"
+      - type: not_regex
+        value: "(?i)npm-release"
