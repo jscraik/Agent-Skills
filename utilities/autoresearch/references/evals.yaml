@@ -24,6 +24,8 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you run iterative hardening passes across our Skill Factory plugin and score each pass before deciding keep or discard?"
+    deterministic_checks:
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
     acceptance:
       - type: regex
         value: "(?i)iteration|hypothesis|evidence|validation"
@@ -36,6 +38,8 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Please initialize a run with a timestamped results TSV and journal so I can review the keep/discard evidence before merge."
+    deterministic_checks:
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
     acceptance:
       - type: regex
         value: '(?i)results\.tsv|journal|artifacts|keep|discard'
@@ -88,6 +92,8 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you run the loop with a 10-minute cap per required command and mark timed-out steps as blocked with exact command evidence?"
+    deterministic_checks:
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
     acceptance:
       - type: regex
         value: "(?i)timeout|10.?minute|blocked|command evidence|stop"

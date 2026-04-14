@@ -145,7 +145,7 @@ This is the best balance of risk and leverage: shift the primary system to an ea
 ### Installation and Inspection Orchestration
 
 - R19. Any installation or migration flow in this pivot lane must run with an explicit skill stack that includes `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, and `baseline-ui`; skipping one requires an explicit blocked reason with evidence.
-- R20. Installation flows must execute with inspection support roles, prioritizing `@skill-inspector` and `@plugin-inspector`, with deterministic fallback roles and recorded rationale when either role is unavailable.
+- R20. Installation flows must execute with inspection support roles, prioritizing `@skill-inspector` and `@plugin-inspector`, with deterministic fallback roles and recorded rationale when either role is unavailable. Canonical fallback roles are defined in `docs/specs/2026-04-13-feat-llm-wiki-runtime-pivot-spec.md` section "Core Domain Model" under `InstallationOrchestrationContract`.
 - R21. Role availability must be checked before execution and captured in run evidence so missing inspector roles cannot silently degrade installation quality.
 - R22. The spec/plan must define a fail-closed policy for installation quality checks: if required skill stack or inspection support cannot run, promotion is blocked until fallback or remediation path is complete.
 
@@ -198,7 +198,6 @@ Out of scope:
 
 - Q1. Which exact wiki root path is canonical for this pivot (for example `wiki/` or an existing equivalent), and is this required to be repo-root scoped?
 - Q2. Which current skill-graph gates remain true release blockers after degradation, and which become monitor-only?
-- Q3. What are the canonical fallback roles for `@skill-inspector` and `@plugin-inspector` when either role is not present in the active Codex role catalog?
 
 ### Deferred to Planning
 

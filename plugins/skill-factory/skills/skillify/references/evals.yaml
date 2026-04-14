@@ -74,7 +74,20 @@ cases:
       - type: regex
         value: "(?i)(session-collector|session artifact|telemetry)"
       - type: regex
-        value: "(?i)(optional|thread_only|thread_plus_session_collector|freshness|generated_at)"
+        value: "(?i)(thread_plus_session_collector|freshness|generated_at)"
+
+  - id: session-collector-stale-or-missing
+    name: stale or missing session collector triggers thread-only mode
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The session-collector artifact is stale or missing. Please skillify this workflow using thread evidence only and mark provenance accordingly."
+    acceptance:
+      - type: regex
+        value: "(?i)(thread_only|stale|missing|provenance)"
+      - type: regex
+        value: "(?i)(session-collector|freshness|cutoff)"
 
   - id: request-user-input-unavailable-fallback
     name: interview fallback when request_user_input is unavailable

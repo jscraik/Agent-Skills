@@ -350,9 +350,10 @@ def main() -> int:
         )
     command_checks["plugins_status"] = plugins_status_checks
 
-    # Avoid recursive validation fan-out: `repo validate` calls validate_all.sh, which
-    # now invokes this runtime-separation lane. Emit explicit skipped semantics instead
-    # of shadowing with repo status output.
+    # Avoid recursive validation fan-out: `repo validate --json` calls validate_all.sh, which
+    # now invokes this runtime-separation lane. The recursive_validation_guard permits skipping
+    # `repo validate --json` as degraded/allowed (not a hard blocker). Emit explicit skipped
+    # semantics with guard provenance instead of shadowing with repo status output.
     command_checks["repo_validate"] = _command_check(
         command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
         subject_id="repo",

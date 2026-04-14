@@ -58,6 +58,10 @@ atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
   openai-docs: Reference official ChatGPT documentation for Atlas features
+autoresearch:
+  skill-creator: Create or reshape a single skill package before entering a loop
+  plugin-builder: Harden or validate one plugin package outside a research loop
+  code-review: Run an adversarial review pass on the final diff before accepting loop outcomes
 backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints

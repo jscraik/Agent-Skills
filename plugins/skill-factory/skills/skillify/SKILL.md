@@ -17,7 +17,7 @@ Codex-native workflow for converting a just-completed conversation into a reusab
 ## Required inputs
 - Optional short process description from the user.
 - Current session context (messages, constraints, corrections, and outcomes).
-- Optional `session-collector` JSON artifact path (default: `/Users/jamiecraik/dev/configs/codex/usage-data/session-collector.json`) when thread evidence needs corroboration.
+- Optional `session-collector` JSON artifact path (example: `~/.config/codex/usage-data/session-collector.json` or `$SESSION_COLLECTOR_PATH`) when thread evidence needs corroboration.
 - Preferred destination: canonical git-backed skill category path.
 - Category confirmation (primary category 1-9 from the skill-builder matrix).
 - Target environment (`codex`, `claude`, or `portable`) and compatibility posture (`learn`, `guided`, or `execute`).
@@ -178,7 +178,7 @@ bash scripts/validate_skill_authoring_family.sh
 - "We just finished debugging a failing `pr-pipeline` check and posting the Linear update. Skillify exactly what we did so I can reuse it next week."
 - "Convert this morning's review-to-merge flow into a reusable skill and save it in `utilities/pr-ready-flow`."
 - "Capture my incident-triage handoff process as a reusable skill in `github/incident-triage-flow`, and keep the interview short."
-- "Use `/Users/jamiecraik/dev/configs/codex/usage-data/session-collector.json` to confirm the tool sequence, then skillify this flow."
+- "Use `$HOME/path/to/configs/usage-data/session-collector.json` to confirm the tool sequence, then skillify this flow."
 
 ## Failure mode
 - If `request_user_input` is unavailable, switch to 1-3 numbered chat questions and continue with the same interview rounds.

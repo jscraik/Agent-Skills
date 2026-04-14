@@ -139,11 +139,16 @@ def _load_scope_skill_resolver():
     spec = importlib.util.spec_from_file_location(module_name, resolver_path)
     if spec is None or spec.loader is None:
         return None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    resolver = getattr(module, "resolve_scope_skill_for_path", None)
-    return resolver if callable(resolver) else None
+    try:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        resolver = getattr(module, "resolve_scope_skill_for_path", None)
+        return resolver if callable(resolver) else None
+    except Exception:  # noqa: BLE001
+        # Syntax/import errors in skill_graph_inventory.py should not abort the benchmark;
+        # gracefully degrade and use fallback scope resolution.
+        return None
 
 
 def _resolve_scope_skill_for_path(relative_skill_dir: str) -> str:

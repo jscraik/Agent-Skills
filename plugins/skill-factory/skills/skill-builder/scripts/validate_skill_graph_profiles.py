@@ -543,6 +543,7 @@ def main() -> int:
             else:
                 copilot_valid += 1
 
+        status_value = "valid" if not errors else "invalid"
         profile_rows.append(
             {
                 "skill_path": entry.skill_md.relative_to(repo_root).as_posix(),
@@ -554,7 +555,8 @@ def main() -> int:
                 "profile_binding": resolved_binding,
                 "profile_binding_mode": binding_mode,
                 "delegation_mode": entry.expected_mode,
-                "task_profile_status": "valid" if not errors else "invalid",
+                "task_profile_status": status_value,
+                "status": status_value,  # Legacy key for backward compatibility until schema v2
                 "errors": errors,
             }
         )

@@ -5,8 +5,13 @@ Read when: session context alone is incomplete and a `session-collector` artifac
 ## Goal
 Use `session-collector.json` as corroborating evidence for workflow ordering and tool usage without blocking `skillify` when telemetry is missing.
 
-## Default artifact path
-- `/Users/jamiecraik/dev/configs/codex/usage-data/session-collector.json`
+## Artifact resolution order
+1. Repo-tracked path (e.g., `artifacts/session-collector.json`)
+2. Environment variable `SESSION_COLLECTOR_PATH`
+3. Package scripts default location
+4. Common defaults (e.g., `~/.config/codex/usage-data/session-collector.json`)
+
+**Example path:** `~/.config/codex/usage-data/session-collector.json` (user-specific; adjust to local environment)
 
 ## Intake checklist
 1. Confirm the artifact exists and parseable JSON.

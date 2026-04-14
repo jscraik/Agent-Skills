@@ -10,7 +10,7 @@ inputs:
   - preferred execution style (inline or fork) when the process demands it
   - session context containing ordered steps, corrections, and constraints
   - confirmed category (1-9), target environment (`codex|claude|portable`), and compatibility posture (`learn|guided|execute`)
-  - optional session-collector artifact (`session-collector.json`) plus freshness signal (`generated_at` and input window cutoff)
+  - optional session-collector artifact (`session-collector.json`) plus freshness signal (`generated_at` and input window cutoff); if `session-collector.generated_at` is older than the defined input window cutoff (or any input in the artifact falls outside the input window) the run MUST be marked `thread_only=true` and provenance must record the reason (stale collector) and cutoff timestamp; otherwise `thread_only` MUST be false and provenance records `thread_plus_session_collector`
 outputs:
   - reviewed SKILL.md draft with clear success criteria per step
   - saved skill path plus invocation syntax

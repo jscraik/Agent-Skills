@@ -181,7 +181,7 @@ Normative source artifacts:
 Governance and validation dependencies:
 
 - `bin/ask repo doctor-catalog --strict`
-- `bin/ask repo validate`
+- `bin/ask repo validate --json` (degraded/allowed when invoked from `recursive_validation_guard` context; recorded as skipped-OK with explicit guard provenance)
 - `bash scripts/verify-work.sh --project-governance`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`
 - runtime-separation comparator pipeline defined in `docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md`
@@ -189,7 +189,7 @@ Governance and validation dependencies:
 Skill dependencies for installation lane:
 
 - `product/docs/llm-wiki/SKILL.md`
-- `plugins/cache/agent-skills-local/coderabbit/0.1.0/skills/simplify/SKILL.md`
+- `coderabbit:simplify` (canonical skill identifier; repository-tracked source when available)
 - `utilities/uv-python-project-setup/SKILL.md`
 - `frontend/ui/baseline-ui/SKILL.md`
 
