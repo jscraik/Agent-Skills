@@ -23,6 +23,11 @@ bash utilities/autoresearch/scripts/init_run.sh --tag <run-tag> --targets "<path
 
 Run the relevant baseline checks before any edits.
 
+Baseline policy:
+- Run at least one unmodified baseline pass before iteration changes.
+- Log the baseline as `iteration=0`, `decision=keep` when gates pass.
+- If a required baseline command cannot run, log `iteration=0` as `blocked` and record the exact blocker.
+
 ### Skill targets
 
 ```bash
@@ -51,6 +56,7 @@ For each iteration:
 1. Write one hypothesis in `journal.md`.
 2. Make one bounded change set.
 3. Run mandatory validations for affected targets.
+   - If a required command exceeds the agreed runtime cap (recommended: 10 minutes), stop it and classify the iteration as `blocked`.
 4. Compute score and choose decision:
    - `keep`: gates pass and score improves, or equal score with lower complexity.
    - `discard`: score regresses or complexity tradeoff is not justified.

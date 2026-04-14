@@ -7,7 +7,7 @@ metadata:
   maturity: experimental
   owner: skill-factory
   review_cadence: monthly
-  last_reviewed: 2026-04-13
+  last_reviewed: 2026-04-14
   metadata_source: frontmatter
 ---
 
@@ -46,6 +46,13 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
   - kept vs discarded experiments,
   - validation evidence,
   - remaining risks and next hypotheses.
+
+## Output contract
+- For non-trivial summaries, include `schema_version`.
+- Include run metadata: `run_tag`, `run_dir`, and `stop_condition`.
+- Include decision totals: `kept`, `discarded`, `blocked`.
+- Include command evidence as `[{command, outcome, note}]` with `outcome` in `pass|fail|blocked`.
+- Include next actions as `next_hypotheses` so a follow-up run can start without re-triage.
 
 ## Constraints and safety
 - Redact secrets/PII by default.
@@ -98,9 +105,9 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 ## See Also
 | Skill | When to use |
 |---|---|
-| `skill-factory:skill-creator` | Create or reshape a single skill package before entering a loop. |
-| `plugin-factory:plugin-builder` | Harden or validate one plugin package outside a research loop. |
-| `coderabbit:code-review` | Run an adversarial review pass on the final diff before accepting loop outcomes. |
+| [[skill-creator]] | Create or reshape a single skill package before entering a loop. |
+| [[plugin-builder]] | Harden or validate one plugin package outside a research loop. |
+| [[code-review]] | Run an adversarial review pass on the final diff before accepting loop outcomes. |
 
 **Topic map:** `[[agent-ops]]`
 
@@ -110,8 +117,10 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 - ❌ Keeping changes that fail mandatory validation gates.
 
 ## Examples
-- Triggering prompt: "Use $autoresearch to run 6 iterations on `utilities/autoresearch` and `plugins/skill-factory/skills/skill-creator`, then keep only changes that pass strict audits."
-- Non-triggering prompt: "Please rename this heading in one file and stop."
+- Triggering prompt: "Run `autoresearch` for four iterations on `plugins/skill-factory/skills/skill-builder` and `utilities/autoresearch`, and keep only iterations that pass strict audit plus quick validate."
+- Triggering prompt: "Set up a run tag for tonight's skill hardening pass, log each keep/discard decision, and give me a morning summary with blocker commands."
+- Non-triggering prompt: "Fix one typo in `utilities/autoresearch/SKILL.md` and don't run any loop."
+- Non-triggering prompt: "Update this repo's billing webhook retry logic."
 
 ## References
 - `references/runbook.md` for setup, scoring, and decision policy.
