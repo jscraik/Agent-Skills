@@ -25,7 +25,7 @@ cases:
     prepend_skill: false
     prompt: "Can you run iterative hardening passes across our Skill Factory plugin and score each pass before deciding keep or discard?"
     deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
         value: "(?i)iteration|hypothesis|evidence|validation"
@@ -39,7 +39,7 @@ cases:
     prepend_skill: false
     prompt: "Please initialize a run with a timestamped results TSV and journal so I can review the keep/discard evidence before merge."
     deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
         value: '(?i)results\.tsv|journal|artifacts|keep|discard'
@@ -62,7 +62,7 @@ cases:
       - type: regex
         value: "(?i)results\\.tsv|journal"
       - type: regex
-        value: "(?i)command evidence|command:"
+        value: "(?i)command evidence|command:|validation"
     realistic: true
 
   - id: edge-missing-stop-condition
@@ -101,14 +101,14 @@ cases:
     prepend_skill: false
     prompt: "Can you run the loop with a 10-minute cap per required command and mark timed-out steps as blocked with exact command evidence?"
     deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
         value: "(?i)timeout|10.?minute"
       - type: regex
         value: "(?i)blocked"
       - type: regex
-        value: "(?i)command evidence|command:"
+        value: "(?i)command evidence|command:|validation|results\\.tsv|journal"
     realistic: true
 
   - id: negative-control

@@ -365,13 +365,13 @@ def main() -> int:
         )
     command_checks["plugins_status"] = plugins_status_checks
 
+    # Avoid recursive validation fan-out: `repo validate --json` calls validate_all.sh, which
+    # invokes this runtime-separation lane. Skip only when the recursive guard is explicit
+    # (CLI flag and/or env var), and emit a deterministic skipped sentinel with provenance.
     recursive_validation_guard = args.recursive_validation_guard or _flag_enabled(
         os.environ.get("RECURSIVE_VALIDATION_GUARD")
     )
     if recursive_validation_guard:
-        # Avoid recursive validation fan-out: `repo validate --json` calls validate_all.sh, which
-        # invokes this runtime-separation lane. Emit explicit skipped semantics only when guard
-        # signal is present.
         command_checks["repo_validate"] = _command_check(
             command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
             subject_id="repo",

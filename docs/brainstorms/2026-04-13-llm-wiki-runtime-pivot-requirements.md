@@ -145,7 +145,7 @@ This is the best balance of risk and leverage: shift the primary system to an ea
 ### Installation and Inspection Orchestration
 
 - R19. Any installation or migration flow in this pivot lane must run with an explicit skill stack that includes `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, and `baseline-ui`; skipping one requires an explicit blocked reason with evidence.
-- R20. Installation flows must execute with inspection support roles, prioritizing `skill-inspector` and `plugin-inspector`, with deterministic fallback roles and recorded rationale when either role is unavailable. Canonical fallback roles are defined in `docs/specs/2026-04-13-feat-llm-wiki-runtime-pivot-spec.md` section "Core Domain Model" under `InstallationOrchestrationContract` (the source of truth for role identifiers).
+- R20. Installation flows must execute with inspection support roles, prioritizing `skill-inspector` and `plugin-inspector`, with deterministic fallback roles and recorded rationale when either role is unavailable. Canonical role identifiers and fallback roles are defined in `docs/specs/2026-04-13-feat-llm-wiki-runtime-pivot-spec.md` section "Core Domain Model" under `InstallationOrchestrationContract` (source of truth). UI/display aliases may use prefixed forms like `@skill-inspector`, but canonical contract tokens are bare identifiers without the `@` prefix.
 - R21. Role availability must be checked before execution and captured in run evidence so missing inspector roles cannot silently degrade installation quality.
 - R22. The spec/plan must define a fail-closed policy for installation quality checks: if required skill stack or inspection support cannot run, promotion is blocked until fallback or remediation path is complete.
 

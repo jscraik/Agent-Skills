@@ -14,6 +14,8 @@ cases:
         value: "(?i)(round 1|round 2|request_user_input)"
       - type: regex
         value: "(?i)(success criteria|SKILL\\.md)"
+      - type: regex
+        value: "(?i)(schema_version|mode|skill_path|findings|next_step)"
 
   - id: canonical-destination-default
     name: project-specific workflow should prefer canonical destination
@@ -100,6 +102,8 @@ cases:
         value: "(?i)(session-collector|session artifact|telemetry)"
       - type: regex
         value: "(?i)(thread_plus_session_collector|freshness|generated_at)"
+      - type: regex
+        value: "(?i)(schema_version|mode|skill_path|security|validations)"
 
   - id: session-collector-stale-or-missing
     name: stale or missing session collector triggers thread-only mode

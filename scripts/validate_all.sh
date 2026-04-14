@@ -231,7 +231,7 @@ fi
 run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" scripts/validate_runtime_separation_manifest.py --strict
 run_check required runtime-separation-consumers "🧪 Scanning runtime-separation consumer inventories..." "${runtime_consumer_scan_cmd[@]}"
 run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
-run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." "${python_cmd[@]}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
+run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." env RECURSIVE_VALIDATION_GUARD=1 "${python_cmd[@]}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
 run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash scripts/verify_wrapper_contract_fixtures.sh --runtime-separation
 run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
 run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash scripts/verify_runtime_separation_writer_mutations.sh --strict

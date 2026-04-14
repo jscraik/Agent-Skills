@@ -552,6 +552,8 @@ def main() -> int:
                 "display_slice": entry.inventory_slice,
                 "selected_skill_dir": entry.relative_skill_dir,
                 "source_skill_dirs": list(entry.source_skill_dirs),
+                "inventory_slice": entry.inventory_slice,
+                "display_slice": entry.inventory_slice,
                 "wave": entry.wave,
                 "profile_path": entry.profile_path.relative_to(repo_root).as_posix(),
                 "profile_binding": resolved_binding,
