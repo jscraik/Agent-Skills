@@ -11,7 +11,7 @@ cases:
     prompt: "Our CI started failing after a refactor because Biome reports formatting drift and lint violations. Show the safest command path to fix it."
     acceptance:
       - type: regex
-        value: "(?i)(biome (lint|check|format) \\.|--write( --unsafe)?|(@biomejs/biome|biome) ci)"
+        value: "(?i)((?=.*biome (lint|check|format) \\.)(?=.*--write --unsafe)|(@biomejs/biome|biome) ci)"
 
   - id: biome-rule-targeting
     name: rule targeting flow
@@ -33,7 +33,7 @@ cases:
     prompt: "I need to suppress one noisy Biome warning in a legacy file. Show the right comment format with a reason."
     acceptance:
       - type: regex
-        value: "(?i)(biome-ignore|reason)"
+        value: "(?i)(?=.*biome-ignore)(?=.*reason)"
 
   - id: biome-command-guard
     name: risky command guard

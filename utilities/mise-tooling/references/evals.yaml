@@ -11,7 +11,7 @@ cases:
     prompt: "Pin Node 24 for this project with mise and show how to confirm the active binary path inside the repo shell."
     acceptance:
       - type: regex
-        value: "(?i)\\bmise use\\s+node@24\\b"
+        value: "(?i)\\bmise use\\s+(?:--pin\\s+)?node@24\\b"
       - type: regex
         value: "(?i)\\bmise (current|exec)\\b"
       - type: regex
@@ -39,7 +39,7 @@ cases:
     prompt: "In a new worktree, mise says the config is not trusted. What is the secure workflow before installing tools?"
     acceptance:
       - type: regex
-        value: "(?i)(trust|confirm|do not auto-trust|decision)"
+        value: "(?i)\\b(do not auto-trust|confirm trust|explicitly trust|inspect.{0,20}config|verify.{0,20}config|manually trust|review.{0,20}(config|contents))\\b"
 
   - id: mise-command-guard
     name: risky command guard
