@@ -74,7 +74,7 @@ eval "$(mise env -s bash)"
 
 1. Inspect existing `mise.toml` or `.tool-versions` and requested scope.
 2. Recommend/pin versions with `mise use` (`local` or `--global`).
-3. Resolve trust state before install execution; use `mise trust <path-to-mise.toml>` (or `mise trust --all` for the current repo) only after explicit review of the config contents.
+3. Resolve trust state before install execution. Review the config file contents first, then use `mise trust <path-to-mise.toml>` for individual files. Do not use `mise trust --all` unless you have explicitly reviewed all config files and have documented consent, as it bypasses per-file review.
 4. Choose `mise exec` for deterministic command execution or `mise env` for shell activation.
 5. Validate selected tools and versions.
 
