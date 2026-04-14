@@ -12,5 +12,5 @@
 PyYAML==6.0.3
 jsonschema==4.25.1
 defusedxml==0.7.1
-pytest==8.4.2
+pytest==9.0.3
 ruff==0.15.5
