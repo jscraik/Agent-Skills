@@ -26,7 +26,7 @@ cases:
     prompt: "Set a global default Node version with mise for my machine and show the safest validation commands."
     acceptance:
       - type: regex
-        value: "(?i)\\bmise use\\s+--global\\b"
+        value: "(?i)(?=.*\\bmise use\\b)(?=.*\\b(--global|-g)\\b)(?=.*\\bnode@)"
       - type: regex
         value: "(?i)\\bmise current\\b"
 
