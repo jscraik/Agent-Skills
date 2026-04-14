@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -354,13 +355,25 @@ def main() -> int:
     # now invokes this runtime-separation lane. The recursive_validation_guard permits skipping
     # `repo validate --json` as degraded/allowed (not a hard blocker). Emit explicit skipped
     # semantics with guard provenance instead of shadowing with repo status output.
-    command_checks["repo_validate"] = _command_check(
-        command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
-        subject_id="repo",
-        returncode=0,
-        normalized_fields=_normalize_repo_validate_skipped(),
-        evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
-    )
+    # Only skip when the guard is explicitly present via environment variable.
+    recursive_guard_active = os.environ.get("RECURSIVE_VALIDATION_GUARD", "").lower() in ("1", "true", "yes")
+    if recursive_guard_active:
+        command_checks["repo_validate"] = _command_check(
+            command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
+            subject_id="repo",
+            returncode=0,
+            normalized_fields=_normalize_repo_validate_skipped(),
+            evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
+        )
+    else:
+        rc, payload, evidence = _run_json(repo_root, ["bin/ask", "repo", "validate", "--json"])
+        command_checks["repo_validate"] = _command_check(
+            command="bin/ask repo validate --json",
+            subject_id="repo",
+            returncode=rc,
+            normalized_fields=_normalize_repo_validate(payload),
+            evidence_ref=evidence,
+        )
 
     rc, payload, evidence = _run_json(
         repo_root,

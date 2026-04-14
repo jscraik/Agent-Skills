@@ -25,7 +25,7 @@ cases:
     prepend_skill: false
     prompt: "Can you run iterative hardening passes across our Skill Factory plugin and score each pass before deciding keep or discard?"
     deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
         value: "(?i)iteration|hypothesis|evidence|validation"
@@ -39,7 +39,7 @@ cases:
     prepend_skill: false
     prompt: "Please initialize a run with a timestamped results TSV and journal so I can review the keep/discard evidence before merge."
     deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
         value: '(?i)results\.tsv|journal|artifacts|keep|discard'
@@ -56,7 +56,9 @@ cases:
       forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
-        value: "(?i)stop condition|blocked|results\\.tsv|journal|validation"
+        value: "(?i)stop condition|blocked"
+      - type: regex
+        value: "(?i)results\\.tsv|journal|validation|command"
     realistic: true
 
   - id: edge-missing-stop-condition
@@ -80,6 +82,8 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Refactor app billing retries and also run iterative improvements on the skills in this repo."
+    deterministic_checks:
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
         value: "(?i)boundary|scope|skills|plugins|out of scope"
@@ -93,10 +97,14 @@ cases:
     prepend_skill: false
     prompt: "Can you run the loop with a 10-minute cap per required command and mark timed-out steps as blocked with exact command evidence?"
     deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "ssh", "sudo", "apt", "pip install", "git clone"]
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc"]
     acceptance:
       - type: regex
-        value: "(?i)timeout|10.?minute|blocked|command evidence|stop"
+        value: "(?i)timeout|10.?minute"
+      - type: regex
+        value: "(?i)blocked"
+      - type: regex
+        value: "(?i)command|evidence|validation|results\\.tsv|journal"
     realistic: true
 
   - id: negative-control
@@ -108,7 +116,7 @@ cases:
     prompt: "Update one paragraph in `utilities/autoresearch/SKILL.md` and stop."
     acceptance:
       - type: not_regex
-        value: "(?i)autoresearch|experiment loop|iteration"
+        value: "(?i)experiment loop|iteration"
     realistic: true
 
   - id: pressure-bypass

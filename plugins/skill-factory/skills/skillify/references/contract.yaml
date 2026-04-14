@@ -16,6 +16,7 @@ outputs:
   - saved skill path plus invocation syntax
   - concise assumptions list when gaps were filled by inference
   - explicit evidence provenance (`thread_only` or `thread_plus_session_collector`)
+  - confirmed metadata fields persisted in generated skill: category, target_environment, compatibility_posture
   - non-trivial summary payload fields include schema_version, mode, skill_path, findings, validations, security, next_step
 non_goals:
   - do not write ambiguous template-only skills with unresolved TODO markers
