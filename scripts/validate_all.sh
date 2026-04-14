@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 # Consolidated validation runner - one command to check everything
+#
+# Bootstrap: macOS ships bash 3.2 which lacks associative arrays (declare -A)
+# and other bash 4+ features used by subscripts. Re-exec with a modern bash
+# when the current interpreter is too old.
+if (( BASH_VERSINFO[0] < 4 )); then
+  for _bash4 in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$_bash4" ]]; then
+      exec "$_bash4" "$0" "$@"
+    fi
+  done
+  echo "error: bash 4+ required but not found (tried /opt/homebrew/bin/bash, /usr/local/bin/bash)" >&2
+  exit 1
+fi
 set -euo pipefail
 
 usage() {
@@ -147,7 +160,7 @@ run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests
 run_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" scripts/verify_skill_catalog_freshness.py --strict
 run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash scripts/check_plugin_skill_shadowing.sh
 run_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash scripts/validate_projection_integrity.sh
-run_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." bash scripts/check_path_ownership_boundaries.sh
+run_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." "$BASH" scripts/check_path_ownership_boundaries.sh
 run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash scripts/lint_skill_types.sh
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict

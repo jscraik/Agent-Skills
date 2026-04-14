@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 
 const COMMIT_MSG_FILE = process.argv[2];
 const CONVENTIONAL_COMMIT_REGEX =
-	/^(feat|fix|chore|docs|refactor|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
+	/^(\[AI\]\s+)?(feat|fix|chore|docs|refactor|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
 const CO_AUTHOR_REGEX = /Co-Authored-By:\s*.+/i;
 
 function main() {

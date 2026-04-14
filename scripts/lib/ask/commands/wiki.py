@@ -7,7 +7,6 @@ import re
 import shutil
 import subprocess
 import os
-import yaml
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -379,6 +378,7 @@ def wiki_add(
         "last_reviewed": date_iso,
         "sources": [cleaned_source],
     }
+    import yaml  # lazy import — optional dep; not needed for most ask commands
     frontmatter_yaml = yaml.safe_dump(frontmatter_dict, default_flow_style=False, allow_unicode=True)
     frontmatter_lines = [
         "---",

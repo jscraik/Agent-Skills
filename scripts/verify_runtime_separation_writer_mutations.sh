@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+# Bootstrap: bash 4+ required for subscript (declare -A). Re-exec if needed.
+if (( BASH_VERSINFO[0] < 4 )); then
+  for _bash4 in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$_bash4" ]]; then
+      exec "$_bash4" "$0" "$@"
+    fi
+  done
+  echo "error: bash 4+ required" >&2
+  exit 1
+fi
 set -euo pipefail
 
 strict=0
@@ -27,7 +37,7 @@ done
 repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_root"
 
-PATH_OWNERSHIP_GUARD_SCOPE=working bash scripts/check_path_ownership_boundaries.sh
+PATH_OWNERSHIP_GUARD_SCOPE=working "$BASH" scripts/check_path_ownership_boundaries.sh
 
 if [[ "$strict" -eq 1 ]]; then
   if git status --porcelain -- .agents .agent runtime skills-antigravity plugins/cache 2>/dev/null | grep -qE '^(A|M|D|R|C|\?\?)'; then
