@@ -48,7 +48,9 @@ Use this skill for Biome-first lint/format/check workflows, especially when user
 ```bash
 biome lint .
 biome lint --write .
-biome lint --write --unsafe .
+if [ "${ALLOW_UNSAFE_FIXES:-}" = "true" ]; then
+  biome lint --write --unsafe .
+fi
 ```
 
 **Prefer focused rule targeting for noisy codebases**:

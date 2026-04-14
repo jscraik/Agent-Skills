@@ -39,7 +39,7 @@ cases:
     prompt: "Our npm publish failed due to OTP requirements. What exact command path should we run now?"
     acceptance:
       - type: regex
-        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*\\b--otp(?:\\s*=?\\s*\\d+)?\\b)"
+        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*\\b--otp\\b)"
 
   - id: npm-release-provenance
     name: provenance publish

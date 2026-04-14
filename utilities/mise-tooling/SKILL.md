@@ -46,8 +46,8 @@ Use this skill for `mise` version management, environment activation, trust prom
 **Pin tools explicitly**:
 
 ```bash
-mise use node@24
-mise use --global node@24
+mise use --pin node@24
+mise use --pin --global node@24
 ```
 
 **Use deterministic wrappers when shell activation is uncertain**:
