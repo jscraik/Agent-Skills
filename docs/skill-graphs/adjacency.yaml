@@ -575,7 +575,7 @@ simplify:
   code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
     fix work
 skill-builder:
-  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
+  codex-agent-builder: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
