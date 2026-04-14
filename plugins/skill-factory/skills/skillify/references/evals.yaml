@@ -63,13 +63,38 @@ cases:
       - type: regex
         value: "(?i)(trigger phrases|gotchas|when to use)"
 
+  - id: output-contract-fields-present
+    name: non-trivial closeout summary includes contract payload fields
+    category: happy
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "After skillifying this workflow, return a non-trivial closeout summary payload with schema and validation/security details."
+    acceptance:
+      - type: regex
+        value: "(?i)schema_version"
+      - type: regex
+        value: "(?i)mode"
+      - type: regex
+        value: "(?i)skill_path"
+      - type: regex
+        value: "(?i)findings"
+      - type: regex
+        value: "(?i)validations|quick_validate|strict_audit"
+      - type: regex
+        value: "(?i)security_checklist_passed|security"
+      - type: regex
+        value: "(?i)next_step"
+      - type: regex
+        value: "(?i)category|target_environment|compatibility_posture"
+
   - id: session-collector-assisted-intake
     name: session collector artifact is used as optional corroboration
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "I already have session data at /Users/jamiecraik/dev/configs/codex/usage-data/session-collector.json. Please use it to confirm tool ordering while skillifying this workflow."
+    prompt: "I already have session data at ${SESSION_COLLECTOR_PATH}. Please use it to confirm tool ordering while skillifying this workflow."
     acceptance:
       - type: regex
         value: "(?i)(session-collector|session artifact|telemetry)"

@@ -548,6 +548,8 @@ def main() -> int:
             {
                 "skill_path": entry.skill_md.relative_to(repo_root).as_posix(),
                 "scope_skill": entry.scope_skill,
+                "inventory_slice": entry.inventory_slice,
+                "display_slice": entry.inventory_slice,
                 "selected_skill_dir": entry.relative_skill_dir,
                 "source_skill_dirs": list(entry.source_skill_dirs),
                 "wave": entry.wave,

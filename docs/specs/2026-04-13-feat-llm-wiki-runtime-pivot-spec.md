@@ -57,7 +57,7 @@ This spec defines a new contract that makes `llm-wiki` the primary knowledge ope
 - Reorganize scaffold authority so canonical sources, factory mechanics, and runtime projections are unambiguous.
 - Absorb blocked lanes 1, 2, and 4 into one contract family without split ownership.
 - Enforce installation governance with a required skill stack: `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, `baseline-ui`.
-- Enforce inspection-role checks (`@skill-inspector`, `@plugin-inspector`) with deterministic fallback and fail-closed gating.
+- Enforce inspection-role checks (`skill-inspector`, `plugin-inspector`) with deterministic fallback and fail-closed gating.
 - Make blocker taxonomy, ownership, and closeout health reporting deterministic and machine-checkable.
 
 ## Non-Goals

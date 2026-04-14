@@ -10,6 +10,9 @@ allowed-tools:
   - <tool pattern>
 metadata:
   skill-type: <canonical-skill-type>
+  category: <1-9>
+  target_environment: <codex|claude|portable>
+  compatibility_posture: <learn|guided|execute>
 ---
 
 # <Skill Title>
