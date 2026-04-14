@@ -290,9 +290,10 @@ fi
 pytest_cmd=()
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${python_cmd[@]}" -m pytest)
-elif command -v uv >/dev/null 2>&1 && uv run --python 3.12 --with pytest python -m pytest --version >/dev/null 2>&1; then
-  pytest_cmd=(uv run --python 3.12 --with pytest python -m pytest)
-  echo "[family-gate] using uv ephemeral pytest runner"
+elif command -v uv >/dev/null 2>&1 \
+  && uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest --version >/dev/null 2>&1; then
+  pytest_cmd=(uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest)
+  echo "[family-gate] using uv ephemeral pytest runner (pytest+pyyaml+jsonschema)"
 fi
 
 if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
