@@ -1,0 +1,77 @@
+{
+  "pilot_version": "v0.1.0",
+  "generated_at": "2026-03-11T10:29:12.729871Z",
+  "overall_state": "blocked",
+  "pilot_skills": [
+    {
+      "skill": "Skills/skill-builder",
+      "declared_posture": "guided",
+      "selected_posture": "guided",
+      "eval_state": "blocked",
+      "telemetry_state": "blocked",
+      "conformance_state": "blocked",
+      "interaction_pattern_tags": [
+        "ai_led_debugging",
+        "conceptual_inquiry",
+        "explain_then_generate",
+        "full_delegation",
+        "generate_then_explain"
+      ],
+      "warnings": [
+        "No usable trace evidence was captured for any eval case."
+      ]
+    },
+    {
+      "skill": "frontend/tools/agentation",
+      "declared_posture": "guided",
+      "selected_posture": "guided",
+      "eval_state": "blocked",
+      "telemetry_state": "blocked",
+      "conformance_state": "blocked",
+      "interaction_pattern_tags": [
+        "ai_led_debugging",
+        "conceptual_inquiry",
+        "explain_then_generate",
+        "full_delegation",
+        "generate_then_explain"
+      ],
+      "warnings": [
+        "No usable trace evidence was captured for any eval case."
+      ]
+    },
+    {
+      "skill": "Skills/systematic-debugging",
+      "declared_posture": "learn",
+      "selected_posture": "learn",
+      "eval_state": "blocked",
+      "telemetry_state": "blocked",
+      "conformance_state": "blocked",
+      "interaction_pattern_tags": [
+        "ai_led_debugging",
+        "conceptual_inquiry",
+        "explain_then_generate",
+        "full_delegation",
+        "generate_then_explain"
+      ],
+      "warnings": [
+        "No usable trace evidence was captured for any eval case."
+      ]
+    },
+    {
+      "skill": "interview/interview-me",
+      "declared_posture": "learn",
+      "selected_posture": "learn",
+      "eval_state": "blocked",
+      "telemetry_state": "blocked",
+      "conformance_state": "blocked",
+      "interaction_pattern_tags": [
+        "conceptual_inquiry",
+        "explain_then_generate",
+        "generate_then_explain"
+      ],
+      "warnings": [
+        "No usable trace evidence was captured for any eval case."
+      ]
+    }
+  ]
+}

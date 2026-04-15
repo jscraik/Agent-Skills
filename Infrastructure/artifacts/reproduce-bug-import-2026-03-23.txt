@@ -1,0 +1,23 @@
+Imported upstream `reproduce-bug` as a new local skill `Skills/reproduce-bug`.
+
+Source repository:
+- owner/repo: `EveryInc/compound-engineering-plugin`
+- ref: `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`
+- source path: `Plugins/compound-engineering/skills/reproduce-bug`
+
+Created local files:
+- `Skills/reproduce-bug/SKILL.md`
+- `Skills/reproduce-bug/Infrastructure/references/tracker-intake-and-reporting.md`
+- `Skills/reproduce-bug/Infrastructure/references/contract.yaml`
+- `Skills/reproduce-bug/Infrastructure/references/evals.yaml`
+
+Upstream source blob:
+- `SKILL.md` sha: `978247debb36e0b5e5ce467a3a96a119c5474d6e`
+
+Tag rationale:
+- used `metadata.skill-type: product_verification` because the skill centers on verified reproduction and investigation of reported product bugs before fixes.
+
+Adaptation rationale:
+- this repo uses Linear as the preferred bug intake system
+- GitHub issue support was intentionally preserved rather than removed
+- upstream GitHub-only tracker assumptions were relocated into a Linear-first tracker reference instead of being flattened away

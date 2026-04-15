@@ -25,8 +25,8 @@ body:
       label: Acceptance criteria
       description: How should we validate this is done?
       placeholder: |
-        - [ ] `bash scripts/validate_all.sh` passes
-        - [ ] `python3 scripts/diagnose_skill.py --all` passes
+        - [ ] `bash Infrastructure/scripts/validate_all.sh` passes
+        - [ ] `python3 Infrastructure/scripts/diagnose_skill.py --all` passes
     validations:
       required: false
 

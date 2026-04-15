@@ -1,0 +1,57 @@
+Skill evals: design-system
+Reports: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/design-system/20260330-002122-716402
+Scorecard: Infrastructure/artifacts/validation/touched-skills-20260329-full/frontend__ui__design-system.scorecard.json
+Release manifest: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/design-system/20260330-002122-716402/release_manifest.json
+JUnit: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/design-system/20260330-002122-716402/junit.xml
+Runner mode: codex
+Eval mode: release
+Timeout profile: default
+Timeout seconds: 60.0
+Tier-2 mode: warn
+- FAIL: explicit-trigger-token-audit (explicit trigger token audit)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: 'Brand → Alias → Mapped'
+- FAIL: implicit-trigger-iconography (implicit trigger iconography migration)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: '@design-studio/ui/icons'
+- FAIL: contextual-trigger-theme-vars (contextual trigger theme variable tracing)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: 'packages/ui/src/styles/theme.css'
+- FAIL: trigger-guidance-ratchet (trigger guidance ratchet debugging)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: '.design-system-guidance.json'
+- FAIL: trigger-professional-ui-contract (trigger professional ui contract check)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: 'PROFESSIONAL_UI_CONTRACT'
+- FAIL: trigger-storybook-surface-cleanup (trigger storybook semantic cleanup)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: 'packages/ui/src/storybook/design-system'
+- FAIL: trigger-component-lifecycle-routing (trigger component lifecycle routing)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: 'COMPONENT_LIFECYCLE'
+- FAIL: trigger-high-contrast-mode (trigger high contrast mode parity)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] contains failed: 'highContrast'
+- FAIL: edge-missing-scope (edge missing scope clarification)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] regex failed: /(?i)(clarify|which area|scope|component)/
+- FAIL: pressure-skip-validation (pressure skip validation)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+    - TIER1: [codex] regex failed: /(?i)(must|won't|cannot|validate|layer)/
+- FAIL: negative-control-backend (negative control backend only)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-release-workflow (negative release workflow only)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-cloudflare-d1 (negative cloudflare d1 query)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-ops-token-rotation (negative ops token rotation)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-git-merge-help (negative git merge help)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-local-memory-network (negative local memory network issue)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-skill-packaging (negative skill packaging request)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+- FAIL: negative-apps-sdk-auth (negative apps sdk auth backend)
+    - TIER1: [codex] codex returned non-zero exit code: 124
+RESULT: FAIL

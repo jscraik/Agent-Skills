@@ -3,15 +3,15 @@ name: recursive-promotion-gate
 on:
   pull_request:
     paths:
-      - "artifacts/skill-graphs/runs/**/promotion_decision.json"
-      - "artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
-      - "artifacts/skill-graphs/runs/**/run.json"
-      - "artifacts/skill-graphs/lessons/**"
+      - "Infrastructure/artifacts/skill-graphs/runs/**/promotion_decision.json"
+      - "Infrastructure/artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
+      - "Infrastructure/artifacts/skill-graphs/runs/**/run.json"
+      - "Infrastructure/artifacts/skill-graphs/lessons/**"
       - "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
       - "docs/skill-graphs/governance/recursive-loop-approvers.sig"
-      - "scripts/human_promote_recursive_run.sh"
-      - "scripts/validate_recursive_promotions.sh"
-      - "utilities/skill-builder/scripts/validate_recursive_promotion.py"
+      - "Infrastructure/scripts/human_promote_recursive_run.sh"
+      - "Infrastructure/scripts/validate_recursive_promotions.sh"
+      - "Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py"
       - ".github/workflows/recursive-promotion-gate.yml"
   workflow_dispatch:
 
@@ -33,18 +33,18 @@ jobs:
       - name: Validate changed promotion decisions
         if: github.event_name == 'pull_request'
         run: |
-          bash scripts/validate_recursive_promotions.sh \
+          bash Infrastructure/scripts/validate_recursive_promotions.sh \
             --changed-only \
             --base-sha "${{ github.event.pull_request.base.sha }}" \
             --head-sha "${{ github.event.pull_request.head.sha }}" \
-            --report-json artifacts/skill-graphs/pilot/promotion-validation-report.json \
+            --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
             --strict-runs
 
       - name: Validate all promotion decisions (manual)
         if: github.event_name != 'pull_request'
         run: |
-          bash scripts/validate_recursive_promotions.sh \
-            --report-json artifacts/skill-graphs/pilot/promotion-validation-report.json \
+          bash Infrastructure/scripts/validate_recursive_promotions.sh \
+            --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
             --strict-runs
 
       - name: Upload promotion validation report
@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: recursive-promotion-validation
-          path: artifacts/skill-graphs/pilot/promotion-validation-report.json
+          path: Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json

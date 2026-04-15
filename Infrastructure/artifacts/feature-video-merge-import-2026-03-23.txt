@@ -1,0 +1,20 @@
+Imported upstream `feature-video` into existing local skill `product/content/feature-video`.
+
+Source repository:
+- owner/repo: `EveryInc/compound-engineering-plugin`
+- ref: `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`
+- source path: `Plugins/compound-engineering/skills/feature-video`
+
+Wrapper updated:
+- `product/content/feature-video/SKILL.md`
+
+Preserved upstream doctrine as local reference:
+- `product/content/feature-video/Infrastructure/references/browser-pr-walkthrough.md`
+
+Upstream source blob:
+- `SKILL.md` sha: `348081c2cac5a082ff3c5ff62503ba8df52cc525`
+
+Merge rationale:
+- avoid replacing the local routing-oriented `feature-video` wrapper
+- preserve the upstream real-app recording and GitHub PR upload workflow as explicit signposted guidance
+- keep concrete auth, upload-validation, resume-mode, and cleanup safeguards available without bloating the wrapper

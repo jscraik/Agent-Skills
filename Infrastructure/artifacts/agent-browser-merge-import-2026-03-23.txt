@@ -1,0 +1,28 @@
+source_repo: EveryInc/compound-engineering-plugin
+source_ref: 0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b
+source_path: Plugins/compound-engineering/skills/agent-browser
+merge_target: Skills/agent-browser
+strategy: merge_local_keep_existing_wrapper_and_governance
+imported_references:
+  - Infrastructure/references/authentication.md
+  - Infrastructure/references/commands.md
+  - Infrastructure/references/profiling.md
+  - Infrastructure/references/proxy-support.md
+  - Infrastructure/references/session-management.md
+  - Infrastructure/references/snapshot-refs.md
+  - Infrastructure/references/video-recording.md
+imported_templates:
+  - Infrastructure/templates/authenticated-session.sh
+  - Infrastructure/templates/capture-workflow.sh
+  - Infrastructure/templates/form-automation.sh
+sha256:
+414ee66b002673dacb7d8559ec057726b19d17aaedc577afbe373fb15de6f3d5  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/authentication.md
+bf3f7fb9a9d18bf19fb87b5ec4513e934d8dd44d2d568e94cf6f8206640d51d6  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/commands.md
+75288f56fd1a9ed604e1d13baa2e6a4530ba548d7247f624a056914e94210e43  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/profiling.md
+4c44ba60d9397523109fdbdf1d972739691856c5bf6bf1587fc58793c71b4671  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/proxy-support.md
+2ce531bf105aaf827a907a4e255e00321eef5994ca0e21e41c28489c0a8efebb  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/session-management.md
+255edc48b99da26d60e4ec1d747c4c0e74ff7869a741e4c0c0441f3897b897cf  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/snapshot-refs.md
+c2c12bd8c44e5d36fbb94cfc376180d47507d3c26a7ee8876b892fc700dcf332  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/references/video-recording.md
+1fa9926c36dbe71191120ce067e5e3babe732cd1cc605020f3bd04dc430aa58c  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/templates/authenticated-session.sh
+bf3f3a2f8413773891d9fa400d2a2fddf6d73ffc7a9b2fa00f797f944171c3d5  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/templates/capture-workflow.sh
+b86836986d339f736b15ca78cf3d566e845a6293ae25a5b00aa520b837572650  /Users/jamiecraik/dev/Agent-Skills/agent-browser/Infrastructure/templates/form-automation.sh

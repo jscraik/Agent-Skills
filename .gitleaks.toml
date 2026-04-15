@@ -16,9 +16,9 @@ paths = [
   "(^|/)test-data/",
   "(^|/)[^.]+\\.(test|spec)\\.[^.]+$",
   "frontend/ui/figma-implement-design/SKILL\\.md$",
-  "(^|/)artifacts/skill-graphs/runs/",
-  "(^|/)artifacts/validation/.*/(stderr|stdout|final|output)\\.txt$",
-  "(^|/)artifacts/validation/.*/codex/(stderr|stdout|result)\\.(txt|json)$",
+  "(^|/)Infrastructure/artifacts/skill-graphs/runs/",
+  "(^|/)Infrastructure/artifacts/validation/.*/(stderr|stdout|final|output)\\.txt$",
+  "(^|/)Infrastructure/artifacts/validation/.*/codex/(stderr|stdout|result)\\.(txt|json)$",
   "(^|/)\\.cache/",
 ]
 regexes = [

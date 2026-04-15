@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.1",
+  "tool": "analyze_skill",
+  "generated_at": "2026-03-29T23:21:22Z",
+  "decision": "pass",
+  "exit_code": 0,
+  "name": "design-system",
+  "description": "Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks.",
+  "path": "frontend/ui/design-system/SKILL.md",
+  "total_score": 127,
+  "max_total": 165,
+  "categories": [
+    {
+      "category": "Frontmatter",
+      "score": 30,
+      "max_score": 30,
+      "findings": [
+        {
+          "category": "Frontmatter",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ `name` present and valid.",
+          "evidence": ""
+        },
+        {
+          "category": "Frontmatter",
+          "points": 20,
+          "severity": "INFO",
+          "message": "✅ `description` is detailed and includes trigger language.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Philosophy",
+      "score": 17,
+      "max_score": 20,
+      "findings": [
+        {
+          "category": "Philosophy",
+          "points": 14,
+          "severity": "INFO",
+          "message": "✅ Philosophy indicators found: approach, principle, principles, why.",
+          "evidence": ""
+        },
+        {
+          "category": "Philosophy",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Contains 1 guiding question(s).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Anti-Patterns",
+      "score": 8,
+      "max_score": 20,
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "points": 8,
+          "severity": "WARN",
+          "message": "⚠️ Some anti-pattern guidance detected (3 signals).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Variation",
+      "score": 14,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Variation",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Variation encouraged: variation, different, adapt.",
+          "evidence": ""
+        },
+        {
+          "category": "Variation",
+          "points": 4,
+          "severity": "INFO",
+          "message": "✅ Warns against generic patterns (4 mention(s)).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Organization",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Organization",
+          "points": 6,
+          "severity": "INFO",
+          "message": "✅ Well-structured with 23 headings.",
+          "evidence": ""
+        },
+        {
+          "category": "Organization",
+          "points": 4,
+          "severity": "INFO",
+          "message": "✅ Contains 137 list items (actionable).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Empowerment",
+      "score": 5,
+      "max_score": 5,
+      "findings": [
+        {
+          "category": "Empowerment",
+          "points": 5,
+          "severity": "INFO",
+          "message": "✅ Empowering tone: extraordinary, capable, unlock, creative, push boundaries.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Conciseness",
+      "score": 10,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Conciseness",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Concise length (248 lines).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Repo Integration",
+      "score": 7,
+      "max_score": 10,
+      "findings": [
+        {
+          "category": "Repo",
+          "points": 2,
+          "severity": "INFO",
+          "message": "ℹ️ No `Infrastructure/scripts/` directory (fine for instruction-only skills).",
+          "evidence": ""
+        },
+        {
+          "category": "Repo",
+          "points": 3,
+          "severity": "INFO",
+          "message": "✅ `Infrastructure/references/` present and referenced (5 file(s)).",
+          "evidence": ""
+        },
+        {
+          "category": "Repo",
+          "points": 3,
+          "severity": "INFO",
+          "message": "✅ `assets/` present and referenced (1 file(s)).",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Scope Focus",
+      "score": 8,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Scope",
+          "points": 5,
+          "severity": "WARN",
+          "message": "⚠️ Moderately broad capability surface (4 major surface(s)).",
+          "evidence": ""
+        },
+        {
+          "category": "Research: Scope",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Some focus language present; make package-boundary guidance more explicit.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Example Quality",
+      "score": 13,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Examples",
+          "points": 10,
+          "severity": "INFO",
+          "message": "✅ Includes multiple worked examples or realistic trigger prompts.",
+          "evidence": ""
+        },
+        {
+          "category": "Research: Examples",
+          "points": 3,
+          "severity": "WARN",
+          "message": "⚠️ Some realism signals found; prefer more natural user-style prompts.",
+          "evidence": ""
+        }
+      ]
+    },
+    {
+      "category": "Research: Eval Realism",
+      "score": 5,
+      "max_score": 15,
+      "findings": [
+        {
+          "category": "Research: Evals",
+          "points": 5,
+          "severity": "WARN",
+          "message": "⚠️ Limited skill-name leakage in eval prompts (3/10).",
+          "evidence": ""
+        },
+        {
+          "category": "Research: Evals",
+          "points": 0,
+          "severity": "WARN",
+          "message": "⚠️ Eval prompts look synthetic; rewrite more cases as realistic user utterances.",
+          "evidence": ""
+        }
+      ]
+    }
+  ]
+}

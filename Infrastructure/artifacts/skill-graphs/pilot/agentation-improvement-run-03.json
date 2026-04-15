@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "skill": "agentation",
+  "timestamp": "2026-03-11",
+  "baseline_artifact": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/pilot/agentation-five-gate-baseline.json",
+  "prior_run": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/pilot/agentation-improvement-run-02.json",
+  "change": {
+    "type": "timeout_reduction",
+    "summary": "Tightened the first-response contract to 3-5 bullets, explicit framework/layer/proof/blocker fields, and single-file-first routing for install incidents."
+  },
+  "comparison": {
+    "quick_validate": "pass",
+    "skill_gate": "pass",
+    "analyze_skill_score": 95,
+    "openclaw_skill_guard": "pass",
+    "run_skill_evals": "blocked_by_policy"
+  },
+  "eval_blocker": {
+    "command": "python3 /Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py /Users/jamiecraik/dev/agent-skills/frontend/tools/agentation --runner codex",
+    "result": "Rejected(\"approval required by policy, but AskForApproval is set to Never\")"
+  },
+  "known_timeout_cases_from_latest_real_eval": [
+    "explicit-react-install",
+    "mcp-doctor-flow",
+    "endpoint-triage",
+    "webhook-submit-delivery"
+  ],
+  "interpretation": "The timeout-focused wording change is structurally clean, but no fresh repo-path eval evidence exists yet because the runner was blocked before case execution."
+}

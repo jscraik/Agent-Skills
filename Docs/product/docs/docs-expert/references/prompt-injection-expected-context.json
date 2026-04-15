@@ -1,0 +1,20 @@
+{
+  "path_patterns": [
+    "Infrastructure/references/evals*.yaml",
+    "Infrastructure/references/discovery-interview.md",
+    "Infrastructure/references/readme-crafting.md",
+    "Infrastructure/references/readme-section-templates.md",
+    "Infrastructure/references/prompt-injection-expected-context.json"
+  ],
+  "context_signals": [
+    "prompt injection",
+    "adversarial",
+    "jailbreak",
+    "forbidden_commands",
+    "security coverage",
+    "red team"
+  ],
+  "skip_binary_globs": [
+    "assets/**"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-30T16:58:06Z",
+  "decision_date": "2026-03-29",
+  "sources": {
+    "wave_readiness": "Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json",
+    "checklist": "Infrastructure/artifacts/skill-graphs/onboarding/skill-onboarding-checklist-2026-03-29.md"
+  },
+  "metrics": {
+    "active_skill_count": 84,
+    "event_envelope_errors": 8,
+    "wave_0_ready": false,
+    "wave_1_ready": false,
+    "wave_2_ready": false,
+    "checklist_rows_total": 84,
+    "checklist_rows_placeholder_default": 84,
+    "checklist_rows_non_placeholder": 0
+  },
+  "completion_thresholds": {
+    "event_envelope_errors_unresolved_max": 0,
+    "checklist_placeholder_rows_max": 0,
+    "required_waves_ready": [
+      "wave-0-controls",
+      "wave-1-manual",
+      "wave-2-co-pilot"
+    ]
+  }
+}

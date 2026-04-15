@@ -1,0 +1,164 @@
+{
+  "jobs": [
+    {
+      "kind": "skill",
+      "name": "ce-ideate",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-ideate-small.png",
+      "target": "product/Infrastructure/ops/ce-ideate/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Ideate\".\nConcept: Generate, challenge, and rank grounded project-improvement ideas before ce-brainstorm.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-ideate",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-ideate-large.png",
+      "target": "product/Infrastructure/ops/ce-ideate/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Ideate\".\nConcept: Generate, challenge, and rank grounded project-improvement ideas before ce-brainstorm.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-plan",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-plan-small.png",
+      "target": "product/Infrastructure/ops/ce-plan/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Plan\".\nConcept: Turn a spec, brainstorm, or UI contract into a traceable implementation plan with execution, validation, and rollout guidance.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-plan",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-plan-large.png",
+      "target": "product/Infrastructure/ops/ce-plan/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Plan\".\nConcept: Turn a spec, brainstorm, or UI contract into a traceable implementation plan with execution, validation, and rollout guidance.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-reliability-review",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-reliability-review-small.png",
+      "target": "product/Infrastructure/ops/ce-reliability-review/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Reliability Review\".\nConcept: Review services and systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-reliability-review",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-reliability-review-large.png",
+      "target": "product/Infrastructure/ops/ce-reliability-review/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Reliability Review\".\nConcept: Review services and systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-review",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-review-small.png",
+      "target": "product/Infrastructure/ops/ce-review/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Review\".\nConcept: Run broad PR, branch, or workflow-artifact reviews with synthesized findings, blockers, readiness guidance, and optional mode/base/plan overrides.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-review",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-review-large.png",
+      "target": "product/Infrastructure/ops/ce-review/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Review\".\nConcept: Run broad PR, branch, or workflow-artifact reviews with synthesized findings, blockers, readiness guidance, and optional mode/base/plan overrides.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-spec",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-spec-small.png",
+      "target": "product/Infrastructure/ops/ce-spec/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Spec\".\nConcept: Turn a brainstorm, feature description, or UI source into a system spec or UI spec that planning can trust.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-spec",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-spec-large.png",
+      "target": "product/Infrastructure/ops/ce-spec/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Spec\".\nConcept: Turn a brainstorm, feature description, or UI source into a system spec or UI spec that planning can trust.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-tdd",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-tdd-small.png",
+      "target": "product/Infrastructure/ops/ce-tdd/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Ce Tdd\".\nConcept: Build behavior-safe code changes with TDD and RED/GREEN evidence\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-tdd",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-tdd-large.png",
+      "target": "product/Infrastructure/ops/ce-tdd/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Ce Tdd\".\nConcept: Build behavior-safe code changes with TDD and RED/GREEN evidence\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-technical-review",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-technical-review-small.png",
+      "target": "product/Infrastructure/ops/ce-technical-review/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Technical Review\".\nConcept: Run focused technical critique on diffs, PRs, specs, and plans with severity-ranked findings and readiness guidance.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-technical-review",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-technical-review-large.png",
+      "target": "product/Infrastructure/ops/ce-technical-review/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Technical Review\".\nConcept: Run focused technical critique on diffs, PRs, specs, and plans with severity-ranked findings and readiness guidance.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-work",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-work-small.png",
+      "target": "product/Infrastructure/ops/ce-work/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Work\".\nConcept: Execute plans, tasks, or tiny direct requests with synchronized progress, validation, UI gates, guarded delegation, and shipping hygiene.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "ce-work",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-ce-work-large.png",
+      "target": "product/Infrastructure/ops/ce-work/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"CE Work\".\nConcept: Execute plans, tasks, or tiny direct requests with synchronized progress, validation, UI gates, guarded delegation, and shipping hygiene.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "decide-build-primitive",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-decide-build-primitive-small.png",
+      "target": "product/Infrastructure/ops/decide-build-primitive/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Decide Build Primitive\".\nConcept: Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the use...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "decide-build-primitive",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-decide-build-primitive-large.png",
+      "target": "product/Infrastructure/ops/decide-build-primitive/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Decide Build Primitive\".\nConcept: Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the use...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "fallback-release",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch6-out/skill-fallback-release-small.png",
+      "target": "product/Infrastructure/ops/fallback-release/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Fallback Release\".\nConcept: Execute deterministic fallback releases when primary CI is unavailable\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "fallback-release",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch6-out/skill-fallback-release-large.png",
+      "target": "product/Infrastructure/ops/fallback-release/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Fallback Release\".\nConcept: Execute deterministic fallback releases when primary CI is unavailable\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    }
+  ]
+}

@@ -21,13 +21,13 @@ Rebuilds the skill projection for all agent runtimes and restores Antigravity sl
 // turbo
 1. Run skill sync from the repo root:
 ```bash
-bash /Users/jamiecraik/dev/Agent-Skills/scripts/sync_skills.sh
+bash /Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/sync_skills.sh
 ```
 
 // turbo
 2. Sync MCP config for Antigravity:
 ```bash
-python3 /Users/jamiecraik/dev/Agent-Skills/scripts/sync_mcp.py
+python3 /Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/sync_mcp.py
 ```
 
 // turbo
@@ -46,7 +46,7 @@ echo "=== skill count ===" && ls ~/.gemini/antigravity/skills/ | wc -l
 
 5. If skill count is 0 or symlink is missing, run the diagnostic:
 ```bash
-python3 /Users/jamiecraik/dev/Agent-Skills/scripts/diagnose_skill.py --all 2>&1 | head -40
+python3 /Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/diagnose_skill.py --all 2>&1 | head -40
 ```
 
 6. **Restart Antigravity** or type `/refresh` in this chat to pick up the updated skill list.

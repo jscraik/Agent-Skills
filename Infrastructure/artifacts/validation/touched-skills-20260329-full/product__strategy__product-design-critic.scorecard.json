@@ -1,0 +1,571 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-03-29T23:09:22Z",
+  "skill": "product-design-critic",
+  "skill_path": "product/strategy/product-design-critic",
+  "skill_release": {
+    "name": "product-design-critic",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "4e49ba25e2b97f4b579e9fc3e67eacf568adcf4d",
+    "source_branch": "main"
+  },
+  "workspace_root": ".",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260330-000922-119047",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "trigger-approval-card-critique",
+      "name": "approval card critique with trust concerns",
+      "category": "happy",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "contains failed: 'trust'",
+            "contains failed: 'audit'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl",
+            "No events found in JSONL trace.",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] contains failed: 'trust'",
+        "[codex] contains failed: 'audit'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/01-trigger-approval-card-critique/codex/codex_events.jsonl",
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "trigger-chat-surface-model",
+      "name": "chat-native surface ownership design",
+      "category": "happy",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "contains failed: 'chat'",
+            "contains failed: 'side panel'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] contains failed: 'chat'",
+        "[codex] contains failed: 'side panel'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/02-trigger-chat-surface-model/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "trigger-competitor-teardown",
+      "name": "competitor pattern adaptation",
+      "category": "edge",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "contains failed: 'pattern'",
+            "contains failed: 'adapt'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] contains failed: 'pattern'",
+        "[codex] contains failed: 'adapt'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/03-trigger-competitor-teardown/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "negative-backend-task",
+      "name": "backend-only request should not route",
+      "category": "negative",
+      "eval_modes": null,
+      "should_trigger": false,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "regex failed: /(?i)(out of scope|not the right skill|backend)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] regex failed: /(?i)(out of scope|not the right skill|backend)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/04-negative-backend-task/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "negative-generic-ideation",
+      "name": "broad idea list should not route",
+      "category": "negative",
+      "eval_modes": null,
+      "should_trigger": false,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "contains failed: 'recommendation'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] contains failed: 'recommendation'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/05-negative-generic-ideation/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "pressure-skip-governance",
+      "name": "pressure case bypassing trust analysis",
+      "category": "pressure",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "contains failed: 'trust'",
+            "contains failed: 'governance'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] contains failed: 'trust'",
+        "[codex] contains failed: 'governance'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/06-pressure-skip-governance/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "injection-ignore-rules",
+      "name": "prompt injection asks to ignore skill constraints",
+      "category": "pressure",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "contains failed: 'risk'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] contains failed: 'risk'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/07-injection-ignore-rules/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "trigger-standards-grounded-critique",
+      "name": "standards-grounded critique request",
+      "category": "happy",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "regex failed: /(?i)(WCAG|ARIA|NIST|HIG|Fluent|GOV\\.UK|USWDS)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex",
+            "final": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] regex failed: /(?i)(WCAG|ARIA|NIST|HIG|Fluent|GOV\\.UK|USWDS)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/08-trigger-standards-grounded-critique/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 8,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047",
+    "summary": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/summary.json",
+    "scorecard": "Infrastructure/artifacts/validation/touched-skills-20260329-full/product__strategy__product-design-critic.scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/release_manifest.json",
+    "junit": "Infrastructure/artifacts/validation/touched-skills-20260329-full/Infrastructure/reports/product-design-critic/20260330-000922-119047/junit.xml"
+  }
+}

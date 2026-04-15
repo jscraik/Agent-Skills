@@ -1,0 +1,16 @@
+# Pinned dependencies for skill-builder validator scripts.
+# Install into the pyyaml venv:
+#   ~/.venvs/pyyaml/bin/pip install -r Skills/skill-builder/requirements-validators.txt
+#
+# Pin policy: use ==<version> for reproducible CI; update pins when:
+#   - a security advisory affects the pinned version
+#   - a validator script requires a new API only present in a higher version
+#   - the ruff gate discovers incompatible lint rules in a new minor release
+#
+# Verified against: Python 3.12.x / macOS + Ubuntu GitHub Actions runners.
+
+PyYAML==6.0.3
+jsonschema==4.25.1
+defusedxml==0.7.1
+pytest==9.0.3
+ruff==0.15.5

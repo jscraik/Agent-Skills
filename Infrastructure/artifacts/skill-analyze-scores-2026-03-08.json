@@ -1,0 +1,563 @@
+{
+  "generated_at": "2026-03-08T21:25:19.536953+00:00",
+  "repo_root": "/Users/jamiecraik/dev/agent-skills",
+  "skill_count": 79,
+  "error_count": 0,
+  "all_100_percent": false,
+  "rows": [
+    {
+      "skill": "frontend/ui/ui-ux-creative-coding",
+      "name": "ui-ux-creative-coding",
+      "total_score": 120,
+      "max_total": 120,
+      "percent": 100.0
+    },
+    {
+      "skill": "frontend/graphics/imagegen",
+      "name": "imagegen",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "frontend/graphics/og-image-creator",
+      "name": "og-image-creator",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "frontend/graphics/sora",
+      "name": "sora",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "github/gh-fix-ci",
+      "name": "gh-fix-ci",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "github/gh-workflow",
+      "name": "gh-workflow",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "product/content/video-transcript-downloader",
+      "name": "video-transcript-downloader",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "product/docs/context7",
+      "name": "context7",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "product/domain/oak-api",
+      "name": "oak-api",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "product/specs/product-spec",
+      "name": "product-spec",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "Skills/atlas",
+      "name": "atlas",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "Skills/beautiful-mermaid",
+      "name": "beautiful-mermaid",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "Skills/codex-home-audit",
+      "name": "codex-home-audit",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "Skills/process-watch",
+      "name": "process-watch",
+      "total_score": 118,
+      "max_total": 120,
+      "percent": 98.33
+    },
+    {
+      "skill": "frontend/ui/ui-visual-regression",
+      "name": "ui-visual-regression",
+      "total_score": 117,
+      "max_total": 120,
+      "percent": 97.5
+    },
+    {
+      "skill": "Skills/diagram-cli",
+      "name": "diagram-cli",
+      "total_score": 117,
+      "max_total": 120,
+      "percent": 97.5
+    },
+    {
+      "skill": "backend/workers-mcp",
+      "name": "workers-mcp",
+      "total_score": 116,
+      "max_total": 120,
+      "percent": 96.67
+    },
+    {
+      "skill": "frontend/ui/frontend-ui-design",
+      "name": "frontend-ui-design",
+      "total_score": 116,
+      "max_total": 120,
+      "percent": 96.67
+    },
+    {
+      "skill": "product/docs/docs-expert",
+      "name": "docs-expert",
+      "total_score": 116,
+      "max_total": 120,
+      "percent": 96.67
+    },
+    {
+      "skill": "Skills/codex-automation-architect",
+      "name": "codex-automation-architect",
+      "total_score": 116,
+      "max_total": 120,
+      "percent": 96.67
+    },
+    {
+      "skill": "Skills/recon-workbench",
+      "name": "recon-workbench",
+      "total_score": 116,
+      "max_total": 120,
+      "percent": 96.67
+    },
+    {
+      "skill": "Skills/skill-builder",
+      "name": "skill-builder",
+      "total_score": 116,
+      "max_total": 120,
+      "percent": 96.67
+    },
+    {
+      "skill": "auth/best-practices",
+      "name": "best-practices",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "backend/backend-engineer",
+      "name": "backend-engineer",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "frontend/graphics/better-icons",
+      "name": "better-icons",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "frontend/tools/figma",
+      "name": "figma",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "frontend/ui/remotion",
+      "name": "remotion",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "interview/architecture-interview",
+      "name": "architecture-interview",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "interview/deep-interview",
+      "name": "deep-interview",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/content/youtube-hooks-scripts",
+      "name": "youtube-hooks-scripts",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/content/youtube-titles-thumbnails",
+      "name": "youtube-titles-thumbnails",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/domain/arscontexta",
+      "name": "ars-contexta-codex",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/Infrastructure/ops/decide-build-primitive",
+      "name": "decide-build-primitive",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/Infrastructure/ops/linear",
+      "name": "linear",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/Infrastructure/ops/release",
+      "name": "release",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "product/security/security-best-practices",
+      "name": "security-best-practices",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "Skills/1password",
+      "name": "1password",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "Skills/alignment-checkpoint",
+      "name": "alignment-checkpoint",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "Skills/markdown-converter",
+      "name": "markdown-converter",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "Skills/repoprompt",
+      "name": "repoprompt",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "Skills/writing-plans",
+      "name": "writing-plans",
+      "total_score": 115,
+      "max_total": 120,
+      "percent": 95.83
+    },
+    {
+      "skill": "backend/mcp-builder",
+      "name": "mcp-builder",
+      "total_score": 114,
+      "max_total": 120,
+      "percent": 95.0
+    },
+    {
+      "skill": "frontend/graphics/favicon-generator",
+      "name": "favicon-generator",
+      "total_score": 114,
+      "max_total": 120,
+      "percent": 95.0
+    },
+    {
+      "skill": "product/domain/cloudflare-deploy",
+      "name": "cloudflare-deploy",
+      "total_score": 113,
+      "max_total": 120,
+      "percent": 94.17
+    },
+    {
+      "skill": "Skills/visual-explainer",
+      "name": "visual-explainer",
+      "total_score": 113,
+      "max_total": 120,
+      "percent": 94.17
+    },
+    {
+      "skill": "product/docs/openai-docs",
+      "name": "openai-docs",
+      "total_score": 112,
+      "max_total": 120,
+      "percent": 93.33
+    },
+    {
+      "skill": "auth/create-auth",
+      "name": "create-auth",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "backend/cli-spec",
+      "name": "cli-spec",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "frontend/graphics/nano-banana-builder",
+      "name": "nano-banana-builder",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "frontend/graphics/threejs-builder",
+      "name": "threejs-builder",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "interview/interview-me",
+      "name": "interview-me",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "Skills/agent-browser",
+      "name": "agent-browser",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "Skills/systematic-debugging",
+      "name": "systematic-debugging",
+      "total_score": 111,
+      "max_total": 120,
+      "percent": 92.5
+    },
+    {
+      "skill": "Skills/codex-sessions-skill-scan",
+      "name": "codex-sessions-skill-scan",
+      "total_score": 110,
+      "max_total": 120,
+      "percent": 91.67
+    },
+    {
+      "skill": "product/domain/chatgpt-apps",
+      "name": "chatgpt-apps",
+      "total_score": 107,
+      "max_total": 120,
+      "percent": 89.17
+    },
+    {
+      "skill": "frontend/ui/design-system",
+      "name": "design-system",
+      "total_score": 101,
+      "max_total": 120,
+      "percent": 84.17
+    },
+    {
+      "skill": "Skills/codex-agent-creator",
+      "name": "codex-agent-creator",
+      "total_score": 101,
+      "max_total": 120,
+      "percent": 84.17
+    },
+    {
+      "skill": "product/Infrastructure/ops/compound-engineering-router",
+      "name": "compound-engineering-router",
+      "total_score": 100,
+      "max_total": 120,
+      "percent": 83.33
+    },
+    {
+      "skill": ".agents/skills/.system/skill-creator",
+      "name": "skill-creator",
+      "total_score": 98,
+      "max_total": 120,
+      "percent": 81.67
+    },
+    {
+      "skill": "frontend/tools/stitch-loop",
+      "name": "stitch-loop",
+      "total_score": 95,
+      "max_total": 120,
+      "percent": 79.17
+    },
+    {
+      "skill": "frontend/ui/shadcn-ui",
+      "name": "shadcn-ui",
+      "total_score": 95,
+      "max_total": 120,
+      "percent": 79.17
+    },
+    {
+      "skill": "frontend/stitch-react-components",
+      "name": "react-components",
+      "total_score": 91,
+      "max_total": 120,
+      "percent": 75.83
+    },
+    {
+      "skill": "product/docs/agents-md",
+      "name": "agents-md",
+      "total_score": 89,
+      "max_total": 120,
+      "percent": 74.17
+    },
+    {
+      "skill": "Skills/using-git-worktrees",
+      "name": "using-git-worktrees",
+      "total_score": 89,
+      "max_total": 120,
+      "percent": 74.17
+    },
+    {
+      "skill": "frontend/ui/stitch-remotion",
+      "name": "stitch-remotion",
+      "total_score": 88,
+      "max_total": 120,
+      "percent": 73.33
+    },
+    {
+      "skill": "frontend/ui/baseline-ui",
+      "name": "baseline-ui",
+      "total_score": 87,
+      "max_total": 120,
+      "percent": 72.5
+    },
+    {
+      "skill": "github/greptile/check-pr",
+      "name": "check-pr",
+      "total_score": 86,
+      "max_total": 120,
+      "percent": 71.67
+    },
+    {
+      "skill": "frontend/website/fixing-metadata",
+      "name": "fixing-metadata",
+      "total_score": 81,
+      "max_total": 120,
+      "percent": 67.5
+    },
+    {
+      "skill": "Skills/apple-app-creator",
+      "name": "apple-app-creator",
+      "total_score": 80,
+      "max_total": 120,
+      "percent": 66.67
+    },
+    {
+      "skill": "frontend/website/fixing-accessibility",
+      "name": "fixing-accessibility",
+      "total_score": 79,
+      "max_total": 120,
+      "percent": 65.83
+    },
+    {
+      "skill": "Skills/fix-mise",
+      "name": "fix-mise",
+      "total_score": 78,
+      "max_total": 120,
+      "percent": 65.0
+    },
+    {
+      "skill": "Skills/simple-tasks",
+      "name": "simple-tasks",
+      "total_score": 78,
+      "max_total": 120,
+      "percent": 65.0
+    },
+    {
+      "skill": "Skills/xcode-makefiles",
+      "name": "xcode-makefiles",
+      "total_score": 78,
+      "max_total": 120,
+      "percent": 65.0
+    },
+    {
+      "skill": "Skills/bootstrap",
+      "name": "bootstrap",
+      "total_score": 72,
+      "max_total": 120,
+      "percent": 60.0
+    },
+    {
+      "skill": "Skills/insight-report",
+      "name": "insight-report",
+      "total_score": 72,
+      "max_total": 120,
+      "percent": 60.0
+    },
+    {
+      "skill": "Skills/notebooklm",
+      "name": "notebooklm",
+      "total_score": 70,
+      "max_total": 120,
+      "percent": 58.33
+    },
+    {
+      "skill": ".agents/skills/.system/skill-installer",
+      "name": "skill-installer",
+      "total_score": 58,
+      "max_total": 120,
+      "percent": 48.33
+    },
+    {
+      "skill": ".agents/skills/.system/slides",
+      "name": "slides",
+      "total_score": 52,
+      "max_total": 120,
+      "percent": 43.33
+    },
+    {
+      "skill": ".agents/skills/.system/spreadsheets",
+      "name": "spreadsheets",
+      "total_score": 48,
+      "max_total": 120,
+      "percent": 40.0
+    }
+  ],
+  "errors": []
+}

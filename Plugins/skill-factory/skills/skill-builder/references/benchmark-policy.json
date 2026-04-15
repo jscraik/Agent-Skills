@@ -1,0 +1,279 @@
+{
+  "schema_version": "1.0",
+  "description": "Portfolio benchmark policy for skill-builder marker coverage and distribution.",
+  "validated_on": "2026-04-09",
+  "release_governance": {
+    "pin_models_on_release": true,
+    "require_model_rationale": true,
+    "require_release_manifest": true,
+    "prefer_holdout_before_promotion": true
+  },
+  "regression_budgets": {
+    "tier1_failures_max": 0,
+    "tier2_findings_delta_max": 1,
+    "pass_rate_floor": 0.95
+  },
+    "validation_notes": [
+    "React latest docs line is 19.x (latest listed 19.2).",
+    "Next.js support policy lists 16.x as Active LTS.",
+    "Tailwind current major line is v4.x.",
+    "OWASP Top 10 current release line is 2025.",
+    "MCP current protocol line in versioning docs is 2025-06-18, with 2025-11-25 release announced in protocol updates.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-08.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-09.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-16.",
+    "GitHub cluster warn threshold capped to the current cluster size on 2026-03-22 so the portfolio target remains achievable.",
+    "OpenAI apps cluster responses_api distribution floor capped to the current tracked cluster size on 2026-03-22 after upstreaming openai-docs to .agents/skills/.system.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-03-30.",
+    "Auto-refreshed via refresh_benchmark_policy.py on 2026-04-06.",
+    "Cloudflare backend and MCP warn/fail floors calibrated to current post-prune cluster inventory on 2026-04-09."
+  ],
+  "refresh_sources": [
+    {
+      "marker_id": "react_19",
+      "library_name": "React",
+      "query": "Determine current stable major version and release line.",
+      "preferred_library_id": "/facebook/react",
+      "regex_template": "\\bReact\\s*{major}(\\.\\d+)?\\b",
+      "description_template": "Explicit React {major} baseline"
+    },
+    {
+      "marker_id": "next_16",
+      "library_name": "Next.js",
+      "query": "Determine current stable major version and release line.",
+      "preferred_library_id": "/vercel/next.js",
+      "regex_template": "\\bNext\\.js\\s*{major}\\b|\\bversion-{major}\\b",
+      "description_template": "Explicit Next.js {major} baseline"
+    },
+    {
+      "marker_id": "tailwind_v4",
+      "library_name": "Tailwind CSS",
+      "query": "Determine current stable major version baseline.",
+      "preferred_library_id": "/tailwindlabs/tailwindcss.com",
+      "regex_template": "Tailwind\\s*(CSS)?\\s*v?{major}(\\.\\d+)?",
+      "description_template": "Explicit Tailwind v{major} baseline"
+    }
+  ],
+  "markers": {
+    "react_19": {
+      "regex": "\\bReact\\s*19(\\.\\d+)?\\b",
+      "description": "Explicit React 19 baseline"
+    },
+    "next_16": {
+      "regex": "\\bNext\\.js\\s*16\\b|\\bversion-16\\b",
+      "description": "Explicit Next.js 16 baseline"
+    },
+    "tailwind_v4": {
+      "regex": "Tailwind\\s*(CSS)?\\s*v?4(\\.\\d+)?",
+      "description": "Explicit Tailwind v4 baseline"
+    },
+    "responses_api": {
+      "regex": "Responses API|migrate to (the )?Responses",
+      "description": "OpenAI Responses API migration baseline"
+    },
+    "wcag_2_2": {
+      "regex": "WCAG\\s*2\\.2|Web Content Accessibility Guidelines\\s*2\\.2",
+      "description": "WCAG 2.2 accessibility baseline"
+    },
+    "owasp_top10": {
+      "regex": "OWASP\\s*Top\\s*10\\s*(?::|-)??\\s*2025|A0[1-9]:2025|A10:2025",
+      "description": "OWASP Top 10:2025 security mapping"
+    },
+    "gha_sha_pin": {
+      "regex": "full[- ]length commit SHA|pin actions to",
+      "description": "GitHub Actions SHA pinning guidance"
+    },
+    "cloudflare_workers": {
+      "regex": "Cloudflare\\s*Workers|wrangler",
+      "description": "Cloudflare Workers baseline"
+    },
+    "mcp_spec": {
+      "regex": "Model Context Protocol|MCP\\s+spec(ification)?|2025-06-18|2025-11-25",
+      "description": "Explicit MCP specification baseline and current protocol release lineage"
+    }
+  },
+  "clusters": {
+    "frontend_ui": {
+      "description": "Frontend and UI implementation skills",
+      "include_prefixes": [
+        "frontend/"
+      ]
+    },
+    "github": {
+      "description": "GitHub and CI skills",
+      "include_prefixes": [
+        "github/"
+      ]
+    },
+    "cloudflare_backend": {
+      "description": "Backend and Cloudflare platform skills",
+      "include_prefixes": [
+        "backend/backend-engineer"
+      ]
+    },
+    "openai_apps": {
+      "description": "OpenAI and ChatGPT Apps skills",
+      "include_prefixes": [
+        "product/domain/chatgpt-apps",
+        "Skills/imagegen",
+        "frontend/graphics/sora",
+        "frontend/graphics/nano-banana-builder",
+        "Skills/codex-automation-architect"
+      ]
+    },
+    "security": {
+      "description": "Security and auth skills",
+      "include_prefixes": [
+        "product/security/",
+        "auth/"
+      ]
+    },
+    "mcp": {
+      "description": "MCP and protocol-aware builder skills",
+      "include_prefixes": [
+        "backend/mcp-builder",
+        "product/docs/context7",
+        "product/domain/chatgpt-apps"
+      ]
+    },
+    "backend_general": {
+      "description": "General backend and CLI design skills",
+      "include_prefixes": [
+        "backend/cli-spec"
+      ]
+    },
+    "interview": {
+      "description": "Interview and requirements discovery skills",
+      "include_prefixes": [
+        "interview/"
+      ]
+    },
+    "docs_content": {
+      "description": "Documentation and content skills",
+      "include_prefixes": [
+        "product/docs/",
+        "product/content/"
+      ]
+    },
+    "product_ops": {
+      "description": "Product strategy, planning, and operational workflow skills",
+      "include_prefixes": [
+        "product/Infrastructure/ops/",
+        "product/strategy/",
+        "product/specs/"
+      ]
+    },
+    "product_domain": {
+      "description": "Product domain and integration-specific skills outside core app clusters",
+      "include_prefixes": [
+        "product/domain/arscontexta",
+        "product/domain/oak-api"
+      ]
+    },
+    "utilities_general": {
+      "description": "General utility and workflow support skills",
+      "include_prefixes": [
+        "Skills/"
+      ]
+    }
+  },
+  "rules": {
+    "frontend_ui": {
+      "required_any": [
+        [
+          "react_19",
+          "next_16"
+        ]
+      ],
+      "required_all": [
+        "tailwind_v4",
+        "wcag_2_2"
+      ],
+      "min_hits_fail": {
+        "react_19": 4,
+        "next_16": 4,
+        "tailwind_v4": 5,
+        "wcag_2_2": 4
+      },
+      "min_hits_warn": {
+        "react_19": 4,
+        "next_16": 4,
+        "tailwind_v4": 6,
+        "wcag_2_2": 4
+      },
+      "min_coverage_fail": 0.26,
+      "min_coverage_warn": 0.313
+    },
+    "github": {
+      "required_all": [
+        "gha_sha_pin"
+      ],
+      "min_hits_fail": {
+        "gha_sha_pin": 1
+      },
+      "min_hits_warn": {
+        "gha_sha_pin": 1
+      },
+      "min_coverage_fail": 0.75,
+      "min_coverage_warn": 1.0
+    },
+    "cloudflare_backend": {
+      "required_all": [
+        "cloudflare_workers"
+      ],
+      "min_hits_fail": {
+        "cloudflare_workers": 1
+      },
+      "min_hits_warn": {
+        "cloudflare_workers": 1
+      },
+      "min_coverage_fail": 0.5,
+      "min_coverage_warn": 0.7
+    },
+    "openai_apps": {
+      "required_all": [
+        "responses_api"
+      ],
+      "min_hits_fail": {
+        "responses_api": 1
+      },
+      "min_hits_warn": {
+        "responses_api": 1
+      },
+      "min_coverage_fail": 0.4,
+      "min_coverage_warn": 0.533
+    },
+    "security": {
+      "required_all": [
+        "owasp_top10"
+      ],
+      "min_hits_fail": {
+        "owasp_top10": 4
+      },
+      "min_hits_warn": {
+        "owasp_top10": 4
+      },
+      "min_coverage_fail": 0.55,
+      "min_coverage_warn": 0.75
+    },
+    "mcp": {
+      "required_all": [
+        "mcp_spec"
+      ],
+      "min_hits_fail": {
+        "mcp_spec": 1
+      },
+      "min_hits_warn": {
+        "mcp_spec": 1
+      },
+      "min_coverage_fail": 0.5,
+      "min_coverage_warn": 0.5
+    },
+    "backend_general": {},
+    "interview": {},
+    "docs_content": {},
+    "product_ops": {},
+    "product_domain": {},
+    "utilities_general": {}
+  }
+}

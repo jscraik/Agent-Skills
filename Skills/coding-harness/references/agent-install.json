@@ -1,0 +1,230 @@
+{
+	"schema_version": "1.0",
+	"package": "@brainwav/coding-harness",
+	"registry": "https://registry.npmjs.org/",
+	"registry_auth": "NPM_TOKEN",
+	"ci_provider": "circleci",
+	"install_command": "mise install -g npm:@brainwav/coding-harness",
+	"init_command": "harness init",
+	"verify_command": "harness check-environment --json",
+
+	"phases": [
+		{
+			"id": "preflight",
+			"label": "Prerequisites check",
+			"required_env": ["NPM_TOKEN"],
+			"required_binaries": [
+				"node",
+				"pnpm",
+				"git",
+				"jq",
+				"rg",
+				"fd",
+				"mise",
+				"gh"
+			],
+			"check_commands": [
+				"node --version",
+				"pnpm --version",
+				"mise --version",
+				"printenv NPM_TOKEN | wc -c"
+			]
+		},
+		{
+			"id": "auth",
+			"label": "Private registry auth",
+			"steps": [
+				"printenv NPM_TOKEN | wc -c",
+				"echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc",
+				"npm whoami",
+				"npm view @brainwav/coding-harness dist-tags --json"
+			]
+		},
+		{
+			"id": "install",
+			"label": "Install harness globally",
+			"steps": [
+				"mise install -g npm:@brainwav/coding-harness",
+				"harness --version",
+				"harness --help"
+			]
+		},
+		{
+			"id": "init",
+			"label": "Scaffold governance files",
+			"steps": [
+				"harness init --dry-run",
+				"harness init",
+				"harness init --check-updates"
+			]
+		},
+		{
+			"id": "mise_tools",
+			"label": "Install pinned tool baseline",
+			"steps": [
+				"mise trust .mise.toml",
+				"mise install",
+				"harness check-environment --json"
+			],
+			"optional_tools": [
+				"mise install -g cargo:prek",
+				"mise install -g npm:@brainwav/diagram",
+				"mise install -g npm:@argos-ci/cli",
+				"mise install -g npm:@mermaid-js/mermaid-cli",
+				"mise install -g npm:agentation",
+				"mise install -g npm:agentation-mcp",
+				"mise install -g npm:agent-browser",
+				"mise install -g npm:beautiful-mermaid",
+				"mise install -g npm:markdownlint-cli2",
+				"mise install -g npm:wrangler"
+			]
+		},
+		{
+			"id": "secrets",
+			"label": "Secrets and environment variables",
+			"agent_can_verify": true,
+			"agent_cannot_create": true,
+			"circleci_project_env_vars": [
+				{
+					"name": "NPM_TOKEN",
+					"purpose": "Install @brainwav/coding-harness in CI jobs",
+					"source": "npm / 1Password"
+				},
+				{
+					"name": "GITHUB_PERSONAL_ACCESS_TOKEN",
+					"purpose": "gh CLI auth for review-gate, PR creation, branch ops",
+					"source": "GitHub PAT (requires repo + admin:repo_hook scopes)"
+				},
+				{
+					"name": "LINEAR_API_KEY",
+					"purpose": "Linear issue sync job",
+					"source": "Linear project settings"
+				}
+			],
+			"github_repo_secrets": [],
+			"note": "No GitHub Actions secrets are required. CI runs through CircleCI; CodeRabbit enforcement comes from the GitHub App check context.",
+			"check_commands": [
+				"curl -s --request GET --url 'https://circleci.com/api/v2/project/github/<owner>/<repo>/envvar' --header 'Circle-Token: $CIRCLE_TOKEN' | jq '[.items[].name]'"
+			]
+		},
+		{
+			"id": "branch_protection",
+			"label": "Apply branch protection",
+			"steps": [
+				"harness branch-protect --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo> --ecosystem harness --branch main",
+				"harness check-authz --contract Infrastructure/harness.contract.json --repo <owner>/<repo> --branch main"
+			],
+			"required_checks": [
+				"pr-template",
+				"linear-gate",
+				"risk-policy-gate",
+				"dependency-scan",
+				"orb-pinning",
+				"consistency-drift-health",
+				"docs-gate",
+				"lint",
+				"typecheck",
+				"test",
+				"audit",
+				"check",
+				"memory",
+				"security-scan",
+				"CodeRabbit"
+			]
+		},
+		{
+			"id": "coderabbit",
+			"label": "CodeRabbit setup",
+			"steps": [
+				"test -f .coderabbit.yaml",
+				"harness verify-coderabbit --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>"
+			],
+			"user_action_required": "Ensure the CodeRabbit GitHub integration is enabled for the repository and the CodeRabbit check is allowed in branch protection"
+		},
+		{
+			"id": "memory",
+			"label": "Per-project memory layer bootstrap",
+			"steps": [
+				"mkdir -p .harness/memory",
+				"test -f .harness/memory/LEARNINGS.md || cat > .harness/memory/LEARNINGS.md << 'EOF'\n---\nschema_version: 1\npurpose: Per-project agent knowledge base.\nscope: This repo only.\n---\n# Learnings\nEOF",
+				"grep -q '.harness/memory' .gitignore || echo '.harness/memory/' >> .gitignore"
+			]
+		},
+		{
+			"id": "validate",
+			"label": "End-to-end validation",
+			"steps": [
+				"bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required",
+				"harness check-environment --json",
+				"harness init --check-updates",
+				"pnpm check",
+				"harness verify-coderabbit --token $GITHUB_PERSONAL_ACCESS_TOKEN --owner <owner> --repo <repo>",
+				"harness check-authz --contract Infrastructure/harness.contract.json --repo <owner>/<repo> --branch main"
+			],
+			"all_must_pass": true
+		}
+	],
+
+	"migration_commands": {
+		"preview": "harness ci-migrate prepare --provider circleci --dry-run",
+		"apply": "harness ci-migrate prepare --provider circleci --apply",
+		"verify": "harness ci-migrate verify --snapshot <snapshot-id>",
+		"commit": "harness ci-migrate commit --snapshot <snapshot-id>",
+		"abort": "harness ci-migrate abort --snapshot <snapshot-id>"
+	},
+
+	"scaffolded_files": {
+		"core": [
+			"Infrastructure/harness.contract.json",
+			".harness/ci-required-checks.json",
+			"memory.json"
+		],
+		"coderabbit": [".coderabbit.yaml"],
+		"ci": [".circleci/config.yml"],
+		"pr_hygiene": [
+			".github/PULL_REQUEST_TEMPLATE.md",
+			".github/ISSUE_TEMPLATE/config.yml",
+			".github/CODEOWNERS",
+			"CONTRIBUTING.md"
+		],
+		"scripts": [
+			"Infrastructure/scripts/codex-preflight.sh",
+			"Infrastructure/scripts/check-environment.sh",
+			"Infrastructure/scripts/setup-git-hooks.js",
+			"Infrastructure/scripts/validate-commit-msg.js",
+			"Infrastructure/scripts/check-staged-secrets.sh",
+			"Infrastructure/scripts/check-doc-style.sh",
+			"Infrastructure/scripts/check-related-tests.sh",
+			"Infrastructure/scripts/check-semgrep-changed.sh",
+			"Infrastructure/scripts/refresh-diagram-context.sh",
+			"Infrastructure/scripts/check-diagram-freshness.sh",
+			"Infrastructure/scripts/semgrep-pre-push.yml"
+		],
+		"tooling": [
+			".mise.toml",
+			"biome.json",
+			".gitleaks.toml",
+			"prek.toml",
+			"Makefile",
+			".diagramrc"
+		],
+		"agent_environment": [".codex/environments/environment.toml"]
+	},
+
+	"capability_boundaries": {
+		"can": [
+			"Scaffold all governance files via harness init",
+			"Verify repository state (check-environment, check-authz, verify-coderabbit)",
+			"Apply branch protection via GitHub API",
+			"Generate Codex environment action blocks from package.json scripts",
+			"Run policy gates (lint, typecheck, test, audit, docs-gate, risk-policy-gate)"
+		],
+		"cannot": [
+			"Create or rotate GitHub tokens / CircleCI environment variables",
+			"Install or authorize third-party review app integrations on a repository",
+			"Set GitHub repository secrets or CircleCI project env vars",
+			"Bypass branch protection or required review checks",
+			"Overwrite user-customized environment.toml without explicit approval"
+		]
+	}
+}

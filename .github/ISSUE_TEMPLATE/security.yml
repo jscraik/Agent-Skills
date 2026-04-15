@@ -20,7 +20,7 @@ body:
     attributes:
       label: Affected paths
       description: Files, scripts, skills, or workflows impacted
-      placeholder: "e.g. scripts/sync_skills.sh, .github/workflows/docs-governance.yml"
+      placeholder: "e.g. Infrastructure/scripts/sync_skills.sh, .github/workflows/docs-governance.yml"
     validations:
       required: true
 

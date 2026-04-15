@@ -1,0 +1,1483 @@
+{
+  "generated_at": "2026-03-08",
+  "total": 144,
+  "summary": {
+    "merge": 94,
+    "keep-core-30": 30,
+    "retire": 20
+  },
+  "core30": [
+    "backend/backend-engineer",
+    "frontend/ui/design-system",
+    "frontend/ui/frontend-ui-design",
+    "frontend/ui/react-ui-patterns",
+    "frontend/website/fixing-accessibility",
+    "github/gh-fix-ci",
+    "github/gh-workflow",
+    "github/greptile/check-pr",
+    "github/greptile/greploop",
+    "interview/deep-interview",
+    "interview/interview-me",
+    "interview/pm-interview",
+    "product/docs/agents-md",
+    "product/docs/context7",
+    "product/docs/docs-expert",
+    "product/docs/docs-md",
+    "product/docs/openai-docs",
+    "product/security/security-best-practices",
+    "product/specs/product-spec",
+    "Skills/codex-automation-architect",
+    "Skills/executing-plans",
+    "Skills/recent-code-bugfix",
+    "Skills/run-tests-and-write-artifacts",
+    "Skills/skill-builder",
+    "Skills/systematic-debugging",
+    "Skills/test-driven-development",
+    "Skills/using-git-worktrees",
+    "Skills/verification-before-completion",
+    "Skills/visual-explainer",
+    "Skills/writing-plans"
+  ],
+  "decisions": [
+    {
+      "name": "best-practices",
+      "scope_skill": "auth/best-practices",
+      "path": "auth/best-practices/SKILL.md",
+      "top": "auth",
+      "family": "auth/best-practices",
+      "description": "Review Better Auth setups and highlight secure integration best practices.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "create-auth",
+      "scope_skill": "auth/create-auth",
+      "path": "auth/create-auth/SKILL.md",
+      "top": "auth",
+      "family": "auth/create-auth",
+      "description": "Build Better Auth integrations for TS/JS apps with secure defaults. Use",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "backend-engineer",
+      "scope_skill": "backend/backend-engineer",
+      "path": "backend/backend-engineer/SKILL.md",
+      "top": "backend",
+      "family": "backend/backend-engineer",
+      "description": "Plan and review safe backend extensions for existing services (Cloudflare",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "cli-spec",
+      "scope_skill": "backend/cli-spec",
+      "path": "backend/cli-spec/SKILL.md",
+      "top": "backend",
+      "family": "backend/cli-spec",
+      "description": "Plan and draft CLI UX and surface area (commands, flags, help, output).",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "mcp-builder",
+      "scope_skill": "backend/mcp-builder",
+      "path": "backend/mcp-builder/SKILL.md",
+      "top": "backend",
+      "family": "backend/mcp-builder",
+      "description": "Create general-purpose MCP servers and tool schemas for standard integrations.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "mkit-builder",
+      "scope_skill": "backend/mkit-builder",
+      "path": "backend/mkit-builder/SKILL.md",
+      "top": "backend",
+      "family": "backend/mkit-builder",
+      "description": "Create MCP servers with OAuth, billing/licensing, and Apps SDK UI integration.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "workers-mcp",
+      "scope_skill": "backend/workers-mcp",
+      "path": "backend/workers-mcp/SKILL.md",
+      "top": "backend",
+      "family": "backend/workers-mcp",
+      "description": "Create and deploy production-ready MCP servers on Cloudflare Workers.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "better-icons",
+      "scope_skill": "frontend/graphics/better-icons",
+      "path": "frontend/graphics/better-icons/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Use this skill to search and extract SVG icons via the better-icons CLI",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "favicon-generator",
+      "scope_skill": "frontend/graphics/favicon-generator",
+      "path": "frontend/graphics/favicon-generator/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Generate complete favicon/app icon suites with templates and assets.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "imagegen",
+      "scope_skill": "frontend/graphics/imagegen",
+      "path": "frontend/graphics/imagegen/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Use when the user asks to generate or edit images via the OpenAI Image API (for example: generate image, edit/inpaint/mask, background removal or replacement, transparent background, product shots, concept art, covers, or batch variants); run the bundled CLI (`Infrastructure/scripts/image_gen.py`) and require `OPENAI_API_KEY` for live calls.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "nano-banana-builder",
+      "scope_skill": "frontend/graphics/nano-banana-builder",
+      "path": "frontend/graphics/nano-banana-builder/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows. Use when a user asks to prototype or ship a Nano Banana powered image product from text-to-image to multi-turn editing.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "og-image-creator",
+      "scope_skill": "frontend/graphics/og-image-creator",
+      "path": "frontend/graphics/og-image-creator/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with Playwright components. Use when a user asks for route-specific OG image generation or refresh in an existing app.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "sora",
+      "scope_skill": "frontend/graphics/sora",
+      "path": "frontend/graphics/sora/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Use when the user asks to generate, remix, poll, list, download, or delete Sora videos via OpenAI\\u2019s video API using the bundled CLI (`Infrastructure/scripts/sora.py`), including requests like \\u201cgenerate AI video,\\u201d \\u201cSora,\\u201d \\u201cvideo remix,\\u201d \\u201cdownload video/thumbnail/spritesheet,\\u201d and batch video generation; requires `OPENAI_API_KEY` and Sora API access.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "threejs-builder",
+      "scope_skill": "frontend/graphics/threejs-builder",
+      "path": "frontend/graphics/threejs-builder/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/graphics",
+      "description": "Build and validate simple, performant Three.js web apps using modern",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "design-md",
+      "scope_skill": "frontend/stitch-design-md",
+      "path": "frontend/stitch-design-md/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/stitch-design-md",
+      "description": "Use this skill when the user wants to analyze a Stitch project and create a reusable DESIGN.md design system file with semantic style tokens and prompting guidance.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "enhance-prompt",
+      "scope_skill": "frontend/stitch-enhance-prompt",
+      "path": "frontend/stitch-enhance-prompt/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/stitch-enhance-prompt",
+      "description": "Use this skill when the user asks to improve a Stitch prompt. It transforms vague UI ideas into specific, design-aware prompts that generate higher-quality screens.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "react-components",
+      "scope_skill": "frontend/stitch-react-components",
+      "path": "frontend/stitch-react-components/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/stitch-react-components",
+      "description": "Use this skill when the user asks to convert Stitch screens into modular Vite/React components with validated structure, data extraction, and style-system alignment.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "agent-trace-debug",
+      "scope_skill": "frontend/tools/agent-trace-debug",
+      "path": "frontend/tools/agent-trace-debug/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/tools",
+      "description": "Analyze Agent Trace data flow when AIAttributionPanel shows empty/incorrect trace by tracing expected vs actual shapes across agentTraceStore and API.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "agentation",
+      "scope_skill": "frontend/tools/agentation",
+      "path": "frontend/tools/agentation/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/tools",
+      "description": "Use when a user wants to install, verify, or troubleshoot Agentation in React/Next.js/Vite/Tauri apps; this skill validates toolbar wiring, MCP health, live webhook delivery, and automation modes (self-driving autopilot + critique mode) with end-to-end submit verification.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "figma",
+      "scope_skill": "frontend/tools/figma",
+      "path": "frontend/tools/figma/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/tools",
+      "description": "Use this canonical Figma skill to extract design context/screenshots/assets with Figma MCP and build production-ready UI guidance. Use when requests include Figma URLs/node IDs, design-to-code implementation, or Figma MCP setup/troubleshooting.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "stitch-design-md",
+      "scope_skill": "frontend/tools/stitch-design-md",
+      "path": "frontend/tools/stitch-design-md/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/tools",
+      "description": "Use this skill when the user wants to analyze a Stitch project and create a reusable DESIGN.md design system file with semantic style tokens and prompting guidance.",
+      "decision": "retire",
+      "reason": "Duplicate or near-duplicate naming with canonical Stitch skill paths."
+    },
+    {
+      "name": "stitch-loop",
+      "scope_skill": "frontend/tools/stitch-loop",
+      "path": "frontend/tools/stitch-loop/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/tools",
+      "description": "Use this skill when the user asks for iterative autonomous website building with Stitch using a baton file (`next-prompt.md`) and multi-pass page generation.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "baseline-ui",
+      "scope_skill": "frontend/ui/baseline-ui",
+      "path": "frontend/ui/baseline-ui/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Validates animation durations, enforces typography scale, checks component accessibility, and prevents layout anti-patterns in Tailwind CSS projects. Use when building UI components, reviewing CSS utilities, styling React views, or enforcing design consistency.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "design-system",
+      "scope_skill": "frontend/ui/design-system",
+      "path": "frontend/ui/design-system/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don\u2019t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand\u2192Alias\u2192Mapped rules and passes design-system checks.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "fixing-motion-performance",
+      "scope_skill": "frontend/ui/fixing-motion-performance",
+      "path": "frontend/ui/fixing-motion-performance/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Audit and fix animation performance issues including layout thrashing, compositor properties, scroll-linked motion, and blur effects. Use when animations stutter, transitions jank, or reviewing CSS/JS animation performance.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "frontend-ui-design",
+      "scope_skill": "frontend/ui/frontend-ui-design",
+      "path": "frontend/ui/frontend-ui-design/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Create and review production-ready UI systems/components with tokens",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "interface-craft",
+      "scope_skill": "frontend/ui/interface-craft",
+      "path": "frontend/ui/interface-craft/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Interface Craft by Josh Puckett helps build polished React interfaces with Motion + DialKit, CSS-variable theming, storyboard motion, and critique/range/depth workflows; use when requests involve UI motion, critique, refinement, concept exploration, or interaction craft.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "react-best-practices",
+      "scope_skill": "frontend/ui/react-best-practices",
+      "path": "frontend/ui/react-best-practices/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "React and Next.js performance optimization guidelines from Vercel Engineering.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "react-ui-patterns",
+      "scope_skill": "frontend/ui/react-ui-patterns",
+      "path": "frontend/ui/react-ui-patterns/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and component structure examples. Use when building or refactoring React screens and components for maintainability.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "remotion",
+      "scope_skill": "frontend/ui/remotion",
+      "path": "frontend/ui/remotion/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Best-practice guidance for Remotion (React video). Use when building",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "shadcn-ui",
+      "scope_skill": "frontend/ui/shadcn-ui",
+      "path": "frontend/ui/shadcn-ui/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Integrate and customize shadcn/ui components in existing projects. Use when the user asks to set up, add, adapt, or troubleshoot shadcn/ui components, registry items, and implementation patterns.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "stitch-react-components",
+      "scope_skill": "frontend/ui/stitch-react-components",
+      "path": "frontend/ui/stitch-react-components/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Use this skill when the user asks to convert Stitch screens into modular Vite/React components with validated structure, data extraction, and style-system alignment.",
+      "decision": "retire",
+      "reason": "Duplicate or near-duplicate naming with canonical Stitch skill paths."
+    },
+    {
+      "name": "stitch-remotion",
+      "scope_skill": "frontend/ui/stitch-remotion",
+      "path": "frontend/ui/stitch-remotion/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Generate Stitch-to-Remotion walkthrough videos from screen assets. Use when the user asks to transform Stitch screens into narrated or demo-style videos with transitions, overlays, and rendered exports.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "ui-ux-creative-coding",
+      "scope_skill": "frontend/ui/ui-ux-creative-coding",
+      "path": "frontend/ui/ui-ux-creative-coding/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "ui-visual-regression",
+      "scope_skill": "frontend/ui/ui-visual-regression",
+      "path": "frontend/ui/ui-visual-regression/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Review and validate UI visual regression diffs (Storybook + Playwright capture + Argos) when snapshot changes or layout regressions appear.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "web-design-guidelines",
+      "scope_skill": "frontend/ui/web-design-guidelines",
+      "path": "frontend/ui/web-design-guidelines/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/ui",
+      "description": "Review UI code against Web Interface Guidelines with file:line findings.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "fixing-accessibility",
+      "scope_skill": "frontend/website/fixing-accessibility",
+      "path": "frontend/website/fixing-accessibility/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/website",
+      "description": "Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast, and form errors. Use when adding interactive controls, forms, dialogs, or reviewing WCAG compliance.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "fixing-metadata",
+      "scope_skill": "frontend/website/fixing-metadata",
+      "path": "frontend/website/fixing-metadata/SKILL.md",
+      "top": "frontend",
+      "family": "frontend/website",
+      "description": "Audit and fix HTML metadata including titles, descriptions, canonical URLs, Open Graph tags, Twitter cards, favicons, JSON-LD, and robots directives. Use when adding SEO metadata or shipping pages that need correct meta tags.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "automate-github-issues",
+      "scope_skill": "github/automate-github-issues",
+      "path": "github/automate-github-issues/SKILL.md",
+      "top": "github",
+      "family": "github/automate-github-issues",
+      "description": "Use when the user asks to automate GitHub issue triage with parallel Jules agents; output a validated fleet setup and runbook for analyze, plan, dispatch, and merge.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "gh-fix-ci",
+      "scope_skill": "github/gh-fix-ci",
+      "path": "github/gh-fix-ci/SKILL.md",
+      "top": "github",
+      "family": "github/gh-fix-ci",
+      "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "gh-workflow",
+      "scope_skill": "github/gh-workflow",
+      "path": "github/gh-workflow/SKILL.md",
+      "top": "github",
+      "family": "github/gh-workflow",
+      "description": "Consolidated GitHub lifecycle skill for agents and users: intake, issue fixing, PR prep, review request/reception, review comment handling, CI diagnosis, and server-side merge via gh. Use when requests involve GitHub issues/PRs/checks/merge operations.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "check-pr",
+      "scope_skill": "github/greptile/check-pr",
+      "path": "github/greptile/check-pr/SKILL.md",
+      "top": "github",
+      "family": "github/greptile",
+      "description": "Use when a user asks to review a GitHub pull request before merge (or asks how to set up Greptile prerequisites) and return a policy-gated readiness view with check status and remediation priority.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "greploop",
+      "scope_skill": "github/greptile/greploop",
+      "path": "github/greptile/greploop/SKILL.md",
+      "top": "github",
+      "family": "github/greptile",
+      "description": "Use when a user wants a closed-loop PR hardening pass (or asks how to set up Greptile loop prerequisites): run policy-gated review/fix iterations toward high-confidence, merge-safe output.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "local-action-verification",
+      "scope_skill": "github/local-action-verification",
+      "path": "github/local-action-verification/SKILL.md",
+      "top": "github",
+      "family": "github/local-action-verification",
+      "description": "Use when the user asks to validate GitHub Actions locally with act; output setup guidance, AGENTS.md instructions, and fail-fast checks before push or PR.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "architecture-interview",
+      "scope_skill": "interview/architecture-interview",
+      "path": "interview/architecture-interview/SKILL.md",
+      "top": "interview",
+      "family": "interview/architecture-interview",
+      "description": "Plan and review architecture decisions via a structured interview and",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "bug-interview",
+      "scope_skill": "interview/bug-interview",
+      "path": "interview/bug-interview/SKILL.md",
+      "top": "interview",
+      "family": "interview/bug-interview",
+      "description": "Analyze and review bug reports to capture repro, evidence, and the next",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "deep-interview",
+      "scope_skill": "interview/deep-interview",
+      "path": "interview/deep-interview/SKILL.md",
+      "top": "interview",
+      "family": "interview/deep-interview",
+      "description": "Deep, gap-filling interview that enhances an existing doc/spec (preferred)",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "interview-kernel",
+      "scope_skill": "interview/interview-kernel",
+      "path": "interview/interview-kernel/SKILL.md",
+      "top": "interview",
+      "family": "interview/interview-kernel",
+      "description": "INTERNAL ENGINE - Core interview engine for wrapper skills. Do NOT invoke",
+      "decision": "retire",
+      "reason": "Internal engine skill; not intended for direct invocation."
+    },
+    {
+      "name": "interview-me",
+      "scope_skill": "interview/interview-me",
+      "path": "interview/interview-me/SKILL.md",
+      "top": "interview",
+      "family": "interview/interview-me",
+      "description": "Interactive, multiple-choice interview for requirements discovery and",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "pm-interview",
+      "scope_skill": "interview/pm-interview",
+      "path": "interview/pm-interview/SKILL.md",
+      "top": "interview",
+      "family": "interview/pm-interview",
+      "description": "Plan and review product scope, value, metrics, and rollout via a structured",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "benjitaylor-persona",
+      "scope_skill": "personas/benjitaylor-persona",
+      "path": "personas/benjitaylor-persona/SKILL.md",
+      "top": "personas",
+      "family": "personas/benjitaylor-persona",
+      "description": "Generate @benjitaylor-inspired responses for interaction craft, AI-assisted developer workflows, and React/TypeScript product execution. Use when users ask for @benjitaylor's perspective.",
+      "decision": "retire",
+      "reason": "Persona-style variants are optional tone overlays; low core workflow value."
+    },
+    {
+      "name": "emilkowalski-persona",
+      "scope_skill": "personas/emilkowalski-persona",
+      "path": "personas/emilkowalski-persona/SKILL.md",
+      "top": "personas",
+      "family": "personas/emilkowalski-persona",
+      "description": "Generate @emilkowalski-inspired responses for design-engineering decisions on UI feel, motion quality, performance, accessibility, and developer experience. Use when users explicitly ask for @emilkowalski's perspective.",
+      "decision": "retire",
+      "reason": "Persona-style variants are optional tone overlays; low core workflow value."
+    },
+    {
+      "name": "jenny-wen-persona",
+      "scope_skill": "personas/jenny-wen-persona",
+      "path": "personas/jenny-wen-persona/SKILL.md",
+      "top": "personas",
+      "family": "personas/jenny-wen-persona",
+      "description": "Generate @jenny_wen-inspired responses for AI product updates, collaboration tools, and team-facing communication with a friendly, practical, craft-forward, product-minded tone. Use when users ask for @jenny_wen's perspective.",
+      "decision": "retire",
+      "reason": "Persona-style variants are optional tone overlays; low core workflow value."
+    },
+    {
+      "name": "jh3yy-persona",
+      "scope_skill": "personas/jh3yy-persona",
+      "path": "personas/jh3yy-persona/SKILL.md",
+      "top": "personas",
+      "family": "personas/jh3yy-persona",
+      "description": "Generate @jh3yy-inspired responses for modern web development, CSS animation, interaction design, and accessibility with a platform-native, example-driven teaching style. Use this when requests explicitly ask for @jh3yy perspective.",
+      "decision": "retire",
+      "reason": "Persona-style variants are optional tone overlays; low core workflow value."
+    },
+    {
+      "name": "kubadesign-persona",
+      "scope_skill": "personas/kubadesign-persona",
+      "path": "personas/kubadesign-persona/SKILL.md",
+      "top": "personas",
+      "family": "personas/kubadesign-persona",
+      "description": "Generate @kubadesign-inspired responses for web design, experimentation, and portfolio-driven product work with an enthusiastic but actionable tone. Use when users ask for @kubadesign's perspective.",
+      "decision": "retire",
+      "reason": "Persona-style variants are optional tone overlays; low core workflow value."
+    },
+    {
+      "name": "steipete-persona",
+      "scope_skill": "personas/steipete-persona",
+      "path": "personas/steipete-persona/SKILL.md",
+      "top": "personas",
+      "family": "personas/steipete-persona",
+      "description": "Generate @steipete-inspired guidance for agentic engineering, AI dev tooling, and open-source shipping. Use when users explicitly ask for @steipete\u2019s perspective on shipping and tooling tradeoffs.",
+      "decision": "retire",
+      "reason": "Persona-style variants are optional tone overlays; low core workflow value."
+    },
+    {
+      "name": "video-transcript-downloader",
+      "scope_skill": "product/content/video-transcript-downloader",
+      "path": "product/content/video-transcript-downloader/SKILL.md",
+      "top": "product",
+      "family": "product/content",
+      "description": "Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "youtube-hooks-scripts",
+      "scope_skill": "product/content/youtube-hooks-scripts",
+      "path": "product/content/youtube-hooks-Infrastructure/scripts/SKILL.md",
+      "top": "product",
+      "family": "product/content",
+      "description": "Create high-retention hooks and full scripts for technical YouTube videos",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "youtube-titles-thumbnails",
+      "scope_skill": "product/content/youtube-titles-thumbnails",
+      "path": "product/content/youtube-titles-thumbnails/SKILL.md",
+      "top": "product",
+      "family": "product/content",
+      "description": "Generate multiple SEO/CTR-optimized YouTube title and thumbnail text",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "agents-md",
+      "scope_skill": "product/docs/agents-md",
+      "path": "product/docs/agents-md/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "'Refactor or create AGENTS.md using progressive disclosure: keep root",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "claude-md",
+      "scope_skill": "product/docs/claude-md",
+      "path": "product/docs/claude-md/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "Refactor or create CLAUDE.md using progressive disclosure: keep always-on guidance concise, include only non-obvious commands/style/workflow rules, use @imports for deeper docs, and flag contradictions/bloat. Use when the user asks to create, update, or audit CLAUDE.md files.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "context7",
+      "scope_skill": "product/docs/context7",
+      "path": "product/docs/context7/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "Extract current library documentation via Context7 when users need up-to-date",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "docs-expert",
+      "scope_skill": "product/docs/docs-expert",
+      "path": "product/docs/docs-expert/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "Use when asked to audit or rewrite repository docs (README, docs, runbooks, community-health files) or when code has missing in-code documentation (JSDoc/DocC/config docs): enforce official brand guidance, harden GitHub visibility signals, and deliver evidence-bundled docs QA.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "docs-md",
+      "scope_skill": "product/docs/docs-md",
+      "path": "product/docs/docs-md/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "Review and refactor overloaded Markdown docs into progressive-disclosure docs when the user asks for structural cleanup or document-splitting of README, runbooks, specs, or internal docs: keep the landing doc short, split deep or volatile sections into linked companion docs, add a table of contents, and flag contradictions/bloat. Do not use for AGENTS/CLAUDE/GEMINI refactors, proofreading, translation, tone polish, API-reference writing, or generic docs QA.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "gemini-md",
+      "scope_skill": "product/docs/gemini-md",
+      "path": "product/docs/gemini-md/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "Use when a user asks to create, update, or review Gemini CLI context (`GEMINI.md`) and memory workflows; emit merge-safe edits that preserve existing guidance while adding what is missing for in-scope tasks.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "openai-docs",
+      "scope_skill": "product/docs/openai-docs",
+      "path": "product/docs/openai-docs/SKILL.md",
+      "top": "product",
+      "family": "product/docs",
+      "description": "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations (for example: Codex, Responses API, Chat Completions, Apps SDK, Agents SDK, Realtime, model capabilities or limits); prioritize OpenAI docs MCP tools and restrict any fallback browsing to official OpenAI domains.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "ars-contexta-codex",
+      "scope_skill": "product/domain/arscontexta",
+      "path": "product/domain/arscontexta/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Use when you need to install, validate, or maintain Ars Contexta parity in Codex; mirrors skills/prompts/agents/automations and returns a parity report with any Codex-vs-Claude deltas.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "graph",
+      "scope_skill": "product/domain/arscontexta/skill-sources/graph",
+      "path": "product/domain/arscontexta/skill-sources/graph/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Interactive knowledge graph analysis. Routes natural language questions to graph scripts, interprets results in domain vocabulary, and suggests concrete actions. Triggers on /graph, /graph health, /graph triangles, find synthesis opportunities, graph analysis.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "learn",
+      "scope_skill": "product/domain/arscontexta/skill-sources/learn",
+      "path": "product/domain/arscontexta/skill-sources/learn/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Research a topic and grow your knowledge graph. Uses Exa deep researcher, web search, or basic search to investigate topics, files results with full provenance, and chains to processing pipeline. Triggers on /learn, /learn [topic], research this, find out about.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "next",
+      "scope_skill": "product/domain/arscontexta/skill-sources/next",
+      "path": "product/domain/arscontexta/skill-sources/next/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Surface the most valuable next action by combining task stack, queue state, inbox pressure, health, and goals. Recommends one specific action with rationale. Triggers on /next, what should I do, what's next.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "pipeline",
+      "scope_skill": "product/domain/arscontexta/skill-sources/pipeline",
+      "path": "product/domain/arscontexta/skill-sources/pipeline/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "End-to-end source processing -- seed, reduce, process all claims through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on /pipeline, /pipeline [file], process this end to end, full pipeline.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "ralph",
+      "scope_skill": "product/domain/arscontexta/skill-sources/ralph",
+      "path": "product/domain/arscontexta/skill-sources/ralph/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Queue processing with fresh context per phase. Processes N tasks from the queue, spawning isolated subagents to prevent context contamination. Supports serial, parallel, batch filter, and dry run modes. Triggers on /ralph, /ralph N, process queue, run pipeline tasks.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "reduce",
+      "scope_skill": "product/domain/arscontexta/skill-sources/reduce",
+      "path": "product/domain/arscontexta/skill-sources/reduce/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Extract structured knowledge from source material. Comprehensive extraction is the default \u2014 every insight that serves the domain gets extracted. For domain-relevant sources, skip rate must be below 10%. Zero extraction from a domain-relevant source is a BUG. Triggers on /reduce, /reduce [file], extract insights, mine this, process this.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "refactor",
+      "scope_skill": "product/domain/arscontexta/skill-sources/refactor",
+      "path": "product/domain/arscontexta/skill-sources/refactor/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Plan vault restructuring from config changes. Compares config.yaml against derivation.md, identifies dimension shifts, shows restructuring plan, executes on approval. Triggers on /refactor, restructure vault.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "reflect",
+      "scope_skill": "product/domain/arscontexta/skill-sources/reflect",
+      "path": "product/domain/arscontexta/skill-sources/reflect/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Find connections between notes and update MOCs. Requires semantic judgment to identify genuine relationships. Use after /reduce creates notes, when exploring connections, or when a topic needs synthesis. Triggers on /reflect, /reflect [note], find connections, update MOCs, connect these notes.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "remember",
+      "scope_skill": "product/domain/arscontexta/skill-sources/remember",
+      "path": "product/domain/arscontexta/skill-sources/remember/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Capture friction as methodology notes. Three modes \u2014 explicit description, contextual (review recent corrections), session mining (scan transcripts for patterns). Triggers on /remember, /remember [description].",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "rethink",
+      "scope_skill": "product/domain/arscontexta/skill-sources/rethink",
+      "path": "product/domain/arscontexta/skill-sources/rethink/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Challenge system assumptions against accumulated evidence. Triages observations and tensions, detects patterns, generates proposals. The scientific method applied to knowledge systems. Triggers on /rethink, review observations, challenge assumptions, what have I learned.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "reweave",
+      "scope_skill": "product/domain/arscontexta/skill-sources/reweave",
+      "path": "product/domain/arscontexta/skill-sources/reweave/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Update old notes with new connections. The backward pass that /reflect doesn't do. Revisit existing notes that predate newer related content, add connections, sharpen claims, consider splits. Triggers on /reweave, /reweave [note], update old notes, backward connections, revisit notes.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "seed",
+      "scope_skill": "product/domain/arscontexta/skill-sources/seed",
+      "path": "product/domain/arscontexta/skill-sources/seed/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Add a source file to the processing queue. Checks for duplicates, creates archive folder, moves source from inbox, creates extract task, and updates queue. Triggers on /seed, /seed [file], queue this for processing.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "stats",
+      "scope_skill": "product/domain/arscontexta/skill-sources/stats",
+      "path": "product/domain/arscontexta/skill-sources/stats/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Show vault statistics and knowledge graph metrics. Provides a shareable snapshot of vault health, growth, and progress. Triggers on /stats, vault stats, show metrics, how big is my vault.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "tasks",
+      "scope_skill": "product/domain/arscontexta/skill-sources/tasks",
+      "path": "product/domain/arscontexta/skill-sources/tasks/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "View and manage the task stack and processing queue. Shows pending work, active tasks, completed items, and queue state. Triggers on /tasks, show tasks, what's pending, task list, queue status.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "validate",
+      "scope_skill": "product/domain/arscontexta/skill-sources/validate",
+      "path": "product/domain/arscontexta/skill-sources/validate/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Schema validation for notes. Checks against domain-specific templates. Validates required fields, enum values, description quality, and link health. Non-blocking \u2014 warns but doesn't prevent capture. Triggers on /validate, /validate [note], check schema, validate note, validate all.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "verify",
+      "scope_skill": "product/domain/arscontexta/skill-sources/verify",
+      "path": "product/domain/arscontexta/skill-sources/verify/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Combined verification \u2014 recite (description quality via cold-read prediction) + validate (schema compliance) + review (health checks). Use as a quality gate after creating notes or as periodic maintenance. Triggers on /verify, /verify [note], verify note quality, check note health.",
+      "decision": "merge",
+      "reason": "Consider collapsing micro-commands into fewer operator-facing entry skills."
+    },
+    {
+      "name": "help",
+      "scope_skill": "product/domain/arscontexta/skills/help",
+      "path": "product/domain/arscontexta/skills/help/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Contextual guidance and command discovery. Three modes \u2014 narrative (first-time), contextual (mid-task), compact (quick reference). Shows available commands, active skills, and intelligent suggestions based on vault state. Triggers on /help, what can I do, show commands, how does this work.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "chatgpt-apps",
+      "scope_skill": "product/domain/chatgpt-apps",
+      "path": "product/domain/chatgpt-apps/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold grounded in current OpenAI docs.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "chatgpt-apps-production-checklist",
+      "scope_skill": "product/domain/chatgpt-apps-production-checklist",
+      "path": "product/domain/chatgpt-apps-production-checklist/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Turn ChatGPT Apps implementation work into a production-ready checklist with concrete tasks, tests, widget changes, and tool-result patterns mapped by priority (P0/P1/P2). Use when designing or hardening Apps SDK products for shipping; do not use for generic web-only apps, static code review, or non-ChatGPT integration planning.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "cloudflare-deploy",
+      "scope_skill": "product/domain/cloudflare-deploy",
+      "path": "product/domain/cloudflare-deploy/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "oak-api",
+      "scope_skill": "product/domain/oak-api",
+      "path": "product/domain/oak-api/SKILL.md",
+      "top": "product",
+      "family": "product/domain",
+      "description": "Build or adapt Oak Curriculum API driven learning experiences, especially",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "compound-engineering-router",
+      "scope_skill": "product/Infrastructure/ops/compound-engineering-router",
+      "path": "product/Infrastructure/ops/compound-engineering-router/SKILL.md",
+      "top": "product",
+      "family": "product/ops",
+      "description": "Route Codex compound-engineering requests to the correct workflow prompt or meta-mode in the config repo, with optional NotebookLM evidence for spec quality, agent orchestration, and Codex operating patterns. Use when a user wants brainstorm, spec, plan, work, review, technical review, compound workflow guidance, context compaction, or guardrail extraction rather than direct feature coding.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "decide-build-primitive",
+      "scope_skill": "product/Infrastructure/ops/decide-build-primitive",
+      "path": "product/Infrastructure/ops/decide-build-primitive/SKILL.md",
+      "top": "product",
+      "family": "product/ops",
+      "description": "Analyze and decide the right Codex primitive (Skill, Custom Prompt, or",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "linear",
+      "scope_skill": "product/Infrastructure/ops/linear",
+      "path": "product/Infrastructure/ops/linear/SKILL.md",
+      "top": "product",
+      "family": "product/ops",
+      "description": "Manage Linear issues, projects, and docs through the Linear MCP workflow with consistent read/create/update operations. Use when a user asks to triage, create, update, or report on Linear work items.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "release",
+      "scope_skill": "product/Infrastructure/ops/release",
+      "path": "product/Infrastructure/ops/release/SKILL.md",
+      "top": "product",
+      "family": "product/ops",
+      "description": "Create and publish a new project release (semver) when you need to cut",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "security-best-practices",
+      "scope_skill": "product/security/security-best-practices",
+      "path": "product/security/security-best-practices/SKILL.md",
+      "top": "product",
+      "family": "product/security",
+      "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "security-ownership-map",
+      "scope_skill": "product/security/security-ownership-map",
+      "path": "product/security/security-ownership-map/SKILL.md",
+      "top": "product",
+      "family": "product/security",
+      "description": "Analyze git repositories to map security ownership (people-to-file), compute bus-factor and sensitive-code risk, and export CSV/JSON/graph artifacts for visualization. Use only when the user explicitly requests security-focused ownership analysis grounded in git history.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "security-threat-model",
+      "scope_skill": "product/security/security-threat-model",
+      "path": "product/security/security-threat-model/SKILL.md",
+      "top": "product",
+      "family": "product/security",
+      "description": "Repository-grounded threat modeling that enumerates trust boundaries, assets, attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown threat model. Trigger only when the user explicitly asks to threat model a codebase or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not trigger for general architecture summaries, code review, or non-security design work.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "prd-to-accessibility",
+      "scope_skill": "product/specs/_archive/prd-to-accessibility",
+      "path": "product/specs/_archive/prd-to-accessibility/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate accessibility requirements and checks from a PRD, aligned to",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-api-lite",
+      "scope_skill": "product/specs/_archive/prd-to-api-lite",
+      "path": "product/specs/_archive/prd-to-api-lite/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate a minimal API outline from a PRD (endpoints + example requests/responses).",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-arch-lite",
+      "scope_skill": "product/specs/_archive/prd-to-arch-lite",
+      "path": "product/specs/_archive/prd-to-arch-lite/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate a lite architecture snapshot from a PRD (minimal components",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-qa-cases",
+      "scope_skill": "product/specs/_archive/prd-to-qa-cases",
+      "path": "product/specs/_archive/prd-to-qa-cases/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate QA test cases from PRD acceptance criteria using Given/When/Then",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-risk",
+      "scope_skill": "product/specs/_archive/prd-to-risk",
+      "path": "product/specs/_archive/prd-to-risk/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate a risk register and mitigation plan from a PRD, covering product,",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-roadmap",
+      "scope_skill": "product/specs/_archive/prd-to-roadmap",
+      "path": "product/specs/_archive/prd-to-roadmap/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate a phased roadmap from a PRD with goals, dependencies, and validation",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-security-review",
+      "scope_skill": "product/specs/_archive/prd-to-security-review",
+      "path": "product/specs/_archive/prd-to-security-review/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate a security review from a PRD. Use when security requirements,",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "prd-to-ui-spec",
+      "scope_skill": "product/specs/_archive/prd-to-ui-spec",
+      "path": "product/specs/_archive/prd-to-ui-spec/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Generate UI specifications from PRDs or UX specs using the aStudio design",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "ui-spec-to-prompts",
+      "scope_skill": "product/specs/_archive/ui-spec-to-prompts",
+      "path": "product/specs/_archive/ui-spec-to-prompts/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Translate a UI spec into build-order prompts for UI generator tools\\",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "ux-spec-to-prompts",
+      "scope_skill": "product/specs/_archive/ux-spec-to-prompts",
+      "path": "product/specs/_archive/ux-spec-to-prompts/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Translate UX specifications into build-order prompts for UI generator",
+      "decision": "retire",
+      "reason": "Archived spec transformers; superseded by product-spec plus interviews."
+    },
+    {
+      "name": "product-spec",
+      "scope_skill": "product/specs/product-spec",
+      "path": "product/specs/product-spec/SKILL.md",
+      "top": "product",
+      "family": "product/specs",
+      "description": "Create or review implementation-ready product specifications from ideas",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "asymmetric-ideation-engine",
+      "scope_skill": "product/strategy/asymmetric-ideation-engine",
+      "path": "product/strategy/asymmetric-ideation-engine/SKILL.md",
+      "top": "product",
+      "family": "product/strategy",
+      "description": "Generate 10 launchable asymmetric ideas by excavating a repository for hidden patterns. Use when users ask for radical non-incremental ideation from repo context; don't use for roadmap optimization, bug fixing, or routine prioritization. Outputs: structured idea set + artifact file. Success: all novelty constraints satisfied.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "brainstorming",
+      "scope_skill": "product/strategy/brainstorming",
+      "path": "product/strategy/brainstorming/SKILL.md",
+      "top": "product",
+      "family": "product/strategy",
+      "description": "This skill should be used before implementing features, building components, or making changes. It guides exploring user intent, approaches, and design decisions before planning. Triggers on let's brainstorm, help me think through, what should we build, explore approaches, ambiguous feature requests, or when the user's request has multiple valid interpretations that need clarification.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "project-improvement-ideator",
+      "scope_skill": "product/strategy/project-improvement-ideator",
+      "path": "product/strategy/project-improvement-ideator/SKILL.md",
+      "top": "product",
+      "family": "product/strategy",
+      "description": "Use when asked to generate and prioritize product or repository improvements: privately explore 100 pragmatic ideas, run a premortem, and return the 10 strongest opportunities with current-source-backed best-practice notes, implementation slices, and risk controls; do not use for bug fixing or generic brainstorming.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "ui-ux-creative-coding",
+      "scope_skill": "skills-antigravity-test/ui-ux-creative-coding",
+      "path": "skills-antigravity-test/ui-ux-creative-coding/SKILL.md",
+      "top": "skills-antigravity-test",
+      "family": "skills-antigravity-test/ui-ux-creative-coding",
+      "description": "Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds.",
+      "decision": "retire",
+      "reason": "Test-copy skill path; duplicate of canonical production skill."
+    },
+    {
+      "name": "1password",
+      "scope_skill": "Skills/1password",
+      "path": "Skills/1password/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/1password",
+      "description": "Plan, validate, and use 1Password CLI setup for secret injection and",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "agent-browser",
+      "scope_skill": "Skills/agent-browser",
+      "path": "Skills/agent-browser/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/agent-browser",
+      "description": "Use this skill to extract page state and automate web interactions with",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "alignment-checkpoint",
+      "scope_skill": "Skills/alignment-checkpoint",
+      "path": "Skills/alignment-checkpoint/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/alignment-checkpoint",
+      "description": "Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "apple-app-creator",
+      "scope_skill": "Skills/apple-app-creator",
+      "path": "Skills/apple-app-creator/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/apple-app-creator",
+      "description": "Orchestrate iOS/macOS app scaffolding and optional subskill adoption for existing projects. Use when users need a guided wizard to scaffold with XcodeGen and optionally install xcode-makefiles and simple-tasks.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "atlas",
+      "scope_skill": "Skills/atlas",
+      "path": "Skills/atlas/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/atlas",
+      "description": "macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and the \\ChatGPT Atlas\\ app is installed; do not trigger for general browser tasks or non-macOS environments.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "beautiful-mermaid",
+      "scope_skill": "Skills/beautiful-mermaid",
+      "path": "Skills/beautiful-mermaid/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/beautiful-mermaid",
+      "description": "Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid. Use when",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "bootstrap",
+      "scope_skill": "Skills/bootstrap",
+      "path": "Skills/bootstrap/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/bootstrap",
+      "description": "Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "codex-agent-creator",
+      "scope_skill": "Skills/codex-agent-creator",
+      "path": "Skills/codex-agent-creator/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/codex-agent-creator",
+      "description": "Create and install Codex custom multi-agent roles when the user asks to add, update, or troubleshoot role entries under agents with a role config file.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "codex-automation-architect",
+      "scope_skill": "Skills/codex-automation-architect",
+      "path": "Skills/codex-automation-architect/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/codex-automation-architect",
+      "description": "Create, review, and merge Codex app automations; use when users need recurring automation design or consolidation with current OpenAI/Codex guidance, environment preflight, and headless multi-runner validation.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "codex-home-audit",
+      "scope_skill": "Skills/codex-home-audit",
+      "path": "Skills/codex-home-audit/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/codex-home-audit",
+      "description": "Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions/, rules/, config.toml) when you want a dated report of risks, duplication, and recommended cleanups.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "codex-prompt-creator",
+      "scope_skill": "Skills/codex-prompt-creator",
+      "path": "Skills/codex-prompt-creator/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/codex-prompt-creator",
+      "description": "Create or update reusable Codex skills under .agents/skills and optionally local ~/.codex/prompts shortcuts. Use when a user asks to build, revise, or package prompts and skills for repeatable workflows.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "codex-sessions-skill-scan",
+      "scope_skill": "Skills/codex-sessions-skill-scan",
+      "path": "Skills/codex-sessions-skill-scan/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/codex-sessions-skill-scan",
+      "description": "Daily skill health scan: analyze ~/.codex/sessions plus per-repo session logs under ~/dev (default last 1 day) and summarize skill invocations + likely failures for personal skills in ~/dev/agent-skills (missing paths, tool failures, complex-task word triggers). Optional: include best-effort local OTel signals.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "diagram-cli",
+      "scope_skill": "Skills/diagram-cli",
+      "path": "Skills/diagram-cli/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/diagram-cli",
+      "description": "Generate, validate, and refresh @brainwav/diagram architecture artifacts (.mmd/.svg/.diagram manifest + context packs). Use this skill when users need fast repository understanding for onboarding, PR architecture impact, and CI drift checks; do not use it for hand-drawn product/UI mock diagrams.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "diagram-context-refresh",
+      "scope_skill": "Skills/diagram-context-refresh",
+      "path": "Skills/diagram-context-refresh/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/diagram-context-refresh",
+      "description": "Refresh Mermaid diagram context packs for Codex and Claude using diagram-cli. Use when the user asks to keep architecture context current, automate diagram refresh, or prepare AI-ready repo context from code.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "executing-plans",
+      "scope_skill": "Skills/executing-plans",
+      "path": "Skills/executing-plans/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/executing-plans",
+      "description": "Validate and execute written implementation plans in verified batches with checkpoints. Use when a plan already exists and work must proceed task-by-task.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "fix-mise",
+      "scope_skill": "Skills/fix-mise",
+      "path": "Skills/fix-mise/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/fix-mise",
+      "description": "Diagnose and repair mise trust/runtime failures and reconcile `~/.Infrastructure/config/mise/config.toml` with required versions; use when commands fail due to trust blockers or stale tool config.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "insight-report",
+      "scope_skill": "Skills/insight-report",
+      "path": "Skills/insight-report/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/insight-report",
+      "description": "Generate a high-fidelity Codex usage insights HTML report from local Codex session data when asked for insights report, usage report, or analyze my Codex sessions.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "markdown-converter",
+      "scope_skill": "Skills/markdown-converter",
+      "path": "Skills/markdown-converter/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/markdown-converter",
+      "description": "Convert source files into Markdown outputs using the bundled converter workflow. Use when a user asks to transform documents, notes, or technical files into clean Markdown format.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "notebooklm",
+      "scope_skill": "Skills/notebooklm",
+      "path": "Skills/notebooklm/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/notebooklm",
+      "description": "Use when a user asks to interact with Google NotebookLM from this environment \u2014 to query notebooks, manage sources/notebooks, or generate audio/video overviews. Do not use for general web/chat questions unrelated to NotebookLM.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "process-watch",
+      "scope_skill": "Skills/process-watch",
+      "path": "Skills/process-watch/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/process-watch",
+      "description": "Analyze system processes and resource usage to diagnose runaway CPU/memory/IO,",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "recent-code-bugfix",
+      "scope_skill": "Skills/recent-code-bugfix",
+      "path": "Skills/recent-code-bugfix/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/recent-code-bugfix",
+      "description": "Diagnose and fix a bug introduced by the current author within the last week. Use when a user asks for a proactive bugfix from their recent commits, asks to triage/fix issues caused by their own changes, or leaves the prompt empty. Don\u2019t use when failures are unrelated to the author\u2019s recent edits or there is no local git history. Outputs: root-cause summary, minimal fix, and targeted verification evidence. Success: root cause maps directly to the author\u2019s own recent changes.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "recon-workbench",
+      "scope_skill": "Skills/recon-workbench",
+      "path": "Skills/recon-workbench/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/recon-workbench",
+      "description": "Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "repoprompt",
+      "scope_skill": "Skills/repoprompt",
+      "path": "Skills/repoprompt/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/repoprompt",
+      "description": "Plan and guide Repo Prompt integration and usage in AI coding workflows.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "run-tests-and-write-artifacts",
+      "scope_skill": "Skills/run-tests-and-write-artifacts",
+      "path": "Skills/run-tests-and-write-Infrastructure/artifacts/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/run-tests-and-write-artifacts",
+      "description": "Run reproducible test suites in a checked-out repo and write evidence artifacts to /mnt/data (test_output.log, test_results.json, test_summary.md). Use when users ask to run tests, verify a branch, or reproduce CI failures; do not use for static-only review, deployment, or bug fixing before evidence is collected.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "simple-tasks",
+      "scope_skill": "Skills/simple-tasks",
+      "path": "Skills/simple-tasks/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/simple-tasks",
+      "description": "Install a fast local task workflow for single-project planning with Infrastructure/scripts/task.sh (claim, done, status, reporting) backed by tasks/TASKS.md and optional tasks/details/ notes. Use when you need lightweight in-progress task coordination rather than full team issue tracking.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "skill-builder",
+      "scope_skill": "Skills/skill-builder",
+      "path": "Skills/skill-builder/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/skill-builder",
+      "description": "Create, revise, benchmark, and quality-gate Codex skills (SKILL.md plus scripts, references, evals, and packaging). Use this skill when the user asks to build, audit, improve, compare, or package a Codex skill or skill-graph contract; do not use it for unrelated app features, generic bug fixing, or routine docs edits.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "skill-installer",
+      "scope_skill": "Skills/skill-installer",
+      "path": "Skills/skill-installer/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/skill-installer",
+      "description": "Plan and install skills into a Codex skills directory from curated or repo sources; use when a user asks to list available skills, install/update a skill, or validate a source before installation. Do not use for general app development, unrelated debugging, or docs-only rewrites.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    },
+    {
+      "name": "systematic-debugging",
+      "scope_skill": "Skills/systematic-debugging",
+      "path": "Skills/systematic-debugging/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/systematic-debugging",
+      "description": "Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "test-driven-development",
+      "scope_skill": "Skills/test-driven-development",
+      "path": "Skills/test-driven-development/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/test-driven-development",
+      "description": "Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "using-git-worktrees",
+      "scope_skill": "Skills/using-git-worktrees",
+      "path": "Skills/using-git-worktrees/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/using-git-worktrees",
+      "description": "Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "verification-before-completion",
+      "scope_skill": "Skills/verification-before-completion",
+      "path": "Skills/verification-before-completion/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/verification-before-completion",
+      "description": "Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "visual-explainer",
+      "scope_skill": "Skills/visual-explainer",
+      "path": "Skills/visual-explainer/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/visual-explainer",
+      "description": "Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) \u2014 present it as a styled HTML page instead.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "writing-plans",
+      "scope_skill": "Skills/writing-plans",
+      "path": "Skills/writing-plans/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/writing-plans",
+      "description": "Create execution-ready implementation plans with task sequencing and checks. Use when requirements are known but implementation is multi-step.",
+      "decision": "keep-core-30",
+      "reason": "High-frequency, broad utility, and strong leverage across common workflows."
+    },
+    {
+      "name": "xcode-makefiles",
+      "scope_skill": "Skills/xcode-makefiles",
+      "path": "Skills/xcode-makefiles/SKILL.md",
+      "top": "utilities",
+      "family": "Skills/xcode-makefiles",
+      "description": "Install strict Xcode Makefile tooling for iOS/macOS projects, including build/run/test scripts with AGENT_NAME-based per-agent isolation under build/. Use when a project needs reproducible local CLI builds without full app scaffolding.",
+      "decision": "merge",
+      "reason": "Consolidate into nearest core workflow to reduce routing overlap."
+    }
+  ]
+}

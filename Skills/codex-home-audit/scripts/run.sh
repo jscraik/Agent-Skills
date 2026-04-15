@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Usage:
+#   ./run.sh [codex_home] [out_dir]
+#
+# Defaults:
+#   codex_home: $CODEX_HOME or ~/.codex
+#   out_dir:    <codex_home>/Infrastructure/reports/codex-home-audit
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  cat <<'USAGE'
+Usage:
+  ./run.sh [codex_home] [out_dir]
+
+Defaults:
+  codex_home: $CODEX_HOME or ~/.codex
+  out_dir:    <codex_home>/Infrastructure/reports/codex-home-audit
+USAGE
+  exit 0
+fi
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+CODEX_HOME_DIR="${1:-${CODEX_HOME:-$HOME/.codex}}"
+OUT_DIR="${2:-${CODEX_HOME_DIR}/Infrastructure/reports/codex-home-audit}"
+
+exec zsh -lc "python3 \"${SCRIPT_DIR}/audit_codex_home.py\" --codex-home \"${CODEX_HOME_DIR}\" --out-dir \"${OUT_DIR}\""

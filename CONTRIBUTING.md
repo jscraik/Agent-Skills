@@ -58,7 +58,7 @@ Prefer explicit file paths in docs and PR notes.
 Examples:
 
 ```
-See `scripts/docs_lint.py`.
+See `Infrastructure/scripts/docs_lint.py`.
 @docs/deployment/index.md
 ```
 
@@ -78,13 +78,13 @@ Code examples should be:
 Run:
 
 ```bash
-python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 ```
 
 To preflight strict enforcement:
 
 ```bash
-python3 scripts/docs_lint.py --mode block --config docs-policy.json
+python3 Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
 ```
 
 ## Pull request checklist (required)

@@ -17,8 +17,8 @@ body:
       label: Steps to reproduce
       description: Exact commands and paths used
       placeholder: |
-        1. Run `bash scripts/sync_skills.sh`
-        2. Run `python3 scripts/diagnose_skill.py --all`
+        1. Run `bash Infrastructure/scripts/sync_skills.sh`
+        2. Run `python3 Infrastructure/scripts/diagnose_skill.py --all`
         3. Observe ...
     validations:
       required: true

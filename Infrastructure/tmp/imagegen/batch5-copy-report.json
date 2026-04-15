@@ -1,0 +1,200 @@
+[
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "context7",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-context7-small.png",
+    "target_requested": "product/docs/context7/agents/assets/icon-small.png",
+    "target_written": "product/docs/context7/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "context7",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-context7-large.png",
+    "target_requested": "product/docs/context7/agents/assets/icon-large.png",
+    "target_written": "product/docs/context7/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "docs-expert",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-docs-expert-small.png",
+    "target_requested": "product/docs/docs-expert/agents/assets/icon-small.png",
+    "target_written": "product/docs/docs-expert/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "docs-expert",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-docs-expert-large.png",
+    "target_requested": "product/docs/docs-expert/agents/assets/icon-large.png",
+    "target_written": "product/docs/docs-expert/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "agent-native-architecture",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-agent-native-architecture-small.png",
+    "target_requested": "product/domain/agent-native-architecture/agents/assets/icon-small.png",
+    "target_written": "product/domain/agent-native-architecture/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "agent-native-architecture",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-agent-native-architecture-large.png",
+    "target_requested": "product/domain/agent-native-architecture/agents/assets/icon-large.png",
+    "target_written": "product/domain/agent-native-architecture/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "chatgpt-apps",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-chatgpt-apps-small.png",
+    "target_requested": "product/domain/chatgpt-apps/agents/assets/icon-small.png",
+    "target_written": "product/domain/chatgpt-apps/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "chatgpt-apps",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-chatgpt-apps-large.png",
+    "target_requested": "product/domain/chatgpt-apps/agents/assets/icon-large.png",
+    "target_written": "product/domain/chatgpt-apps/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "oak-api",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-oak-api-small.png",
+    "target_requested": "product/domain/oak-api/agents/assets/icon-small.png",
+    "target_written": "product/domain/oak-api/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "oak-api",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-oak-api-large.png",
+    "target_requested": "product/domain/oak-api/agents/assets/icon-large.png",
+    "target_written": "product/domain/oak-api/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-brainstorm",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-ce-brainstorm-small.png",
+    "target_requested": "product/Infrastructure/ops/ce-brainstorm/agents/assets/icon-small.png",
+    "target_written": "product/Infrastructure/ops/ce-brainstorm/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-brainstorm",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-ce-brainstorm-large.png",
+    "target_requested": "product/Infrastructure/ops/ce-brainstorm/agents/assets/icon-large.png",
+    "target_written": "product/Infrastructure/ops/ce-brainstorm/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-compound",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-ce-compound-small.png",
+    "target_requested": "product/Infrastructure/ops/ce-compound/agents/assets/icon-small.png",
+    "target_written": "product/Infrastructure/ops/ce-compound/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-compound",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-ce-compound-large.png",
+    "target_requested": "product/Infrastructure/ops/ce-compound/agents/assets/icon-large.png",
+    "target_written": "product/Infrastructure/ops/ce-compound/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-compound-refresh",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-ce-compound-refresh-small.png",
+    "target_requested": "product/Infrastructure/ops/ce-compound-refresh/agents/assets/icon-small.png",
+    "target_written": "product/Infrastructure/ops/ce-compound-refresh/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-compound-refresh",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-ce-compound-refresh-large.png",
+    "target_requested": "product/Infrastructure/ops/ce-compound-refresh/agents/assets/icon-large.png",
+    "target_written": "product/Infrastructure/ops/ce-compound-refresh/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-deepen-plan",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-ce-deepen-plan-small.png",
+    "target_requested": "product/Infrastructure/ops/ce-deepen-plan/agents/assets/icon-small.png",
+    "target_written": "product/Infrastructure/ops/ce-deepen-plan/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-deepen-plan",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-ce-deepen-plan-large.png",
+    "target_requested": "product/Infrastructure/ops/ce-deepen-plan/agents/assets/icon-large.png",
+    "target_written": "product/Infrastructure/ops/ce-deepen-plan/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-deepen-spec",
+    "variant": "small",
+    "source": "tmp/imagegen/batch5-out/skill-ce-deepen-spec-small.png",
+    "target_requested": "product/Infrastructure/ops/ce-deepen-spec/agents/assets/icon-small.png",
+    "target_written": "product/Infrastructure/ops/ce-deepen-spec/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "ce-deepen-spec",
+    "variant": "large",
+    "source": "tmp/imagegen/batch5-out/skill-ce-deepen-spec-large.png",
+    "target_requested": "product/Infrastructure/ops/ce-deepen-spec/agents/assets/icon-large.png",
+    "target_written": "product/Infrastructure/ops/ce-deepen-spec/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "plugin",
+    "name": "skill-factory",
+    "variant": "icon",
+    "source": "tmp/imagegen/batch5-out/plugin-skill-factory-icon.png",
+    "target_requested": "Plugins/skill-factory/assets/icon.png",
+    "target_written": "Plugins/skill-factory/assets/icon.png"
+  },
+  {
+    "status": "copied",
+    "kind": "plugin",
+    "name": "skill-factory",
+    "variant": "logo",
+    "source": "tmp/imagegen/batch5-out/plugin-skill-factory-logo.png",
+    "target_requested": "Plugins/skill-factory/assets/logo.png",
+    "target_written": "Plugins/skill-factory/assets/logo.png"
+  }
+]

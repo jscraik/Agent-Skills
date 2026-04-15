@@ -1,0 +1,205 @@
+{
+  "schema_version": "1.2",
+  "generated_on": "2026-03-08",
+  "overall_verdict": "gold_standard",
+  "quality_gate": {
+    "skills": 79,
+    "passed": true,
+    "structure_failures": 0,
+    "eval_failures": 0
+  },
+  "analyze_summary": {
+    "generated_at": "2026-03-08T22:24:16.559831+00:00",
+    "schema_version": "1.1",
+    "skills_total": 79,
+    "user_facing_skills": 75,
+    "system_skills": 4,
+    "scored": 79,
+    "errors": 0,
+    "avg_percent": 95.45,
+    "min_percent": 90.0,
+    "max_percent": 100.0,
+    "perfect_100": 1,
+    "below_90": 0,
+    "below_80": 0,
+    "below_70": 0,
+    "by_priority": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 0,
+      "P3": 79
+    }
+  },
+  "cluster_benchmark": [
+    {
+      "cluster": "frontend_ui",
+      "label": "Frontend/UI",
+      "skills": 20,
+      "status": "pass",
+      "missing": [],
+      "marker_counts": {
+        "react_19": 1,
+        "next_16": 1,
+        "tailwind_v4": 2,
+        "responses_api": 0,
+        "wcag_2_2": 1,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      }
+    },
+    {
+      "cluster": "github",
+      "label": "GitHub/CI",
+      "skills": 3,
+      "status": "pass",
+      "missing": [],
+      "marker_counts": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 3,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      }
+    },
+    {
+      "cluster": "cloudflare_backend",
+      "label": "Cloudflare/Backend",
+      "skills": 5,
+      "status": "pass",
+      "missing": [],
+      "marker_counts": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 3,
+        "mcp_spec": 1
+      }
+    },
+    {
+      "cluster": "openai_apps",
+      "label": "OpenAI/Apps",
+      "skills": 6,
+      "status": "pass",
+      "missing": [],
+      "marker_counts": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 1,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      }
+    },
+    {
+      "cluster": "security",
+      "label": "Security",
+      "skills": 3,
+      "status": "pass",
+      "missing": [],
+      "marker_counts": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 3,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 0,
+        "mcp_spec": 0
+      }
+    },
+    {
+      "cluster": "mcp",
+      "label": "MCP",
+      "skills": 5,
+      "status": "pass",
+      "missing": [],
+      "marker_counts": {
+        "react_19": 0,
+        "next_16": 0,
+        "tailwind_v4": 0,
+        "responses_api": 0,
+        "wcag_2_2": 0,
+        "owasp_top10": 0,
+        "gha_sha_pin": 0,
+        "cloudflare_workers": 1,
+        "mcp_spec": 1
+      }
+    }
+  ],
+  "cluster_status_counts": {
+    "pass": 6,
+    "warn": 0,
+    "fail": 0
+  },
+  "lowest_scoring_skills": [
+    {
+      "skill": "github/greptile/check-pr",
+      "percent": 90.0,
+      "priority": "P3"
+    },
+    {
+      "skill": "frontend/ui/shadcn-ui",
+      "percent": 90.8,
+      "priority": "P3"
+    },
+    {
+      "skill": "frontend/ui/stitch-remotion",
+      "percent": 91.7,
+      "priority": "P3"
+    },
+    {
+      "skill": "Skills/codex-sessions-skill-scan",
+      "percent": 91.7,
+      "priority": "P3"
+    },
+    {
+      "skill": "Skills/simple-tasks",
+      "percent": 91.7,
+      "priority": "P3"
+    },
+    {
+      "skill": "Skills/xcode-makefiles",
+      "percent": 91.7,
+      "priority": "P3"
+    },
+    {
+      "skill": "auth/create-auth",
+      "percent": 92.5,
+      "priority": "P3"
+    },
+    {
+      "skill": "backend/cli-spec",
+      "percent": 92.5,
+      "priority": "P3"
+    },
+    {
+      "skill": "frontend/graphics/nano-banana-builder",
+      "percent": 92.5,
+      "priority": "P3"
+    },
+    {
+      "skill": "frontend/graphics/threejs-builder",
+      "percent": 92.5,
+      "priority": "P3"
+    }
+  ],
+  "next_actions": [
+    "Automate quarterly standards refresh and rerun this benchmark.",
+    "Keep CI failing if below_90 becomes non-zero.",
+    "Track score drift with weekly analyzer snapshots."
+  ]
+}

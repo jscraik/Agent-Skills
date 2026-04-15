@@ -5,8 +5,8 @@ on:
     paths:
       - "docs/**"
       - "CONTRIBUTING.md"
-      - "docs-policy.json"
-      - "scripts/docs_lint.py"
+      - "Infrastructure/docs-policy.json"
+      - "Infrastructure/scripts/docs_lint.py"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/workflows/docs-governance.yml"
   push:
@@ -15,8 +15,8 @@ on:
     paths:
       - "docs/**"
       - "CONTRIBUTING.md"
-      - "docs-policy.json"
-      - "scripts/docs_lint.py"
+      - "Infrastructure/docs-policy.json"
+      - "Infrastructure/scripts/docs_lint.py"
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/workflows/docs-governance.yml"
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: Ensure GitHub CLI is installed
-        run: bash scripts/ensure-gh-cli.sh
+        run: bash Infrastructure/scripts/ensure-gh-cli.sh
 
       - uses: actions/setup-python@v6
         with:
@@ -46,7 +46,7 @@ jobs:
           import json
           from datetime import date
 
-          with open("docs-policy.json", "r", encoding="utf-8") as f:
+          with open("Infrastructure/docs-policy.json", "r", encoding="utf-8") as f:
               cfg = json.load(f)
 
           mode = cfg.get("enforcement_mode", "warn")
@@ -77,8 +77,8 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             CHANGED_ONLY="--changed-only"
           fi
-          python3 scripts/docs_lint.py \
-            --config docs-policy.json \
+          python3 Infrastructure/scripts/docs_lint.py \
+            --config Infrastructure/docs-policy.json \
             --mode "${{ steps.mode.outputs.mode }}" \
             --report-json /tmp/docs-lint-report.json \
             $CHANGED_ONLY
@@ -128,4 +128,4 @@ jobs:
       - name: Validate adjacency.yaml ↔ SKILL.md sync
         run: |
           pip install pyyaml -q
-          DRIFT_THRESHOLD=5 python3 scripts/validate-adjacency.py .
+          DRIFT_THRESHOLD=5 python3 Infrastructure/scripts/validate-adjacency.py .

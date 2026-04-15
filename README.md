@@ -13,7 +13,7 @@ A governed repository of **112 skills** for AI coding agents (Codex, Claude, Gem
 
 ```bash
 # One-time per shell: load repo environment and add ask to PATH
-source scripts/codex_env_common.sh && codex_apply_env
+source Infrastructure/scripts/codex_env_common.sh && codex_apply_env
 
 # See what's available
 ask graph topics
@@ -150,19 +150,19 @@ agent-skills/
 ├── github/                   # GitHub workflow skills
 ├── interview/                # Structured interview and discovery skills
 ├── product/                  # Product strategy and operations skills
-├── skills-system/            # Core system-level skills
-├── utilities/                # Agent operations and platform utilities
+├── Skills/            # Core system-level skills
+├── Skills/                # Agent operations and platform utilities
 │
-├── scripts/lib/ask/          # CLI implementation
+├── Infrastructure/scripts/lib/ask/          # CLI implementation
 ├── docs/cli-specs/           # Command specifications
-└── ops/metrics/graph/        # Skill relationship data
+└── Infrastructure/ops/metrics/graph/        # Skill relationship data
 ```
 
 Ownership boundaries:
-- Canonical authoring: domain folders plus `plugins/<plugin>/skills/**`
-- Factory mechanics: `scripts/**`, validation/governance contracts
-- Runtime/projection surfaces: `.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `plugins/cache/**`, `runtime/**` (read-only by policy)
-- Full policy: [docs/agents/14-path-ownership-boundaries.md](docs/agents/14-path-ownership-boundaries.md)
+- Canonical authoring: domain folders plus `Plugins/<plugin>/skills/**`
+- Factory mechanics: `Infrastructure/scripts/**`, validation/governance contracts
+- Runtime/projection surfaces: `.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
+- Full policy: [Docs/agents/14-path-ownership-boundaries.md](Docs/agents/14-path-ownership-boundaries.md)
 
 ## Documentation
 

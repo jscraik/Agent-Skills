@@ -1,6 +1,0 @@
-interface:
-  display_name: Fix Mise
-  short_description: Use this skill to diagnose and repair mise trust or runtime selection
-    problems and reconcile `~/.config/mise/config.t...
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

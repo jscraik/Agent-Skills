@@ -53,11 +53,11 @@ Run `pnpm typecheck` after significant TypeScript changes (or repo-native equiva
 ## TypeScript Development
 
 When refactoring interfaces that affect multiple files, first update the interface/type definitions, then systematically update all consumers before running tests. Verify no 'conflated' concerns exist (e.g., subcommand vs. mode flags).
-For cross-file TypeScript refactoring in generated AGENTS guidance, see [workflow and safety guidance](./docs/agents/13-workflow-and-safety-guidance.md#refactoring).
+For cross-file TypeScript refactoring in generated AGENTS guidance, see [workflow and safety guidance](./Docs/agents/13-workflow-and-safety-guidance.md#refactoring).
 
 ## Testing
 
-For testing guidance used across shared operational instructions, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#testing).
+For testing guidance used across shared operational instructions, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#testing).
 
 ## Git Workflow
 
@@ -67,15 +67,15 @@ For shared workflow references, see [AGENTS.md](./AGENTS.md).
 
 ## Configuration Files
 
-For configuration guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#configuration-files) and [AGENTS.md](./AGENTS.md).
+For configuration guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#configuration-files) and [AGENTS.md](./AGENTS.md).
 
 ## Code Review Fixes
 
-For shared review-comment handling, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes) and [AGENTS.md](./AGENTS.md).
+For shared review-comment handling, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes) and [AGENTS.md](./AGENTS.md).
 
 ## Documentation
 
-For formatting and generated-document guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#documentation) and [AGENTS.md](./AGENTS.md).
+For formatting and generated-document guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#documentation) and [AGENTS.md](./AGENTS.md).
 
 ## Examples
 

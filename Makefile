@@ -18,13 +18,13 @@ install: ## Install dependencies
 setup: install hooks ## Full setup: install deps and configure git hooks
 
 preflight: ## Run repository preflight checks (required local-memory gate by default)
-	@bash ./scripts/codex-preflight.sh
+	@bash ./Infrastructure/scripts/codex-preflight.sh
 
 hooks: ## Setup git hooks
-	node scripts/setup-git-hooks.js
+	node Infrastructure/scripts/setup-git-hooks.js
 
 hooks-pre-commit: ## Run local pre-commit gates before creating a commit
-	bash scripts/validate_all.sh --ephemeral
+	bash Infrastructure/scripts/validate_all.sh --ephemeral
 
 hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK_COMMIT_MSG_FILE=/path)
 	@tmp_file="$$(mktemp)"; \
@@ -41,11 +41,11 @@ hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK
 		echo "Usage: HOOK_COMMIT_MSG=\"feat: test\" make hooks-commit-msg or make hooks-commit-msg HOOK_COMMIT_MSG_FILE=/path/to/commit-msg" >&2; \
 		exit 2; \
 	fi; \
-	node scripts/validate-commit-msg.js "$$tmp_file"
+	node Infrastructure/scripts/validate-commit-msg.js "$$tmp_file"
 
 hooks-pre-push: ## Run local pre-push governance gates before pushing
-	bash scripts/validate_skill_authoring_family.sh
-	python3 scripts/diagnose_skill.py --all
+	bash Infrastructure/scripts/validate_skill_authoring_family.sh
+	python3 Infrastructure/scripts/diagnose_skill.py --all
 
 secrets-staged: ## Scan staged content for secrets before committing
 	pnpm run secrets:staged
@@ -60,7 +60,7 @@ semgrep-changed: ## Run narrow Semgrep rules against changed src implementation 
 	pnpm run semgrep:changed
 
 diagrams-check: ## Refresh architecture diagrams when sensitive paths change and fail on drift
-	@bash ./scripts/check-diagram-freshness.sh
+	@bash ./Infrastructure/scripts/check-diagram-freshness.sh
 
 # === Development ===
 
@@ -127,9 +127,9 @@ ci: ## Run CI-equivalent local checks
 # === Diagrams ===
 
 diagrams: ## Generate architecture diagrams
-	@bash ./scripts/refresh-diagram-context.sh --force
+	@bash ./Infrastructure/scripts/refresh-diagram-context.sh --force
 
 # === Environment ===
 
 env-check: ## Check environment policy envelope
-	@bash ./scripts/check-environment.sh
+	@bash ./Infrastructure/scripts/check-environment.sh

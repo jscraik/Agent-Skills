@@ -36,5 +36,5 @@ Paste logs, command output, or screenshots that help reproduce the issue.
 
 ## Checks run
 
-- [ ] `bash scripts/sync_skills.sh` (if relevant)
-- [ ] `python3 scripts/docs_lint.py --mode warn --config docs-policy.json` (if relevant)
+- [ ] `bash Infrastructure/scripts/sync_skills.sh` (if relevant)
+- [ ] `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` (if relevant)

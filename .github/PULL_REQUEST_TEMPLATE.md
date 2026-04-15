@@ -67,16 +67,16 @@ Security/AI risk section:
 - [ ] I understand what the code does and can explain it
 - [ ] Prompts or session logs included (Optional, but helpful)
 
-Prompt: `[PROMPT: artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml]`
-Session: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
+Prompt: `[PROMPT: Infrastructure/artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml]`
+Session: `[PROMPT: Infrastructure/artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
 
 <details>
 <summary>AI Session Log (click to expand)</summary>
 
 [PROMPT: Short AI session summary]
 
-- Log file: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
-- Prompt file: `[PROMPT: artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml]`
+- Log file: `[PROMPT: Infrastructure/artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
+- Prompt file: `[PROMPT: Infrastructure/artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml]`
 - Files touched: [PROMPT: paths]
 - Tests run: [PROMPT: commands]
 - Human verification: [PROMPT: what you personally checked]
@@ -87,10 +87,10 @@ Session: `[PROMPT: artifacts/ai/sessions/YYYY-MM-DD-<slug>.json]`
 
 - [ ] Linked an issue or explained why none exists
 - [ ] Added/updated tests or explained why not
-- [ ] Updated docs where needed (Required for behavior/config/API/CLI changes)
+- [ ] Updated docs where needed (Required for behavior/Infrastructure/config/API/CLI changes)
 - [ ] Internal docs links use full root paths (for example, `/docs/deployment`)
 - [ ] Internal docs links do not use trailing slashes
-- [ ] Ran docs lint: `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
+- [ ] Ran docs lint: `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - [ ] Considered backward compatibility / migrations (Optional)
 - [ ] Verified no secrets are committed (tokens, keys, passwords)
 - [ ] Confirmed CI is green (or explained failures)
