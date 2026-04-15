@@ -28,6 +28,7 @@ Emergency release path when primary CI (GitHub Actions) experiences queue conges
 ## Philosophy
 
 Primary CI remains the default path. Fallback releases are an escape hatch for emergencies only. They require:
+
 - Strict environment verification before building
 - Deterministic, reproducible build outputs
 - Complete artifact provenance (manifests, checksums, signatures)
@@ -79,6 +80,7 @@ The goal is "acceptable parity" with primary CI outputs, not perfect replication
 ## Examples
 
 Quick activation (5 minutes):
+
 ```bash
 # 1. Verify CI is stuck
 github-status  # Check https://www.githubstatus.com
@@ -99,6 +101,7 @@ export FALLBACK_REASON="ci-queue-congestion"
 ```
 
 Monitoring setup:
+
 ```bash
 # Add to crontab for automated CI health monitoring
 */5 * * * * /path/to/repo/Infrastructure/scripts/fallback-release/monitor-ci.sh
@@ -208,17 +211,17 @@ After primary CI recovers:
 
 ## See Also
 
-| Skill | When to use together |
-|---|---|
-| [[release]] | Primary release path when CI is healthy |
-| [[production-deployment]] | Deploy fallback-built artifacts to production |
+| Skill                              | When to use together                           |
+| ---------------------------------- | ---------------------------------------------- |
+| [[release]]                        | Primary release path when CI is healthy        |
+| [[production-deployment]]          | Deploy fallback-built artifacts to production  |
 | [[verification-before-completion]] | Validate fallback artifacts before publication |
 
 **Topic map:** [[ops-engineering]]
 
 ## References
 
-- [Fallback Release Flow Specification](./Infrastructure/references/fallback-flow-spec.md)
-- [Environment Verification Checklist](./Infrastructure/references/env-verification.md)
-- [Build Manifest Schema](./Infrastructure/references/manifest-schema.json)
-- [Incident Response Runbook](./Infrastructure/references/incident-runbook.md)
+- [Fallback Release Flow Specification](/docs/product/ops/fallback-release/references/fallback-flow-spec.md)
+- [Environment Verification Checklist](/docs/product/ops/fallback-release/references/env-verification.md)
+- [Build Manifest Schema](/docs/product/ops/fallback-release/references/manifest-schema.json)
+- [Incident Response Runbook](/docs/product/ops/fallback-release/references/incident-runbook.md)

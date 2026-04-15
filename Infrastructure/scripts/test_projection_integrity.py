@@ -286,7 +286,7 @@ class ProjectionIntegrityTests(unittest.TestCase):
     def test_verify_symlink_reports_missing_canonical_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            alias = repo_root / "utilities" / "plugin-builder"
+            alias = repo_root / "Skills" / "plugin-builder"
             alias.parent.mkdir(parents=True, exist_ok=True)
             alias.symlink_to("../Plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
 
@@ -310,7 +310,7 @@ class ProjectionIntegrityTests(unittest.TestCase):
             repo_root = Path(tmp)
             canonical = repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder"
             canonical.mkdir(parents=True, exist_ok=True)
-            alias = repo_root / "utilities" / "plugin-builder"
+            alias = repo_root / "Skills" / "plugin-builder"
             alias.mkdir(parents=True, exist_ok=True)
             (alias / "local-note.txt").write_text("keep me\n", encoding="utf-8")
 

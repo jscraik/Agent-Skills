@@ -139,6 +139,7 @@ export FALLBACK_ALERT_WEBHOOK="https://hooks.slack.com/services/xxx"
 ## 🚨 When NOT to Use Fallback
 
 Don't use fallback if:
+
 - Tests are failing (fix code first)
 - Version conflicts exist (resolve first)
 - Primary CI is healthy (wait for normal build)
@@ -146,16 +147,16 @@ Don't use fallback if:
 
 ## 📚 Full Documentation
 
-- [Complete Flow Specification](./fallback-flow-spec.md)
-- [Environment Verification](./env-verification.md)
-- [Incident Runbook](./incident-runbook.md)
-- [Build Manifest Schema](./manifest-schema.json)
+- [Complete Flow Specification](/docs/product/ops/fallback-release/references/fallback-flow-spec.md)
+- [Environment Verification](/docs/product/ops/fallback-release/references/env-verification.md)
+- [Incident Runbook](/docs/product/ops/fallback-release/references/incident-runbook.md)
+- [Build Manifest Schema](/docs/product/ops/fallback-release/references/manifest-schema.json)
 
 ## 🆘 Getting Help
 
 Stuck? Check these in order:
 
 1. Run `./Infrastructure/scripts/fallback-release/verify-env.sh` - it tells you what's wrong
-2. Check [Troubleshooting in env-verification.md](./env-verification.md#troubleshooting)
-3. Review [Incident Runbook](./incident-runbook.md)
+2. Check [Troubleshooting in env-verification.md](/docs/product/ops/fallback-release/references/env-verification.md#troubleshooting)
+3. Review [Incident Runbook](/docs/product/ops/fallback-release/references/incident-runbook.md)
 4. Ask in #releases or #incidents Slack channel

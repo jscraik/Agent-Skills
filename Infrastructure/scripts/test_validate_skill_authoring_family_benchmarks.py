@@ -37,9 +37,9 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skill-builder"
+            plugin_skill = root / "Plugins" / "skill-factory" / "skills" / "skill-builder"
             plugin_skill.mkdir(parents=True, exist_ok=True)
-            alias_parent = root / "utilities"
+            alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/skill-builder")
 
@@ -59,9 +59,9 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skill-builder"
+            plugin_skill = root / "Plugins" / "skill-factory" / "skills" / "skill-builder"
             plugin_skill.mkdir(parents=True, exist_ok=True)
-            alias_parent = root / "utilities"
+            alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/skill-builder")
 
@@ -103,7 +103,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            alias_parent = root / "utilities"
+            alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/skill-builder")
 
@@ -126,9 +126,9 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skillify"
+            plugin_skill = root / "Plugins" / "skill-factory" / "skills" / "skillify"
             plugin_skill.mkdir(parents=True, exist_ok=True)
-            alias_parent = root / "utilities"
+            alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skillify").symlink_to("../Plugins/skill-factory/skills/skillify")
 
@@ -145,9 +145,9 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            plugin_skill = root / "plugins" / "skill-factory" / "skills" / "skillify"
+            plugin_skill = root / "Plugins" / "skill-factory" / "skills" / "skillify"
             plugin_skill.mkdir(parents=True, exist_ok=True)
-            alias_parent = root / "utilities"
+            alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
             (alias_parent / "skillify").symlink_to("../Plugins/skill-factory/skills/skillify")
 

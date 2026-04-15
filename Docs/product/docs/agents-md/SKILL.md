@@ -50,7 +50,7 @@ Use this section as an adaptation guideline for generated AGENTS.md files, not r
 - Keep combined project guidance under the `project_doc_max_bytes` budget (32 KiB default) by splitting large guidance across nested scopes instead of bloating one root file.
 - **Instruction budget:** frontier thinking models can reliably follow ~150–200 instructions. Every token in `AGENTS.md` loads on every request regardless of relevance, so every instruction must earn its place.
 - **Minimum viable floor:** the root file needs only three things — a one-sentence project description, the package manager if not npm, and any non-standard build/typecheck commands. Everything else is a candidate for progressive disclosure.
-- **Staleness is poison:** avoid documenting file paths in `AGENTS.md`; they change constantly and agents read stale paths confidently. Describe capabilities and where things *might* be rather than hardcoding structure.
+- **Staleness is poison:** avoid documenting file paths in `AGENTS.md`; they change constantly and agents read stale paths confidently. Describe capabilities and where things _might_ be rather than hardcoding structure.
 - **Never auto-generate AGENTS.md files;** generated files flood the budget with generic instructions that hurt performance. Write them intentionally.
 - When harmonizing `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`, keep shared operational rules semantically aligned while respecting each tool's official instruction-file model and section conventions. For cross-tool coverage, a `ln -s AGENTS.md CLAUDE.md` symlink is a valid low-maintenance option when Claude Code is in scope.
 - Base commands, paths, and conventions on verified repo evidence only.
@@ -104,18 +104,20 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 Reference guidance for AGENTS.md templates — adapt before emitting; not runtime/operational instructions.
 
 Treat this as a template adaptation block. Runtime behavior is defined in:
-- [AGENTS.md](../../../AGENTS.md)
-- [CLAUDE.md](../../../CLAUDE.md)
-- [GEMINI.md](../../../GEMINI.md)
 
-Canonical shared guidance text lives in [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md). Keep this section as references, not duplicated runtime policy:
-- Testing → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#testing)
-- Git Workflow → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#git-workflow)
-- Configuration Files → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#configuration-files)
-- Code Review Fixes → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes)
-- Shell Scripting → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#shell-scripting)
-- Refactoring → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#refactoring)
-- Documentation → [Workflow and safety guidance](../../../Docs/agents/13-workflow-and-safety-guidance.md#documentation)
+- [AGENTS.md](/AGENTS.md)
+- [CLAUDE.md](/CLAUDE.md)
+- [GEMINI.md](/GEMINI.md)
+
+Canonical shared guidance text lives in [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md). Keep this section as references, not duplicated runtime policy:
+
+- Testing → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#testing)
+- Git Workflow → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#git-workflow)
+- Configuration Files → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#configuration-files)
+- Code Review Fixes → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes)
+- Shell Scripting → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#shell-scripting)
+- Refactoring → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#refactoring)
+- Documentation → [Workflow and safety guidance](/Docs/agents/13-workflow-and-safety-guidance.md#documentation)
 
 ## Deliverables
 
@@ -235,10 +237,10 @@ Use this section as an anti-pattern check when adapting or generating AGENTS.md 
 
 ### Monorepo scope table
 
-| Level | Content |
-|---|---|
-| **Root** | Monorepo purpose, how to navigate packages, shared tools (e.g. pnpm workspaces) |
-| **Package** | Package purpose, specific tech stack, package-specific conventions |
+| Level       | Content                                                                         |
+| ----------- | ------------------------------------------------------------------------------- |
+| **Root**    | Monorepo purpose, how to navigate packages, shared tools (e.g. pnpm workspaces) |
+| **Package** | Package purpose, specific tech stack, package-specific conventions              |
 
 Do not overload either level. The agent sees all merged AGENTS files. Keep each level scoped to what is only relevant at that depth.
 
@@ -268,11 +270,11 @@ Do not overload either level. The agent sees all merged AGENTS files. Keep each 
 
 ## See Also
 
-| Skill | When to use together |
-|---|---|
-| [[codex-home-audit]] | Audit the full Codex home dir after AGENTS.md refactors |
-| [[codex-agent-creator]] | Create agent roles that AGENTS.md will reference |
-| [[docs-expert]] | Apply docs polish and community-health guidance to AGENTS.md |
+| Skill                   | When to use together                                         |
+| ----------------------- | ------------------------------------------------------------ |
+| [[codex-home-audit]]    | Audit the full Codex home dir after AGENTS.md refactors      |
+| [[codex-agent-creator]] | Create agent roles that AGENTS.md will reference             |
+| [[docs-expert]]         | Apply docs polish and community-health guidance to AGENTS.md |
 
 **Topic map:** [[agent-ops]]
 

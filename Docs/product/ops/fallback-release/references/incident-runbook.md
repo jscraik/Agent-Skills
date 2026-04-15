@@ -5,6 +5,7 @@ Quick reference for responding to CI incidents requiring fallback release.
 ## Incident Severity Levels
 
 ### P1 - Critical (Immediate Fallback)
+
 - GitHub Actions major incident affecting all workflows
 - Security patch needed within 2 hours
 - Release blocking production incident
@@ -12,6 +13,7 @@ Quick reference for responding to CI incidents requiring fallback release.
 **Response:** Activate fallback immediately
 
 ### P2 - High (Consider Fallback)
+
 - Workflow queue time > 30 minutes
 - API rate limit < 10%
 - Minor GitHub incident affecting builds
@@ -19,6 +21,7 @@ Quick reference for responding to CI incidents requiring fallback release.
 **Response:** Wait 15 minutes, then activate fallback if not resolved
 
 ### P3 - Medium (Monitor)
+
 - Workflow queue time 15-30 minutes
 - API rate limit 10-25%
 - Degraded performance
@@ -28,11 +31,13 @@ Quick reference for responding to CI incidents requiring fallback release.
 ## Activation Checklist
 
 ### 1. Incident Declaration (2 minutes)
+
 - [ ] Verify GitHub Status page shows incident
 - [ ] Check #incidents Slack channel for existing thread
 - [ ] Post in #incidents: "Activating fallback release for [VERSION]"
 
 ### 2. Environment Verification (5 minutes)
+
 ```bash
 # Run automated verification
 ./Infrastructure/scripts/fallback-release/verify-env.sh
@@ -45,6 +50,7 @@ gh run list --workflow=release.yml --limit 5
 - [ ] Primary CI confirmed stuck
 
 ### 3. Build Activation (20 minutes)
+
 ```bash
 export FALLBACK_REASON="ci-queue-congestion"
 export INCIDENT_URL="https://www.githubstatus.com/incidents/xxx"
@@ -59,6 +65,7 @@ export INCIDENT_URL="https://www.githubstatus.com/incidents/xxx"
 - [ ] Artifacts generated
 
 ### 4. Artifact Signing (5 minutes)
+
 ```bash
 ./Infrastructure/scripts/fallback-release/sign-artifacts.sh ./fallback-artifacts
 ```
@@ -68,6 +75,7 @@ export INCIDENT_URL="https://www.githubstatus.com/incidents/xxx"
 - [ ] Signatures verified
 
 ### 5. Verification (10 minutes)
+
 ```bash
 ./Infrastructure/scripts/fallback-release/verify-artifacts.sh ./fallback-artifacts
 ./Infrastructure/scripts/fallback-release/test-installer.sh X.Y.Z ./fallback-artifacts
@@ -79,6 +87,7 @@ export INCIDENT_URL="https://www.githubstatus.com/incidents/xxx"
 - [ ] Installer test passed
 
 ### 6. Publication (5 minutes)
+
 ```bash
 ./Infrastructure/scripts/fallback-release/publish.sh X.Y.Z ./fallback-artifacts
 ```
@@ -88,6 +97,7 @@ export INCIDENT_URL="https://www.githubstatus.com/incidents/xxx"
 - [ ] GitHub release published
 
 ### 7. Communication (ongoing)
+
 - [ ] Update #incidents with completion
 - [ ] Notify #releases channel
 - [ ] Update status page if applicable
@@ -149,11 +159,13 @@ export INCIDENT_URL="https://www.githubstatus.com/incidents/xxx"
 ### When Primary CI Recovers
 
 1. **Sync Artifacts to Primary Registry**
+
    ```bash
    ./Infrastructure/scripts/fallback-release/sync-to-primary.sh X.Y.Z
    ```
 
 2. **Verify Artifact Parity**
+
    ```bash
    # Compare checksums
    diff <(curl -s $PRIMARY_URL/checksum.txt) <(curl -s $FALLBACK_URL/checksum.txt)
@@ -184,19 +196,19 @@ git tag -d vX.Y.Z
 
 ## Contact Information
 
-| Role | Contact | Escalation |
-|------|---------|------------|
-| Primary On-Call | #on-call | 15 min |
-| Release Engineer | #releases | 30 min |
-| Engineering Manager | @eng-manager | 1 hour |
-| VP Engineering | @vp-eng | 2 hours |
+| Role                | Contact      | Escalation |
+| ------------------- | ------------ | ---------- |
+| Primary On-Call     | #on-call     | 15 min     |
+| Release Engineer    | #releases    | 30 min     |
+| Engineering Manager | @eng-manager | 1 hour     |
+| VP Engineering      | @vp-eng      | 2 hours    |
 
 ## Reference Documents
 
-- [Fallback Flow Specification](./fallback-flow-spec.md)
-- [Environment Verification](./env-verification.md)
-- [Build Manifest Schema](./manifest-schema.json)
-- [Main SKILL.md](../SKILL.md)
+- [Fallback Flow Specification](/docs/product/ops/fallback-release/references/fallback-flow-spec.md)
+- [Environment Verification](/docs/product/ops/fallback-release/references/env-verification.md)
+- [Build Manifest Schema](/docs/product/ops/fallback-release/references/manifest-schema.json)
+- [Main SKILL.md](/docs/product/ops/fallback-release/SKILL.md)
 
 ## Post-Incident Template
 
@@ -209,9 +221,11 @@ git tag -d vX.Y.Z
 **Duration:** HH:MM
 
 ### Summary
+
 Brief description of the incident and resolution.
 
 ### Timeline
+
 - HH:MM - Incident detected
 - HH:MM - Fallback activated
 - HH:MM - Build started
@@ -221,17 +235,21 @@ Brief description of the incident and resolution.
 - HH:MM - Primary CI recovered
 
 ### Root Cause
+
 What caused the primary CI to fail?
 
 ### Impact
+
 - Release delayed by X minutes
 - Y customers affected
 - Z services waiting for deployment
 
 ### Lessons Learned
+
 What can we improve?
 
 ### Action Items
+
 - [ ] Item 1 (@owner, due date)
 - [ ] Item 2 (@owner, due date)
 ```

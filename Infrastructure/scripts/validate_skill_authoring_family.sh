@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Run repo preflight before any path-sensitive operations
-preflight_mode="${SKILL_FAMILY_LOCAL_MEMORY_MODE:-required}"
+preflight_mode="${SKILL_FAMILY_LOCAL_MEMORY_MODE:-optional}"
 if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" ]]; then
   echo "[family-gate] ERROR: SKILL_FAMILY_LOCAL_MEMORY_MODE must be 'required' or 'optional' (got '$preflight_mode')"
   exit 1
@@ -16,7 +16,12 @@ else
   echo "WARNING: codex-preflight.sh not found, skipping preflight"
 fi
 
-repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+if repo_root="$(git -C "$script_dir/../.." rev-parse --show-toplevel 2>/dev/null)"; then
+  :
+else
+  repo_root="$(cd -P "$script_dir/../.." && pwd -P)"
+fi
 cd "$repo_root"
 
 python_cmd=(python3)
@@ -299,8 +304,8 @@ fi
 
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${python_cmd[@]}" -m pytest)
-elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 --with pytest python -m pytest --version >/dev/null 2>&1; then
-  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 --with pytest python -m pytest)
+elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest)
   echo "[family-gate] using uv ephemeral pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
 fi
 

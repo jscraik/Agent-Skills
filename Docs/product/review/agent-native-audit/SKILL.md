@@ -7,9 +7,10 @@ metadata:
 
 # Agent-Native Audit
 
-Merged with preserved upstream audit guidance from `EveryInc/compound-engineering-plugin` at pinned ref `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`; see [`Infrastructure/artifacts/agent-native-audit-merge-import-2026-03-23.txt`](../../../Infrastructure/artifacts/agent-native-audit-merge-import-2026-03-23.txt) for provenance and hashes.
+Merged with preserved upstream audit guidance from `EveryInc/compound-engineering-plugin` at pinned ref `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`; see [`Infrastructure/artifacts/agent-native-audit-merge-import-2026-03-23.txt`](/Infrastructure/artifacts/agent-native-audit-merge-import-2026-03-23.txt) for provenance and hashes.
 
 ## Table of Contents
+
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
@@ -25,12 +26,14 @@ Merged with preserved upstream audit guidance from `EveryInc/compound-engineerin
 ## When to use
 
 Use this skill when:
+
 - a repo or feature needs an agent-native audit;
 - a workflow appears to rely on hidden human knowledge, UI-only actions, or undocumented setup;
 - you need a structured review of whether an agent can discover, execute, and verify a task safely.
 - you want a scored principle-by-principle agent-native review and remediation priorities.
 
 Do not use this skill when:
+
 - the user only wants a normal code review;
 - the task is a narrow bug fix with an already-known root cause;
 - the work is purely visual polish with no workflow or automation implications.
@@ -113,10 +116,10 @@ Do not use this skill when:
 
 ## See Also
 
-| Skill | When to use together |
-|---|---|
-| [[agents-md]] | Tighten repo instructions after finding discoverability gaps |
-| [[codex-home-audit]] | Audit the Codex home surface instead of a single repo |
-| [[gh-workflow]] | Land follow-up fixes through the GitHub workflow |
+| Skill                | When to use together                                         |
+| -------------------- | ------------------------------------------------------------ |
+| [[agents-md]]        | Tighten repo instructions after finding discoverability gaps |
+| [[codex-home-audit]] | Audit the Codex home surface instead of a single repo        |
+| [[gh-workflow]]      | Land follow-up fixes through the GitHub workflow             |
 
 **Topic map:** [[agent-ops]]

@@ -20,6 +20,7 @@ user goal
 ```
 
 ## Table of Contents
+
 - [When to use](#when-to-use)
 - [Constraints](#constraints)
 - [Philosophy](#philosophy)
@@ -32,30 +33,36 @@ user goal
 - [References](#references)
 
 ## When to use
+
 Use this skill when:
+
 - the user asks for critique or redesign of a product UI/UX surface
 - the user needs product judgment about hierarchy, flow ownership, or interaction clarity
 - trust, approvals, provenance, permissions, or reversibility must be surfaced in the decision flow
 - competitor teardown or pattern adaptation is needed with an explicit recommendation
 
 Do not use this skill when:
+
 - the request is pure visual polish with no product decision
 - the request is only backend implementation work
 - the user wants broad brainstorming without a recommendation
 
 ## Required inputs
+
 - user goal and job-to-be-done context
 - target surface or workflow description
 - critical constraints and risk tolerance when available
 - optional screenshots, competitor examples, and trust/governance requirements
 
 ## Deliverables
+
 - an opinionated critique or redesign recommendation using the required output pattern
 - explicit tradeoff call-outs and a chosen direction
 - trust/governance implications tied to decision points
 - adapted pattern references when competitor material is relevant
 
 ## Constraints
+
 - Redact secrets, credentials, and sensitive data by default.
 - Optimize for product clarity, trust, and momentum before craft polish.
 - Keep one dominant action per moment unless there is a strong reason not to.
@@ -66,6 +73,7 @@ Do not use this skill when:
 - Avoid sprawling recommendations; keep the critique focused and narrow.
 
 ## Philosophy
+
 - Optimize for clarity, momentum, trust, and legibility.
 - Prefer product judgment over generic brainstorming.
 - Say plainly when a design is confused, overloaded, or too clever.
@@ -76,6 +84,7 @@ Do not use this skill when:
 - Enable capable teams to execute quickly with explicit rationale and implementation-ready calls.
 
 ## Standards baseline (March 2026)
+
 Use official standards and system documentation as evidence anchors, especially for high-stakes flows.
 
 - Normative accessibility baseline: WCAG 2.2 and WAI-ARIA APG.
@@ -86,30 +95,35 @@ Use official standards and system documentation as evidence anchors, especially 
   - one normative source
   - one platform/system source
 
-Use [Infrastructure/references/gold-standards-2026.md](Infrastructure/references/gold-standards-2026.md) as the source of truth for links and usage notes.
+Use [Infrastructure/references/gold-standards-2026.md](/docs/product/strategy/product-design-critic/references/gold-standards-2026.md) as the source of truth for links and usage notes.
 
 ## Cognitive Load Lens
+
 Use this lens when the interface asks users to choose, compare, or decide under uncertainty.
 
 - Check whether the interface preserves a single clear focus per moment.
 - Check whether related choices are chunked into digestible groups instead of being dumped into one visual field.
 - Treat more than 4 simultaneous meaningful options at one decision point as a likely overload signal unless there is strong grouping and recommendation support.
 
-Reference: [Infrastructure/references/cognitive-load.md](Infrastructure/references/cognitive-load.md).
+Reference: [Infrastructure/references/cognitive-load.md](/docs/product/strategy/product-design-critic/references/cognitive-load.md).
 
 ## Persona Stress Test
+
 When critiquing an interface, pressure-test it through 2-3 relevant user lenses instead of relying on one generic observer voice.
 
-- Use the predefined personas in [Infrastructure/references/persona-stress-test.md](Infrastructure/references/persona-stress-test.md).
+- Use the predefined personas in [Infrastructure/references/persona-stress-test.md](/docs/product/strategy/product-design-critic/references/persona-stress-test.md).
 - Pick the personas that best match the interface type and risk profile.
 - Report concrete red flags for each chosen persona tied to the actual primary flow.
 - Use this as a probe for hidden failure modes, not as a substitute for the main recommendation.
 
 ## Use this skill to
+
 See `Infrastructure/references/compaction-context.md` for the expanded capability list.
 
 ## Workflow
+
 ### 1. Anchor on the job
+
 Start with the user's job, moment, and risk.
 
 - What is the user trying to get done right now
@@ -119,6 +133,7 @@ Start with the user's job, moment, and risk.
 If the design does not make the job easier, cleaner visuals do not save it.
 
 ### 2. Decide the owning surface
+
 Choose which surface should own the moment before discussing components.
 
 - Primary surface: where intent and action happen
@@ -126,11 +141,13 @@ Choose which surface should own the moment before discussing components.
 - Ambient signals: status, trust, and lightweight cues that should not interrupt flow
 
 For chat-native products, default to:
+
 - chat as the control plane
 - inline elements as in-flow action aids
 - side panels as reference, evidence, and durable context
 
 ### 3. Clarify hierarchy
+
 State what matters most in one glance.
 
 - What is the single primary action
@@ -141,6 +158,7 @@ State what matters most in one glance.
 If everything is competing, the design has not chosen yet.
 
 ### 4. Check cognitive load before adding polish
+
 Run a quick cognitive-load pass for the primary flow:
 
 - Are there more than 4 meaningful choices competing at once?
@@ -178,7 +196,7 @@ The quality of the edge states often determines whether the product feels seriou
 
 ### 7. Run a persona stress test
 
-Pick 2-3 relevant personas from [Infrastructure/references/persona-stress-test.md](Infrastructure/references/persona-stress-test.md) and walk the main flow through their lens.
+Pick 2-3 relevant personas from [Infrastructure/references/persona-stress-test.md](/docs/product/strategy/product-design-critic/references/persona-stress-test.md) and walk the main flow through their lens.
 
 - Use persona testing to expose friction for first-timers, power users, accessibility-dependent users, stress testers, or mobile users.
 - Report only concrete red flags that change the recommendation or sequencing.
@@ -291,7 +309,7 @@ Adapt depth and tradeoff framing by context:
 - Triggering prompt: "Our SOC2 reviewers flagged our admin approval flow because users cannot tell scope, actor, or rollback. Critique this and recommend a safer redesign."
 - Triggering prompt: "We are shipping a chat-based production change workflow next quarter. Decide what belongs in chat versus side panel and what trust signals must be inline."
 - Non-triggering prompt: "Implement the retry logic in this API client."
-See `Infrastructure/references/compaction-context.md` for additional trigger examples.
+  See `Infrastructure/references/compaction-context.md` for additional trigger examples.
 
 ## References
 
@@ -299,22 +317,28 @@ Use `Infrastructure/references/design-principles.md`, `Infrastructure/references
 Use `Infrastructure/references/compaction-context.md` for expanded cognitive-load checks and full feedback protocol detail.
 
 ## Success standard
+
 This skill succeeds when the next design decision becomes clearer, more opinionated, and more trustworthy, not just more visually refined.
 
 ## See Also
-| Skill | When to use together |
-|---|---|
-| [[product-spec]] | Critique the product surface after speccing, before build |
-| [[brainstorming]] | Explore design alternatives before critical review |
-| [[interview-me]] | Run a requirements interview before critiquing the surface |
-| [[visual-explainer]] | Present critique findings as a visual explainer page |
+
+| Skill                | When to use together                                       |
+| -------------------- | ---------------------------------------------------------- |
+| [[product-spec]]     | Critique the product surface after speccing, before build  |
+| [[brainstorming]]    | Explore design alternatives before critical review         |
+| [[interview-me]]     | Run a requirements interview before critiquing the surface |
+| [[visual-explainer]] | Present critique findings as a visual explainer page       |
 
 **Topic map:** [[product-strategy]]
+
 <!-- decision-feedback-protocol:v2 -->
+
 - If post-run feedback capture is enabled, emit `post_run_feedback` via `request_user_input` and persist with `python3 Infrastructure/scripts/record_skill_feedback.py`.
 
 ## Gotchas
+
 - Capture recurring failures as symptom -> cause -> do instead -> check.
 
 ## Failure mode
+
 - If the product surface, user goal, or evaluation frame is unclear, stop, surface the missing context, and fall back to a smaller critique slice rather than inventing product requirements.
