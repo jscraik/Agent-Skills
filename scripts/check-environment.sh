@@ -419,6 +419,7 @@ if [[ "$runner_succeeded" -eq 0 ]]; then
 	echo "     Requires auth for the private package:"
 	echo "     - Local shell: export NPM_TOKEN=<token>"
 	echo "     - GitHub Actions: add repository secret NPM_TOKEN and map it to workflow env"
+	# shellcheck disable=SC2016
 	echo '       env: NPM_TOKEN: ${{ secrets.NPM_TOKEN }}'
 	echo "  2) Point to a known-good local CLI build:"
 	echo "     export CODING_HARNESS_CLI_PATH=\"$HOME/dev/coding-harness/dist/cli.js\""

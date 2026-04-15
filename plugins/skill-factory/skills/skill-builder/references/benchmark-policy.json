@@ -166,7 +166,6 @@
     "product_domain": {
       "description": "Product domain and integration-specific skills outside core app clusters",
       "include_prefixes": [
-        "product/domain/arscontexta",
         "product/domain/oak-api"
       ]
     },

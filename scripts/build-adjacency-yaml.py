@@ -15,7 +15,6 @@ CANONICAL_PREFIXES = {
     "frontend/",
     "github/",
     "interview/",
-    "plugins/arscontexta/skills/",
     "plugins/coderabbit/skills/",
     "plugins/harness-engineering/skills/",
     "plugins/plugin-factory/skills/",

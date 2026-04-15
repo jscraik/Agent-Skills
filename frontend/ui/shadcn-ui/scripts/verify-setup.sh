@@ -2,7 +2,7 @@
 # shadcn/ui Setup Verification Script
 # Validates that a project is correctly configured for shadcn/ui
 
-set -e
+set -euo pipefail
 
 usage() {
     cat <<'TXT'

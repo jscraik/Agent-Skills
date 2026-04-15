@@ -56,16 +56,30 @@ if [ -z "$selection_policy_shell" ]; then
   exit 1
 fi
 eval "$selection_policy_shell"
-plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
+# Safely handle empty arrays under bash 3.x where ${arr[@]} with set -u
+# fails when the array is empty.  Re-parse the variable line from the eval output.
+_visible_line="$(printf '%s\n' "$selection_policy_shell" | grep '^SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS=')"
+_inner="${_visible_line#SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS=(}"
+_inner="${_inner%)}"
+# shellcheck disable=SC2206
+if [[ -n "$_inner" ]]; then
+  plugin_visible_router_skills=($_inner)
+else
+  plugin_visible_router_skills=()
+fi
 
 is_allowlisted_overlap_skill_name() {
   local skill_name="$1"
-  case " ${plugin_visible_router_skills[*]} " in
-    *" $skill_name "*) return 0 ;;
-  esac
-  case " ${system_bridge_skill_names[*]} " in
-    *" $skill_name "*) return 0 ;;
-  esac
+  local _rv_list=""
+  # plugin_visible_router_skills may be empty; build space-separated string safely.
+  _rv_list="${plugin_visible_router_skills[*]:-}"
+  if [[ -n "$_rv_list" ]] && [[ " $_rv_list " == *" $skill_name "* ]]; then
+    return 0
+  fi
+  _rv_list="${system_bridge_skill_names[*]:-}"
+  if [[ -n "$_rv_list" ]] && [[ " $_rv_list " == *" $skill_name "* ]]; then
+    return 0
+  fi
   return 1
 }
 
@@ -87,7 +101,9 @@ fi
 
 system_bridge_skill_names=()
 if [ -s "$system_bridge_names_file" ]; then
-  mapfile -t system_bridge_skill_names < "$system_bridge_names_file"
+  while IFS= read -r line; do
+    system_bridge_skill_names+=("$line")
+  done < "$system_bridge_names_file"
 fi
 
 find -L plugins -type f -path '*/skills/*/SKILL.md' 2>/dev/null \

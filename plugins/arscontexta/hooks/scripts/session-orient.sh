@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ars Contexta — Session Orientation Hook
 # Injects workspace structure, identity, methodology, and maintenance signals at session start.
 # Also handles session tracking (capture moved here from Stop hook — fires once per session).
+
+set -euo pipefail
 
 # Only run in Ars Contexta vaults
 GUARD_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -115,15 +117,15 @@ if [ -f self/identity.md ]; then
 fi
 
 # Learned behavioral patterns (recent methodology notes)
-for f in $(ls -t ops/methodology/*.md 2>/dev/null | head -5); do
+for f in $(find ops/methodology -maxdepth 1 -name '*.md' -not -name 'README.md' 2>/dev/null | sort -r | head -5); do
   head -3 "$f"
 done
 
 # Condition-based maintenance signals
-OBS_COUNT=$(ls -1 ops/observations/*.md 2>/dev/null | wc -l | tr -d ' ')
-TENS_COUNT=$(ls -1 ops/tensions/*.md 2>/dev/null | wc -l | tr -d ' ')
-SESS_COUNT=$(ls -1 ops/sessions/*.json 2>/dev/null | grep -cv current 2>/dev/null || echo 0)
-INBOX_COUNT=$(ls -1 inbox/*.md 2>/dev/null | wc -l | tr -d ' ')
+OBS_COUNT=$(find ops/observations -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+TENS_COUNT=$(find ops/tensions -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+SESS_COUNT=$(find ops/sessions -maxdepth 1 -name '*.json' -not -name 'current.json' 2>/dev/null | wc -l | tr -d ' ')
+INBOX_COUNT=$(find inbox -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "$OBS_COUNT" -ge 10 ]; then
   echo "CONDITION: $OBS_COUNT pending observations. Consider /rethink."
@@ -147,7 +149,7 @@ fi
 # Methodology staleness check (Rule Zero)
 if [ -d ops/methodology ] && [ -f ops/config.yaml ]; then
   CONFIG_MTIME=$(stat -f %m ops/config.yaml 2>/dev/null || stat -c %Y ops/config.yaml 2>/dev/null || echo 0)
-  NEWEST_METH=$(ls -t ops/methodology/*.md 2>/dev/null | head -1)
+  NEWEST_METH=$(find ops/methodology -maxdepth 1 -name '*.md' -not -name 'README.md' -print0 2>/dev/null | xargs -0 stat -f '%m %N' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
   if [ -n "$NEWEST_METH" ]; then
     METH_MTIME=$(stat -f %m "$NEWEST_METH" 2>/dev/null || stat -c %Y "$NEWEST_METH" 2>/dev/null || echo 0)
     DAYS_STALE=$(( (CONFIG_MTIME - METH_MTIME) / 86400 ))

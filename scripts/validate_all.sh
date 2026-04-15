@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Consolidated validation runner - one command to check everything
-set -u
+set -euo pipefail
 
 usage() {
   cat <<'EOF'
@@ -152,6 +152,7 @@ run_check required skill-types "🏷️  Linting semantic skill-type tags..." ba
 run_check required openai-format "🧩 Linting OpenAI skill format..." bash scripts/lint_openai_skill_format.sh --mode strict
 run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash scripts/lint_progressive_disclosure.sh --mode strict
 run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash scripts/validate_skill_authoring_family.sh
+run_check required skill-graph-profiles "🕸️  Validating skill graph profile contracts..." "${python_cmd[@]}" plugins/skill-factory/skills/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0 --profile-index-out "$run_dir/skill-graph-profile-index.json" --wave-readiness-out "$run_dir/skill-graph-wave-readiness.json"
 run_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" scripts/gotcha_pipeline.py validate
 selection_contract_cmd=("${python_cmd[@]}" scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
 if [[ "$output_mode" == "persistent" ]]; then
@@ -230,7 +231,7 @@ fi
 run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" scripts/validate_runtime_separation_manifest.py --strict
 run_check required runtime-separation-consumers "🧪 Scanning runtime-separation consumer inventories..." "${runtime_consumer_scan_cmd[@]}"
 run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
-run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." "${python_cmd[@]}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current"
+run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." env RECURSIVE_VALIDATION_GUARD=1 "${python_cmd[@]}" scripts/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
 run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash scripts/verify_wrapper_contract_fixtures.sh --runtime-separation
 run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
 run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash scripts/verify_runtime_separation_writer_mutations.sh --strict

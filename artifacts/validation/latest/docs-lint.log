@@ -1,2 +1,2 @@
-docs-lint mode=block scanned_files=148 errors=0 warnings=1
+docs-lint mode=block scanned_files=150 errors=0 warnings=1
 WARNING docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md:300 vague-file-reference - Potential vague file reference; use an explicit path.

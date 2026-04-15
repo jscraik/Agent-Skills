@@ -39,7 +39,7 @@ agentation:
   visual-explainer: Turn the integration state machine or failure path into a visual
     handoff artifact
 agents-md:
-  codex-agent-builder: Create agent roles that AGENTS.md will reference
+  codex-agent-creator: Create agent roles that AGENTS.md will reference
   codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
   docs-expert: Apply docs polish and community-health guidance to AGENTS.md
 alignment-checkpoint:
@@ -53,15 +53,19 @@ architecture-interview:
   diagram-cli: Generate architecture diagrams from ADR decisions
   product-spec: Produce a detailed spec after the architecture is decided
   security-threat-model: Run a threat model alongside architecture decisions
-  writing-plans: Convert ADR output into an implementation plan
+  ce-plan: Convert ADR output into an implementation plan
 atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
   openai-docs: Reference official ChatGPT documentation for Atlas features
+autoresearch:
+  skill-creator: Create or reshape a single skill package before entering a loop
+  plugin-builder: Harden or validate one plugin package outside a research loop
+  code-review: Run an adversarial review pass on the final diff before accepting loop outcomes
 backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
-  writing-plans: Plan backend extensions before implementing
+  ce-plan: Plan backend extensions before implementing
 baseline-ui:
   design-system: Apply design tokens that baseline-ui validates
   fixing-accessibility: Fix accessibility issues found during baseline-ui checks
@@ -207,7 +211,7 @@ coderabbit:
   context7: Cross-check third-party library docs when CodeRabbit guidance references
     external tools
   gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
-codex-agent-builder:
+codex-agent-creator:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
     agents
@@ -215,7 +219,7 @@ codex-agent-builder:
     or automation first
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
-  codex-agent-builder: Create the agent role the automation will run under
+  codex-agent-creator: Create the agent role the automation will run under
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
@@ -226,7 +230,7 @@ codex-home-audit:
   skill-refactor: Run a skill health scan alongside the home audit
   verification-before-completion: Verify fixes before marking the audit complete
 codex-hooks-builder:
-  codex-agent-builder: Create or update agent roles that the hooks should invoke or
+  codex-agent-creator: Create or update agent roles that the hooks should invoke or
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
@@ -365,9 +369,11 @@ interview-me:
     clarifying interview
   product-spec: Turn the clarified outcome into a fuller product-planning specification
 llm-wiki:
-  context7: Ground library and framework references used in wiki entries
-  docs-expert: Improve authored wiki docs to repo-quality documentation standards
-  project-brain: Connect wiki summaries to persistent project memory workflows
+  context7: Pull current external API/library docs to enrich wiki source material
+  docs-expert: Improve surrounding repository docs and runbooks once the wiki workflow
+    is chosen
+  project-brain: Operate project memory systems when the ask is broader than a single
+    wiki pattern
 markdown-converter:
   docs-expert: Polish converted docs to meet repository quality standards
   notebooklm: Feed converted markdown to NotebookLM for analysis
@@ -417,7 +423,7 @@ openai-docs:
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
-  codex-agent-builder: Create or update the agent roles that the orchestration plan
+  codex-agent-creator: Create or update the agent roles that the orchestration plan
     needs
   resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
     general subagent orchestration
@@ -483,11 +489,6 @@ project-improver:
   ce-plan: Convert approved improvements into an execution-ready plan
   product-spec: Produce a revised spec after high-leverage improvements are identified
   security-threat-model: Include security improvements in the improvement scope
-rclone:
-  1password: Inject remote credentials or secrets safely into the runtime
-  feature-video: Upload generated demo artifacts after rendering or capture
-  video-transcript-downloader: Transfer downloaded media or transcripts to long-term
-    storage
 react-components:
   baseline-ui: Validate converted components against baseline UI rules
   design-system: Align converted components with the design-system token layer
@@ -575,14 +576,14 @@ simplify:
   code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
     fix work
 skill-builder:
-  codex-agent-builder: Reuse existing agent TOMLs or create role-specific custom agents
+  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
   decide-build-primitive: Decide whether the capability should be a skill, prompt,
     or agent before authoring it
   skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
     instead of authoring doctrine alone
 skill-creator:
-  codex-agent-builder: Create or update custom agents when skill workflows need dedicated
+  codex-agent-creator: Create or update custom agents when skill workflows need dedicated
     role files
   skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
     packages
@@ -713,15 +714,6 @@ visual-explainer:
     final explainer
   slides: Use a presentation deck instead of a scrollable HTML explainer when the
     format fits better
-writing-plans:
-  brainstorming: Use first when scope is still ambiguous — resolve approach before
-    planning steps
-  ce-plan: Canonical owner of both generic and CE execution-planning behavior
-  interview-me: Use when requirements need discovery before routing to `ce-plan`
-  product-spec: Use for product-level specs before routing to `ce-plan`
-  systematic-debugging: When 3+ fix attempts fail, restart with this skill to re-plan
-    the approach
-  verification-before-completion: Embed in the plan's final task to gate "done" claims
 youtube-hooks-scripts:
   notebooklm: Use NotebookLM to generate audio overviews from scripts
   product-spec: Spec the content series before scripting individual videos

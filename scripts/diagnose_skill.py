@@ -265,18 +265,21 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
         return results
 
     results.append(DiagnosticResult("skill directory", "pass", f"Found at {skill_dir.relative_to(REPO_ROOT)}"))
+    resolved_skill_name = skill_dir.name
 
     # Run checks
     results.append(check_skill_md(skill_dir))
     results.append(check_nested_git(skill_dir))
-    results.append(check_symlink(skill_name, CODEX_SKILLS, "codex"))
-    results.append(check_symlink(skill_name, CLAUDE_SKILLS, "claude"))
-    results.append(check_symlink(skill_name, AGENTS_SKILLS, "agents"))
-    results.append(check_symlink(skill_name, ANTIGRAVITY_SKILLS, "antigravity", allow_real_dir=True))
-    results.append(check_symlink(skill_name, GEMINI_SKILLS, "gemini", allow_real_dir=True))
-    results.append(check_symlink(skill_name, LEGACY_ANTIGRAVITY_SKILLS, "legacy-antigravity", allow_real_dir=True))
+    # Skill audits may be invoked with a path argument (for example, utilities/my-skill).
+    # Symlink/index checks must always use the canonical skill directory name.
+    results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+    results.append(check_symlink(resolved_skill_name, CLAUDE_SKILLS, "claude"))
+    results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+    results.append(check_symlink(resolved_skill_name, ANTIGRAVITY_SKILLS, "antigravity", allow_real_dir=True))
+    results.append(check_symlink(resolved_skill_name, GEMINI_SKILLS, "gemini", allow_real_dir=True))
+    results.append(check_symlink(resolved_skill_name, LEGACY_ANTIGRAVITY_SKILLS, "legacy-antigravity", allow_real_dir=True))
     results.append(check_antigravity_skills_txt())
-    results.append(check_skill_index(skill_name))
+    results.append(check_skill_index(resolved_skill_name))
     results.append(check_task_profile(skill_dir))
     results.append(check_lifecycle_readiness(skill_dir))
 

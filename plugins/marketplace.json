@@ -5,21 +5,6 @@
   },
   "plugins": [
     {
-      "name": "arscontexta",
-      "source": {
-        "source": "local",
-        "path": "./plugins/arscontexta"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL",
-        "products": [
-          "CODEX"
-        ]
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "coderabbit",
       "source": {
         "source": "local",

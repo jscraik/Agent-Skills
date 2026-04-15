@@ -32,7 +32,7 @@ Use the helper scripts based on the task:
 When install requests include role wiring for the newly installed skill:
 
 1. Look for reusable role TOMLs in `./configs/codex/agents/` when present, then fall back to project/global `.codex/agents/`.
-2. If no suitable role exists, route role creation to [[codex-agent-builder]].
+2. If no suitable role exists, route role creation to [[codex-agent-creator]].
 3. Validate candidate role files before reporting success:
 
 ```bash
@@ -160,7 +160,7 @@ python3 scripts/install-skill-from-github.py --url https://github.com/<owner>/<r
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from canonical repo category directories (default `github/`).
-- For dedicated role creation during install handoff, use [[codex-agent-builder]].
+- For dedicated role creation during install handoff, use [[codex-agent-creator]].
 
 ## See Also
 

@@ -1,5 +1,5 @@
 ---
-name: codex-agent-builder
+name: codex-agent-creator
 description: Create, install, and validate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
 metadata:
   skill-type: scaffolding_templates
@@ -7,7 +7,7 @@ metadata:
   maturity: canonical
   owner: Agent Skills Team
   review_cadence: quarterly
-  last_reviewed: 2026-04-12
+  last_reviewed: 2026-04-14
   metadata_source: frontmatter
 ---
 
@@ -28,6 +28,7 @@ metadata:
 - Agent name and short description.
 - Model and reasoning profile.
 - Desired developer instructions.
+- Desired execution posture when non-default behavior is needed (approval policy, sandbox mode, and network setting).
 - Scope (default `global`; `project` only when explicitly requested):
   - `--scope global`: installs to `~/dev/configs/codex/agents/<name>/<name>.toml` and updates `~/dev/configs/codex/config.toml`
   - `--scope project`: installs to `${project_root}/.codex/agents/<name>/<name>.toml` and only updates or creates `${project_root}/.codex/config.toml` when runtime limits are supplied or when `--allow-project-config-write` is explicitly provided; otherwise the installer does not mutate project config
@@ -72,8 +73,9 @@ metadata:
 ### 5) Upstream alignment checkpoint
 - Verify current Codex guidance from OpenAI docs before recommending config keys (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`, `model_reasoning_effort`).
 - Verify current `openai/codex` release track before stating "latest" release details.
+- Verify the current `config-schema.json` path and deprecation notes (for example `experimental_instructions_file` -> `model_instructions_file`) before migration advice.
 - Use the local fork (`~/dev/codex`) to confirm role-loader behavior (discovery from each config-layer `agents/` directory and standalone role validation requirements).
-- Record the checked sources in the delivery summary and route deep details to `references/upstream-alignment-2026-04-12.md`.
+- Record checked sources with absolute dates in the delivery summary and route deep details to `references/upstream-alignment-2026-04-14.md`.
 
 ## Scope focus guardrails
 - Start with the **smallest viable package boundary**: one custom agent file and one validation pass.
@@ -141,7 +143,7 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 
 ## References
 - Policy references: `references/role-config-reference.md`, `references/contract.yaml`, `references/evals.yaml`, `references/task-profile.json`, `references/discovery-interview.md`.
-- Upstream alignment snapshot: `references/upstream-alignment-2026-04-12.md`.
+- Upstream alignment snapshot: `references/upstream-alignment-2026-04-14.md`.
 - Scripts: `scripts/write_role_config.sh`, `scripts/install_role.sh`, `scripts/validate_role.sh`.
 - Compatibility and governance notes in `references/task-profile.json`.
 

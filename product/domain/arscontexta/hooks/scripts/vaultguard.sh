@@ -1,10 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ars Contexta — Vault Guard
 # Checks if the current directory is an Ars Contexta vault.
 # Called by all hooks to skip execution in non-vault repos.
 #
 # Exit 0 = vault detected (safe to proceed)
 # Exit 1 = not a vault (caller should exit)
+
+set -euo pipefail
 
 MARKER=".arscontexta"
 

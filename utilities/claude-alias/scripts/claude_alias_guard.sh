@@ -10,7 +10,7 @@ case "${MODE}" in
     ;;
 esac
 
-CONFIG_ROOT="${CLAUDE_CONFIG_ROOT:-${HOME}/dev/config}"
+CONFIG_ROOT="${CLAUDE_CONFIG_ROOT:-${HOME}/dev/configs}"
 CLAUDE_DIR="${CONFIG_ROOT}/claude"
 CANON_ALIAS="${CLAUDE_DIR}/bin/claude-aliases.sh"
 CANON_KIMI_SETTINGS="${CLAUDE_DIR}/kimi_settings.json"
@@ -20,6 +20,7 @@ TARGET_ALIAS="${HOME}/.claude/claude-aliases.sh"
 TARGET_KIMI_SETTINGS="${HOME}/.claude/kimi_settings.json"
 TARGET_ZAI_SETTINGS="${HOME}/.claude/zai_settings.json"
 ZSHRC="${HOME}/.zshrc"
+# shellcheck disable=SC2016
 SOURCE_LINE='[ -f "$HOME/.claude/claude-aliases.sh" ] && source "$HOME/.claude/claude-aliases.sh"'
 
 checks_run=0
@@ -92,9 +93,9 @@ check_zshrc_source_line() {
   fi
 
   if [[ "${count}" == "1" ]]; then
-    pass "~/.zshrc has one claude-aliases source line"
+    pass "\$HOME/.zshrc has one claude-aliases source line"
   else
-    fail "~/.zshrc has ${count} claude-aliases source lines (expected 1)"
+    fail "\$HOME/.zshrc has ${count} claude-aliases source lines (expected 1)"
   fi
 }
 
@@ -315,30 +316,47 @@ run_checks() {
   require_file "${CANON_KIMI_SETTINGS}" "Canonical Kimi settings"
   require_file "${CANON_ZAI_SETTINGS}" "Canonical Z.AI settings"
 
-  check_symlink_target "${TARGET_ALIAS}" "${CANON_ALIAS}" "~/.claude/claude-aliases.sh"
-  check_symlink_target "${TARGET_KIMI_SETTINGS}" "${CANON_KIMI_SETTINGS}" "~/.claude/kimi_settings.json"
-  check_symlink_target "${TARGET_ZAI_SETTINGS}" "${CANON_ZAI_SETTINGS}" "~/.claude/zai_settings.json"
+  # shellcheck disable=SC2016
+  check_symlink_target "${TARGET_ALIAS}" "${CANON_ALIAS}" '$HOME/.claude/claude-aliases.sh'
+  # shellcheck disable=SC2016
+  check_symlink_target "${TARGET_KIMI_SETTINGS}" "${CANON_KIMI_SETTINGS}" '$HOME/.claude/kimi_settings.json'
+  # shellcheck disable=SC2016
+  check_symlink_target "${TARGET_ZAI_SETTINGS}" "${CANON_ZAI_SETTINGS}" '$HOME/.claude/zai_settings.json'
 
   check_zshrc_source_line
 
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'ck() {' 'ck function exists'
   check_contains "${CANON_ALIAS}" 'claude-kimi --dangerously-skip-permissions "$@"' 'ck routes to claude-kimi'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'cz() {' 'cz function exists'
   check_contains "${CANON_ALIAS}" 'claude-zai --dangerously-skip-permissions "$@"' 'cz routes to claude-zai'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'cc() {' 'cc function exists'
   check_contains "${CANON_ALIAS}" 'claude --dangerously-skip-permissions "$@"' 'cc routes to claude'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'command claude --bare --settings "$CLAUDE_KIMI_SETTINGS" "${args[@]}"' 'Kimi launches in API-key-only mode (--bare)'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'command claude --bare --settings "$CLAUDE_ZAI_SETTINGS" "${args[@]}"' 'Z.AI launches in API-key-only mode (--bare)'
   check_contains "${CANON_ALIAS}" 'CLAUDE_CONFIG_DIR CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC ENABLE_TOOL_SEARCH' 'claude() clears provider-only env vars'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" '_claude_clear_oauth_file "${HOME}/.claude_kimi/.claude.json"' 'OAuth scrub covers Kimi config dir'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" '_claude_clear_oauth_file "${HOME}/.claude_zai/.claude.json"' 'OAuth scrub covers Z.AI config dir'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'kimi_model="${KIMI_MODEL:-kimi-for-coding}"' 'Kimi model default is pinned'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'zai_model="${ZAI_MODEL:-glm-5.1}"' 'Z.AI model default is pinned'
+  # shellcheck disable=SC2016
   check_contains "${CANON_ALIAS}" 'if [[ -n "${BASH_VERSION:-}" ]]; then' 'bash export guard is nounset-safe'
 
+  # shellcheck disable=SC2016
   check_json_expr "${CANON_KIMI_SETTINGS}" '.env.ANTHROPIC_MODEL == "kimi-for-coding" and .env.ANTHROPIC_DEFAULT_SONNET_MODEL == "kimi-for-coding" and .env.CLAUDE_CODE_SUBAGENT_MODEL == "kimi-for-coding"' 'Kimi settings model pins are correct'
+  # shellcheck disable=SC2016
   check_json_expr "${CANON_ZAI_SETTINGS}" '.env.ANTHROPIC_MODEL == "glm-5.1" and .env.ANTHROPIC_DEFAULT_SONNET_MODEL == "glm-4.7" and .env.ANTHROPIC_DEFAULT_HAIKU_MODEL == "glm-4.5-air"' 'Z.AI settings model pins are correct'
+  # shellcheck disable=SC2016
   check_json_expr "${CANON_KIMI_SETTINGS}" '([(.env // {})[] | strings | select(test("\\$\\{"))] | length) == 0' 'Kimi settings do not contain ${VAR} placeholders'
+  # shellcheck disable=SC2016
   check_json_expr "${CANON_ZAI_SETTINGS}" '([(.env // {})[] | strings | select(test("\\$\\{"))] | length) == 0' 'Z.AI settings do not contain ${VAR} placeholders'
 }
 

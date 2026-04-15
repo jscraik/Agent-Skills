@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ars Contexta — Config Reader
 # Reads values from .arscontexta vault marker (which doubles as config).
 # Usage: read_config.sh <key> [default]
@@ -7,6 +7,8 @@
 #
 # Migration: old marker files (cat face text) have no YAML keys,
 # so grep returns nothing → defaults apply → behaviour unchanged.
+
+set -euo pipefail
 
 KEY="$1"
 DEFAULT="${2:-true}"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Fallback Release Build Script
 # Creates deterministic, reproducible builds with full provenance
 
@@ -111,6 +111,7 @@ echo "[4/8] Creating build manifest..."
 # Handle optional incident_url: use null if empty/unset
 if [[ -n "${INCIDENT_URL:-}" ]]; then
     incident_url_arg="--arg incident_url \"$INCIDENT_URL\""
+    # shellcheck disable=SC2016
     incident_url_json='$incident_url'
 else
     incident_url_arg=""
@@ -118,6 +119,7 @@ else
 fi
 
 # Build manifest with jq for proper JSON escaping
+# shellcheck disable=SC2086
 jq -n \
     --arg schema_version "1.0.0" \
     --arg build_id "$BUILD_ID" \

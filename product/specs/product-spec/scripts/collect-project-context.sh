@@ -40,10 +40,12 @@ mkdir -p "$OUT_DIR"
 
 OUT_FILE="$OUT_DIR/context.md"
 
-echo "# Project Context Pack" > "$OUT_FILE"
-echo "" >> "$OUT_FILE"
-echo "**Generated:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$OUT_FILE"
-echo "" >> "$OUT_FILE"
+{
+  echo "# Project Context Pack"
+  echo ""
+  echo "**Generated:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  echo ""
+} > "$OUT_FILE"
 
 if command -v git >/dev/null 2>&1 && [[ -d .git ]]; then
   {
@@ -64,6 +66,7 @@ if command -v git >/dev/null 2>&1 && [[ -d .git ]]; then
   } >> "$OUT_FILE"
 fi
 
+# shellcheck disable=SC2012,SC2129
 {
   echo "## Repo structure (top-level)"
   echo ""

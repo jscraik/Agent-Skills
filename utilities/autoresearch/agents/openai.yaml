@@ -1,5 +1,7 @@
 interface:
   display_name: "Autoresearch"
   short_description: "Iterative skill and plugin improvement loops"
+  icon_small: ./assets/icon-small.svg
+  icon_large: ./assets/icon-large.svg
   brand_color: "#0F766E"
   default_prompt: "Use $autoresearch to run a bounded improvement loop on selected skills or plugins."

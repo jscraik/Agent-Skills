@@ -19,9 +19,19 @@ bash utilities/autoresearch/scripts/init_run.sh --tag <run-tag> --targets "<path
    - Targets under `plugins/cache/**` are rejected.
    - Run output must stay under `artifacts/autoresearch/`.
 
+Fixed-iteration rule:
+- If the user asks for an exact number of loops (for example, "do five loops"), set the stop condition to that exact iteration cap.
+- Record one result row per loop and stop immediately after the final requested loop unless a blocker triggers earlier stop.
+
 ## Baseline matrix
 
 Run the relevant baseline checks before any edits.
+
+Baseline policy:
+- Run at least one unmodified baseline pass before iteration changes.
+- Log the baseline as `iteration=0`, `decision=keep` when gates pass.
+- If a required baseline command cannot run, log `iteration=0` as `blocked` and record the exact blocker.
+- Treat baseline score as the required `start_score` for final reporting.
 
 ### Skill targets
 
@@ -33,16 +43,42 @@ python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py <sk
 ### Plugin targets
 
 ```bash
+./bin/ask plugins doctor --robot
 ./bin/ask plugins harden <plugin-path> --robot
 ```
 
 ### Broad or mixed edits
 
 ```bash
-bash scripts/verify-work.sh --fast
+bash scripts/verify-work.sh
 ```
 
 Record outcomes in `journal.md`.
+
+## Hypothesis prioritization
+
+Pick the next hypothesis from observed evidence in this order:
+
+1. Command-contract drift (for example wrong wrapper flags) that makes validation non-reproducible.
+2. Strict skill/plugin hardening warnings that weaken safety or routing quality.
+3. Deterministic eval coverage gaps in common trigger lanes.
+4. Structural simplification and doc polish after gates are stable.
+
+When two candidates are tied, pick the smaller diff with clearer keep/discard attribution.
+
+## Workspace drift guard
+
+Before and after each iteration, capture:
+
+```bash
+git status --short
+```
+
+Only keep an iteration when changed paths are attributable to:
+- the active target path(s), and
+- `artifacts/autoresearch/<run-tag>-<timestamp>/`.
+
+If unrelated paths appear, classify the iteration as `blocked` until drift is isolated or explicitly approved.
 
 ## Iteration loop
 
@@ -51,6 +87,7 @@ For each iteration:
 1. Write one hypothesis in `journal.md`.
 2. Make one bounded change set.
 3. Run mandatory validations for affected targets.
+   - If a required command exceeds the agreed runtime cap (recommended: 10 minutes), stop it and classify the iteration as `blocked`.
 4. Compute score and choose decision:
    - `keep`: gates pass and score improves, or equal score with lower complexity.
    - `discard`: score regresses or complexity tradeoff is not justified.
@@ -73,8 +110,9 @@ python3 utilities/autoresearch/scripts/log_result.py \
 
 - Skill quick validate pass: `+1`
 - Skill strict audit pass: `+2`
+- Plugin doctor pass: `+1`
 - Plugin harden pass: `+2`
-- Repo fast verification pass: `+1` (when executed)
+- Repo verification wrapper pass: `+1` (when executed)
 - Any failed mandatory gate: force `discard` for that iteration.
 
 Use the rubric consistently, but prioritize correctness over raw score.
@@ -92,6 +130,7 @@ Use the rubric consistently, but prioritize correctness over raw score.
 - Stop condition reached.
 - Results log is complete for all attempted iterations.
 - Final summary includes:
+  - start score, end score, and delta,
   - kept/discarded counts,
   - biggest gains,
   - blocked steps,

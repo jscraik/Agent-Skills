@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Download Stitch screen asset with proper handling of Google Cloud Storage URLs
 # Usage: ./download-stitch-asset.sh "https://storage.googleapis.com/..." "output-path.png"

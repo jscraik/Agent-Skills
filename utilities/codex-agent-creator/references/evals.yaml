@@ -42,7 +42,7 @@ cases:
   - name: create-minimal-custom-agent
     id: create-minimal-custom-agent
     category: happy
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
     prompt: "Can you create a global custom agent named researcher with model gpt-5.4-mini, medium reasoning, and read-only research instructions?"
@@ -57,6 +57,9 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Please create a custom agent, but I don't care which model, reasoning, description, or instructions to use."
+    deterministic_checks:
+      forbidden_commands:
+        - "write_role_config.sh --output /tmp/role.toml --agent-name unspecified --model gpt-5.4-mini --reasoning medium"
     acceptance:
       - type: regex
         value: "(?i)(need|missing|required|model|reasoning|description|developer instructions)"
@@ -75,7 +78,7 @@ cases:
   - name: advanced-custom-agent-with-restrictions
     id: advanced-custom-agent-with-restrictions
     category: happy
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
     prompt: "Can you create a global custom agent with workspace-write sandbox, no network, and restricted writable roots in the canonical configs/codex location?"
@@ -86,7 +89,7 @@ cases:
   - name: global-agent-limits
     id: global-agent-limits
     category: happy
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
     prompt: "Please install a worker custom agent and set max threads to 6, max depth to 1, and CSV job runtime to 1200 seconds."
@@ -108,7 +111,7 @@ cases:
   - name: allow-nickname-candidates
     id: allow-nickname-candidates
     category: happy
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
     prompt: "Please install a researcher custom agent with nickname candidates Researcher and Archivist so spawned agents can show friendly labels."
@@ -174,6 +177,9 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Install globally into ~/.codex/agents and ~/.codex/config.toml with no explicit override flags."
+    deterministic_checks:
+      forbidden_commands:
+        - "install_role.sh --scope global --agents-dir ~/.codex/agents/researcher --config ~/.codex/config.toml --agent-name researcher --agent-file /tmp/researcher.toml"
     acceptance:
       - type: regex
         value: "(?i)(refusing non-canonical|canonical path|allow-noncanonical-global-paths)"

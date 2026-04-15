@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from pathlib import Path
 
 HEADER = (
@@ -62,6 +63,17 @@ def main() -> int:
     parser.add_argument("--change-summary", required=True)
     parser.add_argument("--validation-evidence", required=True)
     args = parser.parse_args()
+
+    if args.iteration < 0:
+        raise SystemExit("--iteration must be >= 0")
+    if not math.isfinite(args.score):
+        raise SystemExit("--score must be a finite number")
+    if args.score < 0 or args.score > 10:
+        raise SystemExit("--score must be between 0 and 10")
+    if args.decision == "blocked" and args.status != "blocked":
+        raise SystemExit("blocked decision requires --status blocked")
+    if args.decision in {"keep", "discard"} and args.status == "blocked":
+        raise SystemExit("blocked status requires --decision blocked")
 
     repo_root = Path(__file__).resolve().parents[3]
     allowed_root = (repo_root / "artifacts" / "autoresearch").resolve()

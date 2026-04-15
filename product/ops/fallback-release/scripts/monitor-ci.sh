@@ -1,10 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Monitor CI health and alert when fallback may be needed
 # Run this as a cron job every 5 minutes
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo '.')"
 ALERT_WEBHOOK="${FALLBACK_ALERT_WEBHOOK:-}"
 LOG_FILE="${FALLBACK_MONITOR_LOG:-/tmp/fallback-monitor.log}"

@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recursive Skill Graph State Map</title>
+  <style>
+    :root {
+      --bg:#071522; --panel:#10273c; --border:#2b5272; --text:#e9f3ff; --muted:#a9c4dd;
+      --ok:#31c48d; --warn:#f6c24d; --bad:#ff8277; --info:#69abff; --neutral:#8da6c4;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Avenir Next","Segoe UI",sans-serif; background:linear-gradient(180deg,#0a1f33,#071522); color:var(--text); }
+    .wrap { max-width:1800px; margin:0 auto; padding:20px; }
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:14px; }
+    .grid4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .grid2 { display:grid; grid-template-columns:2fr 1fr; gap:14px; }
+    .toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+    .toggle-btn { border:1px solid var(--border); background:#17314a; color:var(--text); border-radius:999px; padding:5px 10px; cursor:pointer; font-size:0.78rem; }
+    .toggle-btn.active { border-color:var(--ok); }
+    .card { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:10px; }
+    .muted { color:var(--muted); }
+    .small { font-size:0.75rem; }
+    .clusters { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:10px; }
+    .clusters.mode-core .slice-extended,.clusters.mode-core .slice-system { display:none; }
+    .clusters.mode-full .slice-system { display:none; }
+    .skill-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; }
+    .skill-node { border:1px solid var(--border); border-radius:10px; padding:8px; background:#0c2032; }
+    .skill-node h4 { margin:2px 0 4px; font-size:0.84rem; word-break:break-word; }
+    .glyph { position:relative; width:34px; height:34px; margin-bottom:6px; }
+    .halo,.core,.corner,.badge { position:absolute; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); }
+    .halo { inset:0; border-radius:999px; }
+    .core { width:var(--node-size,20px); height:var(--node-size,20px); max-width:24px; max-height:24px; left:50%; top:50%; transform:translate(-50%,-50%); border-radius:999px; background:rgba(141,166,196,0.28); }
+    .corner { right:-1px; top:-1px; width:11px; height:11px; border-radius:0 9px 0 9px; }
+    .badge { right:-6px; bottom:-6px; width:16px; height:16px; border-radius:999px; font-size:0.58rem; font-weight:700; }
+    .chips { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0; }
+    .chip { border:1px solid var(--border); border-radius:999px; padding:1px 6px; font-size:0.63rem; }
+    .wave-ready { border-color:var(--ok); }
+    .wave-blocked { border-color:var(--bad); }
+    .mode-manual .core { background:rgba(246,194,77,0.25); }
+    .mode-co-pilot .core { background:rgba(105,171,255,0.25); }
+    .mode-autopilot .core { background:rgba(49,196,141,0.25); }
+    .halo-passed .halo { border-color:var(--ok); }
+    .halo-failed .halo,.halo-escalated .halo,.halo-aborted .halo { border-color:var(--bad); }
+    .halo-no_recent_run_data .halo { border-color:var(--neutral); }
+    .parity-compliant .corner { background:rgba(49,196,141,0.35); }
+    .parity-missing_mandatory .corner { background:rgba(255,130,119,0.35); }
+    .parity-legacy_partial .corner { background:rgba(246,194,77,0.35); }
+    .parity-empty .corner { background:rgba(141,166,196,0.35); }
+    .badge-approved .badge { border-color:var(--ok); }
+    .badge-draft .badge { border-color:var(--info); }
+    .badge-candidate .badge { border-color:var(--warn); }
+    .badge-rejected .badge { border-color:var(--bad); }
+    table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+    th,td { border-bottom:1px solid var(--border); text-align:left; padding:7px; vertical-align:top; }
+    code { background:rgba(255,255,255,0.08); border-radius:4px; padding:1px 4px; }
+    @media (max-width:1200px) { .grid4 { grid-template-columns:repeat(2,minmax(0,1fr)); } .grid2 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Recursive Skill Graph State Map</h1>
+    <p class="muted">Generated at 2026-04-13T21:01:28Z. This view intentionally separates readiness, controls, run/compliance, and learning/change lanes.</p>
+
+    <section class="panel">
+      <h2>1) Global program strip</h2>
+      <div class="grid4">
+        <article class="card">
+          <h3>Controls</h3>
+          <ul>
+            <li>rollout-mode: <strong>active</strong> (raw: <code>active</code>)</li>
+            <li>kill-switch: <strong>inactive</strong> (raw: <code>off</code>)</li>
+            <li>rollback-required: <strong>inactive</strong> (raw: <code>off</code>)</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Readiness</h3>
+          <ul>
+            <li>wave-0-controls: <strong>blocked</strong></li>
+            <li>wave-1-manual: <strong>blocked</strong></li>
+            <li>wave-2-co-pilot: <strong>blocked</strong></li>
+          </ul>
+          <p class="muted">active=74, manual=9, co-pilot=65, valid=74, invalid=0</p>
+        </article>
+        <article class="card">
+          <h3>Operational health</h3>
+          <ul>
+            <li>shadow decision: <strong>HOLD</strong></li>
+            <li>daily-health decision: <strong>HOLD</strong></li>
+            <li>window: <code>2026-04-07..2026-04-13</code></li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Promotion</h3>
+          <ul>
+            <li>status: <strong>ok</strong></li>
+            <li>approved: <strong>1</strong></li>
+            <li>draft: <strong>57</strong></li>
+            <li>failed: <strong>0</strong></li>
+          </ul>
+        </article>
+      </div>
+      <details>
+        <summary>Artifact timestamps</summary>
+        <table>
+          <thead><tr><th>artifact</th><th>path</th><th>generated_at</th><th>mtime (UTC)</th></tr></thead>
+          <tbody><tr><td>profile-index</td><td><code>artifacts/skill-graphs/onboarding/profile-index.json</code></td><td>2026-04-13T20:58:38Z</td><td>2026-04-13T20:58:38Z</td></tr><tr><td>wave-readiness</td><td><code>artifacts/skill-graphs/onboarding/wave-readiness.json</code></td><td>2026-04-13T20:58:38Z</td><td>2026-04-13T20:58:38Z</td></tr><tr><td>shadow-dashboard</td><td><code>artifacts/skill-graphs/pilot/shadow-dashboard.json</code></td><td>2026-04-13T08:19:21Z</td><td>2026-04-13T16:56:10Z</td></tr><tr><td>daily-health</td><td><code>docs/skill-graphs/telemetry/daily-skill-health.md</code></td><td>2026-04-13T08:19:21Z</td><td>2026-04-13T16:56:10Z</td></tr><tr><td>promotion-validation</td><td><code>artifacts/skill-graphs/pilot/promotion-validation-report.json</code></td><td>unknown</td><td>2026-03-08T01:16:40Z</td></tr><tr><td>parity-manifest</td><td><code>artifacts/skill-graphs/pilot/artifact-parity-manifest.json</code></td><td>2026-04-13T19:11:15Z</td><td>2026-04-13T19:11:15Z</td></tr><tr><td>inventory-policy</td><td><code>docs/skill-graphs/governance/inventory-policy.json</code></td><td>n/a</td><td>2026-04-11T18:21:58Z</td></tr></tbody>
+        </table>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>2) Skill state map</h2>
+      <div class="toolbar">
+        <button id="view-core" class="toggle-btn active" type="button">Core View (70)</button>
+        <button id="view-full" class="toggle-btn" type="button">Full View (114)</button>
+      </div>
+      <div id="skill-clusters" class="clusters mode-core">
+        
+<article class="card cluster-card slice-core">
+  <h3>auth</h3>
+  <p class="muted small">skills=2</p>
+  <div class="skill-grid">
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>auth/best-practices</h4>
+  <p class="muted">auth-best-practices | auth</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>auth/create-auth</h4>
+  <p class="muted">auth-create-auth | auth</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-core">
+  <h3>backend</h3>
+  <p class="muted small">skills=3</p>
+  <div class="skill-grid">
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>backend/backend-engineer</h4>
+  <p class="muted">backend-backend-engineer | backend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>backend/cli-spec</h4>
+  <p class="muted">backend-cli-spec | backend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>backend/mcp-builder</h4>
+  <p class="muted">backend-mcp-builder | backend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-core">
+  <h3>frontend</h3>
+  <p class="muted small">skills=17</p>
+  <div class="skill-grid">
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/graphics/better-icons</h4>
+  <p class="muted">frontend-graphics-better-icons | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/graphics/favicon-generator</h4>
+  <p class="muted">frontend-graphics-favicon-generator | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/graphics/nano-banana-builder</h4>
+  <p class="muted">frontend-graphics-nano-banana-builder | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/graphics/og-image-creator</h4>
+  <p class="muted">frontend-graphics-og-image-creator | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/graphics/sora</h4>
+  <p class="muted">frontend-graphics-sora | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/graphics/threejs-builder</h4>
+  <p class="muted">frontend-graphics-threejs-builder | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/stitch-react-components</h4>
+  <p class="muted">frontend-stitch-react-components | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/tools/agentation</h4>
+  <p class="muted">frontend-tools-agentation | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/tools/stitch-loop</h4>
+  <p class="muted">frontend-tools-stitch-loop | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/ui/design-system</h4>
+  <p class="muted">frontend-ui-design-system | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-escalated parity-missing_mandatory badge-draft slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">D</span>
+  </div>
+  <h4>frontend/ui/frontend-ui-design</h4>
+  <p class="muted">frontend-ui-frontend-ui-design | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">missing_mandatory</span></p>
+  <p class="muted small">recent: escalated (run_20260413T081920967414Z_50ef7d_91bf024)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-passed parity-missing_mandatory badge-draft slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">D</span>
+  </div>
+  <h4>frontend/ui/react-ui-patterns</h4>
+  <p class="muted">frontend-ui-react-ui-patterns | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">missing_mandatory</span></p>
+  <p class="muted small">recent: passed (run_20260413T081921414441Z_f93d59_9201174)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/ui/remotion</h4>
+  <p class="muted">frontend-ui-remotion | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/ui/shadcn-ui</h4>
+  <p class="muted">frontend-ui-shadcn-ui | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/ui/stitch-remotion</h4>
+  <p class="muted">frontend-ui-stitch-remotion | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-escalated parity-missing_mandatory badge-draft slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">D</span>
+  </div>
+  <h4>frontend/ui/ui-ux-creative-coding</h4>
+  <p class="muted">frontend-ui-ui-ux-creative-coding | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">missing_mandatory</span></p>
+  <p class="muted small">recent: escalated (run_20260413T081920731856Z_04dd5b_916d06e)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>frontend/ui/ui-visual-regression</h4>
+  <p class="muted">frontend-ui-ui-visual-regression | frontend</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-core">
+  <h3>github</h3>
+  <p class="muted small">skills=1</p>
+  <div class="skill-grid">
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>github/gh-workflow</h4>
+  <p class="muted">github-gh-workflow | github</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-extended">
+  <h3>interview</h3>
+  <p class="muted small">skills=3</p>
+  <div class="skill-grid">
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>interview/architecture-interview</h4>
+  <p class="muted">interview-architecture-interview | interview</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>interview/deep-interview</h4>
+  <p class="muted">interview-deep-interview | interview</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>interview/interview-me</h4>
+  <p class="muted">interview-interview-me | interview</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-extended">
+  <h3>product</h3>
+  <p class="muted small">skills=25</p>
+  <div class="skill-grid">
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/content/video-transcript-downloader</h4>
+  <p class="muted">product-content-video-transcript-downloader | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/content/youtube-hooks-scripts</h4>
+  <p class="muted">product-content-youtube-hooks-scripts | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/content/youtube-titles-thumbnails</h4>
+  <p class="muted">product-content-youtube-titles-thumbnails | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/docs/agents-md</h4>
+  <p class="muted">product-docs-agents-md | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/docs/context7</h4>
+  <p class="muted">product-docs-context7 | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/docs/docs-expert</h4>
+  <p class="muted">product-docs-docs-expert | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/domain/oak-api</h4>
+  <p class="muted">product-domain-oak-api | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-brainstorm</h4>
+  <p class="muted">product-ops-ce-brainstorm | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-compound</h4>
+  <p class="muted">product-ops-ce-compound | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-compound-refresh</h4>
+  <p class="muted">product-ops-ce-compound-refresh | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-deepen-plan</h4>
+  <p class="muted">product-ops-ce-deepen-plan | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-deepen-spec</h4>
+  <p class="muted">product-ops-ce-deepen-spec | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-ideate</h4>
+  <p class="muted">product-ops-ce-ideate | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-plan</h4>
+  <p class="muted">product-ops-ce-plan | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-review</h4>
+  <p class="muted">product-ops-ce-review | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-spec</h4>
+  <p class="muted">product-ops-ce-spec | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-technical-review</h4>
+  <p class="muted">product-ops-ce-technical-review | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/ce-work</h4>
+  <p class="muted">product-ops-ce-work | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/decide-build-primitive</h4>
+  <p class="muted">product-ops-decide-build-primitive | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/ops/release</h4>
+  <p class="muted">product-ops-release | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/security/security-best-practices</h4>
+  <p class="muted">product-security-security-best-practices | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/security/security-ownership-map</h4>
+  <p class="muted">product-security-security-ownership-map | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/security/security-threat-model</h4>
+  <p class="muted">product-security-security-threat-model | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/specs/product-spec</h4>
+  <p class="muted">product-specs-product-spec | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>product/strategy/brainstorming</h4>
+  <p class="muted">product-strategy-brainstorming | product</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-extended">
+  <h3>skills-system</h3>
+  <p class="muted small">skills=1</p>
+  <div class="skill-grid">
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-extended" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>skills-system/imagegen</h4>
+  <p class="muted">skills-system-imagegen | skills-system</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+<article class="card cluster-card slice-core">
+  <h3>utilities</h3>
+  <p class="muted small">skills=22</p>
+  <div class="skill-grid">
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/1password</h4>
+  <p class="muted">utilities-1password | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/agent-browser</h4>
+  <p class="muted">utilities-agent-browser | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/alignment-checkpoint</h4>
+  <p class="muted">utilities-alignment-checkpoint | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/atlas</h4>
+  <p class="muted">utilities-atlas | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/beautiful-mermaid</h4>
+  <p class="muted">utilities-beautiful-mermaid | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/bootstrap</h4>
+  <p class="muted">utilities-bootstrap | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/codex-agent-creator</h4>
+  <p class="muted">utilities-codex-agent-creator | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/codex-automation-architect</h4>
+  <p class="muted">utilities-codex-automation-architect | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/codex-home-audit</h4>
+  <p class="muted">utilities-codex-home-audit | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/fix-mise</h4>
+  <p class="muted">utilities-fix-mise | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/insight-report</h4>
+  <p class="muted">utilities-insight-report | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/markdown-converter</h4>
+  <p class="muted">utilities-markdown-converter | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/notebooklm</h4>
+  <p class="muted">utilities-notebooklm | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/process-watch</h4>
+  <p class="muted">utilities-process-watch | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/recon-workbench</h4>
+  <p class="muted">utilities-recon-workbench | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/repoprompt</h4>
+  <p class="muted">utilities-repoprompt | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/systematic-debugging</h4>
+  <p class="muted">utilities-systematic-debugging | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/test-driven-development</h4>
+  <p class="muted">utilities-test-driven-development | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/using-git-worktrees</h4>
+  <p class="muted">utilities-using-git-worktrees | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-manual halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/verification-before-completion</h4>
+  <p class="muted">utilities-verification-before-completion | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-1-manual</span> <span class="chip">manual</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/visual-explainer</h4>
+  <p class="muted">utilities-visual-explainer | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+
+<article class="skill-node mode-co-pilot halo-no_recent_run_data parity-empty badge-none slice-core" style="--node-size:18px">
+  <div class="glyph">
+    <span class="halo"></span>
+    <span class="core"></span>
+    <span class="corner"></span>
+    <span class="badge">N</span>
+  </div>
+  <h4>utilities/writing-plans</h4>
+  <p class="muted">utilities-writing-plans | utilities</p>
+  <p class="chips"><span class="chip wave-blocked">wave-2-co-pilot</span> <span class="chip">co-pilot</span> <span class="chip">empty</span></p>
+  <p class="muted small">recent: no_recent_run_data (n/a)</p>
+</article>
+</div>
+</article>
+
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>3) Run / compliance lane</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>run_id</th><th>profile_id</th><th>scope_skill</th><th>terminal_status</th><th>stop_reason</th>
+            <th>iterations</th><th>quality_uplift</th><th>non_regression</th><th>capture</th><th>confidence</th>
+            <th>injected</th><th>parity</th><th>promotion</th><th>queue_reason</th><th>finished_at</th>
+          </tr>
+        </thead>
+        <tbody><tr><td><code>run_20260413T081921163303Z_c6442d_91e82bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.158</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-13T08:19:21Z</td></tr><tr><td><code>run_20260413T081921414441Z_f93d59_9201174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.172</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-13T08:19:21Z</td></tr><tr><td><code>run_20260413T081920417414Z_4270e1_90f80eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.179</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-13T08:19:20Z</td></tr><tr><td><code>run_20260413T081920519358Z_cbb8d4_911c4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.046</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-13T08:19:20Z</td></tr><tr><td><code>run_20260413T081920625530Z_5b4309_914fa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.064</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-13T08:19:20Z</td></tr><tr><td><code>run_20260413T081920731856Z_04dd5b_916d06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td>1</td><td>0.113</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-13T08:19:20Z</td></tr><tr><td><code>run_20260413T081920845569Z_1c1272_919ad51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td>4</td><td>0.249</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-13T08:19:20Z</td></tr><tr><td><code>run_20260413T081920967414Z_50ef7d_91bf024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td>5</td><td>0.278</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-13T08:19:20Z</td></tr><tr><td><code>run_20260412T064420106973Z_50ef7d_925f024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td>5</td><td>0.278</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-12T06:44:20Z</td></tr><tr><td><code>run_20260412T064420226688Z_c6442d_92882bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.158</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-12T06:44:20Z</td></tr><tr><td><code>run_20260412T064420341042Z_f93d59_92a1174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.172</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-12T06:44:20Z</td></tr><tr><td><code>run_20260412T064419504123Z_4270e1_91980eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.179</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-12T06:44:19Z</td></tr><tr><td><code>run_20260412T064419624036Z_cbb8d4_91bc4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.046</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-12T06:44:19Z</td></tr><tr><td><code>run_20260412T064419747082Z_5b4309_91efa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.064</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-12T06:44:19Z</td></tr><tr><td><code>run_20260412T064419865434Z_04dd5b_920d06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td>1</td><td>0.113</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-12T06:44:19Z</td></tr><tr><td><code>run_20260412T064419988886Z_1c1272_923ad51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td>4</td><td>0.249</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-12T06:44:19Z</td></tr><tr><td><code>run_20260411T063348089335Z_1c1272_91ead51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td>4</td><td>0.249</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-11T06:33:48Z</td></tr><tr><td><code>run_20260411T063348205332Z_50ef7d_920f024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td>5</td><td>0.278</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-11T06:33:48Z</td></tr><tr><td><code>run_20260411T063348323211Z_c6442d_92382bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.158</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-11T06:33:48Z</td></tr><tr><td><code>run_20260411T063348436763Z_f93d59_9251174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.172</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-11T06:33:48Z</td></tr><tr><td><code>run_20260411T063347630118Z_4270e1_91480eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.179</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-11T06:33:47Z</td></tr><tr><td><code>run_20260411T063347744899Z_cbb8d4_916c4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.046</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-11T06:33:47Z</td></tr><tr><td><code>run_20260411T063347860332Z_5b4309_919fa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.064</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-11T06:33:47Z</td></tr><tr><td><code>run_20260411T063347973328Z_04dd5b_91bd06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td>1</td><td>0.113</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-11T06:33:47Z</td></tr><tr><td><code>run_20260410T065025010349Z_5b4309_916fa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.064</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-10T06:50:25Z</td></tr><tr><td><code>run_20260410T065025126723Z_04dd5b_918d06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td>1</td><td>0.113</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-10T06:50:25Z</td></tr><tr><td><code>run_20260410T065025246860Z_1c1272_91bad51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td>4</td><td>0.249</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-10T06:50:25Z</td></tr><tr><td><code>run_20260410T065025360237Z_50ef7d_91df024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td>5</td><td>0.278</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-10T06:50:25Z</td></tr><tr><td><code>run_20260410T065025474543Z_c6442d_92082bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.158</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-10T06:50:25Z</td></tr><tr><td><code>run_20260410T065025587352Z_f93d59_9221174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.172</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-10T06:50:25Z</td></tr><tr><td><code>run_20260410T065024768042Z_4270e1_91180eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.179</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-10T06:50:24Z</td></tr><tr><td><code>run_20260410T065024889084Z_cbb8d4_913c4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.046</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-10T06:50:24Z</td></tr><tr><td><code>run_20260409T064532056345Z_cbb8d4_919c4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.046</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064532169749Z_5b4309_91cfa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.064</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064532279715Z_04dd5b_91ed06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td>1</td><td>0.113</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064532394104Z_1c1272_921ad51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td>4</td><td>0.249</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064532504568Z_50ef7d_923f024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td>5</td><td>0.278</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064532619060Z_c6442d_92682bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.158</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064532730733Z_f93d59_9291174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.172</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-09T06:45:32Z</td></tr><tr><td><code>run_20260409T064531946744Z_4270e1_91780eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.179</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-09T06:45:31Z</td></tr><tr><td><code>run_20260408T064527014926Z_50ef7d_946f024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td>5</td><td>0.278</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-08T06:45:27Z</td></tr><tr><td><code>run_20260408T064527137168Z_c6442d_94982bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.158</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-08T06:45:27Z</td></tr><tr><td><code>run_20260408T064527254102Z_f93d59_94b1174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td>2</td><td>0.172</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-08T06:45:27Z</td></tr><tr><td><code>run_20260408T064526421324Z_4270e1_93980eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.179</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-08T06:45:26Z</td></tr><tr><td><code>run_20260408T064526538395Z_cbb8d4_93bc4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.046</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-08T06:45:26Z</td></tr><tr><td><code>run_20260408T064526656356Z_5b4309_93efa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td>2</td><td>0.064</td><td>False</td><td>True</td><td>low</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-08T06:45:26Z</td></tr><tr><td><code>run_20260408T064526774193Z_04dd5b_940d06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td>1</td><td>0.113</td><td>True</td><td>True</td><td>medium</td><td>0</td><td>missing_mandatory</td><td>draft</td><td>non_passing_run</td><td>2026-04-08T06:45:26Z</td></tr><tr><td><code>run_20260408T064526894446Z_1c1272_943ad51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td>4</td><td>0.249</td><td>False</td><td>True</td><td>low</td><td>1</td><td>missing_mandatory</td><td>draft</td><td>unknown</td><td>2026-04-08T06:45:26Z</td></tr><tr><td><code>run_20260407T064405056266Z_04dd5b_8e4d06e</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>escalated</td><td>evaluator_conflict</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:05Z</td></tr><tr><td><code>run_20260407T064405159287Z_1c1272_8e7ad51</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:05Z</td></tr><tr><td><code>run_20260407T064405259532Z_50ef7d_8e9f024</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>escalated</td><td>evaluator_conflict</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:05Z</td></tr><tr><td><code>run_20260407T064405363942Z_c6442d_8ec82bd</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:05Z</td></tr><tr><td><code>run_20260407T064405465228Z_f93d59_8ee1174</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:05Z</td></tr><tr><td><code>run_20260407T064404758172Z_4270e1_8dc80eb</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:04Z</td></tr><tr><td><code>run_20260407T064404855416Z_cbb8d4_8dec4e9</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:04Z</td></tr><tr><td><code>run_20260407T064404953569Z_5b4309_8e1fa81</code></td><td>interface-craft</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-04-07T06:44:04Z</td></tr><tr><td><code>run_20260220T195545Z_8799c2</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>draft</td><td>none</td><td>2026-02-20T19:55:45Z</td></tr><tr><td><code>run_20260220T150021Z_518880</code></td><td>interface-craft</td><td>interface-craft</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>approved</td><td>none</td><td>2026-02-20T15:00:21Z</td></tr><tr><td><code>run_20260220T150021Z_82ecf7</code></td><td>react-ui-patterns</td><td>frontend/ui/react-ui-patterns</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>none</td><td>none</td><td>2026-02-20T15:00:21Z</td></tr><tr><td><code>run_20260220T150021Z_9b592b</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>none</td><td>none</td><td>2026-02-20T15:00:21Z</td></tr><tr><td><code>run_20260220T150021Z_bb9acb</code></td><td>frontend-ui-design</td><td>frontend/ui/frontend-ui-design</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>none</td><td>none</td><td>2026-02-20T15:00:21Z</td></tr><tr><td><code>run_20260220T144736Z_425b7a</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>none</td><td>none</td><td>2026-02-20T14:47:36Z</td></tr><tr><td><code>run_20260220T144710Z_425b7a</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>passed</td><td>pass</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>none</td><td>none</td><td>2026-02-20T14:47:10Z</td></tr><tr><td><code>run_20260220T144703Z_425b7a</code></td><td>ui-ux-creative-coding</td><td>frontend/ui/ui-ux-creative-coding</td><td>failed</td><td>budget_exhausted</td><td></td><td></td><td></td><td></td><td></td><td></td><td>missing_mandatory</td><td>none</td><td>none</td><td>2026-02-20T14:47:03Z</td></tr><tr><td><code>run_001</code></td><td>interview-interview-me</td><td>interview/interview-me</td><td>passed</td><td>approval_granted</td><td></td><td></td><td></td><td></td><td></td><td></td><td>legacy_partial</td><td>none</td><td>none</td><td></td></tr><tr><td><code>run_002</code></td><td>interview-interview-me</td><td>interview/interview-me</td><td>passed</td><td>approval_granted</td><td></td><td></td><td></td><td></td><td></td><td></td><td>legacy_partial</td><td>none</td><td>none</td><td></td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>4) Learning / change lane</h2>
+      <div class="grid2">
+        <article class="card">
+          <h3>Candidate pressure</h3>
+          <table>
+            <thead><tr><th>candidate_id</th><th>skill</th><th>composite_score</th><th>window_count</th><th>decision_reason</th></tr></thead>
+            <tbody><tr><td colspan='5' class='muted'>No candidates.jsonl rows found.</td></tr></tbody>
+          </table>
+        </article>
+        <article class="card">
+          <h3>Queue bottlenecks</h3>
+          <ul><li><code>unknown</code>: <strong>36</strong></li></ul>
+          <p class="muted small">source-state semantics: missing vs empty vs present are preserved by source existence checks.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const clusters = document.getElementById("skill-clusters");
+      const coreBtn = document.getElementById("view-core");
+      const fullBtn = document.getElementById("view-full");
+      if (!clusters || !coreBtn || !fullBtn) return;
+      function setMode(mode) {
+        clusters.classList.remove("mode-core", "mode-full");
+        clusters.classList.add(mode === "full" ? "mode-full" : "mode-core");
+        coreBtn.classList.toggle("active", mode !== "full");
+        fullBtn.classList.toggle("active", mode === "full");
+      }
+      coreBtn.addEventListener("click", () => setMode("core"));
+      fullBtn.addEventListener("click", () => setMode("full"));
+      setMode("core");
+    })();
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: Improve and validate Codex skill quality using automated audits and comparative hardening loops. Use when hardening skill routing, workflows, and safety before release, or when packaging validated standalone skills for distribution, rather than for first-draft scaffolding or pure installation.
+description: Analyze and harden Codex skills and plugin packages for contract quality, eval coverage, and safety compliance. Use this skill when an existing package is approaching release and needs evidence-backed validation.
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active

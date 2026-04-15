@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Codex Agent Creator icon">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f4fff" />
+      <stop offset="100%" stop-color="#00a5ff" />
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="92" fill="url(#g)" />
+  <path d="M154 166h96v42h-54v54h42v42h-42v54h56v42h-98V166zm162 0h42v192h-42V166zm-24 192h110v42H292v-42z" fill="#fff"/>
+</svg>

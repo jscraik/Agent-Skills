@@ -41,7 +41,6 @@ covers:
 
 ## Knowledge Systems
 
-- [[arscontexta]] — Install, validate, or maintain Ars Contexta knowledge management system in Codex; mirrors skills/prompts/agents.
 - [[notebooklm]] — Manage, analyze, and generate NotebookLM workflows for notebook management and audio overview generation.
 - [[context7]] — Extract current library documentation via Context7 for up-to-date API details and versioning.
 
@@ -56,7 +55,7 @@ covers:
 
 - New feature idea → [[brainstorming]] → [[interview-me]] → [[product-spec]] → [[ce-plan]].
 - Improve existing project → [[project-improver]] → [[deep-interview]] → [[architecture-interview]] → [[ce-plan]].
-- Research and document → [[context7]] / [[notebooklm]] → [[docs-expert]] →  [[arscontexta]].
+- Research and document → [[context7]] / [[notebooklm]] → [[docs-expert]].
 
 ## Cross-links
 

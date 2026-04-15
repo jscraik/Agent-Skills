@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-13T20:23:51Z",
+  "decision_date": "2026-04-13",
+  "summary": {
+    "active_skill_count": 74,
+    "manual_skill_count": 9,
+    "co_pilot_skill_count": 65,
+    "profile_valid_count": 74,
+    "profile_invalid_count": 0,
+    "event_envelope_errors": 40,
+    "event_envelope_errors_total": 40,
+    "event_envelope_errors_waived": 0,
+    "event_envelope_errors_unresolved": 40,
+    "approver_count": 2,
+    "telemetry_generated_at": "2026-04-13T08:19:21Z",
+    "telemetry_window_start": "2026-04-07",
+    "telemetry_window_end": "2026-04-13",
+    "telemetry_freshness_ok": true,
+    "triage_summary": [
+      {
+        "wave": "wave-0-controls",
+        "code": "EVENT_ENVELOPE_ERRORS",
+        "owner": "telemetry-ops",
+        "due_date": "2026-04-13",
+        "escalation_date": "2026-04-15",
+        "acceptance": "pending"
+      },
+      {
+        "wave": "wave-1-manual",
+        "code": "WAVE0_NOT_READY",
+        "owner": "release-coordination",
+        "due_date": "2026-04-14",
+        "escalation_date": "2026-04-16",
+        "acceptance": "pending"
+      },
+      {
+        "wave": "wave-2-co-pilot",
+        "code": "WAVE1_NOT_READY",
+        "owner": "release-coordination",
+        "due_date": "2026-04-15",
+        "escalation_date": "2026-04-17",
+        "acceptance": "pending"
+      },
+      {
+        "wave": "wave-2-co-pilot",
+        "code": "EVENT_ENVELOPE_ERRORS",
+        "owner": "telemetry-ops",
+        "due_date": "2026-04-15",
+        "escalation_date": "2026-04-17",
+        "acceptance": "pending"
+      }
+    ]
+  },
+  "waves": {
+    "wave-0-controls": {
+      "ready": false,
+      "checks": {
+        "required_controls_present": true,
+        "event_envelope_errors_zero": false,
+        "telemetry_freshness_ok": true,
+        "approver_count_gte_2": true
+      },
+      "blockers": [
+        {
+          "code": "EVENT_ENVELOPE_ERRORS",
+          "detail": "Unresolved event envelope errors in decision window: 40",
+          "owner": "telemetry-ops",
+          "due_date": "2026-04-13",
+          "escalation_date": "2026-04-15"
+        }
+      ]
+    },
+    "wave-1-manual": {
+      "ready": false,
+      "checks": {
+        "manual_profiles_valid": true,
+        "wave_0_ready": false
+      },
+      "coverage": {
+        "total": 9,
+        "valid": 9
+      },
+      "blockers": [
+        {
+          "code": "WAVE0_NOT_READY",
+          "detail": "Wave 1 blocked until Wave 0 controls verification passes",
+          "owner": "release-coordination",
+          "due_date": "2026-04-14",
+          "escalation_date": "2026-04-16"
+        }
+      ]
+    },
+    "wave-2-co-pilot": {
+      "ready": false,
+      "checks": {
+        "co_pilot_profiles_valid": true,
+        "wave_1_ready": false,
+        "event_envelope_errors_zero": false,
+        "telemetry_freshness_ok": true
+      },
+      "coverage": {
+        "total": 65,
+        "valid": 65
+      },
+      "blockers": [
+        {
+          "code": "WAVE1_NOT_READY",
+          "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
+          "owner": "release-coordination",
+          "due_date": "2026-04-15",
+          "escalation_date": "2026-04-17"
+        },
+        {
+          "code": "EVENT_ENVELOPE_ERRORS",
+          "detail": "Wave 2 requires zero unresolved event envelope errors (actual=40)",
+          "owner": "telemetry-ops",
+          "due_date": "2026-04-15",
+          "escalation_date": "2026-04-17"
+        }
+      ]
+    }
+  }
+}

@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Install cron job for skill genome loop
 
-set -e
+set -euo pipefail
 
 SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd)/cron_genome_loop.sh"
 CRON_ENTRY="0 4 * * * $SCRIPT_PATH"

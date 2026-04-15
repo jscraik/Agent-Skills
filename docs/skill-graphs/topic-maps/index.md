@@ -41,7 +41,6 @@ The 92 skills are organized into 7 functional topic maps. Each topic map serves 
 
 The following skills appear in multiple topic maps or serve cross-cutting concerns:
 
-- [[arscontexta]] — Knowledge management system (in [[agent-ops]] and [[product-strategy]])
 - [[brainstorming]] — Pre-planning exploration (in [[agent-ops]] and [[product-strategy]])
 - [[context7]] — Live library documentation (in [[agent-ops]] and [[product-strategy]])
 - [[docs-expert]] — Repository documentation (in [[agent-ops]] and [[product-strategy]])

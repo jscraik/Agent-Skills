@@ -1,0 +1,7 @@
+iteration	target	decision	score	status	change_summary	validation_evidence
+0	plugins/skill-factory/skills/skill-builder	keep	4.00	pass	baseline before loop changes	quick_validate=pass;skills_audit_strict=pass;security_warns=2;benchmark_warns=1;openclaw_warns=1
+1	plugins/skill-factory/skills/skill-builder	discard	4.00	pass	frontmatter description reword attempt did not reduce warnings	quick_validate=pass;skills_audit_strict=pass;security_warns=2;benchmark_warns=1;openclaw_warns=1
+2	plugins/skill-factory/skills/skill-builder	keep	4.20	pass	removed subprocess execution from template drift checker via in-process benchmark call	py_compile=pass;quick_validate=pass;skills_audit_strict=pass;security_warns=1;benchmark_warns=1;openclaw_warns=0
+3	plugins/skill-factory/skills/skill-builder	keep	4.50	pass	raised deterministic_checks coverage in evals from 11/37 to 14/37	evals_coverage=37.84pct;quick_validate=pass;skills_audit_strict=pass;security_warns=1;benchmark_warns=0;openclaw_warns=0
+4	plugins/skill-factory/skills/skill-builder	discard	2.00	fail	description shortened too far and failed FM_DESC_WHAT_WHEN	quick_validate=pass;skills_audit_strict=fail;security_gate=fail
+5	plugins/skill-factory/skills/skill-builder	keep	5.00	pass	final WHAT+WHEN description passes security gate while keeping non-workflow phrasing	quick_validate=pass;skills_audit_strict=pass;security_warns=0;benchmark_warns=0;openclaw_warns=0

@@ -23,6 +23,15 @@ observability: >
   Track pass/fail/blocked status for every validation command per iteration and
   record keep/discard rationale in results.tsv plus journal.md.
 
+baseline_policy: >
+  Require one unmodified baseline entry (iteration 0) before hypothesis-driven
+  changes; classify baseline as blocked when required commands cannot run.
+
+timeout_policy: >
+  If a required validation command exceeds the agreed cap (recommended 10
+  minutes), terminate it and classify the iteration as blocked with exact
+  command evidence.
+
 risks:
   - Modifying mirrored cache paths instead of canonical sources
   - Regression from multi-change iterations without clear attribution

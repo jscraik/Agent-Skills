@@ -2,5 +2,5 @@ interface:
   display_name: Codex Agent Creator
   short_description: Create, install, and validate Codex custom subagents plus optional
     thread/depth/runtime limits
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png
+  icon_small: ./assets/icon-small.svg
+  icon_large: ./assets/icon-large.svg
