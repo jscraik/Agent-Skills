@@ -11,8 +11,8 @@ Use this page to record expansion-gate evidence after pilot runs.
 
 ## Readout metadata
 
-- Window: `2026-04-07..2026-04-13`
-- Baseline: `2026-04-07..2026-04-07` via `rolling_window`
+- Window: `2026-04-09..2026-04-15`
+- Baseline: `2026-04-07..2026-04-09` via `rolling_window`
 - Total runs: `48`
 - Runs per profile:
   - `ui-ux-creative-coding`: `12`

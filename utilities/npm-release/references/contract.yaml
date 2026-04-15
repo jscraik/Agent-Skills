@@ -1,0 +1,27 @@
+schema_version: "1.0"
+skill: npm-release
+type: runbook
+purpose: >
+  Provide npm release command guidance covering semver bumping, dist-tags,
+  provenance flags, and 2FA/OTP-safe publish flows.
+triggers:
+  - User asks how to release/publish an npm package.
+  - User needs dist-tag channel strategy.
+  - User asks how npm version bumping maps to release flow.
+inputs:
+  - package/version target
+  - release channel and access requirements
+  - account security constraints (2FA/OTP)
+outputs:
+  - exact release command sequence
+  - channel/dist-tag guidance
+  - post-release verification checks
+non_goals:
+  - non-npm registry publishing workflows
+  - dependency install-only guidance with no release scope
+risks:
+  - wrong dist-tag can expose unstable versions as latest
+  - missing OTP/provenance/access flags can fail or misconfigure releases
+source_basis:
+  execution_path: cli_primary
+  context7_library_id: /websites/npmjs

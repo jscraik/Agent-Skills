@@ -72,6 +72,11 @@ baseline-ui:
   frontend-ui-design: Implement UI components that baseline-ui governs
   shadcn-ui: Validate shadcn/ui components against baseline rules
   ui-visual-regression: Combine with visual regression to catch visual drift
+biome-linting:
+  npm-workflow-discipline: Keep formatter and lint command flows aligned with package
+    script contracts
+  pnpm-manager: Run repo-wide Biome commands through pnpm workspace selectors
+  typescript: Combine static typing diagnostics with Biome lint and formatting remediation
 bash-hygiene:
   codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
     safer defaults
@@ -379,6 +384,10 @@ mcp-builder:
   chatgpt-apps: Connect the MCP server to a ChatGPT Apps SDK integration
   openai-docs: Use official MCP schema docs when designing tool schemas
   security-best-practices: Apply security hardening to MCP server endpoints
+mise-tooling:
+  fix-mise: Deep-dive trust, shim, and runtime-selection failures
+  npm-release: Ensure release commands run on the intended Node toolchain
+  pnpm-manager: Execute workspace commands under pinned runtimes
 nano-banana-builder:
   chatgpt-apps: Integrate Nano Banana image APIs into a ChatGPT App
   imagegen: Use as fallback for static image generation outside Nano Banana
@@ -388,6 +397,10 @@ notebooklm:
   insight-report: Feed session insights into NotebookLM for deeper analysis
   markdown-converter: Convert docs to markdown before uploading to NotebookLM
   video-transcript-downloader: Download transcripts to feed as NotebookLM sources
+npm-release:
+  mise-tooling: Verify runtime and toolchain pinning before publishing packages
+  npm-workflow-discipline: Keep release scripts and lockfile policy deterministic
+  pnpm-manager: Coordinate workspace package release prep across pnpm projects
 npm-workflow-discipline:
   circleci: Align deterministic npm install and script contracts with CircleCI pipeline
     behavior
@@ -435,6 +448,10 @@ plugin-installer:
   plugin-builder: Harden or convert plugin packages before installation and activation
   plugin-creator: Scaffold a fresh local plugin package before install/distribution
     workflows
+pnpm-manager:
+  mise-tooling: Run pnpm workflows on the pinned runtime selected by mise
+  npm-release: Prepare workspace packages for safe npm publish and tagging
+  npm-workflow-discipline: Enforce consistent workspace script and lockfile behavior
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
