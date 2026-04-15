@@ -22,6 +22,17 @@ SELECTION_POLICY_SCRIPT = REPO_ROOT / "scripts" / "selection_policy.py"
 SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "scripts" / "skill_discovery.py"
 SYNC_SCRIPT = REPO_ROOT / "scripts" / "sync_skills.sh"
 
+# macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
+# shell scripts in this repo. Prefer a known bash 4+ path when available.
+def _find_bash4() -> str:
+    import shutil
+    for candidate in ["/opt/homebrew/bin/bash", "/usr/local/bin/bash"]:
+        if shutil.which(candidate):
+            return candidate
+    return "bash"
+
+_BASH4 = _find_bash4()
+
 
 def run_validator(repo_root: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
@@ -35,7 +46,7 @@ def run_validator(repo_root: Path) -> subprocess.CompletedProcess[str]:
 
 def run_shadow_check(repo_root: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["bash", str(SHADOW_SCRIPT), "--repo-root", str(repo_root)],
+        [_BASH4, str(SHADOW_SCRIPT), "--repo-root", str(repo_root)],
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,

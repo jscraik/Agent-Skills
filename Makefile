@@ -24,7 +24,7 @@ hooks: ## Setup git hooks
 	node scripts/setup-git-hooks.js
 
 hooks-pre-commit: ## Run local pre-commit gates before creating a commit
-	bash scripts/validate_all.sh --ephemeral
+	./scripts/validate_all.sh --ephemeral
 
 hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK_COMMIT_MSG_FILE=/path)
 	@tmp_file="$$(mktemp)"; \

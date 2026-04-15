@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 # Sign artifacts with GPG and generate checksums
+#
+# Bootstrap: macOS ships bash 3.2 which lacks mapfile (bash 4+ feature).
+# Re-exec with a modern bash when the current interpreter is too old.
+if (( BASH_VERSINFO[0] < 4 )); then
+  for _bash4 in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$_bash4" ]]; then
+      exec "$_bash4" "$0" "$@"
+    fi
+  done
+  echo "error: bash 4+ required but not found (tried /opt/homebrew/bin/bash, /usr/local/bin/bash)" >&2
+  exit 1
+fi
 
 set -euo pipefail
+
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -f "$SCRIPT_DIR/utils.sh" ]]; then
+    echo "ERROR: Required file not found: $SCRIPT_DIR/utils.sh"
+    exit 1
+fi
+source "$SCRIPT_DIR/utils.sh"
 
 ARTIFACT_DIR="${1:-}"
 GPG_KEY="${FALLBACK_GPG_KEY:-releases@company.com}"
@@ -113,4 +133,4 @@ echo "Artifacts signed: ${#artifacts[@]}"
 echo ""
 echo "To verify:"
 echo "  sha256sum -c *.sha256"
-echo "  gpg --verify *.asc *"
+append_signature_checks "$ARTIFACT_DIR" | sed 's/^/  /'
