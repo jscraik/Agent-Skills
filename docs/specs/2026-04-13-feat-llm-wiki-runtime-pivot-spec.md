@@ -180,7 +180,7 @@ Normative source artifacts:
 
 Governance and validation dependencies:
 
-- `bin/ask repo doctor-catalog --strict`
+- `bin/ask repo doctor-catalog --strict --json`
 - `bin/ask repo validate --json` (degraded/allowed when invoked from `recursive_validation_guard` context; recorded as skipped-OK with explicit guard provenance)
 - `bash scripts/verify-work.sh --project-governance`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`

@@ -130,24 +130,25 @@ This is the best balance of risk and leverage: shift the primary system to an ea
 - R11. A gate can block promotion only when its blocker conditions and evidence paths are contract-defined.
 - R12. Plan/spec/requirements status must be synchronized with execution evidence; status/checklist drift is a validation failure.
 - R13. The pivot must include a recurring closeout health check that reports unresolved blockers, stale evidence, and ownership gaps.
+- R14. Every gate and spec must include freshness metadata (timestamp, source, TTL or equivalent); absence of freshness metadata or indeterminate freshness must be treated as a blocker; recurring closeout health checks must surface unresolved blockers and ownership gaps with missing or unknown freshness.
 
 ### Alignment for Existing Blocked Lanes (1, 2, 4)
 
-- R14. The new spec/plan must explicitly absorb and resolve the currently blocked certification/readiness concerns without keeping skill-graph as the primary delivery dependency.
-- R15. The new spec/plan must include runtime-separation recovery obligations and success gates that return control-plane status to healthy.
-- R16. The new spec/plan must include ask CLI contract completion obligations for remaining contract gaps that affect deterministic governance signaling.
+- R15. The new spec/plan must explicitly absorb and resolve the currently blocked certification/readiness concerns without keeping skill-graph as the primary delivery dependency.
+- R16. The new spec/plan must include runtime-separation recovery obligations and success gates that return control-plane status to healthy.
+- R17. The new spec/plan must include ask CLI contract completion obligations for remaining contract gaps that affect deterministic governance signaling.
 
 ### Safety and Privacy
 
-- R17. Privacy classification and redaction policy must be defined before ingesting sensitive corpora into wiki pages.
-- R18. Governance outputs must avoid leaking sensitive runtime details while preserving actionable diagnostics.
+- R18. Privacy classification and redaction policy must be defined before ingesting sensitive corpora into wiki pages.
+- R19. Governance outputs must avoid leaking sensitive runtime details while preserving actionable diagnostics.
 
 ### Installation and Inspection Orchestration
 
-- R19. Any installation or migration flow in this pivot lane must run with an explicit skill stack that includes `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, and `baseline-ui`; skipping one requires an explicit blocked reason with evidence.
-- R20. Installation flows must execute with inspection support roles, prioritizing `skill-inspector` and `plugin-inspector`, with deterministic fallback roles and recorded rationale when either role is unavailable. Canonical role identifiers and fallback roles are defined in `docs/specs/2026-04-13-feat-llm-wiki-runtime-pivot-spec.md` section "Core Domain Model" under `InstallationOrchestrationContract` (source of truth). UI/display aliases may use prefixed forms like `@skill-inspector`, but canonical contract tokens are bare identifiers without the `@` prefix.
-- R21. Role availability must be checked before execution and captured in run evidence so missing inspector roles cannot silently degrade installation quality.
-- R22. The spec/plan must define a fail-closed policy for installation quality checks: if required skill stack or inspection support cannot run, promotion is blocked until fallback or remediation path is complete.
+- R20. Any installation or migration flow in this pivot lane must run with an explicit skill stack that includes `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, and `baseline-ui`; skipping one requires an explicit blocked reason with evidence.
+- R21. Installation flows must execute with inspection support roles, prioritizing `skill-inspector` and `plugin-inspector`, with deterministic fallback roles and recorded rationale when either role is unavailable. Canonical role identifiers and fallback roles are defined in `docs/specs/2026-04-13-feat-llm-wiki-runtime-pivot-spec.md` section "Core Domain Model" under `InstallationOrchestrationContract` (source of truth). UI/display aliases may use prefixed forms like `@skill-inspector`, but canonical contract tokens are bare identifiers without the `@` prefix.
+- R22. Role availability must be checked before execution and captured in run evidence so missing inspector roles cannot silently degrade installation quality.
+- R23. The spec/plan must define a fail-closed policy for installation quality checks: if required skill stack or inspection support cannot run, promotion is blocked until fallback or remediation path is complete.
 
 ## Success Criteria
 

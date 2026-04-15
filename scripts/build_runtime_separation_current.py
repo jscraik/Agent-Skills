@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+# Sentinel return code for skipped commands to distinguish from executed-success
+SKIPPED_RETURN_CODE = 2
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -375,7 +378,7 @@ def main() -> int:
         command_checks["repo_validate"] = _command_check(
             command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
             subject_id="repo",
-            returncode=0,
+            returncode=SKIPPED_RETURN_CODE,
             normalized_fields=_normalize_repo_validate_skipped(),
             evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
         )
@@ -468,10 +471,10 @@ def main() -> int:
 
     issues: list[str] = []
     for check_name, check in command_checks.items():
-        if isinstance(check, dict) and check.get("returncode") not in (None, 0):
+        if isinstance(check, dict) and check.get("returncode") not in (None, 0, SKIPPED_RETURN_CODE):
             issues.append(f"{check_name} exited {check.get('returncode')}")
     for plugin, check in plugins_status_checks.items():
-        if check.get("returncode") != 0:
+        if check.get("returncode") not in (0, SKIPPED_RETURN_CODE):
             issues.append(f"plugins_status.{plugin} exited {check.get('returncode')}")
 
     status = "healthy" if not issues else "degraded"

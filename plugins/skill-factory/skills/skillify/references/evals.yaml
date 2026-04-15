@@ -88,7 +88,7 @@ cases:
       - type: regex
         value: "(?i)next_step"
       - type: regex
-        value: "(?i)category|target_environment|compatibility_posture"
+        value: "(?i)(?=.*category)(?=.*target_environment)(?=.*compatibility_posture).*"
 
   - id: session-collector-assisted-intake
     name: session collector artifact is used as optional corroboration
@@ -257,4 +257,4 @@ cases:
 
 metadata:
   last_updated: "2026-04-13"
-  review_status: "updated-awaiting-validation"
+  review_status: "validated"
