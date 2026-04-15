@@ -378,7 +378,18 @@ def wiki_add(
         "last_reviewed": date_iso,
         "sources": [cleaned_source],
     }
-    import yaml  # lazy import — optional dep; not needed for most ask commands
+    try:
+        import yaml  # lazy import — optional dep; not needed for most ask commands
+    except (ImportError, ModuleNotFoundError):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="PyYAML is required for wiki features but is not installed.",
+                fix_suggestion="Install PyYAML with: pip install PyYAML",
+            )
+        )
+        return result
     frontmatter_yaml = yaml.safe_dump(frontmatter_dict, default_flow_style=False, allow_unicode=True)
     frontmatter_lines = [
         "---",

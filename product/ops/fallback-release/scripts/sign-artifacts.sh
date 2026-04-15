@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 # Sign artifacts with GPG and generate checksums
+#
+# Bootstrap: macOS ships bash 3.2 which lacks mapfile (bash 4+ feature).
+# Re-exec with a modern bash when the current interpreter is too old.
+if (( BASH_VERSINFO[0] < 4 )); then
+  for _bash4 in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [[ -x "$_bash4" ]]; then
+      exec "$_bash4" "$0" "$@"
+    fi
+  done
+  echo "error: bash 4+ required but not found (tried /opt/homebrew/bin/bash, /usr/local/bin/bash)" >&2
+  exit 1
+fi
 
 set -euo pipefail
 
