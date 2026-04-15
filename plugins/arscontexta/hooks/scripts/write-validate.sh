@@ -1,8 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ars Contexta — Schema Enforcement Hook
 # Validates notes in the knowledge space have required fields.
 # Runs as PostToolUse hook on Write events.
 # Receives tool input as JSON on stdin.
+
+set -euo pipefail
 
 # Only run in Ars Contexta vaults
 GUARD_DIR="$(cd "$(dirname "$0")" && pwd)"

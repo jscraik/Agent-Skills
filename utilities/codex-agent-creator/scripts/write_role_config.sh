@@ -61,6 +61,13 @@ require_option_value() {
   fi
 }
 
+trim_ascii_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --output)
@@ -295,7 +302,7 @@ fi
 if [[ -n "$mcp_enable_csv" ]]; then
   IFS=',' read -r -a mcp_enable_arr <<< "$mcp_enable_csv"
   for name in "${mcp_enable_arr[@]}"; do
-    trimmed="$(printf '%s' "$name" | xargs)"
+    trimmed="$(trim_ascii_whitespace "$name")"
     if [[ -n "$trimmed" ]]; then
       config_json="$(printf '%s' "$config_json" | jq --arg NAME "$trimmed" '.mcp_servers[$NAME].enabled = true')"
     fi
@@ -305,7 +312,7 @@ fi
 if [[ -n "$mcp_disable_csv" ]]; then
   IFS=',' read -r -a mcp_disable_arr <<< "$mcp_disable_csv"
   for name in "${mcp_disable_arr[@]}"; do
-    trimmed="$(printf '%s' "$name" | xargs)"
+    trimmed="$(trim_ascii_whitespace "$name")"
     if [[ -n "$trimmed" ]]; then
       config_json="$(printf '%s' "$config_json" | jq --arg NAME "$trimmed" '.mcp_servers[$NAME].enabled = false')"
     fi

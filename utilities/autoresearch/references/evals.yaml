@@ -95,6 +95,30 @@ cases:
         value: "(?i)evidence"
     realistic: true
 
+  - id: happy-fixed-loop-count
+    name: explicit five-loop request should run exact count
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Do five loops on `utilities/autoresearch`, keep only passing iterations, and show a final count of kept, discarded, and blocked."
+    acceptance:
+      - type: regex
+        value: "(?i)five loops|iteration cap|kept|discarded|blocked|results\\.tsv"
+    realistic: true
+
+  - id: happy-score-progression-report
+    name: final report includes starting and ending score
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run five loops and report the starting score, ending score, and the improvement delta."
+    acceptance:
+      - type: regex
+        value: "(?i)starting score|ending score|start score|end score|delta|improvement"
+    realistic: true
+
   - id: edge-missing-stop-condition
     name: missing stop condition should trigger clarification
     category: edge
@@ -139,6 +163,42 @@ cases:
         value: "(?i)blocked"
       - type: regex
         value: "(?i)evidence.*results\\.tsv.*journal"
+    realistic: true
+
+  - id: edge-command-contract
+    name: broad validation command contract must be canonical
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Before we keep this iteration, run the repo-level wrapper check using the canonical command for this repo and record the exact outcome."
+    acceptance:
+      - type: regex
+        value: "(?i)bash scripts/verify-work\\.sh|canonical command|exact outcome"
+    realistic: true
+
+  - id: edge-unrelated-diff-guard
+    name: unrelated workspace drift must block keep decision
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I changed the target skill, but there are also unrelated modified docs in the working tree. Do not keep this iteration unless drift is isolated and evidenced."
+    acceptance:
+      - type: regex
+        value: "(?i)git status --short|unrelated|blocked|isolate|drift"
+    realistic: true
+
+  - id: edge-plugin-lane-doctor-first
+    name: plugin lane should run doctor before harden
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Run three autoresearch iterations against `plugins/skill-factory` and keep only changes where plugin diagnostics run before plugin hardening."
+    acceptance:
+      - type: regex
+        value: "(?i)ask plugins doctor|ask plugins harden|validation evidence|keep"
     realistic: true
 
   - id: negative-control

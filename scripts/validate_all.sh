@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Consolidated validation runner - one command to check everything
-set -u
+set -euo pipefail
 
 usage() {
   cat <<'EOF'

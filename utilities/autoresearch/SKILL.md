@@ -37,6 +37,7 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
   - Success goal (examples: strict audit pass rate, reduced warnings, simplified structure).
   - Initial scope cap (start with 2-3 surfaces before broadening).
 - Ask clarifying questions only for ambiguous risk boundaries or missing stop conditions.
+- If the user specifies an exact loop count (for example "do five loops"), treat that as the active iteration cap and run exactly that many unless a blocker forces an early stop.
 
 ## Deliverables
 - `artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv`
@@ -45,12 +46,14 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 - A final summary with:
   - kept vs discarded experiments,
   - validation evidence,
+  - baseline/start score vs end score with delta,
   - remaining risks and next hypotheses.
 
 ## Output contract
 - For non-trivial summaries, include `schema_version`.
 - Include run metadata: `run_tag`, `run_dir`, and `stop_condition`.
 - Include decision totals: `kept`, `discarded`, `blocked`.
+- Include score progress: `start_score`, `end_score`, and `delta`.
 - Include command evidence as `[{command, outcome, note}]` with `outcome` in `pass|fail|blocked`.
 - Include next actions as `next_hypotheses` so a follow-up run can start without re-triage.
 
@@ -67,6 +70,12 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 - One hypothesis per iteration, one decision per iteration (`keep`, `discard`, `blocked`).
 - Validation gates are mandatory and define decision quality.
 - Favor simpler maintainable outcomes over marginal complexity-heavy gains.
+- Keep iteration diffs attributable: capture pre/post `git status --short` and isolate unrelated changes before deciding `keep`.
+- Prioritize the next hypothesis from evidence, in this order:
+  - fix command-contract drift that blocks reproducible validation;
+  - fix strict-audit/security warnings that affect skill/plugin hardening quality;
+  - improve deterministic eval coverage for frequently triggered lanes;
+  - optimize style/readability only after gates are stable.
 
 ## Workflow
 1) Initialize run artifacts:
@@ -74,12 +83,14 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 2) Capture baseline for each target using the matrix in `references/runbook.md`.
 3) Loop on one hypothesis:
    - Apply minimal patch.
+   - Capture post-change `git status --short` and confirm changed paths are limited to targets plus run artifacts.
    - Run mandatory validations.
    - Compute iteration score and decision (`keep`/`discard`).
    - Record the result:
      - `python3 utilities/autoresearch/scripts/log_result.py --run-dir <run-dir> ...`
 4) Keep only improvements that pass gates and improve score or quality with equal score and lower complexity.
 5) Continue until stop condition is met.
+   - For fixed-count requests, stop exactly at the requested count.
 6) Produce a concise findings summary and list exact commands run.
 
 ## Validation
@@ -87,10 +98,13 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 - Skill targets:
   - `python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py <skill-path>`
   - `./bin/ask skills audit <skill-path> --level strict --robot`
+- Independent check (when available and requested):
+  - `@skill-inspector` subagent pass over changed skill files plus run artifacts.
 - Plugin targets:
+  - `./bin/ask plugins doctor --robot`
   - `./bin/ask plugins harden <plugin-path> --robot`
 - Mixed or broad changes:
-  - `bash scripts/verify-work.sh --fast`
+  - `bash scripts/verify-work.sh`
 - Keep command-level outcomes in the run artifact.
 
 ## Gotchas

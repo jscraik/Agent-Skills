@@ -67,6 +67,13 @@ cases:
     smoke_mode: discovery-round-one
     timeout_profile: discovery-heavy
     prompt: "I need a new skill for long design review threads, but the workflow is still underspecified. Can you keep this first response to round 1 discovery only? Use the required headings, explain briefly why the question matters in plain language, and ask one intuitive goal question instead of dumping the full interview."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "netcat"
+        - "nc"
     acceptance:
       - type: contains
         value: "## Scope and triggers"
@@ -86,6 +93,13 @@ cases:
     smoke_mode: discovery-round-six
     timeout_profile: discovery-heavy
     prompt: "Can you finish the discovery interview for a new skill? In this response, do not keep interviewing. Provide the confirmation summary, separate facts from assumptions, and ask clearly whether it captures the skill well enough to build."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "netcat"
+        - "nc"
     acceptance:
       - type: contains
         value: "## Skill Summary:"
@@ -123,6 +137,13 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Can you improve a code review skill that keeps over-triggering? In this first response, use the required headings and confirm the likely skill category before drafting."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "netcat"
+        - "nc"
     acceptance:
       - type: contains
         value: "## Scope and triggers"

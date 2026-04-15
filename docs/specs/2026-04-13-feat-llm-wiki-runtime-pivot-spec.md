@@ -25,7 +25,6 @@ deepened: 2026-04-13
 - [Failure Model and Recovery](#failure-model-and-recovery)
 - [Observability](#observability)
 - [Acceptance and Test Matrix](#acceptance-and-test-matrix)
-- [Open Questions](#open-questions)
 - [Definition of Done](#definition-of-done)
 
 ## Enhancement Summary
@@ -57,9 +56,8 @@ This spec defines a new contract that makes `llm-wiki` the primary knowledge ope
 - Reorganize scaffold authority so canonical sources, factory mechanics, and runtime projections are unambiguous.
 - Absorb blocked lanes 1, 2, and 4 into one contract family without split ownership.
 - Enforce installation governance with a required skill stack: `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, `baseline-ui`.
-- Enforce inspection-role checks (`skill-inspector`, `plugin-inspector`) with deterministic fallback and fail-closed gating.
+- Enforce inspection-role checks (`@skill-inspector`, `@plugin-inspector`) with deterministic fallback and fail-closed gating.
 - Make blocker taxonomy, ownership, and closeout health reporting deterministic and machine-checkable.
-- **Governance Contract Coupling Justification**: OperatingModeContract, InstallationOrchestrationContract, and BlockedLaneObligation content are explicitly coupled to the autoresearch hardening effort because autoresearch operations depend on deterministic mode-switching, fail-closed skill-stack verification, and lane-obligation evaluation for certification/runtime-separation/ask-contract parity; without these governance primitives, autoresearch cannot reliably determine when research operations are safe to promote or when they must remain blocked due to upstream blocker families.
 
 ## Non-Goals
 
@@ -88,12 +86,12 @@ Not owned by this spec:
 ## Core Domain Model
 
 - `OperatingModeContract`
-  - Fields: `primary_mode`, `compatibility_mode`, `blocking_exceptions`, `mode_owner`.
+  - Fields: `primary_mode`, `compatibility_mode`, `blocking_exceptions_ref`, `mode_owner`.
   - Required values: `primary_mode=llm_wiki_primary`, `compatibility_mode=degraded_compatibility`.
 
 - `KnowledgeAuthorityMap`
   - Fields: `canonical_wiki_root`, `raw_source_roots`, `schema_root`, `projection_roots`, `authoritative_writers`, `authoritative_readers`.
-  - Rule: canonical wiki defaults to `wiki/` unless repo policy declares an explicit alternate root.
+  - Rule: canonical wiki root is fixed to `wiki/` for all lanes; alternate roots are invalid for this contract.
 
 - `InstallationOrchestrationContract`
   - Fields: `required_skills[]`, `inspector_roles[]`, `fallback_roles[]`, `fail_closed`, `evidence_requirements[]`.
@@ -101,6 +99,19 @@ Not owned by this spec:
   - Required inspector roles: `skill-inspector`, `plugin-inspector`.
   - Canonical fallback roles when a required inspector role is temporarily unavailable: `repo-research-analyst`, `project-standards-reviewer`.
   - Additional fields: `role_resolution_policy`, `role_resolution_evidence`, `skill_coverage_ratio`.
+
+- `BlockingExceptionRegistry`
+  - Fields: `exception_code`, `lane_id`, `blocker_code`, `owner_role`, `evidence_command`, `freshness_window_hours`, `expiry_policy`.
+  - Rule: compatibility findings are non-blocking unless they match one registry row exactly.
+
+- `LaneOwnerPolicy`
+  - Fields: `lane_id`, `owner_role`, `secondary_owner_role`, `ack_sla`, `mitigation_sla`.
+  - Rule: each lane must map to one primary owner role before promotion can proceed.
+
+- `FreshnessPolicyContract`
+  - Fields: `default_windows_hours`, `override_windows_hours`, `policy_ref`, `declared_at`.
+  - Required defaults: `lane_1=24`, `lane_2=24`, `lane_4=24`.
+  - Rule: overrides are valid only when `freshness_policy_ref` is included in `CloseoutHealthSnapshot`.
 
 - `BlockedLaneObligation`
   - Fields: `lane_id`, `contract_reference`, `required_outcome`, `blocking_condition`.
@@ -110,15 +121,36 @@ Not owned by this spec:
   - `lane_id=4` ask deterministic contract parity.
 
 - `CloseoutHealthSnapshot`
-  - Fields: `schema_version`, `timestamp`, `mode_state`, `lane_obligations`, `blockers[]`, `degraded_findings[]`, `owner_assignments`, `promotion_decision`.
+  - Fields: `schema_version`, `timestamp`, `mode_state`, `lane_obligations`, `blockers[]`, `degraded_findings[]`, `owner_assignments`, `freshness_policy_ref`, `promotion_decision`.
 
 - `LifecycleStateRecord`
   - Fields: `lifecycle_state`, `entered_at`, `exit_condition`, `blocking_context`.
   - Allowed states: `contract_declared`, `preflight_ready`, `governance_running`, `lane_evaluated`, `promotion_blocked`, `promotion_ready`.
 
+- `LaneObligationResult`
+  - Fields: `lane_id`, `result`, `blocker_code?`, `owner_role`, `freshness_state`, `freshness_age_hours`.
+  - Allowed `result` values: `ready`, `degraded`, `blocked`.
+  - Rule: lane result vocabulary is distinct from lifecycle states.
+
 - `BlockerRecord`
   - Fields: `blocker_code`, `lane_id`, `severity`, `owner`, `escalation_window`, `evidence_ref`, `first_seen_at`, `last_seen_at`, `status`.
   - Status values: `active`, `mitigating`, `cleared`, `accepted_with_expiry`.
+
+### Blocking exception registry (normative)
+
+| exception_code | lane_id | blocker_code | owner_role | evidence_command | freshness_window_hours | expiry_policy |
+| --- | --- | --- | --- | --- | --- | --- |
+| `compat.ask.error_code_unreachable` | 4 | `BLOCKER_ASK_CONTRACT_DRIFT` | `ask-contract-owner` | `bin/ask repo validate` | 24 | `never` |
+| `compat.runtime.parity_regression` | 2 | `BLOCKER_RUNTIME_SEPARATION_DRIFT` | `runtime-separation-owner` | `bash scripts/verify-work.sh --project-governance` | 24 | `never` |
+| `compat.cert.evidence_stale` | 1 | `BLOCKER_CERTIFICATION_EVIDENCE_STALE` | `skill-family-certification-owner` | `python3 scripts/verify_skill_catalog_freshness.py --strict` | 24 | `never` |
+
+### Lane owner and escalation policy (normative)
+
+| lane_id | owner_role | secondary_owner_role | ack_sla | mitigation_sla |
+| --- | --- | --- | --- | --- |
+| `1` | `skill-family-certification-owner` | `repo-standards-owner` | `4h_release_or_1bd_standard` | `24h_release_or_3bd_standard` |
+| `2` | `runtime-separation-owner` | `repo-standards-owner` | `4h_release_or_1bd_standard` | `24h_release_or_3bd_standard` |
+| `4` | `ask-contract-owner` | `repo-standards-owner` | `4h_release_or_1bd_standard` | `24h_release_or_3bd_standard` |
 
 ## Main Flow / Lifecycle
 
@@ -126,15 +158,15 @@ Not owned by this spec:
 
 1. Load `OperatingModeContract`.
 2. Assert `primary_mode=llm_wiki_primary`.
-3. Assert skill-graph surfaces are tagged `degraded_compatibility` with explicit blocking exceptions.
+3. Assert skill-graph surfaces are tagged `degraded_compatibility` and `blocking_exceptions_ref` points to the registry in this contract.
 4. If mode contract is missing or contradictory, emit blocking status and stop promotion.
 5. Emit `LifecycleStateRecord` transition: `contract_declared -> preflight_ready`.
 
 ### 2. Knowledge Operation Lifecycle
 
-1. Ingest/query/lint workflows run against canonical wiki roots and governance rules.
+1. Ingest/query/lint workflows run against canonical wiki root `wiki/` and governance rules.
 2. Obsidian reads markdown link graph as inspection/view layer only.
-3. Skill-graph compatibility outputs are monitorable but non-blocking unless they match declared blocking exceptions.
+3. Skill-graph compatibility outputs are monitorable but non-blocking unless they match one `BlockingExceptionRegistry` row.
 
 ### 3. Installation Governance Lifecycle
 
@@ -153,9 +185,11 @@ Not owned by this spec:
 - lane 1: certification evidence freshness and readiness parity.
 - lane 2: runtime-separation comparator/parity health.
 - lane 4: ask deterministic contract parity (including error-code reachability obligations).
-1. Any failed obligation blocks promotion.
-1. Degraded-only findings remain visible and must carry owner plus escalation window.
-1. Lane-level transition rules:
+2. Resolve `owner_role` from `LaneOwnerPolicy` for each lane before evaluating result.
+3. Emit `LaneObligationResult` (`ready|degraded|blocked`) for each lane.
+4. Any failed obligation (`result=blocked`) blocks promotion.
+5. Degraded-only findings remain visible and must carry owner plus escalation window.
+6. Lane-level transition rules:
 - if any lane emits a blocker, `governance_running -> promotion_blocked`;
 - if all lanes are ready and degraded findings are non-blocking, `governance_running -> lane_evaluated`;
 - only `lane_evaluated` can advance to `promotion_ready`.
@@ -167,7 +201,8 @@ Not owned by this spec:
 3. Promotion is allowed only when no blocked obligations remain and required evidence is current.
 4. Evidence freshness policy:
 - lane-1 certification telemetry evidence is stale when older than 24 hours;
-- lane-2 and lane-4 freshness windows are policy-defined and must be explicit in closeout output;
+- lane-2 and lane-4 default freshness windows are 24 hours each;
+- policy overrides are allowed only when `freshness_policy_ref` is present and points to a declared policy artifact;
 - unknown freshness values are treated as blocked.
 
 ## Interfaces and Dependencies
@@ -181,8 +216,8 @@ Normative source artifacts:
 
 Governance and validation dependencies:
 
-- `bin/ask repo doctor-catalog --strict --json`
-- `bin/ask repo validate --json` (degraded/allowed when invoked from `recursive_validation_guard` context; recorded as skipped-OK with explicit guard provenance)
+- `bin/ask repo doctor-catalog --strict`
+- `bin/ask repo validate`
 - `bash scripts/verify-work.sh --project-governance`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`
 - `python3 scripts/validate_health_counters.py <snapshot.json> --json`
@@ -192,10 +227,10 @@ Governance and validation dependencies:
 
 Skill dependencies for installation lane:
 
-- `llm-wiki`
-- `coderabbit:simplify`
-- `uv-python-project-setup`
-- `baseline-ui`
+- `product/docs/llm-wiki/SKILL.md`
+- `plugins/cache/agent-skills-local/coderabbit/0.1.0/skills/simplify/SKILL.md`
+- `utilities/uv-python-project-setup/SKILL.md`
+- `frontend/ui/baseline-ui/SKILL.md`
 
 ## Invariants / Safety Requirements
 
@@ -217,11 +252,17 @@ Skill dependencies for installation lane:
 - Blocker-taxonomy invariant:
   - every blocking decision includes explicit blocker code, owner, and escalation window.
 
+- Lane-owner invariant:
+  - each lane uses `LaneOwnerPolicy` owner mapping; unresolved owner mapping is blocking.
+
 - State-transition invariant:
   - lifecycle transitions cannot skip `preflight_ready` or `lane_evaluated` states.
 
 - Acceptance-ID invariant:
   - existing `SA` identifiers remain stable; new acceptance criteria append without renumbering prior IDs.
+
+- Freshness-policy invariant:
+  - lane freshness windows must come from `FreshnessPolicyContract` defaults or a declared override policy reference.
 
 - Privacy invariant:
   - sensitive-source ingestion requires classification and redaction policy before persistence.
@@ -246,7 +287,7 @@ Recovery policy:
 
 - Recovery must be idempotent and safe to rerun.
 - Any rollback must preserve canonical authority boundaries and evidence continuity.
-- Promotion resumes only after the failed lane re-enters `ready`.
+- Promotion resumes only after the failed lane reports `LaneObligationResult.result=ready` and lifecycle state returns to `lane_evaluated`.
 - Recovery ordering rule:
 - resolve lane-1 freshness blockers first;
 - then lane-2 parity blockers;
@@ -258,13 +299,15 @@ Recovery policy:
 Required events and artifacts for this contract:
 
 - `mode_contract_evaluated`
-  - fields: `primary_mode`, `compatibility_mode`, `result`, `blocker_code?`.
+  - fields: `primary_mode`, `compatibility_mode`, `blocking_exceptions_ref`, `result`, `blocker_code?`.
+- `blocking_exception_registry_evaluated`
+  - fields: `registry_version`, `matched_exception_code?`, `lane_id?`, `result`.
 - `installation_contract_evaluated`
   - fields: `required_skills`, `skills_present`, `inspectors_present`, `fallback_used`, `result`.
 - `lane_obligation_evaluated`
-  - fields: `lane_id`, `result`, `blocker_code?`, `evidence_ref`.
+  - fields: `lane_id`, `owner_role`, `result`, `blocker_code?`, `evidence_ref`, `freshness_state`, `freshness_age_hours`.
 - `closeout_health_reported`
-  - fields: `schema_version`, `overall_state`, `blocked_count`, `degraded_count`, `promotion_decision`.
+  - fields: `schema_version`, `overall_state`, `blocked_count`, `degraded_count`, `freshness_policy_ref`, `promotion_decision`.
 
 Required health counters:
 
@@ -301,12 +344,9 @@ Closeout reporting requirements:
 | SA15 | Evidence freshness gating | Lane outputs include freshness state and freshness age; unknown freshness is blocking | Closeout report shows freshness per lane and blocks when freshness cannot be evaluated |
 | SA16 | Inspector quality coverage | Inspector-role resolution is measurable and fail-closed when unresolved | Inspector resolution ratio is present and unresolved coverage blocks promotion |
 | SA17 | Blocker metadata completeness | Every active blocker includes code, owner, escalation window, and evidence reference | Blocker completeness ratio is 100% whenever promotion is attempted |
-| SA18 | Governance contract traceability | OperatingModeContract, InstallationOrchestrationContract, and BlockedLaneObligation content are traceable to autoresearch hardening validation evidence | Validation pointers exist showing how governance contracts gate autoresearch promotion decisions and blocker resolution paths |
-
-## Open Questions
-
-- Should this pivot mandate one fixed canonical wiki root (`wiki/`) for all lanes, or allow policy-defined alternatives per bounded domain?
-- What is the exact owner mapping and escalation SLA for lane-4 ask contract obligations in release windows?
+| SA18 | Exception determinism | Compatibility findings block only when they match a normative exception registry row | Closeout artifact includes matched `exception_code` for every compatibility blocker |
+| SA19 | Lane ownership and SLA | Lanes 1, 2, and 4 have deterministic owner role mapping and escalation SLA | Every lane result includes owner role; blockers include SLA-backed escalation window |
+| SA20 | Freshness policy provenance | Lane freshness windows are defaulted or override-referenced through policy provenance | Closeout report includes `freshness_policy_ref` and numeric windows per lane |
 
 ## Definition of Done
 

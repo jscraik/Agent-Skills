@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T21:04:23Z",
-  "decision_date": "2026-04-13",
+  "generated_at": "2026-04-14T17:14:43Z",
+  "decision_date": "2026-04-14",
   "summary": {
     "active_skill_count": 74,
     "manual_skill_count": 9,
@@ -16,38 +16,54 @@
     "telemetry_generated_at": "2026-04-13T08:19:21Z",
     "telemetry_window_start": "2026-04-07",
     "telemetry_window_end": "2026-04-13",
-    "telemetry_freshness_ok": true,
+    "telemetry_freshness_ok": false,
     "triage_summary": [
+      {
+        "wave": "wave-0-controls",
+        "code": "TELEMETRY_HEALTH_STALE",
+        "owner": "platform-ops",
+        "due_date": "2026-04-14",
+        "escalation_date": "2026-04-16",
+        "acceptance": "pending"
+      },
+      {
+        "wave": "wave-0-controls",
+        "code": "TELEMETRY_WINDOW_MISMATCH",
+        "owner": "platform-ops",
+        "due_date": "2026-04-14",
+        "escalation_date": "2026-04-16",
+        "acceptance": "pending"
+      },
       {
         "wave": "wave-0-controls",
         "code": "EVENT_ENVELOPE_ERRORS",
         "owner": "telemetry-ops",
-        "due_date": "2026-04-13",
-        "escalation_date": "2026-04-15",
+        "due_date": "2026-04-14",
+        "escalation_date": "2026-04-16",
         "acceptance": "pending"
       },
       {
         "wave": "wave-1-manual",
         "code": "WAVE0_NOT_READY",
         "owner": "release-coordination",
-        "due_date": "2026-04-14",
-        "escalation_date": "2026-04-16",
+        "due_date": "2026-04-15",
+        "escalation_date": "2026-04-17",
         "acceptance": "pending"
       },
       {
         "wave": "wave-2-co-pilot",
         "code": "WAVE1_NOT_READY",
         "owner": "release-coordination",
-        "due_date": "2026-04-15",
-        "escalation_date": "2026-04-17",
+        "due_date": "2026-04-16",
+        "escalation_date": "2026-04-18",
         "acceptance": "pending"
       },
       {
         "wave": "wave-2-co-pilot",
         "code": "EVENT_ENVELOPE_ERRORS",
         "owner": "telemetry-ops",
-        "due_date": "2026-04-15",
-        "escalation_date": "2026-04-17",
+        "due_date": "2026-04-16",
+        "escalation_date": "2026-04-18",
         "acceptance": "pending"
       }
     ]
@@ -58,16 +74,34 @@
       "checks": {
         "required_controls_present": true,
         "event_envelope_errors_zero": false,
-        "telemetry_freshness_ok": true,
+        "telemetry_freshness_ok": false,
         "approver_count_gte_2": true
       },
       "blockers": [
         {
+          "code": "TELEMETRY_HEALTH_STALE",
+          "detail": "daily-skill-health.md age 32.92h exceeds 24.00h",
+          "remediation": {
+            "owner": "platform-ops",
+            "targetDate": "2026-04-15"
+          },
+          "owner": "platform-ops",
+          "due_date": "2026-04-14",
+          "escalation_date": "2026-04-16"
+        },
+        {
+          "code": "TELEMETRY_WINDOW_MISMATCH",
+          "detail": "daily-skill-health.md window mismatch (expected 2026-04-08..2026-04-14, actual 2026-04-07..2026-04-13)",
+          "owner": "platform-ops",
+          "due_date": "2026-04-14",
+          "escalation_date": "2026-04-16"
+        },
+        {
           "code": "EVENT_ENVELOPE_ERRORS",
           "detail": "Unresolved event envelope errors in decision window: 40",
           "owner": "telemetry-ops",
-          "due_date": "2026-04-13",
-          "escalation_date": "2026-04-15"
+          "due_date": "2026-04-14",
+          "escalation_date": "2026-04-16"
         }
       ]
     },
@@ -86,8 +120,8 @@
           "code": "WAVE0_NOT_READY",
           "detail": "Wave 1 blocked until Wave 0 controls verification passes",
           "owner": "release-coordination",
-          "due_date": "2026-04-14",
-          "escalation_date": "2026-04-16"
+          "due_date": "2026-04-15",
+          "escalation_date": "2026-04-17"
         }
       ]
     },
@@ -97,7 +131,7 @@
         "co_pilot_profiles_valid": true,
         "wave_1_ready": false,
         "event_envelope_errors_zero": false,
-        "telemetry_freshness_ok": true
+        "telemetry_freshness_ok": false
       },
       "coverage": {
         "total": 65,
@@ -108,15 +142,15 @@
           "code": "WAVE1_NOT_READY",
           "detail": "Wave 2 blocked until Wave 1 manual onboarding passes",
           "owner": "release-coordination",
-          "due_date": "2026-04-15",
-          "escalation_date": "2026-04-17"
+          "due_date": "2026-04-16",
+          "escalation_date": "2026-04-18"
         },
         {
           "code": "EVENT_ENVELOPE_ERRORS",
           "detail": "Wave 2 requires zero unresolved event envelope errors (actual=40)",
           "owner": "telemetry-ops",
-          "due_date": "2026-04-15",
-          "escalation_date": "2026-04-17"
+          "due_date": "2026-04-16",
+          "escalation_date": "2026-04-18"
         }
       ]
     }

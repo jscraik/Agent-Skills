@@ -57,8 +57,8 @@ fi
 
 # --- Diff: find added, removed, changed ---
 # Build file lists (basenames only)
-SOURCE_FILES=$(ls -1 "$SOURCE_DIR"/*.md 2>/dev/null | xargs -I{} basename {} | sort)
-DEST_FILES=$(ls -1 "$DEST_DIR"/*.md 2>/dev/null | xargs -I{} basename {} | sort)
+SOURCE_FILES=$(find "$SOURCE_DIR" -maxdepth 1 -name '*.md' -print0 2>/dev/null | xargs -0 -I{} basename {} | sort)
+DEST_FILES=$(find "$DEST_DIR" -maxdepth 1 -name '*.md' -print0 2>/dev/null | xargs -0 -I{} basename {} | sort)
 
 ADDED=$(comm -23 <(echo "$SOURCE_FILES") <(echo "$DEST_FILES"))
 REMOVED=$(comm -13 <(echo "$SOURCE_FILES") <(echo "$DEST_FILES"))
@@ -99,13 +99,13 @@ echo ""
 
 if [[ "$ADDED_COUNT" -gt 0 ]]; then
   echo "ADDED ($ADDED_COUNT):"
-  echo "$ADDED" | sed 's/^/  + /'
+  while IFS= read -r line; do printf '  + %s\n' "$line"; done <<< "$ADDED"
   echo ""
 fi
 
 if [[ "$REMOVED_COUNT" -gt 0 ]]; then
   echo "REMOVED ($REMOVED_COUNT):"
-  echo "$REMOVED" | sed 's/^/  - /'
+  while IFS= read -r line; do printf '  - %s\n' "$line"; done <<< "$REMOVED"
   echo ""
 fi
 
@@ -143,5 +143,5 @@ done <<< "$REMOVED"
 # Record vault hash
 echo "$VAULT_HASH" > "$HASH_FILE"
 
-FINAL_COUNT=$(ls -1 "$DEST_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
+FINAL_COUNT=$(find "$DEST_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 echo "Sync complete. $FINAL_COUNT files in thinking/. Vault hash: $VAULT_HASH"

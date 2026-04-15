@@ -260,7 +260,7 @@ run_check_command() {
 count_unchecked_boxes() {
   local file="$1"
   [[ -f "$file" ]] || { echo "0"; return 0; }
-  grep -E "^\s*([-*]|\d+[.)])?\s*\[\s\]\s+" "$file" 2>/dev/null | wc -l | tr -d ' '
+  grep -cE "^\s*([-*]|\d+[.)])?\s*\[\s\]\s+" "$file" 2>/dev/null || echo "0"
 }
 
 # PRD mode: detect task array key
@@ -659,7 +659,7 @@ for ((iter=1; iter<=MAX_ITERATIONS; iter++)); do
     if [[ -z "$SPEC_FILE" ]]; then
       if [[ -d "$SPEC_DIR" ]]; then
         # pick newest spec by mtime
-        SPEC_FILE="$(ls -t "$SPEC_DIR"/spec-*.md 2>/dev/null | head -n 1 || true)"
+        SPEC_FILE="$(find "$SPEC_DIR" -maxdepth 1 -name 'spec-*.md' -print0 2>/dev/null | xargs -0 stat -f '%m %N' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2- || true)"
       fi
     fi
     if [[ -n "$SPEC_FILE" && -f "$SPEC_FILE" && -f "$COMPILER" ]]; then
@@ -762,21 +762,27 @@ Workspace: $(pwd)
 EOF
 
   if [[ "${#instruction_files[@]}" -gt 0 ]]; then
-    echo "" >>"$prompt_file"
-    echo "## Also read (repo instructions)" >>"$prompt_file"
-    for f in "${instruction_files[@]}"; do
-      echo "- $f" >>"$prompt_file"
-    done
+    {
+      echo ""
+      echo "## Also read (repo instructions)"
+      for f in "${instruction_files[@]}"; do
+        echo "- $f"
+      done
+    } >>"$prompt_file"
   fi
 
   if [[ "$local_mode" == "checkbox" ]]; then
-    echo "" >>"$prompt_file"
-    echo "## Task file" >>"$prompt_file"
-    echo "- $TASK_FILE" >>"$prompt_file"
+    {
+      echo ""
+      echo "## Task file"
+      echo "- $TASK_FILE"
+    } >>"$prompt_file"
   else
-    echo "" >>"$prompt_file"
-    echo "## PRD file" >>"$prompt_file"
-    echo "- $PRD_FILE" >>"$prompt_file"
+    {
+      echo ""
+      echo "## PRD file"
+      echo "- $PRD_FILE"
+    } >>"$prompt_file"
   fi
 
   cat >> "$prompt_file" <<EOF
@@ -793,14 +799,18 @@ EOF
 EOF
 
   if [[ -f "$PROMPT_ADDENDUM_FILE" ]]; then
-    echo "## Prompt addendum (project-specific)" >> "$prompt_file"
-    cat "$PROMPT_ADDENDUM_FILE" >> "$prompt_file"
-    echo "" >> "$prompt_file"
+    {
+      echo "## Prompt addendum (project-specific)"
+      cat "$PROMPT_ADDENDUM_FILE"
+      echo ""
+    } >> "$prompt_file"
   fi
 
-  echo "## Current objective" >> "$prompt_file"
-  echo "$objective_block" >> "$prompt_file"
-  echo "" >> "$prompt_file"
+  {
+    echo "## Current objective"
+    echo "$objective_block"
+    echo ""
+  } >> "$prompt_file"
 
   if [[ "$USE_STRUCTURED" == "true" ]]; then
     cat >> "$prompt_file" <<EOF

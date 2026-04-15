@@ -14,6 +14,13 @@ Options:
 EOF
 }
 
+trim_ascii_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
 tag=""
 targets_raw=""
 out_root="artifacts/autoresearch"
@@ -107,7 +114,7 @@ declare -A seen_targets=()
 : > "$targets_path"
 
 for target in "${raw_targets[@]}"; do
-  trimmed="$(echo "$target" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  trimmed="$(trim_ascii_whitespace "$target")"
   [[ -n "$trimmed" ]] || continue
 
   if ! normalized_target="$(

@@ -288,12 +288,20 @@ fi
 # P1.x: pytest unit gate — run validator unit tests
 # ---------------------------------------------------------------------------
 pytest_cmd=()
+uv_pytest_env=()
+uv_pytest_cache_dir=""
+
+if command -v uv >/dev/null 2>&1; then
+  uv_pytest_cache_dir="${SKILL_FAMILY_UV_CACHE_DIR:-${UV_CACHE_DIR:-${TMPDIR:-/tmp}/agent-skills-uv-cache}}"
+  mkdir -p "$uv_pytest_cache_dir"
+  uv_pytest_env=(env "UV_CACHE_DIR=$uv_pytest_cache_dir")
+fi
+
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${python_cmd[@]}" -m pytest)
-elif command -v uv >/dev/null 2>&1 \
-  && uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest --version >/dev/null 2>&1; then
-  pytest_cmd=(uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest)
-  echo "[family-gate] using uv ephemeral pytest runner (pytest+pyyaml+jsonschema)"
+elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 --with pytest python -m pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 --with pytest python -m pytest)
+  echo "[family-gate] using uv ephemeral pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
 fi
 
 if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
@@ -349,7 +357,7 @@ _set_evidence_path() {
     skill_evidence_paths_ordered+=("$path")
     skill_outcomes_ordered+=("")
   else
-    skill_evidence_paths_ordered[$idx]="$path"
+    skill_evidence_paths_ordered[idx]="$path"
   fi
 }
 
@@ -364,7 +372,7 @@ _set_outcome() {
     skill_evidence_paths_ordered+=("")
     skill_outcomes_ordered+=("$outcome")
   else
-    skill_outcomes_ordered[$idx]="$outcome"
+    skill_outcomes_ordered[idx]="$outcome"
   fi
 }
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-13T21:05:17.311776+00:00",
+  "generated_at": "2026-04-14T22:49:53.290245+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -36,22 +36,6 @@
       "alias": "skills-system/plugin-installer",
       "canonical": "plugins/plugin-factory/skills/plugin-installer",
       "target": "../plugins/plugin-factory/skills/plugin-installer"
-    },
-    {
-      "name": "cache-arscontexta",
-      "type": "mirror",
-      "source": "plugins/arscontexta",
-      "projection": ".agents/plugins-runtime/cache/agent-skills-local/arscontexta",
-      "policy": "hash-manifest-plus-path-diff",
-      "missing_in_projection": [],
-      "extra_in_projection": [],
-      "mismatched_files": [],
-      "unstamped_files": [],
-      "checked_files": 306,
-      "source_manifest_sha256": "6d323897838081eeeba48cc8cdcdb274c0c7278bbff891edc19dc7ed04121cec",
-      "projection_manifest_sha256": "6d323897838081eeeba48cc8cdcdb274c0c7278bbff891edc19dc7ed04121cec",
-      "manifest_mismatch": false,
-      "status": "pass"
     },
     {
       "name": "cache-coderabbit",
@@ -112,8 +96,8 @@
       "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 206,
-      "source_manifest_sha256": "4178c51db826d0773dee5584cd1836fb14b2ecd966e7153ad9b6bed140c80444",
-      "projection_manifest_sha256": "4178c51db826d0773dee5584cd1836fb14b2ecd966e7153ad9b6bed140c80444",
+      "source_manifest_sha256": "006c0a9506d86f350db9e027fb59ce4b853da30bf0fdd19ac4f310156adc3493",
+      "projection_manifest_sha256": "006c0a9506d86f350db9e027fb59ce4b853da30bf0fdd19ac4f310156adc3493",
       "manifest_mismatch": false,
       "status": "pass"
     }

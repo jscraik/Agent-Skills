@@ -2,6 +2,8 @@
 
 # Shared Codex environment bootstrap for .codex/environments/environment.toml.
 # Keep this script idempotent because setup/actions can source it repeatedly.
+# Note: sourced library — only set nounset to avoid leaking errexit/pipefail to callers.
+set -u
 
 _codex_script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 CODEX_REPO_ROOT="$(

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Sign artifacts with GPG and generate checksums
 
 set -euo pipefail

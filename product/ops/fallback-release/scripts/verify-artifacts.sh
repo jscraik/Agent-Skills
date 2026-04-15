@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Verify fallback artifacts match expected format and are installable
 
 set -euo pipefail
@@ -162,7 +162,7 @@ while IFS= read -r artifact; do
         echo "WARNING: $name is very small (${size} bytes)"
         ((SIZE_ANOMALIES++)) || true
     elif [[ $size -gt 524288000 ]]; then
-        echo "WARNING: $name is very large ($(numfmt --to=iec $size))"
+        echo "WARNING: $name is very large ($(numfmt --to=iec "$size"))"
         ((SIZE_ANOMALIES++)) || true
     fi
 done < <( jq -c '.artifacts[]' "$MANIFEST_FILE" )
