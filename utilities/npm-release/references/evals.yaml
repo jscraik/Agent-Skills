@@ -50,7 +50,7 @@ cases:
     prompt: "This is the first public release. Include provenance and access flags in the publish command."
     acceptance:
       - type: regex
-        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*\\b--provenance\\b)(?=.*\\b--access\\s+public\\b)"
+        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*\\b--provenance\\b)(?=.*\\b--access(?:\\s+|=)public\\b)"
 
   - id: npm-release-command-guard
     name: risky command guard
