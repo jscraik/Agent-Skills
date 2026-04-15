@@ -125,4 +125,15 @@ echo "Artifacts signed: ${#artifacts[@]}"
 echo ""
 echo "To verify:"
 echo "  sha256sum -c *.sha256"
-echo "  gpg --verify *.asc *"
+for sig_file in "$ARTIFACT_DIR"/*.asc; do
+    if [[ -f "$sig_file" ]]; then
+        artifact_file="${sig_file%.asc}"
+        sig_name=$(basename "$sig_file")
+        artifact_name=$(basename "$artifact_file")
+        if [[ -f "$artifact_file" ]]; then
+            echo "  gpg --verify $sig_name $artifact_name"
+        else
+            echo "  # WARNING: Artifact not found for signature $sig_name"
+        fi
+    fi
+done
