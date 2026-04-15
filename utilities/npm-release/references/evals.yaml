@@ -28,7 +28,7 @@ cases:
     prompt: "Publish a release candidate to the beta tag while keeping latest on stable."
     acceptance:
       - type: regex
-        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*(--tag\\s*=?\\s*beta|dist-tag\\s+(add|set|ls)))"
+        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*(--tag\\s*=?\\s*beta|dist-tag\\s+(?:add|set)\\s+beta))"
 
   - id: npm-release-otp
     name: otp required flow
