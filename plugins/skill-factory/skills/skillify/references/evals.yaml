@@ -87,10 +87,8 @@ cases:
         value: "(?i)security_checklist_passed|security"
       - type: regex
         value: "(?i)next_step"
-      - type: regex
-        value: "(?i)(?=.*category)(?=.*target_environment)(?=.*compatibility_posture).*"
     structure_validation:
-      description: "Validate that validations and security objects contain explicit boolean fields"
+      description: "Validate that validations and security objects contain explicit boolean fields, and that skill metadata/frontmatter contains required fields"
       required_objects:
         - path: "validations"
           required_fields:
@@ -102,6 +100,14 @@ cases:
           required_fields:
             - name: "security_checklist_passed"
               type: "boolean"
+        - path: "metadata"
+          required_fields:
+            - name: "category"
+              type: "any"
+            - name: "target_environment"
+              type: "string"
+            - name: "compatibility_posture"
+              type: "string"
 
   - id: session-collector-assisted-intake
     name: session collector artifact is used as optional corroboration
