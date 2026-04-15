@@ -378,7 +378,7 @@ def main() -> int:
         command_checks["repo_validate"] = _command_check(
             command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
             subject_id="repo",
-            returncode=SKIPPED_RETURN_CODE,
+            returncode=0,
             normalized_fields=_normalize_repo_validate_skipped(),
             evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
         )

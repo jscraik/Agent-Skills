@@ -188,10 +188,10 @@ Governance and validation dependencies:
 
 Skill dependencies for installation lane:
 
-- `product/docs/llm-wiki/SKILL.md`
-- `coderabbit:simplify` (canonical skill identifier; repository-tracked source when available)
-- `utilities/uv-python-project-setup/SKILL.md`
-- `frontend/ui/baseline-ui/SKILL.md`
+- `llm-wiki`
+- `coderabbit:simplify`
+- `uv-python-project-setup`
+- `baseline-ui`
 
 ## Invariants / Safety Requirements
 

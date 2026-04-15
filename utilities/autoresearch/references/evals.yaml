@@ -16,15 +16,15 @@ cases:
       - type: regex
         value: "(?i)schema_version"
       - type: regex
-        value: "(?i)run_id|timestamp"
+        value: "(?i)run\\.tag|run\\.path|run\\.stop_condition"
       - type: regex
-        value: "(?i)decision_totals|decisions"
+        value: "(?i)summary\\.kept|summary\\.discarded|summary\\.blocked"
       - type: regex
-        value: "(?i)command_evidence|commands"
+        value: "(?i)evidence"
       - type: regex
         value: "(?i)next_hypotheses|hypotheses"
       - type: regex
-        value: "(?i)results\\.tsv|journal"
+        value: "(?i)results\\.tsv.*journal"
     realistic: true
 
   - id: implicit-trigger
@@ -40,11 +40,11 @@ cases:
       - type: regex
         value: "(?i)schema_version"
       - type: regex
-        value: "(?i)run_id|timestamp"
+        value: "(?i)run\\.tag|run\\.path|run\\.stop_condition"
       - type: regex
-        value: "(?i)decision_totals|decisions"
+        value: "(?i)summary\\.kept|summary\\.discarded|summary\\.blocked"
       - type: regex
-        value: "(?i)command_evidence|commands"
+        value: "(?i)evidence"
       - type: regex
         value: "(?i)next_hypotheses|hypotheses"
     realistic: true
@@ -62,15 +62,15 @@ cases:
       - type: regex
         value: "(?i)schema_version"
       - type: regex
-        value: "(?i)run_id|timestamp"
+        value: "(?i)run\\.tag|run\\.path|run\\.stop_condition"
       - type: regex
-        value: "(?i)decision_totals|decisions"
+        value: "(?i)summary\\.kept|summary\\.discarded|summary\\.blocked"
       - type: regex
-        value: "(?i)command_evidence|commands"
+        value: "(?i)evidence"
       - type: regex
         value: "(?i)next_hypotheses|hypotheses"
       - type: regex
-        value: '(?i)results\.tsv|journal'
+        value: '(?i)results\\.tsv.*journal'
     realistic: true
 
   - id: happy-stop-on-blocker
@@ -90,9 +90,9 @@ cases:
       - type: regex
         value: "(?i)stop condition|stop early|iteration cap|up to five"
       - type: regex
-        value: "(?i)results\\.tsv|journal"
+        value: "(?i)results\\.tsv.*journal"
       - type: regex
-        value: "(?i)command evidence|command:|validation"
+        value: "(?i)evidence"
     realistic: true
 
   - id: edge-missing-stop-condition
@@ -138,7 +138,7 @@ cases:
       - type: regex
         value: "(?i)blocked"
       - type: regex
-        value: "(?i)command evidence|command:|validation|results\\.tsv|journal"
+        value: "(?i)evidence.*results\\.tsv.*journal"
     realistic: true
 
   - id: negative-control
