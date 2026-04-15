@@ -1,0 +1,3 @@
+interface:
+  display_name: "PNPM Manager"
+  short_description: "pnpm workspace filters and recursive command routing"
