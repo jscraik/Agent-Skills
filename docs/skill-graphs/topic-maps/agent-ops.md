@@ -36,7 +36,6 @@ covers:
 - [[codex-agent-creator]] — Create and install Codex custom multi-agent roles under `agents/` with a role definition and `openai.yaml` metadata.
 - [[plugin-builder]] — Create, convert, and validate Codex plugin packages: skills, prompts, hooks, agents, and MCP metadata.
 - [[decide-build-primitive]] — Analyze and decide the right Codex primitive: Skill, Custom Prompt, or Agent automation.
-- [[arscontexta]] — Install, validate, or maintain Ars Contexta parity in Codex; mirror skills/prompts/agents/automations.
 - [[codex-automation-architect]] — Create, review, and merge Codex app automations with environment preflight and multi-runner validation.
 - [[agents-md]] — Refactor or create AGENTS.md using progressive disclosure: minimal root, linked docs, contradiction tracking.
 
