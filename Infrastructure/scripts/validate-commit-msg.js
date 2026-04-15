@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 
 const COMMIT_MSG_FILE = process.argv[2];
 const CONVENTIONAL_COMMIT_REGEX =
-	/^(feat|fix|chore|docs|refactor|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
+	/^(\[AI\]\s+)?(feat|fix|chore|docs|refactor|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
 const CO_AUTHOR_REGEX = /Co-Authored-By:\s*.+/i;
 
 function main() {
@@ -40,7 +40,7 @@ function main() {
 	const firstLine = lines[0];
 	if (!CONVENTIONAL_COMMIT_REGEX.test(firstLine)) {
 		errors.push(
-			"First line must follow conventional commit format: type(scope)!: description",
+			"First line must follow conventional commit format: [AI] type(scope)!: description (AI prefix optional)",
 		);
 	}
 
@@ -78,7 +78,7 @@ function main() {
 			console.error(`  ✗ ${error}`);
 		}
 		console.error(
-			"\nCommit message format example:\n  feat(scope): add new feature\n\n  Detailed description here.\n\n  Co-Authored-By: Your Name <email@example.com>",
+			"\nCommit message format examples:\n  feat(scope): add new feature\n  [AI] fix(core): resolve bug in parser\n\n  Detailed description here.\n\n  Co-Authored-By: Your Name <email@example.com>",
 		);
 		process.exit(1);
 	}

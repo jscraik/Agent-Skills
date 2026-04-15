@@ -3,6 +3,14 @@
 
 set -euo pipefail
 
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -f "$SCRIPT_DIR/utils.sh" ]]; then
+    echo "ERROR: Required file not found: $SCRIPT_DIR/utils.sh"
+    exit 1
+fi
+source "$SCRIPT_DIR/utils.sh"
+
 VERSION="${1:-}"
 ARTIFACT_DIR="${2:-}"
 
@@ -121,14 +129,17 @@ This release was built using the fallback CI path due to primary CI unavailabili
 sha256sum -c *.sha256
 
 # Verify signatures
-gpg --verify *.asc *
+EOF
+)
+    append_signature_checks "$ARTIFACT_DIR" RELEASE_NOTES
+    RELEASE_NOTES="$RELEASE_NOTES
 \`\`\`
 
 ### Artifacts
-$(cd "$ARTIFACT_DIR" && for f in ./*-"$VERSION"-*; do case "$f" in *.sha256|*.asc|*.json) ;; *) stat -f '%N %z' "$f" 2>/dev/null | awk '{print "- " $1 " (" $2 " bytes)"}' || wc -c < "$f" | awk -v n="$f" '{print "- " n " (" $1 " bytes)"}' ;; esac; done)
+$(find "$ARTIFACT_DIR" -maxdepth 1 -type f -name "*-$VERSION-*" ! -name "*.sha256" ! -name "*.asc" ! -name "*.json" -printf "- %f (%s bytes)\n" 2>/dev/null | sort)
 
 ---
-Built with [fallback-release](../tree/main/product/Infrastructure/ops/fallback-release)
+Built with [fallback-release](../tree/main/Docs/product/ops/fallback-release)
 EOF
 )
 
