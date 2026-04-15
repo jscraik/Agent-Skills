@@ -3,6 +3,10 @@
 
 set -euo pipefail
 
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
+
 VERSION="${1:-}"
 ARTIFACT_DIR="${2:-}"
 
@@ -123,20 +127,7 @@ sha256sum -c *.sha256
 # Verify signatures
 EOF
 )
-    for sig_file in "$ARTIFACT_DIR"/*.asc; do
-        if [[ -e "$sig_file" ]]; then
-            artifact_file="${sig_file%.asc}"
-            sig_name=$(basename "$sig_file")
-            artifact_name=$(basename "$artifact_file")
-            if [[ -e "$artifact_file" ]]; then
-                RELEASE_NOTES="$RELEASE_NOTES
-gpg --verify $sig_name $artifact_name"
-            else
-                RELEASE_NOTES="$RELEASE_NOTES
-# WARNING: Artifact not found for signature $sig_name"
-            fi
-        fi
-    done
+    append_signature_checks "$ARTIFACT_DIR" RELEASE_NOTES
     RELEASE_NOTES="$RELEASE_NOTES
 \`\`\`
 
