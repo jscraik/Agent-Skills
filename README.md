@@ -5,8 +5,8 @@ A governed repository of **137 skills** for AI coding agents (Codex, Claude, Gem
 **What this gives you:**
 
 - **One place for skills** – Author in Markdown, sync to any runtime
-- **Quality gates** – 29 automated structural, security, and behavioral validation checks
-- **Living skill graph** – Browse 137 skills across 13 topic clusters with relationship mapping
+- **Quality gates** – 28 automated structural, security, and behavioral validation checks
+- **Living skill graph** – Browse skills organized by topic clusters with relationship mapping
 - **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
 
 ## Quick start
@@ -187,5 +187,5 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 
 - **License:** Apache 2.0
 - **Skills:** 137 canonical total (manual cluster table above is non-canonical)
-- **Validation:** 29 automated checks via `ask repo validate`
+- **Validation:** 28 automated checks via `ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity
