@@ -39,7 +39,7 @@ Use this skill when:
 
 Do not use this skill when:
 - The user wants a normal single-agent implementation with no delegation.
-- The user only wants to create, install, or update a role definition. Route that part to `codex-agent-builder`.
+- The user only wants to create, install, or update a role definition. Route that part to `codex-agent-creator`.
 - The main need is isolated checkouts or parallel write safety via worktrees. Route to `using-git-worktrees`.
 - The task is a generic Codex product question with no orchestration design need. Route to `openai-docs`.
 
@@ -48,7 +48,7 @@ Do not use this skill when:
 - The current repo or project path is known.
 - The desired outcome is clear enough to split into bounded subtasks.
 - If code edits are in scope, the orchestrator can determine whether writes are read-only, disjoint-by-file, or unsafe-in-shared-checkout.
-- Existing installed roles are preferred over inventing new ones. If a genuinely missing role blocks the design, co-trigger `codex-agent-builder`.
+- Existing installed roles are preferred over inventing new ones. If a genuinely missing role blocks the design, co-trigger `codex-agent-creator`.
 
 ## Deliverables and results
 - A response that can be emitted as `schema_version: 1` structured output when the caller requests schema-bound output mode.
@@ -66,7 +66,7 @@ Do not use this skill when:
 1. **Translate the runtime first**
    - Treat the root Codex thread as the orchestrator because Codex subagents do not use Claude-style teams, inbox files, or shared task JSON queues.
    - Coordinate through the parent agent using `spawn_agent`, `wait_agent`, `send_input`, and `close_agent` because Codex subagents report back through the parent workflow.
-   - Read `Infrastructure/references/upstream-orchestrating-swarms.md` when translating older `Task`, `Teammate`, `team_name`, or inbox concepts into Codex-native behavior.
+   - Read `references/upstream-orchestrating-swarms.md` when translating older `Task`, `Teammate`, `team_name`, or inbox concepts into Codex-native behavior.
 
 2. **Decide whether subagents are actually warranted**
    - Use subagents only when the user explicitly asked for delegation.
@@ -80,7 +80,7 @@ Do not use this skill when:
    - Use specialist reviewers such as `security-sentinel`, `performance-oracle`, `architecture-strategist`, or language reviewers when the request is clearly specialized.
    - Use `worker` for bounded implementation tasks with explicit file ownership.
    - Use `monitor` for long-running polling, waits, and status checks that should stay off the main thread.
-   - If a required role truly does not exist, stop broadening the skill and route the role-creation part to `codex-agent-builder`.
+   - If a required role truly does not exist, stop broadening the skill and route the role-creation part to `codex-agent-creator`.
 
 4. **Choose a write strategy before spawning**
    - Default to shared-checkout read-only work for review, exploration, docs lookup, and evidence gathering.
@@ -109,7 +109,7 @@ Do not use this skill when:
 8. **Use modern Codex defaults**
    - Prefer a `gpt-5.4` main planner or reviewer-of-reviews for the parent thread when the task is complex.
    - Prefer `gpt-5.4-mini` subagents for narrower supporting work because that matches current OpenAI guidance for responsive, cost-efficient Codex subagent workflows.
-   - Read `Infrastructure/references/codex-subagents-2026.md` when you need the current OpenAI-backed rationale and configuration guidance.
+   - Read `references/codex-subagents-2026.md` when you need the current OpenAI-backed rationale and configuration guidance.
 
 ## Validation
 Fail fast: stop at the first failed gate.
@@ -118,7 +118,7 @@ Required gates:
 1. Explicit user permission for subagents or parallel agent work is present.
 2. The selected subtasks are genuinely parallel or sidecar-safe.
 3. The write strategy is classified before any write-capable worker is spawned.
-4. The chosen roster uses installed roles first and only escalates to `codex-agent-builder` when a real gap exists.
+4. The chosen roster uses installed roles first and only escalates to `codex-agent-creator` when a real gap exists.
 5. Worker briefs include shared-environment, non-overwrite, and deliverable constraints.
 6. Finished outputs are reviewed and integrated before completion is reported.
 
@@ -165,19 +165,19 @@ Required gates:
 - "Help me design the smallest safe subagent roster for a flaky checkout flow, plus a long-running verification monitor."
 
 ## References
-- `Infrastructure/references/codex-subagents-2026.md`
+- `references/codex-subagents-2026.md`
   Read when: you need current OpenAI docs, March 2026 model guidance, or the manager-versus-handoff decision.
-- `Infrastructure/references/upstream-orchestrating-swarms.md`
+- `references/upstream-orchestrating-swarms.md`
   Read when: the user provides an older Claude swarm prompt or wants to preserve upstream orchestration doctrine during migration.
-- `Infrastructure/references/overlap-matrix.md`
-  Read when: you need to decide whether this skill, `codex-agent-builder`, `using-git-worktrees`, or another workflow owner should lead.
-- `Infrastructure/references/contract.yaml`
-- `Infrastructure/references/evals.yaml`
+- `references/overlap-matrix.md`
+  Read when: you need to decide whether this skill, `codex-agent-creator`, `using-git-worktrees`, or another workflow owner should lead.
+- `references/contract.yaml`
+- `references/evals.yaml`
 
 ## See Also
 | Skill | When to use |
 |---|---|
-| [[codex-agent-builder]] | Create or update the agent roles that the orchestration plan needs |
+| [[codex-agent-creator]] | Create or update the agent roles that the orchestration plan needs |
 | [[using-git-worktrees]] | Split write-heavy parallel work into isolated worktrees instead of a shared checkout |
 | [[ce-work]] | Execute a plan once the orchestration decision is made and the task is implementation-ready |
 | [[resolve-pr-parallel]] | Apply bounded parallelism to PR review resolution rather than general subagent orchestration |
@@ -207,11 +207,11 @@ Required gates:
 ## Deliverables
 - A Codex-native orchestration plan or execution path.
 - A recommended roster and write strategy.
-- Clear routing to `codex-agent-builder` or `using-git-worktrees` when those are the right companion owners.
+- Clear routing to `codex-agent-creator` or `using-git-worktrees` when those are the right companion owners.
 
 ## Failure mode
 - If the user did not explicitly ask for subagents, keep the task local and say so.
 - If the write surface is unsafe for same-checkout parallelism, stop and route to `using-git-worktrees` or a single-agent plan.
-- If the workflow depends on a missing role, stop broadening the skill and route the role-creation step to `codex-agent-builder`.
+- If the workflow depends on a missing role, stop broadening the skill and route the role-creation step to `codex-agent-creator`.
 
 **Topic map:** [[agent-ops]]

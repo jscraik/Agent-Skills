@@ -307,7 +307,7 @@ TMP_CONTEXT="$TMP_DIR/diagram-context.md"
 
 CONTEXT_SHA="$(shasum -a 256 "$TMP_CONTEXT" | awk '{print $1}')"
 GIT_HEAD="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
-DIAGRAM_COUNT="$(ls "$TMP_DIR/diagrams"/*.mmd | wc -l | tr -d ' ')"
+DIAGRAM_COUNT="$(find "$TMP_DIR/diagrams" -maxdepth 1 -name '*.mmd' 2>/dev/null | wc -l | tr -d ' ')"
 CHANGED=true
 
 if [[ -f "$CONTEXT_FILE" ]] && cmp -s "$TMP_CONTEXT" "$CONTEXT_FILE"; then

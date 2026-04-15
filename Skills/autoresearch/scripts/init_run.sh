@@ -5,18 +5,25 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  bash Skills/autoresearch/Infrastructure/scripts/init_run.sh --tag <run-tag> --targets "<path1,path2,...>" [--out <artifacts-root>]
+  bash Skills/autoresearch/scripts/init_run.sh --tag <run-tag> --targets "<path1,path2,...>" [--out <artifacts-root>]
 
 Options:
   --tag       Required run tag (lowercase letters, digits, hyphens)
   --targets   Required comma-separated target paths
-  --out       Optional output root under Infrastructure/artifacts/autoresearch (default: Infrastructure/artifacts/autoresearch)
+  --out       Optional output root under artifacts/autoresearch (default: artifacts/autoresearch)
 EOF
+}
+
+trim_ascii_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
 }
 
 tag=""
 targets_raw=""
-out_root="Infrastructure/artifacts/autoresearch"
+out_root="artifacts/autoresearch"
 repo_root="$(git rev-parse --show-toplevel)"
 
 while [[ $# -gt 0 ]]; do
@@ -56,8 +63,8 @@ if [[ ! "$tag" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
   exit 2
 fi
 
-normalized_out="$(
-python3 - "$repo_root" "$out_root" <<'PY'
+if ! normalized_out="$(
+  python3 -c '
 from pathlib import Path
 import sys
 
@@ -77,14 +84,14 @@ except ValueError as exc:
 
 allowed_root = (repo_root / "artifacts" / "autoresearch").resolve()
 if out_path != allowed_root and allowed_root not in out_path.parents:
-    raise SystemExit("Output root must stay under Infrastructure/artifacts/autoresearch.")
+    raise SystemExit("Output root must stay under artifacts/autoresearch.")
 
 print(rel.as_posix())
-PY
-)" || {
+' "$repo_root" "$out_root" 2>&1
+)"; then
   echo "$normalized_out" >&2
   exit 2
-}
+fi
 
 timestamp="$(date +%Y%m%d-%H%M%S)"
 run_dir="${normalized_out}/${tag}-${timestamp}"
@@ -107,11 +114,11 @@ declare -A seen_targets=()
 : > "$targets_path"
 
 for target in "${raw_targets[@]}"; do
-  trimmed="$(echo "$target" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  trimmed="$(trim_ascii_whitespace "$target")"
   [[ -n "$trimmed" ]] || continue
 
-  normalized_target="$(
-  python3 - "$repo_root" "$trimmed" <<'PY'
+  if ! normalized_target="$(
+    python3 -c '
 from pathlib import Path
 import sys
 
@@ -125,20 +132,20 @@ resolved = (repo_root / raw_target).resolve()
 try:
     rel = resolved.relative_to(repo_root)
 except ValueError as exc:
-    raise SystemExit(f"Target '{raw_target}' resolves outside repo root.") from exc
+    raise SystemExit(f"Target '"'"'{raw_target}'"'"' resolves outside repo root.") from exc
 
 rel_posix = rel.as_posix()
 if rel_posix.startswith("Plugins/cache/"):
-    raise SystemExit(f"Target '{raw_target}' is under Plugins/cache and is not editable.")
+    raise SystemExit(f"Target '"'"'{raw_target}'"'"' is under Plugins/cache and is not editable.")
 if not resolved.exists():
-    raise SystemExit(f"Target '{raw_target}' does not exist.")
+    raise SystemExit(f"Target '"'"'{raw_target}'"'"' does not exist.")
 
 print(rel_posix)
-PY
-  )" || {
+' "$repo_root" "$trimmed" 2>&1
+  )"; then
     echo "$normalized_target" >&2
     exit 2
-  }
+  fi
 
   if [[ -z "${seen_targets[$normalized_target]:-}" ]]; then
     printf '%s\n' "$normalized_target" >> "$targets_path"

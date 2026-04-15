@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
 import sys
 from pathlib import Path
 
@@ -28,8 +27,8 @@ from render_reference_templates import (
     build_context,
 )
 
-REPO_ROOT = SCRIPT_DIR.parents[5]
-BENCHMARK_VALIDATOR = REPO_ROOT / "scripts" / "validate_skill_authoring_family_benchmarks.py"
+REPO_ROOT = SCRIPT_DIR.parents[4]
+REPO_SCRIPTS_DIR = REPO_ROOT / "scripts"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -100,14 +99,25 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.update:
-        benchmark_cmd = [sys.executable, str(BENCHMARK_VALIDATOR), "--format", "text"]
-        benchmark_proc = subprocess.run(benchmark_cmd, cwd=REPO_ROOT)
-        if benchmark_proc.returncode != 0:
+        if str(REPO_SCRIPTS_DIR) not in sys.path:
+            sys.path.insert(0, str(REPO_SCRIPTS_DIR))
+        try:
+            from validate_skill_authoring_family_benchmarks import (  # noqa: WPS433
+                main as validate_skill_authoring_family_benchmarks_main,
+            )
+        except ModuleNotFoundError as exc:
+            raise TemplateRenderError(
+                "Could not import validate_skill_authoring_family_benchmarks from "
+                f"{REPO_SCRIPTS_DIR}. Check REPO_ROOT path wiring."
+            ) from exc
+
+        benchmark_exit_code = validate_skill_authoring_family_benchmarks_main(["--format", "text"])
+        if benchmark_exit_code != 0:
             print(
                 "[ERROR] Updated baselines but family benchmark validation failed. "
                 "Fix benchmark findings before accepting updated templates."
             )
-            return benchmark_proc.returncode
+            return benchmark_exit_code
         print("[OK] Family benchmark validation passed after template baseline update.")
 
     if drift_found and not args.update:

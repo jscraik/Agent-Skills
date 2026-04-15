@@ -8,15 +8,22 @@ name: <skill-name>
 description: <one-line description with when-to-use intent>
 allowed-tools:
   - <tool pattern>
-when_to_use: Use when <clear trigger statement>. Examples: "<trigger 1>", "<trigger 2>".
-argument-hint: "<optional argument hint>"
-arguments:
-  - <optional argument name>
-context: <fork|inline; omit when inline>
+metadata:
+  skill-type: <canonical-skill-type>
+  category: <1-9>
+  target_environment: <codex|claude|portable>
+  compatibility_posture: <learn|guided|execute>
 ---
 
 # <Skill Title>
 <short description>
+
+## When to use
+- Use when <clear trigger statement>.
+- Trigger examples: "<trigger 1>", "<trigger 2>".
+
+## Arguments
+- Optional arguments: `<arg1>`, `<arg2>`
 
 ## Inputs
 - `$<arg_name>`: <description>
@@ -60,6 +67,7 @@ Notes:
 - Only include optional annotations (`Execution`, `Artifacts`, `Human checkpoint`, `Rules`) when they materially help execution.
 - Keep the skill concise and move deep references into `Infrastructure/references/`.
 - Keep `allowed-tools` minimal and pattern-based (for example `Bash(gh:*)`), based on observed requirements.
+- Keep frontmatter on official keys only; move routing and argument hints into body sections.
 - Include a real `## See Also` table in final output (replace placeholders with real local skill links before saving).
 - For parallel work, use sub-step labels such as `3a`, `3b`.
 - For user-owned actions, mark step titles with `[human]`.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Publish fallback artifacts to cache and create GitHub release
 
 set -euo pipefail
@@ -125,7 +125,7 @@ gpg --verify *.asc *
 \`\`\`
 
 ### Artifacts
-$(cd "$ARTIFACT_DIR" && ls -la *-"$VERSION"-* | grep -v '\.sha256\|\.asc\|\.json' | awk '{print "- " $9 " (" $5 " bytes)"}')
+$(cd "$ARTIFACT_DIR" && for f in ./*-"$VERSION"-*; do case "$f" in *.sha256|*.asc|*.json) ;; *) stat -f '%N %z' "$f" 2>/dev/null | awk '{print "- " $1 " (" $2 " bytes)"}' || wc -c < "$f" | awk -v n="$f" '{print "- " n " (" $1 " bytes)"}' ;; esac; done)
 
 ---
 Built with [fallback-release](../tree/main/product/Infrastructure/ops/fallback-release)

@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Nightly cron job for skill genome loop
 # Add to crontab: 0 4 * * * /path/to/Infrastructure/scripts/cron_genome_loop.sh >> logs/genome-loop.log 2>&1
 
-set -e
+set -euo pipefail
 
 # Configuration
 REPO_ROOT="/Users/jamiecraik/dev/agent-skills"

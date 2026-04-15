@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Quick status overview for agent-skills repository
-set -e
+set -euo pipefail
 
 echo "📊 Agent Skills Status"
 echo "======================"

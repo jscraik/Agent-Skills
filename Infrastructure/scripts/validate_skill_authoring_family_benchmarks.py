@@ -21,6 +21,7 @@ import shutil
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Sequence, Set
 
@@ -119,6 +120,49 @@ _RUBRIC_VERSION_DIVERGENCE_DAYS = 90
 
 # Optional contract fields expected at gold standard; absence produces WARN (not FAIL).
 _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
+
+
+@lru_cache(maxsize=1)
+def _load_scope_skill_resolver():
+    resolver_path = (
+        REPO_ROOT
+        / "plugins"
+        / "skill-factory"
+        / "skills"
+        / "skill-builder"
+        / "scripts"
+        / "skill_graph_inventory.py"
+    )
+    if not resolver_path.exists():
+        return None
+    module_name = "skill_graph_inventory_shared_resolver"
+    spec = importlib.util.spec_from_file_location(module_name, resolver_path)
+    if spec is None or spec.loader is None:
+        return None
+    try:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        resolver = getattr(module, "resolve_scope_skill_for_path", None)
+        return resolver if callable(resolver) else None
+    except Exception:  # noqa: BLE001
+        # Syntax/import errors in skill_graph_inventory.py should not abort the benchmark;
+        # gracefully degrade and use fallback scope resolution.
+        return None
+
+
+def _resolve_scope_skill_for_path(relative_skill_dir: str) -> str:
+    """Resolve semantic scope taxonomy for a repo-relative skill path."""
+    resolver = _load_scope_skill_resolver()
+    if resolver is not None:
+        try:
+            resolved = str(resolver(relative_skill_dir)).strip().strip("/")
+            if resolved:
+                return resolved
+            raise RuntimeError(f"scope resolver returned empty scope for {relative_skill_dir}")
+        except Exception as exc:  # noqa: BLE001
+            raise RuntimeError(f"scope resolver failed for {relative_skill_dir}: {exc}") from exc
+    return relative_skill_dir
 
 
 @dataclass(frozen=True)
@@ -585,6 +629,12 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
     canonical_rel = _canonical_skill_rel(skill_rel)
     findings: List[Finding] = []
 
+    try:
+        expected_scope_skill = _resolve_scope_skill_for_path(canonical_rel)
+    except RuntimeError as exc:
+        findings.append(Finding("FAIL", "TASK_PROFILE_SCOPE_RESOLVER", skill_rel, str(exc)))
+        expected_scope_skill = canonical_rel
+
     if not skill_dir.exists():
         return [Finding("FAIL", "SKILL_DIR_MISSING", skill_rel, "skill directory not found")]
 
@@ -594,7 +644,7 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
 
     findings.extend(_validate_contract(skill_rel, skill_dir))
     findings.extend(_validate_evals(skill_rel, skill_dir))
-    findings.extend(_validate_task_profile(skill_rel, skill_dir, expected_scope_skill=canonical_rel))
+    findings.extend(_validate_task_profile(skill_rel, skill_dir, expected_scope_skill=expected_scope_skill))
     findings.extend(_validate_reference_pi(skill_rel, skill_dir))
     return findings
 
@@ -773,4 +823,3 @@ def main(argv: Sequence[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

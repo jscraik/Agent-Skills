@@ -4,7 +4,10 @@ set -euo pipefail
 repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_root"
 
-declare -A changed_map=()
+# Use a temporary file for changed paths to avoid bash 3.2 associative-array limitation.
+_changed_paths_file="$(mktemp "${TMPDIR:-/tmp}/path-ownership-paths.XXXXXX")"
+trap 'rm -f "$_changed_paths_file"' EXIT
+: > "$_changed_paths_file"
 allow_cache_projection_writes="${PATH_OWNERSHIP_ALLOW_CACHE_WRITES:-0}"
 if [[ "$allow_cache_projection_writes" != "0" && "$allow_cache_projection_writes" != "1" ]]; then
   echo "[path-ownership] invalid PATH_OWNERSHIP_ALLOW_CACHE_WRITES=${allow_cache_projection_writes} (expected 0 or 1)" >&2
@@ -15,12 +18,6 @@ if [[ "$guard_scope" != "auto" && "$guard_scope" != "staged" && "$guard_scope" !
   echo "[path-ownership] invalid PATH_OWNERSHIP_GUARD_SCOPE=${guard_scope} (expected auto|staged|working|base-ref)" >&2
   exit 2
 fi
-
-add_path() {
-  local path="$1"
-  [[ -z "$path" ]] && return 0
-  changed_map["$path"]=1
-}
 
 collect_changed_paths() {
   local path=""
@@ -48,122 +45,128 @@ collect_changed_paths() {
       echo "[path-ownership] base-ref scope requested but base ref is unavailable; falling back to staged scope" >&2
       selected_scope="staged"
     else
-      while IFS= read -r path; do
-        add_path "$path"
-      done < <(git diff --name-only "${base_ref}...HEAD")
+      git diff --name-only "${base_ref}...HEAD" >> "$_changed_paths_file"
       return 0
     fi
   fi
 
   if [[ "$selected_scope" == "staged" ]]; then
-    while IFS= read -r path; do
-      add_path "$path"
-    done < <(git diff --name-only --cached)
+    git diff --name-only --cached >> "$_changed_paths_file"
     return 0
   fi
 
-  while IFS= read -r path; do
-    add_path "$path"
-  done < <(git diff --name-only)
-
-  while IFS= read -r path; do
-    add_path "$path"
-  done < <(git diff --name-only --cached)
-
-  while IFS= read -r path; do
-    add_path "$path"
-  done < <(git ls-files --others --exclude-standard)
+  {
+    git diff --name-only
+    git diff --name-only --cached
+    git ls-files --others --exclude-standard
+  } >> "$_changed_paths_file"
 
   if [[ -n "${PATH_OWNERSHIP_GUARD_BASE_REF:-}" ]] && git rev-parse --verify "$PATH_OWNERSHIP_GUARD_BASE_REF" >/dev/null 2>&1; then
-    while IFS= read -r path; do
-      add_path "$path"
-    done < <(git diff --name-only "$PATH_OWNERSHIP_GUARD_BASE_REF...HEAD")
+    git diff --name-only "$PATH_OWNERSHIP_GUARD_BASE_REF...HEAD" >> "$_changed_paths_file"
     return 0
   fi
 
   if [[ -n "${GITHUB_BASE_REF:-}" ]] && git rev-parse --verify "origin/${GITHUB_BASE_REF}" >/dev/null 2>&1; then
-    while IFS= read -r path; do
-      add_path "$path"
-    done < <(git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD")
+    git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" >> "$_changed_paths_file"
   fi
 }
 
 collect_changed_paths
 
-if [[ "${#changed_map[@]}" -eq 0 ]]; then
+# Deduplicate and count paths.
+_dedup_file="$(mktemp "${TMPDIR:-/tmp}/path-ownership-dedup.XXXXXX")"
+trap 'rm -f "$_changed_paths_file" "$_dedup_file"' EXIT
+sort -u "$_changed_paths_file" > "$_dedup_file"
+sed -i '' '/^$/d' "$_dedup_file" 2>/dev/null || sed -i '/^$/d' "$_dedup_file"
+
+changed_count="$(wc -l < "$_dedup_file" | tr -d '[:space:]')"
+
+if [[ "$changed_count" -eq 0 ]]; then
   echo "[path-ownership] no changed paths detected"
   exit 0
 fi
 
+# Helper: check if a path exists in the changed set.
+has_path() {
+  grep -qxF "$1" "$_dedup_file"
+}
+
 mechanics_changed=0
 for mechanics_path in \
-  "Infrastructure/scripts/projection_integrity.py" \
-  "Infrastructure/scripts/sync_skills.sh" \
-  "Infrastructure/scripts/sync_projection_trees.sh" \
-  "Infrastructure/scripts/sync_plugin_factory_family.sh" \
-  "Infrastructure/scripts/validate_projection_integrity.sh"; do
-  if [[ -n "${changed_map[$mechanics_path]:-}" ]]; then
+  "scripts/projection_integrity.py" \
+  "scripts/sync_skills.sh" \
+  "scripts/sync_projection_trees.sh" \
+  "scripts/sync_plugin_factory_family.sh" \
+  "scripts/validate_projection_integrity.sh"; do
+  if has_path "$mechanics_path"; then
     mechanics_changed=1
     break
   fi
 done
 
-declare -a runtime_violations=()
-declare -a cache_violations=()
+runtime_violations_file="$(mktemp "${TMPDIR:-/tmp}/path-ownership-runtime.XXXXXX")"
+cache_violations_file="$(mktemp "${TMPDIR:-/tmp}/path-ownership-cache.XXXXXX")"
+trap 'rm -f "$_changed_paths_file" "$_dedup_file" "$runtime_violations_file" "$cache_violations_file"' EXIT
+: > "$runtime_violations_file"
+: > "$cache_violations_file"
 
-for path in "${!changed_map[@]}"; do
+while IFS= read -r path; do
+  [[ -z "$path" ]] && continue
   case "$path" in
     .agents/*|.agent/skills/*|skills-antigravity/*|runtime/*)
-      runtime_violations+=("$path")
+      printf '%s\n' "$path" >> "$runtime_violations_file"
       ;;
     Plugins/cache/*)
       if [[ "$allow_cache_projection_writes" != "1" ]]; then
-        cache_violations+=("$path -> set PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 for explicit projection-refresh lanes")
+        printf '%s -> set PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 for explicit projection-refresh lanes\n' "$path" >> "$cache_violations_file"
         continue
       fi
 
       if [[ "$path" =~ ^Plugins/cache/[^/]+/([^/]+)/local/(.+)$ ]]; then
         plugin_name="${BASH_REMATCH[1]}"
         rel_path="${BASH_REMATCH[2]}"
-        source_path="Plugins/${plugin_name}/${rel_path}"
-        if [[ -n "${changed_map[$source_path]:-}" || "$mechanics_changed" -eq 1 ]]; then
+        source_path="plugins/${plugin_name}/${rel_path}"
+        if has_path "$source_path" || [[ "$mechanics_changed" -eq 1 ]]; then
           :
         else
-          cache_violations+=("$path -> expected source change: $source_path (or projection mechanics update)")
+          printf '%s -> expected source change: %s (or projection mechanics update)\n' "$path" "$source_path" >> "$cache_violations_file"
         fi
       elif [[ "$path" =~ ^Plugins/cache/[^/]+/([^/]+)/(.+)$ ]]; then
         plugin_name="${BASH_REMATCH[1]}"
         rel_path="${BASH_REMATCH[2]}"
-        source_path="Plugins/${plugin_name}/${rel_path}"
-        if [[ -n "${changed_map[$source_path]:-}" || "$mechanics_changed" -eq 1 ]]; then
+        source_path="plugins/${plugin_name}/${rel_path}"
+        if has_path "$source_path" || [[ "$mechanics_changed" -eq 1 ]]; then
           :
         else
-          cache_violations+=("$path -> expected source change: $source_path (or projection mechanics update)")
+          printf '%s -> expected source change: %s (or projection mechanics update)\n' "$path" "$source_path" >> "$cache_violations_file"
         fi
       else
-        cache_violations+=("$path -> unmapped cache path")
+        printf '%s -> unmapped cache path\n' "$path" >> "$cache_violations_file"
       fi
       ;;
   esac
-done
+done < "$_dedup_file"
 
-if [[ "${#runtime_violations[@]}" -eq 0 && "${#cache_violations[@]}" -eq 0 ]]; then
+runtime_count="$(wc -l < "$runtime_violations_file" | tr -d '[:space:]')"
+cache_count="$(wc -l < "$cache_violations_file" | tr -d '[:space:]')"
+
+if [[ "$runtime_count" -eq 0 && "$cache_count" -eq 0 ]]; then
   echo "[path-ownership] pass"
   exit 0
 fi
 
 echo "[path-ownership] ERROR: direct edits crossed runtime/projection ownership boundaries." >&2
-echo "[path-ownership] Canonical guidance: Docs/agents/14-path-ownership-boundaries.md" >&2
+echo "[path-ownership] Canonical guidance: docs/agents/14-path-ownership-boundaries.md" >&2
 
-if [[ "${#runtime_violations[@]}" -gt 0 ]]; then
+if [[ "$runtime_count" -gt 0 ]]; then
   echo "[path-ownership] runtime surfaces must not be edited directly:" >&2
-  printf '  - %s\n' "${runtime_violations[@]}" >&2
+  sed 's/^/  - /' "$runtime_violations_file" >&2
 fi
 
-if [[ "${#cache_violations[@]}" -gt 0 ]]; then
+if [[ "$cache_count" -gt 0 ]]; then
   echo "[path-ownership] Plugins/cache edits are blocked by default and require explicit projection-write intent." >&2
   echo "[path-ownership] set PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 only for projection-refresh lanes." >&2
-  printf '  - %s\n' "${cache_violations[@]}" >&2
+  sed 's/^/  - /' "$cache_violations_file" >&2
 fi
 
 echo "[path-ownership] Fix: edit canonical source paths, then regenerate via ask/scripts sync wrappers." >&2

@@ -1,0 +1,27 @@
+schema_version: "1.0"
+skill: biome-linting
+type: runbook
+purpose: >
+  Provide Biome lint/check/ci guidance with explicit safe-vs-unsafe remediation
+  gates and rule-targeted command flows.
+triggers:
+  - User asks for Biome linting, formatting, or CI command guidance.
+  - User needs help triaging Biome diagnostics by rule scope.
+  - User asks for suppression patterns or fix strategy.
+inputs:
+  - Biome config and scripts
+  - desired remediation posture (read-only, safe-write, unsafe-write)
+  - target paths or workspace scope
+outputs:
+  - exact Biome command sequence
+  - scoped rule/suppression guidance
+  - CI-ready validation path
+non_goals:
+  - generic ESLint-only migration playbooks
+  - language ecosystems outside Biome scope
+risks:
+  - unsafe fixes can alter behavior
+  - broad suppressions can mask regressions
+source_basis:
+  execution_path: cli_primary
+  context7_library_id: /biomejs/biome

@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ars Contexta — Auto-Commit Hook
 # Commits changes after writes to keep the vault in version control.
 # Runs as async PostToolUse hook on Write events.
 #
 # Async hooks don't reliably receive tool input — commit all pending changes.
 
-set -e
+set -euo pipefail
 
 # Change to project directory
 cd "${CLAUDE_PROJECT_DIR:-$(pwd)}"

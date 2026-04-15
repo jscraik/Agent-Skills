@@ -3,6 +3,8 @@
 # Usage: ./validate-kernel.sh [path-to-vault]
 # Defaults to current directory if no path given.
 
+set -euo pipefail
+
 VAULT="${1:-.}"
 PASS=0
 WARN=0
@@ -43,8 +45,8 @@ fi
 
 # --- Primitive 2: Wiki links as graph edges ---
 echo "2. Wiki links as graph edges"
-link_files=$(grep -rl '\[\[' "$VAULT" --include="*.md" 2>/dev/null | grep -v ".git" | wc -l | tr -d ' ')
-total_notes=$(echo "$md_count")
+link_files=$(grep -rl '\[\[' "$VAULT" --include="*.md" 2>/dev/null | grep -vc ".git" || true)
+total_notes="$md_count"
 if [ "$total_notes" -eq 0 ]; then
     fail "No notes to check"
 elif [ "$link_files" -gt "$((total_notes / 2))" ]; then
@@ -54,7 +56,7 @@ else
 fi
 
 # Build index of existing filenames for dangling link check
-existing_files=$(find "$VAULT" -name "*.md" -not -path "*/.git/*" 2>/dev/null | xargs -I{} basename {} .md | sort -u)
+existing_files=$(find "$VAULT" -name "*.md" -not -path "*/.git/*" -print0 2>/dev/null | xargs -0 -I{} basename {} .md | sort -u)
 
 # Extract wiki links from note content (scan known note directories)
 dangling=0
@@ -99,9 +101,9 @@ fi
 
 # --- Primitive 3: MOC hierarchy ---
 echo "3. MOC hierarchy for attention management"
-moc_count=$(grep -rl '^type: moc' "$VAULT" --include="*.md" 2>/dev/null | grep -v ".git" | wc -l | tr -d ' ')
+moc_count=$(grep -rl '^type: moc' "$VAULT" --include="*.md" 2>/dev/null | grep -vc ".git" || true)
 if [ "$moc_count" -eq 0 ]; then
-    moc_like=$(grep -rl '## Core Ideas' "$VAULT" --include="*.md" 2>/dev/null | grep -v ".git" | wc -l | tr -d ' ')
+    moc_like=$(grep -rl '## Core Ideas' "$VAULT" --include="*.md" 2>/dev/null | grep -vc ".git" || true)
     if [ "$moc_like" -gt 0 ]; then
         warn "$moc_like MOC-like files but none declare type: moc"
     else
@@ -118,9 +120,8 @@ echo "4. Tree injection at session start"
 has_tree=false
 [ -f "$VAULT/.claude/hooks/session-start.sh" ] && has_tree=true
 [ -f "$VAULT/WORKSPACE-MAP.md" ] && has_tree=true
-for ctx in "$VAULT/CLAUDE.md"; do
-    [ -f "$ctx" ] && grep -qi "tree\|workspace.map\|orient" "$ctx" 2>/dev/null && has_tree=true
-done
+ctx="$VAULT/CLAUDE.md"
+[ -f "$ctx" ] && grep -qi "tree\|workspace.map\|orient" "$ctx" 2>/dev/null && has_tree=true
 find "$VAULT" -name "session-orient.sh" -not -path "*/.git/*" 2>/dev/null | grep -q . && has_tree=true
 
 if $has_tree; then
@@ -141,7 +142,7 @@ done
 desc_count=0
 no_desc=0
 for dir in $notes_dirs; do
-    d=$(grep -rl '^description:' "$dir" --include="*.md" -l 2>/dev/null | grep -v ".git" | wc -l | tr -d ' ')
+    d=$(grep -rl '^description:' "$dir" --include="*.md" -l 2>/dev/null | grep -vc ".git" || true)
     n=$(find "$dir" -maxdepth 1 -name "*.md" -not -name "README.md" -not -name "SKILL.md" 2>/dev/null | wc -l | tr -d ' ')
     desc_count=$((desc_count + d))
     no_desc=$((no_desc + n - d))
@@ -163,7 +164,7 @@ echo "6. Topics footer linking notes to MOCs"
 topics_count=0
 no_topics=0
 for dir in $notes_dirs; do
-    t=$(grep -rl '^topics:' "$dir" --include="*.md" 2>/dev/null | grep -v ".git" | wc -l | tr -d ' ')
+    t=$(grep -rl '^topics:' "$dir" --include="*.md" 2>/dev/null | grep -vc ".git" || true)
     n=$(find "$dir" -maxdepth 1 -name "*.md" -not -name "README.md" -not -name "SKILL.md" 2>/dev/null | wc -l | tr -d ' ')
     topics_count=$((topics_count + t))
     no_topics=$((no_topics + n - t))
@@ -235,9 +236,8 @@ fi
 # --- Primitive 9: Session rhythm ---
 echo "9. Session rhythm: orient, work, persist"
 has_rhythm=false
-for ctx in "$VAULT/CLAUDE.md"; do
-    [ -f "$ctx" ] && grep -qi "orient\|session start\|session end\|persist\|session rhythm" "$ctx" 2>/dev/null && has_rhythm=true
-done
+ctx="$VAULT/CLAUDE.md"
+[ -f "$ctx" ] && grep -qi "orient\|session start\|session end\|persist\|session rhythm" "$ctx" 2>/dev/null && has_rhythm=true
 [ -f "$VAULT/.claude/hooks/session-start.sh" ] && has_rhythm=true
 find "$VAULT" -name "session-orient.sh" -not -path "*/.git/*" 2>/dev/null | grep -q . && has_rhythm=true
 
@@ -256,9 +256,8 @@ has_search_docs=false
 
 [ -f "$VAULT/.mcp.json" ] && grep -q '"qmd"' "$VAULT/.mcp.json" 2>/dev/null && grep -q '"mcp"' "$VAULT/.mcp.json" 2>/dev/null && has_search_mcp=true
 command -v qmd &>/dev/null && has_search_cli=true
-for ctx in "$VAULT/CLAUDE.md"; do
-    [ -f "$ctx" ] && grep -qi "semantic search\|qmd\|vector_search\|deep_search" "$ctx" 2>/dev/null && has_search_docs=true
-done
+ctx="$VAULT/CLAUDE.md"
+[ -f "$ctx" ] && grep -qi "semantic search\|qmd\|vector_search\|deep_search" "$ctx" 2>/dev/null && has_search_docs=true
 
 if $has_search_mcp || $has_search_cli; then
     has_search=true
@@ -268,7 +267,7 @@ if $has_search; then
     details=""
     $has_search_mcp && details="${details}.mcp.json qmd server, "
     $has_search_cli && details="${details}qmd executable, "
-    details=$(echo "$details" | sed 's/, $//')
+    details="${details%, }"
     pass "Semantic search capability found (${details})"
 elif $has_search_docs; then
     warn "Semantic search mentioned in docs but no qmd executable or .mcp.json qmd server config detected"
@@ -295,9 +294,8 @@ has_discovery_section=false
 has_discovery_skills=false
 
 # Check context files for Discovery-First section
-for ctx in "$VAULT/CLAUDE.md"; do
-    [ -f "$ctx" ] && grep -qi "discovery.first" "$ctx" 2>/dev/null && has_discovery_section=true
-done
+ctx="$VAULT/CLAUDE.md"
+[ -f "$ctx" ] && grep -qi "discovery.first" "$ctx" 2>/dev/null && has_discovery_section=true
 
 # Check skills for discovery checks
 skill_dirs=""
@@ -336,9 +334,8 @@ for candidate in "Infrastructure/ops/tensions" "04_meta/logs/tensions" "logs/ten
 done
 
 # Check context files for review trigger documentation
-for ctx in "$VAULT/CLAUDE.md"; do
-    [ -f "$ctx" ] && grep -qi "rethink\|review\|observations" "$ctx" 2>/dev/null && has_review_trigger=true
-done
+ctx="$VAULT/CLAUDE.md"
+[ -f "$ctx" ] && grep -qi "rethink\|review\|observations" "$ctx" 2>/dev/null && has_review_trigger=true
 
 # Check for rethink command/skill
 for d in ".claude/skills/rethink" "skills/rethink"; do
@@ -362,7 +359,7 @@ elif [ "$checks_passed" -ge 2 ]; then
     $has_tensions_dir || details="${details}tensions dir, "
     $has_review_trigger || details="${details}review trigger, "
     $has_rethink || details="${details}rethink mechanism, "
-    details=$(echo "$details" | sed 's/, $//')
+    details="${details%, }"
     warn "Partial learning loop ($checks_passed/4). Missing: $details"
 else
     fail "No operational learning loop detected (need observations dir, tensions dir, review trigger, rethink mechanism)"

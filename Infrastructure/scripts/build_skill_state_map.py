@@ -274,7 +274,10 @@ def discover_nodes(
                 wave=str(row.get("wave", "wave-2-co-pilot")).strip() or "wave-2-co-pilot",
                 wave_ready=wave_ready.get(str(row.get("wave", "")), False),
                 display_slice=display_slice,
-                profile_status=str(row.get("status", "unknown")).strip() or "unknown",
+                profile_status=str(
+                    row.get("task_profile_status", row.get("status", "unknown"))
+                ).strip()
+                or "unknown",
                 thresholds=profile_obj.get("thresholds") if isinstance(profile_obj.get("thresholds"), dict) else {},
                 criteria_ids=[str(item.get("id", "")).strip() for item in criteria if isinstance(item, dict) and str(item.get("id", "")).strip()],
             )

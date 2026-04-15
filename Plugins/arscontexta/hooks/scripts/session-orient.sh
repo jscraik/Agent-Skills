@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ars Contexta — Session Orientation Hook
 # Injects workspace structure, identity, methodology, and maintenance signals at session start.
 # Also handles session tracking (capture moved here from Stop hook — fires once per session).
+
+set -euo pipefail
 
 # Only run in Ars Contexta vaults
 GUARD_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -61,7 +63,7 @@ EOF
   if [ "$(bash "$READ_CONFIG" "git" "true")" = "true" ] && git rev-parse --is-inside-work-tree &>/dev/null; then
     git add Infrastructure/ops/sessions/ 2>/dev/null
     [ -f self/goals.md ] && git add self/goals.md 2>/dev/null
-    [ -f Infrastructure/ops/goals.md ] && git add Infrastructure/ops/goals.md 2>/dev/null
+    [ -f ops/goals.md ] && git add ops/goals.md 2>/dev/null
     git commit -m "Session start: ${TIMESTAMP}" --quiet --no-verify 2>/dev/null || true
   fi
 fi
@@ -103,8 +105,8 @@ fi
 if [ -f self/goals.md ]; then
   cat self/goals.md
   echo ""
-elif [ -f Infrastructure/ops/goals.md ]; then
-  cat Infrastructure/ops/goals.md
+elif [ -f ops/goals.md ]; then
+  cat ops/goals.md
   echo ""
 fi
 
@@ -115,15 +117,15 @@ if [ -f self/identity.md ]; then
 fi
 
 # Learned behavioral patterns (recent methodology notes)
-for f in $(ls -t Infrastructure/ops/methodology/*.md 2>/dev/null | head -5); do
+for f in $(find ops/methodology -maxdepth 1 -name '*.md' -not -name 'README.md' 2>/dev/null | sort -r | head -5); do
   head -3 "$f"
 done
 
 # Condition-based maintenance signals
-OBS_COUNT=$(ls -1 Infrastructure/ops/observations/*.md 2>/dev/null | wc -l | tr -d ' ')
-TENS_COUNT=$(ls -1 Infrastructure/ops/tensions/*.md 2>/dev/null | wc -l | tr -d ' ')
-SESS_COUNT=$(ls -1 Infrastructure/ops/sessions/*.json 2>/dev/null | grep -cv current 2>/dev/null || echo 0)
-INBOX_COUNT=$(ls -1 inbox/*.md 2>/dev/null | wc -l | tr -d ' ')
+OBS_COUNT=$(find ops/observations -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+TENS_COUNT=$(find ops/tensions -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+SESS_COUNT=$(find ops/sessions -maxdepth 1 -name '*.json' -not -name 'current.json' 2>/dev/null | wc -l | tr -d ' ')
+INBOX_COUNT=$(find inbox -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 
 if [ "$OBS_COUNT" -ge 10 ]; then
   echo "CONDITION: $OBS_COUNT pending observations. Consider /rethink."
@@ -140,14 +142,14 @@ fi
 
 # Workboard reconciliation (explicit opt-in only)
 # Never execute workspace-provided scripts by default.
-if [ "${ARSCONTEXTA_TRUST_REPO_SCRIPTS:-false}" = "true" ] && [ -e Infrastructure/ops/Infrastructure/scripts/reconcile.sh ]; then
-  bash Infrastructure/ops/Infrastructure/scripts/reconcile.sh --compact 2>/dev/null
+if [ "${ARSCONTEXTA_TRUST_REPO_SCRIPTS:-false}" = "true" ] && [ -e ops/scripts/reconcile.sh ]; then
+  bash ops/scripts/reconcile.sh --compact 2>/dev/null
 fi
 
 # Methodology staleness check (Rule Zero)
-if [ -d Infrastructure/ops/methodology ] && [ -f Infrastructure/ops/config.yaml ]; then
-  CONFIG_MTIME=$(stat -f %m Infrastructure/ops/config.yaml 2>/dev/null || stat -c %Y Infrastructure/ops/config.yaml 2>/dev/null || echo 0)
-  NEWEST_METH=$(ls -t Infrastructure/ops/methodology/*.md 2>/dev/null | head -1)
+if [ -d ops/methodology ] && [ -f ops/config.yaml ]; then
+  CONFIG_MTIME=$(stat -f %m ops/config.yaml 2>/dev/null || stat -c %Y ops/config.yaml 2>/dev/null || echo 0)
+  NEWEST_METH=$(find ops/methodology -maxdepth 1 -name '*.md' -not -name 'README.md' -print0 2>/dev/null | xargs -0 stat -f '%m %N' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
   if [ -n "$NEWEST_METH" ]; then
     METH_MTIME=$(stat -f %m "$NEWEST_METH" 2>/dev/null || stat -c %Y "$NEWEST_METH" 2>/dev/null || echo 0)
     DAYS_STALE=$(( (CONFIG_MTIME - METH_MTIME) / 86400 ))

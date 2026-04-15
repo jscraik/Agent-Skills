@@ -51,7 +51,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Python deps
-        run: python -m pip install --upgrade pip pyyaml
+        run: python -m pip install --upgrade pip pyyaml pytest
 
       - name: Run repo validation
         env:
@@ -81,7 +81,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Python deps
-        run: python -m pip install --upgrade pip pyyaml
+        run: python -m pip install --upgrade pip pyyaml pytest
 
       - name: Run authoring family contract/eval/security gate
         env:

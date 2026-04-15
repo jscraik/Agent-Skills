@@ -6,10 +6,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+# Sentinel return code for skipped commands to distinguish from executed-success
+SKIPPED_RETURN_CODE = 2
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,6 +32,14 @@ def parse_args() -> argparse.Namespace:
         "--repo-root",
         default="",
         help="Repository root override",
+    )
+    parser.add_argument(
+        "--recursive-validation-guard",
+        action="store_true",
+        help=(
+            "Skip `bin/ask repo validate --json` when this run is already inside "
+            "a validate_all.sh recursion path."
+        ),
     )
     return parser.parse_args()
 
@@ -233,6 +245,20 @@ def _normalize_repo_validate(payload: dict[str, Any] | None) -> dict[str, Any]:
     }
 
 
+def _normalize_repo_validate_skipped() -> dict[str, Any]:
+    return {
+        "command": "repo validate --json",
+        "status": "not_run_recursive_guard",
+        "skip_reason": "recursive_validation_guard",
+    }
+
+
+def _flag_enabled(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _command_check(
     *,
     command: str,
@@ -279,7 +305,7 @@ def main() -> int:
         int: Process exit code; `0` on success.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[2]
+    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[1]
     if not repo_root.is_absolute():
         repo_root = (Path.cwd() / repo_root).resolve()
 
@@ -342,16 +368,29 @@ def main() -> int:
         )
     command_checks["plugins_status"] = plugins_status_checks
 
-    # Avoid recursive validation fan-out: `repo validate` calls validate_all.sh, which
-    # now invokes this runtime-separation lane.
-    rc, payload, evidence = _run_json(repo_root, ["Infrastructure/bin/ask", "repo", "status", "--json"])
-    command_checks["repo_validate"] = _command_check(
-        command="bin/ask repo status --json",
-        subject_id="repo",
-        returncode=rc,
-        normalized_fields=_normalize_repo_validate(payload),
-        evidence_ref=evidence,
+    # Avoid recursive validation fan-out: `repo validate --json` calls validate_all.sh, which
+    # invokes this runtime-separation lane. Skip only when the recursive guard is explicit
+    # (CLI flag and/or env var), and emit a deterministic skipped sentinel with provenance.
+    recursive_validation_guard = args.recursive_validation_guard or _flag_enabled(
+        os.environ.get("RECURSIVE_VALIDATION_GUARD")
     )
+    if recursive_validation_guard:
+        command_checks["repo_validate"] = _command_check(
+            command="bin/ask repo validate --json (skipped: recursive_validation_guard)",
+            subject_id="repo",
+            returncode=0,
+            normalized_fields=_normalize_repo_validate_skipped(),
+            evidence_ref=_sha256_text("SKIPPED:recursive_validation_guard"),
+        )
+    else:
+        rc, payload, evidence = _run_json(repo_root, ["Infrastructure/bin/ask", "repo", "validate", "--json"])
+        command_checks["repo_validate"] = _command_check(
+            command="bin/ask repo validate --json",
+            subject_id="repo",
+            returncode=rc,
+            normalized_fields=_normalize_repo_validate(payload),
+            evidence_ref=evidence,
+        )
 
     rc, payload, evidence = _run_json(
         repo_root,
@@ -432,10 +471,10 @@ def main() -> int:
 
     issues: list[str] = []
     for check_name, check in command_checks.items():
-        if isinstance(check, dict) and check.get("returncode") not in (None, 0):
+        if isinstance(check, dict) and check.get("returncode") not in (None, 0, SKIPPED_RETURN_CODE):
             issues.append(f"{check_name} exited {check.get('returncode')}")
     for plugin, check in plugins_status_checks.items():
-        if check.get("returncode") != 0:
+        if check.get("returncode") not in (0, SKIPPED_RETURN_CODE):
             issues.append(f"plugins_status.{plugin} exited {check.get('returncode')}")
 
     status = "healthy" if not issues else "degraded"

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Autoresearch icon large">
+  <rect width="512" height="512" rx="112" fill="#0F766E" />
+  <path d="M128 336L208 256L272 320L360 192" fill="none" stroke="#F8FAFC" stroke-width="38" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="360" cy="192" r="30" fill="#FDE047" />
+</svg>

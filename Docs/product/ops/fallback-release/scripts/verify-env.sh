@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Fallback Release Environment Verification
 # Exits 0 if environment is ready for fallback builds, 1 otherwise
 

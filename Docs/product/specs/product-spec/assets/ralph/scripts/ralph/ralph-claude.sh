@@ -241,7 +241,7 @@ run_check_command() {
 count_unchecked_boxes() {
   local file="$1"
   [[ -f "$file" ]] || { echo "0"; return 0; }
-  grep -E "^\s*([-*]|\d+[.)])?\s*\[\s\]\s+" "$file" 2>/dev/null | wc -l | tr -d ' '
+  grep -cE "^\s*([-*]|\d+[.)])?\s*\[\s\]\s+" "$file" 2>/dev/null || echo "0"
 }
 
 prd_tasks_key() {
@@ -685,21 +685,27 @@ Workspace: $(pwd)
 EOF
 
   if [[ "${#instruction_files[@]}" -gt 0 ]]; then
-    echo "" >>"$iter_prompt"
-    echo "## Also read (repo instructions)" >>"$iter_prompt"
-    for f in "${instruction_files[@]}"; do
-      echo "- $f" >>"$iter_prompt"
-    done
+    {
+      echo ""
+      echo "## Also read (repo instructions)"
+      for f in "${instruction_files[@]}"; do
+        echo "- $f"
+      done
+    } >>"$iter_prompt"
   fi
 
   if [[ "$local_mode" == "checkbox" ]]; then
-    echo "" >>"$iter_prompt"
-    echo "## Task file" >>"$iter_prompt"
-    echo "- $TASK_FILE" >>"$iter_prompt"
+    {
+      echo ""
+      echo "## Task file"
+      echo "- $TASK_FILE"
+    } >>"$iter_prompt"
   else
-    echo "" >>"$iter_prompt"
-    echo "## PRD file" >>"$iter_prompt"
-    echo "- $PRD_FILE" >>"$iter_prompt"
+    {
+      echo ""
+      echo "## PRD file"
+      echo "- $PRD_FILE"
+    } >>"$iter_prompt"
   fi
 
   cat >>"$iter_prompt" <<EOF
@@ -716,13 +722,17 @@ EOF
 EOF
 
   if [[ -f "$ADDENDUM_FILE" ]]; then
-    echo "## Prompt addendum (project-specific)" >>"$iter_prompt"
-    cat "$ADDENDUM_FILE" >>"$iter_prompt"
-    echo "" >>"$iter_prompt"
+    {
+      echo "## Prompt addendum (project-specific)"
+      cat "$ADDENDUM_FILE"
+      echo ""
+    } >>"$iter_prompt"
   fi
 
-  echo "## Current objective" >>"$iter_prompt"
-  echo "$objective_block" >>"$iter_prompt"
+  {
+    echo "## Current objective"
+    echo "$objective_block"
+  } >>"$iter_prompt"
   echo "" >>"$iter_prompt"
 
   if [[ "$USE_STRUCTURED" == "true" ]]; then

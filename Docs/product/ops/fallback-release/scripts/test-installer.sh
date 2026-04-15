@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test that installer path works with fallback artifacts
 
 set -euo pipefail
@@ -89,6 +89,7 @@ mkdir -p "$INSTALL_DIR/bin"
 # Copy binaries to install location
 for artifact in *-"$VERSION"-*; do
     if [[ -f "$artifact" && ! "$artifact" =~ \.(sha256|asc)$ ]]; then
+        # shellcheck disable=SC2001
         name=$(echo "$artifact" | sed "s/-${VERSION}-[a-f0-9]*//")
         cp "$artifact" "$INSTALL_DIR/bin/$name"
         chmod +x "$INSTALL_DIR/bin/$name"

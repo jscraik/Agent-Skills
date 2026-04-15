@@ -46,7 +46,7 @@ jobs:
       - name: Ensure GitHub CLI is installed
         run: bash Infrastructure/scripts/ensure-gh-cli.sh
       - name: Install deps
-        run: python -m pip install --upgrade pip pyyaml
+        run: python -m pip install --upgrade pip pyyaml pytest
       - name: Tier-1 structure gate (skill_gate)
         run: |
           python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
@@ -102,7 +102,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deps
-        run: python -m pip install --upgrade pip pyyaml
+        run: python -m pip install --upgrade pip pyyaml pytest
       - name: Validate skill authoring family (eval + security parity)
         env:
           SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
@@ -124,7 +124,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deps
-        run: python -m pip install --upgrade pip pyyaml
+        run: python -m pip install --upgrade pip pyyaml pytest
       - name: Run dual-run evals (requires codex/claude binaries + auth)
         run: |
           python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \

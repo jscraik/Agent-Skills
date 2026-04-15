@@ -7,7 +7,7 @@ Outputs:
   - edges in adjacency.yaml but NOT in any SKILL.md (stale seed entries)
 
 Usage:
-  python3 Infrastructure/scripts/validate-adjacency.py [vault_root]
+  python3 scripts/validate-adjacency.py [vault_root]
 
 Exit codes:
   0 = clean
@@ -31,14 +31,13 @@ CANONICAL_PREFIXES = {
     "github/",
     "interview/",
     "personas/",
-    "Plugins/arscontexta/skills/",
     "Plugins/coderabbit/skills/",
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
     "product/",
     "skills-antigravity/",
-    "Skills/",
+    "skills-system/",
     "Skills/",
 }
 

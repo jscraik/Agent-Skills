@@ -41,6 +41,8 @@ class SkillEntry:
     skill_md: Path
     skill_dir: Path
     relative_skill_dir: str
+    source_skill_dirs: tuple[str, ...]
+    scope_skill: str
     inventory_slice: str
     profile_path: Path
     wave: str
@@ -69,13 +71,16 @@ def discover_active_skills(
         skill_md = row.skill_md
         skill_dir = skill_md.parent
         rel_dir = row.relative_skill_dir
-        mode = "manual" if rel_dir in MANUAL_SKILL_PATHS else "co-pilot"
+        scope_skill = row.scope_skill
+        mode = "manual" if scope_skill in MANUAL_SKILL_PATHS else "co-pilot"
         wave = "wave-1-manual" if mode == "manual" else "wave-2-co-pilot"
         entries.append(
             SkillEntry(
                 skill_md=skill_md,
                 skill_dir=skill_dir,
                 relative_skill_dir=rel_dir,
+                source_skill_dirs=row.source_skill_dirs or (rel_dir,),
+                scope_skill=scope_skill,
                 inventory_slice=row.inventory_slice,
                 profile_path=skill_dir / "references" / "task-profile.json",
                 wave=wave,
@@ -86,7 +91,7 @@ def discover_active_skills(
 
 
 def build_default_profile(entry: SkillEntry, rubric_version: str) -> Dict[str, Any]:
-    scope_profile = entry.relative_skill_dir.split("/", 1)[0]
+    scope_profile = entry.scope_skill.split("/", 1)[0]
     if entry.delegation_mode == "manual":
         human_baseline_minutes = 60.0
         ai_process_minutes = 20.0
@@ -106,8 +111,8 @@ def build_default_profile(entry: SkillEntry, rubric_version: str) -> Dict[str, A
 
     return {
         "schema_version": "1.0",
-        "profile_id": entry.relative_skill_dir.replace("/", "-"),
-        "scope_skill": entry.relative_skill_dir,
+        "profile_id": entry.scope_skill.replace("/", "-"),
+        "scope_skill": entry.scope_skill,
         "scope_profile": scope_profile,
         "rubric_version": rubric_version,
         "evaluator_version": "v1",
@@ -265,6 +270,7 @@ def write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 def write_baseline(
     *,
+    repo_root: Path,
     baseline_path: Path,
     generated_at: str,
     entries: Iterable[SkillEntry],
@@ -276,9 +282,11 @@ def write_baseline(
     for entry in entries:
         skills.append(
             {
-                "skill_md": entry.skill_md.relative_to(ROOT).as_posix(),
-                "skill_dir": entry.relative_skill_dir,
-                "profile_file": entry.profile_path.relative_to(ROOT).as_posix(),
+                "skill_md": entry.skill_md.relative_to(repo_root).as_posix(),
+                "selected_skill_dir": entry.relative_skill_dir,
+                "source_skill_dirs": list(entry.source_skill_dirs),
+                "scope_skill": entry.scope_skill,
+                "profile_file": entry.profile_path.relative_to(repo_root).as_posix(),
                 "delegation_mode": entry.delegation_mode,
                 "wave": entry.wave,
             }
@@ -314,12 +322,13 @@ def _sanitize_assignment(value: Any, fallback: str) -> str:
 
 
 def write_checklist(
+    repo_root: Path,
     path: Path,
     generated_at: str,
     entries: Iterable[SkillEntry],
     owner_map: Dict[str, Any],
 ) -> None:
-    rows = sorted(entries, key=lambda item: item.relative_skill_dir)
+    rows = sorted(entries, key=lambda item: item.scope_skill)
     wave_counts: Dict[str, int] = {}
     for row in rows:
         wave_counts[row.wave] = wave_counts.get(row.wave, 0) + 1
@@ -358,10 +367,10 @@ def write_checklist(
     )
 
     for idx, row in enumerate(rows, start=1):
-        skill_path = row.skill_md.relative_to(ROOT).as_posix()
-        profile_path = row.profile_path.relative_to(ROOT).as_posix()
+        skill_path = row.skill_md.relative_to(repo_root).as_posix()
+        profile_path = row.profile_path.relative_to(repo_root).as_posix()
         assignment = None
-        candidate_keys = (skill_path, row.relative_skill_dir)
+        candidate_keys = (skill_path, row.scope_skill, row.relative_skill_dir)
         for key in candidate_keys:
             raw = skills_map.get(key)
             if isinstance(raw, dict):
@@ -495,6 +504,7 @@ def main() -> int:
 
     baseline_path = (repo_root / args.baseline_out).resolve()
     write_baseline(
+        repo_root=repo_root,
         baseline_path=baseline_path,
         generated_at=generated_at,
         entries=entries,
@@ -506,7 +516,7 @@ def main() -> int:
     checklist_path = (repo_root / args.checklist_out).resolve()
     owner_map_path = (repo_root / args.owner_map).resolve()
     owner_map = load_owner_map(owner_map_path)
-    write_checklist(checklist_path, generated_at, entries, owner_map)
+    write_checklist(repo_root, checklist_path, generated_at, entries, owner_map)
 
     print(
         json.dumps(

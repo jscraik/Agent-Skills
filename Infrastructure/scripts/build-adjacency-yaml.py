@@ -15,7 +15,6 @@ CANONICAL_PREFIXES = {
     "frontend/",
     "github/",
     "interview/",
-    "Plugins/arscontexta/skills/",
     "Plugins/coderabbit/skills/",
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
@@ -23,7 +22,7 @@ CANONICAL_PREFIXES = {
     "skills-antigravity/",
     "personas/",
     "product/",
-    "Skills/",
+    "skills-system/",
     "Skills/",
 }
 
