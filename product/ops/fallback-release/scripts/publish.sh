@@ -121,7 +121,23 @@ This release was built using the fallback CI path due to primary CI unavailabili
 sha256sum -c *.sha256
 
 # Verify signatures
-gpg --verify *.asc *
+EOF
+)
+    for sig_file in "$ARTIFACT_DIR"/*.asc; do
+        if [[ -e "$sig_file" ]]; then
+            artifact_file="${sig_file%.asc}"
+            sig_name=$(basename "$sig_file")
+            artifact_name=$(basename "$artifact_file")
+            if [[ -e "$artifact_file" ]]; then
+                RELEASE_NOTES="$RELEASE_NOTES
+gpg --verify $sig_name $artifact_name"
+            else
+                RELEASE_NOTES="$RELEASE_NOTES
+# WARNING: Artifact not found for signature $sig_name"
+            fi
+        fi
+    done
+    RELEASE_NOTES="$RELEASE_NOTES
 \`\`\`
 
 ### Artifacts
@@ -129,8 +145,7 @@ $(cd "$ARTIFACT_DIR" && for f in ./*-"$VERSION"-*; do case "$f" in *.sha256|*.as
 
 ---
 Built with [fallback-release](../tree/main/product/ops/fallback-release)
-EOF
-)
+"
 
     # Check if release already exists
     if gh release view "v$VERSION" > /dev/null 2>&1; then
