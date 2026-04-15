@@ -89,6 +89,19 @@ cases:
         value: "(?i)next_step"
       - type: regex
         value: "(?i)(?=.*category)(?=.*target_environment)(?=.*compatibility_posture).*"
+    structure_validation:
+      description: "Validate that validations and security objects contain explicit boolean fields"
+      required_objects:
+        - path: "validations"
+          required_fields:
+            - name: "quick_validate"
+              type: "boolean"
+            - name: "strict_audit"
+              type: "boolean"
+        - path: "security"
+          required_fields:
+            - name: "security_checklist_passed"
+              type: "boolean"
 
   - id: session-collector-assisted-intake
     name: session collector artifact is used as optional corroboration
@@ -258,3 +271,10 @@ cases:
 metadata:
   last_updated: "2026-04-13"
   review_status: "validated"
+  structure_validation_note: >
+    Cases with structure_validation blocks require explicit object/field/type
+    validation beyond regex matching. Validators must assert the existence of
+    specified objects and that named fields are explicit booleans (true/false),
+    not strings or other types. This ensures contract compliance for required
+    boolean fields: validations.quick_validate, validations.strict_audit, and
+    security.security_checklist_passed.

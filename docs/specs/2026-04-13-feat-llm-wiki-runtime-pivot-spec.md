@@ -185,6 +185,9 @@ Governance and validation dependencies:
 - `bin/ask repo validate --json` (degraded/allowed when invoked from `recursive_validation_guard` context; recorded as skipped-OK with explicit guard provenance)
 - `bash scripts/verify-work.sh --project-governance`
 - `python3 scripts/verify_skill_catalog_freshness.py --strict`
+- `python3 scripts/validate_health_counters.py <snapshot.json> --json`
+- `python3 scripts/validate_freshness_state.py <snapshot.json> --json`
+- `python3 scripts/validate_blocker_completeness.py <snapshot.json> --json`
 - runtime-separation comparator pipeline defined in `docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md`
 
 Skill dependencies for installation lane:
