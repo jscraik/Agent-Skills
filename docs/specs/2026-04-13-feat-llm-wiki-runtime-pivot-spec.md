@@ -153,9 +153,9 @@ Not owned by this spec:
 - lane 1: certification evidence freshness and readiness parity.
 - lane 2: runtime-separation comparator/parity health.
 - lane 4: ask deterministic contract parity (including error-code reachability obligations).
-2. Any failed obligation blocks promotion.
-3. Degraded-only findings remain visible and must carry owner plus escalation window.
-4. Lane-level transition rules:
+1. Any failed obligation blocks promotion.
+1. Degraded-only findings remain visible and must carry owner plus escalation window.
+1. Lane-level transition rules:
 - if any lane emits a blocker, `governance_running -> promotion_blocked`;
 - if all lanes are ready and degraded findings are non-blocking, `governance_running -> lane_evaluated`;
 - only `lane_evaluated` can advance to `promotion_ready`.
