@@ -17,6 +17,10 @@ set -euo pipefail
 
 # Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -f "$SCRIPT_DIR/utils.sh" ]]; then
+    echo "ERROR: Required file not found: $SCRIPT_DIR/utils.sh"
+    exit 1
+fi
 source "$SCRIPT_DIR/utils.sh"
 
 ARTIFACT_DIR="${1:-}"
