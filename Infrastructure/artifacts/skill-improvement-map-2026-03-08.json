@@ -1,0 +1,2426 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-08T21:33:00.274242+00:00",
+  "mode": "improve",
+  "repo_root": "/Users/jamiecraik/dev/agent-skills",
+  "summary": {
+    "total_skills": 79,
+    "by_priority": {
+      "P0": 15,
+      "P1": 1,
+      "P2": 3,
+      "P3": 60
+    },
+    "perfect_scores": 1,
+    "below_80": 20,
+    "structure_gate_failures": [
+      ".agents/skills/.system/skill-creator",
+      ".agents/skills/.system/skill-installer",
+      ".agents/skills/.system/slides",
+      ".agents/skills/.system/spreadsheets"
+    ],
+    "top_recurring_findings": [
+      {
+        "message": "`assets/` present but not referenced.",
+        "count": 42,
+        "suggested_fix": "`assets/` present but not referenced."
+      },
+      {
+        "message": "No explicit variation encouragement.",
+        "count": 12,
+        "suggested_fix": "No explicit variation encouragement."
+      },
+      {
+        "message": "Some empowering language: enable.",
+        "count": 10,
+        "suggested_fix": "Some empowering language: enable."
+      },
+      {
+        "message": "Some anti-pattern guidance detected (3 signals).",
+        "count": 8,
+        "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+      },
+      {
+        "message": "Some anti-pattern guidance detected (2 signals).",
+        "count": 6,
+        "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+      },
+      {
+        "message": "Some philosophy indicators found: philosophy.",
+        "count": 5,
+        "suggested_fix": "Some philosophy indicators found: philosophy."
+      },
+      {
+        "message": "Contains 1 guiding question(s).",
+        "count": 4,
+        "suggested_fix": "Contains 1 guiding question(s)."
+      },
+      {
+        "message": "Some anti-pattern guidance detected (4 signals).",
+        "count": 4,
+        "suggested_fix": "Some anti-pattern guidance detected (4 signals)."
+      },
+      {
+        "message": "No clear philosophical foundation detected.",
+        "count": 3,
+        "suggested_fix": "No clear philosophical foundation detected."
+      },
+      {
+        "message": "No explicit anti-pattern warnings detected.",
+        "count": 3,
+        "suggested_fix": "No explicit anti-pattern warnings detected."
+      },
+      {
+        "message": "`Infrastructure/references/` present but not referenced.",
+        "count": 3,
+        "suggested_fix": "`Infrastructure/references/` present but not referenced."
+      },
+      {
+        "message": "`description` is detailed but lacks explicit trigger language.",
+        "count": 3,
+        "suggested_fix": "`description` is detailed but lacks explicit trigger language."
+      },
+      {
+        "message": "Some philosophy indicators found: philosophy, tradeoff.",
+        "count": 3,
+        "suggested_fix": "Some philosophy indicators found: philosophy, tradeoff."
+      },
+      {
+        "message": "Some philosophy indicators found: philosophy, approach.",
+        "count": 2,
+        "suggested_fix": "Some philosophy indicators found: philosophy, approach."
+      },
+      {
+        "message": "Some philosophy indicators found: philosophy, framework.",
+        "count": 2,
+        "suggested_fix": "Some philosophy indicators found: philosophy, framework."
+      },
+      {
+        "message": "Some empowering language: enable, empower.",
+        "count": 2,
+        "suggested_fix": "Some empowering language: enable, empower."
+      },
+      {
+        "message": "Some variation mentioned: variation, customize.",
+        "count": 1,
+        "suggested_fix": "Some variation mentioned: variation, customize."
+      },
+      {
+        "message": "Slightly long (368 lines). Aim for ~200–300; hard cap ~400.",
+        "count": 1,
+        "suggested_fix": "Slightly long (368 lines). Aim for ~200–300; hard cap ~400."
+      },
+      {
+        "message": "Contains 2 guiding question(s).",
+        "count": 1,
+        "suggested_fix": "Contains 2 guiding question(s)."
+      },
+      {
+        "message": "Slightly long (326 lines). Aim for ~200–300; hard cap ~400.",
+        "count": 1,
+        "suggested_fix": "Slightly long (326 lines). Aim for ~200–300; hard cap ~400."
+      }
+    ]
+  },
+  "skills": [
+    {
+      "skill": ".agents/skills/.system/spreadsheets",
+      "name": "spreadsheets",
+      "score": 48,
+      "max_score": 120,
+      "percent": 40.0,
+      "priority": "P0",
+      "structure_gate_failure": true,
+      "fail_count": 3,
+      "warn_count": 1,
+      "top_fixes": [
+        "`description` is detailed but lacks explicit trigger language.",
+        "No clear philosophical foundation detected.",
+        "No explicit anti-pattern warnings detected."
+      ],
+      "findings": [
+        {
+          "category": "Frontmatter",
+          "severity": "WARN",
+          "points": 12,
+          "message": "`description` is detailed but lacks explicit trigger language.",
+          "suggested_fix": "`description` is detailed but lacks explicit trigger language."
+        },
+        {
+          "category": "Philosophy",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No clear philosophical foundation detected.",
+          "suggested_fix": "No clear philosophical foundation detected."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit anti-pattern warnings detected.",
+          "suggested_fix": "No explicit anti-pattern warnings detected."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        }
+      ]
+    },
+    {
+      "skill": ".agents/skills/.system/slides",
+      "name": "slides",
+      "score": 52,
+      "max_score": 120,
+      "percent": 43.33,
+      "priority": "P0",
+      "structure_gate_failure": true,
+      "fail_count": 3,
+      "warn_count": 2,
+      "top_fixes": [
+        "`description` is detailed but lacks explicit trigger language.",
+        "No clear philosophical foundation detected.",
+        "Contains 2 guiding question(s)."
+      ],
+      "findings": [
+        {
+          "category": "Frontmatter",
+          "severity": "WARN",
+          "points": 12,
+          "message": "`description` is detailed but lacks explicit trigger language.",
+          "suggested_fix": "`description` is detailed but lacks explicit trigger language."
+        },
+        {
+          "category": "Philosophy",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No clear philosophical foundation detected.",
+          "suggested_fix": "No clear philosophical foundation detected."
+        },
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Contains 2 guiding question(s).",
+          "suggested_fix": "Contains 2 guiding question(s)."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit anti-pattern warnings detected.",
+          "suggested_fix": "No explicit anti-pattern warnings detected."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        }
+      ]
+    },
+    {
+      "skill": ".agents/skills/.system/skill-installer",
+      "name": "skill-installer",
+      "score": 58,
+      "max_score": 120,
+      "percent": 48.33,
+      "priority": "P0",
+      "structure_gate_failure": true,
+      "fail_count": 3,
+      "warn_count": 3,
+      "top_fixes": [
+        "No clear philosophical foundation detected.",
+        "Contains 1 guiding question(s).",
+        "No explicit anti-pattern warnings detected."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No clear philosophical foundation detected.",
+          "suggested_fix": "No clear philosophical foundation detected."
+        },
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Contains 1 guiding question(s).",
+          "suggested_fix": "Contains 1 guiding question(s)."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit anti-pattern warnings detected.",
+          "suggested_fix": "No explicit anti-pattern warnings detected."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`Infrastructure/references/` present but not referenced.",
+          "suggested_fix": "`Infrastructure/references/` present but not referenced."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/notebooklm",
+      "name": "notebooklm",
+      "score": 70,
+      "max_score": 120,
+      "percent": 58.33,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, tradeoff.",
+        "Some anti-pattern guidance detected (2 signals).",
+        "No explicit variation encouragement."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, tradeoff.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, tradeoff."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (2 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`Infrastructure/scripts/` present but not referenced in SKILL.md.",
+          "suggested_fix": "`Infrastructure/scripts/` present but not referenced in SKILL.md."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/bootstrap",
+      "name": "bootstrap",
+      "score": 72,
+      "max_score": 120,
+      "percent": 60.0,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 4,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy.",
+        "Some anti-pattern guidance detected (3 signals).",
+        "No explicit variation encouragement."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy.",
+          "suggested_fix": "Some philosophy indicators found: philosophy."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`Infrastructure/references/` present but not referenced.",
+          "suggested_fix": "`Infrastructure/references/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/insight-report",
+      "name": "insight-report",
+      "score": 72,
+      "max_score": 120,
+      "percent": 60.0,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 2,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, tradeoff.",
+        "Some anti-pattern guidance detected (2 signals).",
+        "No explicit variation encouragement."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, tradeoff.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, tradeoff."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (2 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/simple-tasks",
+      "name": "simple-tasks",
+      "score": 78,
+      "max_score": 120,
+      "percent": 65.0,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy.",
+        "Some anti-pattern guidance detected (2 signals).",
+        "No explicit variation encouragement."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy.",
+          "suggested_fix": "Some philosophy indicators found: philosophy."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (2 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/xcode-makefiles",
+      "name": "xcode-makefiles",
+      "score": 78,
+      "max_score": 120,
+      "percent": 65.0,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy.",
+        "Some anti-pattern guidance detected (3 signals).",
+        "No explicit variation encouragement."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy.",
+          "suggested_fix": "Some philosophy indicators found: philosophy."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/website/fixing-accessibility",
+      "name": "fixing-accessibility",
+      "score": 79,
+      "max_score": 120,
+      "percent": 65.83,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some anti-pattern guidance detected (3 signals).",
+        "No explicit variation encouragement.",
+        "Some empowering language: enable."
+      ],
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": -2,
+          "message": "Many rigid constraints (25 instances).",
+          "suggested_fix": "Many rigid constraints (25 instances)."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/apple-app-creator",
+      "name": "apple-app-creator",
+      "score": 80,
+      "max_score": 120,
+      "percent": 66.67,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, framework.",
+        "Some anti-pattern guidance detected (3 signals).",
+        "No explicit variation encouragement."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, framework.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, framework."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/website/fixing-metadata",
+      "name": "fixing-metadata",
+      "score": 81,
+      "max_score": 120,
+      "percent": 67.5,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 2,
+      "top_fixes": [
+        "Some anti-pattern guidance detected (4 signals).",
+        "No explicit variation encouragement.",
+        "Some empowering language: enable."
+      ],
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (4 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (4 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/baseline-ui",
+      "name": "baseline-ui",
+      "score": 87,
+      "max_score": 120,
+      "percent": 72.5,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 2,
+      "top_fixes": [
+        "Some anti-pattern guidance detected (4 signals).",
+        "No explicit variation encouragement.",
+        "Some empowering language: enable."
+      ],
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (4 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (4 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "No explicit variation encouragement.",
+          "suggested_fix": "No explicit variation encouragement."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/stitch-remotion",
+      "name": "stitch-remotion",
+      "score": 88,
+      "max_score": 120,
+      "percent": 73.33,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 2,
+      "top_fixes": [
+        "Some anti-pattern guidance detected (3 signals).",
+        "Some empowering language: enable.",
+        "Too long (451 lines). Reduce to ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        },
+        {
+          "category": "Conciseness",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "Too long (451 lines). Reduce to ~200–300; hard cap ~400.",
+          "suggested_fix": "Too long (451 lines). Reduce to ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "product/docs/agents-md",
+      "name": "agents-md",
+      "score": 89,
+      "max_score": 120,
+      "percent": 74.17,
+      "priority": "P0",
+      "structure_gate_failure": false,
+      "fail_count": 1,
+      "warn_count": 3,
+      "top_fixes": [
+        "Contains 1 guiding question(s).",
+        "Some anti-pattern guidance detected (4 signals).",
+        "Many rigid constraints (26 instances)."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Contains 1 guiding question(s).",
+          "suggested_fix": "Contains 1 guiding question(s)."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (4 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (4 signals)."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": -2,
+          "message": "Many rigid constraints (26 instances).",
+          "suggested_fix": "Many rigid constraints (26 instances)."
+        },
+        {
+          "category": "Conciseness",
+          "severity": "FAIL",
+          "points": 0,
+          "message": "Too long (495 lines). Reduce to ~200–300; hard cap ~400.",
+          "suggested_fix": "Too long (495 lines). Reduce to ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": ".agents/skills/.system/skill-creator",
+      "name": "skill-creator",
+      "score": 98,
+      "max_score": 120,
+      "percent": 81.67,
+      "priority": "P0",
+      "structure_gate_failure": true,
+      "fail_count": 0,
+      "warn_count": 4,
+      "top_fixes": [
+        "Some anti-pattern guidance detected (2 signals).",
+        "Some variation mentioned: variation, customize.",
+        "Some empowering language: enable."
+      ],
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (2 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Some variation mentioned: variation, customize.",
+          "suggested_fix": "Some variation mentioned: variation, customize."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        },
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (368 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (368 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/fix-mise",
+      "name": "fix-mise",
+      "score": 78,
+      "max_score": 120,
+      "percent": 65.0,
+      "priority": "P1",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy.",
+        "Some anti-pattern guidance detected (2 signals).",
+        "Some variation mentioned: variation."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy.",
+          "suggested_fix": "Some philosophy indicators found: philosophy."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (2 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+        },
+        {
+          "category": "Variation",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Some variation mentioned: variation.",
+          "suggested_fix": "Some variation mentioned: variation."
+        }
+      ]
+    },
+    {
+      "skill": "github/greptile/check-pr",
+      "name": "check-pr",
+      "score": 86,
+      "max_score": 120,
+      "percent": 71.67,
+      "priority": "P2",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, framework.",
+        "Some anti-pattern guidance detected (4 signals).",
+        "Some empowering language: capable."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, framework.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, framework."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (4 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (4 signals)."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: capable.",
+          "suggested_fix": "Some empowering language: capable."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/using-git-worktrees",
+      "name": "using-git-worktrees",
+      "score": 89,
+      "max_score": 120,
+      "percent": 74.17,
+      "priority": "P2",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, tradeoff.",
+        "Some variation mentioned: variation, adapt.",
+        "Some empowering language: enable, empower."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, tradeoff.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, tradeoff."
+        },
+        {
+          "category": "Variation",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Some variation mentioned: variation, adapt.",
+          "suggested_fix": "Some variation mentioned: variation, adapt."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable, empower.",
+          "suggested_fix": "Some empowering language: enable, empower."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/stitch-react-components",
+      "name": "react-components",
+      "score": 91,
+      "max_score": 120,
+      "percent": 75.83,
+      "priority": "P2",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, approach.",
+        "Some anti-pattern guidance detected (3 signals).",
+        "Some empowering language: enable."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, approach.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, approach."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable.",
+          "suggested_fix": "Some empowering language: enable."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/tools/stitch-loop",
+      "name": "stitch-loop",
+      "score": 95,
+      "max_score": 120,
+      "percent": 79.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy, approach."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy, approach.",
+          "suggested_fix": "Some philosophy indicators found: philosophy, approach."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/shadcn-ui",
+      "name": "shadcn-ui",
+      "score": 95,
+      "max_score": 120,
+      "percent": 79.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 4,
+      "top_fixes": [
+        "Contains 1 guiding question(s).",
+        "Some anti-pattern guidance detected (2 signals).",
+        "Some empowering language: enable, explore."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Contains 1 guiding question(s).",
+          "suggested_fix": "Contains 1 guiding question(s)."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (2 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (2 signals)."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable, explore.",
+          "suggested_fix": "Some empowering language: enable, explore."
+        },
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (385 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (385 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "product/Infrastructure/ops/compound-engineering-router",
+      "name": "compound-engineering-router",
+      "score": 100,
+      "max_score": 120,
+      "percent": 83.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Some anti-pattern guidance detected (3 signals).",
+        "Some empowering language: enable, empower."
+      ],
+      "findings": [
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Some empowering language: enable, empower.",
+          "suggested_fix": "Some empowering language: enable, empower."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/design-system",
+      "name": "design-system",
+      "score": 101,
+      "max_score": 120,
+      "percent": 84.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Contains 1 guiding question(s).",
+        "Some anti-pattern guidance detected (3 signals)."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 3,
+          "message": "Contains 1 guiding question(s).",
+          "suggested_fix": "Contains 1 guiding question(s)."
+        },
+        {
+          "category": "Anti-Patterns",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some anti-pattern guidance detected (3 signals).",
+          "suggested_fix": "Some anti-pattern guidance detected (3 signals)."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/codex-agent-creator",
+      "name": "codex-agent-creator",
+      "score": 101,
+      "max_score": 120,
+      "percent": 84.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 3,
+      "top_fixes": [
+        "Some philosophy indicators found: philosophy.",
+        "Many rigid constraints (21 instances).",
+        "Slightly long (355 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Philosophy",
+          "severity": "WARN",
+          "points": 8,
+          "message": "Some philosophy indicators found: philosophy.",
+          "suggested_fix": "Some philosophy indicators found: philosophy."
+        },
+        {
+          "category": "Empowerment",
+          "severity": "WARN",
+          "points": -2,
+          "message": "Many rigid constraints (21 instances).",
+          "suggested_fix": "Many rigid constraints (21 instances)."
+        },
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (355 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (355 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "product/domain/chatgpt-apps",
+      "name": "chatgpt-apps",
+      "score": 107,
+      "max_score": 120,
+      "percent": 89.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (310 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (310 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (310 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/codex-sessions-skill-scan",
+      "name": "codex-sessions-skill-scan",
+      "score": 110,
+      "max_score": 120,
+      "percent": 91.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "`description` is detailed but lacks explicit trigger language.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Frontmatter",
+          "severity": "WARN",
+          "points": 12,
+          "message": "`description` is detailed but lacks explicit trigger language.",
+          "suggested_fix": "`description` is detailed but lacks explicit trigger language."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "auth/create-auth",
+      "name": "create-auth",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (326 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (326 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (326 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "backend/cli-spec",
+      "name": "cli-spec",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (366 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (366 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (366 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/graphics/nano-banana-builder",
+      "name": "nano-banana-builder",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (347 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (347 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (347 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/graphics/threejs-builder",
+      "name": "threejs-builder",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (379 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (379 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (379 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "interview/interview-me",
+      "name": "interview-me",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (312 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (312 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (312 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/agent-browser",
+      "name": "agent-browser",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (328 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (328 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (328 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/systematic-debugging",
+      "name": "systematic-debugging",
+      "score": 111,
+      "max_score": 120,
+      "percent": 92.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (378 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (378 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (378 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/docs/openai-docs",
+      "name": "openai-docs",
+      "score": 112,
+      "max_score": 120,
+      "percent": 93.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "`Infrastructure/references/` present but not referenced.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`Infrastructure/references/` present but not referenced.",
+          "suggested_fix": "`Infrastructure/references/` present but not referenced."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/domain/cloudflare-deploy",
+      "name": "cloudflare-deploy",
+      "score": 113,
+      "max_score": 120,
+      "percent": 94.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (309 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (309 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (309 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/visual-explainer",
+      "name": "visual-explainer",
+      "score": 113,
+      "max_score": 120,
+      "percent": 94.17,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    },
+    {
+      "skill": "backend/mcp-builder",
+      "name": "mcp-builder",
+      "score": 114,
+      "max_score": 120,
+      "percent": 95.0,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (392 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (392 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (392 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/graphics/favicon-generator",
+      "name": "favicon-generator",
+      "score": 114,
+      "max_score": 120,
+      "percent": 95.0,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 2,
+      "top_fixes": [
+        "Slightly long (398 lines). Aim for ~200–300; hard cap ~400.",
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (398 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (398 lines). Aim for ~200–300; hard cap ~400."
+        },
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "auth/best-practices",
+      "name": "best-practices",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "backend/backend-engineer",
+      "name": "backend-engineer",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/graphics/better-icons",
+      "name": "better-icons",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/tools/figma",
+      "name": "figma",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/remotion",
+      "name": "remotion",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "interview/architecture-interview",
+      "name": "architecture-interview",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "interview/deep-interview",
+      "name": "deep-interview",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/content/youtube-hooks-scripts",
+      "name": "youtube-hooks-scripts",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/content/youtube-titles-thumbnails",
+      "name": "youtube-titles-thumbnails",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/domain/arscontexta",
+      "name": "ars-contexta-codex",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    },
+    {
+      "skill": "product/Infrastructure/ops/decide-build-primitive",
+      "name": "decide-build-primitive",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/Infrastructure/ops/linear",
+      "name": "linear",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/Infrastructure/ops/release",
+      "name": "release",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/security/security-best-practices",
+      "name": "security-best-practices",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/1password",
+      "name": "1password",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/alignment-checkpoint",
+      "name": "alignment-checkpoint",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/markdown-converter",
+      "name": "markdown-converter",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/repoprompt",
+      "name": "repoprompt",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/writing-plans",
+      "name": "writing-plans",
+      "score": 115,
+      "max_score": 120,
+      "percent": 95.83,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    },
+    {
+      "skill": "backend/workers-mcp",
+      "name": "workers-mcp",
+      "score": 116,
+      "max_score": 120,
+      "percent": 96.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (387 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (387 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (387 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/frontend-ui-design",
+      "name": "frontend-ui-design",
+      "score": 116,
+      "max_score": 120,
+      "percent": 96.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (354 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (354 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (354 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "product/docs/docs-expert",
+      "name": "docs-expert",
+      "score": 116,
+      "max_score": 120,
+      "percent": 96.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (332 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (332 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (332 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/codex-automation-architect",
+      "name": "codex-automation-architect",
+      "score": 116,
+      "max_score": 120,
+      "percent": 96.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    },
+    {
+      "skill": "Skills/recon-workbench",
+      "name": "recon-workbench",
+      "score": 116,
+      "max_score": 120,
+      "percent": 96.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (314 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (314 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (314 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/skill-builder",
+      "name": "skill-builder",
+      "score": 116,
+      "max_score": 120,
+      "percent": 96.67,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "Slightly long (329 lines). Aim for ~200–300; hard cap ~400."
+      ],
+      "findings": [
+        {
+          "category": "Conciseness",
+          "severity": "WARN",
+          "points": 6,
+          "message": "Slightly long (329 lines). Aim for ~200–300; hard cap ~400.",
+          "suggested_fix": "Slightly long (329 lines). Aim for ~200–300; hard cap ~400."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/ui-visual-regression",
+      "name": "ui-visual-regression",
+      "score": 117,
+      "max_score": 120,
+      "percent": 97.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    },
+    {
+      "skill": "Skills/diagram-cli",
+      "name": "diagram-cli",
+      "score": 117,
+      "max_score": 120,
+      "percent": 97.5,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    },
+    {
+      "skill": "frontend/graphics/imagegen",
+      "name": "imagegen",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/graphics/og-image-creator",
+      "name": "og-image-creator",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/graphics/sora",
+      "name": "sora",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "github/gh-fix-ci",
+      "name": "gh-fix-ci",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "github/gh-workflow",
+      "name": "gh-workflow",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/content/video-transcript-downloader",
+      "name": "video-transcript-downloader",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/docs/context7",
+      "name": "context7",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/domain/oak-api",
+      "name": "oak-api",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "product/specs/product-spec",
+      "name": "product-spec",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/atlas",
+      "name": "atlas",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/beautiful-mermaid",
+      "name": "beautiful-mermaid",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/codex-home-audit",
+      "name": "codex-home-audit",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "Skills/process-watch",
+      "name": "process-watch",
+      "score": 118,
+      "max_score": 120,
+      "percent": 98.33,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 1,
+      "top_fixes": [
+        "`assets/` present but not referenced."
+      ],
+      "findings": [
+        {
+          "category": "Repo",
+          "severity": "WARN",
+          "points": 0,
+          "message": "`assets/` present but not referenced.",
+          "suggested_fix": "`assets/` present but not referenced."
+        }
+      ]
+    },
+    {
+      "skill": "frontend/ui/ui-ux-creative-coding",
+      "name": "ui-ux-creative-coding",
+      "score": 120,
+      "max_score": 120,
+      "percent": 100.0,
+      "priority": "P3",
+      "structure_gate_failure": false,
+      "fail_count": 0,
+      "warn_count": 0,
+      "top_fixes": [],
+      "findings": []
+    }
+  ]
+}

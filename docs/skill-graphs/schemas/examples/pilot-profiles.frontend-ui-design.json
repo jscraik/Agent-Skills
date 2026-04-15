@@ -1,7 +1,0 @@
-[
-  {
-    "profile_id": "frontend-ui-design",
-    "profile_file": "frontend/ui/frontend-ui-design/references/task-profile.json",
-    "objective": "Shadow evaluation run {n} for {profile_id}: produce production-ready frontend UI design guidance for a web screen with one clear primary action, explicit default/loading/empty/error/disabled states, token-backed primitives, keyboard-focus-contrast-reduced-motion behavior, restrained composition without decorative overload, and a concrete verification checklist."
-  }
-]

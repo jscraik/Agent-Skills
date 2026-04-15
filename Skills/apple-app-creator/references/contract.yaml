@@ -1,0 +1,19 @@
+purpose: >
+  Define expected behavior for app-builder to scaffold or adopt iOS/macOS projects.
+schema_version: 1.0
+triggers:
+  - user asks to scaffold a new iOS/macOS app from templates
+  - user asks to adopt app tooling into an existing project
+inputs:
+  - project mode (new or adopt)
+  - app metadata for new mode (name, bundle id, platform, framework, output dir)
+  - git onboarding flags
+outputs:
+  - scaffolded or updated project with app-builder workflow defaults
+  - exact next-step commands for local build/run flow
+non_goals:
+  - replacing existing product architecture or app logic not requested by user
+  - force-overwriting unrelated files without explicit instruction
+risks:
+  - destructive file changes if mode/paths are incorrect; mitigated by dry-run and validation
+  - leaking sensitive values in logs; mitigated by default redaction

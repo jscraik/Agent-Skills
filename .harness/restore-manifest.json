@@ -11,31 +11,31 @@
       "action": "created"
     },
     {
-      "path": "scripts/check-staged-secrets.sh",
+      "path": "Infrastructure/scripts/check-staged-secrets.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-doc-style.sh",
+      "path": "Infrastructure/scripts/check-doc-style.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-related-tests.sh",
+      "path": "Infrastructure/scripts/check-related-tests.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-semgrep-changed.sh",
+      "path": "Infrastructure/scripts/check-semgrep-changed.sh",
       "action": "created"
     },
     {
-      "path": "scripts/semgrep-pre-push.yml",
+      "path": "Infrastructure/scripts/semgrep-pre-push.yml",
       "action": "created"
     },
     {
-      "path": "scripts/refresh-diagram-context.sh",
+      "path": "Infrastructure/scripts/refresh-diagram-context.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-diagram-freshness.sh",
+      "path": "Infrastructure/scripts/check-diagram-freshness.sh",
       "action": "created"
     },
     {
@@ -60,19 +60,19 @@
       "action": "created"
     },
     {
-      "path": "scripts/codex-learn",
+      "path": "Infrastructure/scripts/codex-learn",
       "action": "created"
     },
     {
-      "path": "scripts/codex-enforced",
+      "path": "Infrastructure/scripts/codex-enforced",
       "action": "created"
     },
     {
-      "path": "scripts/prepare-worktree.sh",
+      "path": "Infrastructure/scripts/prepare-worktree.sh",
       "action": "created"
     },
     {
-      "path": "scripts/harness-cli.sh",
+      "path": "Infrastructure/scripts/harness-cli.sh",
       "action": "created"
     },
     {

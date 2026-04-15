@@ -1,0 +1,65 @@
+schema_version: 1
+name: autofix
+purpose: Resolve unresolved CodeRabbit review threads on the active PR via approval-aware manual or batch autofix workflow.
+triggers:
+  - User asks to autofix or resolve CodeRabbit review comments.
+  - User wants CodeRabbit feedback applied in manual or auto mode.
+inputs:
+  - name: repository_state
+    type: object
+    description: Branch status, working tree cleanliness, and push state.
+  - name: pr_number
+    type: integer
+    description: Open PR number associated with the active branch.
+  - name: unresolved_threads
+    type: array
+    description: Unresolved review threads authored by CodeRabbit bot identities.
+  - name: mode
+    type: enum
+    values: [manual, auto]
+    description: Whether fixes are approved per issue or applied in batch.
+outputs:
+  - name: schema_version
+    type: integer
+    description: Output envelope schema version (always 1).
+  - name: summary
+    type: string
+    description: High-level autofix run outcome.
+  - name: fix_plan
+    type: array
+    description: Ordered list of parsed issues and intended fixes.
+  - name: preview_table
+    type: array
+    description: Pre-apply table of proposed patch actions with risk labels.
+  - name: applied_changes
+    type: array
+    description: Files changed with issue linkage.
+  - name: actions
+    type: array
+    description: Human or agent actions remaining after applied fixes.
+  - name: validation
+    type: array
+    description: Validation commands and outcomes (pass, fail, blocked).
+  - name: risk_note
+    type: string
+    description: Key risks, caveats, or unresolved blockers.
+  - name: next_step
+    type: string
+    description: Safest immediate follow-up action.
+  - name: summary_comment
+    type: string
+    description: Final PR summary comment text.
+success_criteria:
+  - Output always includes the standard envelope keys: schema_version, summary, actions, validation, risk_note, next_step.
+  - A pre-apply preview table is produced before edits are applied.
+  - Only unresolved CodeRabbit threads are used as fix sources.
+  - Fixes preserve issue ordering and create one consolidated commit when changes exist.
+  - Sensitive values are redacted in all generated output.
+non_goals:
+  - General refactoring outside CodeRabbit findings.
+  - Live SaaS account administration.
+risks:
+  - Applying stale feedback when branch changes are not pushed.
+  - Over-applying low-priority findings without user approval.
+execution_primitives:
+  - python3 Plugins/coderabbit/skills/autofix/Infrastructure/scripts/fetch_unresolved_threads.py --owner <owner> --repo <repo> --pr <number>

@@ -1,0 +1,7 @@
+# profile--utilities-bootstrap
+
+- profile_id: `utilities-bootstrap`
+- scope_skill: `Skills/bootstrap`
+- scope_profile: `utilities`
+
+Links: [[skill--utilities-bootstrap]] [[wave--wave-1-manual]]

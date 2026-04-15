@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "skill": "agentation",
+  "timestamp": "2026-03-11",
+  "baseline_artifact": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/pilot/agentation-five-gate-baseline.json",
+  "change": {
+    "type": "warning_clearance",
+    "summary": "Removed the literal curl mention from the Python webhook smoke-test section to clear the residual PI_COMMANDS warning without changing workflow meaning."
+  },
+  "source_of_truth": {
+    "public_sources_path": "/Users/jamiecraik/dev/agent-skills/frontend/tools/agentation/Infrastructure/references/public-sources.md",
+    "status": "corrected",
+    "note": "Official agentation.com docs were re-verified live on 2026-03-11 and ranked authoritative."
+  },
+  "comparison": {
+    "quick_validate": "pass",
+    "skill_gate": "pass",
+    "analyze_skill_score": 95,
+    "openclaw_skill_guard": "pass",
+    "run_skill_evals": "not_rerun"
+  },
+  "delta_vs_run_01": {
+    "skill_gate": "pass_with_warnings -> pass",
+    "analyze_skill_score": "95 -> 95"
+  },
+  "next_step": "Apply one tiny first-response brevity improvement aimed at timeout-heavy early eval cases."
+}

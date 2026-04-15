@@ -27,7 +27,7 @@ Apply code-owner review and stricter review expectations for:
 
 - `.github/PULL_REQUEST_TEMPLATE.md`
 - `.github/workflows/**`
-- `.github/scripts/gov_security_gates.py`
+- `.github/Infrastructure/scripts/gov_security_gates.py`
 - `.github/CODEOWNERS`
 - `GOVERNANCE/**`
 - `COMPLIANCE/**`

@@ -28,7 +28,7 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 
 ```bash
 # One-time per shell: load repo environment and add ask to PATH
-source scripts/codex_env_common.sh && codex_apply_env
+source Infrastructure/scripts/codex_env_common.sh && codex_apply_env
 
 ask repo status          # Check repo health
 ask skills list          # List available skills
@@ -68,35 +68,35 @@ When intent is clear but syntax is off, the CLI honors your command and shows co
 
 ## Testing
 
-For shared testing workflow guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#testing).
+For shared testing workflow guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#testing).
 
 ## Shell Scripting
 
-For shared shell scripting guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#shell-scripting).
+For shared shell scripting guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#shell-scripting).
 
 ## Git Workflow
 
-For shared git workflow guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#git-workflow).
+For shared git workflow guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#git-workflow).
 
 ## Configuration Files
 
-For shared configuration-file guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#configuration-files).
+For shared configuration-file guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#configuration-files).
 
 ## Path Ownership
 
-For canonical source vs runtime/projection edit boundaries, see [Path Ownership Boundaries](./docs/agents/14-path-ownership-boundaries.md).
+For canonical source vs runtime/projection edit boundaries, see [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
 
 ## Code Review Fixes
 
-For shared review-comment fix guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes).
+For shared review-comment fix guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#code-review-fixes).
 
 ## Refactoring
 
-For shared refactoring guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#refactoring).
+For shared refactoring guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#refactoring).
 
 ## Documentation
 
-For shared documentation guidance, see [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md#documentation).
+For shared documentation guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#documentation).
 
 ## Skill Management
 
@@ -108,7 +108,7 @@ ask skills audit <path> --level strict  # Mandatory hardening
 
 **Folding strategy:** If `ask skills fold source target` returns confidence ≥ 0.2, fold rather than duplicate.
 
-**Line budget:** Keep `SKILL.md` body ≤ 360 lines (see `docs/agents/02-tooling-policy.md`). Move bulk content to `references/<topic>.md`.
+**Line budget:** Keep `SKILL.md` body ≤ 360 lines (see `Docs/agents/02-tooling-policy.md`). Move bulk content to `Infrastructure/references/<topic>.md`.
 
 ## Browser/Playwright
 
@@ -125,4 +125,4 @@ python3 -m http.server  # in relevant directory
 
 ---
 
-*Entry: `bin/ask` | Implementation: `scripts/lib/ask/` | Specs: `docs/cli-specs/`*
+*Entry: `bin/ask` | Implementation: `Infrastructure/scripts/lib/ask/` | Specs: `docs/cli-specs/`*

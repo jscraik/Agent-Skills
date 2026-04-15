@@ -1,0 +1,20 @@
+Import artifact: resolve-todo-parallel
+Date: 2026-03-23
+Source: https://github.com/EveryInc/compound-engineering-plugin/tree/0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b/Plugins/compound-engineering/skills/resolve-todo-parallel
+Pinned ref: 0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b
+Imported file: SKILL.md
+Upstream sha256:
+8e1e4fbe4e533ae87199c4fd85af64bc41afbbf7e0a98db3a9852dfcf5324a3c
+
+Local placement decision:
+- Created as a new dedicated skill at `product/Infrastructure/ops/resolve-todo-parallel/`.
+- Did not merge into `ce-work` because the repo has a real file-based `todos/` workflow and the imported behavior is a distinct orchestration pattern: dependency-aware todo discovery, bounded parallel resolver fan-out, compound-learning capture, and backlog cleanup.
+
+Local adaptation notes:
+- Preserved the upstream protected-artifact rule for `docs/brainstorms/`, `Docs/plans/`, and `docs/solutions/`.
+- Preserved bounded parallelism, scratch-directory guidance, and lesson-capture sequencing in references.
+- Adapted upstream commit/push expectations to local repo policy: commit, push, and destructive cleanup require explicit approval.
+- Kept `ce-compound` as the learning-capture destination rather than flattening that step into the wrapper.
+
+Semantic tag rationale:
+- `team_automation` fits best because this skill coordinates a structured multi-item operational workflow rather than providing generic implementation, tracker installation, or pure review.

@@ -1,0 +1,164 @@
+{
+  "jobs": [
+    {
+      "kind": "skill",
+      "name": "orchestrating-subagents",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-orchestrating-subagents-small.png",
+      "target": "Skills/orchestrating-subagents/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Orchestrating Subagents\".\nConcept: Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "orchestrating-subagents",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-orchestrating-subagents-large.png",
+      "target": "Skills/orchestrating-subagents/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Orchestrating Subagents\".\nConcept: Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "process-watch",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-process-watch-small.png",
+      "target": "Skills/process-watch/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Process Watch\".\nConcept: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next di...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "process-watch",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-process-watch-large.png",
+      "target": "Skills/process-watch/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Process Watch\".\nConcept: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next di...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "rclone",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-rclone-small.png",
+      "target": "Skills/rclone/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Rclone\".\nConcept: Upload, sync, verify, or inspect files in remote storage with rclone\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "rclone",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-rclone-large.png",
+      "target": "Skills/rclone/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Rclone\".\nConcept: Upload, sync, verify, or inspect files in remote storage with rclone\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "recon-workbench",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-recon-workbench-small.png",
+      "target": "Skills/recon-workbench/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Recon Workbench\".\nConcept: Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validat...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "recon-workbench",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-recon-workbench-large.png",
+      "target": "Skills/recon-workbench/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Recon Workbench\".\nConcept: Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validat...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "repoprompt",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-repoprompt-small.png",
+      "target": "Skills/repoprompt/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Repoprompt\".\nConcept: Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "repoprompt",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-repoprompt-large.png",
+      "target": "Skills/repoprompt/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Repoprompt\".\nConcept: Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "reproduce-bug",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-reproduce-bug-small.png",
+      "target": "Skills/reproduce-bug/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Reproduce Bug\".\nConcept: Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro s...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "reproduce-bug",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-reproduce-bug-large.png",
+      "target": "Skills/reproduce-bug/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Reproduce Bug\".\nConcept: Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro s...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "skill-refactor",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-skill-refactor-small.png",
+      "target": "Skills/skill-refactor/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Skill Refactor\".\nConcept: Daily scan for skill failures\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "skill-refactor",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-skill-refactor-large.png",
+      "target": "Skills/skill-refactor/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Skill Refactor\".\nConcept: Daily scan for skill failures\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "skillify",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-skillify-small.png",
+      "target": "Skills/skillify/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Skillify (Codex)\".\nConcept: Turn a completed Codex workflow into a reusable skill package\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "skillify",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-skillify-large.png",
+      "target": "Skills/skillify/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Skillify (Codex)\".\nConcept: Turn a completed Codex workflow into a reusable skill package\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "systematic-debugging",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-systematic-debugging-small.png",
+      "target": "Skills/systematic-debugging/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Systematic Debugging\".\nConcept: Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "systematic-debugging",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-systematic-debugging-large.png",
+      "target": "Skills/systematic-debugging/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Systematic Debugging\".\nConcept: Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "test-driven-development",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch10-out/skill-test-driven-development-small.png",
+      "target": "Skills/test-driven-development/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Test Driven Development\".\nConcept: Create test-first Red-Green-Refactor delivery for behavior\u2026\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "test-driven-development",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch10-out/skill-test-driven-development-large.png",
+      "target": "Skills/test-driven-development/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Test Driven Development\".\nConcept: Create test-first Red-Green-Refactor delivery for behavior\u2026\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    }
+  ]
+}

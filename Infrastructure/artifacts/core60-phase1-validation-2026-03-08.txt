@@ -1,0 +1,357 @@
+== backend/mkit-builder ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: mkit-builder
+Path:  /Users/jamiecraik/dev/agent-skills/backend/mkit-builder/SKILL.md
+
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/node_mcp_server.md
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/test_command_recipes.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/references/review_fix_checklist.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== frontend/tools/agent-trace-debug ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: agent-trace-debug
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/agent-trace-debug/SKILL.md
+
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== frontend/tools/agentation ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: agentation
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/tools/agentation/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .DS_Store
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== frontend/ui/interface-craft ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: interface-craft
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/interface-craft/SKILL.md
+
+WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/references/config-patterns.json
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== frontend/ui/react-best-practices ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: react-best-practices
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/react-best-practices/SKILL.md
+
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== frontend/ui/web-design-guidelines ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: web-design-guidelines
+Path:  /Users/jamiecraik/dev/agent-skills/frontend/ui/web-design-guidelines/SKILL.md
+
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== github/automate-github-issues ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: automate-github-issues
+Path:  /Users/jamiecraik/dev/agent-skills/github/automate-github-issues/SKILL.md
+
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .diagram/gh-issues-focus/auth.png
+WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .diagram/gh-issues-focus/security.png
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== github/greptile/greploop ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: greploop
+Path:  /Users/jamiecraik/dev/agent-skills/github/greptile/greploop/SKILL.md
+
+
+RESULT: PASS
+skill_gate_exit=0
+
+== github/local-action-verification ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: local-action-verification
+Path:  /Users/jamiecraik/dev/agent-skills/github/local-action-verification/SKILL.md
+
+WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/scripts/install-act.sh
+WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | Infrastructure/scripts/install-act.sh
+WARN SAFE_NETWORK_ALLOWLIST: Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md. | Infrastructure/scripts/install-act.sh
+WARN SAFE_NETWORK_UNDECLARED: Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed. | Infrastructure/scripts/install-act.sh
+WARN SAFE_NETWORK_URL_ALLOWLIST: Hard-coded URL(s) detected in scripts; document explicit allowed domains/hosts in SKILL.md. | Infrastructure/scripts/install-act.sh
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== interview/bug-interview ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: bug-interview
+Path:  /Users/jamiecraik/dev/agent-skills/interview/bug-interview/SKILL.md
+
+WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze and review bug reports to capture repro, evidence, and the next smallest diagnostic step. Use when a bug report lacks clear reproduction.
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== interview/pm-interview ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: pm-interview
+Path:  /Users/jamiecraik/dev/agent-skills/interview/pm-interview/SKILL.md
+
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/docs/claude-md ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: claude-md
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/claude-md/SKILL.md
+
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/docs/docs-md ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: docs-md
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/docs-md/SKILL.md
+
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/docs/gemini-md ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: gemini-md
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/gemini-md/SKILL.md
+
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/domain/chatgpt-apps-production-checklist ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: chatgpt-apps-production-checklist
+Path:  /Users/jamiecraik/dev/agent-skills/product/domain/chatgpt-apps-production-checklist/SKILL.md
+
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/security/security-ownership-map ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: security-ownership-map
+Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-ownership-map/SKILL.md
+
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SAFE_UNTRUSTED_TO_COMMAND: Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | Infrastructure/scripts/build_ownership_map.py
+WARN SAFE_UNTRUSTED_TO_COMMAND: Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | Infrastructure/scripts/community_maintainers.py
+WARN SAFE_UNTRUSTED_TO_COMMAND: Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | Infrastructure/scripts/run_ownership_map.py
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/security/security-threat-model ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: security-threat-model
+Path:  /Users/jamiecraik/dev/agent-skills/product/security/security-threat-model/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/strategy/asymmetric-ideation-engine ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: asymmetric-ideation-engine
+Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/asymmetric-ideation-engine/SKILL.md
+
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/strategy/brainstorming ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: brainstorming
+Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/brainstorming/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+WARN WF_FAIL_FAST_MISSING: Validation section should specify fail-fast behavior (stop at first failed gate).
+
+RESULT: PASS
+skill_gate_exit=0
+
+== product/strategy/project-improvement-ideator ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: project-improvement-ideator
+Path:  /Users/jamiecraik/dev/agent-skills/product/strategy/project-improvement-ideator/SKILL.md
+
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+
+RESULT: PASS
+skill_gate_exit=0
+
+== Skills/codex-prompt-creator ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: codex-prompt-creator
+Path:  /Users/jamiecraik/dev/agent-skills/Skills/codex-prompt-creator/SKILL.md
+
+
+RESULT: PASS
+skill_gate_exit=0
+
+== Skills/diagram-context-refresh ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: diagram-context-refresh
+Path:  /Users/jamiecraik/dev/agent-skills/Skills/diagram-context-refresh/SKILL.md
+
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+
+RESULT: PASS
+skill_gate_exit=0
+
+== Skills/executing-plans ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: executing-plans
+Path:  /Users/jamiecraik/dev/agent-skills/Skills/executing-plans/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== Skills/recent-code-bugfix ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: recent-code-bugfix
+Path:  /Users/jamiecraik/dev/agent-skills/Skills/recent-code-bugfix/SKILL.md
+
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+== Skills/skill-installer ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: skill-installer
+Path:  /Users/jamiecraik/dev/agent-skills/Skills/skill-installer/SKILL.md
+
+
+RESULT: PASS
+skill_gate_exit=0
+
+== Skills/verification-before-completion ==
+[OK] SKILL.md frontmatter looks valid.
+quick_validate_exit=0
+Skill: verification-before-completion
+Path:  /Users/jamiecraik/dev/agent-skills/Skills/verification-before-completion/SKILL.md
+
+WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.
+WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml
+WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml
+
+RESULT: PASS
+skill_gate_exit=0
+
+failed_skills=0

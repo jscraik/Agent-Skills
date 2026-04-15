@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "utilities-1password",
+  "scope_skill": "Skills/1password",
+  "scope_profile": "utilities",
+  "rubric_version": "2026-02-26",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "clarity",
+      "label": "Instructional clarity",
+      "threshold": 0.72,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "specificity",
+      "label": "Concrete implementation detail",
+      "threshold": 0.68,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Safety/compliance compliance",
+      "threshold": 0.85,
+      "weight": 0.33,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "manual",
+    "human_baseline_minutes": 60.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.68,
+    "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+  }
+}

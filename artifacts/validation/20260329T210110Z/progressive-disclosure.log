@@ -1,6 +1,0 @@
-WARN  frontend/ui/design-system/SKILL.md: consider moving embedded mechanics to scripts/ (code fences=4)
-Checked files: 119
-Errors: 0
-Warnings: 1
-Mode: strict
-Progressive disclosure lint passed

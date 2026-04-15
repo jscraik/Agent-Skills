@@ -1,0 +1,39 @@
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior for bootstrapping a repository into a working local
+  development environment with reproducible setup and verification output.
+
+triggers:
+  - user asks to clone and set up a repository locally
+  - user asks for automated onboarding environment setup
+  - user needs a clean-room setup validation workflow
+
+inputs:
+  - repository URL
+  - optional branch/ref
+  - optional tool/runtime constraints
+
+outputs:
+  - setup result summary (success/failure)
+  - documented setup steps and verification notes
+  - actionable blocker report when setup fails
+
+non_goals:
+  - hidden global system mutations without consent
+  - pretending setup succeeded when verification failed
+
+risks:
+  - environment-specific assumptions; mitigated via explicit detection and notes
+  - sensitive data leakage; mitigated via default redaction in Infrastructure/artifacts/logs
+
+examples:
+  happy_path:
+    input: "Bootstrap https://github.com/org/repo and run it"
+    expected_output: "Repo cloned, deps installed, dev command verified, setup notes written"
+  edge_case:
+    input: "Bootstrap repo with mixed Node + Python tooling"
+    expected_output: "Detected multi-stack requirements and documented resolved steps"
+  failure_mode:
+    input: "Bootstrap private repo without access credentials"
+    expected_output: "Fail-fast access error with remediation guidance"

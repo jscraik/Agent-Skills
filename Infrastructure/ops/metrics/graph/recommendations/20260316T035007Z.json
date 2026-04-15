@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-03-16 03:50:07Z",
+  "snapshot": "20260316T035007Z.json",
+  "previous_snapshot": "20260316T032405Z.json",
+  "feedback_log": "/Users/jamiecraik/dev/Agent-Skills/Infrastructure/ops/metrics/graph/feedback/decision-feedback.jsonl",
+  "feedback_schema": {
+    "decision": [
+      "accepted",
+      "partial",
+      "rejected",
+      "deferred"
+    ],
+    "outcome": [
+      "good",
+      "neutral",
+      "bad",
+      "unknown"
+    ],
+    "confidence": [
+      "high",
+      "medium",
+      "low"
+    ]
+  },
+  "insights": [
+    "Notes delta vs previous snapshot: +8",
+    "Community count delta: +1",
+    "Top-5 PageRank overlap: 0.00",
+    "Top-5 bridge overlap: 0.00"
+  ],
+  "recommendations": [
+    {
+      "id": "rec-001",
+      "priority": "high",
+      "action_key": "influence_shift",
+      "action": "Run /graph forward on the newest top PageRank note and /reflect to stabilize new linkage patterns.",
+      "reason": "Top influence set shifted materially (overlap < 0.40)."
+    },
+    {
+      "id": "rec-002",
+      "priority": "high",
+      "action_key": "bridge_shift",
+      "action": "Run /graph bridges and /reweave on emerging bridge notes to reduce single-point-of-failure risk.",
+      "reason": "Bridge structure shifted materially (overlap < 0.40)."
+    }
+  ]
+}

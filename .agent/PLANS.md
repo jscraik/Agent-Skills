@@ -9,7 +9,7 @@ All significant implementation plans MUST use task graphs with explicit dependen
 Validation command:
 
 ```bash
-python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md
+python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md
 ```
 
 Current implementation plan:
@@ -121,5 +121,5 @@ tasks:
 ```
 
 Closeout status update (2026-03-30):
-- Closeout execution completed; evidence recorded in `docs/plans/2026-03-29-fix-outstanding-onboarding-readiness-closeout-plan.md` execution ledger and acceptance checklist.
+- Closeout execution completed; evidence recorded in `Docs/plans/2026-03-29-fix-outstanding-onboarding-readiness-closeout-plan.md` execution ledger and acceptance checklist.
 <!-- AGENT-FIRST-PLANS:END -->

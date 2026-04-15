@@ -55,7 +55,7 @@ jobs:
           # Note: p/default finds 12+ findings; using p/secrets until findings addressed
           semgrep_args=(
             --config "p/secrets"
-            --exclude "artifacts/skill-graphs/**"
+            --exclude "Infrastructure/artifacts/skill-graphs/**"
             --metrics=off
             --sarif --output semgrep.sarif
           )
@@ -167,18 +167,18 @@ jobs:
         run: |
           if [ -d "artifacts" ]; then
             gitleaks detect \
-              --source artifacts/ \
+              --source Infrastructure/artifacts/ \
               --config .gitleaks.toml \
               --no-git \
               --redact \
               --exit-code 1 \
               --report-format json \
               --report-path gitleaks-artifacts.json || {
-                echo "::error::Secret pattern detected in artifacts/ — review gitleaks-artifacts.json"
+                echo "::error::Secret pattern detected in Infrastructure/artifacts/ — review gitleaks-artifacts.json"
                 exit 1
               }
           else
-            echo "No artifacts/ directory — skipping."
+            echo "No Infrastructure/artifacts/ directory — skipping."
           fi
 
       - name: Upload Gitleaks artifact report

@@ -32,9 +32,9 @@ This project follows **Model A** AI artifact governance: prompts and session log
 
 **When creating PRs with AI assistance:**
 
-1. **Save artifacts** to `artifacts/ai/`:
-   - Prompt: `artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml`
-   - Session: `artifacts/ai/sessions/YYYY-MM-DD-<slug>.json`
+1. **Save artifacts** to `Infrastructure/artifacts/ai/`:
+   - Prompt: `Infrastructure/artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml`
+   - Session: `Infrastructure/artifacts/ai/sessions/YYYY-MM-DD-<slug>.json`
 
 2. **Commit both files** in the PR branch
 
@@ -50,7 +50,7 @@ This project follows **Model A** AI artifact governance: prompts and session log
 
 5. **Abort** if artifacts cannot be created and committed.
 
-See templates: `artifacts/ai/prompts/.template.yaml`
+See templates: `Infrastructure/artifacts/ai/prompts/.template.yaml`
 
 ## MCP Configuration
 

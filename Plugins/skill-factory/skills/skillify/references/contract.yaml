@@ -1,0 +1,42 @@
+schema_version: "1.2"
+purpose: "Convert the current Codex session into a reusable skill package by extracting process steps, optionally corroborating with session-collector evidence, interviewing for missing details, and writing a reviewed SKILL.md."
+triggers:
+  - user asks to turn a completed workflow into a skill
+  - user says skillify this session or capture this process as reusable
+  - repeated guidance in a session should be preserved as a skill contract
+inputs:
+  - optional process description from the user
+  - preferred save destination under canonical repository category paths
+  - preferred execution style (inline or fork) when the process demands it
+  - session context containing ordered steps, corrections, and constraints
+  - confirmed category (1-9), target environment (`codex|claude|portable`), and compatibility posture (`learn|guided|execute`)
+  - >-
+    optional session-collector artifact (`session-collector.json`) plus freshness signal (`generated_at` and input window cutoff); both `thread_only` and `provenance` fields are required with a deterministic mapping: when `session-collector.json` is missing or unreadable, MUST set `thread_only=true` and `provenance=thread_only` and record a provenance object including `reason=missing_or_unreadable_collector`, the input window cutoff, and a null/absent `session_collector.generated_at` field; when `session-collector.generated_at` is older than the defined input window cutoff (or any input in the artifact falls outside the input window) MUST set `thread_only=true` and `provenance=thread_only` recording the reason (stale collector) and cutoff timestamp; when intake logic deems collector data ambiguous MUST set `thread_only=true` and `provenance=thread_only` and include a provenance object with `reason=ambiguous_collector`, the input window cutoff, and either the `session-collector.generated_at` (if present) or null; otherwise MUST set `thread_only=false` and `provenance=thread_plus_session_collector`; the provenance object must record the `session-collector.generated_at` timestamp, the input window cutoff, and the mapping decision
+outputs:
+  - reviewed SKILL.md draft with clear success criteria per step
+  - saved skill path plus invocation syntax
+  - concise assumptions list when gaps were filled by inference
+  - >-
+    explicit evidence provenance with both `thread_only` boolean and `provenance` enum (must be consistent per mapping rule: `provenance=thread_only` requires `thread_only=true`, `provenance=thread_plus_session_collector` requires `thread_only=false`)
+  - confirmed metadata fields persisted in generated skill: category, target_environment, compatibility_posture
+  - >-
+    non-trivial summary payload MUST include all of: schema_version, mode, skill_path, findings, validations (with boolean keys quick_validate and strict_audit), security (with boolean key security_checklist_passed), next_step; partial payloads missing any of these required fields must be rejected
+non_goals:
+  - do not write ambiguous template-only skills with unresolved TODO markers
+  - do not skip user confirmation before saving the final SKILL.md
+  - do not ask plain-text multi-choice questions when request_user_input is available
+risks:
+  - overfitting to one session can produce brittle skills; mitigated by confirming reusable triggers and arguments
+  - long interviews can frustrate users; mitigated by keeping rounds minimal and stopping once the contract is complete
+  - incorrect destination can hide skills from expected scope; mitigated by explicit destination confirmation before writes
+  - stale telemetry can mis-order steps; mitigated by validating `generated_at`/cutoff before using session-collector defaults
+rollback_procedure: >
+  If the generated SKILL.md is malformed, mismatched to the user intent, or saved to the wrong
+  location, discard the generated files and regenerate from the latest confirmed interview
+  answers. If regressions are introduced in this skill package, restore the previous
+  Plugins/skill-factory/skills/skillify files from git and rerun strict audit.
+observability: >
+  Monitor quality through (1) quick_validate pass rate for generated skill packages, (2) strict
+  ask skills audit outcomes, (3) frequency of user-requested rewrites after draft review, and
+  (4) recurring destination mistakes between canonical category paths, and
+  (5) how often session-collector evidence changes draft ordering versus thread-only extraction.

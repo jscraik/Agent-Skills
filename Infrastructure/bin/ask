@@ -1,0 +1,1560 @@
+#!/usr/bin/env python3
+"""
+Agent Skills Kit (ask) CLI - Agent-Native Interface
+
+Designed for AI coding agents with:
+- --robot / --agent-mode: Flexible parsing, helpful corrections
+- --json: Structured output for programmatic use
+- Fuzzy command matching when intent is clear
+- Detailed error messages with examples
+"""
+import sys
+import os
+import argparse
+import time
+import difflib
+from pathlib import Path
+from typing import List, Optional, Tuple
+
+# Add Infrastructure/scripts/lib and scripts to path
+repo_root_path = Path(__file__).resolve().parents[1]
+sys.path.append(str(repo_root_path / "scripts" / "lib"))
+sys.path.append(str(repo_root_path / "scripts"))
+sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
+
+from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
+from ask.context import find_repo_root
+from ask.commands.skills import (
+    list_skills,
+    route_skills,
+    goal_skills,
+    sync_skills,
+    audit_skill,
+    install_skill,
+    fold_skills,
+    init_skill,
+    extract_family_fail_lines,
+)
+from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog
+from ask.commands.plugins import (
+    init_plugin,
+    install_plugin,
+    harden_plugin,
+    list_plugins_state,
+    status_plugin_state,
+    doctor_plugins_state,
+)
+from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
+from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
+from ask.commands.mcp import sync_mcp
+from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
+
+# Error Code Mapping (per spec Error Registry)
+ERROR_MAP = {
+    ErrorCode.SUCCESS: ExitCode.SUCCESS,
+    ErrorCode.ERR_RUNTIME: ExitCode.ERR_RUNTIME,
+    ErrorCode.ERR_VALIDATION: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_PI_GUARD: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_PATH_TRAVERSAL: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_SCHEMA_INVALID: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_INVALID_HANDOFF: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_INVALID_STATE: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_DEPENDENCY: ExitCode.ERR_DEPENDENCY,
+    ErrorCode.ERR_CONFLICT: ExitCode.ERR_CONFLICT,
+    ErrorCode.ERR_REDUNDANCY: ExitCode.ERR_CONFLICT,
+    ErrorCode.ERR_AUTH: ExitCode.ERR_AUTH,
+}
+
+# Valid commands for fuzzy matching
+VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
+VALID_ACTIONS = {
+    "repo": ["status", "validate", "check-stability", "doctor-catalog"],
+    "skills": ["list", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
+    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden"],
+    "evals": ["run", "benchmark", "dashboard"],
+    "graph": ["related", "find", "info", "chain", "list", "topics"],
+    "mcp": ["sync"],
+    "wiki": ["lint", "ingest", "add", "query", "add-asset"],
+}
+
+# Common mistakes and their corrections
+FUZZY_MATCHES = {
+    # Topic typos
+    "skill": "skills",
+    "skil": "skills",
+    "skils": "skills",
+    "repo": "repo",
+    "rep": "repo",
+    "plugin": "plugins",
+    "plug": "plugins",
+    "eval": "evals",
+    "evaluation": "evals",
+    "mcp": "mcp",
+    "mc": "mcp",
+    "wiki": "wiki",
+    "wik": "wiki",
+    "wili": "wiki",
+    # Action typos for skills
+    "aud": "audit",
+    "audt": "audit",
+    "sync": "sync",
+    "syn": "sync",
+    "install": "install",
+    "instal": "install",
+    "list": "list",
+    "ls": "list",
+    "init": "init",
+    "create": "init",
+    "harden": "harden",
+    "fold": "fold",
+    "merge": "fold",
+    # Graph actions
+    "search": "find",
+    "query": "find",
+    "related": "related",
+    "rel": "related",
+    "neighbors": "related",
+    "info": "info",
+    "show": "info",
+    "details": "info",
+    "chain": "chain",
+    "path": "chain",
+    "route": "chain",
+    "goal": "goal",
+    "doctor": "doctor-catalog",
+    "catalog": "doctor-catalog",
+    "topics": "topics",
+    "tags": "topics",
+    "categories": "topics",
+    # Wiki actions
+    "ingest": "ingest",
+    "import": "ingest",
+    "add": "add",
+    "triage": "add",
+    "lookup": "query",
+    "asset": "add-asset",
+    "add-asset": "add-asset",
+    "lint": "lint",
+    "check": "lint",
+}
+
+
+def get_closest_match(query: str, options: List[str], cutoff: float = 0.6) -> Optional[str]:
+    """Find closest match using difflib."""
+    matches = difflib.get_close_matches(query, options, n=1, cutoff=cutoff)
+    return matches[0] if matches else None
+
+
+def format_correction(original: str, corrected: str, robot_mode: bool = False) -> str:
+    """Format a command correction message."""
+    if robot_mode:
+        return f"🤖 Robot mode: Interpreting '{original}' as '{corrected}'\n   💡 Tip: Use '{corrected}' for exact matching next time."
+    return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
+
+
+def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
+    """Split leading global flags from positional command tokens."""
+    global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
+    prefix_flags: List[str] = []
+    idx = 0
+    while idx < len(raw_args) and raw_args[idx].startswith("-"):
+        flag = raw_args[idx]
+        if flag not in global_flags:
+            break
+        prefix_flags.append(flag)
+        idx += 1
+        if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
+            prefix_flags.append(raw_args[idx])
+            idx += 1
+    return prefix_flags, raw_args[idx:]
+
+
+def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
+    """Build a helpful error message with examples."""
+    result = CallResult()
+    result.status = "error"
+
+    error_msg = "I couldn't understand that command."
+    suggestions = []
+    examples = []
+
+    # Try to figure out what they meant
+    if not topic:
+        error_msg = "Missing or unknown command topic."
+        suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
+        if raw_args:
+            guess = get_closest_match(raw_args[0], VALID_TOPICS)
+            if guess:
+                suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+    elif topic not in VALID_TOPICS:
+        guess = get_closest_match(topic, VALID_TOPICS)
+        if guess:
+            error_msg = f"Unknown topic: '{topic}'"
+            suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+        else:
+            error_msg = f"Unknown topic: '{topic}'"
+            suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
+    elif not action:
+        error_msg = f"Missing action for 'ask {topic}'"
+        valid_actions = VALID_ACTIONS.get(topic, [])
+        suggestions.append(f"Valid actions: {', '.join(valid_actions)}")
+    elif action not in VALID_ACTIONS.get(topic, []):
+        valid = VALID_ACTIONS.get(topic, [])
+        guess = get_closest_match(action, valid)
+        if guess:
+            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
+            suggestions.append(f"💡 Did you mean 'ask {topic} {guess}'?")
+        else:
+            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
+            suggestions.append(f"Valid actions: {', '.join(valid)}")
+
+    # Add relevant examples based on context
+    if topic == "skills" or not topic:
+        examples.extend([
+            "ask skills list",
+            "ask skills route \"find me the right skill for this request\"",
+            "ask skills goal \"implement this feature safely\"",
+            "ask skills starter --archetype delivery",
+            "ask skills audit backend/cli-spec --level strict",
+            "ask skills init my-skill --category backend --description 'Does something useful'",
+        ])
+    if topic == "graph" or not topic:
+        examples.extend([
+            "ask graph find security",
+            "ask graph related skill-builder --depth 2",
+            "ask graph info cli-spec",
+        ])
+    if topic == "repo" or not topic:
+        examples.extend([
+            "ask repo status",
+            "ask repo validate --ephemeral",
+            "ask repo doctor-catalog --strict",
+            "ask repo check-stability",
+        ])
+    if topic == "mcp" or not topic:
+        examples.extend([
+            "ask mcp sync",
+            "ask mcp sync --dry-run",
+        ])
+    if topic == "wiki" or not topic:
+        examples.extend([
+            "ask wiki lint",
+            "ask wiki ingest 'Title' --summary 'Summary' --source '<source>'",
+            "ask wiki add --interactive",
+            "ask wiki query '1password signing'",
+            "ask wiki add-asset /path/to/screenshot.png --title 'Checkout flow' --summary 'Reference layout' --status verified",
+            "ask wiki add-asset --interactive",
+        ])
+
+    # Build the full error message
+    full_message = f"❌ {error_msg}\n"
+    if suggestions:
+        full_message += "\n" + "\n".join(f"   {s}" for s in suggestions)
+    if examples:
+        full_message += "\n\n📚 Examples:\n"
+        full_message += "\n".join(f"   • {e}" for e in examples[:4])
+
+    result.errors.append(ErrorObject(
+        code=ErrorCode.ERR_VALIDATION,
+        message=full_message,
+        fix_suggestion="Use 'ask --help' for full usage information."
+    ))
+
+    return result
+
+
+def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:
+    """
+    Try to parse args with fuzzy matching.
+    Returns: (topic, action, remaining_args, correction_note)
+    """
+    if not raw_args:
+        return None, None, [], None
+
+    # Skip leading global flags (--json, --trace-id, --robot, etc.)
+    prefix_flags, working_args = consume_global_prefix_flags(raw_args)
+    if not working_args:
+        return None, None, raw_args, None
+
+    correction_note = None
+
+    # Alias normalization:
+    # - ask goal "<intent>" -> ask skills goal "<intent>"
+    # - ask doctor catalog -> ask repo doctor-catalog
+    if working_args[0] == "goal":
+        topic = "skills"
+        action = "goal"
+        return topic, action, prefix_flags + working_args[1:], format_correction("goal", "skills goal", robot_mode)
+    if len(working_args) >= 2 and working_args[0] == "doctor" and working_args[1] == "catalog":
+        topic = "repo"
+        action = "doctor-catalog"
+        return topic, action, prefix_flags + working_args[2:], format_correction("doctor catalog", "repo doctor-catalog", robot_mode)
+
+    topic = working_args[0]
+    remaining = working_args[1:]
+
+    # Try fuzzy match on topic
+    if topic not in VALID_TOPICS:
+        # Check direct fuzzy matches
+        if topic in FUZZY_MATCHES:
+            corrected = FUZZY_MATCHES[topic]
+            if corrected in VALID_TOPICS:
+                correction_note = format_correction(topic, corrected, robot_mode)
+                topic = corrected
+        else:
+            # Try difflib
+            guess = get_closest_match(topic, VALID_TOPICS)
+            if guess:
+                correction_note = format_correction(topic, guess, robot_mode)
+                topic = guess
+
+    # Get action if available
+    action = None
+    if remaining:
+        action = remaining[0]
+        valid_actions = VALID_ACTIONS.get(topic, [])
+
+        if action not in valid_actions:
+            # Try fuzzy match on action
+            if action in FUZZY_MATCHES:
+                corrected = FUZZY_MATCHES[action]
+                if corrected in valid_actions:
+                    if correction_note:
+                        correction_note += f"\n   Also interpreting '{action}' as '{corrected}'"
+                    else:
+                        correction_note = format_correction(action, corrected, robot_mode)
+                    action = corrected
+            else:
+                guess = get_closest_match(action, valid_actions)
+                if guess:
+                    if correction_note:
+                        correction_note += f"\n   Also interpreting '{action}' as '{guess}'"
+                    else:
+                        correction_note = format_correction(action, guess, robot_mode)
+                    action = guess
+
+            # If we couldn't match to a valid action, preserve the original action
+            # so later VALID_ACTIONS validation can produce the proper unknown-action message
+
+        remaining = remaining[1:]
+
+    # Combine prefix flags with remaining args for downstream processing
+    full_remaining = prefix_flags + remaining
+    return topic, action, full_remaining, correction_note
+
+
+def _safe_input(prompt: str) -> Optional[str]:
+    """Prompt with defensive handling of EOFError and KeyboardInterrupt."""
+    try:
+        return input(prompt)
+    except (EOFError, KeyboardInterrupt):
+        print("\n\nInteractive input cancelled by user.")
+        raise SystemExit(130)
+
+
+def _prompt_choice(prompt: str, options: List[str]) -> str:
+    """Prompt the operator for one option using 1-based indexing."""
+    print(prompt)
+    for idx, option in enumerate(options, start=1):
+        print(f"  {idx}. {option}")
+    while True:
+        raw = _safe_input("> ").strip()
+        if raw.isdigit():
+            choice = int(raw)
+            if 1 <= choice <= len(options):
+                return options[choice - 1]
+        if raw in options:
+            return raw
+        print(f"Please choose 1-{len(options)} or type an exact option value.")
+
+
+def _prompt_nonempty(prompt: str) -> str:
+    """Prompt until a non-empty string is entered."""
+    while True:
+        value = _safe_input(prompt).strip()
+        if value:
+            return value
+        print("This value cannot be empty.")
+
+
+def _prompt_optional(prompt: str) -> str:
+    """Prompt for an optional value (can be empty)."""
+    return _safe_input(prompt).strip()
+
+def main():
+    start_time = time.time()
+
+    # Check for robot mode in raw args before parsing
+    raw_args = sys.argv[1:]
+    alias_correction_note = None
+    prefix_flags, positional_args = consume_global_prefix_flags(raw_args)
+    if positional_args and positional_args[0] == "goal":
+        raw_args = [*prefix_flags, "skills", "goal", *positional_args[1:]]
+        alias_correction_note = "💡 Alias: 'ask goal' maps to 'ask skills goal'."
+    elif len(positional_args) >= 2 and positional_args[0] == "doctor" and positional_args[1] == "catalog":
+        raw_args = [*prefix_flags, "repo", "doctor-catalog", *positional_args[2:]]
+        alias_correction_note = "💡 Alias: 'ask doctor catalog' maps to 'ask repo doctor-catalog'."
+
+    robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
+
+    # Keep raw_args intact for parse_args() so robot flags are properly handled
+    # Use filtered_args only for early help detection (before parser setup)
+    filtered_args = [a for a in raw_args if a not in ["--robot", "--agent-mode", "-r"]]
+
+    # Use a parent parser for global flags to share them with subcommands
+    global_parser = argparse.ArgumentParser(add_help=False)
+    global_parser.add_argument("--json", action="store_true", help="Output results in JSON format for programmatic use")
+    global_parser.add_argument("--trace-id", help="Trace ID for correlating logs", default=os.environ.get("ASK_TRACE_ID"))
+    global_parser.add_argument("--robot", "--agent-mode", "-r", dest="robot_mode", action="store_true",
+                               help="Enable AI-friendly mode: flexible parsing, helpful corrections, verbose guidance")
+
+    parser = argparse.ArgumentParser(
+        prog="ask",
+        description="Agent Skills Kit CLI - Designed for AI coding agents. Use --robot for maximum flexibility.",
+        parents=[global_parser],
+        epilog="Examples:\n"
+               "  ask repo status                    # Check repository health\n"
+               "  ask skills list --json             # List skills as JSON\n"
+               "  ask graph find security --robot    # Fuzzy search with corrections\n"
+               "  ask skills audit backend/cli-spec  # Validate a skill\n"
+               "  ask wiki add --interactive         # Triage and file a wiki note\n"
+               "\n🤖 Robot mode (--robot): Auto-corrects minor syntax errors when intent is clear."
+    )
+    subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
+    
+    # --- repo ---
+    repo_parser = subparsers.add_parser("repo", help="Repository management", parents=[global_parser])
+    repo_subparsers = repo_parser.add_subparsers(dest="action")
+    
+    repo_status_parser = repo_subparsers.add_parser("status", help="Show repository status", parents=[global_parser])
+    repo_status_parser.add_argument("--verbose", action="store_true", help="Include more details")
+    
+    repo_validate_parser = repo_subparsers.add_parser("validate", help="Run all repository validations", parents=[global_parser])
+    repo_validate_parser.add_argument("--ephemeral", action="store_true", help="Do not mutate repo validation artifacts")
+
+    repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
+    repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
+    repo_doctor_catalog_parser = repo_subparsers.add_parser(
+        "doctor-catalog",
+        help="Diagnose canonical catalog parity drift",
+        parents=[global_parser],
+    )
+    repo_doctor_catalog_parser.add_argument("--strict", action="store_true", help="Enable strict trend and stamp enforcement")
+
+    # --- skills ---
+    skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
+    skills_subparsers = skills_parser.add_subparsers(dest="action")
+    
+    skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
+    skills_list_parser.add_argument("--category", help="Filter by category")
+    skills_list_parser.add_argument("--advanced", action="store_true", help="Include lane skills hidden in default listings")
+    skills_list_parser.add_argument("--starter", action="store_true", help="Return starter-mode curated skills")
+    skills_list_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
+    skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
+
+    skills_route_parser = skills_subparsers.add_parser("route", help="Route a request to matching skills", parents=[global_parser])
+    skills_route_parser.add_argument("request", nargs="+", help="Request text to route")
+    skills_route_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to return")
+    skills_route_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
+
+    skills_goal_parser = skills_subparsers.add_parser("goal", help="Resolve intent into one recommended skill", parents=[global_parser])
+    skills_goal_parser.add_argument("intent", nargs="+", help="Intent text to route")
+    skills_goal_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
+    skills_goal_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
+
+    skills_starter_parser = skills_subparsers.add_parser("starter", help="List starter-mode curated skills", parents=[global_parser])
+    skills_starter_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
+    skills_starter_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
+    
+    skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
+    skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
+    skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
+    
+    skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
+    skills_audit_parser.add_argument("path", help="Path to the skill directory")
+    skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
+    
+    skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
+    skills_install_parser.add_argument("url", help="GitHub URL of the skill")
+    skills_install_parser.add_argument("--dest", default="github", help="Repo-relative canonical category directory (default: github)")
+    skills_install_parser.add_argument("--remediate", action="store_true", help="Scaffold missing contract/eval files")
+    skills_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation")
+    
+    skills_fold_parser = skills_subparsers.add_parser("fold", help="Suggest folding source into target", parents=[global_parser])
+    skills_fold_parser.add_argument("source", help="Skill to be folded")
+    skills_fold_parser.add_argument("target", help="Skill to merge into")
+    skills_fold_parser.add_argument("--sensitivity", type=float, default=0.2, help="Overlap threshold")
+    
+    skills_init_parser = skills_subparsers.add_parser("init", help="Initialize a new skill scaffold", parents=[global_parser])
+    skills_init_parser.add_argument("name", help="Name of the new skill")
+    skills_init_parser.add_argument("--category", required=True, help="Category directory")
+    skills_init_parser.add_argument("--description", required=True, help="Short routing description")
+    
+    # --- plugins ---
+    plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
+    plugins_subparsers = plugins_parser.add_subparsers(dest="action")
+
+    def _add_plugin_init_args(parser):
+        parser.add_argument("name", help="Name of the new plugin")
+        parser.add_argument("--with-marketplace", action="store_true", help="Add to local marketplace")
+        parser.add_argument("--with-scripts", action="store_true", help="Add scripts directory")
+        parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
+        parser.add_argument("--with-references", action="store_true", help="Add references directory")
+        parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
+
+    def _add_plugin_install_args(parser):
+        parser.add_argument("url", help="GitHub URL of the plugin source")
+        parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
+        parser.add_argument("--name", help="Override installed plugin name")
+        parser.add_argument("--ref", help="Pinned Git ref to install (recommended: commit SHA)")
+        parser.add_argument("--dest", default="Plugins/third-party", help="Destination directory relative to repo root")
+        parser.add_argument("--validation-level", choices=["strict", "compat"], default="compat", help="Installer validation depth")
+        parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
+        parser.add_argument("--allow-unpinned-ref", action="store_true", help="Allow non-SHA refs (e.g. main)")
+        parser.add_argument("--dry-run", action="store_true", help="Preview installation without writing")
+
+    plugins_subparsers.add_parser("list", help="List plugin lifecycle state", parents=[global_parser])
+
+    plugins_status_parser = plugins_subparsers.add_parser("status", help="Show state for one plugin", parents=[global_parser])
+    plugins_status_parser.add_argument("name", help="Plugin name")
+
+    plugins_subparsers.add_parser("doctor", help="Run read-only plugin diagnostics", parents=[global_parser])
+    
+    plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
+    _add_plugin_init_args(plugins_init_parser)
+
+    plugins_create_parser = plugins_subparsers.add_parser("create", help="Alias for plugins init", parents=[global_parser])
+    _add_plugin_init_args(plugins_create_parser)
+
+    plugins_install_parser = plugins_subparsers.add_parser("install", help="Install a plugin from GitHub", parents=[global_parser])
+    _add_plugin_install_args(plugins_install_parser)
+
+    plugins_import_parser = plugins_subparsers.add_parser("import", help="Alias for plugins install", parents=[global_parser])
+    _add_plugin_install_args(plugins_import_parser)
+
+    plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
+    plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: Plugins/my-plugin)")
+    plugins_harden_parser.add_argument("--marketplace-path", default=".agents/Plugins/marketplace.json", help="Marketplace manifest path")
+    plugins_harden_parser.add_argument("--skip-compat", action="store_true", help="Skip audit-compat step")
+    plugins_harden_parser.add_argument("--skip-marketplace-audit", action="store_true", help="Skip audit-marketplace step")
+    plugins_harden_parser.add_argument("--no-require-marketplace", action="store_true", help="Do not require a matching marketplace entry")
+    plugins_harden_parser.add_argument("--strict-marketplace-path", action="store_true", help="Disallow legacy marketplace path override")
+    
+    # --- evals ---
+    evals_parser = subparsers.add_parser("evals", help="Evaluation and Benchmarking", parents=[global_parser])
+    evals_subparsers = evals_parser.add_subparsers(dest="action")
+    
+    evals_run_parser = evals_subparsers.add_parser("run", help="Run evaluation cases for a skill", parents=[global_parser])
+    evals_run_parser.add_argument("path", help="Path to the skill directory")
+    evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode")
+    
+    evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
+    evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
+
+    # --- graph ---
+    graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
+    graph_subparsers = graph_parser.add_subparsers(dest="action")
+
+    graph_related_parser = graph_subparsers.add_parser("related", help="Find related skills", parents=[global_parser])
+    graph_related_parser.add_argument("skill", help="Skill name to find relations for")
+    graph_related_parser.add_argument("--depth", type=int, default=1, help="BFS depth")
+    graph_related_parser.add_argument("--reverse", action="store_true", help="Follow in-links instead of out-links")
+    graph_related_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
+    graph_related_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
+
+    graph_find_parser = graph_subparsers.add_parser("find", help="Search for skills", parents=[global_parser])
+    graph_find_parser.add_argument("query", help="Search query")
+    graph_find_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
+    graph_find_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
+
+    graph_info_parser = graph_subparsers.add_parser("info", help="Show skill details", parents=[global_parser])
+    graph_info_parser.add_argument("skill", help="Skill name")
+
+    graph_chain_parser = graph_subparsers.add_parser("chain", help="Find path between skills", parents=[global_parser])
+    graph_chain_parser.add_argument("from_skill", help="Starting skill")
+    graph_chain_parser.add_argument("to_skill", help="Target skill")
+
+    graph_list_parser = graph_subparsers.add_parser("list", help="List all skills in graph", parents=[global_parser])
+    graph_list_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
+    graph_list_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
+
+    graph_subparsers.add_parser("topics", help="List all topic clusters", parents=[global_parser])
+
+    # --- mcp ---
+    mcp_parser = subparsers.add_parser("mcp", help="MCP configuration management", parents=[global_parser])
+    mcp_subparsers = mcp_parser.add_subparsers(dest="action")
+
+    mcp_sync_parser = mcp_subparsers.add_parser("sync", help="Sync MCP config from Codex to Antigravity", parents=[global_parser])
+    mcp_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing")
+
+    # --- wiki ---
+    wiki_parser = subparsers.add_parser("wiki", help="Skill Ops Wiki operations", parents=[global_parser])
+    wiki_subparsers = wiki_parser.add_subparsers(dest="action")
+
+    wiki_lint_parser = wiki_subparsers.add_parser("lint", help="Lint wiki links and freshness", parents=[global_parser])
+    wiki_lint_parser.add_argument("--wiki-root", default="Wiki/skill-ops-wiki/wiki", help="Wiki root path")
+    wiki_lint_parser.add_argument("--max-age-days", type=int, default=60, help="Max last_reviewed age before warning")
+
+    wiki_ingest_parser = wiki_subparsers.add_parser("ingest", help="Ingest raw source notes into wiki logs", parents=[global_parser])
+    wiki_ingest_parser.add_argument("title", help="Ingest title")
+    wiki_ingest_parser.add_argument("--source", action="append", default=[], help="Source reference (repeatable)")
+    wiki_ingest_parser.add_argument("--summary", required=True, help="One-paragraph summary")
+    wiki_ingest_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
+    wiki_ingest_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
+
+    wiki_add_parser = wiki_subparsers.add_parser("add", help="Triage and add a structured wiki note", parents=[global_parser])
+    wiki_add_parser.add_argument("title", nargs="?", help="Note title")
+    wiki_add_parser.add_argument("--summary", help="Summary text")
+    wiki_add_parser.add_argument("--source", help="Primary source reference")
+    wiki_add_parser.add_argument(
+        "--intent",
+        choices=["finding", "playbook", "design-asset", "lesson-learned"],
+        help="Triage intent",
+    )
+    wiki_add_parser.add_argument(
+        "--status",
+        choices=["needs-verification", "verified", "fix-now"],
+        help="Current status",
+    )
+    wiki_add_parser.add_argument(
+        "--destination",
+        choices=["failures", "playbooks", "assets/ui", "learnings"],
+        help="Override destination folder under Wiki/skill-ops-wiki/wiki",
+    )
+    wiki_add_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
+    wiki_add_parser.add_argument("--interactive", action="store_true", help="Prompt for missing triage fields")
+    wiki_add_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
+
+    wiki_query_parser = wiki_subparsers.add_parser("query", help="Search wiki pages", parents=[global_parser])
+    wiki_query_parser.add_argument("query", help="Search query")
+    wiki_query_parser.add_argument("--limit", type=int, default=5, help="Max results to return")
+    wiki_query_parser.add_argument("--wiki-root", default="Wiki/skill-ops-wiki/wiki", help="Wiki root path")
+
+    wiki_asset_parser = wiki_subparsers.add_parser("add-asset", help="Add screenshot/asset to wiki and create linked note", parents=[global_parser])
+    wiki_asset_parser.add_argument("asset_path", nargs="?", help="Path to local asset file")
+    wiki_asset_parser.add_argument("--title", help="Asset note title")
+    wiki_asset_parser.add_argument("--summary", help="Summary for why this asset matters")
+    wiki_asset_parser.add_argument("--source", default="", help="Original source reference (optional)")
+    wiki_asset_parser.add_argument("--status", choices=["needs-verification", "verified", "fix-now"], help="Current status")
+    wiki_asset_parser.add_argument("--destination", choices=["assets/ui", "learnings"], help="Destination folder under wiki")
+    wiki_asset_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
+    wiki_asset_parser.add_argument("--interactive", action="store_true", help="Prompt for missing asset fields")
+    wiki_asset_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
+
+    # Pre-parse to check for help
+    if not filtered_args or filtered_args[0] in ("-h", "--help"):
+        parser.print_help()
+        sys.exit(0)
+
+    # Try fuzzy parsing if robot mode or if initial parse fails
+    parsed_topic = None
+    parsed_action = None
+    remaining_args = []
+    correction_note = alias_correction_note
+    fuzzy_matched = False  # Track if fuzzy matching was used
+
+    try:
+        # In robot mode, suppress parser error output to stderr since we handle
+        # fuzzy corrections ourselves. This prevents parser noise from contaminating
+        # structured output flows that expect clean results.
+        if robot_mode:
+            import contextlib
+            with open(os.devnull, 'w') as devnull:
+                with contextlib.redirect_stderr(devnull):
+                    args = parser.parse_args(raw_args)
+        else:
+            args = parser.parse_args(raw_args)
+        parsed_topic = args.topic
+        parsed_action = getattr(args, 'action', None)
+    except SystemExit as e:
+        # argparse raises SystemExit(0) for --help, SystemExit(2) for errors
+        # Re-raise if it's a help request (code 0)
+        if e.code == 0:
+            sys.exit(0)
+        # Parse failed - determine if it's an unknown command or bad arguments
+        # Extract potential topic/action from raw_args for validation
+        potential_topic, potential_action, _, _ = try_fuzzy_parse(raw_args, robot_mode=False)
+        is_known_command = (
+            potential_topic in VALID_TOPICS and
+            potential_action in VALID_ACTIONS.get(potential_topic, [])
+        )
+        if is_known_command:
+            # Known command with bad/missing arguments - preserve argparse's error
+            result = CallResult()
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"Invalid arguments for 'ask {potential_topic} {potential_action}'",
+                fix_suggestion=f"Run 'ask {potential_topic} {potential_action} --help' for usage."
+            ))
+            if "--json" in raw_args:
+                print(result.to_json())
+            else:
+                print(f"❌ {result.errors[0].message}")
+                print(f"\n💡 {result.errors[0].fix_suggestion}")
+            sys.exit(2)
+        # Parse failed - try fuzzy matching if robot mode
+        if robot_mode:
+            parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(raw_args, robot_mode=True)
+            fuzzy_matched = parsed_topic is not None
+            if not parsed_topic or not parsed_action:
+                # Still couldn't parse - show helpful error
+                repo_root = find_repo_root()
+                result = build_helpful_error(parsed_topic, parsed_action, raw_args, repo_root)
+                if "--json" in raw_args:
+                    print(result.to_json())
+                else:
+                    print(result.errors[0].message)
+                sys.exit(2)
+            # Valid topic/action found - will reparse below
+        else:
+            # Not in robot mode - show standard error with hint
+            if "--json" in raw_args:
+                result = CallResult()
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code=ErrorCode.ERR_VALIDATION,
+                    message="Unknown command. Use --robot to enable flexible parsing.",
+                    fix_suggestion=f"Valid topics: {', '.join(VALID_TOPICS)}"
+                ))
+                print(result.to_json())
+            else:
+                print("❌ Unknown command. Use --robot to enable flexible parsing.")
+                print("\n📚 Quick examples:")
+                print("  ask skills list")
+                print("  ask repo status")
+                print("  ask graph find security")
+                print("  ask wiki add --interactive")
+            sys.exit(2)
+
+    # If fuzzy matching failed to produce valid command
+    if parsed_topic and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
+        # Still invalid after fuzzy matching
+        repo_root = find_repo_root()
+        result = build_helpful_error(parsed_topic, parsed_action, raw_args, repo_root)
+        if "--json" in raw_args:
+            print(result.to_json())
+        else:
+            print(result.errors[0].message)
+            if correction_note:
+                print(f"\n{correction_note}")
+        sys.exit(2)
+
+    # Re-parse with corrected values if needed (only if we came from fuzzy matching path)
+    # fuzzy_matched indicates try_fuzzy_parse was used successfully
+    if fuzzy_matched and parsed_topic and parsed_topic in VALID_TOPICS:
+        # Rebuild the command line with corrected values from fuzzy match
+        corrected_args = [parsed_topic]
+        if parsed_action:
+            corrected_args.append(parsed_action)
+        corrected_args.extend(remaining_args)
+        # Add back any flags
+        for flag in ["--json", "--trace-id"]:
+            if flag in raw_args:
+                idx = raw_args.index(flag)
+                corrected_args.append(flag)
+                if idx + 1 < len(raw_args) and not raw_args[idx + 1].startswith("-"):
+                    corrected_args.append(raw_args[idx + 1])
+
+        args = parser.parse_args(corrected_args)
+
+    # Guard: args must be initialized before use (catches robot-mode parse edge cases)
+    if 'args' not in locals() or args is None:
+        result = CallResult()
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code=ErrorCode.ERR_VALIDATION,
+            message="Failed to parse command arguments.",
+            fix_suggestion="Check command format and try again."
+        ))
+        if "--json" in raw_args:
+            print(result.to_json())
+        else:
+            print("❌ Failed to parse command arguments.")
+        sys.exit(2)
+
+    # Preserve leading global flags even when subparser defaults would overwrite them.
+    prefix_flags, _ = consume_global_prefix_flags(raw_args)
+    if "--json" in prefix_flags:
+        args.json = True
+    if "--trace-id" in prefix_flags:
+        trace_idx = prefix_flags.index("--trace-id")
+        if trace_idx + 1 < len(prefix_flags):
+            args.trace_id = prefix_flags[trace_idx + 1]
+
+    repo_root = find_repo_root()
+    result = CallResult()
+    if args.trace_id:
+        result.trace_id = args.trace_id
+
+    # Print correction note if in human mode
+    if correction_note and not args.json:
+        print(f"{correction_note}\n")
+
+    if args.topic == "repo":
+        if args.action == "status":
+            result = repo_status(repo_root, verbose=args.verbose)
+        elif args.action == "validate":
+            result = repo_validate(repo_root, ephemeral=args.ephemeral)
+        elif args.action == "check-stability":
+            result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
+        elif args.action == "doctor-catalog":
+            result = doctor_catalog(repo_root, strict=args.strict)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'repo'",
+                fix_suggestion="Valid actions: status, validate, check-stability, doctor-catalog"
+            ))
+
+    elif args.topic == "skills":
+        if args.action == "list":
+            result = list_skills(
+                repo_root,
+                category=args.category,
+                starter=args.starter,
+                archetype=args.archetype,
+                limit=args.limit,
+                advanced=args.advanced,
+            )
+        elif args.action == "route":
+            result = route_skills(
+                repo_root,
+                request=" ".join(args.request),
+                top_k=args.top_k,
+                considered_limit=args.considered_limit,
+            )
+        elif args.action == "goal":
+            result = goal_skills(
+                repo_root,
+                intent_text=" ".join(args.intent),
+                top_k=args.top_k,
+                considered_limit=args.considered_limit,
+            )
+        elif args.action == "starter":
+            result = list_skills(
+                repo_root,
+                category=None,
+                starter=True,
+                archetype=args.archetype,
+                limit=args.limit,
+            )
+        elif args.action == "sync":
+            result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run)
+        elif args.action == "audit":
+            result = audit_skill(repo_root, skill_path=args.path, level=args.level)
+        elif args.action == "install":
+            result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest, dry_run=args.dry_run)
+        elif args.action == "fold":
+            result = fold_skills(repo_root, source=args.source, target=args.target, sensitivity=args.sensitivity)
+        elif args.action == "init":
+            result = init_skill(repo_root, name=args.name, category=args.category, description=args.description)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'skills'",
+                fix_suggestion="Valid actions: list, route, goal, starter, sync, audit, install, fold, init"
+            ))
+            
+    elif args.topic == "plugins":
+        if args.action == "list":
+            result = list_plugins_state(repo_root)
+        elif args.action == "status":
+            result = status_plugin_state(repo_root, name=args.name)
+        elif args.action == "doctor":
+            result = doctor_plugins_state(repo_root)
+        elif args.action in {"init", "create"}:
+            companion = [
+                name
+                for enabled, name in (
+                    (args.with_scripts, "scripts"),
+                    (args.with_assets, "assets"),
+                    (args.with_references, "references"),
+                    (args.with_workflows, "workflows"),
+                )
+                if enabled
+            ]
+            result = init_plugin(repo_root, name=args.name, with_marketplace=args.with_marketplace, companion_folders=companion)
+        elif args.action in {"install", "import"}:
+            result = install_plugin(
+                repo_root,
+                url=args.url,
+                plugin_path=args.path,
+                name=args.name,
+                ref=args.ref,
+                dest=args.dest,
+                validation_level=args.validation_level,
+                allow_untrusted_source=args.allow_untrusted_source,
+                allow_unpinned_ref=args.allow_unpinned_ref,
+                dry_run=args.dry_run,
+            )
+        elif args.action == "harden":
+            result = harden_plugin(
+                repo_root,
+                plugin_path=args.plugin_path,
+                require_marketplace=not args.no_require_marketplace,
+                marketplace_path=args.marketplace_path,
+                run_compat=not args.skip_compat,
+                run_marketplace_audit=not args.skip_marketplace_audit,
+                allow_legacy_marketplace_path=not args.strict_marketplace_path,
+            )
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'plugins'",
+                fix_suggestion="Valid actions: list, status, doctor, init, create, install, import, harden"
+            ))
+
+    elif args.topic == "evals":
+        if args.action == "run":
+            result = run_evals(repo_root, path=args.path, mode=args.mode)
+        elif args.action == "benchmark":
+            result = benchmark_portfolio(repo_root)
+        elif args.action == "dashboard":
+            result = dashboard_report(repo_root)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'evals'",
+                fix_suggestion="Valid actions: run, benchmark, dashboard"
+            ))
+
+    elif args.topic == "graph":
+        if args.action == "related":
+            result = graph_related(repo_root, skill=args.skill, depth=args.depth,
+                                   reverse=args.reverse, topic=args.topic_filter, tier=args.tier)
+        elif args.action == "find":
+            result = graph_find(repo_root, query=args.query, topic=args.topic_filter, tier=args.tier)
+        elif args.action == "info":
+            result = graph_info(repo_root, skill=args.skill)
+        elif args.action == "chain":
+            result = graph_chain(repo_root, from_skill=args.from_skill, to_skill=args.to_skill)
+        elif args.action == "list":
+            result = graph_list(repo_root, topic=args.topic_filter, tier=args.tier)
+        elif args.action == "topics":
+            result = graph_topics(repo_root)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'graph'",
+                fix_suggestion="Valid actions: related, find, info, chain, list, topics"
+            ))
+
+    elif args.topic == "mcp":
+        if args.action == "sync":
+            result = sync_mcp(repo_root, dry_run=args.dry_run)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'mcp'",
+                fix_suggestion="Valid actions: sync"
+            ))
+
+    elif args.topic == "wiki":
+        if args.action == "lint":
+            result = wiki_lint(repo_root, wiki_root=args.wiki_root, max_age_days=args.max_age_days)
+        elif args.action == "ingest":
+            result = wiki_ingest(
+                repo_root,
+                title=args.title,
+                sources=args.source or [],
+                summary=args.summary,
+                tags=args.tag or [],
+                dry_run=args.dry_run,
+            )
+        elif args.action == "add":
+            title = args.title
+            summary = args.summary
+            source = args.source
+            intent = args.intent
+            status = args.status
+            destination = args.destination
+            tags = args.tag or []
+
+            if args.interactive:
+                if args.json:
+                    result.status = "error"
+                    result.errors.append(
+                        ErrorObject(
+                            code=ErrorCode.ERR_VALIDATION,
+                            message="--interactive cannot be combined with --json.",
+                            fix_suggestion="Use interactive mode without --json or pass all fields explicitly.",
+                        )
+                    )
+                else:
+                    print("🧭 Wiki triage questionnaire")
+                    title = title or _prompt_nonempty("Title: ")
+                    summary = summary or _prompt_nonempty("Summary: ")
+                    source = source or _prompt_nonempty("Source: ")
+                    intent = intent or _prompt_choice(
+                        "Intent:",
+                        ["finding", "playbook", "design-asset", "lesson-learned"],
+                    )
+                    status = status or _prompt_choice(
+                        "Status:",
+                        ["needs-verification", "verified", "fix-now"],
+                    )
+                    destination = destination or _prompt_choice(
+                        "Destination:",
+                        ["failures", "playbooks", "assets/ui", "learnings"],
+                    )
+
+            required_missing = []
+            if not title:
+                required_missing.append("title")
+            if not summary:
+                required_missing.append("summary")
+            if not source:
+                required_missing.append("source")
+            if not intent:
+                required_missing.append("intent")
+            if not status:
+                required_missing.append("status")
+
+            if result.status != "error" and required_missing:
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code=ErrorCode.ERR_VALIDATION,
+                        message=f"Missing required fields for wiki add: {', '.join(required_missing)}",
+                        fix_suggestion="Use --interactive or pass --summary, --source, --intent, and --status explicitly.",
+                    )
+                )
+            elif result.status != "error":
+                result = wiki_add(
+                    repo_root,
+                    title=title,
+                    summary=summary,
+                    source=source,
+                    intent=intent,
+                    status=status,
+                    destination=destination,
+                    tags=tags,
+                    dry_run=args.dry_run,
+                )
+        elif args.action == "query":
+            result = wiki_query(
+                repo_root,
+                query=args.query,
+                wiki_root=args.wiki_root,
+                limit=args.limit,
+            )
+        elif args.action == "add-asset":
+            asset_path = args.asset_path
+            title = args.title
+            summary = args.summary
+            source = args.source
+            status = args.status
+            destination = args.destination
+            tags = args.tag or []
+
+            if args.interactive:
+                if args.json:
+                    result.status = "error"
+                    result.errors.append(
+                        ErrorObject(
+                            code=ErrorCode.ERR_VALIDATION,
+                            message="--interactive cannot be combined with --json.",
+                            fix_suggestion="Use interactive mode without --json or pass all fields explicitly.",
+                        )
+                    )
+                else:
+                    print("🖼️ Wiki asset questionnaire")
+                    asset_path = asset_path or _prompt_nonempty("Asset path: ")
+                    title = title or _prompt_nonempty("Title: ")
+                    summary = summary or _prompt_nonempty("Summary: ")
+                    source = source or _prompt_optional("Source (optional): ")
+                    status = status or _prompt_choice(
+                        "Status:",
+                        ["needs-verification", "verified", "fix-now"],
+                    )
+                    destination = destination or _prompt_choice(
+                        "Destination:",
+                        ["assets/ui", "learnings"],
+                    )
+
+            required_missing = []
+            if not asset_path:
+                required_missing.append("asset_path")
+            if not title:
+                required_missing.append("title")
+            if not summary:
+                required_missing.append("summary")
+            status = status or "verified"
+            destination = destination or "assets/ui"
+
+            if result.status != "error" and required_missing:
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code=ErrorCode.ERR_VALIDATION,
+                        message=f"Missing required fields for wiki add-asset: {', '.join(required_missing)}",
+                        fix_suggestion="Use --interactive or pass asset_path, --title, and --summary explicitly.",
+                    )
+                )
+            elif result.status != "error":
+                result = wiki_add_asset(
+                    repo_root,
+                    asset_path=asset_path,
+                    title=title,
+                    summary=summary,
+                    source=source,
+                    status=status,
+                    destination=destination,
+                    tags=tags,
+                    dry_run=args.dry_run,
+                )
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'wiki'",
+                fix_suggestion="Valid actions: lint, ingest, add, query, add-asset"
+            ))
+
+    # Finalize Result Metadata (before output dispatch so both JSON and human modes see it)
+    result.metadata["command"] = " ".join(sys.argv[1:])
+    if correction_note:
+        result.metadata["correction_note"] = correction_note.replace("\n", " ")
+
+    # Finalize Telemetry
+    result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
+    if args.trace_id:
+        result.trace_id = args.trace_id # Ensure it persists if command function replaced result
+
+    # Dispatch Output
+    if args.json:
+        print(result.to_json(repo_root=str(repo_root)))
+    else:
+        if result.status == "success":
+            if args.topic:
+                if args.topic == "repo" and args.action == "status":
+                    print(f"✅ Success: {result.metadata['command']}")
+                    print(f"  Root: {result.data['repo_root']}")
+                    print(f"  Synced: {result.data['skills_synced']}")
+                elif args.topic == "repo" and args.action == "validate":
+                    print(f"✅ Validation passed! ({result.data['warn_only_issues']} warnings)")
+                elif args.topic == "repo" and args.action == "check-stability":
+                    print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
+                    if args.changed_files:
+                        print(f"   Checked {result.data['checked_files']} changed file(s)")
+                elif args.topic == "repo" and args.action == "doctor-catalog":
+                    report = result.data.get("catalog_parity", {})
+                    print(f"✅ Catalog parity: {report.get('decision_status', 'resolved')}")
+                    print(f"  Canonical count: {report.get('canonical_count')}")
+                    print(f"  Policy identity: {report.get('policy_identity')}")
+                    for surface in report.get("surfaces", []):
+                        print(
+                            "  - "
+                            f"{surface.get('surface_name')}: "
+                            f"{surface.get('observed_count')} / {surface.get('canonical_count')} "
+                            f"(parity_ok={surface.get('parity_ok')})"
+                        )
+                elif args.topic == "skills" and args.action == "list":
+                    print(f"Discovered {len(result.data['skills'])} skills:")
+                    for skill in result.data["skills"]:
+                        print(f"  - {skill['name']} [{skill['category']}]")
+                    if result.data.get("policy_identity"):
+                        print(f"Policy identity: {result.data['policy_identity']}")
+                    if result.data.get("advanced_mode"):
+                        print("Advanced mode: visible")
+                    if result.data.get("starter_mode"):
+                        print(
+                            f"Starter mode: archetype={result.data.get('starter_archetype')} "
+                            f"limit={result.data.get('starter_limit')}"
+                        )
+                elif args.topic == "skills" and args.action == "route":
+                    decision = result.data["decision"]
+                    print(f"🧭 Route decision: {decision['decision_status']}")
+                    print(f"Policy identity: {decision['policy_identity']}")
+                    print(
+                        "Considered: "
+                        f"{len(decision['considered_candidates'])}/{decision['considered_total']} "
+                        f"(limit={decision['considered_limit']}, truncated={decision['considered_truncated']})"
+                    )
+                    if decision["selected_candidates"]:
+                        print("Selected:")
+                        for candidate in decision["selected_candidates"]:
+                            print(
+                                f"  - {candidate['name']} ({candidate['path']}) "
+                                f"confidence={candidate.get('confidence', 0.0):.4f}"
+                            )
+                            rationale = candidate.get("rationale") or []
+                            if rationale:
+                                print(f"    rationale: {', '.join(rationale)}")
+                    if decision.get("failure_class"):
+                        print(f"Failure class: {decision['failure_class']}")
+                    if decision.get("operator_action"):
+                        print(f"Operator action: {decision['operator_action']}")
+                    if decision.get("ambiguity_set"):
+                        print("Ambiguity set:")
+                        for candidate in decision["ambiguity_set"]:
+                            print(
+                                f"  - {candidate.get('name')} ({candidate.get('path')}) "
+                                f"confidence={candidate.get('confidence', 0.0):.4f}"
+                            )
+                elif args.topic == "skills" and args.action == "goal":
+                    goal = result.data["goal_decision"]
+                    print(f"🎯 Goal decision: {goal['decision_status']}")
+                    print(f"Policy identity: {goal['policy_identity']}")
+                    recommended = goal.get("recommended_candidate")
+                    if recommended:
+                        print(
+                            f"Recommended: {recommended.get('name')} "
+                            f"({recommended.get('path')})"
+                        )
+                    alternatives = goal.get("alternative_candidates", [])
+                    if alternatives:
+                        print("Alternatives:")
+                        for candidate in alternatives:
+                            print(f"  - {candidate.get('name')} ({candidate.get('path')})")
+                    prompts = goal.get("disambiguation_prompts", [])
+                    if prompts:
+                        print("Disambiguation prompts:")
+                        for prompt in prompts:
+                            print(f"  - {prompt}")
+                elif args.topic == "skills" and args.action == "starter":
+                    print(
+                        f"Starter skills ({len(result.data['skills'])}) "
+                        f"[{result.data.get('starter_archetype', 'general')}]"
+                    )
+                    for skill in result.data["skills"]:
+                        print(f"  - {skill['name']} [{skill['category']}]")
+                elif args.topic == "skills" and args.action == "sync":
+                    print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
+                    for log in result.data.get("logs", []):
+                        print(f"  {log}")
+                    if args.dry_run:
+                        print("  (Dry run - no changes made)")
+                    if result.data.get("policy_identity"):
+                        print(f"  Policy identity: {result.data['policy_identity']}")
+                elif args.topic == "skills" and args.action == "audit":
+                    print(f"✅ Audit passed: {args.path}")
+                    print(result.data["diagnostics"]["stdout"])
+                elif args.topic == "skills" and args.action == "install":
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would install:")
+                        print(f"   URL: {result.data.get('url')}")
+                        print(f"   Skill: {result.data.get('skill_name')}")
+                        print(f"   Target: {result.data.get('target_path')}")
+                        if result.data.get('remediate'):
+                            print("   Remediate: Yes (scaffold missing files)")
+                        print("\n💡 To actually install, run:")
+                        print(f"   {result.metadata.get('next_steps', ['ask skills install <url>'])[0]}")
+                    else:
+                        print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
+                        print(result.data.get("raw_output", ""))
+                elif args.topic == "skills" and args.action == "fold":
+                    print(f"✅ Result: {result.data['recommendation']}")
+                    print(f"  Overlap Score: {result.data['overlap_score']}")
+                    print(f"  Rationale: {result.data['rationale']}")
+                elif args.topic == "skills" and args.action == "init":
+                    print(f"✅ {result.data['message']}")
+                elif args.topic == "plugins" and args.action in {"init", "create"}:
+                    print(f"✅ {result.data['message']}")
+                    print(result.data.get("raw_output", ""))
+                    created_manual = result.data.get("created_manual_folders", [])
+                    if created_manual:
+                        print("Created companion folders:")
+                        for folder in created_manual:
+                            print(f"  - {folder}")
+                elif args.topic == "plugins" and args.action in {"list", "status", "doctor"}:
+                    installed_state = result.data.get("installed_state", {})
+                    activation_state = result.data.get("activation_state", {})
+                    health_state = result.data.get("health_state", {})
+                    print(f"Plugins installed: {installed_state.get('plugin_count', 0)}")
+                    for plugin in installed_state.get("plugins", []):
+                        print(f"  - {plugin.get('name')} ({plugin.get('path')})")
+                    print(f"Activation entries: {activation_state.get('plugin_count', 0)}")
+                    print(f"Health status: {health_state.get('status', 'unknown')}")
+                    blockers = health_state.get("blockers", [])
+                    if blockers:
+                        print("Blockers:")
+                        for blocker in blockers:
+                            print(f"  - {blocker}")
+                elif args.topic == "plugins" and args.action in {"install", "import"}:
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would install plugin:")
+                        print(f"   URL: {result.data.get('url')}")
+                        print(f"   Source path: {result.data.get('plugin_path')}")
+                        print(f"   Name: {result.data.get('plugin_name')}")
+                        print(f"   Target: {result.data.get('target_path')}")
+                        print("\n💡 To actually install, run:")
+                        print(f"   {result.metadata.get('next_steps', ['ask plugins install <url> --path <path>'])[0]}")
+                    else:
+                        print(f"✅ {result.data.get('message', 'Plugin installed.')}")
+                        if result.data.get("raw_output"):
+                            print(result.data["raw_output"])
+                elif args.topic == "plugins" and args.action == "harden":
+                    print(f"✅ {result.data.get('message', 'Plugin hardening checks passed.')}")
+                    command_runs = result.data.get("command_runs", [])
+                    if command_runs:
+                        print("Checks run:")
+                        for run in command_runs:
+                            print(f"  - {run.get('step')}: {run.get('command')}")
+                elif args.topic == "evals":
+                    if args.action == "run":
+                        print(f"✅ Evaluation complete for {args.path}")
+                        print(result.data.get("raw_output", ""))
+                    elif args.action == "benchmark":
+                        print("✅ Benchmark suite complete.")
+                        print(result.data.get("raw_output", ""))
+                    elif args.action == "dashboard":
+                        print(f"✅ {result.data['message']}")
+                elif args.topic == "mcp" and args.action == "sync":
+                    if result.data.get("dry_run"):
+                        print(f"🔍 Dry run - would sync {result.data['server_count']} MCP server(s):")
+                        for server in result.data.get("servers", []):
+                            print(f"   • {server}")
+                        print(f"\n   Target: {result.data['target_path']}")
+                    else:
+                        print(f"✅ Synced {result.data['server_count']} MCP servers to {result.data['target_path']}")
+                        print("   Restart Antigravity or type '/refresh' to pick up changes.")
+                elif args.topic == "wiki":
+                    if args.action == "lint":
+                        print(f"✅ {result.data.get('message', 'Wiki lint passed.')}")
+                        if result.data.get("raw_output"):
+                            print(result.data["raw_output"])
+                    elif args.action == "ingest":
+                        if result.data.get("dry_run"):
+                            print("🔍 Dry run - would ingest:")
+                            print(f"   Raw note: {result.data.get('raw_note')}")
+                            print(f"   Log file: {result.data.get('log_file')}")
+                        else:
+                            print(f"✅ {result.data.get('message', 'Wiki ingest complete.')}")
+                            print(f"   Raw note: {result.data.get('raw_note')}")
+                            print(f"   Log file: {result.data.get('log_file')}")
+                    elif args.action == "add":
+                        if result.data.get("dry_run"):
+                            print("🔍 Dry run - would add triaged wiki note:")
+                        else:
+                            print(f"✅ {result.data.get('message', 'Wiki note added.')}")
+                        print(f"   Note: {result.data.get('note_path')}")
+                        print(f"   Intent: {result.data.get('intent')}")
+                        print(f"   Status: {result.data.get('status')}")
+                        print(f"   Destination: {result.data.get('destination')}")
+                    elif args.action == "query":
+                        count = result.data.get("count", 0)
+                        print(f"✅ {result.data.get('message', f'Found {count} page(s).')}")
+                        for entry in result.data.get("results", []):
+                            print(f"   • {entry.get('title')} ({entry.get('path')})")
+                            if entry.get("snippet"):
+                                print(f"     {entry.get('snippet')}")
+                    elif args.action == "add-asset":
+                        if result.data.get("dry_run"):
+                            print("🔍 Dry run - would add asset-backed wiki note:")
+                        else:
+                            print(f"✅ {result.data.get('message', 'Asset wiki note added.')}")
+                        print(f"   Asset source: {result.data.get('asset_source')}")
+                        print(f"   Asset stored: {result.data.get('asset_stored_path')}")
+                        print(f"   Note: {result.data.get('note_path')}")
+                elif args.topic == "graph":
+                    if args.action == "related":
+                        print(f"\n📊 {result.data['skill']} [{result.data['direction']}, depth={result.data['depth']}]")
+                        print(f"   Found {result.data['count']} related skill(s)\n")
+                        for r in result.data['related'][:15]:
+                            tier_icon = "★" if r['tier'] == 'stable' else ("◆" if r['tier'] == 'growing' else "◇")
+                            weight = f" ×{r['weight']:.1f}" if r['weight'] > 1.2 else ""
+                            print(f"   {tier_icon} {r['skill']} [{r['topic']}]{weight}")
+                            if r['description']:
+                                print(f"      {r['description'][:70]}")
+                        if result.data['count'] > 15:
+                            print(f"\n   ... and {result.data['count'] - 15} more")
+                        print()
+                    elif args.action == "find":
+                        print(f"\n🔍 Search: '{result.data['query']}' ({result.data['count']} match(es))\n")
+                        for n in result.data['matches'][:20]:
+                            tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
+                            print(f"   {tier_icon} {n['id']} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print()
+                    elif args.action == "info":
+                        n = result.data['node']
+                        tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
+                        print(f"\n📋 {result.data['skill']}")
+                        print(f"   Topic:     {n.get('topic', 'unknown')}")
+                        print(f"   Tier:      {tier_icon} {n.get('tier', 'experimental')}")
+                        print(f"   Stability: {n.get('stability', 'unknown')}")
+                        print(f"   In-links:  {result.data['metrics']['in_degree']}")
+                        print(f"   Out-links: {result.data['metrics']['out_degree']}")
+                        out_edges = result.data['out_edges']
+                        if out_edges:
+                            print("\n   Links to:")
+                            for e in out_edges[:10]:
+                                w = f" ×{e['weight']:.1f}" if e.get('weight', 1) > 1.2 else ""
+                                print(f"      → {e['to']}{w}")
+                        print()
+                    elif args.action == "chain":
+                        if result.data['reachable']:
+                            path_str = " → ".join(result.data['path'])
+                            print(f"\n🔗 Chain ({result.data['hops']} hops):\n   {path_str}\n")
+                        else:
+                            print(f"\n❌ No path found from {result.data['from']} to {result.data['to']}\n")
+                    elif args.action == "list":
+                        filters = result.data['filters']
+                        filter_str = f"topic={filters['topic']}" if filters['topic'] else "all"
+                        if filters['tier']:
+                            filter_str += f", tier={filters['tier']}"
+                        print(f"\n📚 Skills [{filter_str}] ({result.data['count']} result(s))\n")
+                        for n in result.data['skills']:
+                            tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
+                            print(f"   {tier_icon} {n['id']:<35} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print()
+                    elif args.action == "topics":
+                        print(f"\n🏷️  Topic Clusters ({result.data['count']} topics)\n")
+                        for topic, count in result.data['topics'].items():
+                            print(f"   {topic:<25} {count} skill(s)")
+                        print()
+            else:
+                parser.print_help()
+        else:
+            # Enhanced error output with examples
+            error = result.errors[0] if result.errors else ErrorObject(code=ErrorCode.ERR_RUNTIME, message="Unknown error")
+            if args.topic == "skills" and args.action == "route" and result.data.get("decision"):
+                decision = result.data["decision"]
+                print(f"🧭 Route decision: {decision.get('decision_status', 'unknown')}")
+                if decision.get("failure_class"):
+                    print(f"Failure class: {decision['failure_class']}")
+                if decision.get("operator_action"):
+                    print(f"Operator action: {decision['operator_action']}")
+                if decision.get("ambiguity_set"):
+                    print("Ambiguity set:")
+                    for candidate in decision["ambiguity_set"]:
+                        print(
+                            f"  - {candidate.get('name')} ({candidate.get('path')}) "
+                            f"confidence={candidate.get('confidence', 0.0):.4f}"
+                        )
+                print("")
+            if args.topic == "skills" and args.action == "goal" and result.data.get("goal_decision"):
+                goal = result.data["goal_decision"]
+                print(f"🎯 Goal decision: {goal.get('decision_status', 'unknown')}")
+                if goal.get("failure_class"):
+                    print(f"Failure class: {goal['failure_class']}")
+                if goal.get("operator_action"):
+                    print(f"Operator action: {goal['operator_action']}")
+                prompts = goal.get("disambiguation_prompts") or []
+                if prompts:
+                    print("Disambiguation prompts:")
+                    for prompt in prompts:
+                        print(f"  - {prompt}")
+                print("")
+            error_message = error.message
+            if args.topic == "skills" and args.action == "audit" and " First failures:" in error_message:
+                error_message = error_message.split(" First failures:", 1)[0]
+            print(f"❌ Error: {error_message}")
+
+                # Add fix suggestion if available
+            if error.fix_suggestion:
+                print(f"\n💡 {error.fix_suggestion}")
+
+                # Add examples based on the current context
+            if args.topic == "skills":
+                if args.action == "audit":
+                    family_data = result.data.get("family_benchmarks")
+                    if isinstance(family_data, dict) and int(family_data.get("exit_code", 0) or 0) != 0:
+                        fail_lines = extract_family_fail_lines(str(family_data.get("stdout", "")))
+                        if fail_lines:
+                            print("\n🔎 Family benchmark failures (first 3):")
+                            for fail in fail_lines[:3]:
+                                print(f"   - {fail}")
+                            remaining = len(fail_lines) - 3
+                            if remaining > 0:
+                                print(f"   ... and {remaining} more (use --json for full details)")
+                        else:
+                            for raw_line in str(family_data.get("stderr", "")).splitlines():
+                                line = raw_line.strip()
+                                if line:
+                                    print("\n🔎 Family benchmark error:")
+                                    print(f"   {line}")
+                                    break
+                    if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
+                    if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
+                    print("\n📚 Audit examples:")
+                    print("   ask skills audit backend/cli-spec --level compat")
+                    print("   ask skills audit backend/cli-spec --level strict")
+                    print("   ask skills audit Skills/skill-builder --level strict")
+                elif args.action in ("install", "fold", "init"):
+                    if "raw_output" in result.data: print(result.data["raw_output"])
+                    if "raw_error" in result.data: print(result.data["raw_error"])
+                    if args.action == "init":
+                        print("\n📚 Init examples:")
+                        print("   ask skills init my-skill --category backend --description 'Does X'")
+                        print("   ask skills init security-guard --category auth --description 'Validates Y'")
+                    elif args.action == "install":
+                        print("\n📚 Install examples:")
+                        print("   ask skills install https://github.com/user/repo --remediate")
+            elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden"):
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+                # Display command_runs for harden_plugin() failures
+                if "command_runs" in result.data:
+                    print("\n🔧 Command execution details:")
+                    for run in result.data["command_runs"]:
+                        print(f"\n  Step: {run.get('step')}")
+                        print(f"  Command: {run.get('command')}")
+                        print(f"  Return code: {run.get('returncode')}")
+                        if run.get('stdout'):
+                            print(f"  Stdout:\n{run.get('stdout')}")
+                        if run.get('stderr'):
+                            print(f"  Stderr:\n{run.get('stderr')}")
+                print("\n📚 Plugin examples:")
+                print("   ask plugins init my-plugin --with-marketplace")
+                print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")
+                print("   ask plugins harden Plugins/my-plugin")
+            elif args.topic == "evals":
+                if "raw_output" in result.data: print(result.data["raw_output"])
+                if "raw_error" in result.data: print(result.data["raw_error"])
+                print("\n📚 Eval examples:")
+                print("   ask evals run backend/cli-spec --mode smoke")
+                print("   ask evals run backend/cli-spec --mode release")
+            elif args.topic == "graph":
+                print("\n📚 Graph examples:")
+                print("   ask graph find security")
+                print("   ask graph related skill-builder --depth 2")
+                print("   ask graph chain skill-creator skill-installer")
+                print("   ask graph info cli-spec")
+            elif args.topic == "repo":
+                if args.action == "validate":
+                    print(result.data.get("raw_output", ""))
+                if args.action == "check-stability" and "errors" in result.data:
+                    for e in result.data["errors"]:
+                        print(f"   ERROR: {e}")
+                print("\n📚 Repo examples:")
+                print("   ask repo status")
+                print("   ask repo validate --ephemeral")
+                print("   ask repo doctor-catalog --strict")
+                print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
+            elif args.topic == "mcp":
+                print("\n📚 MCP examples:")
+                print("   ask mcp sync")
+                print("   ask mcp sync --dry-run")
+            elif args.topic == "wiki":
+                print("\n📚 Wiki examples:")
+                print("   ask wiki lint")
+                print("   ask wiki ingest 'Title' --summary 'Summary' --source '<source>'")
+                print("   ask wiki add --interactive")
+                print("   ask wiki query 'prompt injection'")
+                print("   ask wiki add-asset ./tmp/screenshot.png --title 'UI reference' --summary 'Capture for reuse'")
+                print("   ask wiki add-asset --interactive")
+
+    # Semantic Exit Code
+    if result.status == "success":
+        sys.exit(0)
+    else:
+        error_code = result.errors[0].code if result.errors else "ERR_RUNTIME"
+        sys.exit(ERROR_MAP.get(error_code, 1))
+
+if __name__ == "__main__":
+    main()

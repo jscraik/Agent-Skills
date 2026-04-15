@@ -1,0 +1,81 @@
+---
+name: {skill_name}
+description: "{description}"
+metadata:
+  lifecycle_state: {lifecycle_state}
+  maturity: {maturity}
+  owner: {owner}
+  review_cadence: {review_cadence}
+  last_reviewed: {last_reviewed}
+  metadata_source: frontmatter
+---
+
+# {skill_title}
+
+This scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter guidance below before treating it as active or broadly reusable.
+
+## Working agreement
+- Follow the repo's `AGENTS.md` (map, not a megadoc).
+- For long runs, also follow `~/.codex/instructions/shell-skills-compaction.md` if present.
+- Artifact boundary:
+  - Local CLI: write deliverables to `./Infrastructure/artifacts/`
+  - Hosted shell: write deliverables to `/mnt/data/`
+
+## When to use
+- Primary triggers:
+  - Replace with the real user ask this skill should own.
+- Non-triggers (route elsewhere):
+  - Replace with the neighboring asks this skill should reject or reroute.
+
+## Inputs
+- Assumptions:
+  - Replace with the minimum safe assumptions for this skill.
+- Replace with the concrete files, repos, APIs, schemas, or constraints the finished skill will need.
+- Ask clarifying questions only for genuine gaps.
+
+## Outputs
+- Replace with the concrete outputs, paths, and formats the skill should produce.
+- Always write artifacts to `./Infrastructure/artifacts/` (local) or `/mnt/data/` (hosted).
+
+## Constraints and safety
+- Redact secrets/PII by default.
+- If networking is required: specify a minimal domain allowlist and gate it behind explicit opt-in.
+- Destructive actions require explicit confirmation; prefer dry-run first.
+
+## Principles
+- Replace with 2–6 bullets capturing the mental model for this skill.
+- Adapt execution and output shape to context; avoid rigid one-size-fits-all responses.
+
+## Workflow
+1) Replace with the smallest reliable workflow for this skill.
+2) Prefer progressive disclosure:
+   - Put deep docs in `Infrastructure/references/` and link to them.
+   - Put reusable automation in `Infrastructure/scripts/` and reference it here.
+   - Put Infrastructure/templates/boilerplate in `assets/`.
+3) End by writing artifacts + listing changed files/commands.
+
+## Validation
+- Replace with the commands, tests, or checks that prove this skill is safe to use.
+- Fail fast: if a gate fails, stop and report the failure before continuing.
+- For non-trivial skills, add `Infrastructure/references/evals.yaml` with at least:
+  - happy-path
+  - edge-case
+  - failure-mode
+
+## Gotchas
+- Replace with the recurring mistake, misconception, or failure pattern this skill should call out early.
+
+## See Also
+| Skill | When to use |
+|---|---|
+| `adjacent-skill-name-1` | Replace with a real nearby skill this one is commonly confused with. |
+| `adjacent-skill-name-2` | Replace with another real related skill in the local graph. |
+
+**Topic map:** `[[topic-name]]`
+
+## Anti-patterns
+- ❌ Replace with the common pitfalls and what not to do.
+
+## Examples
+- Triggering prompt: "Replace with a realistic triggering prompt."
+- Non-triggering prompt: "Replace with a realistic non-triggering prompt."

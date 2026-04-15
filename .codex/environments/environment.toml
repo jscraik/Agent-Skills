@@ -8,7 +8,7 @@ set -euo pipefail
 
 printf '[codex] setup: %s\n' "${PWD}"
 
-source scripts/codex_env_common.sh
+source Infrastructure/scripts/codex_env_common.sh
 codex_apply_env
 
 if command -v mise >/dev/null 2>&1; then
@@ -100,7 +100,7 @@ icon = "tool"
 command = '''
 set -euo pipefail
 
-source scripts/codex_env_common.sh
+source Infrastructure/scripts/codex_env_common.sh
 codex_apply_env
 
 echo "git: $(git --version 2>/dev/null || echo missing)"

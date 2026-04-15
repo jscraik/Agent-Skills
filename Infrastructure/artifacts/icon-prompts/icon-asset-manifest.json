@@ -1,0 +1,1203 @@
+{
+  "generated_at": "2026-04-09",
+  "skills": [
+    {
+      "name": "best-practices",
+      "path": "auth/best-practices",
+      "display_name": "Best Practices",
+      "description": "Audit Better Auth integrations for secure patterns, config mistakes, and operational gaps",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "auth",
+      "style_profile": "ops"
+    },
+    {
+      "name": "create-auth",
+      "path": "auth/create-auth",
+      "display_name": "Create Auth",
+      "description": "Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "auth",
+      "style_profile": "ops"
+    },
+    {
+      "name": "backend-engineer",
+      "path": "backend/backend-engineer",
+      "display_name": "Backend Engineer",
+      "description": "Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary)",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "backend",
+      "style_profile": "ops"
+    },
+    {
+      "name": "cli-spec",
+      "path": "backend/cli-spec",
+      "display_name": "CLI Spec",
+      "description": "Create an implementation-grade CLI specification when the user requests a binding technical contract for a new or exi...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "backend",
+      "style_profile": "ops"
+    },
+    {
+      "name": "mcp-builder",
+      "path": "backend/mcp-builder",
+      "display_name": "MCP Builder",
+      "description": "Create general-purpose MCP servers and tool schemas for standard integrations",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "backend",
+      "style_profile": "ops"
+    },
+    {
+      "name": "stitch-react-components",
+      "path": "frontend/stitch-react-components",
+      "display_name": "Stitch React Components",
+      "description": "Convert Stitch screens into modular Vite or React components with extracted structure and style-system alignment",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "better-icons",
+      "path": "frontend/graphics/better-icons",
+      "display_name": "Better Icons",
+      "description": "Search and extract SVG icons from Iconify collections through the better-icons CLI or MCP",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "favicon-generator",
+      "path": "frontend/graphics/favicon-generator",
+      "display_name": "Favicon Generator",
+      "description": "Generate complete favicon/app icon suites with templates and assets",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "imagegen",
+      "path": "frontend/graphics/imagegen",
+      "display_name": "Image Gen",
+      "description": "Generate and edit images using OpenAI",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/imagegen.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "nano-banana-builder",
+      "path": "frontend/graphics/nano-banana-builder",
+      "display_name": "Nano Banana Builder",
+      "description": "Build web applications that use Google's Nano Banana image APIs for generation and iterative editing workflows",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "og-image-creator",
+      "path": "frontend/graphics/og-image-creator",
+      "display_name": "Og Image Creator",
+      "description": "Generate brand-aligned Open Graph images for existing routes by inspecting a web codebase and rendering assets with P...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "sora",
+      "path": "frontend/graphics/sora",
+      "display_name": "Sora Video Generation Skill",
+      "description": "Generate and manage Sora videos",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/sora.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "threejs-builder",
+      "path": "frontend/graphics/threejs-builder",
+      "display_name": "Threejs Builder",
+      "description": "Build and validate simple, performant Three.js web apps using modern ES module patterns",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/graphics",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "agentation",
+      "path": "frontend/tools/agentation",
+      "display_name": "Agentation",
+      "description": "Install, verify, and troubleshoot Agentation in React 18+ apps, including dev-only root mounting, `endpoint` and `webhookUrl` wiring, MCP health, watch mode, critique mode, and self-driving workflows.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/tools",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "playwright-interactive",
+      "path": "frontend/tools/playwright-interactive",
+      "display_name": "Playwright Interactive",
+      "description": "Persistent browser and Electron QA",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/playwright.png",
+      "category": "frontend/tools",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "stitch-loop",
+      "path": "frontend/tools/stitch-loop",
+      "display_name": "Stitch Loop",
+      "description": "Run iterative autonomous website-building loops with Stitch using a baton file and multi-pass page generation",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/tools",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "test-browser",
+      "path": "frontend/tools/test-browser",
+      "display_name": "Test Browser",
+      "description": "Run or plan browser-based verification for changed web surfaces using sanctioned browser automation tools",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/tools",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "ui-cloner",
+      "path": "frontend/tools/ui-cloner",
+      "display_name": "UI Cloner",
+      "description": "Create implementation-ready UI replication plans from a reference website URL.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/tools",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "baseline-ui",
+      "path": "frontend/ui/baseline-ui",
+      "display_name": "Baseline UI",
+      "description": "Check Tailwind UI work for accessibility, performance, theming, responsive behavior, and anti-patterns",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "design-system",
+      "path": "frontend/ui/design-system",
+      "display_name": "Design System",
+      "description": "Repository-grounded design-system skill for token layers, semantic UI styling, and guidance policy checks.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "frontend-design",
+      "path": "frontend/ui/frontend-design",
+      "display_name": "Frontend Design",
+      "description": "Analyze broad frontend design requests and route them to the correct local UI skill after classifying intent and matu...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "frontend-ui-design",
+      "path": "frontend/ui/frontend-ui-design",
+      "display_name": "Frontend UI Design",
+      "description": "Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm,...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "react-ui-patterns",
+      "path": "frontend/ui/react-ui-patterns",
+      "display_name": "React UI Patterns",
+      "description": "Provide concrete React UI composition patterns for TypeScript + Tailwind + Radix, including state, routing, and compo...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "remotion",
+      "path": "frontend/ui/remotion",
+      "display_name": "Remotion",
+      "description": "Best-practice guidance for Remotion (React video)",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "shadcn-ui",
+      "path": "frontend/ui/shadcn-ui",
+      "display_name": "Shadcn UI",
+      "description": "Integrate and customize shadcn/ui components in existing projects",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "stitch-remotion",
+      "path": "frontend/ui/stitch-remotion",
+      "display_name": "Stitch Remotion",
+      "description": "Generate Stitch-to-Remotion walkthrough videos from screen assets",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "ui-ux-creative-coding",
+      "path": "frontend/ui/ui-ux-creative-coding",
+      "display_name": "UI/UX Creative Coding",
+      "description": "Ship polished React/Tauri UI with motion, five-lens persona guidance, component benchmarking, and implementation-ready artifacts.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "ui-visual-regression",
+      "path": "frontend/ui/ui-visual-regression",
+      "display_name": "UI Visual Regression",
+      "description": "Review and validate Storybook, Playwright, and Argos visual regression diffs",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/ui",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "fixing-accessibility",
+      "path": "frontend/website/fixing-accessibility",
+      "display_name": "Fixing Accessibility",
+      "description": "Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast,...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/website",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "fixing-metadata",
+      "path": "frontend/website/fixing-metadata",
+      "display_name": "Fixing Metadata",
+      "description": "Audit and fix HTML metadata including titles, descriptions, canonical URLs, Open Graph tags, Twitter cards, favicons,...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "frontend/website",
+      "style_profile": "frontend"
+    },
+    {
+      "name": "gh-workflow",
+      "path": "github/gh-workflow",
+      "display_name": "GH Workflow",
+      "description": "Canonical GitHub lifecycle orchestration",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "github",
+      "style_profile": "ops"
+    },
+    {
+      "name": "resolve-pr-parallel",
+      "path": "github/resolve-pr-parallel",
+      "display_name": "Resolve PR Parallel",
+      "description": "Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "github",
+      "style_profile": "ops"
+    },
+    {
+      "name": "architecture-interview",
+      "path": "interview/architecture-interview",
+      "display_name": "Architecture Interview",
+      "description": "Use this skill to analyze architecture alternatives through a structured interview that produces an ADR-style decisio...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "interview",
+      "style_profile": "ops"
+    },
+    {
+      "name": "deep-interview",
+      "path": "interview/deep-interview",
+      "display_name": "Deep Interview",
+      "description": "Deepen an existing doc or topic through a structured gap-filling interview that adds missing assumptions, edge cases,...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "interview",
+      "style_profile": "ops"
+    },
+    {
+      "name": "interview-me",
+      "path": "interview/interview-me",
+      "display_name": "Interview Me",
+      "description": "Use this skill to analyze underspecified requests through a short interview and surface missing tradeoffs, assumption...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "interview",
+      "style_profile": "ops"
+    },
+    {
+      "name": "changelog",
+      "path": "product/content/changelog",
+      "display_name": "Changelog",
+      "description": "Create engaging changelogs for recent merges to main branch with a witty, enthusiastic marketing voice",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/content",
+      "style_profile": "docs"
+    },
+    {
+      "name": "every-style-editor",
+      "path": "product/content/every-style-editor",
+      "display_name": "Every Style Editor",
+      "description": "Edit prose to conform to Every's editorial house style, including grammar, punctuation, mechanics, and naming convent...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/content",
+      "style_profile": "docs"
+    },
+    {
+      "name": "feature-video",
+      "path": "product/content/feature-video",
+      "display_name": "Feature Video",
+      "description": "Produce a concise feature walkthrough video and package it for PR, release, or handoff workflows.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/content",
+      "style_profile": "docs"
+    },
+    {
+      "name": "video-transcript-downloader",
+      "path": "product/content/video-transcript-downloader",
+      "display_name": "Video Transcript Downloader",
+      "description": "Download video or audio and extract transcripts or subtitles with yt-dlp and ffmpeg",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/content",
+      "style_profile": "docs"
+    },
+    {
+      "name": "youtube-hooks-scripts",
+      "path": "product/content/youtube-hooks-scripts",
+      "display_name": "Youtube Hooks Scripts",
+      "description": "Use this skill to create high-retention hooks, outlines, and full scripts for technical YouTube videos when the user...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/content",
+      "style_profile": "docs"
+    },
+    {
+      "name": "youtube-titles-thumbnails",
+      "path": "product/content/youtube-titles-thumbnails",
+      "display_name": "Youtube Titles Thumbnails",
+      "description": "Generate SEO/CTR-oriented YouTube title options and thumbnail copy variants with rationale",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/content",
+      "style_profile": "docs"
+    },
+    {
+      "name": "agents-md",
+      "path": "product/docs/agents-md",
+      "display_name": "Agents Md",
+      "description": "Create or refactor AGENTS.md and linked instruction docs using progressive disclosure",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/docs",
+      "style_profile": "docs"
+    },
+    {
+      "name": "context7",
+      "path": "product/docs/context7",
+      "display_name": "Context7",
+      "description": "Retrieve current third-party library documentation through Context7",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/docs",
+      "style_profile": "docs"
+    },
+    {
+      "name": "docs-expert",
+      "path": "product/docs/docs-expert",
+      "display_name": "Docs Expert",
+      "description": "Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/docs",
+      "style_profile": "docs"
+    },
+    {
+      "name": "agent-native-architecture",
+      "path": "product/domain/agent-native-architecture",
+      "display_name": "Agent-Native Architecture",
+      "description": "Design applications where agents operate as first-class users with parity, composability, and shared-workspace patterns.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/domain",
+      "style_profile": "ops"
+    },
+    {
+      "name": "chatgpt-apps",
+      "path": "product/domain/chatgpt-apps",
+      "display_name": "ChatGPT Apps",
+      "description": "Build and scaffold ChatGPT apps",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/domain",
+      "style_profile": "ops"
+    },
+    {
+      "name": "oak-api",
+      "path": "product/domain/oak-api",
+      "display_name": "Oak API",
+      "description": "Build or adapt Oak Curriculum API learning experiences, especially child-facing Apps SDK flows",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/domain",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-brainstorm",
+      "path": "product/Infrastructure/ops/ce-brainstorm",
+      "display_name": "CE Brainstorm",
+      "description": "Clarify WHAT to build, compare approaches, and capture a right-sized requirements doc before spec, planning, or lightweight direct work.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-compound",
+      "path": "product/Infrastructure/ops/ce-compound",
+      "display_name": "CE Compound",
+      "description": "Coordinate the CE lifecycle or capture a solved problem into durable docs/solutions knowledge, refreshing an existing solution doc when overlap is high.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-compound-refresh",
+      "path": "product/Infrastructure/ops/ce-compound-refresh",
+      "display_name": "CE Compound Refresh",
+      "description": "Refresh stale docs/solutions learnings and patterns against the current codebase with evidence-backed update, consolidate, replace, archive, or stale outcomes.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-deepen-plan",
+      "path": "product/Infrastructure/ops/ce-deepen-plan",
+      "display_name": "CE Deepen Plan",
+      "description": "Stress-test and strengthen an existing plan with targeted research, risk treatment, and optional exhaustive coverage.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-deepen-spec",
+      "path": "product/Infrastructure/ops/ce-deepen-spec",
+      "display_name": "CE Deepen Spec",
+      "description": "Stress-test and strengthen an existing system spec or UI spec with tighter boundaries, lifecycle detail, and validation before planning.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-ideate",
+      "path": "product/Infrastructure/ops/ce-ideate",
+      "display_name": "CE Ideate",
+      "description": "Generate, challenge, and rank grounded project-improvement ideas before ce-brainstorm.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-plan",
+      "path": "product/Infrastructure/ops/ce-plan",
+      "display_name": "CE Plan",
+      "description": "Turn a spec, brainstorm, or UI contract into a traceable implementation plan with execution, validation, and rollout guidance.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-reliability-review",
+      "path": "product/Infrastructure/ops/ce-reliability-review",
+      "display_name": "CE Reliability Review",
+      "description": "Review services and systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-review",
+      "path": "product/Infrastructure/ops/ce-review",
+      "display_name": "CE Review",
+      "description": "Run broad PR, branch, or workflow-artifact reviews with synthesized findings, blockers, readiness guidance, and optional mode/base/plan overrides.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-spec",
+      "path": "product/Infrastructure/ops/ce-spec",
+      "display_name": "CE Spec",
+      "description": "Turn a brainstorm, feature description, or UI source into a system spec or UI spec that planning can trust.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-tdd",
+      "path": "product/Infrastructure/ops/ce-tdd",
+      "display_name": "Ce Tdd",
+      "description": "Build behavior-safe code changes with TDD and RED/GREEN evidence",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-technical-review",
+      "path": "product/Infrastructure/ops/ce-technical-review",
+      "display_name": "CE Technical Review",
+      "description": "Run focused technical critique on diffs, PRs, specs, and plans with severity-ranked findings and readiness guidance.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "ce-work",
+      "path": "product/Infrastructure/ops/ce-work",
+      "display_name": "CE Work",
+      "description": "Execute plans, tasks, or tiny direct requests with synchronized progress, validation, UI gates, guarded delegation, and shipping hygiene.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "decide-build-primitive",
+      "path": "product/Infrastructure/ops/decide-build-primitive",
+      "display_name": "Decide Build Primitive",
+      "description": "Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the use...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "fallback-release",
+      "path": "product/Infrastructure/ops/fallback-release",
+      "display_name": "Fallback Release",
+      "description": "Execute deterministic fallback releases when primary CI is unavailable",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "production-deployment",
+      "path": "product/Infrastructure/ops/production-deployment",
+      "display_name": "Production Deployment",
+      "description": "Deploy and manage production services across various platforms with automated verification and rollback safety",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "release",
+      "path": "product/Infrastructure/ops/release",
+      "display_name": "Release",
+      "description": "Cut a clean semver release from the main branch using the repo's release flow",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "resolve-todo-parallel",
+      "path": "product/Infrastructure/ops/resolve-todo-parallel",
+      "display_name": "Resolve Todo Parallel",
+      "description": "WHAT: Resolve file-based `todos/` items with dependency-aware serial or bounded-parallel execution, verification, and...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "triage",
+      "path": "product/Infrastructure/ops/triage",
+      "display_name": "Triage",
+      "description": "Triage file-based `todos/` findings into ready, skipped, or revised states before execution",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/ops",
+      "style_profile": "ops"
+    },
+    {
+      "name": "agent-native-audit",
+      "path": "product/review/agent-native-audit",
+      "display_name": "Agent Native Audit",
+      "description": "Audit a repository, workflow, or feature against agent-native operating principles and return evidence-backed gaps pl...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/review",
+      "style_profile": "ops"
+    },
+    {
+      "name": "security-best-practices",
+      "path": "product/security/security-best-practices",
+      "display_name": "Security Best Practices",
+      "description": "Security reviews and secure-by-default guidance",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/security",
+      "style_profile": "security"
+    },
+    {
+      "name": "security-ownership-map",
+      "path": "product/security/security-ownership-map",
+      "display_name": "Security Ownership Map",
+      "description": "Map maintainers, bus factor, and sensitive code ownership",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/security",
+      "style_profile": "security"
+    },
+    {
+      "name": "security-threat-model",
+      "path": "product/security/security-threat-model",
+      "display_name": "Security Threat Model",
+      "description": "Repo-grounded threat modeling and abuse-path analysis",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/security",
+      "style_profile": "security"
+    },
+    {
+      "name": "product-spec",
+      "path": "product/specs/product-spec",
+      "display_name": "Product Spec",
+      "description": "Create or review product-planning specifications from ideas or existing docs",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/specs",
+      "style_profile": "ops"
+    },
+    {
+      "name": "brainstorming",
+      "path": "product/strategy/brainstorming",
+      "display_name": "Brainstorming",
+      "description": "Clarify intent and explore options and tradeoffs before planning implementation.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/strategy",
+      "style_profile": "ops"
+    },
+    {
+      "name": "product-design-critic",
+      "path": "product/strategy/product-design-critic",
+      "display_name": "Product Design Critic",
+      "description": "Opinionated product UI/UX critique with trust and hierarchy focus",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/strategy",
+      "style_profile": "ops"
+    },
+    {
+      "name": "project-improver",
+      "path": "product/strategy/project-improver",
+      "display_name": "Project Improver",
+      "description": "Generate, filter, pressure-test, and implement the best project improvements",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "product/strategy",
+      "style_profile": "ops"
+    },
+    {
+      "name": "openai-docs",
+      "path": "Skills/openai-docs",
+      "display_name": "OpenAI Docs",
+      "description": "Reference official OpenAI docs, including upgrade guidance",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/openai.png",
+      "category": "skills-system",
+      "style_profile": "ops"
+    },
+    {
+      "name": "1password",
+      "path": "Skills/1password",
+      "display_name": "1password",
+      "description": "Plan, validate, and use 1Password CLI setup for secret injection and auth",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "agent-browser",
+      "path": "Skills/agent-browser",
+      "display_name": "Agent Browser",
+      "description": "Drive deterministic browser automation with snapshots, refs, and evidence-friendly capture flows.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "alignment-checkpoint",
+      "path": "Skills/alignment-checkpoint",
+      "display_name": "Alignment Checkpoint",
+      "description": "Extract goal/assumptions/criteria and require /proceed before any tool use.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "atlas",
+      "path": "Skills/atlas",
+      "display_name": "Atlas",
+      "description": "Use to manage tabs in ChatGPT Atlas and access your browser history.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/atlas.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "beautiful-mermaid",
+      "path": "Skills/beautiful-mermaid",
+      "display_name": "Beautiful Mermaid",
+      "description": "Render Mermaid diagrams to SVG and PNG with Beautiful Mermaid",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "bootstrap",
+      "path": "Skills/bootstrap",
+      "display_name": "Bootstrap",
+      "description": "Bootstrap a local development environment from a GitHub repository URL",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "circleci",
+      "path": "Skills/circleci",
+      "display_name": "CircleCI",
+      "description": "Migration and best-practice guidance for CircleCI workflow, deployment, security, and policy design.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "claude-alias",
+      "path": "Skills/claude-alias",
+      "display_name": "Claude Alias Guard",
+      "description": "Fix and harden ck/cz/cc alias routing",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "codex-agent-creator",
+      "path": "Skills/codex-agent-creator",
+      "display_name": "Codex Agent Creator",
+      "description": "Create, install, and validate Codex custom subagents plus optional thread/depth/runtime limits",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "codex-automation-architect",
+      "path": "Skills/codex-automation-architect",
+      "display_name": "Codex Automation Architect",
+      "description": "Create/review/merge Codex automations with hardened validation",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "codex-home-audit",
+      "path": "Skills/codex-home-audit",
+      "display_name": "Codex Home Audit",
+      "description": "Audit Codex home guidance, telemetry, history, hooks, agents, skills, plugins, config drift, and rules safety",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "codex-hooks-builder",
+      "path": "Skills/codex-hooks-builder",
+      "display_name": "Codex Hooks Builder",
+      "description": "Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "coding-harness",
+      "path": "Skills/coding-harness",
+      "display_name": "Coding Harness",
+      "description": "Install, bootstrap, update, audit, and explain @brainwav/coding-harness with command-accurate setup flows, governance checks, and environment action-sync guidance.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "diagram-cli",
+      "path": "Skills/diagram-cli",
+      "display_name": "Diagram CLI",
+      "description": "Generate and validate architecture diagrams for repository understanding.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "evals-router",
+      "path": "Skills/evals-router",
+      "display_name": "Evals Router",
+      "description": "Route LLM evaluation work to the right workflow: audit, error analysis, judge design, validation, RAG eval, synthetic data, or review UI.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "fix-mise",
+      "path": "Skills/fix-mise",
+      "display_name": "Fix Mise",
+      "description": "Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.Infrastructure/config/mise/config.t...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "insight-report",
+      "path": "Skills/insight-report",
+      "display_name": "Insight Report",
+      "description": "WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "markdown-converter",
+      "path": "Skills/markdown-converter",
+      "display_name": "Markdown Converter",
+      "description": "Convert source files into Markdown outputs using the bundled converter workflow",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "notebooklm",
+      "path": "Skills/notebooklm",
+      "display_name": "Notebooklm",
+      "description": "Analyze NotebookLM workflows for notebook management, question answering, and audio or video overviews",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "orchestrating-subagents",
+      "path": "Skills/orchestrating-subagents",
+      "display_name": "Orchestrating Subagents",
+      "description": "Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "process-watch",
+      "path": "Skills/process-watch",
+      "display_name": "Process Watch",
+      "description": "Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next di...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "rclone",
+      "path": "Skills/rclone",
+      "display_name": "Rclone",
+      "description": "Upload, sync, verify, or inspect files in remote storage with rclone",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "recon-workbench",
+      "path": "Skills/recon-workbench",
+      "display_name": "Recon Workbench",
+      "description": "Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validat...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "repoprompt",
+      "path": "Skills/repoprompt",
+      "display_name": "Repoprompt",
+      "description": "Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "reproduce-bug",
+      "path": "Skills/reproduce-bug",
+      "display_name": "Reproduce Bug",
+      "description": "Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro s...",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "skill-refactor",
+      "path": "Skills/skill-refactor",
+      "display_name": "Skill Refactor",
+      "description": "Daily scan for skill failures",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "skillify",
+      "path": "Skills/skillify",
+      "display_name": "Skillify (Codex)",
+      "description": "Turn a completed Codex workflow into a reusable skill package",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "slides",
+      "path": "Skills/slides",
+      "display_name": "Slides",
+      "description": "Create and edit PPTX slide decks",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/slides.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "spreadsheet",
+      "path": "Skills/spreadsheet",
+      "display_name": "Spreadsheet Skill",
+      "description": "Create, edit, and analyze spreadsheets",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/spreadsheet.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "systematic-debugging",
+      "path": "Skills/systematic-debugging",
+      "display_name": "Systematic Debugging",
+      "description": "Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "test-driven-development",
+      "path": "Skills/test-driven-development",
+      "display_name": "Test Driven Development",
+      "description": "Create test-first Red-Green-Refactor delivery for behavior\u2026",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "using-git-worktrees",
+      "path": "Skills/using-git-worktrees",
+      "display_name": "Using Git Worktrees",
+      "description": "Align Codex and Claude worktree setup, sync strategy, and cleanup safety.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "verification-before-completion",
+      "path": "Skills/verification-before-completion",
+      "display_name": "Verification Before Completion",
+      "description": "Validate completion claims with fresh command evidence. Use\u2026",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "visual-explainer",
+      "path": "Skills/visual-explainer",
+      "display_name": "Visual Explainer",
+      "description": "Generate self-contained HTML explainers for systems, plans, and comparisons.",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    },
+    {
+      "name": "writing-plans",
+      "path": "Skills/writing-plans",
+      "display_name": "Writing Plans",
+      "description": "Create execution-ready implementation plans with task\u2026",
+      "icon_small": "./assets/icon-small.png",
+      "icon_large": "./assets/icon-large.png",
+      "category": "utilities",
+      "style_profile": "ops"
+    }
+  ],
+  "plugins": [
+    {
+      "name": "arscontexta",
+      "manifest": "Plugins/arscontexta/.codex-plugin/plugin.json",
+      "display_name": "Ars Contexta",
+      "description": "Starter workflows for Ars Contexta in Codex",
+      "composerIcon": "./assets/icon.png",
+      "logo": "./assets/logo.png",
+      "style_profile": "ops"
+    },
+    {
+      "name": "coderabbit",
+      "manifest": "Plugins/coderabbit/.codex-plugin/plugin.json",
+      "display_name": "CodeRabbit",
+      "description": "CodeRabbit review, simplify, and autofix skills",
+      "composerIcon": "./assets/icon.png",
+      "logo": "./assets/logo.png",
+      "style_profile": "ops"
+    },
+    {
+      "name": "harness-engineering",
+      "manifest": "Plugins/harness-engineering/.codex-plugin/plugin.json",
+      "display_name": "Harness Engineering",
+      "description": "Run the full compound-engineering workflow",
+      "composerIcon": "./assets/icon.png",
+      "logo": "./assets/logo.png",
+      "style_profile": "ops"
+    },
+    {
+      "name": "plugin-factory",
+      "manifest": "Plugins/plugin-factory/.codex-plugin/plugin.json",
+      "display_name": "Plugin Factory",
+      "description": "Create, harden, and install Codex plugins",
+      "composerIcon": "./assets/icon.png",
+      "logo": "./assets/logo.png",
+      "style_profile": "ops"
+    },
+    {
+      "name": "skill-factory",
+      "manifest": "Plugins/skill-factory/.codex-plugin/plugin.json",
+      "display_name": "Skill Factory",
+      "description": "Create, capture, improve, and install Codex skills",
+      "composerIcon": "./assets/icon.png",
+      "logo": "./assets/logo.png",
+      "style_profile": "ops"
+    }
+  ],
+  "summary": {
+    "skills_total": 110,
+    "plugins_total": 5,
+    "openai_yaml_created": 0,
+    "openai_yaml_updated": 110,
+    "skills_icon_fields_added_or_completed": 0,
+    "plugin_manifests_updated": 0,
+    "style_profiles": {
+      "security": 3,
+      "frontend": 25,
+      "ops": 78,
+      "docs": 9
+    }
+  },
+  "style_profiles": {
+    "core": {
+      "name": "Core Family (applies to all)",
+      "rules": [
+        "Rounded-corner geometric silhouette with medium stroke weight.",
+        "No text, no letters, no numbers, no watermark.",
+        "Transparent background, centered mark, balanced negative space.",
+        "Readable at tiny sizes; avoid thin detail and visual noise."
+      ]
+    },
+    "profiles": {
+      "security": {
+        "palette": "Deep slate + ember amber + danger red accents",
+        "motif": "Shield, lock, boundary, alert geometry",
+        "texture": "Subtle hard-edge facets, high-contrast edges",
+        "mood": "Trustworthy, defensive, precise"
+      },
+      "frontend": {
+        "palette": "Cobalt + cyan + electric mint accents",
+        "motif": "Layout grids, viewport frames, component blocks, motion arcs",
+        "texture": "Softer gradients with crisp shape boundaries",
+        "mood": "Creative, modern, interactive"
+      },
+      "ops": {
+        "palette": "Teal + green + graphite neutrals",
+        "motif": "Pipelines, nodes, automation loops, reliability checkpoints",
+        "texture": "Flat-to-subtle depth, clean technical geometry",
+        "mood": "Operational, stable, execution-focused"
+      },
+      "docs": {
+        "palette": "Indigo + slate + cool gray accents",
+        "motif": "Pages, layers, maps, knowledge cards",
+        "texture": "Clean planes and tidy spacing cues",
+        "mood": "Structured, legible, reference-oriented"
+      }
+    }
+  }
+}

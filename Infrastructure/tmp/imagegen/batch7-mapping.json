@@ -1,0 +1,164 @@
+{
+  "jobs": [
+    {
+      "kind": "skill",
+      "name": "production-deployment",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-production-deployment-small.png",
+      "target": "product/Infrastructure/ops/production-deployment/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Production Deployment\".\nConcept: Deploy and manage production services across various platforms with automated verification and rollback safety\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "production-deployment",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-production-deployment-large.png",
+      "target": "product/Infrastructure/ops/production-deployment/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Production Deployment\".\nConcept: Deploy and manage production services across various platforms with automated verification and rollback safety\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "release",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-release-small.png",
+      "target": "product/Infrastructure/ops/release/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Release\".\nConcept: Cut a clean semver release from the main branch using the repo's release flow\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "release",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-release-large.png",
+      "target": "product/Infrastructure/ops/release/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Release\".\nConcept: Cut a clean semver release from the main branch using the repo's release flow\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "resolve-todo-parallel",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-resolve-todo-parallel-small.png",
+      "target": "product/Infrastructure/ops/resolve-todo-parallel/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Resolve Todo Parallel\".\nConcept: WHAT: Resolve file-based `todos/` items with dependency-aware serial or bounded-parallel execution, verification, and...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "resolve-todo-parallel",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-resolve-todo-parallel-large.png",
+      "target": "product/Infrastructure/ops/resolve-todo-parallel/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Resolve Todo Parallel\".\nConcept: WHAT: Resolve file-based `todos/` items with dependency-aware serial or bounded-parallel execution, verification, and...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "triage",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-triage-small.png",
+      "target": "product/Infrastructure/ops/triage/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Triage\".\nConcept: Triage file-based `todos/` findings into ready, skipped, or revised states before execution\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "triage",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-triage-large.png",
+      "target": "product/Infrastructure/ops/triage/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Triage\".\nConcept: Triage file-based `todos/` findings into ready, skipped, or revised states before execution\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "agent-native-audit",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-agent-native-audit-small.png",
+      "target": "product/review/agent-native-audit/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Agent Native Audit\".\nConcept: Audit a repository, workflow, or feature against agent-native operating principles and return evidence-backed gaps pl...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "agent-native-audit",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-agent-native-audit-large.png",
+      "target": "product/review/agent-native-audit/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Agent Native Audit\".\nConcept: Audit a repository, workflow, or feature against agent-native operating principles and return evidence-backed gaps pl...\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "security-best-practices",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-security-best-practices-small.png",
+      "target": "product/security/security-best-practices/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Security Best Practices\".\nConcept: Security reviews and secure-by-default guidance\nStyle profile: security\nPalette direction: Deep slate + ember amber + danger red accents\nMotif direction: Shield, lock, boundary, alert geometry\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "security-best-practices",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-security-best-practices-large.png",
+      "target": "product/security/security-best-practices/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Security Best Practices\".\nConcept: Security reviews and secure-by-default guidance\nStyle profile: security\nPalette direction: Deep slate + ember amber + danger red accents\nMotif direction: Shield, lock, boundary, alert geometry\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "security-ownership-map",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-security-ownership-map-small.png",
+      "target": "product/security/security-ownership-map/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Security Ownership Map\".\nConcept: Map maintainers, bus factor, and sensitive code ownership\nStyle profile: security\nPalette direction: Deep slate + ember amber + danger red accents\nMotif direction: Shield, lock, boundary, alert geometry\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "security-ownership-map",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-security-ownership-map-large.png",
+      "target": "product/security/security-ownership-map/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Security Ownership Map\".\nConcept: Map maintainers, bus factor, and sensitive code ownership\nStyle profile: security\nPalette direction: Deep slate + ember amber + danger red accents\nMotif direction: Shield, lock, boundary, alert geometry\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "security-threat-model",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-security-threat-model-small.png",
+      "target": "product/security/security-threat-model/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Security Threat Model\".\nConcept: Repo-grounded threat modeling and abuse-path analysis\nStyle profile: security\nPalette direction: Deep slate + ember amber + danger red accents\nMotif direction: Shield, lock, boundary, alert geometry\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "security-threat-model",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-security-threat-model-large.png",
+      "target": "product/security/security-threat-model/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Security Threat Model\".\nConcept: Repo-grounded threat modeling and abuse-path analysis\nStyle profile: security\nPalette direction: Deep slate + ember amber + danger red accents\nMotif direction: Shield, lock, boundary, alert geometry\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "product-spec",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-product-spec-small.png",
+      "target": "product/specs/product-spec/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Product Spec\".\nConcept: Create or review product-planning specifications from ideas or existing docs\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "product-spec",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-product-spec-large.png",
+      "target": "product/specs/product-spec/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Product Spec\".\nConcept: Create or review product-planning specifications from ideas or existing docs\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    },
+    {
+      "kind": "skill",
+      "name": "brainstorming",
+      "variant": "small",
+      "generated": "tmp/imagegen/batch7-out/skill-brainstorming-small.png",
+      "target": "product/strategy/brainstorming/agents/assets/icon-small.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Brainstorming\".\nConcept: Clarify intent and explore options and tradeoffs before planning implementation.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the SMALL icon version with strong silhouette clarity and minimal micro-detail for tiny UI rendering."
+    },
+    {
+      "kind": "skill",
+      "name": "brainstorming",
+      "variant": "large",
+      "generated": "tmp/imagegen/batch7-out/skill-brainstorming-large.png",
+      "target": "product/strategy/brainstorming/agents/assets/icon-large.png",
+      "prompt": "Create a clean app-style icon set for a developer skill named \"Brainstorming\".\nConcept: Clarify intent and explore options and tradeoffs before planning implementation.\nStyle profile: ops\nPalette direction: Teal + green + graphite neutrals\nMotif direction: Pipelines, nodes, automation loops, reliability checkpoints\nStyle: minimal, modern, high contrast, simple geometric forms, no letters or words.\nBackground: transparent.\nComposition: centered symbol with a strong silhouette at small sizes.\nReturn two coordinated variants: one optimized for tiny UI use and one with richer detail for larger preview.\nOutput: square images.\n\nVariant instruction: generate the LARGE icon version with richer internal detail while preserving the same symbol and style family."
+    }
+  ]
+}

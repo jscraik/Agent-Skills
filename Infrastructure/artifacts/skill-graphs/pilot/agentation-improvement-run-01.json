@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-11",
+  "skill_path": "frontend/tools/agentation",
+  "baseline_artifact": "Infrastructure/artifacts/skill-graphs/pilot/agentation-five-gate-baseline.json",
+  "change_summary": "Added a compact first-response contract so early Agentation answers name the framework/runtime, install-vs-MCP-vs-webhook layer, and development-only gating faster.",
+  "reference_inputs": [
+    "frontend/tools/agentation/Infrastructure/references/annotation-format.md",
+    "frontend/tools/agentation/Infrastructure/references/public-sources.md"
+  ],
+  "comparison": {
+    "quick_validate": {
+      "baseline": "pass",
+      "current": "pass"
+    },
+    "skill_gate": {
+      "baseline": "pass_with_warnings",
+      "current": "pass_with_warnings",
+      "warnings_unchanged": [
+        "PI_COMMANDS",
+        "SEC_EVALS_COMMAND_GUARD_MISSING",
+        "SEC_EVALS_PI_CASE_MISSING"
+      ]
+    },
+    "analyze_skill": {
+      "baseline": "94/120",
+      "current": "95/120",
+      "delta": "+1"
+    },
+    "openclaw_skill_guard": {
+      "baseline": "pass",
+      "current": "pass"
+    },
+    "run_skill_evals": {
+      "baseline": "partial_red",
+      "current": "not-yet-refreshed",
+      "notes": "The live eval rerun did not yet yield a fresh scorecard during this turn; the latest observed repo-path evidence remains the baseline report directory."
+    }
+  },
+  "result": "keep",
+  "next_step": "Address one remaining warning or one eval-failure pattern next, then rerun the same comparison flow."
+}

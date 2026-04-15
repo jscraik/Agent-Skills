@@ -1,0 +1,23 @@
+{
+  "path_patterns": [
+    "assets/**",
+    "examples/**",
+    "Infrastructure/references/evals*.yaml",
+    "Infrastructure/references/evals-v2-migration.md",
+    "Infrastructure/references/prompt-injection-expected-context.json",
+    "Infrastructure/references/coderabbit-docs/**",
+    "Infrastructure/references/discovery-interview.md",
+    "Infrastructure/references/contract.yaml",
+    "Infrastructure/scripts/skill_gate.py",
+    "Infrastructure/scripts/openclaw_skill_guard.py",
+    "Infrastructure/scripts/recursive_skill_loop.py",
+    "Infrastructure/scripts/generate_pressure_tests.py",
+    "Infrastructure/scripts/migrate_evals_v2.py",
+    "Infrastructure/scripts/run_skill_evals.py",
+    "Infrastructure/scripts/run_skill_graph_smoke.py",
+    "workflows/create-new-skill.md"
+  ],
+  "skip_binary_globs": [
+    "assets/**"
+  ]
+}

@@ -1,0 +1,4816 @@
+{
+  "summary": {
+    "generated_at": "2026-03-08T20:45:35.213711Z",
+    "skill_count": 106,
+    "validator_names": [
+      "quick_validate",
+      "skill_gate",
+      "analyze_skill",
+      "openclaw_guard"
+    ],
+    "totals": {
+      "quick_validate": {
+        "nonzero_exit": 8,
+        "warn_total": 0,
+        "fail_total": 0
+      },
+      "skill_gate": {
+        "nonzero_exit": 27,
+        "warn_total": 1619,
+        "fail_total": 193
+      },
+      "analyze_skill": {
+        "nonzero_exit": 5,
+        "warn_total": 0,
+        "fail_total": 13
+      },
+      "openclaw_guard": {
+        "nonzero_exit": 0,
+        "warn_total": 51,
+        "fail_total": 0
+      }
+    },
+    "blocking_skills": [
+      {
+        "skill": "product/domain/arscontexta/skill-sources/graph",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/learn",
+        "validators": [
+          "skill_gate",
+          "analyze_skill"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/next",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/pipeline",
+        "validators": [
+          "skill_gate",
+          "analyze_skill"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/ralph",
+        "validators": [
+          "skill_gate",
+          "analyze_skill"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/reduce",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/refactor",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/reflect",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/remember",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/rethink",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/reweave",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/seed",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/stats",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/tasks",
+        "validators": [
+          "skill_gate",
+          "analyze_skill"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/validate",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skill-sources/verify",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "product/domain/arscontexta/skills/help",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/insight-report",
+        "validators": [
+          "skill_gate",
+          "analyze_skill"
+        ]
+      },
+      {
+        "skill": "Skills/notebooklm",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/dependency_doctor",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/interrogate",
+        "validators": [
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/ios_sim_interrogate",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/macos_app_triage",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/oss_repo_map",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/report_compiler",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/web_app_interrogate",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      },
+      {
+        "skill": "Skills/recon-workbench/assets/template/.codex/skills/worst_case_interrogation",
+        "validators": [
+          "quick_validate",
+          "skill_gate"
+        ]
+      }
+    ]
+  },
+  "results": [
+    {
+      "skill": "auth/best-practices",
+      "index": 1,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "auth/create-auth",
+      "index": 2,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "backend/backend-engineer",
+      "index": 3,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "backend/cli-spec",
+      "index": 4,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | Infrastructure/references/cli-guidelines.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "backend/mcp-builder",
+      "index": 5,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 12,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | reference/node_mcp_server.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | reference/test_command_recipes.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "backend/workers-mcp",
+      "index": 6,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/better-icons",
+      "index": 7,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/favicon-generator",
+      "index": 8,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 12,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/references/effects-guide.md",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/scripts/generate_favicon.html"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/imagegen",
+      "index": 9,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 4,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/scripts/image_gen.py",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/nano-banana-builder",
+      "index": 10,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 9,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/references/advanced-patterns.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/og-image-creator",
+      "index": 11,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/scripts/analyze_codebase.py",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/scripts/generate_og_images.py"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/sora",
+      "index": 12,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 4,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/references/cli.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/graphics/threejs-builder",
+      "index": 13,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/stitch-design-md",
+      "index": 14,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/stitch-enhance-prompt",
+      "index": 15,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/stitch-react-components",
+      "index": 16,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 14,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | README.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | resources/stitch-api-reference.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/tools/figma",
+      "index": 17,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/tools/stitch-loop",
+      "index": 18,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Use this skill when the user asks for iterative autonomous website building with Stitch using a baton file (`next-prompt.md`) and multi-pass page generation.",
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | resources/site-template.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/baseline-ui",
+      "index": 19,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/design-system",
+      "index": 20,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/fixing-motion-performance",
+      "index": 21,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/frontend-ui-design",
+      "index": 22,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 15,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/references/brand-apps-in-chatgpt.md",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/references/design-guidelines-canonical.md",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/references/design-guidelines-summary.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/react-ui-patterns",
+      "index": 23,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/remotion",
+      "index": 24,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | rules/calculate-metadata.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/shadcn-ui",
+      "index": 25,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/scripts/verify-setup.sh"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/stitch-remotion",
+      "index": 26,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md",
+            "WARN SAFE_NETWORK_ALLOWLIST: Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md. | Infrastructure/scripts/download-stitch-asset.sh"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/ui-ux-creative-coding",
+      "index": 27,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/ui/ui-visual-regression",
+      "index": 28,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/website/fixing-accessibility",
+      "index": 29,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "frontend/website/fixing-metadata",
+      "index": 30,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "github/gh-fix-ci",
+      "index": 31,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "github/gh-workflow",
+      "index": 32,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SAFE_UNTRUSTED_TO_COMMAND: Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | Infrastructure/scripts/fetch_comments.py"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN security.subprocess_usage: subprocess command execution detected; review for input hardening. (Infrastructure/scripts/github-pr.py:37) | Remediation: Ensure argv lists, `shell=False`, and strict input sanitization are used.",
+            "WARN security.subprocess_usage: subprocess command execution detected; review for input hardening. (Infrastructure/scripts/fetch_comments.py:97) | Remediation: Ensure argv lists, `shell=False`, and strict input sanitization are used."
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "github/greptile/check-pr",
+      "index": 33,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "interview/architecture-interview",
+      "index": 34,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "interview/deep-interview",
+      "index": 35,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "interview/interview-me",
+      "index": 36,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/content/video-transcript-downloader",
+      "index": 37,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | Infrastructure/scripts/vtd.js",
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | Infrastructure/scripts/vtd.js",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN security.node_child_process: Node child_process usage detected; review for command injection risk. (Infrastructure/scripts/vtd.js:2) | Remediation: Ensure command/argv are fixed or validated and avoid shell wrappers."
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/content/youtube-hooks-scripts",
+      "index": 38,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/content/youtube-titles-thumbnails",
+      "index": 39,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/docs/agents-md",
+      "index": 40,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Refactor or create AGENTS.md using progressive disclosure: keep root minimal, split detailed instructions into linked docs, and flag contradictions/redundancy. Use when the user asks to create, update, or refactor AGENTS.md, including architecture-first onboarding guidance from diagram-cli artifacts."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/docs/context7",
+      "index": 41,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SAFE_NETWORK_ALLOWLIST: Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md. | Infrastructure/scripts/context7.py",
+            "WARN SAFE_NETWORK_UNDECLARED: Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed. | Infrastructure/scripts/context7.py"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/docs/docs-expert",
+      "index": 42,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 9,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/readme-crafting.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/docs/openai-docs",
+      "index": 43,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta",
+      "index": 44,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 50,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | platforms/claude-code/hooks/write-validate.sh.template",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | methodology/engineering uses technical decision tracking with architectural memory.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | platforms/shared/skill-blocks/reflect.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/graph",
+      "index": 45,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 11,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Interactive knowledge graph analysis. Routes natural language questions to graph scripts, interprets results in domain vocabulary, and suggests concrete actions. Triggers on \"/graph\", \"/graph health\", \"/graph triangles\", \"find synthesis opportunities\", \"graph analysis\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/learn",
+      "index": 46,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 10,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Research a topic and grow your knowledge graph. Uses Exa deep researcher, web search, or basic search to investigate topics, files results with full provenance, and chains to processing pipeline. Triggers on \"/learn\", \"/learn [topic]\", \"research this\", \"find out about\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 2,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/next",
+      "index": 47,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 10,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Surface the most valuable next action by combining task stack, queue state, inbox pressure, health, and goals. Recommends one specific action with rationale. Triggers on \"/next\", \"what should I do\", \"what's next\".",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Surface the most valuable next action by combining task stack, queue state, inbox pressure, health, and goals. Recommends one specific action with rationale. Triggers on \"/next\", \"what should I do\", \"what's next\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/pipeline",
+      "index": 48,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 9,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: End-to-end source processing -- seed, reduce, process all claims through reflect/reweave/verify, archive. The full pipeline in one command. Triggers on \"/pipeline\", \"/pipeline [file]\", \"process this end to end\", \"full pipeline\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 2,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/ralph",
+      "index": 49,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 10,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).",
+            "WARN WF_FAIL_FAST_MISSING: Validation section should specify fail-fast behavior (stop at first failed gate)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Queue processing with fresh context per phase. Processes N tasks from the queue, spawning isolated subagents to prevent context contamination. Supports serial, parallel, batch filter, and dry run modes. Triggers on \"/ralph\", \"/ralph N\", \"process queue\", \"run pipeline tasks\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 2,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/reduce",
+      "index": 50,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 9,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL PD_SKILLMD_TOO_LONG: SKILL.md exceeds line budget (1124 > 500). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/refactor",
+      "index": 51,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 9,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/reflect",
+      "index": 52,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 7,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL PD_SKILLMD_TOO_LONG: SKILL.md exceeds line budget (753 > 500). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/remember",
+      "index": 53,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 10,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL PD_SKILLMD_TOO_LONG: SKILL.md exceeds line budget (538 > 500). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/rethink",
+      "index": 54,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 9,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL PD_SKILLMD_TOO_LONG: SKILL.md exceeds line budget (664 > 500). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/reweave",
+      "index": 55,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 8,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Update old notes with new connections. The backward pass that /reflect doesn't do. Revisit existing notes that predate newer related content, add connections, sharpen claims, consider splits. Triggers on \"/reweave\", \"/reweave [note]\", \"update old notes\", \"backward connections\", \"revisit notes\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/seed",
+      "index": 56,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 8,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/stats",
+      "index": 57,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 10,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Show vault statistics and knowledge graph metrics. Provides a shareable snapshot of vault health, growth, and progress. Triggers on \"/stats\", \"vault stats\", \"show metrics\", \"how big is my vault\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/tasks",
+      "index": 58,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 10,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: View and manage the task stack and processing queue. Shows pending work, active tasks, completed items, and queue state. Triggers on \"/tasks\", \"show tasks\", \"what's pending\", \"task list\", \"queue status\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 2,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/validate",
+      "index": 59,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 8,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL SAFE_REDACTION_REQUIRED: Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skill-sources/verify",
+      "index": 60,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 7,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading).",
+            "WARN WF_FAIL_FAST_MISSING: Validation section should specify fail-fast behavior (stop at first failed gate)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL PD_SKILLMD_TOO_LONG: SKILL.md exceeds line budget (540 > 500). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/arscontexta/skills/help",
+      "index": 61,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 12,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Contextual guidance and command discovery. Three modes \u2014 narrative (first-time), contextual (mid-task), compact (quick reference). Shows available commands, active skills, and intelligent suggestions based on vault state. Triggers on \"/help\", \"what can I do\", \"show commands\", \"how does this work\".",
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL FM_DESC_WHAT_WHEN: Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Contextual guidance and command discovery. Three modes \u2014 narrative (first-time), contextual (mid-task), compact (quick reference). Shows available commands, active skills, and intelligent suggestions based on vault state. Triggers on \"/help\", \"what can I do\", \"show commands\", \"how does this work\"."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/chatgpt-apps",
+      "index": 62,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 3,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/references/window-openai-patterns.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/cloudflare-deploy",
+      "index": 63,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 99,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/ai-gateway/configuration.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/ai-gateway/sdk-integration.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/ai-gateway/troubleshooting.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/domain/oak-api",
+      "index": 64,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SAFE_NETWORK_ALLOWLIST: Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md. | Infrastructure/scripts/oak_api_fetch.py",
+            "WARN SAFE_NETWORK_UNDECLARED: Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed. | Infrastructure/scripts/oak_api_fetch.py"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/Infrastructure/ops/compound-engineering-router",
+      "index": 65,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 2,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/references/notebooklm-sources.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/Infrastructure/ops/decide-build-primitive",
+      "index": 66,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/Infrastructure/ops/linear",
+      "index": 67,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/Infrastructure/ops/release",
+      "index": 68,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/security/security-best-practices",
+      "index": 69,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 19,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/golang-general-backend-security.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/python-fastapi-web-server-security.md",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/python-flask-web-server-security.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "product/specs/product-spec",
+      "index": 70,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 11,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/scripts/render-diagrams.sh",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/scripts/validate-mermaid.sh",
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/1password",
+      "index": 71,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/get-started.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/agent-browser",
+      "index": 72,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/alignment-checkpoint",
+      "index": 73,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/apple-app-creator",
+      "index": 74,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/templates/xcodegen/ios-uikit/Sources/ViewController.swift"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/atlas",
+      "index": 75,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | Infrastructure/scripts/__pycache__/atlas_common.cpython-312.pyc",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/beautiful-mermaid",
+      "index": 76,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SAFE_UNTRUSTED_TO_COMMAND: Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | Infrastructure/scripts/render.ts",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN security.node_child_process: Node child_process usage detected; review for command injection risk. (Infrastructure/scripts/render.ts:161) | Remediation: Ensure command/argv are fixed or validated and avoid shell wrappers."
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/bootstrap",
+      "index": 77,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 6,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/codex-agent-creator",
+      "index": 78,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/codex-automation-architect",
+      "index": 79,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/codex-home-audit",
+      "index": 80,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 9,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/scripts/audit_codex_home.py",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/references/contract.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/codex-sessions-skill-scan",
+      "index": 81,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 11,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | Infrastructure/scripts/__pycache__/scan_codex_sessions.cpython-314.pyc",
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/diagram-cli",
+      "index": 82,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/fix-mise",
+      "index": 83,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/insight-report",
+      "index": 84,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 6,
+          "fail_count": 11,
+          "sample_warn": [
+            "WARN REPO_REFERENCES_UNREFERENCED: Infrastructure/references/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_KEYS_MISSING: contract.yaml missing keys: purpose, triggers, inputs, non_goals, risks",
+            "FAIL EVALS_CASE_KEYS: Case #1 missing `name`.",
+            "FAIL EVALS_CASE_KEYS: Case #1 missing `acceptance`."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 2,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/markdown-converter",
+      "index": 85,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/notebooklm",
+      "index": 86,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 933,
+          "fail_count": 9,
+          "sample_warn": [
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python",
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python3",
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | .venv/bin/python3.14"
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold).",
+            "FAIL PD_SKILLMD_TOO_LONG: SKILL.md exceeds line budget (663 > 500). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.contract_missing: Missing Infrastructure/references/contract.yaml",
+            "WARN readiness.evals_missing: Missing Infrastructure/references/evals.yaml",
+            "WARN security.subprocess_usage: subprocess command execution detected; review for input hardening. (Infrastructure/scripts/run.py:125) | Remediation: Ensure argv lists, `shell=False`, and strict input sanitization are used."
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/process-watch",
+      "index": 87,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks.",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench",
+      "index": 88,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 14,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | Infrastructure/references/recon_rules.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/references/activation_and_ops.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/dependency_doctor",
+      "index": 89,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/interrogate",
+      "index": 90,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 5,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Plan and execute an evidence-first interrogation using approved probes; outputs schema-valid findings + report. Use when you need a structured investigation workflow.",
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PATH_TRAVERSAL: Parent directory traversal (`../`) mentioned; avoid in references."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/ios_sim_interrogate",
+      "index": 91,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/macos_app_triage",
+      "index": 92,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/oss_repo_map",
+      "index": 93,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/report_compiler",
+      "index": 94,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 2,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/web_app_interrogate",
+      "index": 95,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 3,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Analyze Web/React apps using HAR + Playwright traces and endpoint mapping (behavior-first when sourcemaps absent). Use when you need evidence from web app behavior.",
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN SEC_EXAMPLES_MISSING: Missing recommended section: examples (add a ## heading)."
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/recon-workbench/assets/template/.codex/skills/worst_case_interrogation",
+      "index": 96,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 1,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 2,
+          "result_line": "RESULT: FAIL",
+          "warn_count": 4,
+          "fail_count": 2,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Plan an escalation ladder for hardened/minified/low-signal targets using observation-first instrumentation and baseline/stimulus diffs. Use when standard probes fail.",
+            "WARN FM_NAME_STYLE: Consider kebab-case name (lowercase + hyphens).",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          ],
+          "sample_fail": [
+            "FAIL CONTRACT_MISSING: Missing Infrastructure/references/contract.yaml (required for gold).",
+            "FAIL EVALS_MISSING: Missing Infrastructure/references/evals.yaml (required for gold)."
+          ]
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN readiness.references_missing: Missing Infrastructure/references/ directory"
+          ],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/repoprompt",
+      "index": 97,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 8,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PI_ROLEPLAY: [medium] Role-shifting language detected; verify it is safe and limited to user content. | Infrastructure/references/legacy-prompts/rp-investigate-cli.md",
+            "WARN PI_ROLEPLAY: [medium] Role-shifting language detected; verify it is safe and limited to user content. | Infrastructure/references/legacy-prompts/rp-investigate.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/run-tests-and-write-artifacts",
+      "index": 98,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN REPO_ASSETS_UNREFERENCED: assets/ exists but is not referenced in SKILL.md.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_NEGATIVE_MISSING: No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/simple-tasks",
+      "index": 99,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 1,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/skill-builder",
+      "index": 100,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/systematic-debugging",
+      "index": 101,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 7,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Use this skill when encountering bugs, test failures, regressions, or unexpected behavior to run a root-cause-first debugging workflow before proposing fixes or code changes.",
+            "WARN PI_OVERRIDE: [high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | defense-in-depth.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/test-driven-development",
+      "index": 102,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 5,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN FM_DESC_WORKFLOWY: Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.",
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/using-git-worktrees",
+      "index": 103,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/visual-explainer",
+      "index": 104,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 17,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN PATH_ABSOLUTE: Absolute paths detected; prefer repo-relative paths.",
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | banner.png",
+            "WARN PI_OBFUSCATION: [high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | SKILL.md"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/writing-plans",
+      "index": 105,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 4,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN SEC_EVALS_COMMAND_GUARD_MISSING: No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml",
+            "WARN SEC_EVALS_PI_CASE_MISSING: No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    },
+    {
+      "skill": "Skills/xcode-makefiles",
+      "index": 106,
+      "validators": {
+        "quick_validate": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        },
+        "skill_gate": {
+          "exit_code": 0,
+          "result_line": "RESULT: PASS",
+          "warn_count": 3,
+          "fail_count": 0,
+          "sample_warn": [
+            "WARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/templates/toolkit/Infrastructure/scripts/resolve_agent_name.sh",
+            "WARN PI_TOOL_CHAIN: [high] High-risk control language detected; verify this does not instruct unsafe behavior. | Infrastructure/templates/toolkit/Infrastructure/scripts/resolve_sim_destination.sh"
+          ],
+          "sample_fail": []
+        },
+        "analyze_skill": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 1,
+          "sample_warn": [],
+          "sample_fail": [
+            "Good: address WARN/FAIL items above to improve consistency."
+          ]
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "result_line": "",
+          "warn_count": 0,
+          "fail_count": 0,
+          "sample_warn": [],
+          "sample_fail": []
+        }
+      }
+    }
+  ]
+}

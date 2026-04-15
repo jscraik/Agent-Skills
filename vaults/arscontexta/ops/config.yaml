@@ -1,7 +1,0 @@
-schema_version: 1
-self_evolution:
-  observation_threshold: 10
-  tension_threshold: 5
-maintenance:
-  inbox_pressure_threshold: 3
-  sessions_unprocessed_threshold: 5

@@ -1,0 +1,105 @@
+{
+  "schema_version": "projection-parity.v1",
+  "generated_at": "2026-04-14T22:49:53.290245+00:00",
+  "mode": "verify",
+  "scope": "all",
+  "status": "pass",
+  "results": [
+    {
+      "name": "skill-factory-skill-creator-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/skill-creator",
+      "canonical": "Plugins/skill-factory/skills/skill-creator",
+      "target": "../plugins/skill-factory/skills/skill-creator"
+    },
+    {
+      "name": "skill-factory-skill-installer-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/skill-installer",
+      "canonical": "Plugins/skill-factory/skills/skill-installer",
+      "target": "../plugins/skill-factory/skills/skill-installer"
+    },
+    {
+      "name": "plugin-factory-plugin-creator-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/plugin-creator",
+      "canonical": "Plugins/plugin-factory/skills/plugin-creator",
+      "target": "../plugins/plugin-factory/skills/plugin-creator"
+    },
+    {
+      "name": "plugin-factory-plugin-installer-alias",
+      "type": "symlink",
+      "status": "pass",
+      "alias": "skills-system/plugin-installer",
+      "canonical": "Plugins/plugin-factory/skills/plugin-installer",
+      "target": "../plugins/plugin-factory/skills/plugin-installer"
+    },
+    {
+      "name": "cache-coderabbit",
+      "type": "mirror",
+      "source": "Plugins/coderabbit",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/coderabbit",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 210,
+      "source_manifest_sha256": "ab6e8fedde2839d37dd05ce583e32202ff7a768bd8dfe722634a8bfa2482a0cd",
+      "projection_manifest_sha256": "ab6e8fedde2839d37dd05ce583e32202ff7a768bd8dfe722634a8bfa2482a0cd",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-harness-engineering",
+      "type": "mirror",
+      "source": "Plugins/harness-engineering",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 198,
+      "source_manifest_sha256": "582773769e0571f41e0d70599eb702b62d294d6b419bfe2b226b8b119fb73777",
+      "projection_manifest_sha256": "582773769e0571f41e0d70599eb702b62d294d6b419bfe2b226b8b119fb73777",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-plugin-factory",
+      "type": "mirror",
+      "source": "Plugins/plugin-factory",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/plugin-factory",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 63,
+      "source_manifest_sha256": "93484e5260689e441be3d504c3c675af434787586580ccb6ed53674b9fe5415b",
+      "projection_manifest_sha256": "93484e5260689e441be3d504c3c675af434787586580ccb6ed53674b9fe5415b",
+      "manifest_mismatch": false,
+      "status": "pass"
+    },
+    {
+      "name": "cache-skill-factory",
+      "type": "mirror",
+      "source": "Plugins/skill-factory",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/skill-factory",
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 206,
+      "source_manifest_sha256": "006c0a9506d86f350db9e027fb59ce4b853da30bf0fdd19ac4f310156adc3493",
+      "projection_manifest_sha256": "006c0a9506d86f350db9e027fb59ce4b853da30bf0fdd19ac4f310156adc3493",
+      "manifest_mismatch": false,
+      "status": "pass"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "path_patterns": [
+    "assets/**",
+    "examples/**",
+    "Infrastructure/references/evals*.yaml",
+    "Infrastructure/references/evals-v2-migration.md",
+    "Infrastructure/references/destructive-commands.rules",
+    "Infrastructure/references/api-security.md",
+    "Infrastructure/references/best-practices.md",
+    "Infrastructure/references/core-principles.md",
+    "Infrastructure/references/composability.md",
+    "Infrastructure/references/extended.md",
+    "Infrastructure/references/governance-and-style.md",
+    "Infrastructure/references/feedback-analytics.md",
+    "Infrastructure/references/philosophy-patterns.md",
+    "Infrastructure/references/security-hardening.md",
+    "Infrastructure/references/prompt-injection-expected-context.json",
+    "Infrastructure/references/raw-docs/**",
+    "Infrastructure/references/raw-docs-md/**",
+    "Infrastructure/references/raw-docs**/*.html",
+    "Infrastructure/references/raw-docs**/*.md",
+    "Infrastructure/references/cf-crawl/**",
+    "Infrastructure/references/plan.md",
+    "Infrastructure/scripts/skill_gate.py",
+    "Infrastructure/scripts/openclaw_skill_guard.py",
+    "Infrastructure/scripts/recursive_skill_loop.py",
+    "Infrastructure/scripts/generate_pressure_tests.py",
+    "Infrastructure/scripts/migrate_evals_v2.py",
+    "Infrastructure/scripts/run_skill_evals.py",
+    "Infrastructure/scripts/run_skill_graph_smoke.py",
+    "Infrastructure/scripts/record_skill_feedback.py",
+    "workflows/create-new-skill.md"
+  ],
+  "context_signals": [
+    "prompt injection",
+    "adversarial",
+    "jailbreak",
+    "forbidden_commands",
+    "security coverage",
+    "red team",
+    "regex",
+    "re.compile(",
+    "pattern"
+  ],
+  "skip_binary_globs": [
+    "assets/**"
+  ]
+}

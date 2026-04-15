@@ -1,0 +1,37 @@
+schema_version: "2.0"
+skill_name: "writing-plans"
+
+cases:
+  - id: explicit-plan-request
+    name: explicit plan request
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Write an implementation plan for adding retry logic to this API client."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "writing-plans"
+      - type: contains
+        value: "verification"
+
+  - id: plan-with-checkpoints
+    name: plan with checkpoints
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Break this feature into execution steps with clear pause points for review."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "writing-plans"
+      - type: regex
+        value: "(?i)task|checkpoint"
+
+  - id: immediate-fix-request
+    name: immediate fix negative
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Apply this one-line typo fix right now."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "writing-plans"

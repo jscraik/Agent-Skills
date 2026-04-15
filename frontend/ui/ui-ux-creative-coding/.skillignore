@@ -1,6 +1,0 @@
-# Skip binary inspiration assets in prompt-injection text scan.
-assets/ui-ux-creative-coding.png
-references/images/**
-references/images/*/*.jpg
-references/images/*/*.jpeg
-references/images/*/*.png

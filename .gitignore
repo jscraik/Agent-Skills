@@ -32,40 +32,40 @@ node_modules/
 .temp/
 
 # Generated skill views (symlink aggregation dirs)
-skills/
+Skills/skills
 # Keep codex-plugin-builder Ars Contexta fixture skill tracked for lint coverage.
-!utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/
-utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/*
-!utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/
-utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
-!utilities/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
+!Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/
+Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/*
+!Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/
+Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
+!Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
 # Keep coderabbit plugin skills tracked despite global skills/ ignore.
-!plugins/coderabbit/skills/
-plugins/coderabbit/skills/*
-!plugins/coderabbit/skills/**
+!Plugins/coderabbit/skills/
+Plugins/coderabbit/skills/*
+!Plugins/coderabbit/skills/**
 # Keep harness-engineering plugin skills tracked despite global skills/ ignore.
-!plugins/harness-engineering/skills/
-plugins/harness-engineering/skills/*
-!plugins/harness-engineering/skills/**
-plugins/coderabbit/skills/**/.DS_Store
-plugins/coderabbit/skills/**/__pycache__/
-plugins/harness-engineering/skills/**/.DS_Store
-plugins/harness-engineering/skills/**/__pycache__/
+!Plugins/harness-engineering/skills/
+Plugins/harness-engineering/skills/*
+!Plugins/harness-engineering/skills/**
+Plugins/coderabbit/skills/**/.DS_Store
+Plugins/coderabbit/skills/**/__pycache__/
+Plugins/harness-engineering/skills/**/.DS_Store
+Plugins/harness-engineering/skills/**/__pycache__/
 # Keep skill-factory plugin skills tracked despite global skills/ ignore.
-!plugins/skill-factory/skills/
-plugins/skill-factory/skills/*
-!plugins/skill-factory/skills/**
+!Plugins/skill-factory/skills/
+Plugins/skill-factory/skills/*
+!Plugins/skill-factory/skills/**
 # Keep plugin-factory plugin skills tracked despite global skills/ ignore.
-!plugins/plugin-factory/skills/
-plugins/plugin-factory/skills/*
-!plugins/plugin-factory/skills/**
+!Plugins/plugin-factory/skills/
+Plugins/plugin-factory/skills/*
+!Plugins/plugin-factory/skills/**
 # Keep generated/runtime debris ignored inside tracked skill-factory skills.
-plugins/skill-factory/skills/**/.DS_Store
-plugins/skill-factory/skills/**/__pycache__/
-plugins/skill-factory/skills/skill-builder/artifacts/
+Plugins/skill-factory/skills/**/.DS_Store
+Plugins/skill-factory/skills/**/__pycache__/
+Plugins/skill-factory/skills/skill-builder/Infrastructure/artifacts/
 # Keep generated/runtime debris ignored inside tracked plugin-factory skills.
-plugins/plugin-factory/skills/**/.DS_Store
-plugins/plugin-factory/skills/**/__pycache__/
+Plugins/plugin-factory/skills/**/.DS_Store
+Plugins/plugin-factory/skills/**/__pycache__/
 skills-antigravity/
 sync-symlink/
 
@@ -75,27 +75,27 @@ sync-symlink/
 .diagram/context/refresh.log
 !.diagram/manifest.json
 semgrep.sarif
-artifacts/diagrams/
-artifacts/dist/
-artifacts/build/dist/
-artifacts/reports/
-artifacts/sessions/
-artifacts/*-status-*.md
-artifacts/skill-validation*
-artifacts/skill_validation_*
-artifacts/run_skill_validation.sh
-artifacts/skill-graphs/drills/
-reports/20*.md
-reports/data/pattern-registry.json
-reports/data/candidates.json
-/artifacts/ai/tmp/
-/artifacts/ai/cache/
-/artifacts/ai/raw/
-/artifacts/skill-graphs/runs/**/debug/
-/artifacts/skill-graphs/runs/**/iter-*-generated.txt
-/artifacts/skill-graphs/runs/**/iter-*-improved.txt
-/artifacts/skill-graphs/runs/**/summary.md
-/artifacts/skill-graphs/runs/**/events.jsonl
+Infrastructure/artifacts/diagrams/
+Infrastructure/artifacts/dist/
+Infrastructure/artifacts/build/dist/
+Infrastructure/artifacts/reports/
+Infrastructure/artifacts/sessions/
+Infrastructure/artifacts/*-status-*.md
+Infrastructure/artifacts/skill-validation*
+Infrastructure/artifacts/skill_validation_*
+Infrastructure/artifacts/run_skill_validation.sh
+Infrastructure/artifacts/skill-graphs/drills/
+Infrastructure/reports/20*.md
+Infrastructure/reports/data/pattern-registry.json
+Infrastructure/reports/data/candidates.json
+/Infrastructure/artifacts/ai/tmp/
+/Infrastructure/artifacts/ai/cache/
+/Infrastructure/artifacts/ai/raw/
+/Infrastructure/artifacts/skill-graphs/runs/**/debug/
+/Infrastructure/artifacts/skill-graphs/runs/**/iter-*-generated.txt
+/Infrastructure/artifacts/skill-graphs/runs/**/iter-*-improved.txt
+/Infrastructure/artifacts/skill-graphs/runs/**/summary.md
+/Infrastructure/artifacts/skill-graphs/runs/**/events.jsonl
 
 # Local backups/patch leftovers
 *.bak
@@ -109,7 +109,7 @@ FORJAMIE-*.md
 
 # Misc local throwaways
 *.skill
-product/Archive.zip
+Docs/product/Archive.zip
 logs/
 environment.toml
 
@@ -117,16 +117,16 @@ environment.toml
 .install-journal/
 
 # Skill Genome Loop runtime artifacts
-artifacts/skill-graphs/telemetry/candidates.jsonl
-artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
-artifacts/skill-graphs/telemetry/.genome-watermark
+Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl
+Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
+Infrastructure/artifacts/skill-graphs/telemetry/.genome-watermark
 
-artifacts/policy/
+Infrastructure/artifacts/policy/
 
 # Validation evidence policy:
 # - ignore timestamped local run directories by default
 # - ignore the latest directory entirely (may contain sensitive logs)
-/artifacts/validation/20[0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z/
-/artifacts/validation/latest/
-/artifacts/validation/family-gate/
-plugins/cache/
+/Infrastructure/artifacts/validation/20[0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z/
+/Infrastructure/artifacts/validation/latest/
+/Infrastructure/artifacts/validation/family-gate/
+Plugins/cache/

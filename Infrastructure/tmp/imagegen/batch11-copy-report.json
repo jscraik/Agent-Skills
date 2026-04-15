@@ -1,0 +1,74 @@
+[
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "using-git-worktrees",
+    "variant": "small",
+    "source": "tmp/imagegen/batch11-out/skill-using-git-worktrees-small.png",
+    "target_requested": "Skills/using-git-worktrees/agents/assets/icon-small.png",
+    "target_written": "Skills/using-git-worktrees/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "using-git-worktrees",
+    "variant": "large",
+    "source": "tmp/imagegen/batch11-out/skill-using-git-worktrees-large.png",
+    "target_requested": "Skills/using-git-worktrees/agents/assets/icon-large.png",
+    "target_written": "Skills/using-git-worktrees/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "verification-before-completion",
+    "variant": "small",
+    "source": "tmp/imagegen/batch11-out/skill-verification-before-completion-small.png",
+    "target_requested": "Skills/verification-before-completion/agents/assets/icon-small.png",
+    "target_written": "Skills/verification-before-completion/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "verification-before-completion",
+    "variant": "large",
+    "source": "tmp/imagegen/batch11-out/skill-verification-before-completion-large.png",
+    "target_requested": "Skills/verification-before-completion/agents/assets/icon-large.png",
+    "target_written": "Skills/verification-before-completion/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "visual-explainer",
+    "variant": "small",
+    "source": "tmp/imagegen/batch11-out/skill-visual-explainer-small.png",
+    "target_requested": "Skills/visual-explainer/agents/assets/icon-small.png",
+    "target_written": "Skills/visual-explainer/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "visual-explainer",
+    "variant": "large",
+    "source": "tmp/imagegen/batch11-out/skill-visual-explainer-large.png",
+    "target_requested": "Skills/visual-explainer/agents/assets/icon-large.png",
+    "target_written": "Skills/visual-explainer/agents/assets/icon-large.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "writing-plans",
+    "variant": "small",
+    "source": "tmp/imagegen/batch11-out/skill-writing-plans-small.png",
+    "target_requested": "Skills/writing-plans/agents/assets/icon-small.png",
+    "target_written": "Skills/writing-plans/agents/assets/icon-small.png"
+  },
+  {
+    "status": "copied",
+    "kind": "skill",
+    "name": "writing-plans",
+    "variant": "large",
+    "source": "tmp/imagegen/batch11-out/skill-writing-plans-large.png",
+    "target_requested": "Skills/writing-plans/agents/assets/icon-large.png",
+    "target_written": "Skills/writing-plans/agents/assets/icon-large.png"
+  }
+]

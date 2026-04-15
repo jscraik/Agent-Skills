@@ -1,0 +1,249 @@
+import subprocess
+import json
+import re
+from pathlib import Path
+from typing import List
+from ask.envelope import CallResult, ErrorObject
+from ask.catalog_parity import compute_catalog_parity
+
+def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
+    """
+    Collect basic repository metadata and whether agent skills appear to be synced.
+    
+    The returned CallResult's `data` includes:
+    - `repo_root` (str): contract-preserving repository root marker (`"."`).
+    - `repo_root_resolved` (str): absolute resolved repository root path.
+    - `is_git` (bool): `True` if a `.git` directory exists at `repo_root`, `False` otherwise.
+    - `skills_synced` (bool): `True` if `.agents/skills` exists and contains at least one entry, `False` otherwise.
+    
+    Returns:
+        CallResult: A CallResult with `status` set to `"success"` and the metadata above stored in `data`.
+    """
+    result = CallResult()
+    result.data["repo_root"] = "."
+    result.data["repo_root_resolved"] = str(repo_root.resolve())
+    result.data["is_git"] = (repo_root / ".git").exists()
+    
+    # Check if .agents/skills is synced
+    skills_dir = repo_root / ".agents" / "skills"
+    is_synced = skills_dir.is_dir() and any(skills_dir.iterdir())
+    result.data["skills_synced"] = is_synced
+    
+    result.status = "success"
+    return result
+
+def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
+    """
+    Run the repository validation script and collect a structured result.
+    
+    Executes the repository's Infrastructure/scripts/validate_all.sh with either `--ephemeral` or `--persistent`, parses the script summary from stdout, and records the raw output and summary counts in the returned result. If the script fails to emit the expected summary lines or exits with a non‑zero code, the result is marked as an error and includes an `ErrorObject` describing the validation failure.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root where the script will be executed.
+        ephemeral (bool): When True run validation with `--ephemeral`; otherwise use `--persistent`.
+    
+    Returns:
+        CallResult: Contains `data` with keys:
+            - `required_failures` (int): Number of required failures reported by the validator.
+            - `warn_only_issues` (int): Number of warn-only issues reported by the validator.
+            - `raw_output` (str): Full stdout captured from the validation script.
+          The result's `status` is `"success"` when the script exits with code 0, otherwise `"error"`.
+          On error the result may include one or more `ErrorObject` entries with `code="ERR_VALIDATION"` and a `fix_suggestion`.
+    """
+    result = CallResult()
+    
+    cmd = ["bash", "Infrastructure/scripts/validate_all.sh"]
+    if ephemeral:
+        cmd.append("--ephemeral")
+    else:
+        cmd.append("--persistent")
+        
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    
+    # Parse output for summary
+    stdout = process.stdout
+    required_failures = 0
+    warn_only_issues = 0
+
+    # Handle early exit case where validation script fails before producing summary
+    if "- required_failures:" not in stdout and "- warn_only_issues:" not in stdout:
+        result.data["required_failures"] = 1  # Assume failure if no summary lines
+        result.data["warn_only_issues"] = 0
+        result.data["raw_output"] = stdout
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Validation script failed before producing summary output.",
+            fix_suggestion="Check validation logs for script errors."
+        ))
+        return result
+
+    for line in stdout.splitlines():
+        if "- required_failures:" in line:
+            required_failures = int(line.split(":")[-1].strip())
+        elif "- warn_only_issues:" in line:
+            warn_only_issues = int(line.split(":")[-1].strip())
+            
+    result.data["required_failures"] = required_failures
+    result.data["warn_only_issues"] = warn_only_issues
+    result.data["raw_output"] = stdout
+    
+    if process.returncode == 0:
+        result.status = "success"
+    else:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Validation failed with {required_failures} required failures.",
+            fix_suggestion="Review the validation logs in Infrastructure/artifacts/validation/latest/"
+        ))
+
+    return result
+
+
+def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
+    """
+    Run catalog parity diagnostics and record the findings in a CallResult.
+    
+    Performs parity checks for the catalog at `repo_root` (optionally using stricter rules when `strict` is True), stores the full parity report under `result.data["catalog_parity"]` and exposes `decision_status` and `policy_identity` in `result.data`. If no drift is detected the returned CallResult has `status` set to `"success"`. If drift is detected the CallResult has `status` set to `"error"` and includes an `ErrorObject` (code `"ERR_VALIDATION"`) whose message contains the detected drift class and whose `fix_suggestion` is taken from the report's `operator_action` or a default instruction.
+    
+    Parameters:
+        repo_root (Path): Root path of the repository to analyse.
+        strict (bool): Apply stricter parity rules when True.
+    
+    Returns:
+        CallResult: Result object containing:
+            - data["catalog_parity"]: full parity report object
+            - data["decision_status"]: decision status from the report (if present)
+            - data["policy_identity"]: policy identity from the report (if present)
+            - status: `"success"` when no drift, `"error"` when drift detected
+            - errors: may include an `ErrorObject` with code `"ERR_VALIDATION"` if drift is detected
+    """
+    result = CallResult()
+    report = compute_catalog_parity(repo_root, strict=strict)
+    result.data["catalog_parity"] = report
+    result.data["decision_status"] = report.get("decision_status")
+    result.data["policy_identity"] = report.get("policy_identity")
+
+    drift_detected = report.get("drift_detected")
+    if drift_detected is False:
+        result.status = "success"
+        return result
+
+    if drift_detected is True:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"doctor-catalog detected drift: {report.get('drift_class')}",
+                fix_suggestion=report.get("operator_action")
+                or "Run sync/projection tooling and rerun doctor-catalog.",
+            )
+        )
+        return result
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_RUNTIME",
+            message="doctor-catalog report missing required drift_detected boolean.",
+            fix_suggestion="Regenerate catalog parity diagnostics and rerun doctor-catalog.",
+        )
+    )
+    return result
+
+def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:
+    """
+    Validate stability-related changes to SKILL.md files and enforce rules for skills marked `stability: stable`.
+    
+    Checks the repository for SKILL.md frontmatter that declares a skill as stable and, when a list of changed files is provided, verifies that:
+    - stable SKILL.md files include `name:` and `description:` fields in their frontmatter, and
+    - deletion of a stable skill is not performed without an existing deprecation notice.
+    
+    Parameters:
+        repo_root (Path): Repository root directory against which paths and SKILL.md files are resolved.
+        changed_files (List[str], optional): Iterable of file paths (typically relative to `repo_root`) to inspect; if omitted, only a global scan is performed.
+    
+    Returns:
+        CallResult: Contains:
+          - `status`: `"success"` if no stability violations were found, `"error"` otherwise.
+          - `data.stable_skills` (List[str]): Sorted list of discovered stable skill identifiers.
+          - `data.stable_count` (int): Number of discovered stable skills.
+          - `data.checked_files` (int): Number of `changed_files` inspected (0 if `changed_files` was not provided).
+          - `data.errors` (List[str], optional): When `status` is `"error"`, a list of human-readable error messages describing each violation.
+          - `errors` (List[ErrorObject]): For each string in `data.errors`, an `ErrorObject` with `code="ERR_VALIDATION"` is appended to the result's `errors` list.
+    """
+    result = CallResult()
+
+    # Build list of all SKILL.md files
+    stable_skills = []
+    errors = []
+
+    FRONTMATTER_RE = re.compile(r"^---\r?\n(.*?)\r?\n---", re.DOTALL)
+    STABLE_RE = re.compile(r"^stability\s*:\s*stable\s*$", re.MULTILINE)
+
+    for md in sorted(repo_root.rglob("SKILL.md")):
+        try:
+            content = md.read_text(encoding="utf-8", errors="replace")
+            fm = FRONTMATTER_RE.search(content)
+            if fm and STABLE_RE.search(fm.group(1)):
+                skill = md.parts[-2]
+                stable_skills.append(skill)
+        except Exception:
+            continue
+
+    # If checking specific changed files
+    if changed_files:
+        for f in changed_files:
+            p = repo_root / f
+            if p.name != "SKILL.md":
+                continue
+            skill = p.parts[-2] if len(p.parts) >= 2 else str(p)
+
+            if not p.exists():
+                # File was deleted - check against stable skills list or edges file
+                edges_file = repo_root / "ops" / "metrics" / "graph" / "skill-edges.json"
+                if edges_file.exists():
+                    try:
+                        data = json.loads(edges_file.read_text())
+                        stable_ids = {n["id"] for n in data.get("nodes", []) if n.get("stability") == "stable"}
+                        if skill in stable_ids:
+                            errors.append(
+                                f"STABLE SKILL DELETED: '{skill}' is marked stable and was deleted "
+                                f"without a deprecation notice. Add a ## Deprecation section to the "
+                                f"last committed version before removal."
+                            )
+                    except Exception as e:
+                        errors.append(
+                            f"Unable to validate stable skill deletion for '{skill}' due to error reading "
+                            f"or parsing skill-edges.json: {e}"
+                        )
+                continue
+
+            try:
+                content = p.read_text(encoding="utf-8", errors="replace")
+                fm = FRONTMATTER_RE.search(content)
+                if not (fm and STABLE_RE.search(fm.group(1))):
+                    continue
+
+                # Stable skill exists - check required fields
+                if not re.search(r"^name\s*:", fm.group(1), re.MULTILINE):
+                    errors.append(f"STABLE SKILL MISSING 'name': {skill}")
+                if not re.search(r"^description\s*:", fm.group(1), re.MULTILINE):
+                    errors.append(f"STABLE SKILL MISSING 'description': {skill}")
+            except Exception:
+                continue
+
+    result.data["stable_skills"] = sorted(stable_skills)
+    result.data["stable_count"] = len(stable_skills)
+    result.data["checked_files"] = len(changed_files) if changed_files else 0
+
+    if errors:
+        result.status = "error"
+        result.data["errors"] = errors
+        for e in errors:
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message=e))
+    else:
+        result.status = "success"
+
+    return result

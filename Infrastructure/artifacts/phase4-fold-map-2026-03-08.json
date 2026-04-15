@@ -1,0 +1,173 @@
+{
+  "product/domain/arscontexta": [
+    {
+      "from": "product/domain/arscontexta/skill-sources/graph",
+      "mode": "graph-analysis",
+      "why": "Graph analysis routes through Ars Contexta root orchestration."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/learn",
+      "mode": "research-intake",
+      "why": "Learning intake is a first-class Ars Contexta workflow mode."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/next",
+      "mode": "priority-next",
+      "why": "Next-action recommendation belongs in root routing."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/pipeline",
+      "mode": "end-to-end-pipeline",
+      "why": "Pipeline orchestration is handled by root command surface."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/ralph",
+      "mode": "queue-batch-runner",
+      "why": "Queue batch execution is a root-managed run mode."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/reduce",
+      "mode": "extract-insights",
+      "why": "Extraction is part of the unified processing lifecycle."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/refactor",
+      "mode": "vault-refactor",
+      "why": "Refactor operations remain available through root routing."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/reflect",
+      "mode": "connection-pass",
+      "why": "Connection synthesis is a root workflow stage."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/remember",
+      "mode": "methodology-capture",
+      "why": "Methodology capture is folded into root memory operations."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/rethink",
+      "mode": "assumption-challenge",
+      "why": "Assumption review is a routed root mode."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/reweave",
+      "mode": "backward-pass",
+      "why": "Backward linking belongs in the same root lifecycle."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/seed",
+      "mode": "queue-seed",
+      "why": "Queue seeding is a root entry operation."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/stats",
+      "mode": "vault-metrics",
+      "why": "Metrics reporting is folded into root diagnostics."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/tasks",
+      "mode": "queue-status",
+      "why": "Task stack visibility is a root utility mode."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/validate",
+      "mode": "schema-validation",
+      "why": "Validation remains available as a root quality mode."
+    },
+    {
+      "from": "product/domain/arscontexta/skill-sources/verify",
+      "mode": "quality-gate",
+      "why": "Verification is folded into root quality workflow."
+    },
+    {
+      "from": "product/domain/arscontexta/skills/help",
+      "mode": "contextual-help",
+      "why": "Contextual help becomes a root support mode."
+    }
+  ],
+  "Skills/recon-workbench": [
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/dependency_doctor",
+      "mode": "dependency-doctor",
+      "why": "Doctor checks are native preflight for recon-workbench."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/interrogate",
+      "mode": "interrogate",
+      "why": "Core interrogate workflow is owned by recon-workbench."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/ios_sim_interrogate",
+      "mode": "ios-sim-interrogate",
+      "why": "iOS simulator interrogation is a scoped recon mode."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/macos_app_triage",
+      "mode": "macos-app-triage",
+      "why": "macOS static triage is a recon-workbench operation."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/oss_repo_map",
+      "mode": "oss-repo-map",
+      "why": "OSS mapping runs as a recon workflow mode."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/report_compiler",
+      "mode": "report-compiler",
+      "why": "Report compilation is folded into recon summarization."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/web_app_interrogate",
+      "mode": "web-app-interrogate",
+      "why": "Web app interrogation remains under recon-workbench."
+    },
+    {
+      "from": "Skills/recon-workbench/assets/template/.codex/skills/worst_case_interrogation",
+      "mode": "worst-case-interrogation",
+      "why": "Escalation ladder is a recon troubleshooting mode."
+    }
+  ],
+  "frontend/stitch-react-components": [
+    {
+      "from": "frontend/stitch-design-md",
+      "mode": "design-md-emission",
+      "why": "Design system extraction is now a mode of Stitch-to-React conversion."
+    }
+  ],
+  "frontend/tools/stitch-loop": [
+    {
+      "from": "frontend/stitch-enhance-prompt",
+      "mode": "prompt-enhancement",
+      "why": "Prompt enhancement is folded into iterative stitch-loop baton flow."
+    }
+  ],
+  "frontend/ui/frontend-ui-design": [
+    {
+      "from": "frontend/ui/react-ui-patterns",
+      "mode": "react-composition-patterns",
+      "why": "React composition guidance is a UI implementation mode."
+    }
+  ],
+  "frontend/ui/ui-visual-regression": [
+    {
+      "from": "frontend/ui/fixing-motion-performance",
+      "mode": "motion-performance-audit",
+      "why": "Motion performance checks are part of UI quality regression work."
+    }
+  ],
+  "Skills/writing-plans": [
+    {
+      "from": "Skills/test-driven-development",
+      "mode": "test-first-delivery",
+      "why": "TDD workflow is folded into plan authoring as a delivery profile."
+    }
+  ],
+  "Skills/systematic-debugging": [
+    {
+      "from": "Skills/run-tests-and-write-artifacts",
+      "mode": "evidence-test-runner",
+      "why": "Evidence test runs are now a debugging support mode."
+    }
+  ]
+}

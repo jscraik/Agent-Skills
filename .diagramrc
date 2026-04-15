@@ -16,7 +16,7 @@ exclude:
 # Output defaults
 output:
   format: mermaid
-  directory: artifacts/diagrams
+  directory: Infrastructure/artifacts/diagrams
 
 # Analysis options
 analysis:

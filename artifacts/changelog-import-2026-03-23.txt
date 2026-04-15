@@ -1,8 +1,0 @@
-source_repo: EveryInc/compound-engineering-plugin
-source_ref: 0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b
-source_path: plugins/compound-engineering/skills/changelog/SKILL.md
-install_target: product/content/changelog
-strategy: new_local_wrapper_with_preserved_upstream_reference
-imported_reference: product/content/changelog/references/full-guide.md
-sha256:
-249e8bed25bfc45f2f27d4af55574ace383b7d6377c4053d19b5344aedd96822  /Users/jamiecraik/dev/Agent-Skills/product/content/changelog/references/full-guide.md
