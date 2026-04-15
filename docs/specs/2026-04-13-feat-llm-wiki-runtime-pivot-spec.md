@@ -59,6 +59,7 @@ This spec defines a new contract that makes `llm-wiki` the primary knowledge ope
 - Enforce installation governance with a required skill stack: `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, `baseline-ui`.
 - Enforce inspection-role checks (`skill-inspector`, `plugin-inspector`) with deterministic fallback and fail-closed gating.
 - Make blocker taxonomy, ownership, and closeout health reporting deterministic and machine-checkable.
+- **Governance Contract Coupling Justification**: OperatingModeContract, InstallationOrchestrationContract, and BlockedLaneObligation content are explicitly coupled to the autoresearch hardening effort because autoresearch operations depend on deterministic mode-switching, fail-closed skill-stack verification, and lane-obligation evaluation for certification/runtime-separation/ask-contract parity; without these governance primitives, autoresearch cannot reliably determine when research operations are safe to promote or when they must remain blocked due to upstream blocker families.
 
 ## Non-Goals
 
@@ -297,6 +298,7 @@ Closeout reporting requirements:
 | SA15 | Evidence freshness gating | Lane outputs include freshness state and freshness age; unknown freshness is blocking | Closeout report shows freshness per lane and blocks when freshness cannot be evaluated |
 | SA16 | Inspector quality coverage | Inspector-role resolution is measurable and fail-closed when unresolved | Inspector resolution ratio is present and unresolved coverage blocks promotion |
 | SA17 | Blocker metadata completeness | Every active blocker includes code, owner, escalation window, and evidence reference | Blocker completeness ratio is 100% whenever promotion is attempted |
+| SA18 | Governance contract traceability | OperatingModeContract, InstallationOrchestrationContract, and BlockedLaneObligation content are traceable to autoresearch hardening validation evidence | Validation pointers exist showing how governance contracts gate autoresearch promotion decisions and blocker resolution paths |
 
 ## Open Questions
 

@@ -11,7 +11,7 @@ inputs:
   - session context containing ordered steps, corrections, and constraints
   - confirmed category (1-9), target environment (`codex|claude|portable`), and compatibility posture (`learn|guided|execute`)
   - >-
-    optional session-collector artifact (`session-collector.json`) plus freshness signal (`generated_at` and input window cutoff); both `thread_only` and `provenance` fields are required with a deterministic mapping: when `session-collector.generated_at` is older than the defined input window cutoff (or any input in the artifact falls outside the input window) MUST set `thread_only=true` and `provenance=thread_only` recording the reason (stale collector) and cutoff timestamp; otherwise MUST set `thread_only=false` and `provenance=thread_plus_session_collector`; the provenance object must record the `session-collector.generated_at` timestamp, the input window cutoff, and the mapping decision
+    optional session-collector artifact (`session-collector.json`) plus freshness signal (`generated_at` and input window cutoff); both `thread_only` and `provenance` fields are required with a deterministic mapping: when `session-collector.json` is missing or unreadable, MUST set `thread_only=true` and `provenance=thread_only` and record a provenance object including `reason=missing_or_unreadable_collector`, the input window cutoff, and a null/absent `session_collector.generated_at` field; when `session-collector.generated_at` is older than the defined input window cutoff (or any input in the artifact falls outside the input window) MUST set `thread_only=true` and `provenance=thread_only` recording the reason (stale collector) and cutoff timestamp; otherwise MUST set `thread_only=false` and `provenance=thread_plus_session_collector`; the provenance object must record the `session-collector.generated_at` timestamp, the input window cutoff, and the mapping decision
 outputs:
   - reviewed SKILL.md draft with clear success criteria per step
   - saved skill path plus invocation syntax
@@ -19,7 +19,8 @@ outputs:
   - >-
     explicit evidence provenance with both `thread_only` boolean and `provenance` enum (must be consistent per mapping rule: `provenance=thread_only` requires `thread_only=true`, `provenance=thread_plus_session_collector` requires `thread_only=false`)
   - confirmed metadata fields persisted in generated skill: category, target_environment, compatibility_posture
-  - non-trivial summary payload fields include schema_version, mode, skill_path, findings, validations (`quick_validate`, `strict_audit`), security (`security_checklist_passed`), next_step
+  - >-
+    non-trivial summary payload MUST include all of: schema_version, mode, skill_path, findings, validations (with boolean keys quick_validate and strict_audit), security (with boolean key security_checklist_passed), next_step; partial payloads missing any of these required fields must be rejected
 non_goals:
   - do not write ambiguous template-only skills with unresolved TODO markers
   - do not skip user confirmation before saving the final SKILL.md
