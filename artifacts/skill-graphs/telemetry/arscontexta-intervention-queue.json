@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-14T08:01:14Z",
-  "current_window": "2026-04-08..2026-04-14",
+  "generated_at": "2026-04-15T08:02:08Z",
+  "current_window": "2026-04-09..2026-04-15",
   "source_artifacts": {
     "dashboard_json": "artifacts/skill-graphs/pilot/shadow-dashboard.json",
     "failure_patterns_jsonl": "artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl",
@@ -84,6 +84,12 @@
         ],
         "failure_candidates": [
           {
+            "run_id": "run_20260415T080207704735Z_50ef7d_92df024",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.278
+          },
+          {
             "run_id": "run_20260414T080113687304Z_50ef7d_91ff024",
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
@@ -106,17 +112,11 @@
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
             "quality_uplift": 0.278
-          },
-          {
-            "run_id": "run_20260410T065025360237Z_50ef7d_91df024",
-            "stop_reason": "evaluator_conflict",
-            "terminal_status": "escalated",
-            "quality_uplift": 0.278
           }
         ]
       },
       "recommendations": [
-        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and State completeness, using run_20260414T080113687304Z_50ef7d_91ff024, run_20260413T081920967414Z_50ef7d_91bf024, run_20260412T064420106973Z_50ef7d_925f024 as the seed evidence set.",
+        "Capture an Ars Contexta note for frontend-ui-design centered on Restraint and composition, Accessibility contract, and State completeness, using run_20260415T080207704735Z_50ef7d_92df024, run_20260414T080113687304Z_50ef7d_91ff024, run_20260413T081920967414Z_50ef7d_91bf024 as the seed evidence set.",
         "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Accessibility contract and State completeness; treat that as search refinement, not failure.",
         "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
       ],
@@ -202,6 +202,12 @@
         ],
         "failure_candidates": [
           {
+            "run_id": "run_20260415T080207452364Z_04dd5b_928d06e",
+            "stop_reason": "evaluator_conflict",
+            "terminal_status": "escalated",
+            "quality_uplift": 0.113
+          },
+          {
             "run_id": "run_20260414T080113449366Z_04dd5b_91ad06e",
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
@@ -224,17 +230,11 @@
             "stop_reason": "evaluator_conflict",
             "terminal_status": "escalated",
             "quality_uplift": 0.113
-          },
-          {
-            "run_id": "run_20260410T065025126723Z_04dd5b_918d06e",
-            "stop_reason": "evaluator_conflict",
-            "terminal_status": "escalated",
-            "quality_uplift": 0.113
           }
         ]
       },
       "recommendations": [
-        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Concrete implementation detail, and Instructional clarity, using run_20260414T080113449366Z_04dd5b_91ad06e, run_20260413T081920731856Z_04dd5b_916d06e, run_20260412T064419865434Z_04dd5b_920d06e as the seed evidence set.",
+        "Capture an Ars Contexta note for interface-craft centered on Safety/compliance compliance, Concrete implementation detail, and Instructional clarity, using run_20260415T080207452364Z_04dd5b_928d06e, run_20260414T080113449366Z_04dd5b_91ad06e, run_20260413T081920731856Z_04dd5b_916d06e as the seed evidence set.",
         "At each reevaluation checkpoint, explicitly reassess whether the objective should pivot toward Instructional clarity; treat that as search refinement, not failure.",
         "Keep these interventions at documentation level for now, and only promote a pattern upward once it repeats cleanly without reopening regressions."
       ],

@@ -1,9 +1,9 @@
 # Daily Skill Health
 
-- Generated at: `2026-04-14T08:01:14Z`
-- Window: `2026-04-08..2026-04-14`
+- Generated at: `2026-04-15T08:02:08Z`
+- Window: `2026-04-09..2026-04-15`
 - Baseline source: `rolling_window`
-- Baseline window: `2026-04-07..2026-04-08`
+- Baseline window: `2026-04-07..2026-04-09`
 - Runs total: `48`
 - Decision: `HOLD`
 - Critical non-regression compliance: `37.5%`
@@ -25,6 +25,14 @@
 
 ## Event envelope errors (unresolved)
 
+- run_20260414T080113088052Z_4270e1_91280eb: missing events.jsonl
+- run_20260414T080113215773Z_cbb8d4_914c4e9: missing events.jsonl
+- run_20260414T080113334093Z_5b4309_917fa81: missing events.jsonl
+- run_20260414T080113449366Z_04dd5b_91ad06e: missing events.jsonl
+- run_20260414T080113568206Z_1c1272_91dad51: missing events.jsonl
+- run_20260414T080113687304Z_50ef7d_91ff024: missing events.jsonl
+- run_20260414T080113805620Z_c6442d_92282bd: missing events.jsonl
+- run_20260414T080113923109Z_f93d59_9241174: missing events.jsonl
 - run_20260411T063348089335Z_1c1272_91ead51: missing events.jsonl
 - run_20260411T063348205332Z_50ef7d_920f024: missing events.jsonl
 - run_20260411T063348323211Z_c6442d_92382bd: missing events.jsonl
@@ -41,14 +49,6 @@
 - run_20260410T065025587352Z_f93d59_9221174: missing events.jsonl
 - run_20260410T065024768042Z_4270e1_91180eb: missing events.jsonl
 - run_20260410T065024889084Z_cbb8d4_913c4e9: missing events.jsonl
-- run_20260409T064532056345Z_cbb8d4_919c4e9: missing events.jsonl
-- run_20260409T064532169749Z_5b4309_91cfa81: missing events.jsonl
-- run_20260409T064532279715Z_04dd5b_91ed06e: missing events.jsonl
-- run_20260409T064532394104Z_1c1272_921ad51: missing events.jsonl
-- run_20260409T064532504568Z_50ef7d_923f024: missing events.jsonl
-- run_20260409T064532619060Z_c6442d_92682bd: missing events.jsonl
-- run_20260409T064532730733Z_f93d59_9291174: missing events.jsonl
-- run_20260409T064531946744Z_4270e1_91780eb: missing events.jsonl
 
 ## Event envelope waivers applied
 

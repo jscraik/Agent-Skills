@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "captured_at": "2026-04-14T08:01:14Z",
-  "window": "2026-04-08..2026-04-14",
+  "captured_at": "2026-04-15T08:02:08Z",
+  "window": "2026-04-09..2026-04-15",
   "window_days": 7,
   "sample_ready": true,
   "pilot_profiles": [
