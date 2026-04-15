@@ -123,7 +123,7 @@ If blocked by missing critical information, insert `## Questions` before `## Pla
 |---|---|
 | [[mcp-builder]] | Build MCP server tools alongside the backend |
 | [[security-best-practices]] | Apply security hardening to new backend endpoints |
-| [[writing-plans]] | Plan backend extensions before implementing |
+| [[ce-plan]] | Plan backend extensions before implementing |
 
 **Topic map:** [[backend-platform]]
 

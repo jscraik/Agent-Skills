@@ -1,5 +1,5 @@
 ---
-name: codex-agent-builder
+name: codex-agent-creator
 description: Create, install, and validate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
 metadata:
   skill-type: scaffolding_templates
