@@ -1,16 +1,17 @@
 ---
 name: simplify
 description: Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
-version: 0.1.0
-triggers:
-  - coderabbit.?simplify
-  - simplify.?coderabbit
-  - simplify.?code
-  - simplify.?changes
-  - cr.?simplify
 metadata:
   skill-type: code_quality_review
+  version: 0.1.0
+  triggers:
+    - coderabbit.?simplify
+    - simplify.?coderabbit
+    - simplify.?code
+    - simplify.?changes
+    - cr.?simplify
 ---
+
 
 # CodeRabbit Simplify
 

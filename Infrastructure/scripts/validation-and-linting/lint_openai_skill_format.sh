@@ -47,7 +47,7 @@ else
   find_cmd="find"
 fi
 
-roots=(auth backend frontend github interview product skills-system utilities)
+roots=(Skills skills-antigravity skills-system plugins/harness-engineering plugins/plugin-factory plugins/skill-factory)
 errors=0
 warnings=0
 checked=0
