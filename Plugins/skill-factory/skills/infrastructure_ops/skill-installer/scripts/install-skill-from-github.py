@@ -585,6 +585,20 @@ def _write_json(path: Path, payload: dict[str, object]) -> None:
     tmp_path.replace(path)
 
 
+def _redact_manifest_payload_for_storage(payload: dict[str, object]) -> dict[str, object]:
+    sanitized = json.loads(json.dumps(payload))
+    security_policy = sanitized.get("security_policy")
+    if isinstance(security_policy, dict):
+        signer_allowlist = security_policy.get("signer_allowlist")
+        if isinstance(signer_allowlist, dict):
+            signer_allowlist["emails"] = ["[redacted]"] if signer_allowlist.get("emails") else []
+            signer_allowlist["domains"] = ["[redacted]"] if signer_allowlist.get("domains") else []
+            signer_allowlist["logins"] = ["[redacted]"] if signer_allowlist.get("logins") else []
+        if "trusted_repos" in security_policy:
+            security_policy["trusted_repos"] = ["[redacted]"]
+    return sanitized
+
+
 def _append_journal(path: Path, event: str, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     row = {
@@ -826,7 +840,7 @@ def main(argv: list[str]) -> int:
                 ],
             },
         }
-        _write_json(manifest_path, manifest_payload)
+        _write_json(manifest_path, _redact_manifest_payload_for_storage(manifest_payload))
         _append_journal(
             journal_path,
             "run_completed",
