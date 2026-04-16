@@ -71,8 +71,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
@@ -92,7 +92,7 @@ class ProjectionIntegrityTests(unittest.TestCase):
     def test_verify_mirror_allows_optional_missing_projection(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
+            source = repo_root / "Plugins" / "demo"
             source.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
 
@@ -107,7 +107,7 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertEqual(result["status"], "pass")
             self.assertEqual(result["reason"], "projection_missing_optional")
 
-            projection_file = repo_root / "plugins" / "cache" / "demo" / "local"
+            projection_file = repo_root / "Plugins" / "cache" / "demo" / "local"
             projection_file.parent.mkdir(parents=True, exist_ok=True)
             projection_file.write_text("not-a-directory\n", encoding="utf-8")
             result = self.mod.verify_mirror(repo_root, spec)
@@ -122,8 +122,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
@@ -157,8 +157,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
@@ -184,8 +184,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
     def test_sync_mirror_raises_non_permission_rsync_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
@@ -209,8 +209,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
     def test_sync_mirror_raises_when_mkstemp_lacks_permission_phrase(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
             (source / "README.md").write_text("# Demo\n", encoding="utf-8")
@@ -234,8 +234,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
     def test_sync_mirror_replaces_projection_directory_with_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
 
@@ -263,8 +263,8 @@ class ProjectionIntegrityTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            source = repo_root / "plugins" / "demo"
-            projection = repo_root / "plugins" / "cache" / "demo" / "local"
+            source = repo_root / "Plugins" / "demo"
+            projection = repo_root / "Plugins" / "cache" / "demo" / "local"
             source.mkdir(parents=True, exist_ok=True)
             projection.mkdir(parents=True, exist_ok=True)
 
@@ -310,7 +310,7 @@ class ProjectionIntegrityTests(unittest.TestCase):
             repo_root = Path(tmp)
             canonical = (
                 repo_root
-                / "plugins"
+                / "Plugins"
                 / "plugin-factory"
                 / "skills"
                 / "code_quality_review"
