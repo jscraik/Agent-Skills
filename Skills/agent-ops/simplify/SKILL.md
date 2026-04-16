@@ -12,8 +12,7 @@ metadata:
     - cr.?simplify
 ---
 
-
-# CodeRabbit Simplify
+# Simplify
 
 Run a focused cleanup pass over changed code to improve reuse, quality, and efficiency while preserving behavior.
 
