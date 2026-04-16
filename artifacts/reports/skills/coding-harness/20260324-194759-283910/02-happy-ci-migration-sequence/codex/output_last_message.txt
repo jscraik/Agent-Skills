@@ -1,0 +1,64 @@
+The safe path here is a two-phase harness flow, because this repo still has GitHub Actions workflows in [.github/workflows](/Users/jamiecraik/dev/Agent-Skills/.github/workflows), its required-checks file still says `activeProvider: github-actions` in [.harness/ci-required-checks.json](/Users/jamiecraik/dev/Agent-Skills/.harness/ci-required-checks.json), and there is no `.circleci/config.yml` yet. Also, the repo-local preflight policy in [docs/agents/02-tooling-policy.md](/Users/jamiecraik/dev/Agent-Skills/docs/agents/02-tooling-policy.md) conflicts with an older harness reference about sourcing a shell function, so for a real run I’d use the repo-local standalone preflight command, not `source scripts/codex-preflight.sh`.
+
+**Sequence**
+This is the no-execution, dry-run-first sequence I’d use:
+
+```bash
+# 0. Repo-safe preflight
+pwd
+bash scripts/codex-preflight.sh --stack auto --mode required
+
+# 1. Preview the harness scaffold that will add CircleCI-owned files
+harness init --dry-run
+
+# 2. Apply the scaffold only after the preview looks right
+harness init
+
+# 3. Confirm the scaffold is now current
+harness init --check-updates
+
+# 4. Preview the GitHub Actions -> CircleCI cutover
+harness ci-migrate prepare --provider circleci --dry-run
+
+# Expect this preview to show:
+# - creation/use of .circleci/config.yml
+# - removal of .github/workflows/*.yml CI files
+# - activeProvider flipping to circleci
+# - required checks moving from dependency-review/actions-pinning
+#   to dependency-scan/orb-pinning
+
+# 5. Apply the migration and capture the snapshot id from output
+harness ci-migrate prepare --provider circleci --apply
+
+# 6. Verify the migration using that snapshot id
+harness ci-migrate verify --snapshot <snapshot-id>
+
+# 7. Run the narrow repo verification ladder
+harness check-environment --json
+harness init --check-updates
+circleci config validate
+bash scripts/sync_skills.sh
+python3 scripts/docs_lint.py --mode warn --config docs-policy.json
+just validate
+bash ~/.codex/scripts/verify-work.sh
+
+# 8. Finalize the cutover only after verification is green
+harness ci-migrate commit --snapshot <snapshot-id>
+```
+
+If anything looks wrong after step 5 or 6, the rollback is the harness snapshot restore, not manual file surgery:
+
+```bash
+harness ci-migrate abort --snapshot <snapshot-id>
+```
+
+If you want the Git history step after the harness commit as well, I’d keep it separate:
+
+```bash
+git add .circleci/config.yml .harness/ci-required-checks.json harness.contract.json .github/workflows
+git commit -m "chore(ci): migrate from GitHub Actions to CircleCI via harness
+
+Co-authored-by: Codex <noreply@openai.com>"
+```
+
+A few repo-specific expectations for the preview: it should propose removing the 13 workflow files currently under [.github/workflows](/Users/jamiecraik/dev/Agent-Skills/.github/workflows), it should preserve non-CI GitHub hygiene files like [PULL_REQUEST_TEMPLATE.md](/Users/jamiecraik/dev/Agent-Skills/.github/PULL_REQUEST_TEMPLATE.md) and [CODEOWNERS](/Users/jamiecraik/dev/Agent-Skills/.github/CODEOWNERS), and it should continue treating [.codex/environments/environment.toml](/Users/jamiecraik/dev/Agent-Skills/.codex/environments/environment.toml) as harness-generated. I did not run any of these commands.

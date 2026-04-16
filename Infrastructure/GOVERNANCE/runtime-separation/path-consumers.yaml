@@ -1713,21 +1713,21 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: Plugins/coderabbit/skills/autofix/SKILL.md
+    consumer_path: Plugins/coderabbit/skills/code_quality_review/autofix/SKILL.md
     is_executable: false
     line_numbers:
       - 51
     match_count: 1
     root: plugins
   -
-    consumer_path: Plugins/coderabbit/skills/autofix/Infrastructure/references/contract.yaml
+    consumer_path: Plugins/coderabbit/skills/code_quality_review/autofix/Infrastructure/references/contract.yaml
     is_executable: false
     line_numbers:
       - 65
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/autofix/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/coderabbit/skills/code_quality_review/autofix/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
@@ -1735,21 +1735,21 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/code-review/SKILL.md"
+    consumer_path: "Plugins/coderabbit/skills/code_quality_review/code-review/SKILL.md"
     is_executable: false
     line_numbers:
       - 51
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/code-review/Infrastructure/references/contract.yaml"
+    consumer_path: "Plugins/coderabbit/skills/code_quality_review/code-review/Infrastructure/references/contract.yaml"
     is_executable: false
     line_numbers:
       - 72
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/code-review/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/coderabbit/skills/code_quality_review/code-review/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
@@ -1757,7 +1757,7 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: Plugins/coderabbit/skills/coderabbit/SKILL.md
+    consumer_path: Plugins/coderabbit/skills/library_api_reference/coderabbit/SKILL.md
     is_executable: false
     line_numbers:
       - 42
@@ -1767,14 +1767,14 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/coderabbit/Infrastructure/references/coderabbit-docs/cli-skills.md"
+    consumer_path: "Plugins/coderabbit/skills/library_api_reference/coderabbit/Infrastructure/references/coderabbit-docs/cli-skills.md"
     is_executable: false
     line_numbers:
       - 65
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/coderabbit/skills/coderabbit/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/coderabbit/skills/library_api_reference/coderabbit/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
@@ -1782,7 +1782,7 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/simplify/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/coderabbit/skills/code_quality_review/simplify/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
@@ -1808,7 +1808,7 @@ rows:
     match_count: 7
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-brainstorm/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-brainstorm/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 13
@@ -1817,35 +1817,35 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-compound-refresh/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-compound-refresh/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 214
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-compound-refresh/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-compound-refresh/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 14
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-compound/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-compound/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 188
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-compound/Infrastructure/references/project-brain-integration.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-compound/Infrastructure/references/project-brain-integration.md"
     is_executable: false
     line_numbers:
       - 17
     match_count: 1
     root: runtime
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-compound/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-compound/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 13
@@ -1859,14 +1859,14 @@ rows:
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-deepen-plan/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-deepen-plan/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 19
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-deepen-spec/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-deepen-spec/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 229
@@ -1926,28 +1926,28 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-ideate/SKILL.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-ideate/SKILL.md"
     is_executable: false
     line_numbers:
       - 236
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-ideate/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-ideate/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 64
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-ideate/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-ideate/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 15
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-plan/Infrastructure/references/plan-artifacts.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-plan/Infrastructure/references/plan-artifacts.md"
     is_executable: false
     line_numbers:
       - 24
@@ -1956,7 +1956,7 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-plan/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-plan/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 13
@@ -1965,7 +1965,7 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-review/Infrastructure/references/findings-and-todos.md"
+    consumer_path: "Plugins/harness-engineering/skills/code_quality_review/ce-review/Infrastructure/references/findings-and-todos.md"
     is_executable: false
     line_numbers:
       - 32
@@ -1974,14 +1974,14 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-review/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/code_quality_review/ce-review/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 11
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-review/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/harness-engineering/skills/code_quality_review/ce-review/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
@@ -2011,7 +2011,7 @@ rows:
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-technical-review/Infrastructure/references/review-modes.md"
+    consumer_path: "Plugins/harness-engineering/skills/code_quality_review/ce-technical-review/Infrastructure/references/review-modes.md"
     is_executable: false
     line_numbers:
       - 24
@@ -2020,14 +2020,14 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-technical-review/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/code_quality_review/ce-technical-review/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 15
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-work/Infrastructure/references/source-parity.md"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-work/Infrastructure/references/source-parity.md"
     is_executable: false
     line_numbers:
       - 17
@@ -2036,7 +2036,7 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/harness-engineering/skills/ce-work/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/harness-engineering/skills/team_automation/ce-work/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
@@ -2077,7 +2077,7 @@ rows:
     match_count: 13
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/SKILL.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md"
     is_executable: false
     line_numbers:
       - 127
@@ -2088,7 +2088,7 @@ rows:
     match_count: 5
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/SKILL.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md"
     is_executable: false
     line_numbers:
       - 49
@@ -2100,7 +2100,7 @@ rows:
     match_count: 6
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/arscontexta-conversion-map.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/arscontexta-conversion-map.md"
     is_executable: false
     line_numbers:
       - 121
@@ -2108,7 +2108,7 @@ rows:
     match_count: 2
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/arscontexta-conversion-map.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/arscontexta-conversion-map.md"
     is_executable: false
     line_numbers:
       - 72
@@ -2123,7 +2123,7 @@ rows:
     match_count: 10
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/compound-engineering-comparison.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/compound-engineering-comparison.md"
     is_executable: false
     line_numbers:
       - 8
@@ -2137,14 +2137,14 @@ rows:
     match_count: 8
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/contract.yaml"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/contract.yaml"
     is_executable: false
     line_numbers:
       - 15
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 42
@@ -2152,7 +2152,7 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/hooks-contract.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/hooks-contract.md"
     is_executable: false
     line_numbers:
       - 22
@@ -2161,7 +2161,7 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/plugin-contract.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/plugin-contract.md"
     is_executable: false
     line_numbers:
       - 12
@@ -2174,7 +2174,7 @@ rows:
     match_count: 7
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/plugin-contract.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/plugin-contract.md"
     is_executable: false
     line_numbers:
       - 9
@@ -2189,21 +2189,21 @@ rows:
     match_count: 10
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/superpowers-comparison.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/superpowers-comparison.md"
     is_executable: false
     line_numbers:
       - 95
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/terminology-map.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/terminology-map.md"
     is_executable: false
     line_numbers:
       - 37
@@ -2211,7 +2211,7 @@ rows:
     match_count: 2
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/references/terminology-map.md"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/references/terminology-map.md"
     is_executable: false
     line_numbers:
       - 37
@@ -2220,7 +2220,7 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py"
     is_executable: true
     line_numbers:
       - 75
@@ -2239,7 +2239,7 @@ rows:
     match_count: 13
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py"
     is_executable: true
     line_numbers:
       - 28
@@ -2263,14 +2263,14 @@ rows:
     match_count: 24
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py"
     is_executable: true
     line_numbers:
       - 1376
     match_count: 1
     root: runtime
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/SKILL.md"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md"
     is_executable: false
     line_numbers:
       - 3
@@ -2283,7 +2283,7 @@ rows:
     match_count: 7
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/SKILL.md"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md"
     is_executable: false
     line_numbers:
       - 3
@@ -2306,14 +2306,14 @@ rows:
     match_count: 18
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/contract.yaml"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/contract.yaml"
     is_executable: false
     line_numbers:
       - 21
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 27
@@ -2321,7 +2321,7 @@ rows:
     match_count: 2
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/evals.yaml"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/evals.yaml"
     is_executable: false
     line_numbers:
       - 27
@@ -2329,14 +2329,14 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/marketplace-entry.sample.json"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/marketplace-entry.sample.json"
     is_executable: false
     line_numbers:
       - 5
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/plugin-json-spec.md"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/plugin-json-spec.md"
     is_executable: false
     line_numbers:
       - 124
@@ -2348,7 +2348,7 @@ rows:
     match_count: 6
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/plugin-json-spec.md"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/plugin-json-spec.md"
     is_executable: false
     line_numbers:
       - 15
@@ -2365,7 +2365,7 @@ rows:
     match_count: 14
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/plugin-manifest.sample.json"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/plugin-manifest.sample.json"
     is_executable: false
     line_numbers:
       - 10
@@ -2373,14 +2373,14 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
     is_executable: true
     line_numbers:
       - 15
@@ -2394,7 +2394,7 @@ rows:
     match_count: 8
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
     is_executable: true
     line_numbers:
       - 15
@@ -2412,7 +2412,7 @@ rows:
     match_count: 12
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/scripts/render_plugin_creator_templates.py"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/scripts/render_plugin_creator_templates.py"
     is_executable: true
     line_numbers:
       - 43
@@ -2420,14 +2420,14 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/templates/marketplace-entry.json.tmpl"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/templates/marketplace-entry.json.tmpl"
     is_executable: false
     line_numbers:
       - 5
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-installer/SKILL.md"
+    consumer_path: "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md"
     is_executable: false
     line_numbers:
       - 41
@@ -2437,14 +2437,14 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-installer/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-installer/Infrastructure/scripts/install-plugin-from-github.py"
+    consumer_path: "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/Infrastructure/scripts/install-plugin-from-github.py"
     is_executable: true
     line_numbers:
       - 861
@@ -2517,28 +2517,28 @@ rows:
     match_count: 6
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/references/benchmark-policy.json"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/references/benchmark-policy.json"
     is_executable: false
     line_numbers:
       - 26
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/references/contract.yaml"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/references/contract.yaml"
     is_executable: false
     line_numbers:
       - 53
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/references/folded-legacy-modes-core60.md"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/references/folded-legacy-modes-core60.md"
     is_executable: false
     line_numbers:
       - 35
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/references/quality-tools.md"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/references/quality-tools.md"
     is_executable: false
     line_numbers:
       - 322
@@ -2547,7 +2547,7 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/references/skill-quality-baseline.json"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/references/skill-quality-baseline.json"
     is_executable: false
     line_numbers:
       - 3
@@ -2557,14 +2557,14 @@ rows:
     match_count: 4
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/analyze_skill.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/analyze_skill.py"
     is_executable: true
     line_numbers:
       - 8
@@ -2574,7 +2574,7 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/build_arscontexta_intervention_queue.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/build_arscontexta_intervention_queue.py"
     is_executable: true
     line_numbers:
       - 21
@@ -2584,35 +2584,35 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/skill_gate.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/skill_gate.py"
     is_executable: true
     line_numbers:
       - 23
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/skill_graph_inventory.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/skill_graph_inventory.py"
     is_executable: true
     line_numbers:
       - 12
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/workflows/create-new-skill.md"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/workflows/create-new-skill.md"
     is_executable: false
     line_numbers:
       - 155
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-creator/Infrastructure/references/handoff-package-scaffold.md"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/Infrastructure/references/handoff-package-scaffold.md"
     is_executable: false
     line_numbers:
       - 38
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-creator/Infrastructure/references/handoff-package-template.md"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/Infrastructure/references/handoff-package-template.md"
     is_executable: false
     line_numbers:
       - 26
@@ -2621,7 +2621,7 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-creator/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 3
@@ -2629,21 +2629,21 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-creator/Infrastructure/scripts/render_handoff_package_template.py"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/Infrastructure/scripts/render_handoff_package_template.py"
     is_executable: true
     line_numbers:
       - 45
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-factory/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/skill-factory/skills/team_automation/skill-factory/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-installer/Infrastructure/references/contract.yaml"
+    consumer_path: "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/Infrastructure/references/contract.yaml"
     is_executable: false
     line_numbers:
       - 34
@@ -2651,14 +2651,14 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-installer/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-refactor/SKILL.md"
+    consumer_path: "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md"
     is_executable: false
     line_numbers:
       - 71
@@ -2668,7 +2668,7 @@ rows:
     match_count: 4
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-refactor/SKILL.md"
+    consumer_path: "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md"
     is_executable: false
     line_numbers:
       - 56
@@ -2677,14 +2677,14 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-refactor/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-refactor/Infrastructure/scripts/scan_codex_sessions.py"
+    consumer_path: "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/Infrastructure/scripts/scan_codex_sessions.py"
     is_executable: true
     line_numbers:
       - 170
@@ -2695,7 +2695,7 @@ rows:
     match_count: 5
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skillify/SKILL.md"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md"
     is_executable: false
     line_numbers:
       - 126
@@ -2703,14 +2703,14 @@ rows:
     match_count: 3
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skillify/Infrastructure/references/contract.yaml"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skillify/Infrastructure/references/contract.yaml"
     is_executable: false
     line_numbers:
       - 28
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skillify/Infrastructure/references/task-profile.json"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skillify/Infrastructure/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 3

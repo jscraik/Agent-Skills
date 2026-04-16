@@ -9,181 +9,165 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 7
-- `product_verification`: 8
-- `data_fetch_analysis`: 5
-- `team_automation`: 36
-- `scaffolding_templates`: 25
-- `code_quality_review`: 27
-- `ci_cd_deployment`: 6
-- `runbook`: 14
-- `infrastructure_ops`: 5
-- `invalid`: 0
-- `total_tagged`: 133
+- `library_api_reference`: 5
+- `product_verification`: 7
+- `data_fetch_analysis`: 4
+- `team_automation`: 25
+- `scaffolding_templates`: 26
+- `code_quality_review`: 26
+- `ci_cd_deployment`: 4
+- `runbook`: 13
+- `infrastructure_ops`: 7
+- `invalid`: 1
+- `total_tagged`: 117
 
 ## Semantic Types
 
 ### Library Api Reference
 
-- `agent-native-architecture` — `product/domain`
-- `coderabbit` — `Plugins/coderabbit/skills`
-- `context7` — `product/docs`
-- `oak-api` — `product/domain`
-- `react-ui-patterns` — `frontend/ui`
-- `remotion` — `frontend/ui`
-- `repoprompt` — `utilities`
+- `coderabbit` — `Plugins/coderabbit/skills/library_api_reference`
+- `openai-docs` — `.agents/skills/.system`
+- `react-ui-patterns` — `Skills/frontend-ui`
+- `remotion` — `Skills/frontend-ui`
+- `repoprompt` — `Skills/agent-ops`
 
 ### Product Verification
 
-- `agent-browser` — `utilities`
-- `agent-native-audit` — `product/review`
-- `agentation` — `frontend/tools`
-- `design-system` — `frontend/ui`
-- `playwright-interactive` — `frontend/tools`
-- `reproduce-bug` — `utilities`
-- `test-browser` — `frontend/tools`
-- `ui-visual-regression` — `frontend/ui`
+- `agent-browser` — `Skills/frontend-ui`
+- `agentation` — `Skills/frontend-ui`
+- `design-system` — `Skills/frontend-ui`
+- `playwright-interactive` — `Skills/frontend-ui`
+- `reproduce-bug` — `Skills/agent-ops`
+- `test-browser` — `Skills/agent-ops`
+- `ui-visual-regression` — `Skills/frontend-ui`
 
 ### Data Fetch Analysis
 
-- `insight-report` — `utilities`
-- `notebooklm` — `utilities`
-- `security-ownership-map` — `product/security`
-- `skill-refactor` — `Plugins/skill-factory/skills`
-- `spreadsheet` — `utilities`
+- `insight-report` — `Skills/agent-ops`
+- `notebooklm` — `Skills/product-strategy`
+- `skill-refactor` — `Plugins/skill-factory/skills/data_fetch_analysis`
+- `spreadsheet` — `Skills/content-publishing`
 
 ### Team Automation
 
-- `alignment-checkpoint` — `utilities`
-- `architecture-interview` — `interview`
-- `atlas` — `utilities`
-- `autoresearch` — `utilities`
-- `brainstorming` — `product/strategy`
-- `ce-brainstorm` — `Plugins/harness-engineering/skills`
-- `ce-compound-refresh` — `Plugins/harness-engineering/skills`
-- `ce-compound` — `Plugins/harness-engineering/skills`
-- `ce-deepen-plan` — `Plugins/harness-engineering/skills`
-- `ce-deepen-spec` — `Plugins/harness-engineering/skills`
-- `ce-ideate` — `Plugins/harness-engineering/skills`
-- `ce-plan` — `Plugins/harness-engineering/skills`
-- `ce-spec` — `Plugins/harness-engineering/skills`
-- `ce-tdd` — `Plugins/harness-engineering/skills`
-- `ce-work` — `Plugins/harness-engineering/skills`
-- `changelog` — `product/content`
-- `codex-automation-architect` — `utilities`
-- `coding-harness` — `utilities`
-- `decide-build-primitive` — `product/ops`
-- `deep-interview` — `interview`
-- `feature-video` — `product/content`
-- `interview-me` — `interview`
-- `markdown-converter` — `utilities`
-- `orchestrating-subagents` — `utilities`
-- `product-design-critic` — `product/strategy`
-- `product-spec` — `product/specs`
-- `production-deployment` — `product/ops`
-- `project-improver` — `product/strategy`
-- `resolve-todo-parallel` — `product/ops`
-- `slides` — `utilities`
-- `triage` — `product/ops`
-- `video-transcript-downloader` — `product/content`
-- `visual-explainer` — `utilities`
-- `writing-plans` — `utilities`
-- `youtube-hooks-scripts` — `product/content`
-- `youtube-titles-thumbnails` — `product/content`
+- `alignment-checkpoint` — `Skills/agent-ops`
+- `architecture-interview` — `Skills/product-strategy`
+- `atlas` — `Skills/mobile-native`
+- `autoresearch` — `Skills/agent-ops`
+- `ce-brainstorm` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-compound-refresh` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-compound` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-deepen-plan` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-deepen-spec` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-ideate` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-plan` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-spec` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-tdd` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-work` — `Plugins/harness-engineering/skills/team_automation`
+- `codex-automation-architect` — `Skills/agent-ops`
+- `coding-harness` — `Skills/agent-ops`
+- `compound-engineering-router` — `Plugins/compound-engineering-router/skills/team_automation`
+- `deep-interview` — `Skills/product-strategy`
+- `interview-me` — `Skills/product-strategy`
+- `markdown-converter` — `Skills/content-publishing`
+- `orchestrating-subagents` — `Skills/agent-ops`
+- `skill-factory` — `Plugins/skill-factory/skills/team_automation`
+- `slides` — `Skills/frontend-ui`
+- `visual-explainer` — `Skills/frontend-ui`
+- `writing-plans` — `Skills/agent-ops`
 
 ### Scaffolding Templates
 
-- `backend-engineer` — `backend`
-- `beautiful-mermaid` — `utilities`
-- `better-icons` — `frontend/graphics`
-- `bootstrap` — `utilities`
-- `chatgpt-apps` — `product/domain`
-- `cli-spec` — `backend`
-- `codex-agent-creator` — `utilities`
-- `codex-hooks-builder` — `utilities`
-- `create-auth` — `auth`
-- `favicon-generator` — `frontend/graphics`
-- `frontend-design` — `frontend/ui`
-- `frontend-ui-design` — `frontend/ui`
-- `llm-wiki` — `product/docs`
-- `mcp-builder` — `backend`
-- `nano-banana-builder` — `frontend/graphics`
-- `og-image-creator` — `frontend/graphics`
-- `shadcn-ui` — `frontend/ui`
-- `skillify` — `Plugins/skill-factory/skills`
-- `sora` — `frontend/graphics`
-- `stitch-loop` — `frontend/tools`
-- `stitch-react-components` — `frontend`
-- `stitch-remotion` — `frontend/ui`
-- `threejs-builder` — `frontend/graphics`
-- `ui-cloner` — `frontend/tools`
-- `ui-ux-creative-coding` — `frontend/ui`
+- `backend-engineer` — `Skills/backend-platform`
+- `beautiful-mermaid` — `Skills/frontend-ui`
+- `better-icons` — `Skills/frontend-ui`
+- `bootstrap` — `Skills/backend-platform`
+- `cli-spec` — `Skills/backend-platform`
+- `codex-agent-creator` — `Skills/agent-ops`
+- `codex-hooks-builder` — `Skills/agent-ops`
+- `create-auth` — `Skills/security-ops`
+- `favicon-generator` — `Skills/frontend-ui`
+- `frontend-design` — `Skills/agent-ops`
+- `frontend-ui-design` — `Skills/frontend-ui`
+- `imagegen` — `.agents/skills/.system`
+- `mcp-builder` — `Skills/backend-platform`
+- `nano-banana-builder` — `Skills/frontend-ui`
+- `og-image-creator` — `Skills/frontend-ui`
+- `plugin-creator` — `Plugins/plugin-factory/skills/scaffolding_templates`
+- `shadcn-ui` — `Skills/frontend-ui`
+- `skill-creator` — `Plugins/skill-factory/skills/scaffolding_templates`
+- `skillify` — `Plugins/skill-factory/skills/scaffolding_templates`
+- `sora` — `Skills/frontend-ui`
+- `stitch-loop` — `Skills/frontend-ui`
+- `stitch-react-components` — `Skills/frontend-ui`
+- `stitch-remotion` — `Skills/frontend-ui`
+- `threejs-builder` — `Skills/frontend-ui`
+- `ui-cloner` — `Skills/product-strategy`
+- `ui-ux-creative-coding` — `Skills/frontend-ui`
 
 ### Code Quality Review
 
-- `agents-md` — `product/docs`
-- `baseline-ui` — `frontend/ui`
-- `best-practices` — `auth`
-- `ce-reliability-review` — `Plugins/harness-engineering/skills`
-- `ce-review` — `Plugins/harness-engineering/skills`
-- `ce-technical-review` — `Plugins/harness-engineering/skills`
-- `codex-home-audit` — `utilities`
-- `docs-expert` — `product/docs`
-- `elixir-pro` — `utilities`
-- `evals-router` — `utilities`
-- `every-style-editor` — `product/content`
-- `fixing-accessibility` — `frontend/website`
-- `fixing-metadata` — `frontend/website`
-- `go` — `utilities`
-- `javascript-pro` — `utilities`
-- `plugin-builder` — `Plugins/plugin-factory/skills`
-- `powershell` — `utilities`
-- `rust-pro` — `utilities`
-- `security-best-practices` — `product/security`
-- `skill-builder` — `Plugins/skill-factory/skills`
-- `sql-pro` — `utilities`
-- `swift-development` — `utilities`
-- `test-driven-development` — `utilities`
-- `toml` — `utilities`
-- `typescript` — `utilities`
-- `verification-before-completion` — `utilities`
-- `yaml` — `utilities`
+- `autofix` — `Plugins/coderabbit/skills/code_quality_review`
+- `baseline-ui` — `Skills/frontend-ui`
+- `best-practices` — `Skills/security-ops`
+- `ce-reliability-review` — `Plugins/harness-engineering/skills/code_quality_review`
+- `ce-review` — `Plugins/harness-engineering/skills/code_quality_review`
+- `ce-technical-review` — `Plugins/harness-engineering/skills/code_quality_review`
+- `code-review` — `Plugins/coderabbit/skills/code_quality_review`
+- `codex-home-audit` — `Skills/agent-ops`
+- `elixir-pro` — `Skills/agent-ops`
+- `evals-router` — `Skills/agent-ops`
+- `fixing-accessibility` — `Skills/frontend-ui`
+- `fixing-metadata` — `Skills/frontend-ui`
+- `go` — `Skills/agent-ops`
+- `javascript-pro` — `Skills/agent-ops`
+- `plugin-builder` — `Plugins/plugin-factory/skills/code_quality_review`
+- `powershell` — `Skills/agent-ops`
+- `rust-pro` — `Skills/agent-ops`
+- `simplify` — `Plugins/coderabbit/skills/code_quality_review`
+- `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
+- `sql-pro` — `Skills/agent-ops`
+- `swift-development` — `Skills/agent-ops`
+- `test-driven-development` — `Skills/mobile-native`
+- `toml` — `Skills/agent-ops`
+- `typescript` — `Skills/agent-ops`
+- `verification-before-completion` — `Skills/agent-ops`
+- `yaml` — `Skills/agent-ops`
 
 ### Ci Cd Deployment
 
-- `circleci` — `utilities`
-- `fallback-release` — `product/ops`
-- `gh-workflow` — `github`
-- `release` — `product/ops`
-- `resolve-pr-parallel` — `github`
-- `using-git-worktrees` — `utilities`
+- `circleci` — `Skills/backend-platform`
+- `gh-workflow` — `Skills/backend-platform`
+- `resolve-pr-parallel` — `Skills/agent-ops`
+- `using-git-worktrees` — `Skills/backend-platform`
 
 ### Runbook
 
-- `bash-hygiene` — `utilities`
-- `biome-linting` — `utilities`
-- `diagram-cli` — `utilities`
-- `mise-tooling` — `utilities`
-- `npm-release` — `utilities`
-- `npm-workflow-discipline` — `utilities`
-- `pnpm-manager` — `utilities`
-- `prek-pro` — `github`
-- `project-brain` — `utilities`
-- `recon-workbench` — `utilities`
-- `scaffolding-expert` — `utilities`
-- `security-threat-model` — `product/security`
-- `systematic-debugging` — `utilities`
-- `uv-python-project-setup` — `utilities`
+- `bash-hygiene` — `Skills/agent-ops`
+- `biome-linting` — `Skills/agent-ops`
+- `diagram-cli` — `Skills/agent-ops`
+- `mise-tooling` — `Skills/agent-ops`
+- `npm-release` — `Skills/agent-ops`
+- `npm-workflow-discipline` — `Skills/agent-ops`
+- `pnpm-manager` — `Skills/agent-ops`
+- `prek-pro` — `Skills/agent-ops`
+- `project-brain` — `Skills/agent-ops`
+- `recon-workbench` — `Skills/security-ops`
+- `scaffolding-expert` — `Skills/agent-ops`
+- `systematic-debugging` — `Skills/agent-ops`
+- `uv-python-project-setup` — `Skills/agent-ops`
 
 ### Infrastructure Ops
 
-- `1password` — `utilities`
-- `claude-alias` — `utilities`
-- `fix-mise` — `utilities`
-- `process-watch` — `utilities`
-- `rclone` — `utilities`
+- `1password` — `Skills/security-ops`
+- `claude-alias` — `Skills/agent-ops`
+- `fix-mise` — `Skills/backend-platform`
+- `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
+- `process-watch` — `Skills/mobile-native`
+- `rclone` — `Skills/agent-ops`
+- `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
 
 ## Validation Notes
 
-- No invalid semantic type tags detected.
+- The `metadata.skill-type` frontmatter tag in each skill still uses the legacy category name from before the topic-cluster restructure. These tags are informational and do not affect runtime discovery, which uses directory location under `Skills/<topic-cluster>/`.
 

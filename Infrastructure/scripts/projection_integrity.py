@@ -45,25 +45,25 @@ SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
     SymlinkProjection(
         name="skill-factory-skill-creator-alias",
         alias_path="skills-system/skill-creator",
-        canonical_path="Plugins/skill-factory/skills/skill-creator",
+        canonical_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
         tags=("skill-factory",),
     ),
     SymlinkProjection(
         name="skill-factory-skill-installer-alias",
         alias_path="skills-system/skill-installer",
-        canonical_path="Plugins/skill-factory/skills/skill-installer",
+        canonical_path="Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
         tags=("skill-factory",),
     ),
     SymlinkProjection(
         name="plugin-factory-plugin-creator-alias",
         alias_path="skills-system/plugin-creator",
-        canonical_path="Plugins/plugin-factory/skills/plugin-creator",
+        canonical_path="Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
         tags=("plugin-factory",),
     ),
     SymlinkProjection(
         name="plugin-factory-plugin-installer-alias",
         alias_path="skills-system/plugin-installer",
-        canonical_path="Plugins/plugin-factory/skills/plugin-installer",
+        canonical_path="Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
         tags=("plugin-factory",),
     ),
 )
@@ -1145,7 +1145,7 @@ def main() -> int:
         exit_code (int): `1` when the generated payload has `status == "fail"`, `0` otherwise.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[1]
+    repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[2]
     payload = run_sync(repo_root, args.scope) if args.mode == "sync" else run_verify(repo_root, args.scope)
 
     if args.manifest_out:

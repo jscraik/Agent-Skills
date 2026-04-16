@@ -4,8 +4,9 @@
  *
  * Validates commit messages follow governance requirements:
  * - Conventional commit format (feat|fix|chore|docs|refactor|test|style)
- * - Co-authorship for AI-generated code
- * - PR template completion reminder for agent branches
+ * - Subject line <= 72 chars
+ * - Blank line between subject and body/trailers
+ * - Co-authored-by trailer on agent branches
  */
 
 import { execFileSync } from "node:child_process";
@@ -13,8 +14,10 @@ import { readFileSync } from "node:fs";
 
 const COMMIT_MSG_FILE = process.argv[2];
 const CONVENTIONAL_COMMIT_REGEX =
-	/^(\[AI\]\s+)?(feat|fix|chore|docs|refactor|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
-const CO_AUTHOR_REGEX = /Co-Authored-By:\s*.+/i;
+	/^(feat|fix|chore|docs|refactor|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
+const CO_AUTHOR_LINE_REGEX = /^Co-authored-by:\s*.+$/gim;
+const CODEX_CO_AUTHOR_REGEX =
+	/^Co-authored-by:\s*Codex <noreply@openai\.com>\s*$/im;
 
 function main() {
 	if (!COMMIT_MSG_FILE) {
@@ -31,45 +34,51 @@ function main() {
 	}
 
 	const errors = [];
-	const warnings = [];
 	const lines = commitMsg
-		.split("\n")
-		.filter((line) => line && !line.startsWith("#"));
+		.split(/\r?\n/)
+		.filter((line) => !line.startsWith("#"));
+	const firstLineIndex = lines.findIndex((line) => line.trim().length > 0);
+	const firstLine = firstLineIndex >= 0 ? lines[firstLineIndex].trim() : "";
 
-	// Check 1: Conventional commit format
-	const firstLine = lines[0];
-	if (!CONVENTIONAL_COMMIT_REGEX.test(firstLine)) {
+	// Check 1: Subject exists and follows conventional commit format
+	if (!firstLine) {
+		errors.push("Commit message subject is required");
+	} else if (!CONVENTIONAL_COMMIT_REGEX.test(firstLine)) {
 		errors.push(
-			"First line must follow conventional commit format: [AI] type(scope)!: description (AI prefix optional)",
+			"Subject must follow conventional commit format: type(scope)!: description",
 		);
 	}
 
-	// Check 2: First line length
+	// Check 2: Subject length
 	if (firstLine && firstLine.length > 72) {
-		errors.push(`First line exceeds 72 characters (${firstLine.length} chars)`);
+		errors.push(`Subject exceeds 72 characters (${firstLine.length} chars)`);
 	}
 
-	// Check 3: Body paragraphs separated by blank line
-	if (lines.length > 1 && lines[1] !== "") {
-		warnings.push(
-			"Body should be separated from subject by a blank line for readability",
+	// Check 3: Body/trailers must be separated by a blank line
+	const hasAdditionalContent = lines
+		.slice(Math.max(firstLineIndex + 1, 0))
+		.some((line) => line.trim().length > 0);
+	if (hasAdditionalContent && lines[firstLineIndex + 1]?.trim() !== "") {
+		errors.push(
+			"Add a blank line between the subject and the rest of the commit message",
 		);
 	}
 
-	// Check 4: Co-authorship for AI-assisted commits (warn only)
-	const hasCoAuthor = CO_AUTHOR_REGEX.test(commitMsg);
+	// Check 4: Co-authorship for agent branches (enforced)
+	const coAuthorLines = commitMsg.match(CO_AUTHOR_LINE_REGEX) ?? [];
 	const branchName = getBranchName();
 	const isAgentBranch = /codex|claude|agent/i.test(branchName);
 
-	if (isAgentBranch && !hasCoAuthor) {
-		warnings.push(
-			"AI-assisted commit detected. Consider adding Co-Authored-By for transparency.",
+	if (isAgentBranch && coAuthorLines.length !== 1) {
+		errors.push(
+			"Agent branches require exactly one Co-authored-by trailer for auditability",
 		);
 	}
-
-	// Check 5: PR template reminder for agent branches
-	// Note: PR template sections are enforced by PR review workflow, not commit hook
-	// Agent branches should follow: Summary, Checklist, Testing, Review artifacts, Notes
+	if (isAgentBranch && !CODEX_CO_AUTHOR_REGEX.test(commitMsg)) {
+		errors.push(
+			"Agent branches must include: Co-authored-by: Codex <noreply@openai.com>",
+		);
+	}
 
 	// Output results
 	if (errors.length > 0) {
@@ -78,17 +87,9 @@ function main() {
 			console.error(`  ✗ ${error}`);
 		}
 		console.error(
-			"\nCommit message format examples:\n  feat(scope): add new feature\n  [AI] fix(core): resolve bug in parser\n\n  Detailed description here.\n\n  Co-Authored-By: Your Name <email@example.com>",
+			"\nCommit message format example:\n  feat(scope): add new feature\n\n  Why this change is needed and what it impacts.\n\n  Co-authored-by: Codex <noreply@openai.com>",
 		);
 		process.exit(1);
-	}
-
-	if (warnings.length > 0) {
-		console.info("\n⚠️  Commit message warnings:\n");
-		for (const warning of warnings) {
-			console.info(`  • ${warning}`);
-		}
-		console.info("");
 	}
 	process.exit(0);
 }
@@ -107,3 +108,4 @@ function getBranchName() {
 }
 
 main();
+		

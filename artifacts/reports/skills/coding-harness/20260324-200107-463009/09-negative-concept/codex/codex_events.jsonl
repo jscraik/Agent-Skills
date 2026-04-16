@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019d22be-d4cc-7d20-8c6c-a2dea2ab0793"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"A binary search tree is a data structure where each node has up to two children, and every value in the left subtree is smaller than the node while every value in the right subtree is larger. This ordering makes operations like search, insert, and delete efficient when the tree stays reasonably balanced."}}
+{"type":"turn.completed","usage":{"input_tokens":39765,"cached_input_tokens":0,"output_tokens":79}}

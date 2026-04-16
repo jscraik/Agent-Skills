@@ -1,0 +1,3 @@
+$skill-builder
+
+I am installing a new skill and skill-creator keeps appearing in overlap results. In this first response, require full-scan deconflict against installed skills and exclude system or meta skills unless explicitly requested.

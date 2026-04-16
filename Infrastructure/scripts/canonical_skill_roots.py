@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 CANONICAL_STANDALONE_SKILL_ROOTS: tuple[str, ...] = (
+    "Skills",
     "utilities",
     "product",
     "frontend",
@@ -85,20 +86,22 @@ def iter_canonical_standalone_skill_roots(repo_root: Path) -> list[Path]:
 
 def iter_declared_plugin_skill_roots(repo_root: Path) -> list[Path]:
     """Return all plugin-owned skill roots declared by plugin manifests."""
-    plugins_root = repo_root / "plugins"
-    if not plugins_root.is_dir():
-        return []
-
     roots: list[Path] = []
+    manifest_patterns = (
+        "plugins/*/.codex-plugin/plugin.json",
+        "Plugins/*/.codex-plugin/plugin.json",
+        "plugins/*/*/.codex-plugin/plugin.json",
+        "Plugins/*/*/.codex-plugin/plugin.json",
+    )
     seen: set[Path] = set()
-    for plugin_root in sorted(plugins_root.iterdir()):
-        if not plugin_root.is_dir():
-            continue
-        skills_root = resolve_declared_plugin_skill_root(plugin_root)
-        if skills_root is None or skills_root in seen:
-            continue
-        seen.add(skills_root)
-        roots.append(skills_root)
+    for pattern in manifest_patterns:
+        for manifest_path in sorted(repo_root.glob(pattern)):
+            plugin_root = manifest_path.parent.parent
+            skills_root = resolve_declared_plugin_skill_root(plugin_root)
+            if skills_root is None or skills_root in seen:
+                continue
+            seen.add(skills_root)
+            roots.append(skills_root)
     return roots
 
 

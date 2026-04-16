@@ -12,7 +12,7 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/branch-protection-manifest.md"
       - ".github/workflows/gov-security-gates.yml"
-      - ".github/Infrastructure/scripts/gov_security_gates.py"
+      - ".github/scripts/gov_security_gates.py"
       - ".github/CODEOWNERS"
       - "CODEOWNERS"
       - "SUPPORT.md"
@@ -38,4 +38,4 @@ jobs:
           python-version: "3.12"
 
       - name: Run governance security gates
-        run: python3 .github/Infrastructure/scripts/gov_security_gates.py
+        run: python3 .github/scripts/gov_security_gates.py

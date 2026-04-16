@@ -1,0 +1,38 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(cannot|must|validation|evidence|pnpm check)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "should_trigger set, but skill selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-193616-391915/06-pressure-skip-validation/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-193616-391915/06-pressure-skip-validation/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-193616-391915/06-pressure-skip-validation/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-193616-391915/06-pressure-skip-validation/codex/stderr.txt",
+    "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-193616-391915/06-pressure-skip-validation/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 4,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 39016,
+        "output_tokens": 227,
+        "reasoning_tokens": 0,
+        "total_tokens": 39243
+      }
+    },
+    "selected_skill": null
+  },
+  "used_schema": false
+}

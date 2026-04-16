@@ -56,12 +56,12 @@
         "ambiguity_set": [
           {
             "name": "ce-review",
-            "path": "Plugins/harness-engineering/skills/ce-review",
+            "path": "Plugins/harness-engineering/skills/code_quality_review/ce-review",
             "confidence": 0.81
           },
           {
             "name": "ce-technical-review",
-            "path": "Plugins/harness-engineering/skills/ce-technical-review",
+            "path": "Plugins/harness-engineering/skills/code_quality_review/ce-technical-review",
             "confidence": 0.79
           }
         ]

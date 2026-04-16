@@ -1,0 +1,32 @@
+Your trust issue is likely caused by **unclear consequence visibility** at the moment of commit.  
+A stronger pattern is: **Preview first, commit second, receipt after**.
+
+**Recommended Interaction**
+1. Replace `Approve` with `Review & Approve` on the card.
+2. Add a compact `What will happen` block directly on the card:
+- `24 users will gain access to Finance Dashboard`
+- `Notification emails will be sent`
+- `Effective immediately`
+- `Can be revoked for 24 hours` (or `Cannot be undone`, if true)
+3. Clicking `Review & Approve` opens a confirmation drawer/modal with:
+- Before/after summary
+- Affected people/systems count
+- Exact side effects (emails, permissions, billing, automation)
+- Risk label (`Low`, `High`, `Irreversible`)
+4. Final CTA should be explicit and dynamic, e.g.  
+`Approve access for 24 users and send notifications`
+5. After submit, show a receipt state:
+- `Approved by Jamie at 2:14 PM`
+- Audit log link
+- `Undo`/`Revoke` action if allowed
+
+**Why this works**
+- Reduces ambiguity at click-time.
+- Converts a “blind trust” action into an informed decision.
+- Gives admins recoverability and accountability (audit trail), which are core trust signals in enterprise UX.
+
+**If approvals are high-risk**
+- Require typed confirmation (`APPROVE`) or a checkbox acknowledgment.
+- Optionally require second approver for irreversible actions.
+
+If you want, I can sketch the exact card + modal copy and state machine next (default, loading, success, error, revoked) so this is implementation-ready for design/dev handoff.

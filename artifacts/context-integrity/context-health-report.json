@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "context-health-report/v1",
+  "command": "context-health",
+  "generatedAt": "2026-04-16T17:21:43.736Z",
+  "repoRoot": "/Users/jamiecraik/dev/Agent-Skills",
+  "triggerType": "current_checkout",
+  "mode": "shadow",
+  "status": "ok",
+  "warnings": [],
+  "artifactRefs": [
+    {
+      "type": "context_index_inventory",
+      "path": "artifacts/context-integrity/index-source-inventory.json",
+      "checksum": "sha256:1d0d23ccc71593515b823ee729b279967648b6e9400a3685b171c1e9f1822d66"
+    },
+    {
+      "type": "memory_metrics_snapshot",
+      "path": "artifacts/context-integrity/memory-metrics-snapshot.json",
+      "checksum": "sha256:58f445b86abd687f82b12099214c8f9ca481a29702f8a17d4fa463bb9f533ef3"
+    }
+  ],
+  "metrics": {
+    "authoritative_coverage_rate": {
+      "value": 0.75,
+      "numerator": 6,
+      "denominator": 8,
+      "insufficient_evidence": false
+    },
+    "contradiction_open_count": 0,
+    "stale_authoritative_source_count": 0,
+    "unknown_authoritative_source_count": 7,
+    "degraded_retrieval_rate": {
+      "value": null,
+      "numerator": 0,
+      "denominator": 0,
+      "insufficient_evidence": true
+    },
+    "memory_unresolved_question_count": [],
+    "decision_consistency_proxy": {
+      "value": null,
+      "numerator": 0,
+      "denominator": 0,
+      "insufficient_evidence": true
+    }
+  }
+}

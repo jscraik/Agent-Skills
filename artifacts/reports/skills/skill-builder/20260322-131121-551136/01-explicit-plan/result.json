@@ -1,0 +1,59 @@
+{
+  "id": "explicit-plan",
+  "name": "explicit plan",
+  "category": "happy",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan",
+  "runners": {
+    "discovery-smoke": {
+      "runner": "discovery-smoke",
+      "exit_code": 0,
+      "passed": false,
+      "tier1_failures": [
+        "contains failed: '## Scope and triggers'",
+        "contains failed: '## Required inputs'",
+        "contains failed: '## Deliverables'",
+        "contains failed: 'SKILL.md'",
+        "contains failed: 'references/plan.md'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[discovery-smoke] contains failed: '## Scope and triggers'",
+    "[discovery-smoke] contains failed: '## Required inputs'",
+    "[discovery-smoke] contains failed: '## Deliverables'",
+    "[discovery-smoke] contains failed: 'SKILL.md'",
+    "[discovery-smoke] contains failed: 'references/plan.md'"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+    "[discovery-smoke] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

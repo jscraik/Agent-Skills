@@ -288,12 +288,12 @@ class ProjectionIntegrityTests(unittest.TestCase):
             repo_root = Path(tmp)
             alias = repo_root / "Skills" / "plugin-builder"
             alias.parent.mkdir(parents=True, exist_ok=True)
-            alias.symlink_to("../Plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
+            alias.symlink_to("../Plugins/plugin-factory/skills/code_quality_review/plugin-builder", target_is_directory=True)
 
             spec = self.mod.SymlinkProjection(
                 name="plugin-builder",
                 alias_path="Skills/plugin-builder",
-                canonical_path="Plugins/plugin-factory/skills/plugin-builder",
+                canonical_path="Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
                 tags=("plugin-factory",),
             )
             result = self.mod.verify_symlink(repo_root, spec)
@@ -308,7 +308,14 @@ class ProjectionIntegrityTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            canonical = repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder"
+            canonical = (
+                repo_root
+                / "plugins"
+                / "plugin-factory"
+                / "skills"
+                / "code_quality_review"
+                / "plugin-builder"
+            )
             canonical.mkdir(parents=True, exist_ok=True)
             alias = repo_root / "Skills" / "plugin-builder"
             alias.mkdir(parents=True, exist_ok=True)
@@ -317,7 +324,7 @@ class ProjectionIntegrityTests(unittest.TestCase):
             spec = self.mod.SymlinkProjection(
                 name="plugin-builder",
                 alias_path="Skills/plugin-builder",
-                canonical_path="Plugins/plugin-factory/skills/plugin-builder",
+                canonical_path="Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
                 tags=("plugin-factory",),
             )
             result = self.mod.ensure_symlink(repo_root, spec)

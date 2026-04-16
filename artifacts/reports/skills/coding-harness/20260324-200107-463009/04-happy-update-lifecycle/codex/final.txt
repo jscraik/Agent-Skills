@@ -1,0 +1,61 @@
+For an existing harness-managed repo, the safe path is preview first, then apply, then validate. The canonical update lane is documented in [SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/SKILL.md), [setup-and-commands.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/references/setup-and-commands.md), and [agent-install-guide.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/references/agent-install-guide.md).
+
+Use this sequence for normal scaffold/template updates:
+
+```bash
+# 0. Check whether updates exist
+harness init --check-updates
+
+# 1. Preview exactly what would change
+harness init --dry-run --update
+
+# 2. Optional: enable tracked apply if you want rollback metadata first
+harness init --track
+
+# 3. Apply the update
+harness init --update
+# or, if you want to choose interactively:
+harness init --interactive
+
+# 4. Re-validate after the update
+harness check-environment --json
+harness init --check-updates
+pnpm check
+# If runtime behavior / contract behavior / artifacts changed:
+pnpm test:deep
+```
+
+If the repo needs a contract/state transition rather than a plain template refresh, use the built-in migrate or rollback commands instead of hand-editing harness-owned files:
+
+```bash
+# Move to the current harness contract/state shape
+harness init --migrate
+
+# Roll back the last harness init transition
+harness init --rollback
+```
+
+If the repo still has GitHub Actions and you’re cutting over to CircleCI, use the snapshot-based CI migration flow, not manual deletion of `.github/workflows/`:
+
+```bash
+# Preview migration
+harness ci-migrate prepare --provider circleci --dry-run
+
+# Apply migration and create a recovery snapshot
+harness ci-migrate prepare --provider circleci --apply
+
+# Verify using the snapshot id returned above
+harness ci-migrate verify --snapshot <snapshot-id>
+
+# Finalize once verified
+harness ci-migrate commit --snapshot <snapshot-id>
+
+# Roll back to the pre-migration state if needed
+harness ci-migrate abort --snapshot <snapshot-id>
+```
+
+Two important guardrails:
+- Don’t hand-edit enforced harness outputs like `harness.contract.json`, `.circleci/config.yml`, or `scripts/check-environment.sh`; `harness init --update` can overwrite them.
+- Don’t manually delete `.github/workflows/`; use `harness ci-migrate` so the snapshot and abort path stay available.
+
+I couldn’t run the repo preflight script in this session because the sandbox blocked it, so the command sequence above is taken from the repo’s canonical harness docs rather than live execution evidence.

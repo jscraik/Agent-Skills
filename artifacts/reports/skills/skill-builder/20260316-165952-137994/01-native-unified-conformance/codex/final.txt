@@ -1,0 +1,13 @@
+Already in place. `skill-builder` is currently enforcing a single unified conformance workflow, including your exact requirement.
+
+- Unified conformance is explicitly defined for `create`, `improve`/`upgrade`, and `install-distribute` in [SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:85).
+- It explicitly says not to split grading into a standalone skill and to keep it inside `skill-builder` in [SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:88).
+- Gold validators are required (`quick_validate`, `skill_gate`, `analyze_skill`, `openclaw_skill_guard`) in [SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:89).
+- The validation rule reiterates:
+  - `create`/`improve` must pass gold validators + evals.
+  - `install-distribute` must run gold validators and upstream-grade checks when present.
+  - Gold validators are never skipped.
+  - See [SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:318).
+- Your exact prompt is already codified as an edge eval (`native-unified-conformance`) with acceptance regex checks in [evals.yaml](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/evals.yaml:165).
+
+No edits were needed.

@@ -1,0 +1,10 @@
+WARNING: proceeding, even though we could not update PATH: Operation not permitted (os error 1)
+2026-03-25T02:06:30.485142Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:30.485297Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:30.549196Z ERROR codex_core::models_manager::manager: failed to renew cache TTL: Operation not permitted (os error 1)
+2026-03-25T02:06:30.800744Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:35.738276Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:37.597553Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:37.597588Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:37.656050Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:06:37.663305Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed

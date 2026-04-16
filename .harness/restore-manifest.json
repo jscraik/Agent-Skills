@@ -1,53 +1,101 @@
 {
-  "harnessVersion": "0.11.12",
-  "ciProvider": "github-actions",
+  "harnessVersion": "0.12.0",
+  "ciProvider": "circleci",
   "files": [
     {
-      "path": ".harness/ci-required-checks.json",
+      "path": "harness.contract.json",
       "action": "created"
     },
     {
-      "path": ".github/workflows/secret-scan.yml",
+      "path": "memory.json",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/check-staged-secrets.sh",
+      "path": ".coderabbit.yaml",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/check-doc-style.sh",
+      "path": ".circleci/config.yml",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/check-related-tests.sh",
+      "path": "scripts/validate-commit-msg.js",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/check-semgrep-changed.sh",
+      "path": "scripts/setup-git-hooks.js",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/semgrep-pre-push.yml",
+      "path": "scripts/check-staged-secrets.sh",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/refresh-diagram-context.sh",
+      "path": "scripts/check-doc-style.sh",
       "action": "created"
     },
     {
-      "path": "Infrastructure/scripts/check-diagram-freshness.sh",
+      "path": "scripts/check-related-tests.sh",
       "action": "created"
     },
     {
-      "path": ".diagram/.gitkeep",
+      "path": "scripts/check-semgrep-changed.sh",
       "action": "created"
     },
     {
-      "path": ".diagram/context/diagram-context.md",
+      "path": "scripts/semgrep-pre-push.yml",
       "action": "created"
     },
     {
-      "path": ".mise.toml",
+      "path": "scripts/refresh-diagram-context.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-diagram-freshness.sh",
+      "action": "created"
+    },
+    {
+      "path": "prek.toml",
+      "action": "created"
+    },
+    {
+      "path": "CODESTYLE.md",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-preflight.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-preflight-local-memory-legacy.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-learn",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-enforced",
+      "action": "created"
+    },
+    {
+      "path": "scripts/verify-work.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/validate-codestyle.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/prepare-worktree.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/harness-cli.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-environment.sh",
       "action": "created"
     },
     {
@@ -56,29 +104,12 @@
       "backupHash": "cd49adffccd28c2b"
     },
     {
-      "path": ".harness/ci-provider-transition-status.json",
-      "action": "created"
-    },
-    {
-      "path": "Infrastructure/scripts/codex-learn",
-      "action": "created"
-    },
-    {
-      "path": "Infrastructure/scripts/codex-enforced",
-      "action": "created"
-    },
-    {
-      "path": "Infrastructure/scripts/prepare-worktree.sh",
-      "action": "created"
-    },
-    {
-      "path": "Infrastructure/scripts/harness-cli.sh",
+      "path": ".github/CODEOWNERS",
       "action": "created"
     },
     {
       "path": "WORKFLOW.md",
       "action": "created"
     }
-  ],
-  "issueTracker": "github"
+  ]
 }

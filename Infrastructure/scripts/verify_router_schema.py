@@ -10,9 +10,17 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCHEMA_LIB = REPO_ROOT / 'utilities' / 'skill-builder' / 'scripts'
-if str(SCHEMA_LIB) not in sys.path:
-    sys.path.insert(0, str(SCHEMA_LIB))
+schema_lib_candidates = [
+    REPO_ROOT / "utilities" / "skill-builder" / "scripts",
+    REPO_ROOT / "Skills" / "skill-builder" / "scripts",
+    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "scripts",
+    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "scripts",
+    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder" / "scripts",
+    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "skill-builder" / "scripts",
+]
+for schema_lib in schema_lib_candidates:
+    if schema_lib.exists() and str(schema_lib) not in sys.path:
+        sys.path.insert(0, str(schema_lib))
 
 from skill_router_schema import validate_router_result  # noqa: E402
 

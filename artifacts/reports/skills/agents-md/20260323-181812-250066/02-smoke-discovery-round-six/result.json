@@ -1,0 +1,55 @@
+{
+  "id": "smoke-discovery-round-six",
+  "name": "smoke-discovery-round-six",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260323-181812-250066/02-smoke-discovery-round-six",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 124,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 124",
+        "contains failed: '## Skill Summary:'",
+        "regex failed: /(?i)assumptions:/",
+        "regex failed: /(?i)(does this capture|capture the AGENTS update well enough)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260323-181812-250066/02-smoke-discovery-round-six/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260323-181812-250066/02-smoke-discovery-round-six/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260323-181812-250066/02-smoke-discovery-round-six/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260323-181812-250066/02-smoke-discovery-round-six/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 124",
+    "[codex] contains failed: '## Skill Summary:'",
+    "[codex] regex failed: /(?i)assumptions:/",
+    "[codex] regex failed: /(?i)(does this capture|capture the AGENTS update well enough)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

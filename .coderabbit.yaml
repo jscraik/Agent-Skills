@@ -1,0 +1,70 @@
+# Harness-managed CodeRabbit baseline for downstream repositories.
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary_in_walkthrough: true
+  review_details: true
+  sequence_diagrams: true
+  commit_status: true
+  fail_commit_status: false
+  poem: false
+  enable_prompt_for_ai_agents: true
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 0
+    drafts: true
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "renovate[bot]"
+      - "github-actions[bot]"
+  path_filters:
+    - "!artifacts/**"
+    - "!coverage/**"
+    - "!dist/**"
+  path_instructions:
+    - path: "**"
+      instructions: |
+        Use repository evidence first: package scripts, tracked docs, harness contracts, and validation wrappers over assumptions.
+        Treat contradictions between code, docs, and workflow policy as review-worthy even when code changes look reasonable.
+        Prioritize behavioral risk, missing validation, and governance drift over style-only feedback.
+  pre_merge_checks:
+    override_requested_reviewers_only: true
+    title:
+      mode: "warning"
+      requirements: "Use a concise, descriptive title that explains the change scope."
+    description:
+      mode: "warning"
+    issue_assessment:
+      mode: "warning"
+
+chat:
+  auto_reply: true
+  allow_non_org_members: false
+
+knowledge_base:
+  issues:
+    scope: "local"
+  pull_requests:
+    scope: "local"
+  learnings:
+    scope: "local"
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "**/AGENTS.md"
+      - "**/CLAUDE.md"
+      - "**/GEMINI.md"
+      - "**/CODESTYLE.md"
+      - "**/WORKFLOW.md"
+      - "docs/agents/**/*.md"
+  mcp:
+    usage: "enabled"
+  web_search:
+    enabled: true
+
+issue_enrichment:
+  auto_enrich:
+    enabled: false

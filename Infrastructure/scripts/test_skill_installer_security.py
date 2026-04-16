@@ -21,6 +21,7 @@ SCRIPT_PATH = (
     / "plugins"
     / "skill-factory"
     / "skills"
+    / "infrastructure_ops"
     / "skill-installer"
     / "scripts"
     / "install-skill-from-github.py"
@@ -56,7 +57,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
 
     def test_resolve_dest_root_uses_canonical_default(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            canonical = Path(tmpdir) / "repo" / "github"
+            canonical = Path(tmpdir) / "repo" / "Skills" / "github"
             canonical.mkdir(parents=True)
             with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": str(canonical)}, clear=False):
                 resolved = Path(installer._resolve_dest_root(None)).resolve()
@@ -65,7 +66,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
     def test_resolve_dest_root_rejects_repo_root_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir) / "repo"
-            canonical = repo_root / "github"
+            canonical = repo_root / "Skills" / "github"
             canonical.mkdir(parents=True)
             with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": str(canonical)}, clear=False):
                 with self.assertRaises(installer.InstallError):
@@ -74,7 +75,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
     def test_resolve_dest_root_rejects_nested_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir) / "repo"
-            canonical = repo_root / "github"
+            canonical = repo_root / "Skills" / "github"
             canonical.mkdir(parents=True)
             with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": str(canonical)}, clear=False):
                 with self.assertRaises(installer.InstallError):
@@ -83,7 +84,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
     def test_resolve_dest_root_rejects_escape(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir) / "repo"
-            canonical = repo_root / "github"
+            canonical = repo_root / "Skills" / "github"
             canonical.mkdir(parents=True)
             outside = Path(tmpdir) / "outside"
             outside.mkdir(parents=True)
@@ -120,13 +121,13 @@ class SkillInstallerSecurityTests(unittest.TestCase):
         ]
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            canonical = Path(tmpdir) / "repo" / "github"
+            canonical = Path(tmpdir) / "repo" / "Skills" / "github"
             canonical.mkdir(parents=True)
             with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": str(canonical)}, clear=False):
                 exit_code = installer.main(args)
                 self.assertEqual(exit_code, 1)
 
-    def test_main_installs_skill_into_top_level_category(self) -> None:
+    def test_main_installs_skill_into_canonical_skills_category(self) -> None:
         pinned_ref = "a" * 40
         source = installer.Source(owner="openai", repo="skills", ref=pinned_ref, paths=["Skills/demo"])
 
@@ -136,7 +137,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
             skill_path.mkdir(parents=True, exist_ok=True)
             _write_min_skill(skill_path)
 
-            canonical = repo_root / "github"
+            canonical = repo_root / "Skills" / "github"
             canonical.mkdir(parents=True, exist_ok=True)
 
             args = [
@@ -147,7 +148,7 @@ class SkillInstallerSecurityTests(unittest.TestCase):
                 "--ref",
                 pinned_ref,
                 "--dest",
-                "github",
+                "Skills/github",
             ]
 
             with patch.dict(os.environ, {"ASK_SKILLS_CANONICAL_DEST": str(canonical)}, clear=False):

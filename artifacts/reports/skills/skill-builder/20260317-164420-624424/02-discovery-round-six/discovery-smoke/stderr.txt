@@ -1,0 +1,1 @@
+discovery-smoke contract gaps: SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance

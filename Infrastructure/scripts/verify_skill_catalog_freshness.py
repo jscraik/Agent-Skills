@@ -36,10 +36,10 @@ SKIP_PATH_PARTS = {
 }
 
 PILOT_SKILL_PROFILE_PATHS = {
-    "Skills/skill-builder",
-    "frontend/tools/agentation",
-    "Skills/systematic-debugging",
-    "interview/interview-me",
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "Skills/frontend-ui/agentation",
+    "Skills/agent-ops/systematic-debugging",
+    "Skills/product-strategy/interview-me",
 }
 LEARNING_POSTURE_VALUES = {"learn", "guided", "execute"}
 AUTOPILOT_DEGRADED_ACCEPTED = "degraded_pairings_acknowledged"
@@ -47,13 +47,12 @@ VALID_LIFECYCLE_STATES = {"incubating", "active", "maintenance", "deprecated"}
 VALID_MATURITY_LEVELS = {"experimental", "validated", "canonical"}
 VALID_METADATA_SOURCES = {"frontmatter", "plugin_manifest", "inherited"}
 GOVERNED_SKILL_PATHS = {
-    "Skills/coding-harness/SKILL.md",
-    "Skills/plugin-builder/SKILL.md",
-    "Skills/skill-builder/SKILL.md",
-    "Plugins/skill-factory/skills/skill-builder/SKILL.md",
+    "Skills/agent-ops/coding-harness/SKILL.md",
+    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
 }
 GOVERNED_PLUGIN_ALIAS_ENFORCED_PATHS = {
-    "Skills/plugin-builder/SKILL.md",
+    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
 }
 GOVERNED_PLUGIN_MANIFEST_PATHS = {
     "Plugins/skill-factory/.codex-plugin/plugin.json",
@@ -91,6 +90,37 @@ class AssetReport:
     readiness: str
     findings: List[str]
     details: Optional[str] = None
+    display_path: Optional[str] = None
+
+
+def _normalize_rel(rel: str) -> str:
+    return rel.replace("\\", "/").strip()
+
+
+def _is_plugin_rel(rel: str) -> bool:
+    parts = _normalize_rel(rel).split("/", 1)
+    return bool(parts and parts[0].lower() == "plugins")
+
+
+def _governed_skill_names() -> set[str]:
+    names: set[str] = set()
+    for rel in GOVERNED_SKILL_PATHS:
+        parts = _normalize_rel(rel).split("/")
+        if len(parts) >= 2:
+            names.add(parts[-2])
+    return names
+
+
+GOVERNED_SKILL_NAMES = _governed_skill_names()
+GOVERNED_PLUGIN_ALIAS_ENFORCED_NAMES = {
+    _normalize_rel(rel).split("/")[-2]
+    for rel in GOVERNED_PLUGIN_ALIAS_ENFORCED_PATHS
+    if "/" in _normalize_rel(rel)
+}
+GOVERNED_SKILL_DISPLAY_BY_NAME = {
+    "plugin-builder": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+    "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+}
 
 
 def parse_json(path: Path) -> Optional[Dict[str, Any]]:
@@ -205,7 +235,15 @@ def should_skip_skill_path(rel: Path) -> bool:
 
 
 def discover_plugin_manifests(repo_root: Path) -> List[Path]:
-    return sorted(repo_root.glob("Plugins/**/.codex-plugin/plugin.json"))
+    manifests: Dict[str, Path] = {}
+    patterns = (
+        "Plugins/**/.codex-plugin/plugin.json",
+        "plugins/**/.codex-plugin/plugin.json",
+    )
+    for pattern in patterns:
+        for path in repo_root.glob(pattern):
+            manifests[path.resolve().as_posix()] = path
+    return sorted(manifests.values(), key=lambda item: item.as_posix())
 
 
 def discover_solution_files(repo_root: Path) -> List[Path]:
@@ -261,7 +299,7 @@ def canonical_skill_map(skill_files: List[Path], repo_root: Path) -> Dict[str, P
         name = parse_frontmatter(skill_file).get("name", "").strip()
         if not name:
             continue
-        if rel.startswith("Plugins/"):
+        if _is_plugin_rel(rel):
             plugin_only_candidates.setdefault(name, skill_file)
             continue
         mapping.setdefault(name, skill_file)
@@ -270,7 +308,7 @@ def canonical_skill_map(skill_files: List[Path], repo_root: Path) -> Dict[str, P
     # be discovered by rglob() in all environments. Include governed non-plugin
     # paths directly so packaged copies can still inherit canonical metadata.
     for governed_rel in sorted(GOVERNED_SKILL_PATHS):
-        if governed_rel.startswith("Plugins/"):
+        if _is_plugin_rel(governed_rel):
             continue
         candidate = repo_root / governed_rel
         if not candidate.exists():
@@ -333,7 +371,7 @@ def find_placeholder_text(text: str) -> List[str]:
 
 
 def is_packaged_skill(skill_path: Path, repo_root: Path) -> bool:
-    return skill_path.relative_to(repo_root).as_posix().startswith("Plugins/")
+    return _is_plugin_rel(skill_path.relative_to(repo_root).as_posix())
 
 
 def has_lifecycle_metadata(frontmatter: Dict[str, str]) -> bool:
@@ -359,8 +397,13 @@ def analyze_skill_file(
 
     name = frontmatter.get("name", "").strip()
     description = frontmatter.get("description", "").strip()
-    governed = rel in GOVERNED_SKILL_PATHS or has_lifecycle_metadata(frontmatter)
+    governed = (
+        rel in GOVERNED_SKILL_PATHS
+        or name in GOVERNED_SKILL_NAMES
+        or has_lifecycle_metadata(frontmatter)
+    )
     packaged = is_packaged_skill(path, repo_root)
+    display_path = GOVERNED_SKILL_DISPLAY_BY_NAME.get(name)
 
     if not name:
         findings.append("missing skill name in frontmatter")
@@ -397,9 +440,16 @@ def analyze_skill_file(
         readiness = escalate(readiness, "degraded")
 
     if not governed:
-        return AssetReport(path=path, kind="skill", readiness=readiness, findings=findings)
+        return AssetReport(
+            path=path,
+            kind="skill",
+            readiness=readiness,
+            findings=findings,
+            display_path=display_path,
+        )
 
     if packaged:
+        packaged_kind = "packaged_skill"
         canonical_path = canonical_by_name.get(name)
         if canonical_path is None:
             findings.append("representation_split_brain: packaged skill has no canonical source skill for inheritance")
@@ -407,6 +457,15 @@ def analyze_skill_file(
         else:
             details = f"inherits lifecycle metadata from {canonical_path.relative_to(repo_root)}"
             canonical_frontmatter = parse_frontmatter(canonical_path)
+            # Enforce governed alias lanes (for example Skills/plugin-builder):
+            # packaged-only copies are not allowed to become the sole source of truth.
+            if name in GOVERNED_PLUGIN_ALIAS_ENFORCED_NAMES and canonical_path == path:
+                packaged_kind = "skill"
+                for field in REQUIRED_SKILL_FIELDS:
+                    value = frontmatter.get(field, "").strip()
+                    if not value:
+                        findings.append(f"missing_metadata: governed skill missing `{field}`")
+                        readiness = escalate(readiness, "blocked")
             for field in REQUIRED_SKILL_FIELDS + ("last_reviewed",):
                 local_value = frontmatter.get(field, "").strip()
                 canonical_value = canonical_frontmatter.get(field, "").strip()
@@ -419,7 +478,14 @@ def analyze_skill_file(
             if canonical_frontmatter.get("owner", "").strip() and not frontmatter.get("metadata_source", "").strip():
                 findings.append("metadata_source inherited from canonical skill")
 
-        return AssetReport(path=path, kind="packaged_skill", readiness=readiness, findings=findings, details=details)
+        return AssetReport(
+            path=path,
+            kind=packaged_kind,
+            readiness=readiness,
+            findings=findings,
+            details=details,
+            display_path=display_path,
+        )
 
     for field in REQUIRED_SKILL_FIELDS:
         value = frontmatter.get(field, "").strip()
@@ -451,7 +517,13 @@ def analyze_skill_file(
         findings.append(overdue)
         readiness = escalate(readiness, "degraded")
 
-    return AssetReport(path=path, kind="skill", readiness=readiness, findings=findings)
+    return AssetReport(
+        path=path,
+        kind="skill",
+        readiness=readiness,
+        findings=findings,
+        display_path=display_path,
+    )
 
 
 def analyze_plugin_manifest(path: Path, repo_root: Path, *, today: Optional[date] = None) -> AssetReport:
@@ -613,7 +685,7 @@ def analyze_repo(repo_root: Path, *, today: Optional[date] = None) -> Tuple[List
 
 
 def render_report(report: AssetReport, repo_root: Path) -> str:
-    rel = report.path.relative_to(repo_root)
+    rel = report.display_path or report.path.relative_to(repo_root).as_posix()
     lines = [f"- {rel} [{report.kind}] -> {report.readiness}"]
     if report.details:
         lines.append(f"  - {report.details}")

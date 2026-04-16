@@ -19,7 +19,7 @@ rows:
     match_count: 5
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py"
     is_executable: true
     line_numbers:
       - 75
@@ -38,7 +38,7 @@ rows:
     match_count: 13
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py"
     is_executable: true
     line_numbers:
       - 28
@@ -62,14 +62,14 @@ rows:
     match_count: 24
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py"
+    consumer_path: "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py"
     is_executable: true
     line_numbers:
       - 1376
     match_count: 1
     root: runtime
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
     is_executable: true
     line_numbers:
       - 15
@@ -83,7 +83,7 @@ rows:
     match_count: 8
     root: .agents
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/scripts/create_basic_plugin.py"
     is_executable: true
     line_numbers:
       - 15
@@ -101,7 +101,7 @@ rows:
     match_count: 12
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-creator/Infrastructure/scripts/render_plugin_creator_templates.py"
+    consumer_path: "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/Infrastructure/scripts/render_plugin_creator_templates.py"
     is_executable: true
     line_numbers:
       - 43
@@ -109,14 +109,14 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/plugin-factory/skills/plugin-installer/Infrastructure/scripts/install-plugin-from-github.py"
+    consumer_path: "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/Infrastructure/scripts/install-plugin-from-github.py"
     is_executable: true
     line_numbers:
       - 861
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/analyze_skill.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/analyze_skill.py"
     is_executable: true
     line_numbers:
       - 8
@@ -126,7 +126,7 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/build_arscontexta_intervention_queue.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/build_arscontexta_intervention_queue.py"
     is_executable: true
     line_numbers:
       - 21
@@ -136,28 +136,28 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/skill_gate.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/skill_gate.py"
     is_executable: true
     line_numbers:
       - 23
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-builder/Infrastructure/scripts/skill_graph_inventory.py"
+    consumer_path: "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/skill_graph_inventory.py"
     is_executable: true
     line_numbers:
       - 12
     match_count: 1
     root: .agents
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-creator/Infrastructure/scripts/render_handoff_package_template.py"
+    consumer_path: "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/Infrastructure/scripts/render_handoff_package_template.py"
     is_executable: true
     line_numbers:
       - 45
     match_count: 1
     root: plugins
   -
-    consumer_path: "Plugins/skill-factory/skills/skill-refactor/Infrastructure/scripts/scan_codex_sessions.py"
+    consumer_path: "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/Infrastructure/scripts/scan_codex_sessions.py"
     is_executable: true
     line_numbers:
       - 170

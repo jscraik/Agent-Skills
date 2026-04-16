@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "generated_at": "2026-04-16T17:18:00.348Z",
+  "findings": [
+    {
+      "rule_id": "command.surface.sources.missing",
+      "surface": "command",
+      "path": "src/cli.ts"
+    },
+    {
+      "rule_id": "todo.lifecycle.not_applicable",
+      "surface": "todo",
+      "path": "todos"
+    },
+    {
+      "rule_id": "quality.score.missing",
+      "surface": "quality-score",
+      "path": "docs/QUALITY_SCORE.md"
+    },
+    {
+      "rule_id": "status.matrix.missing",
+      "surface": "status",
+      "path": "docs/roadmap/agent-first-status.md"
+    }
+  ]
+}

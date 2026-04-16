@@ -24,7 +24,12 @@ if [[ $# -gt 0 ]]; then
   esac
 fi
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if repo_root="$(git -C "$script_dir/../.." rev-parse --show-toplevel 2>/dev/null)"; then
+  :
+else
+  repo_root="$(cd "$script_dir/../.." && pwd)"
+fi
 lint_python="${PLAN_GRAPH_LINT_PYTHON:-python3}"
 LINTER="${PLAN_GRAPH_LINTER:-$repo_root/Infrastructure/scripts/plan_graph_lint.py}"
 
@@ -65,9 +70,13 @@ run_plan_graph_linter() {
 }
 
 paths=(".agent/PLANS.md")
-while IFS= read -r path; do
-  paths+=("$path")
-done < <(find docs/plans -maxdepth 1 -type f -name '*.md' | sort)
+for plans_dir in docs/plans Docs/plans; do
+  if [[ -d "$plans_dir" ]]; then
+    while IFS= read -r path; do
+      paths+=("$path")
+    done < <(find "$plans_dir" -maxdepth 1 -type f -name '*.md' | sort)
+  fi
+done
 
 status=0
 failed_plans=()

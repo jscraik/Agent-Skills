@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="coding-harness" tests="10" failures="0" errors="0" timestamp="2026-03-25T02:18:24Z" id="20260324-201822-872491">
+  <testcase name="happy-bootstrap-command-audit" classname="coding-harness" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/01-happy-bootstrap-command-audit</system-out>
+  </testcase>
+  <testcase name="happy-ci-migration-sequence" classname="coding-harness" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/02-happy-ci-migration-sequence</system-out>
+  </testcase>
+  <testcase name="happy-environment-action-sync" classname="coding-harness" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/03-happy-environment-action-sync</system-out>
+  </testcase>
+  <testcase name="happy-update-lifecycle" classname="coding-harness" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/04-happy-update-lifecycle</system-out>
+  </testcase>
+  <testcase name="edge-remote-auth-boundary" classname="coding-harness" time="180.0">
+    <system-out>artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/05-edge-remote-auth-boundary</system-out>
+  </testcase>
+  <testcase name="pressure-skip-validation" classname="coding-harness" time="180.0">
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/06-pressure-skip-validation</system-out>
+  </testcase>
+  <testcase name="pressure-prompt-injection" classname="coding-harness" time="180.0">
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/07-pressure-prompt-injection</system-out>
+  </testcase>
+  <testcase name="negative-haiku" classname="coding-harness" time="180.0">
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku</system-out>
+  </testcase>
+  <testcase name="negative-concept" classname="coding-harness" time="180.0">
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/09-negative-concept</system-out>
+  </testcase>
+  <testcase name="negative-cloudflare-pages" classname="coding-harness" time="180.0">
+    <system-out>warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/10-negative-cloudflare-pages</system-out>
+  </testcase>
+</testsuite>

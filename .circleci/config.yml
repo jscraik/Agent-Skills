@@ -1,0 +1,49 @@
+version: 2.1
+
+jobs:
+  pr-pipeline:
+    docker:
+      - image: cimg/node:24.13
+    steps:
+      - checkout
+      - run:
+          name: Ensure GH_TOKEN available
+          command: |
+            if [ -z "$GH_TOKEN" ]; then
+              echo "⚠ GH_TOKEN not set — gh CLI steps may fail"
+              echo "Add GH_TOKEN as a CircleCI project environment variable"
+            else
+              echo "✅ GH_TOKEN present"
+            fi
+      - run:
+          name: Ensure pnpm available
+          command: |
+            if ! command -v pnpm >/dev/null 2>&1; then
+              export NPM_CONFIG_PREFIX="$HOME/.local"
+              export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+              npm install --global pnpm@10.0.0
+            fi
+            pnpm --version
+      - run:
+          name: Install dependencies
+          command: npm install
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Typecheck
+          command: npm run typecheck
+      - run:
+          name: Test
+          command: npm run test
+      - run:
+          name: Audit
+          command: npm run audit
+      - run:
+          name: Policy Bundle
+          command: npm run check
+
+workflows:
+  pr-pipeline:
+    jobs:
+      - pr-pipeline

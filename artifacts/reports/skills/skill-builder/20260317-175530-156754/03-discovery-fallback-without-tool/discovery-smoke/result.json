@@ -1,0 +1,25 @@
+{
+  "runner": "discovery-smoke",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(request_user_input.*unavailable|tool unavailable|without request_user_input)/",
+    "regex failed: /(?i)(?m)^\\s*(?:1[\\)\\.]|question\\s*1|round\\s*1)/",
+    "regex failed: /(?i)(one round at a time|single round)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/03-discovery-fallback-without-tool/discovery-smoke",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/03-discovery-fallback-without-tool/discovery-smoke/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/03-discovery-fallback-without-tool/discovery-smoke/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/03-discovery-fallback-without-tool/discovery-smoke/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

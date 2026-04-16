@@ -41,16 +41,19 @@ class ErrorObject:
 
     def __post_init__(self):
         # Validate error code is a known constant
-        valid_codes = [
+        valid_codes = {
             ErrorCode.SUCCESS, ErrorCode.ERR_RUNTIME, ErrorCode.ERR_VALIDATION,
             ErrorCode.ERR_DEPENDENCY, ErrorCode.ERR_CONFLICT, ErrorCode.ERR_AUTH,
             ErrorCode.ERR_PATH_TRAVERSAL, ErrorCode.ERR_PI_GUARD,
             ErrorCode.ERR_SCHEMA_INVALID, ErrorCode.ERR_REDUNDANCY,
             ErrorCode.ERR_INVALID_HANDOFF, ErrorCode.ERR_INVALID_STATE,
-        ]
+        }
         if self.code not in valid_codes:
-            # Allow but warn - don't crash on unknown codes
-            pass
+            import logging
+            logging.getLogger(__name__).warning(
+                "Unknown error code '%s' used in ErrorObject. "
+                "Consider registering it in ErrorCode.", self.code
+            )
 
 def _get_trace_id() -> str:
     """Get trace_id from ASK_TRACE_ID env var or generate UUID."""

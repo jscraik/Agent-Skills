@@ -1,0 +1,3 @@
+$codex-sessions-skill-scan
+
+Before I add another skill, use prior sessions to stop duplicates and recommend the highest-value skill updates.

@@ -79,14 +79,14 @@ else
 			echo -e "${BLUE}Recording failure for analysis...${NC}"
 			"${LEARN_SCRIPT}" --scope repo record "preflight_failure" "Preflight checks failed" || true
 			echo ""
-			echo "Run './Infrastructure/scripts/codex-learn analyze' to see scoped override suggestions."
+			echo "Run './scripts/codex-learn analyze' to see scoped override suggestions."
 		fi
 
 		echo ""
 		echo "Fix the issues above before running codex."
 		echo ""
 		echo "To bypass (not recommended):"
-		echo "  ./Infrastructure/scripts/codex-enforced --skip-preflight <your prompt>"
+		echo "  ./scripts/codex-enforced --skip-preflight <your prompt>"
 		exit 1
 	fi
 

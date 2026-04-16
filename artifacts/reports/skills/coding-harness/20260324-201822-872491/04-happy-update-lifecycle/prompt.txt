@@ -1,0 +1,1 @@
+Please outline the safe update path for an existing harness-managed repo, including preview, update, migrate, and rollback commands.

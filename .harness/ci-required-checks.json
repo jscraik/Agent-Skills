@@ -13,10 +13,25 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "pr-template"
     },
     {
       "policyId": "required-check-2",
+      "displayName": "linear-gate",
+      "sourceAppSlug": "github-actions",
+      "sourceAppId": "github-actions",
+      "externalIdPattern": "^linear-gate$",
+      "requiredOnEvents": [
+        "pull_request",
+        "merge_group"
+      ],
+      "freshnessWindowDays": 7,
+      "class": "required",
+      "githubCheckName": "linear-gate"
+    },
+    {
+      "policyId": "required-check-3",
       "displayName": "risk-policy-gate",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -26,10 +41,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "risk-policy-gate"
     },
     {
-      "policyId": "required-check-3",
+      "policyId": "required-check-4",
       "displayName": "dependency-scan",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -39,10 +55,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "dependency-review"
     },
     {
-      "policyId": "required-check-4",
+      "policyId": "required-check-5",
       "displayName": "orb-pinning",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -52,10 +69,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "actions-pinning"
     },
     {
-      "policyId": "required-check-5",
+      "policyId": "required-check-6",
       "displayName": "consistency-drift-health",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -65,10 +83,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "consistency-drift-health"
     },
     {
-      "policyId": "required-check-6",
+      "policyId": "required-check-7",
       "displayName": "docs-gate",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -78,10 +97,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "docs-gate"
     },
     {
-      "policyId": "required-check-7",
+      "policyId": "required-check-8",
       "displayName": "lint",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -91,10 +111,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "lint"
     },
     {
-      "policyId": "required-check-8",
+      "policyId": "required-check-9",
       "displayName": "typecheck",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -104,10 +125,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "typecheck"
     },
     {
-      "policyId": "required-check-9",
+      "policyId": "required-check-10",
       "displayName": "test",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -117,10 +139,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "test"
     },
     {
-      "policyId": "required-check-10",
+      "policyId": "required-check-11",
       "displayName": "audit",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -130,10 +153,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "audit"
     },
     {
-      "policyId": "required-check-11",
+      "policyId": "required-check-12",
       "displayName": "check",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -143,10 +167,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "check"
     },
     {
-      "policyId": "required-check-12",
+      "policyId": "required-check-13",
       "displayName": "memory",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -156,10 +181,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "memory"
     },
     {
-      "policyId": "required-check-13",
+      "policyId": "required-check-14",
       "displayName": "security-scan",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -169,10 +195,11 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "gitleaks"
     },
     {
-      "policyId": "required-check-14",
+      "policyId": "required-check-15",
       "displayName": "CodeRabbit",
       "sourceAppSlug": "github-actions",
       "sourceAppId": "github-actions",
@@ -182,7 +209,8 @@
         "merge_group"
       ],
       "freshnessWindowDays": 7,
-      "class": "required"
+      "class": "required",
+      "githubCheckName": "CodeRabbit"
     }
   ]
 }

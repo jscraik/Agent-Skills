@@ -63,7 +63,12 @@ if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
   exit 2
 fi
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+if repo_root="$(git -C "$script_dir/../.." rev-parse --show-toplevel 2>/dev/null)"; then
+  :
+else
+  repo_root="$(cd -P "$script_dir/../.." && pwd -P)"
+fi
 cd "$repo_root"
 
 selection_policy_shell="$(
@@ -337,9 +342,21 @@ skill_files_cmd() {
   done
 
   local plugin_skills_root=""
-  for plugin_skills_root in ${SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB}; do
-    [ -d "$plugin_skills_root" ] || continue
-    find_skill_files_with_policy "$plugin_skills_root"
+  local plugin_glob=""
+  local nested_glob=""
+  for plugin_glob in ${SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB}; do
+    for plugin_skills_root in ${plugin_glob}; do
+      [ -d "$plugin_skills_root" ] || continue
+      find_skill_files_with_policy "$plugin_skills_root"
+    done
+
+    if [[ "$plugin_glob" == */\*/skills ]]; then
+      nested_glob="${plugin_glob%/*/skills}/*/*/skills"
+      for plugin_skills_root in ${nested_glob}; do
+        [ -d "$plugin_skills_root" ] || continue
+        find_skill_files_with_policy "$plugin_skills_root"
+      done
+    fi
   done
 }
 
@@ -1514,7 +1531,14 @@ sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$runtime_cache_roo
 materialize_plugin_cache_roots "$runtime_cache_root"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"
 sync_plugin_cache_projections
-sync_user_skills "$skills_dir" "$repo_root/skills" 1
+# On case-insensitive filesystems (e.g. default macOS), "skills" aliases
+# "Skills"; forcing a lowercase symlink would replace the canonical tracked
+# Skills/ tree and can introduce symlink loops.
+if [ -d "$repo_root/Skills" ] && [ ! -L "$repo_root/Skills" ]; then
+  echo "[INFO] Skipping repo-local skills symlink projection because canonical Skills/ exists."
+else
+  sync_user_skills "$skills_dir" "$repo_root/skills" 1
+fi
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 if [[ "$sync_scope" == "workspace" ]]; then
   remove_legacy_home_skill_symlinks

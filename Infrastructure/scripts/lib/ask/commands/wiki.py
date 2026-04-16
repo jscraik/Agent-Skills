@@ -70,7 +70,7 @@ def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResu
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=output or error_output or "Wiki lint failed.",
-                fix_suggestion="Review lint output and update Wiki/skill-ops-wiki/wiki pages or links.",
+                fix_suggestion="Review lint output and update Wiki/wiki pages or links.",
             )
         )
         return result
@@ -238,7 +238,7 @@ def wiki_add(
     """Create a triaged wiki note and update index/log links."""
     result = CallResult()
 
-    wiki_root = repo_root / "docs" / "skill-ops-wiki"
+    wiki_root = repo_root / "Wiki"
     wiki_dir = wiki_root / "wiki"
     index_path = wiki_dir / "index.md"
     log_path = wiki_dir / "log.md"
@@ -403,7 +403,7 @@ def wiki_add(
         "## Triage\n\n"
         f"- Intent: `{cleaned_intent}`\n"
         f"- Status: `{cleaned_status}`\n"
-        f"- Destination: `Wiki/skill-ops-wiki/wiki/{destination_rel}`\n"
+        f"- Destination: `Wiki/wiki/{destination_rel}`\n"
         f"- Tags: {tags_line}\n\n"
         "## Summary\n\n"
         f"{cleaned_summary}\n\n"
@@ -418,7 +418,7 @@ def wiki_add(
         f"- Intent: `{cleaned_intent}`\n"
         f"- Status: `{cleaned_status}`\n"
         f"- Source: {cleaned_source}\n"
-        f"- Note: `Wiki/skill-ops-wiki/wiki/{note_rel}`\n"
+        f"- Note: `Wiki/wiki/{note_rel}`\n"
     )
 
     result.data["title"] = cleaned_title
@@ -430,9 +430,9 @@ def wiki_add(
     result.data["tags"] = cleaned_tags
     if asset_link:
         result.data["asset_link"] = asset_link
-    result.data["note_path"] = f"Wiki/skill-ops-wiki/wiki/{note_rel}"
-    result.data["index_path"] = "Wiki/skill-ops-wiki/wiki/index.md"
-    result.data["log_path"] = "Wiki/skill-ops-wiki/wiki/log.md"
+    result.data["note_path"] = f"Wiki/wiki/{note_rel}"
+    result.data["index_path"] = "Wiki/wiki/index.md"
+    result.data["log_path"] = "Wiki/wiki/log.md"
     result.data["dry_run"] = dry_run
 
     if dry_run:
@@ -464,7 +464,7 @@ def wiki_add(
         handle.write(log_entry)
 
     result.status = "success"
-    result.data["message"] = f"Added triaged wiki note at Wiki/skill-ops-wiki/wiki/{note_rel}"
+    result.data["message"] = f"Added triaged wiki note at Wiki/wiki/{note_rel}"
     result.metadata["next_steps"] = ["ask wiki lint"]
     return result
 
@@ -503,7 +503,7 @@ def wiki_query(
     repo_root: Path,
     *,
     query: str,
-    wiki_root: str = "Wiki/skill-ops-wiki/wiki",
+    wiki_root: str = "Wiki/wiki",
     limit: int = 5,
 ) -> CallResult:
     """Search wiki pages by keyword relevance and return ranked results."""
@@ -521,7 +521,7 @@ def wiki_query(
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Wiki root not found: {wiki_root_path}",
-                fix_suggestion="Ensure Wiki/skill-ops-wiki/wiki exists before querying.",
+                fix_suggestion="Ensure Wiki/wiki exists before querying.",
             )
         )
         return result
@@ -592,7 +592,7 @@ def wiki_add_asset(
 ) -> CallResult:
     """Copy an asset into wiki raw storage and add a linked wiki asset note."""
     result = CallResult()
-    wiki_root = repo_root / "docs" / "skill-ops-wiki"
+    wiki_root = repo_root / "Wiki"
     raw_assets_dir = wiki_root / "raw" / "assets"
 
     asset_input = Path(asset_path).expanduser()
@@ -618,7 +618,7 @@ def wiki_add_asset(
     stored_name = f"{timestamp}-{asset_slug}{ext.lower()}"
     safe_name = _with_collision_suffix(raw_assets_dir, stored_name, timestamp)
     stored_path = raw_assets_dir / safe_name
-    stored_repo_rel = f"Wiki/skill-ops-wiki/raw/assets/{safe_name}"
+    stored_repo_rel = f"Wiki/raw/assets/{safe_name}"
     markdown_asset_link = f"../../raw/assets/{safe_name}"
 
     # Preflight validation before mutating storage
@@ -677,7 +677,7 @@ def wiki_ingest(
     """Capture a raw source ingest note and append a wiki log entry."""
     result = CallResult()
 
-    wiki_root = repo_root / "docs" / "skill-ops-wiki"
+    wiki_root = repo_root / "Wiki"
     raw_dir = wiki_root / "raw"
     log_path = wiki_root / "wiki" / "log.md"
 
@@ -727,15 +727,15 @@ def wiki_ingest(
         f"\n## [{date_iso}] ingest | {title.strip()}\n\n"
         f"- Source(s): {', '.join(cleaned_sources) if cleaned_sources else '(none provided)'}\n"
         f"- Summary: {summary.strip()}\n"
-        f"- Raw note: `Wiki/skill-ops-wiki/raw/{raw_filename}`\n"
+        f"- Raw note: `Wiki/raw/{raw_filename}`\n"
     )
 
     result.data["title"] = title.strip()
     result.data["sources"] = cleaned_sources
     result.data["summary"] = summary.strip()
     result.data["tags"] = cleaned_tags
-    result.data["raw_note"] = f"Wiki/skill-ops-wiki/raw/{raw_filename}"
-    result.data["log_file"] = "Wiki/skill-ops-wiki/wiki/log.md"
+    result.data["raw_note"] = f"Wiki/raw/{raw_filename}"
+    result.data["log_file"] = "Wiki/wiki/log.md"
     result.data["dry_run"] = dry_run
 
     if dry_run:
@@ -758,6 +758,6 @@ def wiki_ingest(
         handle.write(log_entry)
 
     result.status = "success"
-    result.data["message"] = f"Ingested source note at Wiki/skill-ops-wiki/raw/{raw_filename}"
+    result.data["message"] = f"Ingested source note at Wiki/raw/{raw_filename}"
     result.metadata["next_steps"] = ["ask wiki lint"]
     return result

@@ -29,10 +29,10 @@ Codex plugin package for CodeRabbit review operations: reference guidance, CLI r
 
 ## Source Of Truth
 - Source family:
-  - `Plugins/coderabbit/skills/coderabbit/`
-  - `Plugins/coderabbit/skills/code-review/`
-  - `Plugins/coderabbit/skills/autofix/`
-  - `Plugins/coderabbit/skills/simplify/`
+  - `Plugins/coderabbit/skills/library_api_reference/coderabbit/`
+  - `Plugins/coderabbit/skills/code_quality_review/code-review/`
+  - `Plugins/coderabbit/skills/code_quality_review/autofix/`
+  - `Plugins/coderabbit/skills/code_quality_review/simplify/`
 - Packaged cache mirror:
   - `.agents/plugins-runtime/cache/agent-skills-local/coderabbit/local/`
 

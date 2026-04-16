@@ -235,7 +235,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
             alias = repo_root / "utilities" / "plugin-builder"
             alias.parent.mkdir(parents=True, exist_ok=True)
-            alias.symlink_to("../Plugins/plugin-factory/skills/plugin-builder", target_is_directory=True)
+            alias.symlink_to("../Plugins/plugin-factory/skills/code_quality_review/plugin-builder", target_is_directory=True)
 
             result = run_validator(repo_root)
             self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)
@@ -417,7 +417,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             utilities_dir.mkdir(parents=True, exist_ok=True)
             try:
                 (utilities_dir / "skill-builder").symlink_to(
-                    Path("../Plugins/skill-factory/skills/skill-builder"),
+                    Path("../Plugins/skill-factory/skills/code_quality_review/skill-builder"),
                     target_is_directory=True,
                 )
             except (OSError, NotImplementedError):

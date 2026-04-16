@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 
 if ! command -v node >/dev/null 2>&1; then
-	echo "Error: node is required to run Infrastructure/scripts/harness-cli.sh." >&2
+	echo "Error: node is required to run scripts/harness-cli.sh." >&2
 	echo "Install Node.js and retry." >&2
 	exit 1
 fi
@@ -48,7 +48,7 @@ if [[ $resolution_status -eq 42 || -z "$CLI_PATH" ]]; then
 	echo "  npm install" >&2
 	echo "  npm install --save-dev @brainwav/coding-harness" >&2
 	echo "After the package is installed, rerun:" >&2
-	echo "  bash Infrastructure/scripts/harness-cli.sh <command>" >&2
+	echo "  bash scripts/harness-cli.sh <command>" >&2
 	echo "  npm exec harness -- <command>" >&2
 	exit 1
 fi

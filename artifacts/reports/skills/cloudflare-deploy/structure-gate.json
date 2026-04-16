@@ -1,0 +1,487 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:21Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/product/domain/cloudflare-deploy/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/product/domain/cloudflare-deploy/SKILL.md",
+  "name": "cloudflare-deploy",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/ai-gateway/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/ai-gateway/sdk-integration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/ai-gateway/troubleshooting.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/ai-search/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/analytics-engine/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/api-shield/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/api/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/api/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/api/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/argo-smart-routing/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/argo-smart-routing/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/browser-rendering/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/browser-rendering/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cache-reserve/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cache-reserve/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cron-triggers/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cron-triggers/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cron-triggers/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cron-triggers/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/cron-triggers/patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/email-routing/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/email-routing/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/email-routing/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/email-workers/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/images/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/images/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/images/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/network-interconnect/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/observability/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/observability/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/pipelines/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/r2-data-catalog/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/r2-sql/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/r2-sql/patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/realtime-sfu/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/realtimekit/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/realtimekit/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/sandbox/patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/secrets-store/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/smart-placement/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/smart-placement/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/snippets/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/snippets/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/spectrum/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/spectrum/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/stream/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/stream/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/tail-workers/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/tunnel/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/tunnel/networking.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/workers-ai/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/workers-ai/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/workers-for-platforms/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/workers-for-platforms/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/workflows/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/wrangler/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/email-workers/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/images/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/stream/configuration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/stream/patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/tail-workers/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/tunnel/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/workers-for-platforms/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/workers-for-platforms/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/pipelines/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/zaraz/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/ai-gateway/README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/ai-gateway/sdk-integration.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/cache-reserve/gotchas.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/ddos/patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/snippets/patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/tail-workers/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/waf/api.md"
+    },
+    {
+      "level": "WARN",
+      "code": "REPO_ASSETS_UNREFERENCED",
+      "message": "assets/ exists but is not referenced in SKILL.md.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/5"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_SCOPE_BROAD",
+      "message": "Skill/package scope may be too broad for a first pass. Add explicit guidance like 'start with 2-3 focused surfaces' or 'keep scope tight'.",
+      "evidence": "surfaces=4"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "references/evals.yaml"
+    }
+  ]
+}

@@ -63,7 +63,7 @@ Inheritance requirements:
 - if the mapping is missing, ambiguous, or lossy, the packaged asset must declare the required lifecycle fields directly
 
 Phase-one packaged proof target:
-- [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/skill-builder/SKILL.md)
+- [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md) (note: factory skills live in `Plugins/skill-factory/` and `Plugins/plugin-factory/`, not in `Skills/`)
 
 ## Lifecycle Readiness States
 
@@ -97,6 +97,6 @@ Entries that are only short-lived execution notes or incident journals do not qu
 ## Phase-One Proof Targets
 
 Use these seed targets when proving the baseline across asset categories:
-- canonical skill: [coding-harness/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/coding-harness/SKILL.md)
-- packaged skill: [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/skill-builder/SKILL.md)
+- canonical skill: [coding-harness/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/coding-harness/SKILL.md)
+- packaged skill: [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md)
 - plugin package: [skill-factory plugin manifest](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/.codex-plugin/plugin.json)

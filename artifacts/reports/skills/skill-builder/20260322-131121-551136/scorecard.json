@@ -1,0 +1,102 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-03-22T19:11:22Z",
+  "skill": "skill-builder",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder",
+  "skill_release": {
+    "name": "skill-builder",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "88289de6e7c3ba23bf19a5aace3e0d11d02a75be",
+    "source_branch": "codex/skill-governance-sweep-fixes"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/Agent-Skills",
+  "runner_mode": "discovery-smoke",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260322-131121-551136",
+  "case_filters": [
+    "explicit-plan"
+  ],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": false,
+  "cases": [
+    {
+      "id": "explicit-plan",
+      "name": "explicit plan",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 0,
+          "passed": false,
+          "tier1_failures": [
+            "contains failed: '## Scope and triggers'",
+            "contains failed: '## Required inputs'",
+            "contains failed: '## Deliverables'",
+            "contains failed: 'SKILL.md'",
+            "contains failed: 'references/plan.md'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke",
+            "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke/final.txt",
+            "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke/stdout.txt",
+            "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/01-explicit-plan/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] contains failed: '## Scope and triggers'",
+        "[discovery-smoke] contains failed: '## Required inputs'",
+        "[discovery-smoke] contains failed: '## Deliverables'",
+        "[discovery-smoke] contains failed: 'SKILL.md'",
+        "[discovery-smoke] contains failed: 'references/plan.md'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 1,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136",
+    "summary": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/summary.json",
+    "scorecard": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/scorecard.json",
+    "release_manifest": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/release_manifest.json",
+    "junit": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260322-131121-551136/junit.xml"
+  }
+}

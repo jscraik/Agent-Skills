@@ -1,0 +1,52 @@
+{
+  "id": "imported-dual-grade",
+  "name": "imported dual grade",
+  "category": "edge",
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 300.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-171207-842167/01-imported-dual-grade",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-171207-842167/01-imported-dual-grade/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-171207-842167/01-imported-dual-grade/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-171207-842167/01-imported-dual-grade/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-171207-842167/01-imported-dual-grade/codex/stderr.txt",
+        "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-171207-842167/01-imported-dual-grade/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 40,
+          "command_count": 9,
+          "unique_command_count": 9,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 1,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 295403,
+            "output_tokens": 4817,
+            "reasoning_tokens": 0,
+            "total_tokens": 300220
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": []
+}

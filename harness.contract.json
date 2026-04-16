@@ -1,0 +1,748 @@
+{
+  "version": "1.5.0",
+  "riskTierRules": {
+    "src/auth/**": "high",
+    "src/api/**": "high",
+    "src/lib/**": "medium",
+    "**/*.test.ts": "low"
+  },
+  "mergePolicy": {
+    "high": [
+      "review-gate",
+      "evidence-verify"
+    ],
+    "medium": [
+      "review-gate"
+    ],
+    "low": []
+  },
+  "docsDriftRules": {},
+  "branchProtection": {
+    "requiredChecks": [
+      "pr-template",
+      "linear-gate",
+      "risk-policy-gate",
+      "dependency-scan",
+      "orb-pinning",
+      "consistency-drift-health",
+      "docs-gate",
+      "lint",
+      "typecheck",
+      "test",
+      "audit",
+      "check",
+      "memory",
+      "security-scan",
+      "CodeRabbit"
+    ],
+    "restrictDeletions": true,
+    "blockForcePushes": true,
+    "requireLinearHistory": true,
+    "requirePullRequest": true,
+    "requiredApprovingReviewCount": 1,
+    "dismissStaleReviewsOnPush": true,
+    "requireConversationResolution": true,
+    "requireCodeOwnerReview": false,
+    "requireLastPushApproval": false,
+    "requireBranchesUpToDate": true,
+    "allowedMergeMethods": {
+      "mergeCommit": true,
+      "squash": true,
+      "rebase": true
+    },
+    "codeQuality": {
+      "required": true,
+      "severity": "all"
+    },
+    "publicCodeScanning": {
+      "required": true,
+      "publicOnly": true,
+      "tool": "CodeQL",
+      "alertsThreshold": "errors",
+      "securityAlertsThreshold": "high_or_higher"
+    }
+  },
+  "toolingPolicy": {
+    "requiredDocumentationTerms": [
+      "node",
+      "pnpm",
+      "python",
+      "uv",
+      "make",
+      "rg",
+      "fd",
+      "jq",
+      "prek",
+      "diagram",
+      "mise",
+      "vale",
+      "argos",
+      "cosign",
+      "cloudflared",
+      "vitest",
+      "ruff",
+      "eslint",
+      "agent-browser",
+      "agentation",
+      "mermaid-cli",
+      "markdownlint-cli2",
+      "wrangler",
+      "beautiful-mermaid",
+      "semgrep",
+      "semver",
+      "trivy",
+      "rsearch",
+      "wsearch"
+    ],
+    "requiredBinaries": [
+      "pnpm",
+      "node",
+      "jq",
+      "make",
+      "rg",
+      "fd",
+      "prek",
+      "diagram",
+      "mise",
+      "vale",
+      "argos",
+      "cosign",
+      "cloudflared",
+      "vitest",
+      "ruff",
+      "eslint",
+      "agent-browser",
+      "agentation-mcp",
+      "mmdc",
+      "markdownlint-cli2",
+      "wrangler",
+      "beautiful-mermaid",
+      "semgrep",
+      "semver",
+      "trivy",
+      "rsearch",
+      "wsearch"
+    ],
+    "requiredMiseTools": [
+      {
+        "tool": "node",
+        "version": "24.13.1"
+      },
+      {
+        "tool": "pnpm",
+        "version": "10.0.0"
+      },
+      {
+        "tool": "python",
+        "version": "3.12"
+      },
+      {
+        "tool": "uv",
+        "version": "0.10.9"
+      },
+      {
+        "tool": "cargo:prek",
+        "version": "0.3.4"
+      },
+      {
+        "tool": "npm:@brainwav/diagram",
+        "version": "1.0.8"
+      },
+      {
+        "tool": "npm:@argos-ci/cli",
+        "version": "4.1.1"
+      },
+      {
+        "tool": "cosign",
+        "version": "3.0.5"
+      },
+      {
+        "tool": "cloudflared",
+        "version": "2026.3.0"
+      },
+      {
+        "tool": "npm:vitest",
+        "version": "4.0.18"
+      },
+      {
+        "tool": "ruff",
+        "version": "0.15.5"
+      },
+      {
+        "tool": "npm:eslint",
+        "version": "10.0.3"
+      },
+      {
+        "tool": "npm:agent-browser",
+        "version": "0.17.1"
+      },
+      {
+        "tool": "npm:agentation",
+        "version": "2.3.2"
+      },
+      {
+        "tool": "npm:agentation-mcp",
+        "version": "1.2.0"
+      },
+      {
+        "tool": "npm:@mermaid-js/mermaid-cli",
+        "version": "11.12.0"
+      },
+      {
+        "tool": "npm:@brainwav/rsearch",
+        "version": "0.1.6"
+      },
+      {
+        "tool": "npm:@brainwav/wsearch-cli",
+        "version": "0.1.9"
+      },
+      {
+        "tool": "npm:beautiful-mermaid",
+        "version": "1.1.3"
+      },
+      {
+        "tool": "npm:markdownlint-cli2",
+        "version": "0.21.0"
+      },
+      {
+        "tool": "npm:semver",
+        "version": "7.7.4"
+      },
+      {
+        "tool": "npm:wrangler",
+        "version": "4.69.0"
+      },
+      {
+        "tool": "semgrep",
+        "version": "1.153.1"
+      },
+      {
+        "tool": "trivy",
+        "version": "0.69.3"
+      },
+      {
+        "tool": "vale",
+        "version": "3.13.1"
+      }
+    ],
+    "miseFilePath": ".mise.toml",
+    "readinessScriptPath": "scripts/check-environment.sh",
+    "codexEnvironment": {
+      "path": ".codex/environments/environment.toml",
+      "requiredActions": [
+        {
+          "name": "Tools",
+          "icon": "tool"
+        },
+        {
+          "name": "Run",
+          "icon": "run"
+        },
+        {
+          "name": "Debug",
+          "icon": "debug"
+        },
+        {
+          "name": "Test",
+          "icon": "test"
+        },
+        {
+          "name": "Prek",
+          "icon": "test"
+        },
+        {
+          "name": "Diagram",
+          "icon": "tool"
+        },
+        {
+          "name": "Ralph",
+          "icon": "debug"
+        },
+        {
+          "name": "Mise",
+          "icon": "tool"
+        },
+        {
+          "name": "Vale",
+          "icon": "debug"
+        },
+        {
+          "name": "Argos",
+          "icon": "test"
+        },
+        {
+          "name": "Cosign",
+          "icon": "debug"
+        },
+        {
+          "name": "Cloudflared",
+          "icon": "run"
+        },
+        {
+          "name": "Vitest",
+          "icon": "test"
+        },
+        {
+          "name": "Ruff",
+          "icon": "debug"
+        },
+        {
+          "name": "ESLint",
+          "icon": "debug"
+        },
+        {
+          "name": "Agent Browser",
+          "icon": "tool"
+        },
+        {
+          "name": "Agentation",
+          "icon": "tool"
+        },
+        {
+          "name": "Mermaid CLI",
+          "icon": "tool"
+        },
+        {
+          "name": "MarkdownLint",
+          "icon": "debug"
+        },
+        {
+          "name": "Wrangler",
+          "icon": "run"
+        },
+        {
+          "name": "1Password",
+          "icon": "tool"
+        },
+        {
+          "name": "Beautiful Mermaid",
+          "icon": "tool"
+        },
+        {
+          "name": "Auth0",
+          "icon": "tool"
+        },
+        {
+          "name": "Semgrep",
+          "icon": "debug"
+        },
+        {
+          "name": "Semver",
+          "icon": "tool"
+        },
+        {
+          "name": "Trivy",
+          "icon": "debug"
+        },
+        {
+          "name": "Gitleaks",
+          "icon": "debug"
+        },
+        {
+          "name": "Research",
+          "icon": "tool"
+        },
+        {
+          "name": "WSearch",
+          "icon": "tool"
+        }
+      ]
+    },
+    "makefile": {
+      "path": "Makefile",
+      "requiredTargets": [
+        "help",
+        "install",
+        "setup",
+        "preflight",
+        "worktree-ready",
+        "verify-work",
+        "codestyle",
+        "hooks",
+        "hooks-pre-commit",
+        "hooks-pre-push",
+        "secrets-staged",
+        "docs-style-changed",
+        "related-tests",
+        "semgrep-changed",
+        "diagrams-check",
+        "lint",
+        "docs-lint",
+        "fmt",
+        "typecheck",
+        "test",
+        "check",
+        "audit",
+        "secrets",
+        "security",
+        "clean",
+        "reset",
+        "ci",
+        "diagrams",
+        "env-check"
+      ]
+    },
+    "packagePolicy": {
+      "packageJsonPath": "package.json",
+      "explicitCapabilities": [],
+      "capabilityDetectors": [
+        {
+          "capability": "ui",
+          "dependencyMarkers": [
+            "react",
+            "react-dom",
+            "next",
+            "vite",
+            "tailwindcss",
+            "@storybook/react",
+            "@storybook/react-vite",
+            "@radix-ui/react-slot"
+          ]
+        },
+        {
+          "capability": "chatgpt_apps_sdk",
+          "dependencyMarkers": [
+            "@openai/chatkit",
+            "@openai/agents",
+            "@openai/agents-realtime"
+          ]
+        }
+      ],
+      "requiredPackages": [
+        {
+          "package": "@brainwav/design-system-guidance",
+          "dependencyType": "either",
+          "requiredWhenCapabilities": [
+            "ui",
+            "chatgpt_apps_sdk"
+          ]
+        }
+      ]
+    }
+  },
+  "issueTrackingPolicy": {
+    "provider": "linear",
+    "requirePackageBugsUrl": true,
+    "disableGitHubIssues": true,
+    "requireBranchIssueKey": true,
+    "requirePrIssueKey": true,
+    "prReferenceMode": "either",
+    "branchPrefix": "codex"
+  },
+  "evidencePolicy": {
+    "requiredFor": [],
+    "allowedTypes": [
+      "png",
+      "jpeg"
+    ],
+    "maxFileSizeBytes": 1048576
+  },
+  "diffBudget": {
+    "maxFiles": 10,
+    "maxNetLOC": 400,
+    "overrideLabel": "diff-budget-override"
+  },
+  "uiLoopPolicy": {
+    "fastCommand": "npm run ui:fast",
+    "verifyCommand": "npm run ui:verify",
+    "exploreCommand": "npm run ui:explore",
+    "sloTargets": {
+      "fastLoopSeconds": 30,
+      "verifyLoopSeconds": 120
+    }
+  },
+  "runtimePolicy": {
+    "nodeVersion": "20.x",
+    "createIssueOnAgentFindings": true
+  },
+  "memoryPolicy": {
+    "enabled": true,
+    "provider": "local",
+    "sessionIdTemplate": "repo:<name>:task:<id>",
+    "domain": "default",
+    "requiredTags": [
+      "repo",
+      "area",
+      "type"
+    ],
+    "maxObservationsPerStep": 3,
+    "allowedLevels": [
+      "observation",
+      "learning",
+      "pattern"
+    ],
+    "requireStartRead": true,
+    "requireCloseoutSummary": true,
+    "forbiddenContentPatterns": [
+      "token",
+      "api[_-]?key",
+      "secret",
+      "password",
+      "credential"
+    ]
+  },
+  "memoryMaintenancePolicy": {
+    "validateSchedule": "weekly",
+    "reflectSchedule": "weekly",
+    "questionSlaDays": 7,
+    "duplicateThreshold": 0.8
+  },
+  "memoryEvalPolicy": {
+    "trialsPerTask": 3,
+    "requiredMetrics": [
+      "pass^k",
+      "tool_errors",
+      "duplicate_rate"
+    ],
+    "passPowKThreshold": 0.8
+  },
+  "observabilityPolicy": {
+    "provider": "logs",
+    "collectorEndpoint": "http://localhost:4318"
+  },
+  "packageManagerPolicy": {
+    "allowedManagers": [
+      "pnpm",
+      "npm",
+      "yarn"
+    ],
+    "requiredManager": null
+  },
+  "remediationPolicy": {
+    "providerDefaults": {
+      "codex": {
+        "autoApplyMaxTier": "medium",
+        "dryRunOnlyByDefault": false
+      }
+    },
+    "marker": "[auto-remediate]",
+    "timeoutMinutes": 10,
+    "retryLimit": 3,
+    "requireEvidence": true
+  },
+  "loopStageContracts": {
+    "risk-policy-gate": {
+      "inputs": [
+        "changed_files",
+        "harness.contract.json"
+      ],
+      "outputs": [
+        "risk-policy-gate.result"
+      ],
+      "schema": "loop-stage-contract/v1",
+      "failPolicy": "fail_closed",
+      "if": "always()",
+      "permissions": [
+        "contents:read",
+        "pull-requests:read"
+      ],
+      "timeoutMinutes": 15,
+      "concurrency": "none"
+    },
+    "review-gate": {
+      "inputs": [
+        "risk-policy-gate.result",
+        "head_sha",
+        "harness.contract.json"
+      ],
+      "outputs": [
+        "review-gate.result"
+      ],
+      "schema": "loop-stage-contract/v1",
+      "failPolicy": "fail_closed",
+      "if": "always()",
+      "permissions": [
+        "contents:read",
+        "pull-requests:read"
+      ],
+      "timeoutMinutes": 15,
+      "concurrency": "none"
+    },
+    "evidence-verify": {
+      "inputs": [
+        "review-gate.result",
+        "evidence_files",
+        "harness.contract.json"
+      ],
+      "outputs": [
+        "evidence-verify.result",
+        "browser-evidence-artifacts"
+      ],
+      "schema": "loop-stage-contract/v1",
+      "failPolicy": "fail_closed",
+      "if": "always()",
+      "permissions": [
+        "contents:read"
+      ],
+      "timeoutMinutes": 15,
+      "concurrency": "none"
+    },
+    "remediation-decision": {
+      "inputs": [
+        "evidence-verify.result",
+        "findings.json",
+        "harness.contract.json"
+      ],
+      "outputs": [
+        "remediation-decision.result",
+        "remediation-decision-artifacts"
+      ],
+      "schema": "loop-stage-contract/v1",
+      "failPolicy": "fail_closed",
+      "if": "always()",
+      "permissions": [
+        "contents:read",
+        "pull-requests:write"
+      ],
+      "timeoutMinutes": 15,
+      "concurrency": "none"
+    }
+  },
+  "pilotGapCasePolicy": {
+    "enabled": false,
+    "defaultSlaHours": 72,
+    "requireClosureEvidence": true,
+    "storePath": ".harness/gap-cases.v1.json"
+  },
+  "pilotRollbackPolicy": {
+    "autoTrigger": true,
+    "requireManualRelease": true,
+    "completionMarkerPath": ".harness/rollback-marker.json",
+    "mode": "manual"
+  },
+  "pilotAuthzPolicy": {
+    "githubScopeAllowlist": [
+      "pull_requests:write",
+      "contents:read",
+      "issues:write"
+    ],
+    "repoAllowlist": [],
+    "branchAllowlist": [],
+    "protectedBranchDenylist": [
+      "main",
+      "master",
+      "release/*"
+    ],
+    "enforceBranchProtection": true
+  },
+  "controlPlanePolicy": {
+    "overridePolicy": {
+      "authorizedPrincipals": [],
+      "dualApprovalScopes": [
+        "temporary_unblock",
+        "temporary_promote"
+      ],
+      "maxTtlHours": 24,
+      "nonOverridableControls": [
+        "canonical_runtime_invalid",
+        "governance_trust_mismatch",
+        "missing_required_instruction_surface",
+        "missing_snapshot_integrity_verification"
+      ]
+    }
+  },
+  "ciProviderPolicy": {
+    "activeProvider": "circleci",
+    "mode": "shadow",
+    "migrationStage": "dual-provider",
+    "transitionStatusArtifactPath": ".harness/ci-provider-transition-status.json",
+    "authorityConfigPath": "harness.contract.json",
+    "requiredCheckManifestPath": ".harness/ci-required-checks.json",
+    "trustedPolicyRef": "refs/heads/main"
+  },
+  "contextIntegrityPolicy": {
+    "mode": "shadow",
+    "truthSources": [
+      {
+        "path": "README.md",
+        "kind": "file",
+        "authority": "canonical",
+        "required": true
+      },
+      {
+        "path": "AGENTS.md",
+        "kind": "file",
+        "authority": "canonical",
+        "required": true
+      },
+      {
+        "path": "CLAUDE.md",
+        "kind": "file",
+        "authority": "canonical",
+        "required": true
+      },
+      {
+        "path": "CONTRIBUTING.md",
+        "kind": "file",
+        "authority": "canonical",
+        "required": true
+      },
+      {
+        "path": "AI/context/diagram-context.md",
+        "kind": "file",
+        "authority": "canonical",
+        "required": true
+      },
+      {
+        "path": "docs/agents",
+        "kind": "directory",
+        "authority": "governed",
+        "required": true
+      },
+      {
+        "path": "docs/adr",
+        "kind": "directory",
+        "authority": "governed",
+        "required": false
+      },
+      {
+        "path": "docs/specs",
+        "kind": "directory",
+        "authority": "governed",
+        "required": false
+      }
+    ],
+    "contradictionCatalog": [
+      {
+        "id": "command-contract-conflict",
+        "category": "command_contract_conflict",
+        "severity": "error",
+        "description": "Canonical governance docs disagree with executable package-manager or command contracts."
+      },
+      {
+        "id": "required-check-conflict",
+        "category": "required_check_conflict",
+        "severity": "error",
+        "description": "Configured required checks diverge from workflow-enforced required checks."
+      },
+      {
+        "id": "instruction-precedence-conflict",
+        "category": "instruction_precedence_conflict",
+        "severity": "warning",
+        "description": "Governance instruction surfaces disagree about authoritative workflow behavior."
+      },
+      {
+        "id": "workflow-policy-conflict",
+        "category": "workflow_policy_conflict",
+        "severity": "error",
+        "description": "Workflow or policy surfaces disagree on enforced rollout posture or gate ownership."
+      },
+      {
+        "id": "source-truth-missing",
+        "category": "source_truth_missing",
+        "severity": "error",
+        "description": "A configured canonical or governed truth source is missing from the repository."
+      }
+    ],
+    "healthSampling": {
+      "fixtureSetPath": "artifacts/context-integrity/health-sampling-fixtures.json",
+      "fixtureSetId": "context-integrity-v1",
+      "allowedTriggerTypes": [
+        "current_checkout",
+        "recent_artifacts"
+      ],
+      "samplingCadence": "per_run",
+      "dedupeScope": "query"
+    }
+  }
+}

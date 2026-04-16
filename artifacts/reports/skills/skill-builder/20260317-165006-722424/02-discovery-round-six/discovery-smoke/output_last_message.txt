@@ -1,0 +1,33 @@
+## Scope and triggers
+- This request still fits $skill-builder because the discovery phase is finishing and the skill should not be built until the user confirms the summary.
+
+## Required inputs
+- No major discovery gaps remain; this turn is for confirmation before building.
+
+## Deliverables
+- Provide a compact skill summary and wait for confirmation before writing `SKILL.md`.
+
+## Failure mode
+- Do not assume approval from silence; ask for confirmation before building.
+
+## Skill Summary: design-review-helper
+
+**Goal:** Help review long design review threads and turn them into actionable summaries.
+**Trigger:** `/design-review-helper` plus natural requests about summarizing design review threads.
+**Arguments:** thread link or pasted discussion
+
+**Process:**
+1. Capture the goal and desired output.
+2. Review the thread content.
+3. Summarize key decisions, disagreements, and next actions.
+4. Return a concise review artifact.
+
+**Inputs:** discussion text or link
+**Outputs:** structured summary and action list
+**Dependencies:** none required for the smoke example
+**Guardrails:** avoid inventing decisions and do not build before confirmation
+
+Assumptions: this is a lightweight review helper and not an approval or merge tool.
+
+Does this capture it well enough for me to build?
+Anything to add or change before I build it?

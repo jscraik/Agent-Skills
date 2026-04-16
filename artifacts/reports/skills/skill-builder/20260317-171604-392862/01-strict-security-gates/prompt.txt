@@ -1,0 +1,3 @@
+$skill-builder
+
+For this skill review, show the gold validation commands and make security findings release-blocking.

@@ -9,21 +9,11 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-12.v9"
+POLICY_VERSION = "2026-04-16.v11"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
-    "auth",
-    "backend",
-    "design",
-    "frontend",
-    "github",
-    "interview",
-    "ops",
-    "personas",
-    "product",
-    "skills-system",
-    "utilities",
+    "Skills",
 )
 
 # Plugin-bundled skill roots scanned by sync scripts.
@@ -59,7 +49,10 @@ PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()
 
 # Skills intentionally routed through the hidden `.system` lane while still
 # remaining plugin-owned in source. This keeps the bridge explicit and narrow.
+# imagegen and openai-docs are maintained OpenAI originals that live here.
 SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
+    "imagegen",
+    "openai-docs",
     "plugin-creator",
     "plugin-installer",
     "skill-creator",

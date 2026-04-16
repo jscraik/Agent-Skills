@@ -1,0 +1,42 @@
+{
+  "runner": "codex",
+  "exit_code": 124,
+  "passed": false,
+  "tier1_failures": [
+    "codex returned non-zero exit code: 124",
+    "regex failed: /(?i)(deconflict-first|before.*validation|step zero|capability overlap matrix|overlap matrix)/",
+    "regex failed: /(?i)(merge|fold|improve-existing|install-new)/",
+    "regex failed: /(?i)(do not install-new unless|explicit override|override)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-183122-198608/02-install-fold-first-order/codex/codex_events.jsonl",
+    "should_trigger set, but skill selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-183122-198608/02-install-fold-first-order/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-183122-198608/02-install-fold-first-order/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-183122-198608/02-install-fold-first-order/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-183122-198608/02-install-fold-first-order/codex/stderr.txt",
+    "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-183122-198608/02-install-fold-first-order/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 0,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 0,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "selected_skill": null
+  },
+  "used_schema": false
+}

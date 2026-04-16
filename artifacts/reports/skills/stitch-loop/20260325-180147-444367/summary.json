@@ -1,0 +1,145 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-03-26T00:01:47Z",
+  "skill": "stitch-loop",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/frontend/tools/stitch-loop",
+  "skill_release": {
+    "name": "stitch-loop",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "e2ea3e9f7151d048177a6df0065f07cfd00617a4",
+    "source_branch": "main"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/Agent-Skills",
+  "runner_mode": "discovery-smoke",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260325-180147-444367",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": false,
+  "cases": [
+    {
+      "id": "explicit-trigger",
+      "name": "explicit baton loop request",
+      "category": "happy",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": true,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/01-explicit-trigger",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2",
+            "contains failed: '## Deliverables'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/01-explicit-trigger/discovery-smoke",
+            "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/01-explicit-trigger/discovery-smoke/final.txt",
+            "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/01-explicit-trigger/discovery-smoke/stdout.txt",
+            "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/01-explicit-trigger/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2",
+        "[discovery-smoke] contains failed: '## Deliverables'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "edge-missing-baton",
+      "name": "edge missing baton",
+      "category": "edge",
+      "eval_modes": null,
+      "should_trigger": true,
+      "prepend_skill": false,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/02-edge-missing-baton",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2",
+            "contains failed: '## Required inputs'"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/02-edge-missing-baton/discovery-smoke",
+            "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/02-edge-missing-baton/discovery-smoke/final.txt",
+            "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/02-edge-missing-baton/discovery-smoke/stdout.txt",
+            "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/02-edge-missing-baton/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2",
+        "[discovery-smoke] contains failed: '## Required inputs'"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 2,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367",
+    "summary": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/summary.json",
+    "scorecard": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/scorecard.json",
+    "release_manifest": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/release_manifest.json",
+    "junit": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/stitch-loop/20260325-180147-444367/junit.xml"
+  }
+}

@@ -40,6 +40,7 @@ class TestAskPluginsCommands(unittest.TestCase):
             / "Plugins"
             / "plugin-factory"
             / "skills"
+            / "scaffolding_templates"
             / "plugin-creator"
             / "scripts"
             / "create_basic_plugin.py"
@@ -47,7 +48,7 @@ class TestAskPluginsCommands(unittest.TestCase):
         creator_script.parent.mkdir(parents=True, exist_ok=True)
         creator_script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
 
-        plugin_root = self.repo_root / "Plugins" / "my-plugin"
+        plugin_root = self.repo_root / "Plugins" / "third-party" / "my-plugin"
         plugin_root.mkdir(parents=True, exist_ok=True)
         completed = subprocess.CompletedProcess(
             args=[],
@@ -80,6 +81,7 @@ class TestAskPluginsCommands(unittest.TestCase):
             / "Plugins"
             / "plugin-factory"
             / "skills"
+            / "infrastructure_ops"
             / "plugin-installer"
             / "scripts"
             / "install-plugin-from-github.py"
@@ -117,6 +119,7 @@ class TestAskPluginsCommands(unittest.TestCase):
             / "Plugins"
             / "plugin-factory"
             / "skills"
+            / "code_quality_review"
             / "plugin-builder"
             / "scripts"
             / "plugin_builder.py"
@@ -124,7 +127,7 @@ class TestAskPluginsCommands(unittest.TestCase):
         builder_script.parent.mkdir(parents=True, exist_ok=True)
         builder_script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
 
-        plugin_root = self.repo_root / "Plugins" / "demo-plugin"
+        plugin_root = self.repo_root / "Plugins" / "third-party" / "demo-plugin"
         plugin_root.mkdir(parents=True, exist_ok=True)
 
         with patch(
@@ -135,7 +138,7 @@ class TestAskPluginsCommands(unittest.TestCase):
                 subprocess.CompletedProcess(args=[], returncode=0, stdout="PASS: marketplace\n", stderr=""),
             ],
         ):
-            result = harden_plugin(self.repo_root, "Plugins/demo-plugin")
+            result = harden_plugin(self.repo_root, "Plugins/third-party/demo-plugin")
 
         self.assertEqual(result.status, "success")
         runs = result.data.get("command_runs", [])

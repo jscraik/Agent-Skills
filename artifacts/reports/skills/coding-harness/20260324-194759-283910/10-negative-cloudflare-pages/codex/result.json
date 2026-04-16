@@ -1,0 +1,40 @@
+{
+  "runner": "codex",
+  "exit_code": 1,
+  "passed": false,
+  "tier1_failures": [
+    "codex returned non-zero exit code: 1",
+    "regex failed: /(?i)(cloudflare|pages|deploy|cannot|out of scope)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "Codex rejected reasoning.summary for the active profile/model; retrying with fallback profile `d`.",
+    "should_trigger set, but skill selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/10-negative-cloudflare-pages/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/10-negative-cloudflare-pages/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/10-negative-cloudflare-pages/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/10-negative-cloudflare-pages/codex/stderr.txt",
+    "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/10-negative-cloudflare-pages/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 4,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 1,
+      "token_usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "selected_skill": null
+  },
+  "used_schema": false
+}

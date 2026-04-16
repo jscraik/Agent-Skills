@@ -23,7 +23,7 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke") -> CallResult:
     result = CallResult()
 
     cmd = [
-        sys.executable, "Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py",
+        sys.executable, "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py",
         path,
         "--eval-mode", mode
     ]
@@ -55,7 +55,7 @@ def benchmark_portfolio(repo_root: Path) -> CallResult:
     """Runs the full repository skill benchmark suite."""
     result = CallResult()
 
-    cmd = [sys.executable, "Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py"]
+    cmd = [sys.executable, "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/benchmark_skill_portfolio.py"]
     try:
         process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
         result.data["raw_output"] = process.stdout
@@ -82,7 +82,7 @@ def dashboard_report(repo_root: Path) -> CallResult:
     """Generates the skill evaluation dashboard."""
     result = CallResult()
 
-    cmd = [sys.executable, "Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py"]
+    cmd = [sys.executable, "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/build_skill_eval_dashboard.py"]
     try:
         process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
         result.data["raw_output"] = process.stdout

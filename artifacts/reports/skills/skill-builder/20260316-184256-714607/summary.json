@@ -1,0 +1,143 @@
+{
+  "schema_version": "2.0",
+  "skill": "skill-builder",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder",
+  "workspace_root": "/Users/jamiecraik/dev/Agent-Skills",
+  "runner_mode": "codex",
+  "tier2_mode": "warn",
+  "run_id": "20260316-184256-714607",
+  "case_filters": [
+    "install-artifact-uplift-pass",
+    "install-fold-first-order"
+  ],
+  "category_filters": [],
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 180.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "install-fold-first-order",
+      "name": "install fold-first ordering guard",
+      "category": "edge",
+      "should_trigger": true,
+      "prepend_skill": true,
+      "timeout_profile": "codex-heavy",
+      "timeout_sec": 180.0,
+      "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 124,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 124",
+            "regex failed: /(?i)(deconflict-first|before.*validation|step zero|capability overlap matrix|overlap matrix)/",
+            "regex failed: /(?i)(merge|fold|improve-existing|install-new)/",
+            "regex failed: /(?i)(do not install-new unless|explicit override|override)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex/codex_events.jsonl",
+            "should_trigger set, but skill selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex",
+            "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex/final.txt",
+            "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex/stdout.txt",
+            "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex/stderr.txt",
+            "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 124",
+        "[codex] regex failed: /(?i)(deconflict-first|before.*validation|step zero|capability overlap matrix|overlap matrix)/",
+        "[codex] regex failed: /(?i)(merge|fold|improve-existing|install-new)/",
+        "[codex] regex failed: /(?i)(do not install-new unless|explicit override|override)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/01-install-fold-first-order/codex/codex_events.jsonl",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "install-artifact-uplift-pass",
+      "name": "install artifact uplift pass",
+      "category": "edge",
+      "should_trigger": true,
+      "prepend_skill": true,
+      "timeout_profile": "codex-heavy",
+      "timeout_sec": 180.0,
+      "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/02-install-artifact-uplift-pass",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/02-install-artifact-uplift-pass/codex",
+            "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/02-install-artifact-uplift-pass/codex/final.txt",
+            "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/02-install-artifact-uplift-pass/codex/stdout.txt",
+            "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/02-install-artifact-uplift-pass/codex/stderr.txt",
+            "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-184256-714607/02-install-artifact-uplift-pass/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 5,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 44972,
+                "output_tokens": 893,
+                "reasoning_tokens": 0,
+                "total_tokens": 45865
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 1,
+  "tier2_findings": 0,
+  "preflight_warnings": []
+}

@@ -1,0 +1,30 @@
+{
+  "repo": "replace-with-repo-name",
+  "session_id": "bootstrap/init",
+  "preamble": {
+    "bootstrap": true,
+    "search": true
+  },
+  "entries": [
+    {
+      "level": "observation",
+      "content": "Harness memory baseline initialized. Replace with task-specific observations.",
+      "tags": [
+        "repo:unknown",
+        "area:bootstrap",
+        "type:setup"
+      ],
+      "session_id": "bootstrap/init",
+      "source": "harness init",
+      "observed_at": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "closeout": {
+    "forjamie_updated": false,
+    "date": "2026-01-01T00:00:00.000Z"
+  },
+  "meta": {
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "version": "1.0"
+  }
+}

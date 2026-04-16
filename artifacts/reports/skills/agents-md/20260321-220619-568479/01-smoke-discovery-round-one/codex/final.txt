@@ -1,0 +1,9 @@
+## Scope and triggers
+You want help reorganizing a messy `AGENTS.md` setup, and the first thing to pin down is which instruction layer we should change before we touch structure or routing.
+
+## Required inputs
+- The target scope for this cleanup: global, repo-root, or a nested directory override.
+
+Why this matters: `AGENTS.md` precedence changes by directory depth, so the right fix is different depending on which layer is actually messy.
+
+What AGENTS scope are we changing?

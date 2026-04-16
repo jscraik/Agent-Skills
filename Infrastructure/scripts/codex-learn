@@ -36,13 +36,13 @@ resolve_scope_context() {
 			LEARN_SCOPE='repo'
 			LEARN_DIR="${WORKSPACE_ROOT}/.harness/memory/codex-learned"
 			OVERRIDES_FILE="${WORKSPACE_ROOT}/.harness/memory/codex-preflight-overrides.env"
-			PREFLIGHT_SCRIPT="${WORKSPACE_ROOT}/Infrastructure/scripts/codex-preflight.sh"
+			PREFLIGHT_SCRIPT="${WORKSPACE_ROOT}/scripts/codex-preflight.sh"
 			;;
 		global)
 			LEARN_SCOPE='global'
 			LEARN_DIR="${CODEX_HOME:-${HOME}/.codex}/learned"
 			OVERRIDES_FILE="${CODEX_HOME:-${HOME}/.codex}/preflight-overrides.env"
-			PREFLIGHT_SCRIPT="${CODEX_HOME:-${HOME}/.codex}/Infrastructure/scripts/codex-preflight.sh"
+			PREFLIGHT_SCRIPT="${CODEX_HOME:-${HOME}/.codex}/scripts/codex-preflight.sh"
 			;;
 		*)
 			echo -e "${RED}ERROR:${NC} invalid scope '${requested_scope}'" >&2

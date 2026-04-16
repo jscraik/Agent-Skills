@@ -1,0 +1,17 @@
+The requirement you asked for is already present in the canonical `skill-builder` spec, but not yet in the Antigravity mirror.
+
+1. Canonical file already enforces both upstream + gold grading for imported installs:
+- [utilities/skill-builder/SKILL.md:94](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:94)
+- [utilities/skill-builder/SKILL.md:320](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:320)
+- [utilities/skill-builder/SKILL.md:427](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:427)
+
+2. Mirror is behind and does not include that reporting requirement in its install validation section:
+- [skills-antigravity/skill-builder/SKILL.md:403](/Users/jamiecraik/dev/Agent-Skills/skills-antigravity/skill-builder/SKILL.md:403)
+
+3. I could not sync/apply edits in this session because the workspace is read-only.  
+`bash scripts/sync_skills.sh` failed with `Operation not permitted` on `.agents/skills/*`.
+
+No file changes were made due sandbox constraints.
+
+1. If you want, I can complete this end-to-end as soon as write access is available (run sync + re-verify mirror parity).
+2. If canonical-only is sufficient for now, your requested behavior is already codified in the source-of-truth file.

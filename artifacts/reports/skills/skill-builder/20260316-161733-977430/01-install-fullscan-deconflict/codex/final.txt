@@ -1,0 +1,23 @@
+## Scope and triggers
+- `skill-builder` applies here in `install-distribute` mode.
+- First-response gate is now explicit: run a **full-scan deconflict** against all installed operational skills in the chosen scope before any write.
+- Default deconflict exclusions: **system/meta skills are excluded** unless you explicitly opt in, including `.system` slices and creator/meta scaffolding (for example `skill-creator`).
+- Deconflict outcome will be one of: `merge`, `fold`, `improve-existing`, or `install-new`.
+
+## Required inputs
+- Already known: you are installing a new skill and want overlap noise from `skill-creator` removed by default.
+- Still needed:
+1. `source` (curated skill name, git URL, or local path)
+2. `scope` (`REPO` or `USER`)
+3. `action` (`dry-run`, `install`, or `update`)
+4. `include_meta` (`no` default, `yes` only if you want system/meta included)
+
+## Deliverables
+- Full-scan deconflict report for the selected scope with system/meta exclusions applied.
+- Explicit decision record (`merge|fold|improve-existing|install-new`) with rationale.
+- If action is `install` or `update`: validation results and restart reminder.
+
+## Failure mode
+- If `source`, `scope`, or `action` is missing, execution stays non-mutating and stops at intake/deconflict planning.
+
+Reply in one line to proceed: `source=... scope=REPO|USER action=dry-run|install|update include_meta=no`

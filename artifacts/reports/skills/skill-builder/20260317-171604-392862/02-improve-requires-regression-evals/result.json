@@ -1,0 +1,51 @@
+{
+  "id": "improve-requires-regression-evals",
+  "name": "improve requires regression evals",
+  "category": "edge",
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "discovery-heavy",
+  "timeout_sec": 300.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171604-392862/02-improve-requires-regression-evals",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 124,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 124",
+        "regex failed: /(?i)(improve|upgrade)/",
+        "regex failed: /(?i)run_skill_evals\\.py/",
+        "regex failed: /(?i)(required|must run)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171604-392862/02-improve-requires-regression-evals/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171604-392862/02-improve-requires-regression-evals/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171604-392862/02-improve-requires-regression-evals/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171604-392862/02-improve-requires-regression-evals/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 124",
+    "[codex] regex failed: /(?i)(improve|upgrade)/",
+    "[codex] regex failed: /(?i)run_skill_evals\\.py/",
+    "[codex] regex failed: /(?i)(required|must run)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

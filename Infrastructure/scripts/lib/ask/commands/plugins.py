@@ -13,18 +13,16 @@ _SCAFFOLD_SUMMARY_RE = re.compile(r"Created plugin scaffold:\s+(.+)")
 _CREATOR_FLAG_FOLDERS = {"skills", "hooks", "scripts", "assets", "mcp", "apps"}
 _MANUAL_COMPANION_FOLDERS = {"references", "workflows"}
 _PLUGIN_NAME_SANITIZE_RE = re.compile(r"[^a-z0-9]+")
+_DEFAULT_PLUGIN_CATEGORY = "third-party"
 
 _PLUGIN_CREATOR_SCRIPT_CANDIDATES = (
-    "Plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py",
-    "Skills/plugin-creator/scripts/create_basic_plugin.py",
+    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
 )
 _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
-    "Plugins/plugin-factory/skills/plugin-installer/scripts/install-plugin-from-github.py",
-    "Skills/plugin-installer/scripts/install-plugin-from-github.py",
+    "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
 )
 _PLUGIN_BUILDER_SCRIPT_CANDIDATES = (
-    "Plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py",
-    "Skills/plugin-builder/scripts/plugin_builder.py",
+    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
 )
 
 
@@ -145,11 +143,17 @@ def _normalize_plugin_name(raw_name: str) -> str:
     return normalized
 
 
-def _extract_plugin_root_from_output(stdout: str, repo_root: Path, raw_name: str) -> Path:
+def _extract_plugin_root_from_output(
+    stdout: str,
+    repo_root: Path,
+    raw_name: str,
+    *,
+    fallback_parent: str = f"Plugins/{_DEFAULT_PLUGIN_CATEGORY}",
+) -> Path:
     """
     Determine the absolute plugin root path from a scaffold creator's stdout or fall back to a conventional plugins location.
     
-    Scans each line of `stdout` for a scaffold summary that includes a created-path. If a created path is found, expands user home, resolves it relative to `repo_root` when necessary, and returns its absolute form. If no path is discovered in the output, returns `repo_root/Plugins/<name>` where `<name>` is the normalized `raw_name` when non-empty, otherwise the trimmed `raw_name`.
+    Scans each line of `stdout` for a scaffold summary that includes a created-path. If a created path is found, expands user home, resolves it relative to `repo_root` when necessary, and returns its absolute form. If no path is discovered in the output, returns `repo_root/<fallback_parent>/<name>` where `<name>` is the normalized `raw_name` when non-empty, otherwise the trimmed `raw_name`.
     
     Parameters:
         stdout (str): The captured stdout from the plugin creator script.
@@ -168,7 +172,33 @@ def _extract_plugin_root_from_output(stdout: str, repo_root: Path, raw_name: str
             return _to_absolute_path(plugin_root)
     normalized = _normalize_plugin_name(raw_name)
     fallback = normalized if normalized else raw_name.strip()
-    return _to_absolute_path(repo_root / "plugins" / fallback)
+    return _to_absolute_path(repo_root / fallback_parent / fallback)
+
+
+def _resolve_canonical_plugin_dest(repo_root: Path, dest: str) -> tuple[Path, str]:
+    dest_token = (dest or f"Plugins/{_DEFAULT_PLUGIN_CATEGORY}").strip() or f"Plugins/{_DEFAULT_PLUGIN_CATEGORY}"
+    raw_dest = Path(dest_token)
+    if raw_dest.is_absolute():
+        raise ValueError("Destination must be repo-relative (for example: Plugins/third-party).")
+
+    resolved_root = repo_root.resolve()
+    resolved_dest = (repo_root / raw_dest).resolve()
+    try:
+        rel_dest = resolved_dest.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError("Destination escapes repository root.") from exc
+
+    rel_parts = rel_dest.parts
+    if len(rel_parts) == 1:
+        rel_dest = Path("Plugins") / rel_dest
+        resolved_dest = (repo_root / rel_dest).resolve()
+        rel_parts = rel_dest.parts
+
+    if len(rel_parts) != 2 or rel_parts[0] != "Plugins":
+        raise ValueError("Destination must be under Plugins/<category>.")
+    if resolved_dest.exists() and not resolved_dest.is_dir():
+        raise ValueError("Destination must resolve to a directory under repository root.")
+    return resolved_dest, rel_dest.as_posix()
 
 
 def list_plugins_state(repo_root: Path) -> CallResult:
@@ -236,6 +266,7 @@ def doctor_plugins_state(repo_root: Path) -> CallResult:
 def init_plugin(
     repo_root: Path,
     name: str,
+    category: str = _DEFAULT_PLUGIN_CATEGORY,
     with_marketplace: bool = False,
     companion_folders: Optional[List[str]] = None,
 ) -> CallResult:
@@ -247,6 +278,7 @@ def init_plugin(
     Parameters:
         repo_root (Path): Path to the repository root where the creator script is resolved and executed.
         name (str): Name to give the new plugin (used by the creator script and for fallback paths).
+        category (str): Canonical plugin category under Plugins/ where the plugin will be created.
         with_marketplace (bool): If true, instruct the creator script to include marketplace-related scaffolding.
         companion_folders (Optional[List[str]]): Optional list of companion folder types to include. Values must be in the allowed companion-folder set; some types are passed to the creator as `--with-<folder>` flags while others are created manually under the generated plugin root.
     
@@ -259,6 +291,13 @@ def init_plugin(
         On error, `errors` contains one or more ErrorObject entries and `data` may include `raw_output` and `raw_error`.
     """
     result = CallResult()
+    try:
+        parent_path, canonical_parent = _resolve_canonical_plugin_dest(repo_root, category)
+    except ValueError as exc:
+        return _validation_error_result(
+            f"Invalid plugin category '{category}': {exc}",
+            fix_suggestion=f"Use a category under Plugins/, for example: Plugins/{_DEFAULT_PLUGIN_CATEGORY}.",
+        )
 
     if companion_folders:
         invalid = [f for f in companion_folders if f not in _ALLOWED_COMPANION_FOLDERS]
@@ -285,7 +324,7 @@ def init_plugin(
         return resolve_error
     assert creator_script is not None
 
-    cmd = ["python3", str(creator_script), name]
+    cmd = ["python3", str(creator_script), name, "--path", str(parent_path)]
 
     if with_marketplace:
         cmd.append("--with-marketplace")
@@ -301,7 +340,12 @@ def init_plugin(
     process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False)
 
     if process.returncode == 0:
-        plugin_root = _extract_plugin_root_from_output(process.stdout, repo_root, name)
+        plugin_root = _extract_plugin_root_from_output(
+            process.stdout,
+            repo_root,
+            name,
+            fallback_parent=canonical_parent,
+        )
         plugin_root_missing = not plugin_root.is_dir()
         if plugin_root_missing:
             result.status = "error"
@@ -324,6 +368,7 @@ def init_plugin(
         result.data["message"] = f"Initialized plugin '{name}'"
         result.data["raw_output"] = process.stdout
         result.data["plugin_root"] = str(plugin_root)
+        result.data["canonical_dest"] = canonical_parent
         result.data["created_manual_folders"] = created_manual_folders
         return result
 
@@ -370,7 +415,13 @@ def install_plugin(
     """
     result = CallResult()
 
-    dest_path = repo_root / dest
+    try:
+        dest_path, canonical_dest = _resolve_canonical_plugin_dest(repo_root, dest)
+    except ValueError as exc:
+        return _validation_error_result(
+            f"Invalid plugin destination '{dest}': {exc}",
+            fix_suggestion="Use a destination under Plugins/<category>, for example Plugins/third-party.",
+        )
     requested_name = (name or "").strip() or None
     target_path = dest_path / requested_name if requested_name else None
 
@@ -387,10 +438,11 @@ def install_plugin(
                 result.data["target_path"] = str(target_path)
         else:
             result.data["target_path"] = "unknown"
-        next_step = f"ask plugins install {url} --path {plugin_path} --dest {dest}"
+        next_step = f"ask plugins install {url} --path {plugin_path} --dest {canonical_dest}"
         if ref:
             next_step += f" --ref {ref}"
         result.metadata["next_steps"] = [next_step]
+        result.data["canonical_dest"] = canonical_dest
         return result
 
     # Resolve installer helper only when actually running the installer
@@ -445,6 +497,7 @@ def install_plugin(
     process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, check=False)
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
+    result.data["canonical_dest"] = canonical_dest
 
     if process.returncode == 0:
         installed_name = requested_name
@@ -605,6 +658,7 @@ def harden_plugin(
             return _fail("audit-compat")
 
     if run_marketplace_audit:
+        plugins_parent = plugin_root.parent
         marketplace_cmd = [
             "python3",
             str(builder_script),
@@ -612,7 +666,7 @@ def harden_plugin(
             "--marketplace-path",
             str(marketplace),
             "--plugins-path",
-            str(_to_absolute_path(repo_root / "plugins")),
+            str(plugins_parent),
         ]
         if allow_legacy_marketplace_path:
             marketplace_cmd.append("--allow-legacy-marketplace-path")

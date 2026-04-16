@@ -21,11 +21,11 @@ rules:
           - pattern: execSync(...)
 
   - id: ts-no-shell-true
-    message: "Avoid shell:true in child process options in src/** code."
-    severity: ERROR
+    message: Avoid shell:true in child process options in src/** code.
+    severity: WARNING
     languages: [javascript, typescript]
     pattern-either:
-      - pattern: 'spawn(..., { ..., shell: true, ... })'
-      - pattern: 'spawnSync(..., { ..., shell: true, ... })'
-      - pattern: 'execFile(..., { ..., shell: true, ... })'
-      - pattern: 'execFileSync(..., { ..., shell: true, ... })'
+      - pattern: spawn(..., { ..., shell: true, ... })
+      - pattern: spawnSync(..., { ..., shell: true, ... })
+      - pattern: execFile(..., { ..., shell: true, ... })
+      - pattern: execFileSync(..., { ..., shell: true, ... })

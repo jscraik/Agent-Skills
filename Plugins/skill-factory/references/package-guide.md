@@ -18,8 +18,8 @@
 
 ## Commands
 ```bash
-python3 Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-compat Plugins/skill-factory
-python3 Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/skill-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-compat Plugins/skill-factory
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/skill-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
 bash Infrastructure/scripts/validate_skill_authoring_family.sh
 python3 Infrastructure/scripts/projection_integrity.py verify --scope skill-factory --format text
 ```

@@ -16,12 +16,15 @@ from selection_policy import (
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
     PLUGIN_SKILL_ROOT_GLOB as POLICY_PLUGIN_SKILL_ROOT_GLOB,
     REPO_SCAN_ROOTS as POLICY_REPO_SCAN_ROOTS,
+    SYSTEM_BRIDGE_SKILL_NAMES as POLICY_SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FLAT_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
+SYSTEM_LANE_DIR = FLAT_SKILLS_DIR / ".system"
 REPO_SCAN_ROOTS = POLICY_REPO_SCAN_ROOTS
+SYSTEM_BRIDGE_SKILL_NAMES = set(POLICY_SYSTEM_BRIDGE_SKILL_NAMES)
 
 # Ignore SKILL.md files in implementation/support subtrees that are not
 # runtime-selectable skills.
@@ -46,7 +49,7 @@ def get_policy_identity() -> str:
     return policy_identity()
 
 
-def _iter_flat_skill_dirs() -> Iterable[Path]:
+def _iter_flat_skill_dirs() -> List[Path]:
     if not FLAT_SKILLS_DIR.is_dir():
         return []
 
@@ -89,14 +92,54 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
     	list[Path]: Paths to directories containing SKILL.md discovered under plugin roots; an empty list if none are found.
     """
     dirs: List[Path] = []
-    for plugin_root in sorted(REPO_ROOT.glob(POLICY_PLUGIN_SKILL_ROOT_GLOB)):
-        if not plugin_root.is_dir():
+    seen_roots: set[str] = set()
+    plugin_patterns: set[str] = set()
+    for raw_pattern in POLICY_PLUGIN_SKILL_ROOT_GLOB.split():
+        if not raw_pattern:
             continue
-        for skill_md in sorted(plugin_root.rglob("SKILL.md")):
-            rel_parts = skill_md.relative_to(plugin_root).parts
-            if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
+        plugin_patterns.add(raw_pattern)
+        plugin_patterns.add(raw_pattern.replace("./Plugins/", "./plugins/"))
+        plugin_patterns.add(raw_pattern.replace("Plugins/", "plugins/"))
+        if raw_pattern.endswith("/*/skills"):
+            nested_pattern = raw_pattern[: -len("/*/skills")] + "/*/*/skills"
+            plugin_patterns.add(nested_pattern)
+            plugin_patterns.add(nested_pattern.replace("./Plugins/", "./plugins/"))
+            plugin_patterns.add(nested_pattern.replace("Plugins/", "plugins/"))
+    for pattern in sorted(plugin_patterns):
+        for plugin_root in sorted(REPO_ROOT.glob(pattern)):
+            plugin_root_key = plugin_root.resolve().as_posix()
+            if plugin_root_key in seen_roots:
                 continue
-            dirs.append(skill_md.parent)
+            seen_roots.add(plugin_root_key)
+            if not plugin_root.is_dir():
+                continue
+            for skill_md in sorted(plugin_root.rglob("SKILL.md")):
+                rel_parts = skill_md.relative_to(plugin_root).parts
+                if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
+                    continue
+                dirs.append(skill_md.parent)
+    return dirs
+
+
+def _iter_system_lane_skill_dirs() -> List[Path]:
+    """
+    Discover skills from the .system lane (.agents/skills/.system/).
+
+    These are maintained originals (e.g. imagegen, openai-docs) and
+    bridge skills (skill-creator, plugin-creator, etc.) that live outside
+    the topic-cluster directory structure.
+
+    Returns:
+        List[Path]: Paths to .system skill directories containing SKILL.md.
+    """
+    if not SYSTEM_LANE_DIR.is_dir():
+        return []
+    dirs: List[Path] = []
+    for item in sorted(SYSTEM_LANE_DIR.iterdir()):
+        if not item.is_dir():
+            continue
+        if (item / "SKILL.md").exists():
+            dirs.append(item)
     return dirs
 
 
@@ -116,7 +159,7 @@ def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
         return False
 
     parts = rel.parts
-    if not parts or parts[0] != "plugins":
+    if not parts or parts[0].lower() != "plugins":
         return False
     return "skills" in parts[1:-1]
 
@@ -226,6 +269,7 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
     elif source == "repo":
         skill_dirs = list(_iter_repo_skill_dirs())
         skill_dirs.extend(_iter_plugin_skill_dirs())
+        skill_dirs.extend(_iter_system_lane_skill_dirs())
     else:
         skill_dirs = list(_iter_flat_skill_dirs())
         if skill_dirs:
@@ -236,6 +280,7 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         else:
             skill_dirs = list(_iter_repo_skill_dirs())
             skill_dirs.extend(_iter_plugin_skill_dirs())
+            skill_dirs.extend(_iter_system_lane_skill_dirs())
 
     for skill_dir in skill_dirs:
         source_dir = skill_dir.resolve()

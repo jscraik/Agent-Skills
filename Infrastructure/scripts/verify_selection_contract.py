@@ -32,6 +32,23 @@ HISTORY_COMPARISON_KEYS = (
 HISTORY_CHECKPOINT_INTERVAL = timedelta(hours=24)
 
 
+def resolve_fixture_path(filename: str) -> Path:
+    """
+    Resolve a selection-contract fixture path across supported repository layouts.
+
+    Prefers `<repo>/tests/fixtures/selection-contract/<filename>` and falls back
+    to `<repo>/Infrastructure/tests/fixtures/selection-contract/<filename>`.
+    Returns the primary path when neither exists.
+    """
+    primary = REPO_ROOT / "tests" / "fixtures" / "selection-contract" / filename
+    fallback = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "selection-contract" / filename
+    if primary.exists():
+        return primary
+    if fallback.exists():
+        return fallback
+    return primary
+
+
 def parse_args() -> argparse.Namespace:
     """
     Parse command-line arguments for the selection contract verification tool.
@@ -48,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--fixtures",
         type=Path,
-        default=REPO_ROOT / "tests" / "fixtures" / "selection-contract" / "route-fixtures.json",
+        default=resolve_fixture_path("route-fixtures.json"),
         help="Path to route fixture file.",
     )
     parser.add_argument(
@@ -60,7 +77,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--goal-fixtures",
         type=Path,
-        default=REPO_ROOT / "tests" / "fixtures" / "selection-contract" / "goal-fixtures.json",
+        default=resolve_fixture_path("goal-fixtures.json"),
         help="Path to goal fixture file.",
     )
     parser.add_argument(

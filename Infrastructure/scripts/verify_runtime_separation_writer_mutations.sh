@@ -24,7 +24,12 @@ USAGE
   esac
 done
 
-repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+if repo_root="$(git -C "$script_dir/../.." rev-parse --show-toplevel 2>/dev/null)"; then
+  :
+else
+  repo_root="$(cd -P "$script_dir/../.." && pwd -P)"
+fi
 cd "$repo_root"
 
 PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh

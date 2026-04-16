@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:17Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/frontend/ui/ui-ux-creative-coding/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/frontend/ui/ui-ux-creative-coding/SKILL.md",
+  "name": "ui-ux-creative-coding",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": []
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:27Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/utilities/process-watch/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/process-watch/SKILL.md",
+  "name": "process-watch",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "FM_DESC_WORKFLOWY",
+      "message": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references.",
+      "evidence": "description: Analyze system processes and resource usage to diagnose runaway CPU/memory/IO, identify culprits, and propose next diagnostic steps. Use when investigating performance spikes or leaks."
+    },
+    {
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "REPO_ASSETS_UNREFERENCED",
+      "message": "assets/ exists but is not referenced in SKILL.md.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/3"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_THIN",
+      "message": "Examples section is present but thin. Add 2-3 realistic trigger prompts or worked examples.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "references/evals.yaml"
+    }
+  ]
+}

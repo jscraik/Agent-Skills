@@ -53,14 +53,27 @@ else
 fi
 
 skill_dirs=(
-  "Plugins/skill-factory/skills/skill-builder"
-  "Plugins/skill-factory/skills/skill-creator"
-  "Plugins/skill-factory/skills/skill-installer"
-  "Plugins/plugin-factory/skills/plugin-creator"
+  "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+  "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
+  "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+  "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
 )
+skill_builder_dir="Plugins/skill-factory/skills/code_quality_review/skill-builder"
+skill_builder_scripts_dir="${skill_builder_dir}/scripts"
 
-ce_work_skill="Plugins/harness-engineering/skills/ce-work/SKILL.md"
-ce_tdd_skill="Plugins/harness-engineering/skills/ce-tdd/SKILL.md"
+if [[ ! -d "$skill_builder_scripts_dir" ]]; then
+  echo "[family-gate] ERROR: missing skill-builder scripts directory: $skill_builder_scripts_dir"
+  exit 1
+fi
+
+run_skill_builder_script() {
+  local script_name="$1"
+  shift
+  "${python_cmd[@]}" "${skill_builder_scripts_dir}/${script_name}" "$@"
+}
+
+ce_work_skill="Plugins/harness-engineering/skills/team_automation/ce-work/SKILL.md"
+ce_tdd_skill="Plugins/harness-engineering/skills/team_automation/ce-tdd/SKILL.md"
 ce_shared_approval_doc="Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 ce_shared_approval_ref="../shared/references/approval-flow.md"
 
@@ -105,7 +118,7 @@ assert_security_eval_contract() {
   report_file="$(mktemp "${TMPDIR:-/tmp}/skill-authoring-family-gate.XXXXXX")"
   trap 'rm -f "$report_file"' RETURN
 
-  if ! "${python_cmd[@]}" Skills/skill-builder/scripts/skill_gate.py "$skill_dir" \
+  if ! run_skill_builder_script skill_gate.py "$skill_dir" \
     --require-security-evals \
     --pi-high-fail \
     --require-fail-fast \
@@ -248,14 +261,14 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
   # are excluded to avoid pre-existing E401 violations in unrelated tooling.
   family_py_scripts=(
     scripts/validate_skill_authoring_family_benchmarks.py
-    Skills/skill-builder/scripts/yaml_frontmatter.py
-    Skills/skill-builder/scripts/skill_gate.py
-    Skills/skill-builder/scripts/analyze_skill.py
-    Skills/skill-builder/scripts/upgrade_skill.py
-    Skills/skill-builder/scripts/quick_validate.py
-    Skills/skill-builder/scripts/run_skill_evals.py
-    Skills/skill-builder/scripts/ci_skill_quality_gate.py
-    Skills/skill-builder/scripts/openclaw_skill_guard.py
+    "${skill_builder_scripts_dir}/yaml_frontmatter.py"
+    "${skill_builder_scripts_dir}/skill_gate.py"
+    "${skill_builder_scripts_dir}/analyze_skill.py"
+    "${skill_builder_scripts_dir}/upgrade_skill.py"
+    "${skill_builder_scripts_dir}/quick_validate.py"
+    "${skill_builder_scripts_dir}/run_skill_evals.py"
+    "${skill_builder_scripts_dir}/ci_skill_quality_gate.py"
+    "${skill_builder_scripts_dir}/openclaw_skill_guard.py"
   )
   existing_py_scripts=()
   for f in "${family_py_scripts[@]}"; do
@@ -311,8 +324,15 @@ fi
 
 if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   echo "[family-gate] running pytest unit tests..."
+  pytest_skill_gate_path="${skill_builder_scripts_dir}/test_skill_gate.py"
+  if [[ "$pytest_skill_gate_path" == Plugins/* ]]; then
+    lowercase_pytest_skill_gate_path="plugins/${pytest_skill_gate_path#Plugins/}"
+    if [[ -f "$lowercase_pytest_skill_gate_path" ]]; then
+      pytest_skill_gate_path="$lowercase_pytest_skill_gate_path"
+    fi
+  fi
   if "${pytest_cmd[@]}" \
-      Skills/skill-builder/scripts/test_skill_gate.py \
+      "$pytest_skill_gate_path" \
       scripts/test_validate_skill_authoring_family_benchmarks.py \
       scripts/test_projection_integrity.py \
       -q --tb=short; then
@@ -409,7 +429,7 @@ for skill_dir in "${skill_dirs[@]}"; do
   echo
   echo "[family-gate] === $skill_dir ==="
 
-  "${python_cmd[@]}" Skills/skill-builder/scripts/quick_validate.py "$skill_dir" --mode compat
+  run_skill_builder_script quick_validate.py "$skill_dir" --mode compat
 
   assert_security_eval_contract "$skill_dir"
 
@@ -419,26 +439,26 @@ for skill_dir in "${skill_dirs[@]}"; do
     if [[ "$release_ready" == "1" ]]; then
       skill_evidence_path="${evidence_run_dir}/${skill_slug}"
       _set_evidence_path "$skill_dir" "$skill_evidence_path"
-      "${python_cmd[@]}" Skills/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      run_skill_builder_script run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode smoke \
         --reports-dir "$skill_evidence_path" \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
-      "${python_cmd[@]}" Skills/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      run_skill_builder_script run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode release \
         --reports-dir "$skill_evidence_path" \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
-      "${python_cmd[@]}" Skills/skill-builder/scripts/ci_skill_quality_gate.py \
+      run_skill_builder_script ci_skill_quality_gate.py \
         "$skill_evidence_path" \
         --tier2-mode warn \
         --format text || skill_eval_failed=1
     else
-      "${python_cmd[@]}" Skills/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      run_skill_builder_script run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode smoke \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
-      "${python_cmd[@]}" Skills/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+      run_skill_builder_script run_skill_evals.py "$skill_dir" \
         "${runner_args[@]}" \
         --eval-mode release \
         "${codex_profile_args[@]+"${codex_profile_args[@]}"}" || skill_eval_failed=1
@@ -450,24 +470,24 @@ for skill_dir in "${skill_dirs[@]}"; do
       echo "[family-gate] WARN: live evals had failures for $skill_dir — recording outcome as failed"
     fi
   else
-    "${python_cmd[@]}" Skills/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+    run_skill_builder_script run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode smoke
-    "${python_cmd[@]}" Skills/skill-builder/scripts/run_skill_evals.py "$skill_dir" \
+    run_skill_builder_script run_skill_evals.py "$skill_dir" \
       --list-cases \
       --eval-mode release
     _set_outcome "$skill_dir" "structural-only"
   fi
 
-  "${python_cmd[@]}" Skills/skill-builder/scripts/openclaw_skill_guard.py "$skill_dir" \
+  run_skill_builder_script openclaw_skill_guard.py "$skill_dir" \
     --mode both \
     --format text
 
-  "${python_cmd[@]}" Skills/skill-builder/scripts/analyze_skill.py "$skill_dir" \
+  run_skill_builder_script analyze_skill.py "$skill_dir" \
     --min-pass 60 \
     --no-emoji
 
-  "${python_cmd[@]}" Skills/skill-builder/scripts/upgrade_skill.py "$skill_dir" \
+  run_skill_builder_script upgrade_skill.py "$skill_dir" \
     --format text
 
 done

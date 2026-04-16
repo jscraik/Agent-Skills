@@ -1,0 +1,3 @@
+$stitch-loop
+
+Use $stitch-loop to keep building this site one page at a time from next-prompt.md.

@@ -29,14 +29,13 @@ Separate skill and plugin product content from factory mechanics and runtime pro
 ## Canonical sources
 
 First-party skill source:
-- `auth/**`
-- `backend/**`
-- `frontend/**`
-- `github/**`
-- `interview/**`
-- `product/**`
-- `Skills/**`
-- `Skills/**` (system/runtime primitives only)
+- `Skills/agent-ops/**`
+- `Skills/frontend-ui/**`
+- `Skills/backend-platform/**`
+- `Skills/product-strategy/**`
+- `Skills/security-ops/**`
+- `Skills/content-publishing/**`
+- `Skills/mobile-native/**`
 
 Plugin-owned source:
 - `Plugins/<plugin>/skills/**`
@@ -48,7 +47,7 @@ Factory and governance mechanics:
 - `Docs/agents/**`
 - `.harness/**`
 - `.codex/environments/environment.toml`
-- `Infrastructure/harness.contract.json`
+- `harness.contract.json`
 
 ## Derived and runtime surfaces
 

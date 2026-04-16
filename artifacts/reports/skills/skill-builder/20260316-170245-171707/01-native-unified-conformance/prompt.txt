@@ -1,0 +1,3 @@
+$skill-builder
+
+When creating a brand new native skill in skill-builder, apply the unified conformance flow so it is graded against the gold validators and the integrated upstream-style grading model without creating a separate standalone grading skill.

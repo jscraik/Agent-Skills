@@ -1,0 +1,37 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "contains failed: '## Skill Summary:'",
+    "regex failed: /(?i)assumptions:/"
+  ],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215824-305546/02-smoke-discovery-round-six/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215824-305546/02-smoke-discovery-round-six/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215824-305546/02-smoke-discovery-round-six/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215824-305546/02-smoke-discovery-round-six/codex/stderr.txt",
+    "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215824-305546/02-smoke-discovery-round-six/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 31,
+      "command_count": 3,
+      "unique_command_count": 3,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 1,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 322944,
+        "output_tokens": 3976,
+        "reasoning_tokens": 0,
+        "total_tokens": 326920
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

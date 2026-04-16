@@ -121,8 +121,12 @@ STARTER_ARCHETYPES = {
 
 
 _SKILL_INSTALLER_SCRIPT_CANDIDATES = (
-    "Plugins/skill-factory/skills/skill-installer/scripts/install-skill-from-github.py",
-    "Skills/skill-installer/scripts/install-skill-from-github.py",
+    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/scripts/install-skill-from-github.py",
+)
+
+_SKILL_BUILDER_SCRIPT_DIR_CANDIDATES = (
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder/scripts",
 )
 
 
@@ -134,22 +138,33 @@ def _resolve_skill_installer_script(repo_root: Path) -> str:
     # Keep canonical path in the error payload for predictable operator guidance.
     return _SKILL_INSTALLER_SCRIPT_CANDIDATES[0]
 
+
+def _resolve_skill_builder_script(repo_root: Path, module_name: str) -> str:
+    filename = f"{module_name}.py"
+    for rel_dir in _SKILL_BUILDER_SCRIPT_DIR_CANDIDATES:
+        candidate = repo_root / rel_dir / filename
+        if candidate.is_file():
+            return f"{rel_dir}/{filename}"
+    return f"{_SKILL_BUILDER_SCRIPT_DIR_CANDIDATES[0]}/{filename}"
+
+
 # Explicitly load builder-specific logic using absolute paths to avoid namespace collisions
 def _load_builder_module(repo_root: Path, module_name: str):
     """
     Load a skill-builder script from the repository and return it as an imported module.
     
     Parameters:
-        repo_root (Path): Repository root used to locate `Skills/skill-builder/scripts/<module_name>.py`.
+        repo_root (Path): Repository root used to locate `<skill-builder>/scripts/<module_name>.py`.
         module_name (str): Script base name (without `.py`) to load.
     
     Returns:
         module (types.ModuleType | None): The imported module object if the script exists and is loaded, `None` otherwise.
     """
-    scripts_dir = repo_root / "Skills" / "skill-builder" / "scripts"
-    module_path = scripts_dir / f"{module_name}.py"
+    module_rel = _resolve_skill_builder_script(repo_root, module_name)
+    module_path = repo_root / module_rel
     if not module_path.exists():
         return None
+    scripts_dir = module_path.parent
 
     internal_name = f"ask_builder_{module_name}"
     if internal_name in sys.modules:
@@ -313,11 +328,53 @@ def list_skills(
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
     """Initializes a new skill scaffold using the repo template logic."""
     result = CallResult()
+    category_token = (category or "").strip()
+    if not category_token:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skill category cannot be empty.",
+                fix_suggestion="Use a category such as 'ui' or 'code_quality_review'.",
+            )
+        )
+        return result
+    if Path(category_token).is_absolute():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skill category must be repo-relative.",
+                fix_suggestion="Use a category token such as 'ui' (not an absolute path).",
+            )
+        )
+        return result
 
+    if category_token.startswith("Skills/"):
+        out_dir = repo_root / category_token
+        category_rel = category_token
+    else:
+        out_dir = repo_root / "Skills" / category_token
+        category_rel = f"Skills/{category_token}"
+    try:
+        out_dir.resolve().relative_to(repo_root.resolve())
+    except ValueError:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_PATH_TRAVERSAL",
+                message=f"Category '{category}' escapes repository root.",
+                fix_suggestion="Use a category path under Skills/.",
+            )
+        )
+        return result
+
+    init_skill_script = _resolve_skill_builder_script(repo_root, "init_skill")
     cmd = _get_python_command(["pyyaml"]) + [
-        "Skills/skill-builder/scripts/init_skill.py",
+        init_skill_script,
         name,
-        "--category", category,
+        "--path",
+        str(out_dir),
         "--description", description,
         "--owner", "Agent Skills Kit",
         "--review-cadence", "quarterly",
@@ -329,8 +386,9 @@ def init_skill(repo_root: Path, name: str, category: str, description: str) -> C
     
     if process.returncode == 0:
         result.status = "success"
-        result.data["message"] = f"Initialized skill '{name}' in '{category}'"
-        result.metadata["next_steps"] = [f"ask skills audit {category}/{name} --level strict"]
+        result.data["message"] = f"Initialized skill '{name}' in '{category_rel}'"
+        result.data["canonical_dest"] = category_rel
+        result.metadata["next_steps"] = [f"ask skills audit {category_rel}/{name} --level strict"]
     else:
         result.status = "error"
         result.errors.append(ErrorObject(code="ERR_RUNTIME", message=process.stderr.strip()))
@@ -396,7 +454,8 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
     if level == "strict":
         # Security gate (skill_gate.py)
-        gate_cmd = python + ["Skills/skill-builder/scripts/skill_gate.py", skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
+        gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
+        gate_cmd = python + [gate_script, skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
@@ -427,7 +486,8 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # OpenClaw skill guard
-        openclaw_cmd = python + ["Skills/skill-builder/scripts/openclaw_skill_guard.py", skill_path, "--mode", "both", "--format", "text"]
+        openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
+        openclaw_cmd = python + [openclaw_script, skill_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
@@ -463,10 +523,10 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
         ValueError: If `dest` is an absolute path, if the resolved destination escapes the repository root,
         or if the repo-relative destination is empty or "." (must include a category directory).
     """
-    dest_token = (dest or "github").strip() or "github"
+    dest_token = (dest or "Skills/github").strip() or "Skills/github"
     raw_dest = Path(dest_token)
     if raw_dest.is_absolute():
-        raise ValueError("Destination must be repo-relative (for example: github or backend).")
+        raise ValueError("Destination must be repo-relative (for example: Skills/github or Skills/backend).")
 
     resolved_root = repo_root.resolve()
     resolved_dest = (repo_root / raw_dest).resolve()
@@ -475,15 +535,20 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
     except ValueError as exc:
         raise ValueError("Destination escapes repository root.") from exc
 
-    rel_text = str(rel_dest)
-    if len(rel_dest.parts) != 1:
-        raise ValueError("Destination must be a top-level category directory under repository root.")
+    rel_parts = rel_dest.parts
+    if len(rel_parts) == 1:
+        rel_dest = Path("Skills") / rel_dest
+        resolved_dest = (repo_root / rel_dest).resolve()
+        rel_parts = rel_dest.parts
+    rel_text = rel_dest.as_posix()
+    if len(rel_parts) != 2 or rel_parts[0] != "Skills":
+        raise ValueError("Destination must be under Skills/<category>.")
     if resolved_dest.exists() and not resolved_dest.is_dir():
         raise ValueError("Destination must resolve to a directory under repository root.")
     return resolved_dest, rel_text
 
 
-def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "github", dry_run: bool = False) -> CallResult:
+def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:
     """
     Install a GitHub-hosted skill into the repository's canonical skill directory.
     
@@ -493,7 +558,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         repo_root (Path): Root path of the repository used to resolve and validate the install destination.
         url (str): URL or repository path of the skill to install (may end with `.git`).
         remediate (bool): Request installer remediation; fails with `ERR_VALIDATION` if the installer does not support `--remediate`.
-        dest (str): Repo-relative category directory for installation (must not be absolute or escape the repo).
+        dest (str): Repo-relative category directory for installation under Skills/ (must not be absolute or escape the repo).
         dry_run (bool): If true, return a preview without performing any filesystem or network changes.
     
     Returns:
@@ -513,7 +578,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Invalid install destination '{dest}': {exc}",
-                fix_suggestion="Use a repo-relative category path such as 'github' or 'backend'.",
+                fix_suggestion="Use a category under Skills/ such as 'Skills/github' or shorthand 'github'.",
             )
         )
         return result
@@ -777,7 +842,10 @@ def route_skills(
             ErrorObject(
                 code="ERR_DEPENDENCY",
                 message="Skill router module is not available.",
-                fix_suggestion="Ensure Skills/skill-builder/scripts/skill_router.py exists and rerun.",
+                fix_suggestion=(
+                    "Ensure Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/skill_router.py "
+                    "exists and rerun."
+                ),
             )
         )
         return result

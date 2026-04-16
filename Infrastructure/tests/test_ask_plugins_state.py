@@ -199,6 +199,43 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(plugin_row["issues"], [])
         self.assertTrue(any("escapes plugin root" in warning for warning in plugin_row["warnings"]))
 
+    def test_list_plugins_state_includes_categorized_plugins(self) -> None:
+        categorized_manifest = (
+            self.repo_root / "Plugins" / "third-party" / "nested-plugin" / ".codex-plugin" / "plugin.json"
+        )
+        categorized_manifest.parent.mkdir(parents=True, exist_ok=True)
+        (categorized_manifest.parent.parent / "README.md").write_text(
+            "# Nested Plugin\n\nCategorized plugin fixture.\n",
+            encoding="utf-8",
+        )
+        categorized_manifest.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "name": "nested-plugin",
+                    "version": "0.1.0",
+                    "description": "Nested fixture",
+                    "interface": {
+                        "displayName": "Nested Plugin",
+                        "shortDescription": "Nested short description",
+                        "longDescription": "Nested long description",
+                        "developerName": "Agent Skills Team",
+                        "category": "Productivity",
+                        "capabilities": ["Read"],
+                        "websiteURL": "https://example.com/nested",
+                        "defaultPrompt": "Help with nested plugin workflows.",
+                    },
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        result = list_plugins_state(self.repo_root)
+        self.assertEqual(result.status, "success")
+        names = sorted(plugin["name"] for plugin in result.data["installed_state"]["plugins"])
+        self.assertEqual(names, ["example-plugin", "nested-plugin"])
+
 
 if __name__ == "__main__":
     unittest.main()

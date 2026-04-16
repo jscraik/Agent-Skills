@@ -46,12 +46,12 @@ Codex plugin package that bundles the skill-authoring family in one installable 
 
 ## Source Of Truth
 - Canonical writable source (edit here):
-  - `Plugins/skill-factory/skills/skill-factory/`
-  - `Plugins/skill-factory/skills/skill-creator/`
-  - `Plugins/skill-factory/skills/skill-builder/`
-  - `Plugins/skill-factory/skills/skill-refactor/`
-  - `Plugins/skill-factory/skills/skillify/`
-  - `Plugins/skill-factory/skills/skill-installer/`
+  - `Plugins/skill-factory/skills/team_automation/skill-factory/`
+  - `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/`
+  - `Plugins/skill-factory/skills/code_quality_review/skill-builder/`
+  - `Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/`
+  - `Plugins/skill-factory/skills/scaffolding_templates/skillify/`
+  - `Plugins/skill-factory/skills/infrastructure_ops/skill-installer/`
 - Compatibility aliases (do not edit directly):
   - `Skills/skill-builder/`
   - `Skills/skill-refactor/`
@@ -59,7 +59,7 @@ Codex plugin package that bundles the skill-authoring family in one installable 
   - `Skills/skill-creator/`
   - `Skills/skill-installer/`
 - Package-local router surface:
-  - `Plugins/skill-factory/skills/skill-factory/`
+  - `Plugins/skill-factory/skills/team_automation/skill-factory/`
 - Repo: `https://github.com/jscraik/Agent-Skills`
 
 When updating family logic, edit plugin paths first and keep compatibility aliases pointing at the same canonical targets.
@@ -78,18 +78,18 @@ The `skill-factory` plugin helps you:
 Validate the package:
 
 ```sh
-python3 Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/skill-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/skill-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
 ```
 
 Validate bundled skills:
 
 ```sh
-python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/skill-factory
-python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/skill-builder
-python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/skill-refactor
-python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/skill-creator
-python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/skillify
-python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/skill-installer
+python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/team_automation/skill-factory
+python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/code_quality_review/skill-builder
+python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor
+python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/scaffolding_templates/skill-creator
+python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/scaffolding_templates/skillify
+python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/skill-factory/skills/infrastructure_ops/skill-installer
 ```
 
 Projection sync + parity gate:

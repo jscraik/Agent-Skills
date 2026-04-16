@@ -476,7 +476,7 @@ def main():
     
     skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
     skills_install_parser.add_argument("url", help="GitHub URL of the skill")
-    skills_install_parser.add_argument("--dest", default="github", help="Repo-relative canonical category directory (default: github)")
+    skills_install_parser.add_argument("--dest", default="Skills/github", help="Repo-relative canonical category directory under Skills/ (default: Skills/github)")
     skills_install_parser.add_argument("--remediate", action="store_true", help="Scaffold missing contract/eval files")
     skills_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation")
     
@@ -496,6 +496,7 @@ def main():
 
     def _add_plugin_init_args(parser):
         parser.add_argument("name", help="Name of the new plugin")
+        parser.add_argument("--category", default="third-party", help="Plugin category under Plugins/ (default: third-party)")
         parser.add_argument("--with-marketplace", action="store_true", help="Add to local marketplace")
         parser.add_argument("--with-scripts", action="store_true", help="Add scripts directory")
         parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
@@ -592,7 +593,7 @@ def main():
     wiki_subparsers = wiki_parser.add_subparsers(dest="action")
 
     wiki_lint_parser = wiki_subparsers.add_parser("lint", help="Lint wiki links and freshness", parents=[global_parser])
-    wiki_lint_parser.add_argument("--wiki-root", default="Wiki/skill-ops-wiki/wiki", help="Wiki root path")
+    wiki_lint_parser.add_argument("--wiki-root", default="Wiki/wiki", help="Wiki root path")
     wiki_lint_parser.add_argument("--max-age-days", type=int, default=60, help="Max last_reviewed age before warning")
 
     wiki_ingest_parser = wiki_subparsers.add_parser("ingest", help="Ingest raw source notes into wiki logs", parents=[global_parser])
@@ -619,7 +620,7 @@ def main():
     wiki_add_parser.add_argument(
         "--destination",
         choices=["failures", "playbooks", "assets/ui", "learnings"],
-        help="Override destination folder under Wiki/skill-ops-wiki/wiki",
+        help="Override destination folder under Wiki/wiki",
     )
     wiki_add_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
     wiki_add_parser.add_argument("--interactive", action="store_true", help="Prompt for missing triage fields")
@@ -628,7 +629,7 @@ def main():
     wiki_query_parser = wiki_subparsers.add_parser("query", help="Search wiki pages", parents=[global_parser])
     wiki_query_parser.add_argument("query", help="Search query")
     wiki_query_parser.add_argument("--limit", type=int, default=5, help="Max results to return")
-    wiki_query_parser.add_argument("--wiki-root", default="Wiki/skill-ops-wiki/wiki", help="Wiki root path")
+    wiki_query_parser.add_argument("--wiki-root", default="Wiki/wiki", help="Wiki root path")
 
     wiki_asset_parser = wiki_subparsers.add_parser("add-asset", help="Add screenshot/asset to wiki and create linked note", parents=[global_parser])
     wiki_asset_parser.add_argument("asset_path", nargs="?", help="Path to local asset file")
@@ -878,7 +879,13 @@ def main():
                 )
                 if enabled
             ]
-            result = init_plugin(repo_root, name=args.name, with_marketplace=args.with_marketplace, companion_folders=companion)
+            result = init_plugin(
+                repo_root,
+                name=args.name,
+                category=args.category,
+                with_marketplace=args.with_marketplace,
+                companion_folders=companion,
+            )
         elif args.action in {"install", "import"}:
             result = install_plugin(
                 repo_root,
@@ -1490,8 +1497,8 @@ def main():
                     if "raw_error" in result.data: print(result.data["raw_error"])
                     if args.action == "init":
                         print("\n📚 Init examples:")
-                        print("   ask skills init my-skill --category backend --description 'Does X'")
-                        print("   ask skills init security-guard --category auth --description 'Validates Y'")
+                        print("   ask skills init my-skill --category ui --description 'Does X'")
+                        print("   ask skills init security-guard --category infrastructure_ops --description 'Validates Y'")
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")
@@ -1510,7 +1517,7 @@ def main():
                         if run.get('stderr'):
                             print(f"  Stderr:\n{run.get('stderr')}")
                 print("\n📚 Plugin examples:")
-                print("   ask plugins init my-plugin --with-marketplace")
+                print("   ask plugins init my-plugin --category third-party --with-marketplace")
                 print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")
                 print("   ask plugins harden Plugins/my-plugin")
             elif args.topic == "evals":

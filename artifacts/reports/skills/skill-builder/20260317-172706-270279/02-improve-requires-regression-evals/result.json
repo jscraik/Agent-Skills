@@ -1,0 +1,47 @@
+{
+  "id": "improve-requires-regression-evals",
+  "name": "improve requires regression evals",
+  "category": "edge",
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "discovery-heavy",
+  "timeout_sec": 300.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/02-improve-requires-regression-evals",
+  "runners": {
+    "discovery-smoke": {
+      "runner": "discovery-smoke",
+      "exit_code": 0,
+      "passed": false,
+      "tier1_failures": [
+        "regex failed: /(?i)(improve|upgrade)/",
+        "regex failed: /(?i)run_skill_evals\\.py/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/02-improve-requires-regression-evals/discovery-smoke",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/02-improve-requires-regression-evals/discovery-smoke/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/02-improve-requires-regression-evals/discovery-smoke/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/02-improve-requires-regression-evals/discovery-smoke/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[discovery-smoke] regex failed: /(?i)(improve|upgrade)/",
+    "[discovery-smoke] regex failed: /(?i)run_skill_evals\\.py/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+  ]
+}

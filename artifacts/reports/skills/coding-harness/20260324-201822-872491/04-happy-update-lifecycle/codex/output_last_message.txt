@@ -1,0 +1,53 @@
+For an existing harness-managed repo, the safest path is: check for drift, preview the update, apply it, validate, and only use migrate/rollback when you’re intentionally changing scaffold state. The harness skill docs describe that flow in [setup-and-commands.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/references/setup-and-commands.md) and [agent-install-guide.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/references/agent-install-guide.md).
+
+A conservative command sequence looks like this:
+
+```bash
+# 0. Optional repo preflight if the repo ships the helper
+source scripts/codex-preflight.sh && preflight_repo
+
+# 1. Check whether harness thinks updates are needed
+harness init --check-updates
+
+# 2. Preview the exact scaffold changes first
+harness init --dry-run --update
+
+# 3. Apply the update once the preview looks right
+harness init --update
+
+# 4. Validate the repo after the update
+pnpm check
+# If behavior, contracts, or generated artifacts changed materially:
+pnpm test:deep
+```
+
+Use migrate/rollback as explicit state transitions, not as part of every routine update:
+
+```bash
+# Move to a new harness scaffold/contract mode when required
+harness init --migrate
+
+# Revert the last harness scaffold transition when needed
+harness init --rollback
+```
+
+If the repo is also moving CI from GitHub Actions to CircleCI, use the snapshot-based migration path instead of deleting workflows by hand:
+
+```bash
+# Preview CI migration
+harness ci-migrate prepare --provider circleci --dry-run
+
+# Apply and create a recovery snapshot
+harness ci-migrate prepare --provider circleci --apply
+
+# Verify using the snapshot id printed above
+harness ci-migrate verify --snapshot <snapshot-id>
+
+# Finalize once verified
+harness ci-migrate commit --snapshot <snapshot-id>
+
+# Roll back the CI migration if needed
+harness ci-migrate abort --snapshot <snapshot-id>
+```
+
+Two important safety notes: first, always preview with `--dry-run --update` before `--update`; second, never hand-edit or manually delete harness-enforced outputs if the CLI owns them, because a later update will overwrite them anyway. If you want, I can turn this into a copy-paste runbook for a specific repo state.
