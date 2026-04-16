@@ -14,7 +14,7 @@ import argparse
 import time
 import difflib
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Add Infrastructure/scripts/lib and scripts to path
 repo_root_path = Path(__file__).resolve().parents[1]
@@ -76,6 +76,78 @@ VALID_ACTIONS = {
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
     "wiki": ["lint", "ingest", "add", "query", "add-asset"],
+}
+
+TOPIC_EXAMPLES: Dict[str, List[str]] = {
+    "repo": [
+        "ask repo status",
+        "ask repo validate --ephemeral",
+        "ask repo doctor-catalog --strict",
+        "ask repo check-stability --changed-files Skills/backend-platform/cli-spec/SKILL.md",
+    ],
+    "skills": [
+        "ask skills list",
+        "ask skills route \"find the right security skill\"",
+        "ask skills goal \"implement this feature safely\"",
+        "ask skills audit Skills/backend-platform/cli-spec --level strict",
+    ],
+    "plugins": [
+        "ask plugins list",
+        "ask plugins status plugin-factory",
+        "ask plugins harden Plugins/plugin-factory",
+    ],
+    "evals": [
+        "ask evals run Skills/backend-platform/cli-spec --mode smoke",
+        "ask evals benchmark",
+        "ask evals dashboard",
+    ],
+    "graph": [
+        "ask graph find security",
+        "ask graph related skill-builder --depth 2",
+        "ask graph info cli-spec",
+    ],
+    "mcp": [
+        "ask mcp sync",
+        "ask mcp sync --dry-run",
+    ],
+    "wiki": [
+        "ask wiki lint",
+        "ask wiki add --interactive",
+        "ask wiki query \"1password signing\"",
+    ],
+}
+
+COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
+    ("repo", "doctor-catalog"): [
+        "ask repo doctor-catalog",
+        "ask repo doctor-catalog --strict",
+    ],
+    ("skills", "audit"): [
+        "ask skills audit Skills/backend-platform/cli-spec --level compat",
+        "ask skills audit Skills/backend-platform/cli-spec --level strict",
+    ],
+    ("skills", "goal"): [
+        "ask skills goal \"implement auth safely\"",
+        "ask goal \"implement auth safely\"",
+    ],
+    ("skills", "route"): [
+        "ask skills route \"debug flaky tests\"",
+        "ask skills route \"improve UI accessibility\" --top-k 5",
+    ],
+    ("skills", "install"): [
+        "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --remediate",
+        "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --dry-run",
+    ],
+    ("wiki", "add-asset"): [
+        "ask wiki add-asset ./tmp/screenshot.png --title \"Checkout\" --summary \"Reference layout\"",
+        "ask wiki add-asset --interactive",
+    ],
+}
+
+ACTION_TO_TOPICS: Dict[str, List[str]] = {
+    action: [topic for topic, actions in VALID_ACTIONS.items() if action in actions]
+    for topic_actions in VALID_ACTIONS.values()
+    for action in topic_actions
 }
 
 # Common mistakes and their corrections
@@ -153,6 +225,45 @@ def format_correction(original: str, corrected: str, robot_mode: bool = False) -
     return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
 
 
+def _normalize_token(token: str) -> str:
+    """Normalize a command token for robust fuzzy matching."""
+    return token.strip().lower().replace("_", "-")
+
+
+def _extract_argparse_error(stderr_text: Optional[str]) -> Optional[str]:
+    """Extract the actionable argparse error line."""
+    if not stderr_text:
+        return None
+    lines = [line.strip() for line in stderr_text.splitlines() if line.strip()]
+    for line in lines:
+        if line.startswith("ask: error:"):
+            return line.replace("ask: error:", "", 1).strip()
+    return lines[-1] if lines else None
+
+
+def _example_commands(topic: Optional[str], action: Optional[str], *, limit: int = 3) -> List[str]:
+    """Return contextual command examples, preferring command-specific examples."""
+    if topic and action and (topic, action) in COMMAND_EXAMPLES:
+        return COMMAND_EXAMPLES[(topic, action)][:limit]
+    if topic and topic in TOPIC_EXAMPLES:
+        return TOPIC_EXAMPLES[topic][:limit]
+    fallback = []
+    for fallback_topic in ("skills", "repo", "graph"):
+        fallback.extend(TOPIC_EXAMPLES.get(fallback_topic, []))
+    return fallback[:limit]
+
+
+def _merge_corrections(existing: Optional[str], new_note: Optional[str]) -> Optional[str]:
+    """Merge correction notes without duplicating text blocks."""
+    if not existing:
+        return new_note
+    if not new_note:
+        return existing
+    if new_note in existing:
+        return existing
+    return f"{existing}\n{new_note}"
+
+
 def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
     """Split leading global flags from positional command tokens."""
     global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
@@ -170,98 +281,143 @@ def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[st
     return prefix_flags, raw_args[idx:]
 
 
-def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
-    """Build a helpful error message with examples."""
+def build_helpful_error(
+    topic: Optional[str],
+    action: Optional[str],
+    raw_args: List[str],
+    repo_root: Path,
+    *,
+    parser_error: Optional[str] = None,
+) -> CallResult:
+    """Build a detailed error message when command intent is unclear."""
     result = CallResult()
     result.status = "error"
 
-    error_msg = "I couldn't understand that command."
-    suggestions = []
-    examples = []
+    entered = "ask " + " ".join(raw_args) if raw_args else "ask"
+    _, working_args = consume_global_prefix_flags(raw_args)
+    parsed_error = _extract_argparse_error(parser_error)
+    error_msg = "I couldn't reliably determine command intent."
+    suggestions: List[str] = []
+    examples = _example_commands(topic, action, limit=3)
 
     # Try to figure out what they meant
     if not topic:
         error_msg = "Missing or unknown command topic."
-        suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
-        if raw_args:
-            guess = get_closest_match(raw_args[0], VALID_TOPICS)
-            if guess:
-                suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+        suggestions.append(f"Start with a topic: {', '.join(VALID_TOPICS)}")
+        if working_args:
+            first = _normalize_token(working_args[0])
+            action_topics = ACTION_TO_TOPICS.get(first, [])
+            if len(action_topics) == 1:
+                guessed_topic = action_topics[0]
+                suggestions.append(f"'{first}' is an action under '{guessed_topic}'. Try 'ask {guessed_topic} {first}'.")
+                examples = _example_commands(guessed_topic, first, limit=3)
+            elif len(action_topics) > 1:
+                topics_text = ", ".join(action_topics)
+                suggestions.append(f"'{first}' is ambiguous and exists under topics: {topics_text}.")
+            else:
+                guess = get_closest_match(first, VALID_TOPICS)
+                if guess:
+                    suggestions.append(f"Closest topic guess: 'ask {guess}'.")
     elif topic not in VALID_TOPICS:
-        guess = get_closest_match(topic, VALID_TOPICS)
+        normalized_topic = _normalize_token(topic)
+        guess = get_closest_match(normalized_topic, VALID_TOPICS)
         if guess:
             error_msg = f"Unknown topic: '{topic}'"
-            suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+            suggestions.append(f"Closest topic guess: 'ask {guess}'.")
+            examples = _example_commands(guess, None, limit=3)
         else:
             error_msg = f"Unknown topic: '{topic}'"
             suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
     elif not action:
         error_msg = f"Missing action for 'ask {topic}'"
         valid_actions = VALID_ACTIONS.get(topic, [])
-        suggestions.append(f"Valid actions: {', '.join(valid_actions)}")
+        suggestions.append(f"Valid actions for '{topic}': {', '.join(valid_actions)}")
+        examples = _example_commands(topic, None, limit=3)
     elif action not in VALID_ACTIONS.get(topic, []):
         valid = VALID_ACTIONS.get(topic, [])
         guess = get_closest_match(action, valid)
         if guess:
             error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"💡 Did you mean 'ask {topic} {guess}'?")
+            suggestions.append(f"Closest action guess: 'ask {topic} {guess}'.")
+            examples = _example_commands(topic, guess, limit=3)
         else:
             error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"Valid actions: {', '.join(valid)}")
-
-    # Add relevant examples based on context
-    if topic == "skills" or not topic:
-        examples.extend([
-            "ask skills list",
-            "ask skills route \"find me the right skill for this request\"",
-            "ask skills goal \"implement this feature safely\"",
-            "ask skills starter --archetype delivery",
-            "ask skills audit backend/cli-spec --level strict",
-            "ask skills init my-skill --category backend --description 'Does something useful'",
-        ])
-    if topic == "graph" or not topic:
-        examples.extend([
-            "ask graph find security",
-            "ask graph related skill-builder --depth 2",
-            "ask graph info cli-spec",
-        ])
-    if topic == "repo" or not topic:
-        examples.extend([
-            "ask repo status",
-            "ask repo validate --ephemeral",
-            "ask repo doctor-catalog --strict",
-            "ask repo check-stability",
-        ])
-    if topic == "mcp" or not topic:
-        examples.extend([
-            "ask mcp sync",
-            "ask mcp sync --dry-run",
-        ])
-    if topic == "wiki" or not topic:
-        examples.extend([
-            "ask wiki lint",
-            "ask wiki ingest 'Title' --summary 'Summary' --source '<source>'",
-            "ask wiki add --interactive",
-            "ask wiki query '1password signing'",
-            "ask wiki add-asset /path/to/screenshot.png --title 'Checkout flow' --summary 'Reference layout' --status verified",
-            "ask wiki add-asset --interactive",
-        ])
+            suggestions.append(f"Valid actions for '{topic}': {', '.join(valid)}")
+            examples = _example_commands(topic, None, limit=3)
 
     # Build the full error message
-    full_message = f"❌ {error_msg}\n"
+    full_message = f"❌ {error_msg}\n\n   Entered: `{entered}`"
+    if parsed_error:
+        full_message += f"\n   Parser detail: {parsed_error}"
     if suggestions:
-        full_message += "\n" + "\n".join(f"   {s}" for s in suggestions)
+        full_message += "\n\n🧭 Guidance:\n"
+        full_message += "\n".join(f"   • {s}" for s in suggestions)
     if examples:
-        full_message += "\n\n📚 Examples:\n"
-        full_message += "\n".join(f"   • {e}" for e in examples[:4])
+        full_message += "\n\n📚 Try one of these:\n"
+        full_message += "\n".join(f"   • {e}" for e in examples[:3])
 
     result.errors.append(ErrorObject(
         code=ErrorCode.ERR_VALIDATION,
         message=full_message,
-        fix_suggestion="Use 'ask --help' for full usage information."
+        fix_suggestion="Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
     ))
 
     return result
+
+
+def build_argument_error(
+    topic: str,
+    action: str,
+    raw_args: List[str],
+    *,
+    parser_error: Optional[str] = None,
+) -> CallResult:
+    """Build a detailed error when command intent is clear but args are invalid."""
+    result = CallResult()
+    result.status = "error"
+    entered = "ask " + " ".join(raw_args) if raw_args else f"ask {topic} {action}"
+    parsed_error = _extract_argparse_error(parser_error) or "Argument syntax was invalid for this command."
+    examples = _example_commands(topic, action, limit=3)
+
+    message_lines = [
+        "❌ Command intent was understood, but argument syntax is invalid.",
+        "",
+        f"   Entered: `{entered}`",
+        f"   Parsed intent: `ask {topic} {action}`",
+        f"   Parser detail: {parsed_error}",
+        "",
+        "🧭 Guidance:",
+        f"   • Run `ask {topic} {action} --help` to see required/optional arguments.",
+    ]
+    if examples:
+        message_lines.append("   • Use one of the valid example forms below.")
+        message_lines.append("")
+        message_lines.append("📚 Valid examples:")
+        for example in examples:
+            message_lines.append(f"   • {example}")
+
+    result.errors.append(
+        ErrorObject(
+            code=ErrorCode.ERR_VALIDATION,
+            message="\n".join(message_lines),
+            fix_suggestion=f"Run 'ask {topic} {action} --help' and retry with the shown argument shape.",
+        )
+    )
+    return result
+
+
+def parse_args_with_capture(parser: argparse.ArgumentParser, argv: List[str]) -> Tuple[Optional[argparse.Namespace], Optional[int], str]:
+    """Parse CLI args while capturing argparse stderr for richer error reporting."""
+    import contextlib
+    import io
+
+    stderr_buffer = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(stderr_buffer):
+            parsed = parser.parse_args(argv)
+        return parsed, None, stderr_buffer.getvalue()
+    except SystemExit as exc:
+        return None, int(exc.code), stderr_buffer.getvalue()
 
 
 def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:

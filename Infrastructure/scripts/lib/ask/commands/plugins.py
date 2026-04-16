@@ -715,8 +715,9 @@ def _sync_plugin_config(plugin_name: str, enable: bool = True, remove: bool = Fa
             with open(config_path, "a", encoding="utf-8") as f:
                 f.write(f'\n[plugins."{plugin_name}@agent-skills-local"]\nenabled = {rep}\n')
             return True
-    except OSError:
-        pass
+    except OSError as exc:
+        import sys
+        print(f"Warning: Failed to sync config.toml for plugin '{plugin_name}': {exc}", file=sys.stderr)
     return False
 
 
@@ -728,7 +729,10 @@ def uninstall_plugin(repo_root: Path, name: str, *, dry_run: bool = False) -> Ca
 
     plugins_dir = repo_root / "Plugins"
     if not plugins_dir.exists():
-        return _validation_error_result("Plugins/ directory does not exist.", fix_suggestion="")
+        return _validation_error_result(
+            "Plugins/ directory does not exist.", 
+            fix_suggestion="Ensure you are running the command from the root of a valid skills repository."
+        )
 
     # Try to locate the plugin in any category (e.g., third-party, github)
     found_path = None
