@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-codex-agent-creator",
-  "scope_skill": "Skills/codex-agent-creator",
+  "profile_id": "Skills-agent-ops-codex-agent-creator",
+  "scope_skill": "Skills/agent-ops/codex-agent-creator",
   "scope_profile": "Skills",
   "learning_posture": "manual",
   "rubric_version": "2026-02-26",

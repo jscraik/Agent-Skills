@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-test-driven-development",
-  "scope_skill": "Skills/test-driven-development",
+  "profile_id": "Skills-mobile-native-test-driven-development",
+  "scope_skill": "Skills/mobile-native/test-driven-development",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

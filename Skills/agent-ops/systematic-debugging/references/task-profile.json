@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-systematic-debugging",
-  "scope_skill": "Skills/systematic-debugging",
+  "profile_id": "Skills-agent-ops-systematic-debugging",
+  "scope_skill": "Skills/agent-ops/systematic-debugging",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

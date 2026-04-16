@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-bootstrap",
-  "scope_skill": "Skills/bootstrap",
+  "profile_id": "Skills-backend-platform-bootstrap",
+  "scope_skill": "Skills/backend-platform/bootstrap",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

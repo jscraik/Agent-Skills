@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-writing-plans",
-  "scope_skill": "Skills/writing-plans",
+  "profile_id": "Skills-agent-ops-writing-plans",
+  "scope_skill": "Skills/agent-ops/writing-plans",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

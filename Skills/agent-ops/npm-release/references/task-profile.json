@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-npm-release",
-  "scope_skill": "utilities/npm-release",
-  "scope_profile": "utilities",
+  "profile_id": "Skills-agent-ops-npm-release",
+  "scope_skill": "Skills/agent-ops/npm-release",
+  "scope_profile": "Skills",
   "rubric_version": "2026-04-13",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -45,7 +45,11 @@
     "rationale": "Release flows are automatable but channel, provenance, and OTP boundaries require strict operator-visible safeguards."
   },
   "learning_posture": {
-    "supported": ["learn", "guided", "execute"],
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
     "default": "guided"
   }
 }

@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-autoresearch",
-  "scope_skill": "Skills/autoresearch",
-  "scope_profile": "utilities",
+  "profile_id": "Skills-agent-ops-autoresearch",
+  "scope_skill": "Skills/agent-ops/autoresearch",
+  "scope_profile": "Skills",
   "rubric_version": "2026-04-13",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

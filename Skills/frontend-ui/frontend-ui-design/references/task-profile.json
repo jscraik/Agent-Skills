@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-ui-frontend-ui-design",
-  "scope_skill": "frontend/ui/frontend-ui-design",
-  "scope_profile": "frontend",
+  "profile_id": "Skills-frontend-ui-frontend-ui-design",
+  "scope_skill": "Skills/frontend-ui/frontend-ui-design",
+  "scope_profile": "Skills",
   "rubric_version": "2026-03-21",
   "evaluator_version": "v1-frontend-learning",
   "persona_set_id": "frontend-ui-design-v1",

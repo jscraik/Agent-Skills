@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "interview-architecture-interview",
-  "scope_skill": "interview/architecture-interview",
-  "scope_profile": "interview",
+  "profile_id": "Skills-product-strategy-architecture-interview",
+  "scope_skill": "Skills/product-strategy/architecture-interview",
+  "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

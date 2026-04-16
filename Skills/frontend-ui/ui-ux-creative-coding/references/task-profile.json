@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "frontend-ui-ui-ux-creative-coding",
-  "scope_skill": "frontend/ui/ui-ux-creative-coding",
-  "scope_profile": "frontend",
+  "profile_id": "Skills-frontend-ui-ui-ux-creative-coding",
+  "scope_skill": "Skills/frontend-ui/ui-ux-creative-coding",
+  "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

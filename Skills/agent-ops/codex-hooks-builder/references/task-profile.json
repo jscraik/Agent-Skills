@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-codex-hooks-builder",
-  "scope_skill": "Skills/codex-hooks-builder",
-  "scope_profile": "utilities",
+  "profile_id": "Skills-agent-ops-codex-hooks-builder",
+  "scope_skill": "Skills/agent-ops/codex-hooks-builder",
+  "scope_profile": "Skills",
   "rubric_version": "2026-04-09",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

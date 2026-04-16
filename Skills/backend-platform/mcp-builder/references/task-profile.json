@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "backend-mcp-builder",
-  "scope_skill": "backend/mcp-builder",
-  "scope_profile": "backend",
+  "profile_id": "Skills-backend-platform-mcp-builder",
+  "scope_skill": "Skills/backend-platform/mcp-builder",
+  "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-fix-mise",
-  "scope_skill": "Skills/fix-mise",
+  "profile_id": "Skills-backend-platform-fix-mise",
+  "scope_skill": "Skills/backend-platform/fix-mise",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

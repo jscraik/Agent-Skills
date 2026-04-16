@@ -60,7 +60,7 @@ class BrowserSession:
             # Navigate to notebook
             self.page.goto(self.notebook_url, wait_until="domcontentloaded", timeout=30000)
 
-            # Check if login is needed
+            # Check if login is needed — controlled Playwright session, not user-supplied URL
             if "accounts.google.com" in self.page.url:
                 raise RuntimeError("Authentication required. Please run auth_manager.py setup first.")
 

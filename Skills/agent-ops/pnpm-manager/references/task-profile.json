@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "utilities-pnpm-manager",
-  "scope_skill": "utilities/pnpm-manager",
-  "scope_profile": "utilities",
+  "profile_id": "Skills-agent-ops-pnpm-manager",
+  "scope_skill": "Skills/agent-ops/pnpm-manager",
+  "scope_profile": "Skills",
   "rubric_version": "2026-04-13",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -45,7 +45,11 @@
     "rationale": "pnpm workspace operations benefit from automated selector planning but still require explicit scoping for high-impact recursive commands."
   },
   "learning_posture": {
-    "supported": ["learn", "guided", "execute"],
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
     "default": "guided"
   }
 }

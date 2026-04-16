@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-notebooklm",
-  "scope_skill": "Skills/notebooklm",
+  "profile_id": "Skills-product-strategy-notebooklm",
+  "scope_skill": "Skills/product-strategy/notebooklm",
   "scope_profile": "Skills",
   "rubric_version": "2026-03-03",
   "evaluator_version": "v1",

@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "auth-best-practices",
-  "scope_skill": "auth/best-practices",
-  "scope_profile": "auth",
+  "profile_id": "Skills-security-ops-best-practices",
+  "scope_skill": "Skills/security-ops/best-practices",
+  "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

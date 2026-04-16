@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-alignment-checkpoint",
-  "scope_skill": "Skills/alignment-checkpoint",
+  "profile_id": "Skills-agent-ops-alignment-checkpoint",
+  "scope_skill": "Skills/agent-ops/alignment-checkpoint",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-verification-before-completion",
-  "scope_skill": "Skills/verification-before-completion",
+  "profile_id": "Skills-agent-ops-verification-before-completion",
+  "scope_skill": "Skills/agent-ops/verification-before-completion",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
