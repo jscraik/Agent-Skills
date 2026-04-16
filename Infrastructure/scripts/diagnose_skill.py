@@ -361,6 +361,29 @@ def diagnose_all_skills() -> int:
                 if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
                     skill_names.append(skill_dir.name)
 
+    # From plugin skills under Plugins/
+    plugins_root = REPO_ROOT / "Plugins"
+    if plugins_root.is_dir():
+        for plugin_dir in plugins_root.iterdir():
+            if not plugin_dir.is_dir():
+                continue
+            plugin_skills = plugin_dir / "skills"
+            if not plugin_skills.is_dir():
+                continue
+            for type_dir in plugin_skills.iterdir():
+                if not type_dir.is_dir():
+                    continue
+                for skill_dir in type_dir.iterdir():
+                    if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+                        skill_names.append(skill_dir.name)
+
+    # From .system lane
+    system_lane = REPO_ROOT / ".agents" / "skills" / ".system"
+    if system_lane.is_dir():
+        for skill_dir in system_lane.iterdir():
+            if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+                skill_names.append(skill_dir.name)
+
     skill_names = sorted(set(skill_names))
 
     print(f"🔍 Diagnosing {len(skill_names)} skills...\n")

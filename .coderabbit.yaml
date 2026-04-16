@@ -59,7 +59,7 @@ knowledge_base:
       - "**/GEMINI.md"
       - "**/CODESTYLE.md"
       - "**/WORKFLOW.md"
-      - "docs/agents/**/*.md"
+      - "Docs/agents/**/*.md"
   mcp:
     usage: "enabled"
   web_search:

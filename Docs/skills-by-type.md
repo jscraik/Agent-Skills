@@ -18,7 +18,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `ci_cd_deployment`: 4
 - `runbook`: 13
 - `infrastructure_ops`: 7
-- `invalid`: 1
 - `total_tagged`: 117
 
 ## Semantic Types
@@ -169,5 +168,5 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Validation Notes
 
-- The `metadata.skill-type` frontmatter tag in each skill still uses the legacy category name from before the topic-cluster restructure. These tags are informational and do not affect runtime discovery, which uses directory location under `Skills/<topic-cluster>/`.
+- The `metadata.skill-type` frontmatter tag in each skill uses a semantic category name. Runtime discovery uses directory location under `Skills/<topic-cluster>/`, `Plugins/<plugin>/skills/<type>/`, and `.agents/skills/.system/`. Skills in `.system/` (imagegen, openai-docs) are assigned a type based on content since they lack explicit `skill-type` frontmatter.
 

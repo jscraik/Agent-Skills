@@ -135,10 +135,10 @@ Detailed guidance: `Infrastructure/references/llm-wiki-pattern.md` and `Infrastr
 
 ## Validation
 
-- `python3 Plugins/skill-factory/skills/scaffolding_templates/skill-creator/Infrastructure/scripts/quick_validate.py Docs/product/docs/llm-wiki`
+- `python3 Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py Docs/product/docs/llm-wiki`
 - `./bin/ask skills audit Docs/product/docs/llm-wiki --level strict --robot`
-- `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/run_skill_evals.py product/docs/llm-wiki --eval-mode smoke --runner codex --timeout-profile codex-heavy --format text`
-- `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/run_skill_evals.py product/docs/llm-wiki --eval-mode release --runner codex --timeout-profile codex-heavy --format text`
+- `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Docs/product/docs/llm-wiki --eval-mode smoke --runner codex --timeout-profile codex-heavy --format text`
+- `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Docs/product/docs/llm-wiki --eval-mode release --runner codex --timeout-profile codex-heavy --format text`
 - If eval runner execution is unavailable (timeouts/auth/tooling), record the step as blocked and include scorecard/report paths plus blocker text.
 - Fail fast: stop on first failing gate, fix, and rerun the full validation set.
 

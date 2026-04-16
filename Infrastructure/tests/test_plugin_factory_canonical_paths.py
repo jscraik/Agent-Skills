@@ -9,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PLUGIN_CREATOR_SCRIPT = (
     REPO_ROOT
-    / "plugins"
+    / "Plugins"
     / "plugin-factory"
     / "skills"
     / "scaffolding_templates"
@@ -19,7 +19,7 @@ PLUGIN_CREATOR_SCRIPT = (
 )
 PLUGIN_BUILDER_SCRIPT = (
     REPO_ROOT
-    / "plugins"
+    / "Plugins"
     / "plugin-factory"
     / "skills"
     / "code_quality_review"
@@ -28,7 +28,7 @@ PLUGIN_BUILDER_SCRIPT = (
     / "plugin_builder.py"
 )
 PLUGIN_CREATOR_SKILL = (
-    REPO_ROOT / "plugins" / "plugin-factory" / "skills" / "scaffolding_templates" / "plugin-creator" / "SKILL.md"
+    REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "scaffolding_templates" / "plugin-creator" / "SKILL.md"
 )
 
 

@@ -28,8 +28,8 @@ Navigation index for the repository root, major directories, and key subdirector
 
 Primary skill categories are organized by topic cluster under `Skills/`:
 
-- `/Skills/agent-ops/` — Agent operations, tooling, and general dev skills (42)
-- `/Skills/frontend-ui/` — Frontend UI, design, and browser automation (28)
+- `/Skills/agent-ops/` — Agent operations, tooling, and general dev skills (41)
+- `/Skills/frontend-ui/` — Frontend UI, design, and browser automation (25)
 - `/Skills/backend-platform/` — Backend, CI, and platform infrastructure (8)
 - `/Skills/product-strategy/` — Product planning, interviews, and research (5)
 - `/Skills/security-ops/` — Security, auth, and recon workflows (4)

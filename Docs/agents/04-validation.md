@@ -24,10 +24,10 @@
 
 ### Managed asset lifecycle baseline
 - When work touches lifecycle metadata, packaged-skill inheritance, plugin manifests, or `docs/solutions/` governance:
-  - Re-read [managed-asset-lifecycle.md](/Users/jamiecraik/dev/Agent-Skills/Docs/reference/managed-asset-lifecycle.md) before editing.
+  - Re-read [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md) before editing.
   - Keep lifecycle truth in the authoritative in-file source, not a sidecar-first shadow registry.
   - Treat derived catalogs or indexes as stale until regenerated when they disagree with the authoritative source.
-  - Use [skill-factory plugin manifest](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/.codex-plugin/plugin.json) as the phase-one plugin proof target and [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md) as the phase-one packaged-skill proof target. The `skill-builder`, `skill-creator`, `skill-installer`, and `plugin-creator` factory skills live in `Plugins/skill-factory/` and `Plugins/plugin-factory/` respectively.
+  - Use [skill-factory plugin manifest](/Plugins/skill-factory/.codex-plugin/plugin.json) as the phase-one plugin proof target and [skill-factory packaged skill-builder](/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md) as the phase-one packaged-skill proof target. The `skill-builder`, `skill-creator`, `skill-installer`, and `plugin-creator` factory skills live in `Plugins/skill-factory/` and `Plugins/plugin-factory/` respectively.
 
 ## Config-sensitive checks
 - For edits to `package.json`, CI workflows, `settings.json`, or similar config files:

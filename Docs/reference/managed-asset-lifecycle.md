@@ -15,8 +15,8 @@
 This reference records the phase-one lifecycle governance defaults for managed assets in this repo so scaffolds, validators, and migration work reuse one contract instead of inventing parallel rules.
 
 Canonical source artifacts:
-- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md](/Users/jamiecraik/dev/Agent-Skills/Docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md)
-- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md](/Users/jamiecraik/dev/Agent-Skills/Docs/plans/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md)
+- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md](/Docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md)
+- [2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md](/Docs/plans/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md)
 
 ## Phase-One Scope
 
@@ -63,7 +63,7 @@ Inheritance requirements:
 - if the mapping is missing, ambiguous, or lossy, the packaged asset must declare the required lifecycle fields directly
 
 Phase-one packaged proof target:
-- [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md) (note: factory skills live in `Plugins/skill-factory/` and `Plugins/plugin-factory/`, not in `Skills/`)
+- [skill-factory packaged skill-builder](/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md) (note: factory skills live in `Plugins/skill-factory/` and `Plugins/plugin-factory/`, not in `Skills/`)
 
 ## Lifecycle Readiness States
 
@@ -97,6 +97,6 @@ Entries that are only short-lived execution notes or incident journals do not qu
 ## Phase-One Proof Targets
 
 Use these seed targets when proving the baseline across asset categories:
-- canonical skill: [coding-harness/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/coding-harness/SKILL.md)
-- packaged skill: [skill-factory packaged skill-builder](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md)
-- plugin package: [skill-factory plugin manifest](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/.codex-plugin/plugin.json)
+- canonical skill: [coding-harness/SKILL.md](/Skills/agent-ops/coding-harness/SKILL.md)
+- packaged skill: [skill-factory packaged skill-builder](/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md)
+- plugin package: [skill-factory plugin manifest](/Plugins/skill-factory/.codex-plugin/plugin.json)
