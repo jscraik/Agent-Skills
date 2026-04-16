@@ -840,7 +840,6 @@ def main(argv: list[str]) -> int:
                 "signer_allowlist": {
                     "emails": sorted(allowed_signer_emails),
                     "domains": sorted(allowed_signer_domains),
-        _write_json(manifest_path, _redact_manifest_payload_for_storage(manifest_payload))
                 },
             },
             "install": {

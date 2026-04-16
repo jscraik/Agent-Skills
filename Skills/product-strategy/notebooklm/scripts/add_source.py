@@ -206,6 +206,7 @@ def add_url_source(notebook_url: str, source_url: str, headless: bool = True) ->
         print("  URL cannot be empty")
         return None
 
+    # URL content check for source type classification (not used for security decisions)
     is_youtube = "youtube.com" in source_url or "youtu.be" in source_url
     source_type = "YouTube" if is_youtube else "Website"
 
