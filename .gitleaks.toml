@@ -14,7 +14,7 @@ paths = [
   "(^|/)__tests__/",
   "(^|/)test-data/",
   "(^|/)[^.]+\\.(test|spec)\\.[^.]+$",
-  "Infrastructure/artifacts/",
+  "Infrastructure/artifacts/ai/(prompts|sessions)/",
   "artifacts/",
 ]
 regexes = [
