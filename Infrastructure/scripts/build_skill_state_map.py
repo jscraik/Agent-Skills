@@ -560,7 +560,7 @@ def apply_candidates(nodes: List[SkillNode], candidates_rows: Iterable[Dict[str,
         score = row.get("composite_score")
         try:
             node.candidate_pressure = max(node.candidate_pressure, float(score))
-        except Exception:
+        except Exception:  # noqa: BLE001 — score may be None or non-numeric
             pass
 
 
