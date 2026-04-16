@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-ROOTS = ("auth", "backend", "frontend", "github", "interview", "product", "utilities")
+ROOTS = ("Skills", "skills-antigravity", "skills-system", "plugins/harness-engineering", "plugins/plugin-factory", "plugins/skill-factory")
 ORDERED_TYPES = (
     "library_api_reference",
     "product_verification",
