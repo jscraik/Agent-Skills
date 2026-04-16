@@ -24,6 +24,18 @@ codex_prepend_path_if_exists() {
   esac
 }
 
+# codex_append_path_if_exists appends the specified directory to PATH if the argument names an existing directory and is not already present; it does nothing for empty or non-directory arguments.
+codex_append_path_if_exists() {
+  local entry="$1"
+  if [[ -z "$entry" || ! -d "$entry" ]]; then
+    return 0
+  fi
+  case ":${PATH}:" in
+    *":${entry}:"*) ;;
+    *) PATH="${PATH}:${entry}" ;;
+  esac
+}
+
 # codex_apply_env prepends repository, user and common package-manager bin directories to PATH when they exist and then attempts to activate `mise` for bash.
 codex_apply_env() {
   # Ensure repo entrypoints like `ask` resolve without requiring ./bin prefixes.
@@ -32,7 +44,7 @@ codex_apply_env() {
   codex_prepend_path_if_exists "/home/linuxbrew/.linuxbrew/bin"
   codex_prepend_path_if_exists "/usr/local/bin"
   codex_prepend_path_if_exists "/opt/homebrew/bin"
-  codex_prepend_path_if_exists "$CODEX_REPO_ROOT/bin"
+  codex_append_path_if_exists "$CODEX_REPO_ROOT/bin"
   export PATH
 
   if command -v mise >/dev/null 2>&1; then

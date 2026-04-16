@@ -17,7 +17,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCRIPT_PATH = REPO_ROOT / "scripts" / "codex_env_common.sh"
+SCRIPT_PATH = REPO_ROOT / "Infrastructure" / "scripts" / "codex-preflight" / "codex_env_common.sh"
 
 
 def _bash(snippet: str, env: dict | None = None, cwd: str | None = None) -> subprocess.CompletedProcess:
@@ -166,10 +166,10 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
 
         try:
             local_bin_idx = path_entries.index(local_bin_str)
-            self.assertLess(
+            self.assertGreater(
                 repo_bin_idx,
                 local_bin_idx,
-                f"CODEX_REPO_ROOT/bin must precede ~/.local/bin but got indices {repo_bin_idx} > {local_bin_idx}",
+                f"CODEX_REPO_ROOT/bin must follow ~/.local/bin but got indices {repo_bin_idx} < {local_bin_idx}",
             )
         except ValueError:
             # ~/.local/bin not in PATH — that's fine; just verify repo bin is present
@@ -371,6 +371,14 @@ class TestScriptSourceability(unittest.TestCase):
         Sources the module in a subshell and asserts the function name is declared in the resulting shell environment.
         """
         result = _source_and_run("declare -f codex_prepend_path_if_exists > /dev/null && echo defined")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("defined", result.stdout)
+
+    def test_codex_append_path_if_exists_function_is_defined(self) -> None:
+        """
+        Verify that the shell function `codex_append_path_if_exists` is available after sourcing the script.
+        """
+        result = _source_and_run("declare -f codex_append_path_if_exists > /dev/null && echo defined")
         self.assertEqual(result.returncode, 0)
         self.assertIn("defined", result.stdout)
 
