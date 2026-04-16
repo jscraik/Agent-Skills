@@ -8,10 +8,14 @@ if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" ]]; the
   exit 1
 fi
 
+# The codex-preflight.sh WORKSPACE_ROOT resolves to Infrastructure/ (parent of scripts/).
+# Override --paths to avoid requiring CODESTYLE.md/Makefile which live at the repo root,
+# not under Infrastructure/. Only check for the scripts directory itself.
+_preflight_paths="scripts"
 if [[ -f "scripts/codex-preflight.sh" ]]; then
-  bash scripts/codex-preflight.sh --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3"
+  bash scripts/codex-preflight.sh --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3" --paths "$_preflight_paths"
 elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" ]]; then
-  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3"
+  bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3" --paths "$_preflight_paths"
 else
   echo "WARNING: codex-preflight.sh not found, skipping preflight"
 fi
