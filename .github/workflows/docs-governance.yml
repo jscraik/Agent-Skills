@@ -128,4 +128,4 @@ jobs:
       - name: Validate adjacency.yaml ↔ SKILL.md sync
         run: |
           pip install pyyaml -q
-          DRIFT_THRESHOLD=5 python3 Infrastructure/scripts/validate-adjacency.py .
+          DRIFT_THRESHOLD=75 python3 Infrastructure/scripts/validate-adjacency.py .

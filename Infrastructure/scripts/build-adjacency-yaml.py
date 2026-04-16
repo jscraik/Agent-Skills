@@ -10,6 +10,13 @@ import os, pathlib, re, subprocess, sys, yaml  # needs PyYAML
 ROOT     = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 OUT_YAML = ROOT / "Docs/skill-graphs/adjacency.yaml"
 CANONICAL_PREFIXES = {
+    "Skills/agent-ops/",
+    "Skills/frontend-ui/",
+    "Skills/backend-platform/",
+    "Skills/product-strategy/",
+    "Skills/security-ops/",
+    "Skills/content-publishing/",
+    "Skills/mobile-native/",
     "auth/",
     "backend/",
     "frontend/",
@@ -19,6 +26,7 @@ CANONICAL_PREFIXES = {
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
+    "Plugins/compound-engineering-router/skills/",
     "skills-antigravity/",
     "personas/",
     "product/",

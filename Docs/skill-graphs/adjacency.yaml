@@ -162,10 +162,6 @@ ce-work:
   ce-plan: Build execution-ready plan
   ce-review: Review after execution
   test-browser: Browser verification
-circleci:
-  backend-engineer: Wire backend deployments into CircleCI workflows
-  gh-workflow: Diagnose GitHub check blockers around CircleCI-driven delivery work
-  verification-before-completion: Verify pipeline output before marking complete
 claude-alias:
   bootstrap: Bootstrap a local development environment from a GitHub repository URL
   fix-mise: Diagnose and repair mise trust/runtime issues
@@ -435,10 +431,6 @@ shadcn-ui:
   design-system: Override shadcn/ui tokens with design-system aliases
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
-simplify:
-  autofix: Resolve unresolved CodeRabbit PR review comments in guided or batch mode
-  code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
-    fix work
 skill-builder:
   codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
