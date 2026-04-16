@@ -12,14 +12,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `library_api_reference`: 3
 - `product_verification`: 7
 - `data_fetch_analysis`: 4
-- `team_automation`: 25
+- `team_automation`: 24
 - `scaffolding_templates`: 25
 - `code_quality_review`: 24
 - `ci_cd_deployment`: 3
 - `runbook`: 13
 - `infrastructure_ops`: 7
 - `invalid`: 0
-- `total_tagged`: 111
+- `total_tagged`: 110
 
 ## Semantic Types
 
@@ -64,7 +64,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `ce-work` — `Plugins/harness-engineering/skills/team_automation`
 - `codex-automation-architect` — `Skills/agent-ops`
 - `coding-harness` — `Skills/agent-ops`
-- `compound-engineering-router` — `Plugins/compound-engineering-router/skills/team_automation`
 - `deep-interview` — `Skills/product-strategy`
 - `interview-me` — `Skills/product-strategy`
 - `markdown-converter` — `Skills/content-publishing`
@@ -150,18 +149,4 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `scaffolding-expert` — `Skills/agent-ops`
 - `systematic-debugging` — `Skills/agent-ops`
 - `uv-python-project-setup` — `Skills/agent-ops`
-
-### Infrastructure Ops
-
-- `1password` — `Skills/security-ops`
-- `claude-alias` — `Skills/agent-ops`
-- `fix-mise` — `Skills/backend-platform`
-- `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
-- `process-watch` — `Skills/mobile-native`
-- `rclone` — `Skills/agent-ops`
-- `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
-
-## Validation Notes
-
-- No invalid semantic type tags detected.
 

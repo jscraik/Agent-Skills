@@ -12,13 +12,20 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
+- [Plugins — Harness Engineering — Skills — Code_Quality_Review](#plugins-harness-engineering-skills-code_quality_review)
+- [Plugins — Harness Engineering — Skills — Team_Automation](#plugins-harness-engineering-skills-team_automation)
+- [Plugins — Plugin Factory — Skills — Code_Quality_Review](#plugins-plugin-factory-skills-code_quality_review)
+- [Plugins — Skill Factory — Skills — Code_Quality_Review](#plugins-skill-factory-skills-code_quality_review)
+- [Plugins — Skill Factory — Skills — Data_Fetch_Analysis](#plugins-skill-factory-skills-data_fetch_analysis)
+- [Plugins — Skill Factory — Skills — Scaffolding_Templates](#plugins-skill-factory-skills-scaffolding_templates)
+- [Plugins — Skill Factory — Skills — Team_Automation](#plugins-skill-factory-skills-team_automation)
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 93
+- `total_skills`: 108
 - `catalog_source`: repository skill scan
 - `visibility`: default
-- `policy_identity`: 7b5d4c75b7d19338
+- `policy_identity`: c2936567608cc84e
 
 ## Catalog
 
@@ -131,11 +138,47 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `create-auth` — Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults. Use when the user wants Better Auth added or changed in code, not just reviewed.
 - `recon-workbench` — Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
 
+## Plugins — Harness Engineering — Skills — Code_Quality_Review
+
+- `ce-reliability-review` — Review services, APIs, and multi-component systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness. Use when the work involves new services, significant service changes, multiple external dependencies, or high blast-radius failure scenarios.
+- `ce-review` — Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with severity-ranked synthesis. Use when users need readiness synthesis rather than detailed technical-risk critique.
+- `ce-technical-review` — Review a diff, PR, branch, file set, spec, or plan to produce severity-ranked engineering issues with exact locations. Use when the user needs technical risk findings rather than broad readiness synthesis.
+
+## Plugins — Harness Engineering — Skills — Team_Automation
+
+- `ce-brainstorm` — Run the compound-engineering brainstorm stage to clarify WHAT to build, compare viable directions, and capture a right-sized requirements document before spec, planning, or lightweight direct work. Use when the user wants CE-stage exploration, is unsure about scope or direction, or needs help deciding whether a spec is required.
+- `ce-compound` — Analyze compound-engineering artifact state and capture verified solved problems into durable `docs/solutions/` knowledge, including refreshing an existing solution doc instead of creating a duplicate when the same problem is solved again. Use when the user needs a CE request started or resumed from the right place, or wants a fresh fix turned into reusable team knowledge.
+- `ce-compound-refresh` — Review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation when multiple docs now cover the same ground after refactors, migrations, or dependency upgrades.
+- `ce-deepen-plan` — Deepen an existing implementation plan so sequencing, verification, and risk treatment are strong enough for execution. Use when the user wants CE-stage plan hardening before ce-work.
+- `ce-deepen-spec` — Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants CE-stage spec hardening or a requirements review pass before planning.
+- `ce-ideate` — Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants CE-stage idea generation before brainstorming in depth, not a general product brainstorm.
+- `ce-plan` — Own the compound-engineering planning stage by turning a spec, brainstorm, bug report, or feature description into an execution-ready implementation plan. Use when the user wants either the CE planning stage or canonical generic multi-step implementation planning.
+- `ce-spec` — Own the compound-engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the CE WHAT-before-planning artifact, not a broader product-planning pipeline.
+- `ce-tdd` — Build behavior-safe code changes with TDD and RED/GREEN evidence. Use when ce-plan or ce-work requires TDD for a concrete behavior target.
+- `ce-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants compound-engineering work implemented, not just planned.
+
+## Plugins — Plugin Factory — Skills — Code_Quality_Review
+
+- `plugin-builder` — Harden, convert, and validate Codex plugin packages that bundle skills, hooks, agents, and MCP metadata. Use when the deliverable is clearly a plugin package and needs contract-grade safety checks, not when standalone skill lifecycle hardening is still unresolved.
+
+## Plugins — Skill Factory — Skills — Code_Quality_Review
+
+- `skill-builder` — Analyze and harden Codex skills and plugin packages for contract quality, eval coverage, and safety compliance. Use this skill when an existing package is approaching release and needs evidence-backed validation.
+
+## Plugins — Skill Factory — Skills — Data_Fetch_Analysis
+
+- `skill-refactor` — Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.
+
+## Plugins — Skill Factory — Skills — Scaffolding_Templates
+
+- `skillify` — Capture a completed Codex workflow as a reusable SKILL.md package by analyzing session context plus optional session-collector evidence, interviewing the user with structured prompts, and writing a validated skill artifact. Use when the user asks to skillify or operationalize a repeatable process.
+
+## Plugins — Skill Factory — Skills — Team_Automation
+
+- `skill-factory` — Route to the right skill-authoring lane
+
 ## Skills System
 
 - `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
-- `skill-creator` — Create or update a skill
-- `skill-installer` — Install curated skills from openai/skills or other repos
 

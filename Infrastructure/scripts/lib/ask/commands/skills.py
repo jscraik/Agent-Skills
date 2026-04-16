@@ -15,7 +15,7 @@ if str(SCRIPTS_ROOT) not in sys.path:
 
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries, get_policy_identity
-from selection_policy import REPO_SCAN_ROOTS
+from selection_policy import PLUGIN_HIDDEN_LANE_SKILL_NAMES, REPO_SCAN_ROOTS
 from ask.catalog_parity import compute_catalog_parity
 from ask.selection_contract import (
     EligibleCandidate,
@@ -281,7 +281,7 @@ def list_skills(
     	starter (bool): If true, return a deterministic subset of skills ordered by `archetype` rather than the full set.
     	archetype (str): Archetype key used to choose starter skills; unknown keys fall back to `"general"`.
     	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-    	advanced (bool): If false, omit certain internal "coderabbit lane" skills from the default listing; if true, include them.
+    	advanced (bool): If false, include installed plugin skills but omit hidden lane skills from the default listing; if true, include hidden lane skills too.
     
     Returns:
     	CallResult: Result with `status == "success"` and `data` containing:
@@ -294,18 +294,20 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
-    # _canonical_entries already respects visibility and delegates to discover_skill_entries,
-    # which handles filtering hidden skills appropriately for the requested visibility mode.
+    # Use advanced discovery here so installed plugin skills are surfaced by default.
+    # The default list remains human-friendly by filtering hidden lanes below.
     entries = _canonical_entries(
         repo_root,
         source="auto",
-        visibility="advanced" if advanced else "default",
+        visibility="advanced",
     )
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
         if not advanced and _is_hidden_coderabbit_lane(entry):
+            continue
+        if not advanced and entry.name in PLUGIN_HIDDEN_LANE_SKILL_NAMES:
             continue
         if category and category.lower() not in entry.category.lower():
             continue
