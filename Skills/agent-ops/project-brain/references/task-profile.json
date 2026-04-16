@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-security-ops-1password",
-  "scope_skill": "Skills/security-ops/1password",
+  "profile_id": "Skills-agent-ops-project-brain",
+  "scope_skill": "Skills/agent-ops/project-brain",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
@@ -39,9 +39,9 @@
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 60.0,
-    "ai_process_minutes": 20.0,
-    "probability_of_success": 0.68,
-    "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
+    "human_baseline_minutes": 45.0,
+    "ai_process_minutes": 15.0,
+    "probability_of_success": 0.75,
+    "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
   }
 }

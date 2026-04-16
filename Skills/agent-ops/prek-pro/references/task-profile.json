@@ -38,7 +38,7 @@
     }
   ],
   "delegation": {
-    "mode": "manual",
+    "mode": "co-pilot",
     "human_baseline_minutes": 30.0,
     "ai_process_minutes": 10.0,
     "probability_of_success": 0.75,
