@@ -314,7 +314,7 @@ def user_prompt_submit_template() -> str:
           "reset|--hard"
           "checkout|--"
           "dangerously|skip permissions"
-          "--|yolo"
+          "--yolo"
           "delete|everything"
           "remove|everything"
         )
