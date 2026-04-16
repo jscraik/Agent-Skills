@@ -264,6 +264,10 @@ All generate commands support:
 | Quiz | `generate quiz` | `--difficulty [easy\|medium\|hard]`, `--quantity [fewer\|standard\|more]` | .json/.md/.html |
 | Flashcards | `generate flashcards` | `--difficulty [easy\|medium\|hard]`, `--quantity [fewer\|standard\|more]` | .json/.md/.html |
 
+## Legacy Script Context
+
+For philosophical guardrails, validation anti-patterns, and workflow boundaries applicable to the `legacy_scripts/` backup stack, read **`references/legacy-philosophy.md`**.
+
 ## Features Beyond the Web UI
 
 These capabilities are available via CLI but not in NotebookLM's web interface:
