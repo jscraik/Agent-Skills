@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "skill_gate",
-          "informationUri": "https://github.com/openai/skills",
+          "informationUri": "https://github.com/jscraik/Agent-Skills",
           "rules": [
             {
               "id": "CONTRACT_MISSING",
