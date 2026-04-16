@@ -16,13 +16,8 @@ fi
 set -euo pipefail
 
 
-ARTIFACT_DIR="${1:-}"
+ARTIFACT_DIR="${1:?Usage: $0 <artifact-directory>}"
 GPG_KEY="${FALLBACK_GPG_KEY:-releases@company.com}"
-
-if [[ -z "$ARTIFACT_DIR" ]]; then
-    echo "Usage: $0 <artifact-directory>"
-    exit 1
-fi
 
 if [[ ! -d "$ARTIFACT_DIR" ]]; then
     echo "ERROR: Directory not found: $ARTIFACT_DIR"

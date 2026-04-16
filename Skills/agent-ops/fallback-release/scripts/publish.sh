@@ -4,13 +4,8 @@
 set -euo pipefail
 
 
-VERSION="${1:-}"
-ARTIFACT_DIR="${2:-}"
-
-if [[ -z "$VERSION" || -z "$ARTIFACT_DIR" ]]; then
-    echo "Usage: $0 <version> <artifact-directory>"
-    exit 1
-fi
+VERSION="${1:?Usage: $0 <version> <artifact-directory>}"
+ARTIFACT_DIR="${2:?Usage: $0 <version> <artifact-directory>}"
 
 if [[ ! -d "$ARTIFACT_DIR" ]]; then
     echo "ERROR: Artifact directory not found: $ARTIFACT_DIR"
@@ -133,8 +128,7 @@ $(find "$ARTIFACT_DIR" -maxdepth 1 -type f -name "*-$VERSION-*" ! -name "*.sha25
 
 ---
 Built with [fallback-release](../tree/main/Docs/product/ops/fallback-release)
-EOF
-)
+"
 
     # Check if release already exists
     if gh release view "v$VERSION" > /dev/null 2>&1; then
