@@ -239,7 +239,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
             result = run_validator(repo_root)
             self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)
-            self.assertIn("Skills/plugin-builder/SKILL.md [skill]", result.stdout)
+            self.assertIn("Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md [skill]", result.stdout)
             self.assertIn("missing_metadata: governed skill missing `lifecycle_state`", result.stdout)
 
     def test_cached_and_fixture_skills_are_skipped_from_catalog_duplicates(self) -> None:
