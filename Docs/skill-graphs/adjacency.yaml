@@ -169,11 +169,6 @@ cli-spec:
   agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
-coderabbit:
-  circleci: Pair CodeRabbit guidance with broader CircleCI migration and policy workflows
-  context7: Cross-check third-party library docs when CodeRabbit guidance references
-    external tools
-  gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
 codex-agent-creator:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
@@ -206,6 +201,12 @@ coding-harness:
     applying fixes
   verification-before-completion: Add a stronger final verification pass before claiming
     a repo change is complete
+compound-engineering-router:
+  architecture-interview: Route architecture decisions through the structured interview
+  brainstorming: Start with brainstorming before routing to a compound workflow
+  product-spec: Produce a spec before routing to the work or review mode
+  skill-builder: Build skills that compound workflows will invoke
+  writing-plans: Generate the implementation plan the compound mode targets
 create-auth:
   1password: Inject auth secrets via 1Password CLI
   mcp-builder: Secure MCP server authentication using Better Auth
@@ -231,6 +232,9 @@ diagram-cli:
   ce-plan: Use architecture diagrams to ground implementation plans
   docs-expert: Embed diagrams into repository documentation
   visual-explainer: Render diagram artifacts as a polished HTML explainer
+elixir-pro:
+  rust-pro: Systems-level concurrency patterns that share OTP-style supervision thinking
+  systematic-debugging: Triage distributed process failures with evidence-first diagnosis
 evals-router:
   skill-refactor: Analyze session-derived skill quality signals before redesigning
     eval plans
@@ -279,6 +283,9 @@ gh-workflow:
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
+go:
+  rust-pro: Systems programming with similar error-propagation and ownership concerns
+  systematic-debugging: Triage Go runtime errors with evidence-first diagnosis
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -292,6 +299,10 @@ interview-me:
   deep-interview: Deepen an existing draft doc or spec rather than running a lighter
     clarifying interview
   product-spec: Turn the clarified outcome into a fuller product-planning specification
+javascript-pro:
+  biome-linting: Enforce JavaScript/TypeScript lint and format rules with Biome
+  typescript: Typed JavaScript superset when strict contracts and module boundaries
+    are needed
 markdown-converter:
   docs-expert: Polish converted docs to meet repository quality standards
   notebooklm: Feed converted markdown to NotebookLM for analysis
@@ -360,6 +371,9 @@ pnpm-manager:
   mise-tooling: Ensure runtime/tool versions are pinned before pnpm execution
   npm-release: Hand off package publish lanes after workspace validation
   npm-workflow-discipline: Keep workspace install/publish contracts deterministic
+powershell:
+  bash-hygiene: Shell scripting hygiene practices that complement PowerShell automation
+  systematic-debugging: Triage PowerShell pipeline failures with evidence-first diagnosis
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
@@ -421,6 +435,10 @@ resolve-pr-parallel:
     fan-out
   systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
     feedback
+rust-pro:
+  go: Systems programming with similar error-handling and concurrency patterns
+  systematic-debugging: Triage Rust ownership and borrow-checker errors with evidence-first
+    diagnosis
 scaffolding-expert:
   bash-hygiene: Shell-policy and quoting/interpreter hardening
   context7: External docs grounding for version-sensitive dependencies
@@ -431,6 +449,10 @@ shadcn-ui:
   design-system: Override shadcn/ui tokens with design-system aliases
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
+simplify:
+  autofix: Resolve unresolved CodeRabbit PR review comments in guided or batch mode
+  code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
+    fix work
 skill-builder:
   codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
@@ -475,6 +497,9 @@ spreadsheet:
   insight-report: Export session data to spreadsheet for analysis
   markdown-converter: Convert spreadsheet data to markdown for documentation
   visual-explainer: Present spreadsheet data as a styled HTML table
+sql-pro:
+  systematic-debugging: Triage query performance regressions with evidence-first diagnosis
+  yaml: Schema-aware config review for database connection and migration config files
 stitch-loop:
   frontend-ui-design: Review and polish Stitch-generated UI
   react-components: Convert Stitch outputs to React components
@@ -487,6 +512,11 @@ stitch-remotion:
   slides: Compare slide deck with Remotion video for the same content
   sora: Use Sora for AI-generated video alternative to Remotion
   stitch-loop: Generate the Stitch screens that feed this skill
+swift-development:
+  rust-pro: Systems-level safety patterns that share Swift's value-type and concurrency
+    thinking
+  systematic-debugging: Triage Swift concurrency and actor isolation issues with evidence-first
+    diagnosis
 systematic-debugging:
   ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
     converging
@@ -515,6 +545,13 @@ threejs-builder:
   frontend-ui-design: Provide the design context Three.js scene should match
   ui-ux-creative-coding: Orchestrate Three.js alongside React motion for rich UI
   visual-explainer: Embed Three.js scenes in HTML explainer pages
+toml:
+  systematic-debugging: Triage config parsing failures with evidence-first diagnosis
+  yaml: Schema-aware config review for YAML-based tooling configs
+typescript:
+  biome-linting: Enforce TypeScript lint and format rules with Biome
+  javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
+    need attention
 ui-cloner:
   design-system: Map cloned design tokens into your design system
   frontend-ui-design: Adapt the cloned design system to your brand
@@ -568,3 +605,6 @@ writing-plans:
   systematic-debugging: When 3+ fix attempts fail, restart with this skill to re-plan
     the approach
   verification-before-completion: Embed in the plan's final task to gate "done" claims
+yaml:
+  systematic-debugging: Triage config parsing failures with evidence-first diagnosis
+  toml: Schema-aware config review for TOML-based tooling configs
