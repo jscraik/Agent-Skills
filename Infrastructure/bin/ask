@@ -1731,9 +1731,15 @@ def main():
                         print(f"  Command: {run.get('command')}")
                         print(f"  Return code: {run.get('returncode')}")
                         if run.get('stdout'):
-                            print(f"  Stdout:\n{run.get('stdout')}")
+                            if getattr(args, 'verbose', False):
+                                print(f"  Stdout:\n{repr(run.get('stdout'))}")
+                            else:
+                                print("  (Stdout elided. Use --verbose to view)")
                         if run.get('stderr'):
-                            print(f"  Stderr:\n{run.get('stderr')}")
+                            if getattr(args, 'verbose', False):
+                                print(f"  Stderr:\n{repr(run.get('stderr'))}")
+                            else:
+                                print("  (Stderr elided. Use --verbose to view)")
                 print("\n📚 Plugin examples:")
                 print("   ask plugins init my-plugin --category third-party --with-marketplace")
                 print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")

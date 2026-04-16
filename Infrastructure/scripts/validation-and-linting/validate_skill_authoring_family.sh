@@ -60,7 +60,10 @@ skill_dirs=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
   "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+  "Plugins/skill-factory/skills/scaffolding_templates/skillify"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
+  "Plugins/plugin-factory/skills/code_quality_review/plugin-builder"
+  "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer"
 )
 skill_builder_dir="Plugins/skill-factory/skills/code_quality_review/skill-builder"
 skill_builder_scripts_dir="${skill_builder_dir}/scripts"
