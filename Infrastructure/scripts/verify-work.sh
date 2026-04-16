@@ -21,6 +21,9 @@ Options:
   --strict           Fail when fast-mode fallbacks are needed
   --fast             Run preflight + lint + typecheck + tests instead of the full check bundle
   --repo-root PATH   Run checks in a specific repository root
+  --project-governance   Run validation in project-local scope (default). Validation artifacts are ephemeral.
+  --workspace-governance Run validation in workspace scope. Validation artifacts are persistent.
+  --persistent-artifacts Backward-compatible alias for --workspace-governance
   -h, --help         Show this help text
 USAGE
 }

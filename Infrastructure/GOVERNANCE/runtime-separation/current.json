@@ -3,21 +3,15 @@
   "schema_version": "runtime-separation-current.v1",
   "status": "healthy",
   "summary": {
-    "canonical_root_digest": "994ead349ac99b12047c0175095e3bbf7a1516b53255a8f70f20af44fa3961a5",
+    "canonical_root_digest": "7b5d4c75b7d193388853ab7a35833078d82d7650c2003238ba347ebd59913cc1",
     "command_checks": {
       "plugins_doctor": {
         "blocker_id": null,
         "command": "bin/ask plugins doctor --json",
         "drift_class": null,
-        "evidence_ref": "sha256:d4b6d963573428cb898ac7a59922613ab8aa998c1a7920475cbd34a3523d6140",
+        "evidence_ref": "sha256:1dc428e3efbf5553387d12b2491d9f75f51f2a2b3d4e6cd16e5474711a77522f",
         "normalized_fields": {
           "activation_plugins": [
-            {
-              "cache_present": true,
-              "marketplace_source_path": "./Plugins/coderabbit",
-              "name": "coderabbit",
-              "registered_in_marketplace": true
-            },
             {
               "cache_present": true,
               "marketplace_source_path": "./Plugins/harness-engineering",
@@ -42,10 +36,6 @@
           "health_status": "healthy",
           "installed_plugins": [
             {
-              "name": "coderabbit",
-              "path": "plugins/coderabbit"
-            },
-            {
               "name": "harness-engineering",
               "path": "plugins/harness-engineering"
             },
@@ -64,34 +54,11 @@
         "subject_id": "plugins"
       },
       "plugins_status": {
-        "coderabbit": {
-          "blocker_id": null,
-          "command": "bin/ask plugins status coderabbit --json",
-          "drift_class": null,
-          "evidence_ref": "sha256:631247b803e143b4910455b296713b9dfb7f666ae69188a8cd453b96f1246e40",
-          "normalized_fields": {
-            "activation_plugin": {
-              "cache_present": true,
-              "marketplace_source_path": "./Plugins/coderabbit",
-              "name": "coderabbit",
-              "registered_in_marketplace": true
-            },
-            "command": "plugins status coderabbit --json",
-            "installed_plugin": {
-              "name": "coderabbit",
-              "path": "plugins/coderabbit"
-            },
-            "plugin_id": "coderabbit",
-            "status": "success"
-          },
-          "returncode": 0,
-          "subject_id": "coderabbit"
-        },
         "harness-engineering": {
           "blocker_id": null,
           "command": "bin/ask plugins status harness-engineering --json",
           "drift_class": null,
-          "evidence_ref": "sha256:f270a7207917b886f53bb80e1da4ef258b8810dd2ebd45bd4f36dcc3913a4fcc",
+          "evidence_ref": "sha256:a97ed995218b48c842c4d323cdffa52ced60945ce3e07e4b35f0aa3fe420e136",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -114,7 +81,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status plugin-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:5159eb97e49c109ddeefba59dba3f679fcdbe8e60d350c547e01e6b41da07e48",
+          "evidence_ref": "sha256:4c8b2445f39802c206ada8ed2d8d9432266f3064cb79018495d7fe7136d2045b",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -137,7 +104,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status skill-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:8931d34847dc473844e2e1ed7ac7478122f61dbb1c3cf08987dca7bf114a7a58",
+          "evidence_ref": "sha256:80799c8b65411b54e05665a2148ed64d6d1263281a63e218e6adfe50be4200e4",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -161,12 +128,12 @@
         "blocker_id": "catalog:cc4eb19d4fe8",
         "command": "bin/ask repo doctor-catalog --strict --json",
         "drift_class": "command_exit_nonzero",
-        "evidence_ref": "sha256:de974f3c98925d33e14521b26c2da704c578e40bc3efc74ed8ba925eba88bac6",
+        "evidence_ref": "sha256:bdf0ed397b2c6b099a39faf31b5cdbdcc77dd1d7514da6f5daed7f9a08e20bc9",
         "normalized_fields": {
           "command": "repo doctor-catalog --strict --json",
           "decision_status": "blocked_catalog_parity",
           "drift_class": "count_mismatch",
-          "policy_identity": "994ead349ac99b12",
+          "policy_identity": "7b5d4c75b7d19338",
           "status": "error"
         },
         "returncode": 2,
@@ -176,7 +143,7 @@
         "blocker_id": null,
         "command": "bin/ask repo status --json",
         "drift_class": null,
-        "evidence_ref": "sha256:95f06109c1eaae208fef93dbece847adaa3d6361643769c8a229029a917ce6f5",
+        "evidence_ref": "sha256:dbfb394f5f666c70cf030d683da491e9eb67b5a7d37f4a145cedc548d926eec2",
         "normalized_fields": {
           "command": "repo status --json",
           "is_git": true,
@@ -204,30 +171,30 @@
         "blocker_id": null,
         "command": "bin/ask skills list --json",
         "drift_class": null,
-        "evidence_ref": "sha256:fd6236342d0cb8f59db87971c56a5b8eaf321ad3d2a779408e08cd2d3c463478",
+        "evidence_ref": "sha256:9757ae38601498cdd13c6eaea3ba53ba552da4f6f64d38994ce9a8d9664b6a09",
         "normalized_fields": {
           "command": "skills list --json",
           "sample_names": [
-            "Skills",
-            "circleci",
-            "gh-workflow",
-            "resolve-pr-parallel",
-            "using-git-worktrees",
-            "best-practices",
+            "alignment-checkpoint",
+            "autoresearch",
+            "bash-hygiene",
+            "biome-linting",
+            "claude-alias",
+            "codex-agent-creator",
+            "codex-automation-architect",
             "codex-home-audit",
-            "elixir-pro",
-            "evals-router",
-            "go"
+            "codex-hooks-builder",
+            "coding-harness"
           ],
-          "skill_count": 91,
+          "skill_count": 90,
           "status": "success"
         },
         "returncode": 0,
         "subject_id": "skills"
       }
     },
-    "command_checks_digest": "b73aad4fa88de7aacd90ae83bfbc259c5ed03dd4406a849e2ca67992486171fa",
-    "discovery_identity": "c4655f141a54580b2f0773ddb44a993cf7a306adc2ddf940e011ecee66c323fc",
+    "command_checks_digest": "04e73e632cb3aae7097b3f128fbeb2da366c59d82f1382f87b9b9bae3ab7d21e",
+    "discovery_identity": "ce7f47d4ee925770adea4e40633796f12ba2af24f5b099962de5867aefae08c4",
     "duplicate_shadow_drift_classes": {
       "plugins_doctor": null,
       "repo_doctor_catalog": "command_exit_nonzero"
@@ -235,14 +202,12 @@
     "plugin_activation_parity": {
       "cache_absent": true,
       "checked_plugins": [
-        "coderabbit",
         "harness-engineering",
         "plugin-factory",
         "skill-factory"
       ],
       "doctor_status": "success",
       "status_blockers": {
-        "coderabbit": null,
         "harness-engineering": null,
         "plugin-factory": null,
         "skill-factory": null
@@ -251,46 +216,36 @@
     "plugin_package_root_parity": [
       {
         "asset_relpath": ".codex-plugin/plugin.json",
-        "catalog_resolution": "Infrastructure/catalog/Plugins/coderabbit",
-        "consumer_id": "plugins_status.coderabbit",
-        "evidence_ref": "sha256:631247b803e143b4910455b296713b9dfb7f666ae69188a8cd453b96f1246e40",
-        "legacy_resolution": "./Plugins/coderabbit",
-        "parity_result": "fail",
-        "plugin_id": "coderabbit",
-        "selector_row_id": "coderabbit:0"
-      },
-      {
-        "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/harness-engineering",
         "consumer_id": "plugins_status.harness-engineering",
-        "evidence_ref": "sha256:f270a7207917b886f53bb80e1da4ef258b8810dd2ebd45bd4f36dcc3913a4fcc",
+        "evidence_ref": "sha256:a97ed995218b48c842c4d323cdffa52ced60945ce3e07e4b35f0aa3fe420e136",
         "legacy_resolution": "./Plugins/harness-engineering",
         "parity_result": "fail",
         "plugin_id": "harness-engineering",
-        "selector_row_id": "harness-engineering:1"
+        "selector_row_id": "harness-engineering:0"
       },
       {
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/plugin-factory",
         "consumer_id": "plugins_status.plugin-factory",
-        "evidence_ref": "sha256:5159eb97e49c109ddeefba59dba3f679fcdbe8e60d350c547e01e6b41da07e48",
+        "evidence_ref": "sha256:4c8b2445f39802c206ada8ed2d8d9432266f3064cb79018495d7fe7136d2045b",
         "legacy_resolution": "./Plugins/plugin-factory",
         "parity_result": "fail",
         "plugin_id": "plugin-factory",
-        "selector_row_id": "plugin-factory:2"
+        "selector_row_id": "plugin-factory:1"
       },
       {
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/skill-factory",
         "consumer_id": "plugins_status.skill-factory",
-        "evidence_ref": "sha256:8931d34847dc473844e2e1ed7ac7478122f61dbb1c3cf08987dca7bf114a7a58",
+        "evidence_ref": "sha256:80799c8b65411b54e05665a2148ed64d6d1263281a63e218e6adfe50be4200e4",
         "legacy_resolution": "./Plugins/skill-factory",
         "parity_result": "fail",
         "plugin_id": "skill-factory",
-        "selector_row_id": "skill-factory:3"
+        "selector_row_id": "skill-factory:2"
       }
     ],
-    "policy_identity": "994ead349ac99b12",
+    "policy_identity": "7b5d4c75b7d19338",
     "reader_root_set": [
       "plugins_doctor",
       "plugins_status",
@@ -303,7 +258,6 @@
     "writer_authority_map": {
       "plugins_doctor": "plugins",
       "plugins_status": [
-        "coderabbit",
         "harness-engineering",
         "plugin-factory",
         "skill-factory"
