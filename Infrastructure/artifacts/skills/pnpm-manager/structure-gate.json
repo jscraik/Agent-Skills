@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:08Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/pnpm-manager/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/pnpm-manager/SKILL.md",
+  "name": "pnpm-manager",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "REPO_SCRIPTS_UNREFERENCED",
+      "message": "Infrastructure/scripts/ exists but is not referenced in SKILL.md.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=1/6"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    }
+  ]
+}

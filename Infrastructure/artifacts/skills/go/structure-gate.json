@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:06Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/go/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/go/SKILL.md",
+  "name": "go",
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
+  "findings": [
+    {
+      "level": "FAIL",
+      "code": "CONTRACT_MISSING",
+      "message": "Missing Infrastructure/references/contract.yaml (required for gold).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "EVALS_MISSING",
+      "message": "Missing Infrastructure/references/evals.yaml (required for gold).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SAFE_REDACTION_REQUIRED",
+      "message": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default.",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_ANTIPATTERNS_MISSING",
+      "message": "Missing required section: antipatterns (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_CONSTRAINTS_MISSING",
+      "message": "Missing required section: constraints (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_PHILOSOPHY_MISSING",
+      "message": "Missing required section: philosophy (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_PROCEDURE_MISSING",
+      "message": "Missing required section: procedure (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_VALIDATION_MISSING",
+      "message": "Missing required section: validation (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_THIN",
+      "message": "Examples section is present but thin. Add 2-3 realistic trigger prompts or worked examples.",
+      "evidence": "## Examples"
+    }
+  ]
+}

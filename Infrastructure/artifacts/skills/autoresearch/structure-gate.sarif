@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/7"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/autoresearch/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

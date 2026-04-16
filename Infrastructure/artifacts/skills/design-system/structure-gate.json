@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:16Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/design-system/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/design-system/SKILL.md",
+  "name": "design-system",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-large.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "SKILL.md"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "Infrastructure/references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "Infrastructure/references/evals.yaml"
+    }
+  ]
+}

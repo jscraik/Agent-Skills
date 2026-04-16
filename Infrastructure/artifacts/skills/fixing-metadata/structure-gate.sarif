@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "SAFE_REDACTION_REQUIRED",
+              "name": "SAFE_REDACTION_REQUIRED",
+              "shortDescription": {
+                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+              },
+              "properties": {
+                "defaultSeverity": "fail"
+              }
+            },
+            {
+              "id": "SEC_ANTIPATTERNS_MISSING",
+              "name": "SEC_ANTIPATTERNS_MISSING",
+              "shortDescription": {
+                "text": "Missing required section: antipatterns (add a ## heading)."
+              },
+              "properties": {
+                "defaultSeverity": "fail"
+              }
+            },
+            {
+              "id": "SEC_CONSTRAINTS_MISSING",
+              "name": "SEC_CONSTRAINTS_MISSING",
+              "shortDescription": {
+                "text": "Missing required section: constraints (add a ## heading)."
+              },
+              "properties": {
+                "defaultSeverity": "fail"
+              }
+            },
+            {
+              "id": "SEC_PHILOSOPHY_MISSING",
+              "name": "SEC_PHILOSOPHY_MISSING",
+              "shortDescription": {
+                "text": "Missing required section: philosophy (add a ## heading)."
+              },
+              "properties": {
+                "defaultSeverity": "fail"
+              }
+            },
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EXAMPLES_MISSING",
+              "name": "SEC_EXAMPLES_MISSING",
+              "shortDescription": {
+                "text": "Missing recommended section: examples (add a ## heading)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "WF_FAIL_FAST_MISSING",
+              "name": "WF_FAIL_FAST_MISSING",
+              "shortDescription": {
+                "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": false
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "SAFE_REDACTION_REQUIRED",
+          "level": "error",
+          "message": {
+            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_ANTIPATTERNS_MISSING",
+          "level": "error",
+          "message": {
+            "text": "Missing required section: antipatterns (add a ## heading)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_CONSTRAINTS_MISSING",
+          "level": "error",
+          "message": {
+            "text": "Missing required section: constraints (add a ## heading)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_PHILOSOPHY_MISSING",
+          "level": "error",
+          "message": {
+            "text": "Missing required section: philosophy (add a ## heading)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EXAMPLES_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Missing recommended section: examples (add a ## heading)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "WF_FAIL_FAST_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

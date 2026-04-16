@@ -9,23 +9,23 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 5
+- `library_api_reference`: 4
 - `product_verification`: 7
 - `data_fetch_analysis`: 4
 - `team_automation`: 25
-- `scaffolding_templates`: 26
+- `scaffolding_templates`: 25
 - `code_quality_review`: 26
-- `ci_cd_deployment`: 4
+- `ci_cd_deployment`: 3
 - `runbook`: 13
 - `infrastructure_ops`: 7
-- `total_tagged`: 117
+- `invalid`: 0
+- `total_tagged`: 114
 
 ## Semantic Types
 
 ### Library Api Reference
 
 - `coderabbit` — `Plugins/coderabbit/skills/library_api_reference`
-- `openai-docs` — `.agents/skills/.system`
 - `react-ui-patterns` — `Skills/frontend-ui`
 - `remotion` — `Skills/frontend-ui`
 - `repoprompt` — `Skills/agent-ops`
@@ -88,7 +88,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `favicon-generator` — `Skills/frontend-ui`
 - `frontend-design` — `Skills/agent-ops`
 - `frontend-ui-design` — `Skills/frontend-ui`
-- `imagegen` — `.agents/skills/.system`
 - `mcp-builder` — `Skills/backend-platform`
 - `nano-banana-builder` — `Skills/frontend-ui`
 - `og-image-creator` — `Skills/frontend-ui`
@@ -123,7 +122,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `plugin-builder` — `Plugins/plugin-factory/skills/code_quality_review`
 - `powershell` — `Skills/agent-ops`
 - `rust-pro` — `Skills/agent-ops`
-- `simplify` — `Plugins/coderabbit/skills/code_quality_review`
+- `simplify` — `Skills/backend-platform`
 - `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
 - `sql-pro` — `Skills/agent-ops`
 - `swift-development` — `Skills/agent-ops`
@@ -135,7 +134,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Ci Cd Deployment
 
-- `circleci` — `Skills/backend-platform`
 - `gh-workflow` — `Skills/backend-platform`
 - `resolve-pr-parallel` — `Skills/agent-ops`
 - `using-git-worktrees` — `Skills/backend-platform`
@@ -168,5 +166,5 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Validation Notes
 
-- The `metadata.skill-type` frontmatter tag in each skill uses a semantic category name. Runtime discovery uses directory location under `Skills/<topic-cluster>/`, `Plugins/<plugin>/skills/<type>/`, and `.agents/skills/.system/`. Skills in `.system/` (imagegen, openai-docs) are assigned a type based on content since they lack explicit `skill-type` frontmatter.
+- No invalid semantic type tags detected.
 

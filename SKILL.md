@@ -5,7 +5,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills — .System](#.agents-skills-.system)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
@@ -13,6 +12,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
+- [Skills System](#skills-system)
 
 ## Summary
 - `total_skills`: 93
@@ -21,14 +21,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `policy_identity`: 7b5d4c75b7d19338
 
 ## Catalog
-
-## .Agents — Skills — .System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
-- `skill-creator` — Create or update a skill
-- `skill-installer` — Install curated skills from openai/skills or other repos
 
 ## Skills — Agent Ops
 
@@ -78,11 +70,11 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `backend-engineer` — Plan and review safe backend extensions for existing services (Cloudflare Workers + Hono primary). Use this skill when patching or adding backend features in an existing codebase.
 - `bootstrap` — Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
-- `circleci` — Plan, migrate, debug, or harden CircleCI pipelines and related delivery workflows. Use when the user wants CircleCI-specific config, testing, deployment, secrets, or policy help, not generic CI advice.
 - `cli-spec` — Create an implementation-grade CLI specification when the user requests a binding technical contract for a new or existing command-line interface.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.Infrastructure/config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `mcp-builder` — Create general-purpose MCP servers and tool schemas for standard integrations. Use when building MCP services without OAuth/billing/Apps UI requirements.
+- `simplify` — Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
 - `using-git-worktrees` — Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits.
 
 ## Skills — Content Publishing
@@ -138,4 +130,12 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `best-practices` — Audit Better Auth integrations for secure patterns, config mistakes, and operational gaps. Use when the user wants Better Auth review, hardening, or debugging guidance, not a fresh implementation.
 - `create-auth` — Implement or migrate Better Auth in TypeScript or JavaScript apps with secure defaults. Use when the user wants Better Auth added or changed in code, not just reviewed.
 - `recon-workbench` — Run authorized, evidence-backed Recon Workbench (rwb) workflows (doctor/authorize/plan/run/summarize/manifest/validate/reconcile) and produce evidence-cited findings. Use when interrogating macOS/iOS, web/React, or OSS targets under explicit scope/permission.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
+- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+- `skill-creator` — Create or update a skill
+- `skill-installer` — Install curated skills from openai/skills or other repos
 

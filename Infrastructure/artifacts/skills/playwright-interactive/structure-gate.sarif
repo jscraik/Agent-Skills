@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_LEAKY",
+              "name": "RESEARCH_EVALS_LEAKY",
+              "shortDescription": {
+                "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/playwright-interactive/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/playwright-interactive/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/playwright.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/playwright-interactive/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_LEAKY",
+          "level": "warning",
+          "message": {
+            "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior. | leaky=3/5"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/playwright-interactive/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/5"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/playwright-interactive/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

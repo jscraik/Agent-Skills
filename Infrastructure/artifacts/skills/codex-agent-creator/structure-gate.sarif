@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "CONTRACT_MISSING",
+              "name": "CONTRACT_MISSING",
+              "shortDescription": {
+                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+              },
+              "properties": {
+                "defaultSeverity": "fail"
+              }
+            },
+            {
+              "id": "EVALS_MISSING",
+              "name": "EVALS_MISSING",
+              "shortDescription": {
+                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+              },
+              "properties": {
+                "defaultSeverity": "fail"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": false
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "CONTRACT_MISSING",
+          "level": "error",
+          "message": {
+            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/codex-agent-creator/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "EVALS_MISSING",
+          "level": "error",
+          "message": {
+            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/codex-agent-creator/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

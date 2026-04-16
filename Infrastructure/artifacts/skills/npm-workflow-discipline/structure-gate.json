@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:07Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/npm-workflow-discipline/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/npm-workflow-discipline/SKILL.md",
+  "name": "npm-workflow-discipline",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "REPO_SCRIPTS_UNREFERENCED",
+      "message": "Infrastructure/scripts/ exists but is not referenced in SKILL.md.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=2/6"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_SCOPE_BROAD",
+      "message": "Skill/package scope may be too broad for a first pass. Add explicit guidance like 'start with 2-3 focused surfaces' or 'keep scope tight'.",
+      "evidence": "surfaces=4"
+    }
+  ]
+}
