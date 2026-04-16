@@ -601,6 +601,19 @@ def wiki_add_asset(
     else:
         asset_input = asset_input.resolve()
 
+    try:
+        asset_input.relative_to(repo_root.resolve())
+    except ValueError:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Asset path escapes repository boundaries.",
+                fix_suggestion="Ensure the asset is located within the repository before adding it.",
+            )
+        )
+        return result
+
     if not asset_input.exists() or not asset_input.is_file():
         result.status = "error"
         result.errors.append(

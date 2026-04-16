@@ -31,13 +31,13 @@ class WikiCommandTests(unittest.TestCase):
         tmpdir = tempfile.TemporaryDirectory(prefix="wiki-cmd-")
         try:
             root = Path(tmpdir.name)
-            (root / "docs" / "skill-ops-wiki" / "wiki").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "skill-ops-wiki" / "raw").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "skill-ops-wiki" / "wiki" / "index.md").write_text(
+            (root / "Wiki" / "wiki").mkdir(parents=True, exist_ok=True)
+            (root / "Wiki" / "raw").mkdir(parents=True, exist_ok=True)
+            (root / "Wiki" / "wiki" / "index.md").write_text(
                 wiki_commands._default_index(),
                 encoding="utf-8",
             )
-            (root / "docs" / "skill-ops-wiki" / "wiki" / "log.md").write_text(
+            (root / "Wiki" / "wiki" / "log.md").write_text(
                 "# Skill Ops Wiki Log\n",
                 encoding="utf-8",
             )
@@ -59,7 +59,7 @@ class WikiCommandTests(unittest.TestCase):
             )
             self.assertEqual(result.status, "success")
 
-            index_text = (repo_root / "docs" / "skill-ops-wiki" / "wiki" / "index.md").read_text(encoding="utf-8")
+            index_text = (repo_root / "Wiki" / "wiki" / "index.md").read_text(encoding="utf-8")
             failures_block = _section_block(index_text, "Failures")
             operations_block = _section_block(index_text, "Operations")
 
@@ -68,7 +68,7 @@ class WikiCommandTests(unittest.TestCase):
 
     def test_upsert_index_replaces_existing_row(self) -> None:
         with self._make_repo() as repo_root:
-            index_path = repo_root / "docs" / "skill-ops-wiki" / "wiki" / "index.md"
+            index_path = repo_root / "Wiki" / "wiki" / "index.md"
 
             wiki_commands._upsert_index_entry(
                 index_path,
@@ -93,7 +93,7 @@ class WikiCommandTests(unittest.TestCase):
 
     def test_query_snippet_skips_frontmatter_noise(self) -> None:
         with self._make_repo() as repo_root:
-            page = repo_root / "docs" / "skill-ops-wiki" / "wiki" / "failures" / "snippet-test.md"
+            page = repo_root / "Wiki" / "wiki" / "failures" / "snippet-test.md"
             page.parent.mkdir(parents=True, exist_ok=True)
             page.write_text(
                 """---
