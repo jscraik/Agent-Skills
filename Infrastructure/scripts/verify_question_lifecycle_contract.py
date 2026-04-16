@@ -105,7 +105,7 @@ def find_missing_files_and_links() -> list[Finding]:
         except OSError as exc:
             findings.append(Finding(path, 1, f"unable to read file: {exc}"))
             continue
-        if needle not in text:
+        if needle.lower() not in text.lower():
             findings.append(Finding(path, 1, message))
 
     return findings
