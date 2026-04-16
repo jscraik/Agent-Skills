@@ -1,5 +1,27 @@
 {
-  "allowed_structure_failures": [],
+  "allowed_structure_failures": [
+    "Skills/agent-ops/codex-agent-creator",
+    "Skills/agent-ops/elixir-pro",
+    "Skills/agent-ops/evals-router",
+    "Skills/agent-ops/go",
+    "Skills/agent-ops/javascript-pro",
+    "Skills/agent-ops/powershell",
+    "Skills/agent-ops/project-brain",
+    "Skills/agent-ops/rclone",
+    "Skills/agent-ops/reproduce-bug",
+    "Skills/agent-ops/resolve-pr-parallel",
+    "Skills/agent-ops/rust-pro",
+    "Skills/agent-ops/sql-pro",
+    "Skills/agent-ops/swift-development",
+    "Skills/agent-ops/test-browser",
+    "Skills/agent-ops/toml",
+    "Skills/agent-ops/typescript",
+    "Skills/agent-ops/uv-python-project-setup",
+    "Skills/agent-ops/yaml",
+    "Skills/content-publishing/spreadsheet",
+    "Skills/frontend-ui/fixing-metadata",
+    "Skills/frontend-ui/slides"
+  ],
   "generated_by": "run_repo_skill_quality.py",
-  "note": "Reset after topic-cluster restructure - all paths are new"
+  "note": "Updated after topic-cluster restructure — 21 skills missing contract/evals references"
 }

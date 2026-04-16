@@ -176,7 +176,7 @@ def main() -> int:
         )
         return 1
     root = Path(args.root).expanduser().resolve()
-    scripts = root / "utilities" / "skill-builder" / "scripts"
+    scripts = root / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "scripts"
 
     skill_gate_py = scripts / "skill_gate.py"
     run_evals_py = scripts / "run_skill_evals.py"
