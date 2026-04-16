@@ -1475,6 +1475,7 @@ sync_codex_profile_homes() {
   local marketplace_file="$2"
   local profile_home=""
   local profile_plugins=""
+  local profile_plugins_root=""
 
   while IFS= read -r profile_home; do
     [ -n "$profile_home" ] || continue
@@ -1483,17 +1484,18 @@ sync_codex_profile_homes() {
     sync_user_skills "$skills_dir" "$profile_home/skills"
 
     profile_plugins="$profile_home/plugins"
+    profile_plugins_root="$profile_home/Plugins"
     mkdir -p "$profile_plugins"
     if [ -L "$profile_plugins" ]; then
       echo "[WARN] Skipping profile plugin-cache projection for symlinked path: $profile_plugins"
       continue
     fi
 
-    sync_user_skills "$cache_source" "$profile_Plugins/cache" 0 copy
-    materialize_plugin_cache_roots "$profile_Plugins/cache"
+    sync_user_skills "$cache_source" "$profile_plugins_root/cache" 0 copy
+    materialize_plugin_cache_roots "$profile_plugins_root/cache"
     if [ -f "$marketplace_file" ]; then
-      cp "$marketplace_file" "$profile_Plugins/marketplace.json"
-      echo "[OK] Synced profile marketplace manifest: $profile_Plugins/marketplace.json"
+      cp "$marketplace_file" "$profile_plugins_root/marketplace.json"
+      echo "[OK] Synced profile marketplace manifest: $profile_plugins_root/marketplace.json"
       # Keep profile-local marketplace source paths resolvable at
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"

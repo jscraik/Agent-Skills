@@ -513,6 +513,7 @@ def install_plugin(
         if installed_name:
             result.data["message"] = f"Installed plugin '{installed_name}'"
             result.data["plugin_name"] = installed_name
+            _sync_plugin_config(installed_name, enable=True)
         else:
             result.data["message"] = "Installed plugin."
         if installed_path:
@@ -678,4 +679,113 @@ def harden_plugin(
     result.data["message"] = f"Hardened plugin '{plugin_root.name}'"
     result.data["plugin_path"] = str(plugin_root)
     result.data["command_runs"] = command_runs
+    return result
+
+
+def _sync_plugin_config(plugin_name: str, enable: bool = True, remove: bool = False) -> bool:
+    """Sync a plugin's auto-registration state natively in ~/.codex/config.toml."""
+    import re
+    config_path = os.path.expanduser("~/.codex/config.toml")
+    if not os.path.exists(config_path):
+        return False
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        regex = r'(\[plugins\."' + re.escape(plugin_name) + r'@[^"]+"\]\n\s*enabled\s*=\s*)(true|false)(\n?)'
+        pattern = re.compile(regex)
+
+        if remove:
+            remove_regex = r'\[plugins\."' + re.escape(plugin_name) + r'@[^"]+"\]\n\s*enabled\s*=\s*(?:true|false)\n?'
+            new_content, count = re.subn(remove_regex, '', content)
+            if count > 0:
+                with open(config_path, "w", encoding="utf-8") as f:
+                    f.write(new_content)
+                return True
+            return False
+
+        if pattern.search(content):
+            rep = 'true' if enable else 'false'
+            new_content = pattern.sub(rf'\g<1>{rep}\g<3>', content)
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(new_content)
+            return True
+        else:
+            rep = 'true' if enable else 'false'
+            with open(config_path, "a", encoding="utf-8") as f:
+                f.write(f'\n[plugins."{plugin_name}@agent-skills-local"]\nenabled = {rep}\n')
+            return True
+    except OSError:
+        pass
+    return False
+
+
+def uninstall_plugin(repo_root: Path, name: str, *, dry_run: bool = False) -> CallResult:
+    """Safely uninstalls a plugin by removing its directory and syncing config.toml."""
+    import shutil
+    import subprocess
+    result = CallResult()
+
+    plugins_dir = repo_root / "Plugins"
+    if not plugins_dir.exists():
+        return _validation_error_result("Plugins/ directory does not exist.", fix_suggestion="")
+
+    # Try to locate the plugin in any category (e.g., third-party, github)
+    found_path = None
+    for category in plugins_dir.iterdir():
+        if category.is_dir() and (category / name).is_dir():
+            found_path = category / name
+            break
+
+    if not found_path:
+        return _validation_error_result(
+            f"Plugin '{name}' not found under Plugins/.",
+            fix_suggestion="Use 'ask plugins list' to check installed plugins."
+        )
+
+    if dry_run:
+        result.status = "success"
+        result.metadata["next_steps"] = [f"ask plugins uninstall {name}"]
+        result.data["dry_run"] = True
+        result.data["target_path"] = str(found_path.relative_to(repo_root))
+        return result
+
+    # Check if tracked by git to properly remove
+    git_check = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", str(found_path)],
+        cwd=repo_root, capture_output=True
+    )
+    
+    if git_check.returncode == 0:
+        cmd = ["git", "rm", "-r", "--quiet", str(found_path)]
+        process = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True)
+        if process.returncode != 0:
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_RUNTIME", 
+                message=f"Git rm failed: {process.stderr}",
+                fix_suggestion="Manually remove directory."
+            ))
+            return result
+    else:
+        try:
+            shutil.rmtree(found_path)
+        except OSError as exc:
+            result.status = "error"
+            result.errors.append(ErrorObject(code="ERR_RUNTIME", message=f"Failed to delete {found_path}: {exc}"))
+            return result
+
+    # Config sync after file removal
+    sync_ok = _sync_plugin_config(name, remove=True)
+    
+    result.status = "success"
+    msg = f"Uninstalled plugin '{name}'."
+    if sync_ok:
+        msg += " Registration removed from config.toml."
+    result.data["message"] = msg
+    result.data["plugin_name"] = name
+    result.data["target_path"] = str(found_path.relative_to(repo_root))
+    
+    # Let user know to run validation for global parity (like baseline.json sync)
+    result.metadata["next_steps"] = ["ask repo validate"]
     return result

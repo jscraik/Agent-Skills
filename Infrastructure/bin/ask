@@ -43,6 +43,7 @@ from ask.commands.plugins import (
     list_plugins_state,
     status_plugin_state,
     doctor_plugins_state,
+    uninstall_plugin,
 )
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
@@ -70,7 +71,7 @@ VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog"],
     "skills": ["list", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
-    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden"],
+    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden", "uninstall"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
@@ -532,6 +533,10 @@ def main():
 
     plugins_import_parser = plugins_subparsers.add_parser("import", help="Alias for plugins install", parents=[global_parser])
     _add_plugin_install_args(plugins_import_parser)
+    
+    plugins_uninstall_parser = plugins_subparsers.add_parser("uninstall", help="Uninstall a plugin and sync config", parents=[global_parser])
+    plugins_uninstall_parser.add_argument("name", help="Name of plugin to uninstall")
+    plugins_uninstall_parser.add_argument("--dry-run", action="store_true", help="Preview uninstallation without making changes")
 
     plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
     plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: Plugins/my-plugin)")
@@ -908,6 +913,12 @@ def main():
                 run_compat=not args.skip_compat,
                 run_marketplace_audit=not args.skip_marketplace_audit,
                 allow_legacy_marketplace_path=not args.strict_marketplace_path,
+            )
+        elif args.action == "uninstall":
+            result = uninstall_plugin(
+                repo_root,
+                name=args.name,
+                dry_run=args.dry_run,
             )
         else:
             result.status = "error"
