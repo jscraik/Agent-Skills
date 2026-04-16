@@ -62,14 +62,6 @@ description: "{{What it does}} Use when {{primary trigger conditions}}. Don't us
 - Triggering prompt: "{{Example prompt that SHOULD use this skill}}"
 - Non-triggering prompt: "{{Example prompt that should NOT use this skill}}"
 
-## See Also
-
-| Skill | When to use |
-|---|---|
-| `{{adjacent-skill-1}}` | {{When this neighboring skill is a better fit}} |
-| `{{adjacent-skill-2}}` | {{Another nearby skill and its routing boundary}} |
-
-**Topic map:** `[[{{topic-name}}]]`
 
 ## Done when
 {{Skill Title}} is complete when:

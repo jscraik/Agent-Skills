@@ -3,13 +3,6 @@
 
 set -euo pipefail
 
-# Source shared utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ ! -f "$SCRIPT_DIR/utils.sh" ]]; then
-    echo "ERROR: Required file not found: $SCRIPT_DIR/utils.sh"
-    exit 1
-fi
-source "$SCRIPT_DIR/utils.sh"
 
 VERSION="${1:-}"
 ARTIFACT_DIR="${2:-}"
@@ -129,9 +122,9 @@ This release was built using the fallback CI path due to primary CI unavailabili
 sha256sum -c *.sha256
 
 # Verify signatures
+gpg --verify *.asc *
 EOF
 )
-    append_signature_checks "$ARTIFACT_DIR" RELEASE_NOTES
     RELEASE_NOTES="$RELEASE_NOTES
 \`\`\`
 

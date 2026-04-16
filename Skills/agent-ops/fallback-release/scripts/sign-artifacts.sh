@@ -15,13 +15,6 @@ fi
 
 set -euo pipefail
 
-# Source shared utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ ! -f "$SCRIPT_DIR/utils.sh" ]]; then
-    echo "ERROR: Required file not found: $SCRIPT_DIR/utils.sh"
-    exit 1
-fi
-source "$SCRIPT_DIR/utils.sh"
 
 ARTIFACT_DIR="${1:-}"
 GPG_KEY="${FALLBACK_GPG_KEY:-releases@company.com}"
@@ -133,4 +126,4 @@ echo "Artifacts signed: ${#artifacts[@]}"
 echo ""
 echo "To verify:"
 echo "  sha256sum -c *.sha256"
-append_signature_checks "$ARTIFACT_DIR" | sed 's/^/  /'
+echo "  gpg --verify *.asc *"
