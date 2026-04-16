@@ -1,1 +1,0 @@
-Fix OAuth callback handling for our Apps SDK backend integration.

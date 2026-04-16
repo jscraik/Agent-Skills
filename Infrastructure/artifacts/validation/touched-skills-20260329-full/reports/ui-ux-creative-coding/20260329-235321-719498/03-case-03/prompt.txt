@@ -1,3 +1,0 @@
-$ui-ux-creative-coding
-
-Can you help me redesign a Tauri settings panel with subtle motion and keep it concise? Use our standard headings.

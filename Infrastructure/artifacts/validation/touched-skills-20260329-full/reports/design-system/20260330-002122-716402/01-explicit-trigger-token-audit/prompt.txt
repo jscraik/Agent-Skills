@@ -1,3 +1,0 @@
-$design-system
-
-Use $design-system to audit typography and spacing token mapping for chat components.

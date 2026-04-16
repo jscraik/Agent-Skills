@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-lines",
         type=int,
-        default=1700,
+        default=1900,
         help="Maximum allowed line count for bin/ask.",
     )
     return parser.parse_args()

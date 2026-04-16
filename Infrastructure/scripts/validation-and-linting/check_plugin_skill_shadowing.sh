@@ -43,7 +43,7 @@ cd "$repo_root"
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 selection_policy_path="$repo_root/Infrastructure/scripts/lifecycle-and-sync/selection_policy.py"
 if [ ! -f "$selection_policy_path" ]; then
-  selection_policy_path="$script_dir/selection_policy.py"
+  selection_policy_path="$script_dir/../lifecycle-and-sync/selection_policy.py"
 fi
 
 plugin_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-skill-names.XXXXXX")"

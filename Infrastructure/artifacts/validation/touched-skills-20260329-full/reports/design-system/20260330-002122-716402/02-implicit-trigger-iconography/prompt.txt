@@ -1,1 +1,0 @@
-We still import icons from astudio-icons in a few places. Give me the canonical migration plan and validation steps.

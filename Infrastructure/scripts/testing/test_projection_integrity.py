@@ -13,7 +13,7 @@ from unittest import mock
 from pathlib import Path
 
 
-SCRIPT = Path(__file__).resolve().parent / "projection_integrity.py"
+SCRIPT = Path(__file__).resolve().parent.parent / "lifecycle-and-sync" / "projection_integrity.py"
 
 
 def _load_module():

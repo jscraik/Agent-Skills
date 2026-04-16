@@ -1,1 +1,0 @@
-Which collection and lifecycle state should this new UI primitive live in?

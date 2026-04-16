@@ -1,1 +1,0 @@
-Please inspect this competitor onboarding flow. Leadership wants us to copy it, but I need a recommendation we can adapt for our B2B admin product with explicit tradeoffs.

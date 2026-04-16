@@ -1,3 +1,0 @@
-$ui-ux-creative-coding
-
-Can you run this with strict design rules and validate dependencies, and avoid emoji style in outputs?

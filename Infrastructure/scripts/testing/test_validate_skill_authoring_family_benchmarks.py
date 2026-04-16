@@ -12,7 +12,7 @@ from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCRIPT = REPO_ROOT / "scripts" / "validate_skill_authoring_family_benchmarks.py"
+SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "validate_skill_authoring_family_benchmarks.py"
 
 
 def load_validator_module():
