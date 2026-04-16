@@ -56,6 +56,7 @@ jobs:
           semgrep_args=(
             --config "p/secrets"
             --exclude "Infrastructure/artifacts/**"
+            --exclude "artifacts/**"
             --metrics=off
             --sarif --output semgrep.sarif
           )

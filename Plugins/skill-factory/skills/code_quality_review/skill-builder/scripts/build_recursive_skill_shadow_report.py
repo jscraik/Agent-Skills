@@ -19,7 +19,7 @@ DEFAULT_PILOT_PROFILES = [
     "react-ui-patterns",
 ]
 PILOT_PROFILES = list(DEFAULT_PILOT_PROFILES)
-CANONICAL_DAILY_HEALTH_DOC = "docs/skill-graphs/telemetry/daily-skill-health.md"
+CANONICAL_DAILY_HEALTH_DOC = "Docs/skill-graphs/telemetry/daily-skill-health.md"
 LEGACY_DAILY_HEALTH_ARTIFACT = "Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md"
 DEFAULT_WAIVER_FILE = "Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-waivers.json"
 DEFAULT_BASELINE_SNAPSHOT = "Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json"
@@ -114,13 +114,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--window-days", type=int, default=7)
     p.add_argument("--min-runs-total", type=int, default=40)
     p.add_argument("--min-runs-per-profile", type=int, default=10)
-    p.add_argument("--shadow-md", default="docs/skill-graphs/pilots/ui-skills-shadow-results.md")
-    p.add_argument("--readout-md", default="docs/skill-graphs/pilots/ui-skills-pilot-readout.md")
+    p.add_argument("--shadow-md", default="Docs/skill-graphs/pilots/ui-skills-shadow-results.md")
+    p.add_argument("--readout-md", default="Docs/skill-graphs/pilots/ui-skills-pilot-readout.md")
     p.add_argument("--out-json", default="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json")
-    p.add_argument("--daily-health-md", default="docs/skill-graphs/telemetry/daily-skill-health.md")
+    p.add_argument("--daily-health-md", default="Docs/skill-graphs/telemetry/daily-skill-health.md")
     p.add_argument("--failure-patterns-jsonl", default="Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
     p.add_argument("--promotion-queue-md", default="Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md")
-    p.add_argument("--pilot-profiles-file", default="docs/skill-graphs/schemas/examples/pilot-profiles.json")
+    p.add_argument("--pilot-profiles-file", default="Docs/skill-graphs/schemas/examples/pilot-profiles.json")
     p.add_argument("--baseline-snapshot-json", default=DEFAULT_BASELINE_SNAPSHOT)
     p.add_argument(
         "--refresh-baseline-snapshot",

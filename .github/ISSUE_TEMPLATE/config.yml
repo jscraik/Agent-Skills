@@ -5,5 +5,5 @@ contact_links:
     url: https://linear.app/
     about: Create or update bugs, features, policy gaps, automation work, and release follow-ups in Linear.
   - name: Private security disclosure
-    url: mailto:security@example.com
+    url: mailto:security@agent-skills.dev
     about: Report security vulnerabilities privately instead of using public issue flows.

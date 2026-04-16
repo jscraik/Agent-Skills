@@ -7,7 +7,7 @@ cd "$repo_root"
 runs_per_profile=2
 window_days=7
 out_root="Infrastructure/artifacts/skill-graphs/runs"
-profiles_file="docs/skill-graphs/schemas/examples/pilot-profiles.json"
+profiles_file="Docs/skill-graphs/schemas/examples/pilot-profiles.json"
 
 require_option_value() {
   local opt="$1"
@@ -47,7 +47,7 @@ Options:
   --runs-per-profile N   Number of loop runs per pilot profile (default: 2)
   --window-days N        Window size for report aggregation (default: 7)
   --out-root PATH        Output root for run artifacts (default: Infrastructure/artifacts/skill-graphs/runs)
-  --profiles-file PATH   JSON array of pilot profile ids or profile objects (default: docs/skill-graphs/schemas/examples/pilot-profiles.json)
+  --profiles-file PATH   JSON array of pilot profile ids or profile objects (default: Docs/skill-graphs/schemas/examples/pilot-profiles.json)
 USAGE
       exit 0
       ;;
@@ -130,16 +130,16 @@ if [[ ${#profiles[@]} -eq 0 ]]; then
   exit 2
 fi
 
-example_profile="docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
+example_profile="Docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
 loop_script="Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py"
 report_script="Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py"
 arscontexta_queue_script="Skills/skill-builder/Infrastructure/scripts/build_arscontexta_intervention_queue.py"
-shadow_md="docs/skill-graphs/pilots/ui-skills-shadow-results.md"
-readout_md="docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
-arscontexta_queue_md="docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
+shadow_md="Docs/skill-graphs/pilots/ui-skills-shadow-results.md"
+readout_md="Docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
+arscontexta_queue_md="Docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
 dashboard_json="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json"
 baseline_snapshot_json="Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json"
-daily_health_md="docs/skill-graphs/telemetry/daily-skill-health.md"
+daily_health_md="Docs/skill-graphs/telemetry/daily-skill-health.md"
 failure_patterns_jsonl="Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl"
 promotion_queue_md="Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md"
 arscontexta_queue_json="Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json"

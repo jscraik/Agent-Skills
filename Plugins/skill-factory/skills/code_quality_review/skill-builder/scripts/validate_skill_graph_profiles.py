@@ -607,7 +607,7 @@ def main() -> int:
             )
 
     telemetry_health = parse_telemetry_health(
-        repo_root / "docs/skill-graphs/telemetry/daily-skill-health.md"
+        repo_root / "Docs/skill-graphs/telemetry/daily-skill-health.md"
     )
     telemetry_errors_unresolved: Optional[int] = None
     telemetry_errors_total: Optional[int] = None
@@ -706,7 +706,7 @@ def main() -> int:
         )
 
     approver_count = load_approver_count(
-        repo_root / "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+        repo_root / "Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
     )
     if approver_count is None:
         wave0_blockers.append(

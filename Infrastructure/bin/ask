@@ -1489,16 +1489,16 @@ def main():
                     if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
                     if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
                     print("\n📚 Audit examples:")
-                    print("   ask skills audit backend/cli-spec --level compat")
-                    print("   ask skills audit backend/cli-spec --level strict")
-                    print("   ask skills audit Skills/skill-builder --level strict")
+                    print("   ask skills audit backend-platform/cli-spec --level compat")
+                    print("   ask skills audit backend-platform/cli-spec --level strict")
+                    print("   ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict")
                 elif args.action in ("install", "fold", "init"):
                     if "raw_output" in result.data: print(result.data["raw_output"])
                     if "raw_error" in result.data: print(result.data["raw_error"])
                     if args.action == "init":
                         print("\n📚 Init examples:")
-                        print("   ask skills init my-skill --category ui --description 'Does X'")
-                        print("   ask skills init security-guard --category infrastructure_ops --description 'Validates Y'")
+                        print("   ask skills init my-skill --category frontend-ui --description 'Does X'")
+                        print("   ask skills init security-guard --category security-ops --description 'Validates Y'")
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")

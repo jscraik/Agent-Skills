@@ -20,9 +20,9 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-CANONICAL_DAILY_HEALTH = "docs/skill-graphs/telemetry/daily-skill-health.md"
+CANONICAL_DAILY_HEALTH = "Docs/skill-graphs/telemetry/daily-skill-health.md"
 LEGACY_DAILY_HEALTH = "Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md"
-DEFAULT_INVENTORY_POLICY = "docs/skill-graphs/governance/inventory-policy.json"
+DEFAULT_INVENTORY_POLICY = "Docs/skill-graphs/governance/inventory-policy.json"
 DEFAULT_GRAPH_ADAPTER_DIR = "Infrastructure/artifacts/skill-graphs/graph-adapter"
 DEFAULT_SYSTEM_PREFIXES = ("Skills/.system/", ".agents/skills/.system/")
 CORE_PROFILES = {"auth", "backend", "frontend", "github", "utilities"}

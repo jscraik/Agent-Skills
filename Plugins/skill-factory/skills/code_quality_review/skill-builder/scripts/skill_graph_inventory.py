@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence, Set
 
-DEFAULT_INVENTORY_POLICY = "docs/skill-graphs/governance/inventory-policy.json"
+DEFAULT_INVENTORY_POLICY = "Docs/skill-graphs/governance/inventory-policy.json"
 DEFAULT_SYSTEM_PREFIXES = ("Skills/.system/", ".agents/skills/.system/")
 SYSTEM_SLICE_MODES = {"exclude", "separate"}
 MIRROR_PREFIXES = ("plugins/cache/", ".agents/plugins-runtime/cache/")
@@ -66,7 +66,7 @@ def load_inventory_policy(
     if not policy_path.exists():
         raise FileNotFoundError(
             f"Missing inventory policy: {policy_path}. "
-            "Create docs/skill-graphs/governance/inventory-policy.json."
+            "Create Docs/skill-graphs/governance/inventory-policy.json."
         )
 
     raw = json.loads(policy_path.read_text(encoding="utf-8"))

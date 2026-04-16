@@ -25,8 +25,8 @@ ALLOWED_STOP_REASONS = {
 }
 ALLOWED_TERMINAL_STATUSES = {"passed", "failed", "escalated", "aborted"}
 
-DEFAULT_POLICY_FILE = "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
-DEFAULT_POLICY_SIG_FILE = "docs/skill-graphs/governance/recursive-loop-approvers.sig"
+DEFAULT_POLICY_FILE = "Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+DEFAULT_POLICY_SIG_FILE = "Docs/skill-graphs/governance/recursive-loop-approvers.sig"
 
 RUN_REQUIRED_FILES = {"run.json", "iteration_journal.jsonl", "events.jsonl", "promotion_decision.json"}
 CONTROL_CAPTURE_FILES = {

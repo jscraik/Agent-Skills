@@ -15,7 +15,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import build_recursive_skill_shadow_report as shadow_report
 
 DEFAULT_OUTPUT_JSON = "Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json"
-DEFAULT_OUTPUT_MD = "docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
+DEFAULT_OUTPUT_MD = "Docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
 
 METHODOLOGY_REFS = [
     "Plugins/arscontexta/methodology/retrieval verification loop tests description quality at scale.md",
@@ -39,7 +39,7 @@ class ProfileEntry:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build Ars Contexta intervention queue for pilot profiles")
     parser.add_argument("--runs-root", default="Infrastructure/artifacts/skill-graphs/runs")
-    parser.add_argument("--pilot-profiles-file", default="docs/skill-graphs/schemas/examples/pilot-profiles.json")
+    parser.add_argument("--pilot-profiles-file", default="Docs/skill-graphs/schemas/examples/pilot-profiles.json")
     parser.add_argument("--dashboard-json", default="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json")
     parser.add_argument("--failure-patterns-jsonl", default="Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl")
     parser.add_argument("--output-json", default=DEFAULT_OUTPUT_JSON)

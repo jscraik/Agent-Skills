@@ -29,10 +29,10 @@ def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
 
 def _marketplace_payload(repo_root: Path) -> tuple[dict[str, Any], str | None, Path]:
     candidates = [
-        repo_root / ".agents" / "Plugins" / "marketplace.json",
-        repo_root / ".agents" / "plugins" / "marketplace.json",
         repo_root / "Plugins" / "marketplace.json",
         repo_root / "plugins" / "marketplace.json",
+        repo_root / ".agents" / "Plugins" / "marketplace.json",
+        repo_root / ".agents" / "plugins" / "marketplace.json",
     ]
     for candidate in candidates:
         payload, error = _load_json(candidate)

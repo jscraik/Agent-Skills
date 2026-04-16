@@ -24,24 +24,24 @@ FORBIDDEN_SKILL_PHRASES = (
 )
 
 REQUIRED_FILES = (
-    REPO_ROOT / "docs/skill-graphs/question-lifecycle.md",
-    REPO_ROOT / "docs/skill-graphs/schemas/question-event.schema.md",
+    REPO_ROOT / "Docs/skill-graphs/question-lifecycle.md",
+    REPO_ROOT / "Docs/skill-graphs/schemas/question-event.schema.md",
 )
 
 REQUIRED_LINKS = (
     (
-        REPO_ROOT / "docs/skill-graphs/index.md",
-        "/docs/skill-graphs/question-lifecycle.md",
+        REPO_ROOT / "Docs/skill-graphs/index.md",
+        "/Docs/skill-graphs/question-lifecycle.md",
         "skill-graphs index must link to question lifecycle contract",
     ),
     (
-        REPO_ROOT / "docs/skill-graphs/schemas/index.md",
-        "/docs/skill-graphs/schemas/question-event.schema.md",
+        REPO_ROOT / "Docs/skill-graphs/schemas/index.md",
+        "/Docs/skill-graphs/schemas/question-event.schema.md",
         "schema index must link to question event schema",
     ),
     (
-        REPO_ROOT / "docs/skill-graphs/question-lifecycle.md",
-        "/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/schemas/question-event.schema.md",
+        REPO_ROOT / "Docs/skill-graphs/question-lifecycle.md",
+        "/Users/jamiecraik/dev/agent-skills/Docs/skill-graphs/schemas/question-event.schema.md",
         "question lifecycle contract must reference the machine-readable schema path",
     ),
 )

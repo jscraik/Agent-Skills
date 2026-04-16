@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 build-adjacency-yaml.py  —  Extract current See Also adjacency from all SKILL.md
-files and write docs/skill-graphs/adjacency.yaml as the canonical data source.
+files and write Docs/skill-graphs/adjacency.yaml as the canonical data source.
 
 Run once to bootstrap; subsequent updates are made by editing the YAML directly.
 """
 import os, pathlib, re, subprocess, sys, yaml  # needs PyYAML
 
 ROOT     = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
-OUT_YAML = ROOT / "docs/skill-graphs/adjacency.yaml"
+OUT_YAML = ROOT / "Docs/skill-graphs/adjacency.yaml"
 CANONICAL_PREFIXES = {
     "auth/",
     "backend/",

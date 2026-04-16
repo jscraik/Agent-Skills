@@ -22,7 +22,7 @@ except ImportError:
     HAS_YAML = False
 
 ROOT      = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
-ADJ_YAML  = ROOT / "docs/skill-graphs/adjacency.yaml"
+ADJ_YAML  = ROOT / "Docs/skill-graphs/adjacency.yaml"
 THRESHOLD = int(os.environ.get("DRIFT_THRESHOLD", "0"))
 CANONICAL_PREFIXES = {
     "auth/",
