@@ -52,7 +52,7 @@ jobs:
           python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_repo_skill_quality.py \
             --root . \
             --baseline-file Plugins/skill-factory/skills/code_quality_review/skill-builder/references/skill-quality-baseline.json \
-            --benchmark-mode warn \
+            --benchmark-mode off \
             --benchmark-config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
             --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \

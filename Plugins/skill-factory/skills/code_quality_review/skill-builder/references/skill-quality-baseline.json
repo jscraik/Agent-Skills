@@ -1,13 +1,5 @@
 {
-  "allowed_structure_failures": [
-    ".agents/skills/.system/skill-builder",
-    ".agents/skills/.system/skill-installer",
-    ".agents/skills/.system/slides",
-    ".agents/skills/.system/spreadsheets",
-    "interview/interview-kernel",
-    "skills-antigravity-test/ui-ux-creative-coding",
-    "Skills/insight-report",
-    "Skills/notebooklm"
-  ],
-  "generated_by": "run_repo_skill_quality.py"
+  "allowed_structure_failures": [],
+  "generated_by": "run_repo_skill_quality.py",
+  "note": "Reset after topic-cluster restructure - all paths are new"
 }
