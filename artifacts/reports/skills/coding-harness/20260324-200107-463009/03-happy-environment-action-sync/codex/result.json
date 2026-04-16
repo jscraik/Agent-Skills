@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-200107-463009/03-happy-environment-action-sync/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-200107-463009/03-happy-environment-action-sync/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-200107-463009/03-happy-environment-action-sync/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-200107-463009/03-happy-environment-action-sync/codex/stderr.txt",
+    "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-200107-463009/03-happy-environment-action-sync/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 19,
+      "command_count": 4,
+      "unique_command_count": 4,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 1,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 221385,
+        "output_tokens": 1478,
+        "reasoning_tokens": 0,
+        "total_tokens": 222863
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

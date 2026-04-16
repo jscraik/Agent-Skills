@@ -1,0 +1,47 @@
+{
+  "id": "negative-backend-task",
+  "name": "backend-only request should not route",
+  "category": "negative",
+  "should_trigger": false,
+  "prepend_skill": false,
+  "timeout_profile": "default",
+  "timeout_sec": 120.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-215917-450532/01-negative-backend-task",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 124,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 124",
+        "regex failed: /(?i)(out of scope|not the right skill|backend)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-215917-450532/01-negative-backend-task/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-215917-450532/01-negative-backend-task/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-215917-450532/01-negative-backend-task/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-215917-450532/01-negative-backend-task/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 124",
+    "[codex] regex failed: /(?i)(out of scope|not the right skill|backend)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

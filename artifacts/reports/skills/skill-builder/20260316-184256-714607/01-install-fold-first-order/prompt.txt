@@ -1,0 +1,3 @@
+$skill-builder
+
+I want to install this imported skill quickly. Do validation first and we can check overlap later. We had duplicate issues before (like skillupgrade).

@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:09Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/rclone/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/rclone/SKILL.md",
+  "name": "rclone",
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
+  "findings": [
+    {
+      "level": "FAIL",
+      "code": "SEC_PHILOSOPHY_MISSING",
+      "message": "Missing required section: philosophy (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-large.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/provider-operations.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "scripts/check_setup.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_LEAKY",
+      "message": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior.",
+      "evidence": "leaky=6/7"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=1/7"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_NETWORK_ALLOWLIST",
+      "message": "Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md.",
+      "evidence": "scripts/check_setup.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_NETWORK_UNDECLARED",
+      "message": "Network usage detected in scripts but SKILL.md does not explicitly describe network requirements/constraints. Default to offline; gate behind --allow-network if needed.",
+      "evidence": "scripts/check_setup.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_NETWORK_URL_ALLOWLIST",
+      "message": "Hard-coded URL(s) detected in scripts; document explicit allowed domains/hosts in SKILL.md.",
+      "evidence": "scripts/check_setup.sh"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "Infrastructure/references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "Infrastructure/references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "WF_FAIL_FAST_MISSING",
+      "message": "Validation section should specify fail-fast behavior (stop at first failed gate).",
+      "evidence": ""
+    }
+  ]
+}

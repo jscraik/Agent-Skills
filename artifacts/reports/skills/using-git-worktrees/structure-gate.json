@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:29Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/utilities/using-git-worktrees/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/using-git-worktrees/SKILL.md",
+  "name": "using-git-worktrees",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/4"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    }
+  ]
+}

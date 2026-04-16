@@ -18,17 +18,6 @@ agent-browser:
   fixing-accessibility: Probe ARIA and keyboard behaviour via browser automation
   playwright-interactive: Use for iterative UI automation when Playwright is better
   ui-visual-regression: Capture snapshots with agent-browser for regression checks
-agent-native-architecture:
-  agent-native-audit: Audit whether an existing repo or workflow already meets agent-native
-    operating principles
-  architecture-interview: Structure tradeoff-heavy architecture choices into an ADR-style
-    decision
-  chatgpt-apps: Apply agent-native patterns inside a ChatGPT Apps SDK product
-  mcp-builder: Build general MCP servers once the tool surface is clear
-agent-native-audit:
-  agents-md: Tighten repo instructions after finding discoverability gaps
-  codex-home-audit: Audit the Codex home surface instead of a single repo
-  gh-workflow: Land follow-up fixes through the GitHub workflow
 agentation:
   agent-browser: Run deterministic browser interactions against the app once Agentation
     wiring is healthy
@@ -38,10 +27,6 @@ agentation:
     inspection or debugging
   visual-explainer: Turn the integration state machine or failure path into a visual
     handoff artifact
-agents-md:
-  codex-agent-creator: Create agent roles that AGENTS.md will reference
-  codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
-  docs-expert: Apply docs polish and community-health guidance to AGENTS.md
 alignment-checkpoint:
   brainstorming: Explore approaches once intent is aligned
   ce-plan: Move from approved intent to an execution-ready plan
@@ -53,30 +38,26 @@ architecture-interview:
   diagram-cli: Generate architecture diagrams from ADR decisions
   product-spec: Produce a detailed spec after the architecture is decided
   security-threat-model: Run a threat model alongside architecture decisions
-  ce-plan: Convert ADR output into an implementation plan
+  writing-plans: Convert ADR output into an implementation plan
 atlas:
   agent-browser: Complement Atlas AppleScript control with browser automation
   notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
   openai-docs: Reference official ChatGPT documentation for Atlas features
 autoresearch:
-  skill-creator: Create or reshape a single skill package before entering a loop
-  plugin-builder: Harden or validate one plugin package outside a research loop
-  code-review: Run an adversarial review pass on the final diff before accepting loop outcomes
+  code-review: Run an adversarial review pass on the final diff before accepting loop
+    outcomes.
+  plugin-builder: Harden or validate one plugin package outside a research loop.
+  skill-creator: Create or reshape a single skill package before entering a loop.
 backend-engineer:
   mcp-builder: Build MCP server tools alongside the backend
   security-best-practices: Apply security hardening to new backend endpoints
-  ce-plan: Plan backend extensions before implementing
+  writing-plans: Plan backend extensions before implementing
 baseline-ui:
   design-system: Apply design tokens that baseline-ui validates
   fixing-accessibility: Fix accessibility issues found during baseline-ui checks
   frontend-ui-design: Implement UI components that baseline-ui governs
   shadcn-ui: Validate shadcn/ui components against baseline rules
   ui-visual-regression: Combine with visual regression to catch visual drift
-biome-linting:
-  npm-workflow-discipline: Keep formatter and lint command flows aligned with package
-    script contracts
-  pnpm-manager: Run repo-wide Biome commands through pnpm workspace selectors
-  typescript: Combine static typing diagnostics with Biome lint and formatting remediation
 bash-hygiene:
   codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
     safer defaults
@@ -99,18 +80,14 @@ better-icons:
   favicon-generator: Use alongside favicon generation for icon-family consistency
   frontend-ui-design: Source icons for UI components being designed
   shadcn-ui: Add Iconify icons to shadcn/ui component projects
+biome-linting:
+  npm-workflow-discipline: Keep npm/pnpm script contracts aligned with Biome gates
+  pnpm-manager: Target Biome checks to changed workspaces before broad runs
+  typescript: Pair lint remediation with type-safety guidance in TS repos
 bootstrap:
   fix-mise: Repair mise trust issues blocking the bootstrapped environment
   gh-workflow: Set up GitHub PR workflow after bootstrap
   verification-before-completion: Verify the bootstrap is working before continuing
-brainstorming:
-  architecture-interview: When the brainstorm reveals a significant architecture decision
-    needing structured review
-  ce-plan: After spec is agreed, use to turn it into a sequenced execution plan
-  interview-me: Use when the idea needs deeper requirements discovery beyond a quick
-    brainstorm
-  product-spec: Hand off the chosen direction to this skill to produce implementation-ready
-    specs
 ce-brainstorm:
   brainstorming: Use when the user needs a broader, non-compound brainstorming workflow
   ce-plan: Hand off low-risk, well-resolved brainstorm outputs into implementation
@@ -185,20 +162,6 @@ ce-work:
   ce-plan: Build execution-ready plan
   ce-review: Review after execution
   test-browser: Browser verification
-changelog:
-  every-style-editor: Polish the final changelog for a branded external audience
-  feature-video: Pair a release-note summary with a visual walkthrough artifact
-  gh-workflow: Inspect PRs, branches, and merge state before drafting the summary
-  release: Cut the release after the changelog content is ready
-chatgpt-apps:
-  fixing-metadata: Ensure App pages have correct meta and CSP headers
-  mcp-builder: Build the underlying MCP server the Apps SDK connects to
-  oak-api: Integrate Oak curriculum content into ChatGPT App workflows
-  openai-docs: Reference official Apps SDK documentation
-circleci:
-  backend-engineer: Wire backend deployments into CircleCI workflows
-  gh-workflow: Diagnose GitHub check blockers around CircleCI-driven delivery work
-  verification-before-completion: Verify pipeline output before marking complete
 claude-alias:
   bootstrap: Bootstrap a local development environment from a GitHub repository URL
   fix-mise: Diagnose and repair mise trust/runtime issues
@@ -206,11 +169,6 @@ cli-spec:
   agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
-coderabbit:
-  circleci: Pair CodeRabbit guidance with broader CircleCI migration and policy workflows
-  context7: Cross-check third-party library docs when CodeRabbit guidance references
-    external tools
-  gh-workflow: Apply CodeRabbit guidance while executing GitHub PR lifecycle changes
 codex-agent-creator:
   agents-md: Update repo instructions to reference or govern the new agent roles
   codex-automation-architect: Design recurring automations that orchestrate the installed
@@ -219,7 +177,7 @@ codex-agent-creator:
     or automation first
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
-  codex-agent-creator: Create the agent role the automation will run under
+  codex-agent-builder: Create the agent role the automation will run under
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
@@ -230,7 +188,7 @@ codex-home-audit:
   skill-refactor: Run a skill health scan alongside the home audit
   verification-before-completion: Verify fixes before marking the audit complete
 codex-hooks-builder:
-  codex-agent-creator: Create or update agent roles that the hooks should invoke or
+  codex-agent-builder: Create or update agent roles that the hooks should invoke or
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
@@ -243,20 +201,17 @@ coding-harness:
     applying fixes
   verification-before-completion: Add a stronger final verification pass before claiming
     a repo change is complete
-context7:
-  backend-engineer: Use Context7 to check API docs during backend work
-  mcp-builder: Reference Context7 docs when building MCP tool schemas
-  openai-docs: Use OpenAI docs MCP for OpenAI-specific library content
-  repoprompt: Combine repo context with Context7 library docs
+compound-engineering-router:
+  architecture-interview: Route architecture decisions through the structured interview
+  brainstorming: Start with brainstorming before routing to a compound workflow
+  product-spec: Produce a spec before routing to the work or review mode
+  skill-builder: Build skills that compound workflows will invoke
+  writing-plans: Generate the implementation plan the compound mode targets
 create-auth:
   1password: Inject auth secrets via 1Password CLI
   mcp-builder: Secure MCP server authentication using Better Auth
   security-best-practices: Apply secure defaults during auth implementation
   security-threat-model: Model auth attack surface before implementing
-decide-build-primitive:
-  ce-plan: Use when the capability is CE-scoped and needs concrete stage planning
-  codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
-    automation contract
 deep-interview:
   architecture-interview: Use when deep-interview surfaces a major architectural tradeoff
     requiring structured review
@@ -277,13 +232,9 @@ diagram-cli:
   ce-plan: Use architecture diagrams to ground implementation plans
   docs-expert: Embed diagrams into repository documentation
   visual-explainer: Render diagram artifacts as a polished HTML explainer
-docs-expert:
-  agents-md: Refactor or tighten AGENTS.md and related repo instruction routing
-  fixing-metadata: Repair page metadata and SEO surfaces after docs or web content
-    edits
-  markdown-converter: Convert source materials into clean Markdown before docs restructuring
-  visual-explainer: Present a complex system, workflow, or docs audit as a visual
-    artifact
+elixir-pro:
+  rust-pro: Systems-level concurrency patterns that share OTP-style supervision thinking
+  systematic-debugging: Triage distributed process failures with evidence-first diagnosis
 evals-router:
   skill-refactor: Analyze session-derived skill quality signals before redesigning
     eval plans
@@ -293,27 +244,10 @@ evals-router:
     prompt validation tests
   verification-before-completion: Gate "eval is ready" claims with concrete calibration
     or human-label evidence
-every-style-editor:
-  changelog: Edit engineering summaries for a clearer external or community audience
-  docs-expert: Improve repository documentation instead of brand-editorial prose
-  youtube-hooks-scripts: Shape the longer-form video script before applying Every-style
-    edits
-  youtube-titles-thumbnails: Tighten packaging copy once the tone and messaging are
-    set
-fallback-release:
-  production-deployment: Deploy fallback-built artifacts to production
-  release: Primary release path when CI is healthy
-  verification-before-completion: Validate fallback artifacts before publication
 favicon-generator:
   design-system: Keep favicon palette consistent with design-system tokens
   fixing-metadata: Pair with metadata fixes to ensure correct favicon references
   og-image-builder: Generate OG images alongside favicons for complete brand suite
-feature-video:
-  gh-workflow: Attach the final artifact to a PR or delivery note
-  remotion: Create or review a custom Remotion composition
-  sora: Generate synthetic video only when the request is not tied to real product
-    footage
-  stitch-remotion: Build a walkthrough from Stitch screens
 fix-mise:
   bootstrap: Fix mise before retrying the bootstrap
   codex-home-audit: Address mise issues found during a home directory audit
@@ -349,12 +283,9 @@ gh-workflow:
     investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
-imagegen:
-  nano-banana-builder: Use when the task needs iterative image generation or editing
-    with Google's Nano Banana APIs.
-  og-image-builder: Use when route-specific Open Graph images should be generated
-    directly from an existing web codebase.
-  sora: Use when the user needs video generation rather than static raster image output.
+go:
+  rust-pro: Systems programming with similar error-propagation and ownership concerns
+  systematic-debugging: Triage Go runtime errors with evidence-first diagnosis
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -368,12 +299,10 @@ interview-me:
   deep-interview: Deepen an existing draft doc or spec rather than running a lighter
     clarifying interview
   product-spec: Turn the clarified outcome into a fuller product-planning specification
-llm-wiki:
-  context7: Pull current external API/library docs to enrich wiki source material
-  docs-expert: Improve surrounding repository docs and runbooks once the wiki workflow
-    is chosen
-  project-brain: Operate project memory systems when the ask is broader than a single
-    wiki pattern
+javascript-pro:
+  biome-linting: Enforce JavaScript/TypeScript lint and format rules with Biome
+  typescript: Typed JavaScript superset when strict contracts and module boundaries
+    are needed
 markdown-converter:
   docs-expert: Polish converted docs to meet repository quality standards
   notebooklm: Feed converted markdown to NotebookLM for analysis
@@ -385,9 +314,9 @@ mcp-builder:
   openai-docs: Use official MCP schema docs when designing tool schemas
   security-best-practices: Apply security hardening to MCP server endpoints
 mise-tooling:
-  fix-mise: Deep-dive trust, shim, and runtime-selection failures
-  npm-release: Ensure release commands run on the intended Node toolchain
-  pnpm-manager: Execute workspace commands under pinned runtimes
+  fix-mise: Deep-dive broken trust, shim, or runtime-resolution states
+  npm-release: Ensure release commands execute on the intended Node toolchain
+  pnpm-manager: Run workspace commands under the pinned runtime
 nano-banana-builder:
   chatgpt-apps: Integrate Nano Banana image APIs into a ChatGPT App
   imagegen: Use as fallback for static image generation outside Nano Banana
@@ -398,28 +327,18 @@ notebooklm:
   markdown-converter: Convert docs to markdown before uploading to NotebookLM
   video-transcript-downloader: Download transcripts to feed as NotebookLM sources
 npm-release:
-  mise-tooling: Verify runtime and toolchain pinning before publishing packages
-  npm-workflow-discipline: Keep release scripts and lockfile policy deterministic
-  pnpm-manager: Coordinate workspace package release prep across pnpm projects
+  mise-tooling: Pin runtime/tool versions before release commands
+  npm-workflow-discipline: Enforce deterministic npm install/release contracts
+  pnpm-manager: Coordinate monorepo package prep before npm publish
 npm-workflow-discipline:
   circleci: Align deterministic npm install and script contracts with CircleCI pipeline
     behavior
   coding-harness: Validate and enforce repository quality gates in CI and local workflows
   release: Apply package and script contract checks during release readiness and cutover
-oak-api:
-  chatgpt-apps: Build a ChatGPT App that surfaces Oak curriculum content
-  fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
-  mcp-builder: Expose Oak API as MCP tools for agent workflows
-  product-spec: Spec the learning experience before implementing
 og-image-builder:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
   imagegen: Use imagegen for non-route-specific image generation
-openai-docs:
-  chatgpt-apps: Use with Apps SDK implementation tasks that need official OpenAI API
-    references.
-  context7: Use when third-party library docs are needed alongside OpenAI docs.
-  mcp-builder: Pair when building MCP servers that integrate OpenAI APIs.
 orchestrating-subagents:
   ce-work: Execute a plan once the orchestration decision is made and the task is
     implementation-ready
@@ -449,33 +368,18 @@ plugin-installer:
   plugin-creator: Scaffold a fresh local plugin package before install/distribution
     workflows
 pnpm-manager:
-  mise-tooling: Run pnpm workflows on the pinned runtime selected by mise
-  npm-release: Prepare workspace packages for safe npm publish and tagging
-  npm-workflow-discipline: Enforce consistent workspace script and lockfile behavior
+  mise-tooling: Ensure runtime/tool versions are pinned before pnpm execution
+  npm-release: Hand off package publish lanes after workspace validation
+  npm-workflow-discipline: Keep workspace install/publish contracts deterministic
+powershell:
+  bash-hygiene: Shell scripting hygiene practices that complement PowerShell automation
+  systematic-debugging: Triage PowerShell pipeline failures with evidence-first diagnosis
 process-watch:
   codex-home-audit: Check process health during a Codex home audit
   fix-mise: Diagnose mise shim CPU/memory issues via process-watch
   systematic-debugging: Use alongside process-watch for root-cause diagnosis
   verification-before-completion: Confirm processes are healthy before marking work
     done
-product-design-critic:
-  brainstorming: Explore design alternatives before critical review
-  interview-me: Run a requirements interview before critiquing the surface
-  product-spec: Critique the product surface after speccing, before build
-  visual-explainer: Present critique findings as a visual explainer page
-product-spec:
-  architecture-interview: Use when `arch_spec` mode reveals open design decisions
-    needing review
-  brainstorming: Use first when idea is unclear — brainstorm resolves direction, this
-    skill writes the spec
-  ce-plan: After spec approval, use to decompose the spec into an execution plan
-  interview-me: Use for deep requirements discovery when the spec needs user-research
-    grounding
-  security-threat-model: Use on the resulting spec/API to identify and model security
-    risks early
-production-deployment:
-  1password: Inject deployment secrets via 1Password CLI
-  release: Orchestrate the release flow before deployment
 project-brain:
   codex-home-audit: Pair when the user wants Codex control-plane drift analysis across
     agents, hooks, skills, and memory surfaces.
@@ -483,12 +387,11 @@ project-brain:
     gates, and tooling audits in a managed repository.
   docs-expert: Use for follow-on documentation hardening after Project Brain bootstrap
     or rollout changes land.
-project-improver:
-  architecture-interview: Validate architectural improvements via structured interview
-  brainstorming: Brainstorm improvement ideas before running the improver
-  ce-plan: Convert approved improvements into an execution-ready plan
-  product-spec: Produce a revised spec after high-leverage improvements are identified
-  security-threat-model: Include security improvements in the improvement scope
+rclone:
+  1password: Inject remote credentials or secrets safely into the runtime
+  feature-video: Upload generated demo artifacts after rendering or capture
+  video-transcript-downloader: Transfer downloaded media or transcripts to long-term
+    storage
 react-components:
   baseline-ui: Validate converted components against baseline UI rules
   design-system: Align converted components with the design-system token layer
@@ -510,10 +413,6 @@ recon-workbench:
     mitigations
   systematic-debugging: Debug confirmed runtime behavior after recon narrows the target
     surface
-release:
-  ce-plan: Plan the release checklist before executing
-  gh-workflow: Manage the PR and merge lifecycle before cutting a release
-  verification-before-completion: Validate all checks pass before tagging
 remotion:
   design-system: Keep caption, overlay, and UI-adjacent typography and token usage
     aligned with system governance
@@ -536,36 +435,15 @@ resolve-pr-parallel:
     fan-out
   systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
     feedback
-resolve-todo-parallel:
-  ce-compound: Capture durable learnings that emerge from repeated todo fixes
-  ce-work: Execute a single scoped implementation path instead of a todo sweep
-  orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and an
-    explicit user delegation request allow it
-  triage: Review pending todo findings before execution begins
+rust-pro:
+  go: Systems programming with similar error-handling and concurrency patterns
+  systematic-debugging: Triage Rust ownership and borrow-checker errors with evidence-first
+    diagnosis
 scaffolding-expert:
   bash-hygiene: Shell-policy and quoting/interpreter hardening
   context7: External docs grounding for version-sensitive dependencies
   npm-workflow-discipline: Lockfile discipline and script contract normalization
   uv-python-project-setup: uv-managed Python project and execution contract setup
-security-best-practices:
-  1password: Findings involving secrets management — use for secure injection patterns
-  create-auth: Security review often surfaces auth issues — use this for implementation
-  security-ownership-map: Find who owns the highest-risk code after identifying findings
-  security-threat-model: Run first to identify trust boundaries and threat model;
-    this skill remediates specific findings
-security-ownership-map:
-  gh-workflow: Create GitHub issues for identified owners
-  recon-workbench: Correlate recon findings with ownership data
-  security-best-practices: Route best-practice remediation to the right owners
-  security-threat-model: Use ownership map to assign threat model mitigations
-security-threat-model:
-  architecture-interview: When the system design is still unclear — clarify before
-    threat modeling
-  recon-workbench: When authorized recon evidence is needed to ground the threat model
-  security-best-practices: Run after threat modeling to get language-specific remediation
-    guidance
-  security-ownership-map: Use to identify which engineers are responsible for the
-    highest-risk code areas
 shadcn-ui:
   baseline-ui: Validate shadcn/ui component usage against baseline rules
   design-system: Override shadcn/ui tokens with design-system aliases
@@ -619,6 +497,9 @@ spreadsheet:
   insight-report: Export session data to spreadsheet for analysis
   markdown-converter: Convert spreadsheet data to markdown for documentation
   visual-explainer: Present spreadsheet data as a styled HTML table
+sql-pro:
+  systematic-debugging: Triage query performance regressions with evidence-first diagnosis
+  yaml: Schema-aware config review for database connection and migration config files
 stitch-loop:
   frontend-ui-design: Review and polish Stitch-generated UI
   react-components: Convert Stitch outputs to React components
@@ -631,6 +512,11 @@ stitch-remotion:
   slides: Compare slide deck with Remotion video for the same content
   sora: Use Sora for AI-generated video alternative to Remotion
   stitch-loop: Generate the Stitch screens that feed this skill
+swift-development:
+  rust-pro: Systems-level safety patterns that share Swift's value-type and concurrency
+    thinking
+  systematic-debugging: Triage Swift concurrency and actor isolation issues with evidence-first
+    diagnosis
 systematic-debugging:
   ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
     converging
@@ -659,12 +545,13 @@ threejs-builder:
   frontend-ui-design: Provide the design context Three.js scene should match
   ui-ux-creative-coding: Orchestrate Three.js alongside React motion for rich UI
   visual-explainer: Embed Three.js scenes in HTML explainer pages
-triage:
-  ce-work: Execute the approved work once triage decisions are made
-  resolve-todo-parallel: Resolve a batch of approved todo items in parallel rather
-    than triaging them
-  systematic-debugging: Diagnose unclear or flaky findings before deciding whether
-    they belong in the queue
+toml:
+  systematic-debugging: Triage config parsing failures with evidence-first diagnosis
+  yaml: Schema-aware config review for YAML-based tooling configs
+typescript:
+  biome-linting: Enforce TypeScript lint and format rules with Biome
+  javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
+    need attention
 ui-cloner:
   design-system: Map cloned design tokens into your design system
   frontend-ui-design: Adapt the cloned design system to your brand
@@ -701,11 +588,6 @@ verification-before-completion:
     fix worked
   test-driven-development: Write failing tests before fixing; this skill verifies
     they now pass
-video-transcript-downloader:
-  markdown-converter: Convert transcript text to clean markdown
-  notebooklm: Feed transcripts to NotebookLM for summarisation
-  youtube-hooks-scripts: Create scripts for videos whose transcripts you've studied
-  youtube-titles-thumbnails: Package videos after reviewing competitor transcripts
 visual-explainer:
   beautiful-mermaid: Render Mermaid diagrams as image assets for the explainer
   design-system: Align the explainer’s token and visual language with the repo’s design
@@ -714,13 +596,15 @@ visual-explainer:
     final explainer
   slides: Use a presentation deck instead of a scrollable HTML explainer when the
     format fits better
-youtube-hooks-scripts:
-  notebooklm: Use NotebookLM to generate audio overviews from scripts
-  product-spec: Spec the content series before scripting individual videos
-  video-transcript-downloader: Study competitor transcripts before writing hooks
-  youtube-titles-thumbnails: Create titles and thumbnails to pair with the script
-youtube-titles-thumbnails:
-  imagegen: Generate thumbnail concept images
-  video-transcript-downloader: Research competitor videos before writing titles
-  visual-explainer: Present A/B thumbnail options in a visual comparison page
-  youtube-hooks-scripts: Pair with a hook and script for complete video packaging
+writing-plans:
+  brainstorming: Use first when scope is still ambiguous — resolve approach before
+    planning steps
+  ce-plan: Canonical owner of both generic and CE execution-planning behavior
+  interview-me: Use when requirements need discovery before routing to `ce-plan`
+  product-spec: Use for product-level specs before routing to `ce-plan`
+  systematic-debugging: When 3+ fix attempts fail, restart with this skill to re-plan
+    the approach
+  verification-before-completion: Embed in the plan's final task to gate "done" claims
+yaml:
+  systematic-debugging: Triage config parsing failures with evidence-first diagnosis
+  toml: Schema-aware config review for TOML-based tooling configs

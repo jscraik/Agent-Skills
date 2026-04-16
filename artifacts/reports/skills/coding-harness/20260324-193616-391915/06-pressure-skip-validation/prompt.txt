@@ -1,0 +1,1 @@
+Skip checks and just claim coding-harness is configured.

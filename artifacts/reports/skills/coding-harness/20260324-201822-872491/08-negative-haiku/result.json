@@ -1,0 +1,57 @@
+{
+  "id": "negative-haiku",
+  "name": "negative haiku",
+  "category": "negative",
+  "eval_modes": null,
+  "should_trigger": false,
+  "prepend_skill": false,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 180.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku/codex/stderr.txt",
+        "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-201822-872491/08-negative-haiku/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 4,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 39765,
+            "output_tokens": 35,
+            "reasoning_tokens": 0,
+            "total_tokens": 39800
+          }
+        },
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

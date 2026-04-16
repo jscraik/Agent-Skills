@@ -1,0 +1,437 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-15T21:54:49Z",
+  "decision_date": "2026-04-15",
+  "active_skill_count": 23,
+  "expected_count": 23,
+  "inventory_policy": "docs/skill-graphs/governance/inventory-policy.json",
+  "system_slice_mode": "exclude",
+  "summary": {
+    "valid_count": 23,
+    "invalid_count": 0,
+    "missing_profile_count": 0,
+    "missing_binding_count": 0,
+    "missing_legacy_binding_count": 23,
+    "invalid_binding_count": 0,
+    "wave_counts": {
+      "wave-1-manual": 7,
+      "wave-2-co-pilot": 16
+    }
+  },
+  "skills": [
+    {
+      "skill_path": "Skills/1password/SKILL.md",
+      "scope_skill": "Skills/1password",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/1password",
+      "source_skill_dirs": [
+        "Skills/1password"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/1password/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-browser/SKILL.md",
+      "scope_skill": "Skills/agent-browser",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-browser",
+      "source_skill_dirs": [
+        "Skills/agent-browser"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/agent-browser/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/alignment-checkpoint/SKILL.md",
+      "scope_skill": "Skills/alignment-checkpoint",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/alignment-checkpoint",
+      "source_skill_dirs": [
+        "Skills/alignment-checkpoint"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/alignment-checkpoint/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/atlas/SKILL.md",
+      "scope_skill": "Skills/atlas",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/atlas",
+      "source_skill_dirs": [
+        "Skills/atlas"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/atlas/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/beautiful-mermaid/SKILL.md",
+      "scope_skill": "Skills/beautiful-mermaid",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/beautiful-mermaid",
+      "source_skill_dirs": [
+        "Skills/beautiful-mermaid"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/beautiful-mermaid/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/bootstrap/SKILL.md",
+      "scope_skill": "Skills/bootstrap",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/bootstrap",
+      "source_skill_dirs": [
+        "Skills/bootstrap"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/bootstrap/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/codex-agent-creator/SKILL.md",
+      "scope_skill": "Skills/codex-agent-creator",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/codex-agent-creator",
+      "source_skill_dirs": [
+        "Skills/codex-agent-creator"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/codex-agent-creator/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/codex-automation-architect/SKILL.md",
+      "scope_skill": "Skills/codex-automation-architect",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/codex-automation-architect",
+      "source_skill_dirs": [
+        "Skills/codex-automation-architect"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/codex-automation-architect/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/codex-home-audit/SKILL.md",
+      "scope_skill": "Skills/codex-home-audit",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/codex-home-audit",
+      "source_skill_dirs": [
+        "Skills/codex-home-audit"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/codex-home-audit/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/fix-mise/SKILL.md",
+      "scope_skill": "Skills/fix-mise",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/fix-mise",
+      "source_skill_dirs": [
+        "Skills/fix-mise"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/fix-mise/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/imagegen/SKILL.md",
+      "scope_skill": "Skills/imagegen",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/imagegen",
+      "source_skill_dirs": [
+        "Skills/imagegen"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/imagegen/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/insight-report/SKILL.md",
+      "scope_skill": "Skills/insight-report",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/insight-report",
+      "source_skill_dirs": [
+        "Skills/insight-report"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/insight-report/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/markdown-converter/SKILL.md",
+      "scope_skill": "Skills/markdown-converter",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/markdown-converter",
+      "source_skill_dirs": [
+        "Skills/markdown-converter"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/markdown-converter/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/notebooklm/SKILL.md",
+      "scope_skill": "Skills/notebooklm",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/notebooklm",
+      "source_skill_dirs": [
+        "Skills/notebooklm"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/notebooklm/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/process-watch/SKILL.md",
+      "scope_skill": "Skills/process-watch",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/process-watch",
+      "source_skill_dirs": [
+        "Skills/process-watch"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/process-watch/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/recon-workbench/SKILL.md",
+      "scope_skill": "Skills/recon-workbench",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/recon-workbench",
+      "source_skill_dirs": [
+        "Skills/recon-workbench"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/recon-workbench/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/repoprompt/SKILL.md",
+      "scope_skill": "Skills/repoprompt",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/repoprompt",
+      "source_skill_dirs": [
+        "Skills/repoprompt"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/repoprompt/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/systematic-debugging/SKILL.md",
+      "scope_skill": "Skills/systematic-debugging",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/systematic-debugging",
+      "source_skill_dirs": [
+        "Skills/systematic-debugging"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/systematic-debugging/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/test-driven-development/SKILL.md",
+      "scope_skill": "Skills/test-driven-development",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/test-driven-development",
+      "source_skill_dirs": [
+        "Skills/test-driven-development"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/test-driven-development/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/using-git-worktrees/SKILL.md",
+      "scope_skill": "Skills/using-git-worktrees",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/using-git-worktrees",
+      "source_skill_dirs": [
+        "Skills/using-git-worktrees"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/using-git-worktrees/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/verification-before-completion/SKILL.md",
+      "scope_skill": "Skills/verification-before-completion",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/verification-before-completion",
+      "source_skill_dirs": [
+        "Skills/verification-before-completion"
+      ],
+      "wave": "wave-1-manual",
+      "profile_path": "Skills/verification-before-completion/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "manual",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/visual-explainer/SKILL.md",
+      "scope_skill": "Skills/visual-explainer",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/visual-explainer",
+      "source_skill_dirs": [
+        "Skills/visual-explainer"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/visual-explainer/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/writing-plans/SKILL.md",
+      "scope_skill": "Skills/writing-plans",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/writing-plans",
+      "source_skill_dirs": [
+        "Skills/writing-plans"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/writing-plans/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    }
+  ]
+}

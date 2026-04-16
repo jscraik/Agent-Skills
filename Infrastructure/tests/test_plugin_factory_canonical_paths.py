@@ -8,12 +8,28 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PLUGIN_CREATOR_SCRIPT = (
-    REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "plugin-creator" / "scripts" / "create_basic_plugin.py"
+    REPO_ROOT
+    / "Plugins"
+    / "plugin-factory"
+    / "skills"
+    / "scaffolding_templates"
+    / "plugin-creator"
+    / "scripts"
+    / "create_basic_plugin.py"
 )
 PLUGIN_BUILDER_SCRIPT = (
-    REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "plugin-builder" / "scripts" / "plugin_builder.py"
+    REPO_ROOT
+    / "Plugins"
+    / "plugin-factory"
+    / "skills"
+    / "code_quality_review"
+    / "plugin-builder"
+    / "scripts"
+    / "plugin_builder.py"
 )
-PLUGIN_CREATOR_SKILL = REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "plugin-creator" / "SKILL.md"
+PLUGIN_CREATOR_SKILL = (
+    REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "scaffolding_templates" / "plugin-creator" / "SKILL.md"
+)
 
 
 def _load_module(module_name: str, script_path: Path):
@@ -75,12 +91,12 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
             with _chdir(temp_path):
                 module = _load_module(module_name, script_path)
         self.assertEqual(module.REPO_ROOT, REPO_ROOT)
-        self.assertEqual(module.DEFAULT_PLUGIN_PARENT, REPO_ROOT / "plugins")
+        self.assertEqual(module.DEFAULT_PLUGIN_PARENT, REPO_ROOT / "Plugins" / "third-party")
         self.assertEqual(
             module.DEFAULT_MARKETPLACE_PATH,
             REPO_ROOT / ".agents" / "Plugins" / "marketplace.json",
         )
-        self.assertNotEqual(module.DEFAULT_PLUGIN_PARENT, temp_path / "plugins")
+        self.assertNotEqual(module.DEFAULT_PLUGIN_PARENT, temp_path / "Plugins" / "third-party")
 
     def test_plugin_creator_defaults_anchor_to_repo_root(self) -> None:
         self._assert_defaults_anchor_to_repo_root(
@@ -104,7 +120,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
         skill_doc = PLUGIN_CREATOR_SKILL.read_text(encoding="utf-8")
         self.assertIn(
-            "Plugins/plugin-factory/skills/plugin-creator/scripts/create_basic_plugin.py",
+            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
             skill_doc,
         )
 

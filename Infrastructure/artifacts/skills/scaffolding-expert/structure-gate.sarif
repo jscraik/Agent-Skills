@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_COMMANDS",
+              "name": "PI_COMMANDS",
+              "shortDescription": {
+                "text": "[medium] Command-like instructions detected; ensure commands are gated and safe."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_TOOL_CHAIN",
+              "name": "PI_TOOL_CHAIN",
+              "shortDescription": {
+                "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_COMMANDS",
+          "level": "warning",
+          "message": {
+            "text": "[medium] Command-like instructions detected; ensure commands are gated and safe. | scripts/profile-dev-repos.sh"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/scaffolding-expert/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_TOOL_CHAIN",
+          "level": "warning",
+          "message": {
+            "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/scaffolding-expert/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_TOOL_CHAIN",
+          "level": "warning",
+          "message": {
+            "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | references/drift-conflict-audit.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/scaffolding-expert/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=2/8"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/scaffolding-expert/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/scaffolding-expert/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

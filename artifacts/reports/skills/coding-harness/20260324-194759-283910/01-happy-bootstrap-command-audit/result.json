@@ -1,0 +1,65 @@
+{
+  "id": "happy-bootstrap-command-audit",
+  "name": "happy bootstrap command audit",
+  "category": "happy",
+  "eval_modes": null,
+  "should_trigger": true,
+  "prepend_skill": false,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 180.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 124,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 124",
+        "regex failed: /(?i)(harness init --dry-run|harness init|pnpm check|cannot|credentials|token)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex/codex_events.jsonl",
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex/stderr.txt",
+        "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 0,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 0,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "reasoning_tokens": 0,
+            "total_tokens": 0
+          }
+        },
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 124",
+    "[codex] regex failed: /(?i)(harness init --dry-run|harness init|pnpm check|cannot|credentials|token)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/coding-harness/20260324-194759-283910/01-happy-bootstrap-command-audit/codex/codex_events.jsonl",
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

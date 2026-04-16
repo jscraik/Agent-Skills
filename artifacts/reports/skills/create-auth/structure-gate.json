@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:12Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/auth/create-auth/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/auth/create-auth/SKILL.md",
+  "name": "create-auth",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/3"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_SCOPE_BROAD",
+      "message": "Skill/package scope may be too broad for a first pass. Add explicit guidance like 'start with 2-3 focused surfaces' or 'keep scope tight'.",
+      "evidence": "surfaces=4"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_NEGATIVE_MISSING",
+      "message": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PRESSURE_MISSING",
+      "message": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case.",
+      "evidence": "references/evals.yaml"
+    }
+  ]
+}

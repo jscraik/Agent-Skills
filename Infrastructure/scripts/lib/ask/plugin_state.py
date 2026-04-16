@@ -29,8 +29,10 @@ def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
 
 def _marketplace_payload(repo_root: Path) -> tuple[dict[str, Any], str | None, Path]:
     candidates = [
-        repo_root / ".agents" / "plugins" / "marketplace.json",
+        repo_root / "Plugins" / "marketplace.json",
         repo_root / "plugins" / "marketplace.json",
+        repo_root / ".agents" / "Plugins" / "marketplace.json",
+        repo_root / ".agents" / "plugins" / "marketplace.json",
     ]
     for candidate in candidates:
         payload, error = _load_json(candidate)
@@ -42,41 +44,53 @@ def _marketplace_payload(repo_root: Path) -> tuple[dict[str, Any], str | None, P
 
 
 def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
-    plugins_root = repo_root / "plugins"
     installed: list[dict[str, Any]] = []
-    if not plugins_root.exists():
-        return installed
+    resolved_repo_root = repo_root.resolve()
+    seen_plugin_dirs: set[Path] = set()
+    manifest_patterns = (
+        "plugins/*/.codex-plugin/plugin.json",
+        "Plugins/*/.codex-plugin/plugin.json",
+        "plugins/*/*/.codex-plugin/plugin.json",
+        "Plugins/*/*/.codex-plugin/plugin.json",
+    )
 
-    for manifest_path in sorted(plugins_root.glob("*/.codex-plugin/plugin.json")):
-        # Guard against nested caches and fixtures.
-        rel = manifest_path.relative_to(repo_root).as_posix()
-        if rel.startswith("Plugins/cache/"):
-            continue
-        plugin_dir = manifest_path.parent.parent
-        payload, error = _load_json(manifest_path)
-        if payload is None:
+    for pattern in manifest_patterns:
+        for manifest_path in sorted(repo_root.glob(pattern)):
+            rel = manifest_path.relative_to(repo_root).as_posix()
+            if rel.startswith(("Plugins/cache/", "plugins/cache/")):
+                continue
+            plugin_dir = manifest_path.parent.parent
+            plugin_dir_resolved = plugin_dir.resolve()
+            if plugin_dir_resolved in seen_plugin_dirs:
+                continue
+            seen_plugin_dirs.add(plugin_dir_resolved)
+
+            payload, error = _load_json(manifest_path)
+            if payload is None:
+                installed.append(
+                    {
+                        "name": plugin_dir.name,
+                        "path": plugin_dir_resolved.relative_to(resolved_repo_root).as_posix(),
+                        "manifest_path": rel,
+                        "manifest_valid": False,
+                        "manifest_error": error,
+                    }
+                )
+                continue
+
             installed.append(
                 {
-                    "name": plugin_dir.name,
-                    "path": plugin_dir.relative_to(repo_root).as_posix(),
+                    "name": str(payload.get("name") or plugin_dir.name),
+                    "version": payload.get("version"),
+                    "description": payload.get("description"),
+                    "path": plugin_dir_resolved.relative_to(resolved_repo_root).as_posix(),
                     "manifest_path": rel,
-                    "manifest_valid": False,
-                    "manifest_error": error,
+                    "manifest_valid": True,
+                    "governance": payload.get("governance", {}),
                 }
             )
-            continue
 
-        installed.append(
-            {
-                "name": str(payload.get("name") or plugin_dir.name),
-                "version": payload.get("version"),
-                "description": payload.get("description"),
-                "path": plugin_dir.relative_to(repo_root).as_posix(),
-                "manifest_path": rel,
-                "manifest_valid": True,
-                "governance": payload.get("governance", {}),
-            }
-        )
+    installed.sort(key=lambda item: str(item.get("name") or item.get("path") or ""))
     return installed
 
 

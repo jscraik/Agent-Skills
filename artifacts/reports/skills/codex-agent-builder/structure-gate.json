@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:25Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/utilities/codex-agent-creator/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/codex-agent-creator/SKILL.md",
+  "name": "codex-agent-builder",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "RESEARCH_SCOPE_BROAD",
+      "message": "Skill/package scope may be too broad for a first pass. Add explicit guidance like 'start with 2-3 focused surfaces' or 'keep scope tight'.",
+      "evidence": "surfaces=4"
+    }
+  ]
+}

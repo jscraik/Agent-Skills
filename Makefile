@@ -1,7 +1,7 @@
 # Harness Development Makefile
 # Run `make help` to see available commands
 
-.PHONY: help install setup preflight hooks hooks-pre-commit hooks-commit-msg hooks-pre-push secrets-staged docs-style-changed related-tests semgrep-changed diagrams-check dev build lint docs-lint fmt typecheck test check audit secrets security clean reset ci diagrams env-check
+.PHONY: help install setup preflight worktree-ready verify-work codestyle hooks hooks-pre-commit hooks-pre-push secrets-staged docs-style-changed related-tests semgrep-changed diagrams-check dev build lint docs-lint fmt typecheck test check audit secrets security clean reset ci diagrams env-check
 
 # Default target
 help: ## Show this help message
@@ -18,34 +18,36 @@ install: ## Install dependencies
 setup: install hooks ## Full setup: install deps and configure git hooks
 
 preflight: ## Run repository preflight checks (required local-memory gate by default)
-	@bash ./Infrastructure/scripts/codex-preflight.sh
+	@bash ./scripts/codex-preflight.sh
+
+worktree-ready: ## Bootstrap a fresh git worktree before first push
+	@bash ./scripts/prepare-worktree.sh
+
+verify-work: ## Run canonical repo-local verification wrapper
+	@bash ./scripts/verify-work.sh
+
+codestyle: ## Run fail-closed codestyle validation
+	@bash ./scripts/validate-codestyle.sh
 
 hooks: ## Setup git hooks
-	node Infrastructure/scripts/setup-git-hooks.js
+	node scripts/setup-git-hooks.js
 
 hooks-pre-commit: ## Run local pre-commit gates before creating a commit
-	bash Infrastructure/scripts/validate_all.sh --ephemeral
-
-hooks-commit-msg: ## Validate commit message policy (use HOOK_COMMIT_MSG or HOOK_COMMIT_MSG_FILE=/path)
-	@tmp_file="$$(mktemp)"; \
-	trap 'rm -f "$$tmp_file"' EXIT; \
-	if [ -n "$${HOOK_COMMIT_MSG:-}" ]; then \
-		printf '%s\n' "$${HOOK_COMMIT_MSG}" > "$$tmp_file"; \
-	elif [ -n "$${HOOK_COMMIT_MSG_FILE:-}" ]; then \
-		test -r "$${HOOK_COMMIT_MSG_FILE}" || { echo "Cannot read $$HOOK_COMMIT_MSG_FILE" >&2; exit 2; }; \
-		cp "$${HOOK_COMMIT_MSG_FILE}" "$$tmp_file"; \
-	elif [ -n "$${MSG_FILE:-}" ]; then \
-		test -r "$${MSG_FILE}" || { echo "Cannot read $$MSG_FILE" >&2; exit 2; }; \
-		cp "$${MSG_FILE}" "$$tmp_file"; \
-	else \
-		echo "Usage: HOOK_COMMIT_MSG=\"feat: test\" make hooks-commit-msg or make hooks-commit-msg HOOK_COMMIT_MSG_FILE=/path/to/commit-msg" >&2; \
-		exit 2; \
-	fi; \
-	node Infrastructure/scripts/validate-commit-msg.js "$$tmp_file"
+	pnpm lint
+	pnpm docs:lint
+	pnpm typecheck
+	$(MAKE) secrets-staged
+	$(MAKE) docs-style-changed
+	$(MAKE) related-tests
 
 hooks-pre-push: ## Run local pre-push governance gates before pushing
-	bash Infrastructure/scripts/validate_skill_authoring_family.sh
-	python3 Infrastructure/scripts/diagnose_skill.py --all
+	pnpm exec tsx src/cli.ts docs-gate --mode required --json
+	@bash ./scripts/check-diagram-freshness.sh
+	pnpm exec tsx src/cli.ts tooling-audit --path . --json
+	@bash ./scripts/check-environment.sh
+	$(MAKE) semgrep-changed
+	$(MAKE) codestyle
+	pnpm build
 
 secrets-staged: ## Scan staged content for secrets before committing
 	pnpm run secrets:staged
@@ -60,7 +62,7 @@ semgrep-changed: ## Run narrow Semgrep rules against changed src implementation 
 	pnpm run semgrep:changed
 
 diagrams-check: ## Refresh architecture diagrams when sensitive paths change and fail on drift
-	@bash ./Infrastructure/scripts/check-diagram-freshness.sh
+	@bash ./scripts/check-diagram-freshness.sh
 
 # === Development ===
 
@@ -68,32 +70,32 @@ dev: ## Start development server
 	pnpm dev
 
 build: ## Build for production
-	@if [ -f "package.json" ]; then pnpm build; else echo "Skipping build (no package.json)"; fi
+	pnpm build
 
 # === Quality ===
 
 lint: ## Run linter
-	@if [ -f "package.json" ]; then pnpm lint; else echo "Skipping lint (no package.json)"; fi
+	pnpm lint
 
 docs-lint: ## Lint markdown/docs
-	@if [ -f "package.json" ]; then pnpm docs:lint; else echo "Skipping docs:lint (no package.json)"; fi
+	pnpm docs:lint
 
 fmt: ## Format code
-	@if [ -f "package.json" ]; then pnpm fmt; else echo "Skipping fmt (no package.json)"; fi
+	pnpm fmt
 
 typecheck: ## Run TypeScript type checking
-	@if [ -f "package.json" ]; then pnpm typecheck; else echo "Skipping typecheck (no package.json)"; fi
+	pnpm typecheck
 
 test: ## Run tests
-	@if [ -f "package.json" ]; then pnpm test; else echo "Skipping test (no package.json)"; fi
+	pnpm test
 
 check: ## Run all required quality gates
-	@if [ -f "package.json" ]; then pnpm check; else echo "Skipping check (no package.json)"; fi
+	pnpm check
 
 # === Security ===
 
 audit: ## Run security audit
-	@if [ -f "package.json" ]; then pnpm audit; else echo "Skipping audit (no package.json)"; fi
+	pnpm audit
 
 secrets: ## Scan for secrets with gitleaks
 	@gitleaks detect --source . --verbose || (echo "Install gitleaks: brew install gitleaks" && exit 1)
@@ -112,24 +114,14 @@ reset: clean ## Full reset: clean and reinstall
 # === CI ===
 
 ci: ## Run CI-equivalent local checks
-	@# Skills/config repos don't have application code
-	if [ -f "package.json" ]; then \
-		pnpm check; \
-	else \
-		echo "Skipping pnpm check (skills/config repository - no application code)"; \
-		$(MAKE) preflight; \
-		$(MAKE) env-check; \
-		$(MAKE) lint; \
-		$(MAKE) docs-lint; \
-		$(MAKE) security; \
-	fi
+	pnpm check
 
 # === Diagrams ===
 
 diagrams: ## Generate architecture diagrams
-	@bash ./Infrastructure/scripts/refresh-diagram-context.sh --force
+	@bash ./scripts/refresh-diagram-context.sh --force
 
 # === Environment ===
 
 env-check: ## Check environment policy envelope
-	@bash ./Infrastructure/scripts/check-environment.sh
+	@bash ./scripts/check-environment.sh

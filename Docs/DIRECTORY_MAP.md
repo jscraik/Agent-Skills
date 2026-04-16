@@ -18,7 +18,7 @@ Navigation index for the repository root, major directories, and key subdirector
 | `/SKILL.md`              | Generated catalog index of all skills               |
 | `/AGENTS.md`             | Repository-specific operating instructions          |
 | `/DIRECTORY_MAP.md`      | This file (root and subdirectory navigation guide)  |
-| `/docs/`                 | Contributor and governance documentation            |
+| `/Docs/`                 | Contributor and governance documentation            |
 | `/Infrastructure/scripts/`              | Sync, validation, and automation scripts            |
 | `/Infrastructure/templates/`            | Reusable templates for skills and contracts         |
 | `/Infrastructure/scripts/README.md`     | Script index by workflow category                   |
@@ -26,16 +26,15 @@ Navigation index for the repository root, major directories, and key subdirector
 
 ## Skill Domains
 
-Primary skill categories are organized by domain folder:
+Primary skill categories are organized by topic cluster under `Skills/`:
 
-- `/auth/` (index: [/auth/README.md](/auth/README.md))
-- `/backend/` (index: [/backend/README.md](/backend/README.md))
-- `/frontend/` (index: [/frontend/README.md](/frontend/README.md))
-- `/github/` (index: [/github/README.md](/github/README.md))
-- `/interview/` (index: [/interview/README.md](/interview/README.md))
-- `/product/` (index: [/product/README.md](/product/README.md))
-- `/Skills/` (index: [/Skills/README.md](/Skills/README.md))
-- `/Skills/` (index: [/Skills/README.md](/Skills/README.md))
+- `/Skills/agent-ops/` — Agent operations, tooling, and general dev skills (41)
+- `/Skills/frontend-ui/` — Frontend UI, design, and browser automation (25)
+- `/Skills/backend-platform/` — Backend, CI, and platform infrastructure (8)
+- `/Skills/product-strategy/` — Product planning, interviews, and research (5)
+- `/Skills/security-ops/` — Security, auth, and recon workflows (4)
+- `/Skills/mobile-native/` — macOS/iOS native apps and process monitoring (3)
+- `/Skills/content-publishing/` — Content conversion and publishing (2)
 
 Common subdirectory patterns inside each skill:
 
@@ -71,8 +70,8 @@ Common subdirectory patterns inside each skill:
 fd -td -d 1 .
 
 # Skill folders two levels deep
-fd -td -d 2 . auth backend frontend github interview product utilities skills-system
+fd -td -d 2 . Skills
 
 # Generated catalog + docs entrypoints
-ls -la SKILL.md README.md docs/index.md DIRECTORY_MAP.md
+ls -la SKILL.md README.md DIRECTORY_MAP.md
 ```

@@ -46,13 +46,13 @@
       "eligible_candidates": [
         {
           "name": "ce-review",
-          "path": "Plugins/harness-engineering/skills/ce-review",
+          "path": "Plugins/harness-engineering/skills/code_quality_review/ce-review",
           "description": "Readiness review for package-level delivery.",
           "scope_rank": 12
         },
         {
           "name": "ce-technical-review",
-          "path": "Plugins/harness-engineering/skills/ce-technical-review",
+          "path": "Plugins/harness-engineering/skills/code_quality_review/ce-technical-review",
           "description": "Technical risk review with severity findings.",
           "scope_rank": 12
         }
@@ -60,14 +60,14 @@
       "ranked_candidates": [
         {
           "skill_name": "ce-review",
-          "skill_path": "Plugins/harness-engineering/skills/ce-review",
+          "skill_path": "Plugins/harness-engineering/skills/code_quality_review/ce-review",
           "confidence": 0.81,
           "rationale": ["keyword overlap=1"],
           "risk_tier": "medium"
         },
         {
           "skill_name": "ce-technical-review",
-          "skill_path": "Plugins/harness-engineering/skills/ce-technical-review",
+          "skill_path": "Plugins/harness-engineering/skills/code_quality_review/ce-technical-review",
           "confidence": 0.79,
           "rationale": ["keyword overlap=1"],
           "risk_tier": "medium"

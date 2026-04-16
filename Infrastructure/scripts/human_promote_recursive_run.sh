@@ -13,10 +13,10 @@ lesson_file=""
 decision="approved"
 note="Human gate review completed."
 skip_lesson_scan=0
-policy_file="docs/skill-graphs/governance/recursive-loop-approvers.yaml"
-policy_sig_file="docs/skill-graphs/governance/recursive-loop-approvers.sig"
-canonical_policy_file="docs/skill-graphs/governance/recursive-loop-approvers.yaml"
-canonical_policy_sig_file="docs/skill-graphs/governance/recursive-loop-approvers.sig"
+policy_file="Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+policy_sig_file="Docs/skill-graphs/governance/recursive-loop-approvers.sig"
+canonical_policy_file="Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+canonical_policy_sig_file="Docs/skill-graphs/governance/recursive-loop-approvers.sig"
 
 require_option_value() {
   local opt="$1"
@@ -74,8 +74,8 @@ Optional:
   --decision STATE            approved|rejected|candidate (default: approved)
   --note TEXT                 Gate note/comment
   --skip-lesson-scan          Skip lesson content scan (only allowed for non-approved decisions)
-  --policy-file PATH          Reviewer policy file (default: docs/skill-graphs/governance/recursive-loop-approvers.yaml)
-  --policy-sig-file PATH      Policy signature file containing sha256(policy_file) (default: docs/skill-graphs/governance/recursive-loop-approvers.sig)
+  --policy-file PATH          Reviewer policy file (default: Docs/skill-graphs/governance/recursive-loop-approvers.yaml)
+  --policy-sig-file PATH      Policy signature file containing sha256(policy_file) (default: Docs/skill-graphs/governance/recursive-loop-approvers.sig)
 USAGE
 }
 
@@ -428,7 +428,7 @@ PY
 #   - Otherwise (local/interactive): warn and skip signing.
 #
 # Migration path to option 2 (Ed25519) is documented in
-# docs/skill-graphs/governance/promotion-signing.md.
+# Docs/skill-graphs/governance/promotion-signing.md.
 # ---------------------------------------------------------------------------
 decision_sig_file="${decision_tmp}.sig"
 promotion_key="${PROMOTION_SIGNING_KEY:-}"

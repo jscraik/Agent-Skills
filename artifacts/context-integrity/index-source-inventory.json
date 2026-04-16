@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "context-source-inventory/v1",
+  "generatedAt": "2026-04-16T17:21:43.732Z",
+  "summary": {
+    "sourceCount": 11,
+    "authoritativeSourceCount": 8,
+    "supportingSourceCount": 3,
+    "documentCount": 64,
+    "indexedDocumentCount": 64
+  },
+  "sources": [
+    {
+      "id": "readme",
+      "path": "README.md",
+      "kind": "file",
+      "authority": "canonical",
+      "exists": true,
+      "documentCount": 1,
+      "indexedDocumentCount": 1,
+      "stalenessState": "unknown",
+      "documentPaths": [
+        "README.md"
+      ]
+    },
+    {
+      "id": "agents",
+      "path": "AGENTS.md",
+      "kind": "file",
+      "authority": "canonical",
+      "exists": true,
+      "documentCount": 1,
+      "indexedDocumentCount": 1,
+      "stalenessState": "unknown",
+      "documentPaths": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "claude",
+      "path": "CLAUDE.md",
+      "kind": "file",
+      "authority": "canonical",
+      "exists": true,
+      "documentCount": 1,
+      "indexedDocumentCount": 1,
+      "stalenessState": "unknown",
+      "documentPaths": [
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "id": "contributing",
+      "path": "CONTRIBUTING.md",
+      "kind": "file",
+      "authority": "canonical",
+      "exists": true,
+      "documentCount": 1,
+      "indexedDocumentCount": 1,
+      "stalenessState": "unknown",
+      "documentPaths": [
+        "CONTRIBUTING.md"
+      ]
+    },
+    {
+      "id": "diagram_context",
+      "path": "AI/context/diagram-context.md",
+      "kind": "file",
+      "authority": "canonical",
+      "exists": false,
+      "documentCount": 0,
+      "indexedDocumentCount": 0,
+      "stalenessState": "unknown",
+      "documentPaths": []
+    },
+    {
+      "id": "docs_agents",
+      "path": "docs/agents",
+      "kind": "directory",
+      "authority": "governed",
+      "exists": true,
+      "documentCount": 18,
+      "indexedDocumentCount": 18,
+      "stalenessState": "unknown",
+      "documentPaths": [
+        "docs/agents/01-instruction-map.md",
+        "docs/agents/02-tooling-policy.md",
+        "docs/agents/03-local-memory.md",
+        "docs/agents/04-validation.md",
+        "docs/agents/05-contradictions-and-cleanup.md",
+        "docs/agents/06-security-and-governance.md",
+        "docs/agents/07a-role-governance.md",
+        "docs/agents/07b-agent-governance.md",
+        "docs/agents/08-release-and-change-control.md",
+        "docs/agents/09-audit-trail-policy.md",
+        "docs/agents/10-agent-testing-gates.md",
+        "docs/agents/11-ai-review-governance.md",
+        "docs/agents/12-ci-required-checks.md",
+        "docs/agents/13-workflow-and-safety-guidance.md",
+        "docs/agents/14-path-ownership-boundaries.md",
+        "docs/agents/5-minute-success-path.md",
+        "docs/agents/README.md",
+        "docs/agents/tooling.md"
+      ]
+    },
+    {
+      "id": "docs_adr",
+      "path": "docs/adr",
+      "kind": "directory",
+      "authority": "governed",
+      "exists": false,
+      "documentCount": 0,
+      "indexedDocumentCount": 0,
+      "stalenessState": "unknown",
+      "documentPaths": []
+    },
+    {
+      "id": "docs_specs",
+      "path": "docs/specs",
+      "kind": "directory",
+      "authority": "governed",
+      "exists": true,
+      "documentCount": 6,
+      "indexedDocumentCount": 6,
+      "stalenessState": "fresh",
+      "documentPaths": [
+        "docs/specs/2026-03-09-feat-skills-knowledge-graph-visual-interface-spec.md",
+        "docs/specs/2026-03-10-feat-learning-preserving-skill-design-spec.md",
+        "docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md",
+        "docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md",
+        "docs/specs/2026-04-09-feat-skill-plugin-selection-gold-standard-spec.md",
+        "docs/specs/2026-04-13-feat-llm-wiki-runtime-pivot-spec.md"
+      ]
+    },
+    {
+      "id": "docs_brainstorms",
+      "path": "docs/brainstorms",
+      "kind": "directory",
+      "authority": "supporting",
+      "exists": true,
+      "documentCount": 10,
+      "indexedDocumentCount": 10,
+      "stalenessState": "fresh",
+      "documentPaths": [
+        "docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md",
+        "docs/brainstorms/2026-02-23-skill-graph-recursive-loop-parity-pass-brainstorm.md",
+        "docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md",
+        "docs/brainstorms/2026-03-04-skill-router-brainstorm.md",
+        "docs/brainstorms/2026-03-10-learning-preserving-skills-brainstorm.md",
+        "docs/brainstorms/2026-03-24-skill-lifecycle-scaffold-memory-program-brainstorm.md",
+        "docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md",
+        "docs/brainstorms/2026-04-06-skill-authoring-family-certification-requirements.md",
+        "docs/brainstorms/2026-04-09-skill-plugin-selection-gold-standard-requirements.md",
+        "docs/brainstorms/2026-04-13-llm-wiki-runtime-pivot-requirements.md"
+      ]
+    },
+    {
+      "id": "docs_plans",
+      "path": "docs/plans",
+      "kind": "directory",
+      "authority": "supporting",
+      "exists": true,
+      "documentCount": 19,
+      "indexedDocumentCount": 19,
+      "stalenessState": "fresh",
+      "documentPaths": [
+        "docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md",
+        "docs/plans/2026-02-23-feat-recursive-skill-graph-parity-pass-plan.md",
+        "docs/plans/2026-02-24-feat-skill-graph-live-auto-learning-plan.md",
+        "docs/plans/2026-02-26-feat-all-skills-graph-migration-onboarding-plan.md",
+        "docs/plans/2026-02-26-feat-arscontexta-graph-visual-communities-evolution-plan.md",
+        "docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md",
+        "docs/plans/2026-03-04-feat-intent-first-skill-router-scorecard-plan.md",
+        "docs/plans/2026-03-09-feat-skills-knowledge-graph-visual-interface-plan.md",
+        "docs/plans/2026-03-10-feat-learning-preserving-skill-design-plan.md",
+        "docs/plans/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md",
+        "docs/plans/2026-03-29-fix-outstanding-onboarding-readiness-closeout-plan.md",
+        "docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md",
+        "docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md",
+        "docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-plan.md",
+        "docs/plans/2026-04-06-ask-cli-implementation-plan.md",
+        "docs/plans/2026-04-06-feat-skill-authoring-family-certification-plan.md",
+        "docs/plans/2026-04-09-feat-skill-plugin-selection-gold-standard-upgrade-plan.md",
+        "docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md",
+        "docs/plans/2026-04-14-feat-llm-wiki-runtime-pivot-plan.md"
+      ]
+    },
+    {
+      "id": "docs_solutions",
+      "path": "docs/solutions",
+      "kind": "directory",
+      "authority": "supporting",
+      "exists": true,
+      "documentCount": 7,
+      "indexedDocumentCount": 7,
+      "stalenessState": "unknown",
+      "documentPaths": [
+        "docs/solutions/2026-03-24-lifecycle-metadata-representation-decision.md",
+        "docs/solutions/2026-03-24-skill-scaffold-false-green-prevention.md",
+        "docs/solutions/2026-04-04-codex-live-smoke-closeout-stabilization.md",
+        "docs/solutions/2026-04-10-pr104-context7-merge-conflict-resolution.md",
+        "docs/solutions/2026-04-12-skill-picker-duplicate-local-marketplace-cache-separation.md",
+        "docs/solutions/README.md",
+        "docs/solutions/solution-entry-template.md"
+      ]
+    }
+  ]
+}

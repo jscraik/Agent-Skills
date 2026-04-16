@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019d22b4-7b5a-7170-98d5-10428a970f22"}
+{"type":"turn.started"}
+{"type":"error","message":"{\n  \"type\": \"error\",\n  \"error\": {\n    \"type\": \"invalid_request_error\",\n    \"code\": \"unsupported_parameter\",\n    \"message\": \"Unsupported parameter: 'reasoning.summary' is not supported with the 'gpt-5.3-codex-spark' model.\",\n    \"param\": \"reasoning.summary\"\n  },\n  \"status\": 400\n}"}
+{"type":"turn.failed","error":{"message":"{\n  \"type\": \"error\",\n  \"error\": {\n    \"type\": \"invalid_request_error\",\n    \"code\": \"unsupported_parameter\",\n    \"message\": \"Unsupported parameter: 'reasoning.summary' is not supported with the 'gpt-5.3-codex-spark' model.\",\n    \"param\": \"reasoning.summary\"\n  },\n  \"status\": 400\n}"}}

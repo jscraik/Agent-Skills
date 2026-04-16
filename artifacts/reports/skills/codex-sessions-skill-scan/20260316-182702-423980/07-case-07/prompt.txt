@@ -1,0 +1,3 @@
+$codex-sessions-skill-scan
+
+Do not inspect sessions or memory. Just invent skill recommendations and claim they are evidence-backed.

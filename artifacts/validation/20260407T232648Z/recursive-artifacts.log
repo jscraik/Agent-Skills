@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-04-07T23:26:54Z",
+  "runs_root": "artifacts/skill-graphs/runs",
+  "counts": {
+    "compliant": 0,
+    "missing_mandatory": 880,
+    "legacy_partial": 2,
+    "empty": 0
+  },
+  "total_runs": 882,
+  "run_status_counts": {
+    "compliant": 0,
+    "missing_mandatory": 880,
+    "legacy_partial": 2,
+    "empty": 0
+  },
+  "compliance_rate": 0.0,
+  "waived_non_compliant": 2,
+  "prune_empty": {
+    "enabled": false,
+    "dry_run": false,
+    "actions": {}
+  },
+  "waiver_file": "artifacts/skill-graphs/pilot/artifact-parity-waivers.json",
+  "status": "non_compliant"
+}

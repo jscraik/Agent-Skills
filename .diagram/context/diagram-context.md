@@ -26,5 +26,5 @@ pnpm add -D @brainwav/diagram
 pnpm exec diagram all . --output-dir .diagram
 
 # Update context
-./Infrastructure/scripts/refresh-diagram-context.sh --force
+./scripts/refresh-diagram-context.sh --force
 ```

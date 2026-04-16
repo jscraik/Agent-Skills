@@ -32,7 +32,12 @@ while (($# > 0)); do
 done
 
 if [ -z "$repo_root" ]; then
-  repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+  script_dir_default="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  if repo_root="$(git -C "$script_dir_default/../.." rev-parse --show-toplevel 2>/dev/null)"; then
+    :
+  else
+    repo_root="$(cd -P "$script_dir_default/../.." && pwd -P)"
+  fi
 fi
 cd "$repo_root"
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"

@@ -4,6 +4,9 @@ from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 
 
+SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts"
+
+
 def _as_text(value, encoding="utf-8") -> str:
     """Convert subprocess output to text, handling bytes/None safely.
 
@@ -23,7 +26,7 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke") -> CallResult:
     result = CallResult()
 
     cmd = [
-        sys.executable, "Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py",
+        sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
         path,
         "--eval-mode", mode
     ]
@@ -55,7 +58,7 @@ def benchmark_portfolio(repo_root: Path) -> CallResult:
     """Runs the full repository skill benchmark suite."""
     result = CallResult()
 
-    cmd = [sys.executable, "Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py"]
+    cmd = [sys.executable, f"{SKILL_BUILDER_SCRIPTS}/benchmark_skill_portfolio.py"]
     try:
         process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
         result.data["raw_output"] = process.stdout
@@ -82,7 +85,7 @@ def dashboard_report(repo_root: Path) -> CallResult:
     """Generates the skill evaluation dashboard."""
     result = CallResult()
 
-    cmd = [sys.executable, "Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py"]
+    cmd = [sys.executable, f"{SKILL_BUILDER_SCRIPTS}/build_skill_eval_dashboard.py"]
     try:
         process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
         result.data["raw_output"] = process.stdout

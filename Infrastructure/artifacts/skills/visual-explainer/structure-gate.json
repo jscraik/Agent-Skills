@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:21Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/visual-explainer/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/visual-explainer/SKILL.md",
+  "name": "visual-explainer",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-large.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/css-patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/libraries.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OBFUSCATION",
+      "message": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks.",
+      "evidence": "references/slide-patterns.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/libraries.md"
+    }
+  ]
+}

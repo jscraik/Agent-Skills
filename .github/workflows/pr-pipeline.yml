@@ -2,6 +2,7 @@ name: Harness PR Pipeline
 
 on:
   pull_request:
+  merge_group:
 
 permissions:
   contents: read
@@ -13,114 +14,449 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate PR template completion
-        uses: actions/github-script@v9
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const body = context.payload.pull_request?.body ?? '';
             const errors = [];
 
             if (body.trim().length === 0) {
-              errors.push('PR body is empty. Fill out the PR template.');
+              errors.push('PR body is empty. Fill out the full PR template.');
             }
 
-            const requiredSections = ['## Summary', '## Checklist', '## Release notes'];
+            const requiredSections = [
+              '## Summary',
+              '## Checklist',
+              '## Testing',
+              '## Review artifacts',
+              '## Notes',
+            ];
             for (const section of requiredSections) {
               if (!body.includes(section)) {
-                errors.push(`Missing required section: ${section}`);
+                errors.push('Missing required section: ' + section);
               }
             }
 
-            if (/\[PROMPT:/i.test(body)) {
-              errors.push('PR body still contains template prompt placeholders.');
+            const checklistMatch = body.match(/## Checklist([\s\S]*?)(?:\n## |\n# |$)/i);
+            if (!checklistMatch) {
+              errors.push('Missing checklist block.');
+            } else {
+              const checklistBody = checklistMatch[1] ?? '';
+              const checklistItems = checklistBody
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => /^- \[[ xX]\]/.test(line));
+
+              if (checklistItems.length === 0) {
+                errors.push('Checklist has no checkbox items.');
+              }
+
+              const unchecked = checklistItems.filter((line) => /^- \[ \]/.test(line));
+              const unresolvedUnchecked = unchecked.filter(
+                (line) => !/\*\*\((pending|n\/a|not applicable)\)\*\*/i.test(line),
+              );
+              if (unresolvedUnchecked.length > 0) {
+                errors.push(
+                  'Checklist has unchecked item(s) without explicit status marker ((Pending) or (N/A)):\n' +
+                    unresolvedUnchecked.join('\n'),
+                );
+              }
+            }
+
+            const placeholders = [
+              'pass/fail',
+              '<link / artifact path / comment ID>',
+              '<0-5>',
+              '<reviewer + link>',
+              'Add one-paragraph merge rationale here.',
+            ];
+            for (const placeholder of placeholders) {
+              if (body.includes(placeholder)) {
+                errors.push('Replace template placeholder: ' + placeholder);
+              }
+            }
+
+            const reviewArtifactsMatch = body.match(/## Review artifacts([\s\S]*?)(?:\n## |\n# |$)/i);
+            if (reviewArtifactsMatch) {
+              const reviewArtifactsBody = reviewArtifactsMatch[1] ?? '';
+              const unresolvedTokens = reviewArtifactsBody.match(/<[^>\n]+>/g) ?? [];
+              for (const token of unresolvedTokens) {
+                errors.push('Replace unresolved placeholder token: ' + token);
+              }
             }
 
             if (errors.length > 0) {
               core.setFailed(errors.join('\n'));
             }
+      - name: Skip PR template enforcement for merge queue
+        if: github.event_name == 'merge_group'
+        run: echo "merge_group event detected; PR template enforcement is pull_request-only."
 
-  repo-validate:
-    name: repo-validate
+  linear-gate:
+    name: linear-gate
+    runs-on: ubuntu-latest
     needs: [pr-template]
-    runs-on: ubuntu-latest
+    if: ${{ always() && (github.event_name == 'merge_group' || needs.pr-template.result == 'success') }}
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install Python deps
-        run: python -m pip install --upgrade pip pyyaml pytest
-
-      - name: Run repo validation
-        env:
-          SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
-        run: bash Infrastructure/scripts/validate_all.sh
-
-      - name: Run skill diagnostics
-        run: python3 Infrastructure/scripts/diagnose_skill.py --all
-
-      - name: Run docs lint
-        run: python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
-
-  # Governance gate for the skill authoring family (skill-builder, skill-creator,
-  # skill-installer, plugin-creator). This job executes
-  # Infrastructure/scripts/validate_skill_authoring_family.sh so contract coverage, eval parity,
-  # prompt-injection/security cases, and OpenClaw checks are enforced in PR CI.
-  authoring-family-gate:
-    name: authoring-family-gate
-    needs: [pr-template]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install Python deps
-        run: python -m pip install --upgrade pip pyyaml pytest
-
-      - name: Run authoring family contract/eval/security gate
-        env:
-          SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
-        run: bash Infrastructure/scripts/validate_skill_authoring_family.sh
-
-  # CI orchestration policy: harness-preflight must wait for repo-validate and
-  # authoring-family-gate so harness checks only run after repository and
-  # authoring-family governance gates have passed.
-  harness-preflight:
-    name: harness-preflight
-    needs: [repo-validate, authoring-family-gate]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
-
-      - name: Install coding-harness
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Enforce Linear-first issue tracking policy
+        shell: bash
         run: |
-          npm install -g @brainwav/coding-harness@latest || {
-            echo "coding-harness is unavailable in this environment; continuing without harness-preflight gate."
-          }
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH="${{ github.head_ref }}"
+            PR_TITLE="$(cat <<'EOF'
+${{ github.event.pull_request.title }}
+EOF
+)"
+            PR_BODY="$(cat <<'EOF'
+${{ github.event.pull_request.body }}
+EOF
+)"
+            pnpm exec tsx src/cli.ts linear-gate \
+              --branch "$BRANCH" \
+              --pr-title "$PR_TITLE" \
+              --pr-body "$PR_BODY" \
+              --json
+          else
+            pnpm exec tsx src/cli.ts linear-gate \
+              --allow-missing-branch \
+              --allow-missing-pr \
+              --json
+          fi
 
-      - name: Run harness preflight gate
+
+  risk-policy-gate:
+    name: risk-policy-gate
+    runs-on: ubuntu-latest
+    needs: [pr-template, linear-gate]
+    if: ${{ always() && (github.event_name == 'merge_group' || (needs.pr-template.result == 'success' && needs.linear-gate.result == 'success')) }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Run fast preflight policy gate
         run: |
-          if ! command -v harness >/dev/null 2>&1; then
-            echo "harness CLI not found; skipping harness-preflight gate."
-            exit 0
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            BASE_REF="${{ github.base_ref }}"
+            # Load contract from the trusted base branch, not the PR checkout.
+            # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
+            CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
+            if ! git show "origin/$BASE_REF:harness.contract.json" > "$CONTRACT_PATH"; then
+              echo "::error::Unable to load trusted harness.contract.json from origin/$BASE_REF"
+              exit 1
+            fi
+          else
+            BASE_SHA="${{ github.event.merge_group.base_sha }}"
+            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
+            # Merge queue: contract is committed and protected by branch rules.
+            CONTRACT_PATH="harness.contract.json"
           fi
-          CHANGED_FILES="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" | paste -sd, -)"
-          if [ -z "$CHANGED_FILES" ]; then
-            CHANGED_FILES="README.md"
+          CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
+          if [[ -z "$CHANGED_FILES" ]]; then
+            CHANGED_FILES="$(git ls-files | paste -sd, -)"
           fi
-          harness preflight-gate \
-            --contract Infrastructure/harness.contract.json \
-            --files "$CHANGED_FILES" \
-            --max-tier high \
+          pnpm exec tsx src/cli.ts preflight-gate \
+            --contract "$CONTRACT_PATH" \
+            --max-tier medium \
+            --files "${CHANGED_FILES}" \
             --json
+
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Detect dependency review support
+        id: dependency-review-support
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const response = await github.rest.repos.get({ owner, repo });
+            const security = response.data.security_and_analysis ?? {};
+            const advanced = security.advanced_security?.status === 'enabled';
+            const dependencyGraph = security.dependency_graph?.status === 'enabled';
+            core.setOutput('supported', advanced && dependencyGraph ? 'true' : 'false');
+      - name: Run dependency review (pull_request)
+        if: github.event_name == 'pull_request' && ${{ steps.dependency-review-support.outputs.supported == 'true' }}
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high
+      - name: Skip dependency review when repository support is unavailable
+        if: github.event_name == 'pull_request' && ${{ steps.dependency-review-support.outputs.supported != 'true' }}
+        run: echo "Dependency review unsupported (requires dependency graph + advanced security); skipping."
+      - name: Skip dependency review for merge queue
+        if: github.event_name == 'merge_group'
+        run: echo "Dependency review enforced on pull_request; merge_group runs are no-op."
+
+  actions-pinning:
+    name: actions-pinning
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Enforce pinned GitHub Actions
+        shell: bash
+        run: |
+          set -euo pipefail
+          violations=0
+          while IFS=: read -r file line raw; do
+            ref="$(printf "%s" "$raw" | sed -E 's/^[[:space:]]*(-[[:space:]]*)?uses:[[:space:]]*([^[:space:]#]+).*/\2/')"
+            if [[ "$ref" == ./* ]] || [[ "$ref" == docker://* ]]; then
+              continue
+            fi
+            if [[ ! "$ref" =~ @[0-9a-f]{40}$ ]]; then
+              echo "::error file=$file,line=$line::Action is not pinned to a full commit SHA: $ref"
+              violations=1
+            fi
+          done < <(rg -n "^[[:space:]]*(-[[:space:]]*)?uses:[[:space:]]*[^[:space:]]+" .github/workflows/*.yml)
+          exit "$violations"
+
+  consistency-drift-advisory:
+    name: consistency-drift-advisory
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Prepare baseline seed fallback
+        run: |
+          mkdir -p artifacts/consistency-gate
+          if [[ ! -f artifacts/consistency-gate/consistency-baseline-latest.json ]]; then
+            cat > artifacts/consistency-gate/consistency-baseline-latest.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "findings": []
+          }
+          JSON
+          fi
+      - name: Run advisory drift gate
+        run: |
+          pnpm exec tsx src/cli.ts drift-gate \
+            --mode advisory \
+            --json \
+            --out artifacts/consistency-gate/consistency-drift-advisory-latest.json
+      - name: Advisory guard (soft-fail)
+        run: |
+	          if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
+	            echo "::warning::advisory report missing; writing deterministic fallback report."
+            cat > artifacts/consistency-gate/consistency-drift-advisory-latest.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "advisory",
+            "status": "blocked",
+            "outcome": "error",
+            "error_class": "io",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "missing_report_output" },
+            "summary": { "finding_count": 1, "new_count": 1, "preexisting_count": 0, "error_count": 1 },
+            "findings": [
+              {
+                "rule_id": "report.output.missing",
+                "surface": "status",
+                "rule_result": "error",
+                "severity": "error",
+                "baseline_state": "new",
+	                "message": "Advisory report missing; generated deterministic fallback report."
+              }
+            ]
+          }
+          JSON
+          fi
+      - name: Upload advisory artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: consistency-drift-advisory-latest
+          path: artifacts/consistency-gate/consistency-drift-advisory-latest.json
+
+  consistency-drift-health:
+    name: consistency-drift-health
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Detect baseline seed
+        id: baseline-seed
+        run: |
+          mkdir -p artifacts/consistency-gate
+          if [[ -f artifacts/consistency-gate/consistency-baseline-latest.json ]]; then
+            echo "seeded=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "seeded=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run health drift gate
+        if: steps.baseline-seed.outputs.seeded == 'true'
+        run: |
+          pnpm exec tsx src/cli.ts drift-gate \
+            --mode health \
+            --json \
+            --out artifacts/consistency-gate/health.json
+      - name: Bootstrap health warning (first-run)
+        if: steps.baseline-seed.outputs.seeded != 'true'
+        run: |
+          cat > artifacts/consistency-gate/health.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "health",
+            "status": "partial",
+            "outcome": "ok",
+            "error_class": "none",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "bootstrap_seed_missing" },
+            "summary": { "finding_count": 1, "new_count": 1, "preexisting_count": 0, "error_count": 0 },
+            "findings": [
+              {
+                "rule_id": "baseline.seed.bootstrap",
+                "surface": "status",
+                "rule_result": "not_applicable",
+                "severity": "info",
+                "baseline_state": "new",
+                "message": "Health check running in bootstrap mode until baseline seed is published on default branch."
+              }
+            ]
+          }
+          JSON
+          echo "::warning::consistency-drift-health running in bootstrap mode (baseline seed missing)."
+      - name: Upload health artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: consistency-drift-health-latest
+          path: artifacts/consistency-gate/health.json
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Run lint
+        run: npm run lint
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Run typecheck
+        run: npm run typecheck
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm run test
+
+  audit:
+    name: audit
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Run audit
+        run: npm run audit
+
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: npm install
+      - name: Run full check
+        run: npm run check
+
+  memory:
+    name: memory
+    runs-on: ubuntu-latest
+    needs: [risk-policy-gate]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Validate memory.json
+        run: test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null

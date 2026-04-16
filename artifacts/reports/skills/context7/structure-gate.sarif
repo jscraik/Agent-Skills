@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "FM_DESC_WORKFLOWY",
+              "name": "FM_DESC_WORKFLOWY",
+              "shortDescription": {
+                "text": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "REPO_ASSETS_UNREFERENCED",
+              "name": "REPO_ASSETS_UNREFERENCED",
+              "shortDescription": {
+                "text": "assets/ exists but is not referenced in SKILL.md."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SAFE_NETWORK_ALLOWLIST",
+              "name": "SAFE_NETWORK_ALLOWLIST",
+              "shortDescription": {
+                "text": "Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SAFE_NETWORK_URL_ALLOWLIST",
+              "name": "SAFE_NETWORK_URL_ALLOWLIST",
+              "shortDescription": {
+                "text": "Hard-coded URL(s) detected in scripts; document explicit allowed domains/hosts in SKILL.md."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_NEGATIVE_MISSING",
+              "name": "SEC_EVALS_NEGATIVE_MISSING",
+              "shortDescription": {
+                "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PRESSURE_MISSING",
+              "name": "SEC_EVALS_PRESSURE_MISSING",
+              "shortDescription": {
+                "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "FM_DESC_WORKFLOWY",
+          "level": "warning",
+          "message": {
+            "text": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Retrieve current third-party library documentation through Context7. Use when the user needs up-to-date API details, version-specific behavior, or dependency troubleshooting for external libraries."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "REPO_ASSETS_UNREFERENCED",
+          "level": "warning",
+          "message": {
+            "text": "assets/ exists but is not referenced in SKILL.md."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SAFE_NETWORK_ALLOWLIST",
+          "level": "warning",
+          "message": {
+            "text": "Network usage detected in scripts without an explicit domain/host allowlist policy in SKILL.md. | scripts/context7.py"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SAFE_NETWORK_URL_ALLOWLIST",
+          "level": "warning",
+          "message": {
+            "text": "Hard-coded URL(s) detected in scripts; document explicit allowed domains/hosts in SKILL.md. | scripts/context7.py"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_NEGATIVE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PRESSURE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/context7/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:24Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/utilities/beautiful-mermaid/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/beautiful-mermaid/SKILL.md",
+  "name": "beautiful-mermaid",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_UNTRUSTED_TO_COMMAND",
+      "message": "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening.",
+      "evidence": "scripts/render.ts"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_NEGATIVE_MISSING",
+      "message": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PRESSURE_MISSING",
+      "message": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "WF_FAIL_FAST_MISSING",
+      "message": "Validation section should specify fail-fast behavior (stop at first failed gate).",
+      "evidence": ""
+    }
+  ]
+}

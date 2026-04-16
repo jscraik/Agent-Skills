@@ -2,10 +2,10 @@
 """Deterministic benchmark checks for the skill-authoring family.
 
 This script enforces equivalent contract/eval/security baseline requirements for:
-- Plugins/skill-factory/skills/skill-builder
-- Plugins/skill-factory/skills/skill-creator
-- Plugins/skill-factory/skills/skill-installer
-- Plugins/plugin-factory/skills/plugin-creator
+- Plugins/skill-factory/skills/code_quality_review/skill-builder
+- Plugins/skill-factory/skills/scaffolding_templates/skill-creator
+- Plugins/skill-factory/skills/infrastructure_ops/skill-installer
+- Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator
 
 It is designed for CI and local gates where live LLM eval execution is not required.
 """
@@ -66,14 +66,24 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Severity ranking for baseline regression comparison (higher = worse)
 SEVERITY_RANK = {"INFO": 0, "WARN": 1, "FAIL": 2}
-_SCHEMA_DIR = REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder" / "references"
+_SKILL_BUILDER_ROOT_CANDIDATES = (
+    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder",
+    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder",
+    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "skill-builder",
+    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder",
+)
+_SKILL_BUILDER_ROOT = next(
+    (candidate for candidate in _SKILL_BUILDER_ROOT_CANDIDATES if candidate.exists()),
+    _SKILL_BUILDER_ROOT_CANDIDATES[0],
+)
+_SCHEMA_DIR = _SKILL_BUILDER_ROOT / "references"
 _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
-    "Plugins/skill-factory/skills/skill-builder",
-    "Plugins/skill-factory/skills/skill-creator",
-    "Plugins/skill-factory/skills/skill-installer",
-    "Plugins/plugin-factory/skills/plugin-creator",
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
 )
 
 REQUIRED_CONTRACT_KEYS = {
@@ -124,15 +134,7 @@ _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 
 @lru_cache(maxsize=1)
 def _load_scope_skill_resolver():
-    resolver_path = (
-        REPO_ROOT
-        / "plugins"
-        / "skill-factory"
-        / "skills"
-        / "skill-builder"
-        / "scripts"
-        / "skill_graph_inventory.py"
-    )
+    resolver_path = _SKILL_BUILDER_ROOT / "scripts" / "skill_graph_inventory.py"
     if not resolver_path.exists():
         return None
     module_name = "skill_graph_inventory_shared_resolver"

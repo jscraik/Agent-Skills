@@ -25,7 +25,7 @@ from typing import List, Optional
 
 from verify_skill_catalog_freshness import analyze_skill_file, canonical_skill_map, discover_skill_files
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 SKILL_INDEX = REPO_ROOT / "SKILL.md"
 
@@ -62,15 +62,27 @@ def find_skill_dir(skill_name: str) -> Optional[Path]:
         if flat_path.is_dir() and (flat_path / "SKILL.md").exists():
             return flat_path
 
-    # Search category folders
-    for category_dir in REPO_ROOT.iterdir():
-        if not category_dir.is_dir():
-            continue
-        if category_dir.name.startswith(".") or category_dir.name in ("skills", "skills-system", "skills-antigravity", ".agents"):
-            continue
-        skill_path = category_dir / skill_name
-        if skill_path.is_dir() and (skill_path / "SKILL.md").exists():
-            return skill_path
+    # Check .system lane
+    system_path = SKILLS_DIR / ".system" / skill_name
+    if system_path.is_dir() and (system_path / "SKILL.md").exists():
+        return system_path
+
+    # Search topic-cluster directories under Skills/
+    skills_root = REPO_ROOT / "Skills"
+    if skills_root.is_dir():
+        for category_dir in skills_root.iterdir():
+            if not category_dir.is_dir():
+                continue
+            skill_path = category_dir / skill_name
+            if skill_path.is_dir() and (skill_path / "SKILL.md").exists():
+                return skill_path
+
+    # Search plugin directories
+    plugins_root = REPO_ROOT / "Plugins"
+    if plugins_root.is_dir():
+        for plugin_skill_dir in plugins_root.rglob(skill_name):
+            if plugin_skill_dir.is_dir() and (plugin_skill_dir / "SKILL.md").exists():
+                return plugin_skill_dir
 
     return None
 
@@ -339,13 +351,36 @@ def diagnose_all_skills() -> int:
             if item.is_symlink() and (item / "SKILL.md").exists():
                 skill_names.append(item.name)
 
-    # From category directories
-    for category_dir in REPO_ROOT.iterdir():
-        if not category_dir.is_dir():
-            continue
-        if category_dir.name.startswith(".") or category_dir.name in ("skills", "skills-system", "skills-antigravity", "scripts", "artifacts", "docs", "references", "templates"):
-            continue
-        for skill_dir in category_dir.iterdir():
+    # From topic-cluster directories under Skills/
+    skills_root = REPO_ROOT / "Skills"
+    if skills_root.is_dir():
+        for category_dir in skills_root.iterdir():
+            if not category_dir.is_dir():
+                continue
+            for skill_dir in category_dir.iterdir():
+                if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+                    skill_names.append(skill_dir.name)
+
+    # From plugin skills under Plugins/
+    plugins_root = REPO_ROOT / "Plugins"
+    if plugins_root.is_dir():
+        for plugin_dir in plugins_root.iterdir():
+            if not plugin_dir.is_dir():
+                continue
+            plugin_skills = plugin_dir / "skills"
+            if not plugin_skills.is_dir():
+                continue
+            for type_dir in plugin_skills.iterdir():
+                if not type_dir.is_dir():
+                    continue
+                for skill_dir in type_dir.iterdir():
+                    if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+                        skill_names.append(skill_dir.name)
+
+    # From .system lane
+    system_lane = REPO_ROOT / ".agents" / "skills" / ".system"
+    if system_lane.is_dir():
+        for skill_dir in system_lane.iterdir():
             if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
                 skill_names.append(skill_dir.name)
 

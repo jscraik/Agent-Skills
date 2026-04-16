@@ -7,11 +7,11 @@ on:
       - "Infrastructure/artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
       - "Infrastructure/artifacts/skill-graphs/runs/**/run.json"
       - "Infrastructure/artifacts/skill-graphs/lessons/**"
-      - "docs/skill-graphs/governance/recursive-loop-approvers.yaml"
-      - "docs/skill-graphs/governance/recursive-loop-approvers.sig"
+      - "Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+      - "Docs/skill-graphs/governance/recursive-loop-approvers.sig"
       - "Infrastructure/scripts/human_promote_recursive_run.sh"
       - "Infrastructure/scripts/validate_recursive_promotions.sh"
-      - "Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py"
+      - "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_recursive_promotion.py"
       - ".github/workflows/recursive-promotion-gate.yml"
   workflow_dispatch:
 

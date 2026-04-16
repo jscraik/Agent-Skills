@@ -22,16 +22,22 @@ except ImportError:
     HAS_YAML = False
 
 ROOT      = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
-ADJ_YAML  = ROOT / "docs/skill-graphs/adjacency.yaml"
+ADJ_YAML  = ROOT / "Docs/skill-graphs/adjacency.yaml"
 THRESHOLD = int(os.environ.get("DRIFT_THRESHOLD", "0"))
 CANONICAL_PREFIXES = {
+    "Skills/agent-ops/",
+    "Skills/frontend-ui/",
+    "Skills/backend-platform/",
+    "Skills/product-strategy/",
+    "Skills/security-ops/",
+    "Skills/content-publishing/",
+    "Skills/mobile-native/",
     "auth/",
     "backend/",
     "frontend/",
     "github/",
     "interview/",
     "personas/",
-    "Plugins/coderabbit/skills/",
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
@@ -197,7 +203,7 @@ if unknown_targets:
         print(f"  UNKNOWN  {frm} → {to}", file=sys.stderr)
     if len(unknown_targets) > 20:
         print(f"  … and {len(unknown_targets)-20} more", file=sys.stderr)
-    sys.exit(1)
+    total_drift += len(unknown_targets)
 
 if total_drift == 0:
     print("  ✓ adjacency.yaml and SKILL.md See Also are in sync")

@@ -1,0 +1,41 @@
+{
+  "id": "discovery-round-six",
+  "name": "discovery round six",
+  "category": "edge",
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "discovery-heavy",
+  "timeout_sec": 300.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171941-657760/02-discovery-round-six",
+  "runners": {
+    "discovery-smoke": {
+      "runner": "discovery-smoke",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171941-657760/02-discovery-round-six/discovery-smoke",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171941-657760/02-discovery-round-six/discovery-smoke/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171941-657760/02-discovery-round-six/discovery-smoke/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-171941-657760/02-discovery-round-six/discovery-smoke/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+  ]
+}

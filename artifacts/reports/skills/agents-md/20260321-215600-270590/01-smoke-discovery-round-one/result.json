@@ -1,0 +1,74 @@
+{
+  "id": "smoke-discovery-round-one",
+  "name": "smoke-discovery-round-one",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 124,
+      "passed": false,
+      "tier1_failures": [
+        "codex returned non-zero exit code: 124",
+        "contains failed: '## Scope and triggers'",
+        "contains failed: '## Required inputs'",
+        "regex failed: /(?i)(which instruction scope are we changing|what AGENTS scope are we changing|what should this skill help you do)/",
+        "regex failed: /(?i)(why this matters|this matters because|precedence)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex/codex_events.jsonl",
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex/stderr.txt",
+        "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 0,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 0,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "reasoning_tokens": 0,
+            "total_tokens": 0
+          }
+        },
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] codex returned non-zero exit code: 124",
+    "[codex] contains failed: '## Scope and triggers'",
+    "[codex] contains failed: '## Required inputs'",
+    "[codex] regex failed: /(?i)(which instruction scope are we changing|what AGENTS scope are we changing|what should this skill help you do)/",
+    "[codex] regex failed: /(?i)(why this matters|this matters because|precedence)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] JSONL file not found: /Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/agents-md/20260321-215600-270590/01-smoke-discovery-round-one/codex/codex_events.jsonl",
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

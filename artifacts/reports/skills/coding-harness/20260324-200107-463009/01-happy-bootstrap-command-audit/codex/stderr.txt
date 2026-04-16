@@ -1,0 +1,24 @@
+WARNING: proceeding, even though we could not update PATH: Operation not permitted (os error 1)
+2026-03-25T02:01:15.756679Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:15.756827Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:15.838732Z ERROR codex_core::models_manager::manager: failed to renew cache TTL: Operation not permitted (os error 1)
+2026-03-25T02:01:15.980809Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:26.078534Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:29.106883Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:29.106919Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:29.117713Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:29.190031Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:29.190373Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:29.264308Z ERROR codex_core::models_manager::manager: failed to renew cache TTL: Operation not permitted (os error 1)
+2026-03-25T02:01:31.377093Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:31.761913Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:31.761943Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:34.384815Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:34.384950Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:34.403014Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:01:34.482430Z ERROR codex_core::models_manager::manager: failed to renew cache TTL: Operation not permitted (os error 1)
+2026-03-25T02:01:42.861979Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:02:11.044040Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:02:11.044067Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:02:11.119591Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed
+2026-03-25T02:02:11.128555Z ERROR codex_core::codex: failed to record rollout items: failed to queue rollout items: channel closed

@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "upgrade-manifest/v1",
+  "harnessVersion": "0.12.0",
+  "updatedAt": "2026-04-16T17:11:58.380Z",
+  "files": [
+    {
+      "path": ".harness/ci-required-checks.json",
+      "templateHash": "8924b9cb240d0008309df305ddf4a7b718a18db9593ad47a29d76f5c784b35f1",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".harness/ci-provider-transition-status.json",
+      "templateHash": "175eb1aef403b866f9ada202f1edb8ff9fe0bcb1e4f631dfed554d86ab60c1f3",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".npmrc",
+      "templateHash": "cd85f662fa051e06e69ce35d03c78be2250cfa300ee6546022b0e399801a91ea",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".github/workflows/pr-pipeline.yml",
+      "templateHash": "0e0182c267a21ea6b4edc3ff181906ec6b55b6be572f65db1a1b3c3f522479b4",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".github/workflows/secret-scan.yml",
+      "templateHash": "ba46ea051147170accc9d703ca5b04a7e532606af1eefbfeb1a4de4a73f4c1ec",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "templateHash": "2b413bb3fb00d441b2b355c2f8a2d9d1ecbfe133b5679444dd7efcba8589a42c",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "templateHash": "7d22feefe52d3dbf7994a12c4d4d9f9f601426ede75f8bf5a982ab7840081cf6",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/validate-commit-msg.js",
+      "templateHash": "50b2ee451ba9c2367b22595f9d9ad2a6ab409fe6dad226bd17eb23a8ad8eb5ee",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/setup-git-hooks.js",
+      "templateHash": "a3b749f5477a5c23cb725b95d10401aba50b2ac30fe313530c4fa76af2abc6ed",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/check-staged-secrets.sh",
+      "templateHash": "175f482c76d6581f79b5632b044727b6e9168dd2231ccd364e43243b3ca3258c",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/check-doc-style.sh",
+      "templateHash": "2fa6d0f10c368587108b946c776ad7c7cb989c2b6bfd415748ec57a3272d564d",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/check-related-tests.sh",
+      "templateHash": "13951ef9cdaadb9e60aa423f4635f726becf90bc4c22d257f04d753ef5dec305",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/check-semgrep-changed.sh",
+      "templateHash": "eecb35cf6fbfbf8eee90408e286d1fe33b902b1ab29a236975c4a540a5328bd8",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/semgrep-pre-push.yml",
+      "templateHash": "71108f5c58f471e15e4301c947b7f02418bb0622fc38b317e2d0525fe7e6a3b6",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/refresh-diagram-context.sh",
+      "templateHash": "f438b595ebceb0a8f0358fdc6e104d5fa99c69b5425109e1f234011964ee0015",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/check-diagram-freshness.sh",
+      "templateHash": "f5b701254b02fdb97a8470bf3e379fed2a51699d53f76b2c5c30729307736199",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".diagram/.gitkeep",
+      "templateHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".diagram/context/diagram-context.md",
+      "templateHash": "3f89864a16883845e050d87aab0e5b67336a330f5fb4f4b639aacd63e9416e39",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".diagramrc",
+      "templateHash": "3ded0c9cd4ddd3075c2abc9b8b78081b7bf8d9ad1b7bc815d6626fcc62a7193e",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "biome.json",
+      "templateHash": "930d001ad153c2423efa1789906d439966a943fa8e9f0278be3ca66be2506441",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".gitleaks.toml",
+      "templateHash": "c9296124145d858a1ffd8b912858407db3230425071427e81684f0ea6f68b192",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".mise.toml",
+      "templateHash": "c83aa719f33f9644f82a95b6154377a093bc0cc0e2d12a515248d8bb06d9b7ef",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/codex-preflight.sh",
+      "templateHash": "a9c7713481f3072c52d930e7f3f204bbf0ca37e0133542f4e233f395db163a05",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/codex-learn",
+      "templateHash": "6c7d6d6fe3b3a7495398bade94c1515b8440811aea3096a50f7264d6338a4c12",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/codex-enforced",
+      "templateHash": "8bb0415ee446b312d6045e2bcf328c9f07a37cd193466e6a413219f6f88d862d",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/verify-work.sh",
+      "templateHash": "942002c6471cc3a768131a9550500928c87ec53aa672d82d9354300bf221c97d",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/prepare-worktree.sh",
+      "templateHash": "ccbfee0b37d65c43e4f0e991505babd5c865e5e7ccdb916d5afc381e7472e143",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/harness-cli.sh",
+      "templateHash": "b976bdf94ce8da9c13597615762b64e45eb73baf5cb145d89f378bc50207855d",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "scripts/check-environment.sh",
+      "templateHash": "320ccffff728e6650323574c8c00f03dabd314979f885a9a0db04e8af831aa3e",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".codex/environments/environment.toml",
+      "templateHash": "360bad5b63c77b92dc0305b5ed3fcd8b4a7615f54a03fd1ca0adb7b7a860cda5",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "templateHash": "35a459cac6de4ccfeb678a35fb571fa127d7a8f55f273e9fa654a0a07af15386",
+      "version": "0.12.0",
+      "customized": false
+    },
+    {
+      "path": "Makefile",
+      "templateHash": "537cd83af749a4290222ddab2ee27684f7ecace72a49bce5c29b6de436039daf",
+      "version": "0.12.0",
+      "customized": false
+    }
+  ]
+}

@@ -305,7 +305,7 @@ def main() -> int:
         int: Process exit code; `0` on success.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[1]
+    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[2]
     if not repo_root.is_absolute():
         repo_root = (Path.cwd() / repo_root).resolve()
 

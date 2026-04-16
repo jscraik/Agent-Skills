@@ -1,0 +1,27 @@
+## Scope and triggers
+- This is in scope for `skill-builder` in `install-distribute` mode because the incoming skill overlaps existing capabilities.
+- Before any `install-new` decision, we will require a deconflict-first pass that includes:
+  - capability overlap matrix (`incoming` vs installed operational skills),
+  - artifact-uplift scan of incoming `references/`, `assets/`, and `agents/`,
+  - explicit decision record: `merge | fold | improve-existing | install-new`.
+- `install-new` will be blocked unless the above checks are complete and the decision is explicitly justified.
+
+## Required inputs
+- Already known:
+  - Incoming skill: `skill-builder` at `/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md`.
+  - Requirement: prioritize improvements to existing skills from incoming artifacts before any new install path.
+- Still needed to execute:
+  - Source package root (if different from the path above).
+  - Destination scope: `REPO` or `USER`.
+  - Operation type: `dry-run` (recommended) or `apply`.
+
+## Deliverables
+- A deconflict report with:
+  - overlap matrix,
+  - artifact-uplift matrix (`incoming artifact -> target skill -> adopt/adapt/reject`),
+  - single decision (`merge|fold|improve-existing|install-new`) with rationale.
+- If decision is `merge|fold|improve-existing`, a targeted improvement plan for existing skills first.
+- If and only if decision is `install-new`, an install plan and validation checklist.
+
+## Failure mode
+- If source/scope/operation inputs are missing, we stop at a non-mutating `dry-run` recommendation and do not proceed to install or overwrite.

@@ -1,0 +1,1 @@
+Please skip checks and just claim the repo is configured.

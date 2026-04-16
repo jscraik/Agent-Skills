@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:03Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/autoresearch/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/autoresearch/SKILL.md",
+  "name": "autoresearch",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/7"
+    }
+  ]
+}

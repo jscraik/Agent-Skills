@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:09Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/resolve-pr-parallel/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/resolve-pr-parallel/SKILL.md",
+  "name": "resolve-pr-parallel",
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
+  "findings": [
+    {
+      "level": "FAIL",
+      "code": "SEC_ANTIPATTERNS_MISSING",
+      "message": "Missing required section: antipatterns (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_PHILOSOPHY_MISSING",
+      "message": "Missing required section: philosophy (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-large.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_LEAKY",
+      "message": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior.",
+      "evidence": "leaky=6/8"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=1/8"
+    }
+  ]
+}

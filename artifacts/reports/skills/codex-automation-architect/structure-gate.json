@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:25Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/utilities/codex-automation-architect/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/utilities/codex-automation-architect/SKILL.md",
+  "name": "codex-automation-architect",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "SKILL.md"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/6"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_SCOPE_BROAD",
+      "message": "Skill/package scope may be too broad for a first pass. Add explicit guidance like 'start with 2-3 focused surfaces' or 'keep scope tight'.",
+      "evidence": "surfaces=5"
+    }
+  ]
+}

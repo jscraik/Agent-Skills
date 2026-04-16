@@ -33,7 +33,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         Verify that _canonical_skill_rel resolves a symlinked skill alias to the canonical repository-relative skill path.
         
-        Creates a temporary repository layout with a real skill at Plugins/skill-factory/skills/skill-builder and a symlink alias at Skills/skill-builder, patches REPO_ROOT to the temp root, and asserts the canonicalised result equals Plugins/skill-factory/skills/skill-builder.
+        Creates a temporary repository layout with a real skill at Plugins/skill-factory/skills/code_quality_review/skill-builder and a symlink alias at Skills/skill-builder, patches REPO_ROOT to the temp root, and asserts the canonicalised result equals Plugins/skill-factory/skills/code_quality_review/skill-builder.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -41,19 +41,19 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             plugin_skill.mkdir(parents=True, exist_ok=True)
             alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
-            (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/skill-builder")
+            (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/code_quality_review/skill-builder")
 
             with mock.patch.object(self.module, "REPO_ROOT", root):
                 canonical = self.module._canonical_skill_rel("Skills/skill-builder")
 
-            self.assertEqual(canonical, "Plugins/skill-factory/skills/skill-builder")
+            self.assertEqual(canonical, "Plugins/skill-factory/skills/code_quality_review/skill-builder")
 
     def test_dedupe_requested_skills_uses_canonical_target(self) -> None:
         """
         Verifies deduplication prefers a symlink alias path over its canonical target.
         
         Creates a temporary repository where `Skills/skill-builder` is a symlink to
-        `Plugins/skill-factory/skills/skill-builder` and asserts that passing both the
+        `Plugins/skill-factory/skills/code_quality_review/skill-builder` and asserts that passing both the
         alias and the canonical path to `_dedupe_requested_skills` yields only the
         alias entry, protecting against duplicate validations of the same skill.
         """
@@ -63,11 +63,11 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             plugin_skill.mkdir(parents=True, exist_ok=True)
             alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
-            (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/skill-builder")
+            (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/code_quality_review/skill-builder")
 
             with mock.patch.object(self.module, "REPO_ROOT", root):
                 deduped = self.module._dedupe_requested_skills(
-                    ("Skills/skill-builder", "Plugins/skill-factory/skills/skill-builder")
+                    ("Skills/skill-builder", "Plugins/skill-factory/skills/code_quality_review/skill-builder")
                 )
 
             self.assertEqual(deduped, ("Skills/skill-builder",))
@@ -80,7 +80,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            plugin_skill_rel = "Plugins/skill-factory/skills/skill-builder"
+            plugin_skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
             plugin_skill = root / plugin_skill_rel
             refs = plugin_skill / "references"
             refs.mkdir(parents=True, exist_ok=True)
@@ -89,7 +89,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
                 """{
   "schema_version": "1.0",
   "profile_id": "utilities-skill-builder",
-  "scope_skill": "Plugins/skill-factory/skills/skill-builder",
+  "scope_skill": "Plugins/skill-factory/skills/code_quality_review/skill-builder",
   "scope_profile": "utilities",
   "rubric_version": "2026-04-08",
   "evaluator_version": "v1",
@@ -105,7 +105,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
 
             alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
-            (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/skill-builder")
+            (alias_parent / "skill-builder").symlink_to("../Plugins/skill-factory/skills/code_quality_review/skill-builder")
 
             with (
                 mock.patch.object(self.module, "REPO_ROOT", root),
@@ -120,9 +120,9 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
 
     def test_canonical_skill_rel_resolves_skillify_symlink_alias(self) -> None:
         """
-        Verifies that a 'skillify' symlink under utilities is resolved to the canonical Plugins/skill-factory/skills/skillify path.
+        Verifies that a 'skillify' symlink under utilities is resolved to the canonical Plugins/skill-factory/skills/scaffolding_templates/skillify path.
         
-        Creates a temporary repository layout where Skills/skillify is a symlink to Plugins/skill-factory/skills/skillify, patches the module's REPO_ROOT to that repository, and asserts that _canonical_skill_rel("Skills/skillify") returns "Plugins/skill-factory/skills/skillify".
+        Creates a temporary repository layout where Skills/skillify is a symlink to Plugins/skill-factory/skills/scaffolding_templates/skillify, patches the module's REPO_ROOT to that repository, and asserts that _canonical_skill_rel("Skills/skillify") returns "Plugins/skill-factory/skills/scaffolding_templates/skillify".
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -130,18 +130,18 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             plugin_skill.mkdir(parents=True, exist_ok=True)
             alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
-            (alias_parent / "skillify").symlink_to("../Plugins/skill-factory/skills/skillify")
+            (alias_parent / "skillify").symlink_to("../Plugins/skill-factory/skills/scaffolding_templates/skillify")
 
             with mock.patch.object(self.module, "REPO_ROOT", root):
                 canonical = self.module._canonical_skill_rel("Skills/skillify")
 
-            self.assertEqual(canonical, "Plugins/skill-factory/skills/skillify")
+            self.assertEqual(canonical, "Plugins/skill-factory/skills/scaffolding_templates/skillify")
 
     def test_dedupe_requested_skills_uses_skillify_canonical_target(self) -> None:
         """
         Verifies deduplication prefers the aliased invocation when the canonical target is the `skillify` skill.
         
-        Creates a temporary repository where `Skills/skillify` is a symlink to `Plugins/skill-factory/skills/skillify`, calls `_dedupe_requested_skills` with both paths, and asserts only the alias (`Skills/skillify`) is retained.
+        Creates a temporary repository where `Skills/skillify` is a symlink to `Plugins/skill-factory/skills/scaffolding_templates/skillify`, calls `_dedupe_requested_skills` with both paths, and asserts only the alias (`Skills/skillify`) is retained.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -149,11 +149,11 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             plugin_skill.mkdir(parents=True, exist_ok=True)
             alias_parent = root / "Skills"
             alias_parent.mkdir(parents=True, exist_ok=True)
-            (alias_parent / "skillify").symlink_to("../Plugins/skill-factory/skills/skillify")
+            (alias_parent / "skillify").symlink_to("../Plugins/skill-factory/skills/scaffolding_templates/skillify")
 
             with mock.patch.object(self.module, "REPO_ROOT", root):
                 deduped = self.module._dedupe_requested_skills(
-                    ("Skills/skillify", "Plugins/skill-factory/skills/skillify")
+                    ("Skills/skillify", "Plugins/skill-factory/skills/scaffolding_templates/skillify")
                 )
 
             self.assertEqual(deduped, ("Skills/skillify",))
@@ -168,7 +168,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_rel = "plugins/skill-factory/skills/skill-builder"
+            skill_rel = "plugins/skill-factory/skills/code_quality_review/skill-builder"
             skill_dir = root / skill_rel
             refs = skill_dir / "references"
             refs.mkdir(parents=True, exist_ok=True)
@@ -176,8 +176,8 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
             (refs / "task-profile.json").write_text(
                 """{
   "schema_version": "1.0",
-  "profile_id": "plugins-skill-factory-skills-skill-builder",
-  "scope_skill": "plugins/skill-factory/skills/skill-builder",
+  "profile_id": "plugins-skill-factory-skills-code-quality-review-skill-builder",
+  "scope_skill": "plugins/skill-factory/skills/code_quality_review/skill-builder",
   "scope_profile": "plugins",
   "rubric_version": "2026-04-08",
   "evaluator_version": "v1",

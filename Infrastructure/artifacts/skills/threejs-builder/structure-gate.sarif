@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_LEAKY",
+              "name": "RESEARCH_EVALS_LEAKY",
+              "shortDescription": {
+                "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_NEGATIVE_MISSING",
+              "name": "SEC_EVALS_NEGATIVE_MISSING",
+              "shortDescription": {
+                "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PRESSURE_MISSING",
+              "name": "SEC_EVALS_PRESSURE_MISSING",
+              "shortDescription": {
+                "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "WF_FAIL_FAST_MISSING",
+              "name": "WF_FAIL_FAST_MISSING",
+              "shortDescription": {
+                "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_LEAKY",
+          "level": "warning",
+          "message": {
+            "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior. | leaky=3/3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_NEGATIVE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PRESSURE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "WF_FAIL_FAST_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/frontend-ui/threejs-builder/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

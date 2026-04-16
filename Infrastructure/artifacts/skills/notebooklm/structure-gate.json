@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:22Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/product-strategy/notebooklm/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/product-strategy/notebooklm/SKILL.md",
+  "name": "notebooklm",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-large.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "images/example_notebookchat.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "README.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/troubleshooting.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "scripts/auto_sync.py"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "SKILL.md"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_LEAKY",
+      "message": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior.",
+      "evidence": "leaky=2/3"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/3"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EXAMPLES_SYNTHETIC",
+      "message": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows.",
+      "evidence": "## Examples"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_DESTRUCTIVE_GUARD",
+      "message": "Potentially destructive operations detected in scripts without an obvious dry-run/confirm guard. Prefer --dry-run default and require --confirm/--force.",
+      "evidence": "scripts/auth_manager.py"
+    },
+    {
+      "level": "WARN",
+      "code": "SAFE_UNTRUSTED_TO_COMMAND",
+      "message": "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening.",
+      "evidence": "scripts/notebook_manager.py"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "Infrastructure/references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "Infrastructure/references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PRESSURE_MISSING",
+      "message": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case.",
+      "evidence": "Infrastructure/references/evals.yaml"
+    }
+  ]
+}

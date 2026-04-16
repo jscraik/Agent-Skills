@@ -1,0 +1,12 @@
+# Prek configuration (Rust-based pre-commit replacement)
+# Install prek: mise install cargo-prek || cargo install prek
+# Run: prek install && prek run --all-files
+
+[hooks]
+pre-commit = ["make hooks-pre-commit"]
+pre-push = ["make hooks-pre-push"]
+
+[tools]
+biome = "1.9.4"
+typescript = "5.7"
+vitest = "3.2"

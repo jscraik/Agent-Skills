@@ -1,0 +1,13 @@
+You’d prefer a GitHub App JWT when the harness is verifying app-installation access because it proves identity in the same security model GitHub uses for installations, while a PAT is just a user token.
+
+A GitHub App JWT is better here for a few practical reasons:
+
+- It matches the question being asked. If the harness is checking whether a GitHub App installation exists and can access a repo, the cleanest credential is the app’s own JWT, because that is how GitHub lets the app request installation-scoped access.
+- It avoids user-level ambiguity. A PAT reflects what a human account can do, not what the installed app can do. A PAT can succeed even when the app is missing, mis-scoped, or installed on the wrong repos.
+- It is narrower and safer. App JWTs are short-lived and part of a repo/org installation flow. PATs are usually broader, longer-lived, and tied to a person, so they carry more blast radius.
+- It is better for automation hygiene. Installation verification should be about machine-to-machine trust, not “does Jamie’s token happen to have admin-ish access right now?”
+- It catches the real failure mode. If the harness is validating Greptile or another GitHub App integration, the important question is “can the app installation access this repo?” not “can some maintainer’s PAT access this repo?”
+
+The repo’s harness docs make that preference explicit: the command reference says “for remote GitHub checks, a valid token (GitHub App JWT is preferred when verifying App installation state)” in [utilities/coding-harness/references/setup-and-commands.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/references/setup-and-commands.md), and the skill itself calls out choosing PAT vs GitHub App JWT based on the remote-check auth posture in [utilities/coding-harness/SKILL.md](/Users/jamiecraik/dev/Agent-Skills/utilities/coding-harness/SKILL.md).
+
+The short version is: use a PAT when you need user-owned GitHub operations, but use a GitHub App JWT when the harness is specifically verifying whether an app installation is correctly present and authorized. If you want, I can also sketch the exact auth flow the harness should use: `JWT -> installation token -> repo access check`.

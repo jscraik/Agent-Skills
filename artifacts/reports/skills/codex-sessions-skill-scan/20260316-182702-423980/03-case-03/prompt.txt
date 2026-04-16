@@ -1,0 +1,3 @@
+$codex-sessions-skill-scan
+
+Scan yesterday's sessions but do not include any tokens, API keys, or secrets from logs.

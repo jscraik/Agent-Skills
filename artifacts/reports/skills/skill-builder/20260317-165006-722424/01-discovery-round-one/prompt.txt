@@ -1,0 +1,3 @@
+$skill-builder
+
+I need a new skill for long design review threads, but the workflow is still underspecified. Can you keep this first response to round 1 discovery only? Use the required headings, explain briefly why the question matters in plain language, and ask one intuitive goal question instead of dumping the full interview.

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "command": "drift-gate",
+  "mode": "advisory",
+  "status": "partial",
+  "outcome": "ok",
+  "error_class": "none",
+  "generated_at": "2026-04-16T17:20:23.493Z",
+  "repo_root": "/Users/jamiecraik/dev/Agent-Skills",
+  "baseline": {
+    "path": "artifacts/consistency-gate/consistency-baseline-latest.json",
+    "loaded": true
+  },
+  "summary": {
+    "finding_count": 4,
+    "new_count": 0,
+    "preexisting_count": 4,
+    "error_count": 1,
+    "suppressed_count": 0
+  },
+  "findings": [
+    {
+      "rule_id": "command.surface.sources.missing",
+      "surface": "command",
+      "rule_result": "error",
+      "severity": "error",
+      "message": "Required command surface sources are missing (src/cli.ts or README.md).",
+      "path": "src/cli.ts",
+      "baseline_state": "preexisting",
+      "fix": {
+        "manual": "Create the missing source file, or suppress if project type doesn't include a CLI.",
+        "suppressible": true
+      }
+    },
+    {
+      "rule_id": "todo.lifecycle.not_applicable",
+      "surface": "todo",
+      "rule_result": "not_applicable",
+      "severity": "info",
+      "message": "Todos directory is missing; todo lifecycle parity check not applicable.",
+      "path": "todos",
+      "baseline_state": "preexisting"
+    },
+    {
+      "rule_id": "quality.score.missing",
+      "surface": "quality-score",
+      "rule_result": "fail",
+      "severity": "warning",
+      "message": "Quality score document is missing.",
+      "path": "docs/QUALITY_SCORE.md",
+      "baseline_state": "preexisting",
+      "fix": {
+        "command": "harness gardener",
+        "manual": "Create docs/QUALITY_SCORE.md with **Score:** N/100 and last_updated frontmatter.",
+        "suppressible": true
+      }
+    },
+    {
+      "rule_id": "status.matrix.missing",
+      "surface": "status",
+      "rule_result": "fail",
+      "severity": "warning",
+      "message": "Status matrix document is missing.",
+      "path": "docs/roadmap/agent-first-status.md",
+      "baseline_state": "preexisting",
+      "fix": {
+        "manual": "Create docs/roadmap/agent-first-status.md with status sections.",
+        "suppressible": true
+      }
+    }
+  ]
+}

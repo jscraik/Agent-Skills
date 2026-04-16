@@ -1,0 +1,1 @@
+We want to cut this repo from GitHub Actions to CircleCI through the harness. Show the safe preview, apply, verify, commit, and rollback sequence without running it.

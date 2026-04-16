@@ -125,4 +125,4 @@ python3 -m http.server  # in relevant directory
 
 ---
 
-*Entry: `bin/ask` | Implementation: `Infrastructure/scripts/lib/ask/` | Specs: `docs/cli-specs/`*
+*Entry: `bin/ask` | Implementation: `Infrastructure/scripts/lib/ask/` | Specs: `Docs/cli-specs/`*

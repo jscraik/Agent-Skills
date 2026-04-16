@@ -1,0 +1,36 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(do not split|not a standalone skill|inside skill-builder)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-165644-414734/01-native-unified-conformance/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-165644-414734/01-native-unified-conformance/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-165644-414734/01-native-unified-conformance/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-165644-414734/01-native-unified-conformance/codex/stderr.txt",
+    "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-165644-414734/01-native-unified-conformance/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 45,
+      "command_count": 13,
+      "unique_command_count": 13,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 1,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 525522,
+        "output_tokens": 3840,
+        "reasoning_tokens": 0,
+        "total_tokens": 529362
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

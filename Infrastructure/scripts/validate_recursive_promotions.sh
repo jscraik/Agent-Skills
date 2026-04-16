@@ -122,12 +122,6 @@ while (($# > 0)); do
   esac
 done
 
-validator="Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py"
-if [[ ! -f "$validator" ]]; then
-  echo "Missing validator: $validator" >&2
-  exit 2
-fi
-
 promotion_files=()
 
 if [[ "$changed_only" -eq 1 ]]; then
@@ -227,6 +221,23 @@ PY
 fi
 results_jsonl="$(mktemp)"
 trap 'rm -f "$results_jsonl"' EXIT
+
+# Resolve validator only when we actually have promotion files to validate
+validator_candidates=(
+  "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_recursive_promotion.py"
+  "Plugins/skill-factory/skills/skill-builder/scripts/validate_recursive_promotion.py"
+)
+validator=""
+for candidate in "${validator_candidates[@]}"; do
+  if [[ -f "$candidate" ]]; then
+    validator="$candidate"
+    break
+  fi
+done
+if [[ -z "$validator" ]]; then
+  echo "Missing validator: tried ${validator_candidates[*]}" >&2
+  exit 2
+fi
 
 for file in "${promotion_files[@]}"; do
   run_dir="$(dirname "$file")"

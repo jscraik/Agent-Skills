@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:18Z",
+  "skill": "Skills/frontend-ui/playwright-interactive/SKILL.md",
+  "skill_path": "Skills/frontend-ui/playwright-interactive/SKILL.md",
+  "name": "playwright-interactive",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/playwright.png"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_LEAKY",
+      "message": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior.",
+      "evidence": "leaky=3/5"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/5"
+    }
+  ]
+}

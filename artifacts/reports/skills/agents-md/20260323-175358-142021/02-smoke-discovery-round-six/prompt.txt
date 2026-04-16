@@ -1,0 +1,3 @@
+$agents-md
+
+Can you finish the AGENTS discovery interview? Provide the compact AGENTS update summary, separate assumptions if needed, and ask clearly whether it captures the AGENTS change well enough to implement.

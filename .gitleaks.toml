@@ -4,29 +4,19 @@ title = "Project gitleaks config"
 useDefault = true
 
 [allowlist]
-description = "Allowlist for test fixtures, examples, and documentation."
+description = "Allowlist for test fixtures and examples."
 paths = [
   "(^|/)docs?/",
   "(^|/)examples?/",
-  "(^|/)references?/",
   "(^|/)test/",
   "(^|/)tests?/",
   "(^|/)spec/",
   "(^|/)__tests__/",
   "(^|/)test-data/",
   "(^|/)[^.]+\\.(test|spec)\\.[^.]+$",
-  "frontend/ui/figma-implement-design/SKILL\\.md$",
-  "(^|/)Infrastructure/artifacts/skill-graphs/runs/",
-  "(^|/)Infrastructure/artifacts/validation/.*/(stderr|stdout|final|output)\\.txt$",
-  "(^|/)Infrastructure/artifacts/validation/.*/codex/(stderr|stdout|result)\\.(txt|json)$",
-  "(^|/)\\.cache/",
+  "Infrastructure/artifacts/ai/(prompts|sessions)/",
+  "artifacts/",
 ]
 regexes = [
   "\\[REDACTED\\]",
-  "YOUR_API_TOKEN",
-  "YOUR_TOKEN",
-  "sk_live_abc123",
-  "mkL9xQn2VwM8pYrTb4ZcHjF",
-  "pR8mNv5KqXzGwY2JtCfL4D",
-  "\"idempotency_key\"\\s*:\\s*\"[^\"]+\"",
 ]

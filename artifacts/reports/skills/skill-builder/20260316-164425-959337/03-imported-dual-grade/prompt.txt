@@ -1,0 +1,3 @@
+$skill-builder
+
+When installing an imported skill package that includes eval.yaml and graders, keep upstream checks but also run skill-builder gold validation and report both grades.

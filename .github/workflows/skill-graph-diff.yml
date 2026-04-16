@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - '**/SKILL.md'
-      - 'docs/skill-graphs/**'
+      - 'Docs/skill-graphs/**'
       - 'Infrastructure/ops/metrics/graph/**'
 
 permissions:
@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout head
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: head
 
       - name: Checkout base
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.base_ref }}
           path: base
@@ -36,13 +36,13 @@ jobs:
 
       - name: Extract edges (base)
         run: |
-          python3 head/product/domain/arscontexta/reference/Infrastructure/scripts/graph/extract-skill-edges.py \
+          python3 head/Docs/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
             base \
             /tmp/base-edges.json
 
       - name: Extract edges (head)
         run: |
-          python3 head/product/domain/arscontexta/reference/Infrastructure/scripts/graph/extract-skill-edges.py \
+          python3 head/Docs/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
             head \
             /tmp/head-edges.json
 

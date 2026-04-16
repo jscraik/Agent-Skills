@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-04-16T19:44:17Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/fixing-metadata/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/fixing-metadata/SKILL.md",
+  "name": "fixing-metadata",
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
+  "findings": [
+    {
+      "level": "FAIL",
+      "code": "SAFE_REDACTION_REQUIRED",
+      "message": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default.",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_ANTIPATTERNS_MISSING",
+      "message": "Missing required section: antipatterns (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_CONSTRAINTS_MISSING",
+      "message": "Missing required section: constraints (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_PHILOSOPHY_MISSING",
+      "message": "Missing required section: philosophy (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-large.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/2"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EXAMPLES_MISSING",
+      "message": "Missing recommended section: examples (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "WF_FAIL_FAST_MISSING",
+      "message": "Validation section should specify fail-fast behavior (stop at first failed gate).",
+      "evidence": ""
+    }
+  ]
+}

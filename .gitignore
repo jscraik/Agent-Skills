@@ -30,6 +30,7 @@ node_modules/
 .venv-skill-builder/
 .tmp/
 .temp/
+defusedxml/
 
 # Generated skill views (symlink aggregation dirs)
 Skills/skills
@@ -62,7 +63,7 @@ Plugins/plugin-factory/skills/*
 # Keep generated/runtime debris ignored inside tracked skill-factory skills.
 Plugins/skill-factory/skills/**/.DS_Store
 Plugins/skill-factory/skills/**/__pycache__/
-Plugins/skill-factory/skills/skill-builder/Infrastructure/artifacts/
+Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/artifacts/
 # Keep generated/runtime debris ignored inside tracked plugin-factory skills.
 Plugins/plugin-factory/skills/**/.DS_Store
 Plugins/plugin-factory/skills/**/__pycache__/
@@ -106,6 +107,7 @@ Infrastructure/reports/data/candidates.json
 # Internal docs (do not commit)
 /FORJAMIE.md
 FORJAMIE-*.md
+/FORJAMIE
 
 # Misc local throwaways
 *.skill

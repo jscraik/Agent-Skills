@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:18Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/github/greptile/greploop/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/github/greptile/greploop/SKILL.md",
+  "name": "greploop",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_LEAKY",
+      "message": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior.",
+      "evidence": "leaky=4/6"
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/6"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    }
+  ]
+}

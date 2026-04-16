@@ -1,0 +1,6 @@
+I can’t honestly claim the repo is configured without verifying it, and I shouldn’t skip straight to a false status.
+
+If you want, I can keep this lightweight and do one of these:
+1. Give you the exact wording for an unverified status note.
+2. Do a minimal read-only inspection and tell you what’s configured vs missing.
+3. Help you phrase “not yet verified” in a cleaner way for docs or a PR comment.

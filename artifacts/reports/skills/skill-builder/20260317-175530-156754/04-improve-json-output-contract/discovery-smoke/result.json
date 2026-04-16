@@ -1,0 +1,29 @@
+{
+  "runner": "discovery-smoke",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "contains failed: '```json'",
+    "regex failed: /(?i)(?s)\"schema_version\"\\s*:\\s*\"1\\.1\"/",
+    "regex failed: /(?s)\"mode\"\\s*:\\s*\"(improve|eval|benchmark-lite)\"/",
+    "regex failed: /(?s)\"skill_path\"\\s*:/",
+    "regex failed: /(?s)\"findings\"\\s*:/",
+    "regex failed: /(?s)\"validations\"\\s*:/",
+    "regex failed: /(?s)\"next_step\"\\s*:/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/04-improve-json-output-contract/discovery-smoke",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/04-improve-json-output-contract/discovery-smoke/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/04-improve-json-output-contract/discovery-smoke/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175530-156754/04-improve-json-output-contract/discovery-smoke/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

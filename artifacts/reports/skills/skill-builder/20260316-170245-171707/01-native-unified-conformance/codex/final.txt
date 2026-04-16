@@ -1,0 +1,10 @@
+Requirement applied. `skill-builder` already enforces exactly this unified conformance behavior for new native skills, without splitting grading into a separate skill.
+
+Evidence in repo:
+- [utilities/skill-builder/SKILL.md:85](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:85) defines **Unified conformance and grading** (single workflow across modes).
+- [utilities/skill-builder/SKILL.md:88](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:88) explicitly says not to create a standalone grading skill.
+- [utilities/skill-builder/SKILL.md:318](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/SKILL.md:318) makes the unified conformance rule operational in validation.
+- [utilities/skill-builder/references/contract.yaml:37](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/contract.yaml:37) marks standalone grading-skill split as a non-goal.
+- [utilities/skill-builder/references/evals.yaml:165](/Users/jamiecraik/dev/Agent-Skills/utilities/skill-builder/references/evals.yaml:165) includes your exact native unified-conformance scenario as an edge eval.
+
+Operationally, this means native creation stays on one flow with gold gates (`quick_validate`, `skill_gate`, `analyze_skill`, `openclaw_skill_guard`) and integrated upstream-style grading behavior where applicable, all inside `skill-builder`.

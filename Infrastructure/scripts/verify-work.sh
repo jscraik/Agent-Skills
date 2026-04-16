@@ -1,203 +1,146 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-cd "$repo_root"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 
-skip_preflight=0
-skip_sync=0
-governance_scope="project-local"
-validate_output_mode="${VERIFY_WORK_VALIDATE_MODE:-}"
+changed_only=1
+fast_mode=0
+strict_mode=0
+repo_root=""
 
 usage() {
-  cat <<'USAGE'
-Usage: Infrastructure/scripts/verify-work.sh [options]
+	cat <<'USAGE'
+Usage: scripts/verify-work.sh [options]
 
-Repository-local verification runner for agent-skills.
+Canonical repo-local verification runner.
 
 Options:
-  --skip-preflight   Skip Infrastructure/scripts/codex-preflight.sh
-  --skip-sync        Skip Infrastructure/scripts/sync_skills.sh
-  --project-governance
-                     Run checks in project-local scope (default).
-                     Validation artifacts are ephemeral.
-  --workspace-governance
-                     Run checks in workspace scope.
-                     Validation artifacts are persistent.
-  --persistent-artifacts
-                     Backward-compatible alias for --workspace-governance
+  --all              Run full test coverage in --fast mode
+  --changed-only     Prefer changed-file validation in --fast mode (default)
+  --strict           Fail when fast-mode fallbacks are needed
+  --fast             Run preflight + lint + typecheck + tests instead of the full check bundle
+  --repo-root PATH   Run checks in a specific repository root
+  --project-governance   Run validation in project-local scope (default). Validation artifacts are ephemeral.
+  --workspace-governance Run validation in workspace scope. Validation artifacts are persistent.
+  --persistent-artifacts Backward-compatible alias for --workspace-governance
   -h, --help         Show this help text
 USAGE
 }
 
-while (($# > 0)); do
-  case "$1" in
-    --skip-preflight)
-      skip_preflight=1
-      shift
-      ;;
-    --skip-sync)
-      skip_sync=1
-      shift
-      ;;
-    --project-governance)
-      governance_scope="project-local"
-      shift
-      ;;
-    --workspace-governance)
-      governance_scope="workspace"
-      shift
-      ;;
-    --persistent-artifacts)
-      governance_scope="workspace"
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "[verify-work] unknown argument: $1" >&2
-      usage
-      exit 2
-      ;;
-  esac
+detect_stack() {
+	if [[ -f package.json ]]; then
+		echo js
+		return
+	fi
+	if [[ -f pyproject.toml ]]; then
+		echo py
+		return
+	fi
+	if [[ -f Cargo.toml ]]; then
+		echo rust
+		return
+	fi
+	echo repo
+}
+
+preflight_bins_csv() {
+	case "$1" in
+		js) echo 'git,bash,sed,rg,jq,curl,node,python3,pnpm' ;;
+		py) echo 'git,bash,sed,rg,jq,curl,python3' ;;
+		rust) echo 'git,bash,sed,rg,jq,curl,python3,cargo' ;;
+		repo) echo 'git,bash,sed,rg,jq,curl,python3' ;;
+		*) echo "[verify-work] unknown stack: $1" >&2; return 2 ;;
+	esac
+}
+
+# preflight_paths_csv returns a comma-separated list of repository paths required for preflight verification for the given project stack.
+preflight_paths_csv() {
+	case "$1" in
+		js) echo 'package.json,CODESTYLE.md,CONTRIBUTING.md,Makefile,scripts,scripts/codex-preflight.sh,scripts/codex-preflight-local-memory-legacy.sh,scripts/verify-work.sh,scripts/validate-codestyle.sh' ;;
+		py) echo 'pyproject.toml,CODESTYLE.md,CONTRIBUTING.md,Makefile,scripts,scripts/codex-preflight.sh,scripts/codex-preflight-local-memory-legacy.sh,scripts/verify-work.sh,scripts/validate-codestyle.sh' ;;
+		rust) echo 'Cargo.toml,CODESTYLE.md,CONTRIBUTING.md,Makefile,scripts,scripts/codex-preflight.sh,scripts/codex-preflight-local-memory-legacy.sh,scripts/verify-work.sh,scripts/validate-codestyle.sh' ;;
+		repo) echo 'CODESTYLE.md,CONTRIBUTING.md,Makefile,scripts,scripts/codex-preflight.sh,scripts/codex-preflight-local-memory-legacy.sh,scripts/verify-work.sh,scripts/validate-codestyle.sh' ;;
+		*) echo "[verify-work] unknown stack: $1" >&2; return 2 ;;
+	esac
+}
+
+has_package_script() {
+	local script_name="$1"
+	[[ -f "$repo_root/package.json" ]] || return 1
+	jq -e --arg script_name "$script_name" '(.scripts // {}) | has($script_name)' "$repo_root/package.json" >/dev/null 2>&1
+}
+
+while (( $# > 0 )); do
+	case "$1" in
+		--all|--all-skills)
+			changed_only=0
+			shift
+			;;
+		--changed-only)
+			changed_only=1
+			shift
+			;;
+		--strict)
+			strict_mode=1
+			shift
+			;;
+		--fast)
+			fast_mode=1
+			shift
+			;;
+		--repo-root)
+			repo_root="${2:-}"
+			shift 2
+			;;
+		-h|--help)
+			usage
+			exit 0
+			;;
+		*)
+			echo "[verify-work] unknown argument: $1" >&2
+			usage >&2
+			exit 2
+			;;
+	esac
 done
 
-if [[ -n "$validate_output_mode" && "$validate_output_mode" != "ephemeral" && "$validate_output_mode" != "persistent" ]]; then
-  echo "[verify-work] invalid VERIFY_WORK_VALIDATE_MODE='${validate_output_mode}' (expected ephemeral or persistent)" >&2
-  exit 2
+if [[ -z "$repo_root" ]]; then
+	repo_root="$REPO_ROOT"
 fi
 
-if [[ "$governance_scope" == "project-local" ]]; then
-  if [[ "${validate_output_mode:-}" == "persistent" ]]; then
-    echo "[verify-work] ignoring VERIFY_WORK_VALIDATE_MODE=persistent in project-local scope" >&2
-  fi
-  validate_output_mode="ephemeral"
-else
-  if [[ "${validate_output_mode:-}" == "ephemeral" ]]; then
-    echo "[verify-work] ignoring VERIFY_WORK_VALIDATE_MODE=ephemeral in workspace scope" >&2
-  fi
-  validate_output_mode="persistent"
-fi
-
-declare -a passed_checks=()
-declare -a failed_checks=()
-declare -a skipped_checks=()
-
-run_check() {
-  local name="$1"
-  shift
-
-  echo
-  echo "==> $name"
-  if "$@"; then
-    passed_checks+=("$name")
-  else
-    failed_checks+=("$name")
-  fi
-}
-
-skip_check() {
-  local name="$1"
-  local reason="$2"
-
-  skipped_checks+=("$name ($reason)")
-  echo
-  echo "==> $name"
-  echo "[verify-work] skip $name: $reason"
-}
-
-run_skill_sync_check() {
-  local -a sync_args=("$@")
-  local sync_log
-  local sync_start
-  local sync_end
-  local sync_elapsed
-  sync_log="$(mktemp "${TMPDIR:-/tmp}/verify-work-sync.XXXXXX")"
-  sync_start="$(date +%s)"
-  echo
-  echo "==> skill-sync"
-  if bash "Infrastructure/scripts/sync_skills.sh" "${sync_args[@]}" >"${sync_log}" 2>&1; then
-    sync_end="$(date +%s)"
-    sync_elapsed="$((sync_end - sync_start))"
-    passed_checks+=("skill-sync")
-    cat "${sync_log}"
-    echo "[verify-work] skill-sync duration: ${sync_elapsed}s"
-    if [[ -n "${SYNC_SKILLS_MAX_SECONDS:-}" ]]; then
-      if [[ "${SYNC_SKILLS_MAX_SECONDS}" =~ ^[0-9]+$ ]]; then
-        if ((sync_elapsed > SYNC_SKILLS_MAX_SECONDS)); then
-          failed_checks+=("skill-sync-performance")
-          echo "[verify-work] skill-sync exceeded SYNC_SKILLS_MAX_SECONDS=${SYNC_SKILLS_MAX_SECONDS}s (observed ${sync_elapsed}s)." >&2
-          rm -f "${sync_log}"
-          return 1
-        fi
-      else
-        echo "[verify-work] ignoring invalid SYNC_SKILLS_MAX_SECONDS='${SYNC_SKILLS_MAX_SECONDS}' (expected integer)." >&2
-      fi
-    fi
-    rm -f "${sync_log}"
-    return 0
-  fi
-
-  cat "${sync_log}" >&2
-  if rg -q "Operation not permitted|is not writable|Unable to update symlink|rsync error: .*code 23" "${sync_log}"; then
-    skipped_checks+=("skill-sync (sandbox/permission-limited environment)")
-    echo "[verify-work] skip skill-sync: sandbox/permission-limited environment" >&2
-    rm -f "${sync_log}"
-    return 0
-  fi
-
-  failed_checks+=("skill-sync")
-  rm -f "${sync_log}"
-  return 1
-}
-
+cd "$repo_root"
 echo "[verify-work] repo root: $repo_root"
-echo "[verify-work] governance scope: $governance_scope"
-echo "[verify-work] validation artifact mode: $validate_output_mode"
 
-if [[ "$skip_preflight" -eq 0 ]]; then
-  run_check "codex-preflight" bash "Infrastructure/scripts/codex-preflight.sh" --stack auto --mode required
-else
-  skip_check "codex-preflight" "disabled by --skip-preflight"
-fi
-
-if [[ "$skip_sync" -eq 0 ]]; then
-  if [[ "$governance_scope" == "project-local" ]]; then
-    run_skill_sync_check --project-local
-  else
-    run_skill_sync_check --workspace
-  fi
-else
-  skip_check "skill-sync" "disabled by --skip-sync"
-fi
-
-run_check "repo-validation" bash "Infrastructure/scripts/validate_all.sh" "--${validate_output_mode}"
+stack="$(detect_stack)"
+bins_csv="$(preflight_bins_csv "$stack")"
+paths_csv="$(preflight_paths_csv "$stack")"
 
 echo
-echo "=== verify-work summary ==="
-echo "passed:  ${#passed_checks[@]}"
-if ((${#passed_checks[@]} > 0)); then
-  for check in "${passed_checks[@]}"; do
-    echo "  - $check"
-  done
+echo "==> codex-preflight"
+bash "$repo_root/scripts/codex-preflight.sh" \
+	--stack "$stack" \
+	--mode required \
+	--bins "$bins_csv" \
+	--paths "$paths_csv"
+
+if [[ "$fast_mode" -eq 0 ]]; then
+	echo
+	echo "==> validate-codestyle"
+	bash "$repo_root/scripts/validate-codestyle.sh" --repo-root "$repo_root"
+	exit 0
 fi
 
-echo "skipped: ${#skipped_checks[@]}"
-if ((${#skipped_checks[@]} > 0)); then
-  for check in "${skipped_checks[@]}"; do
-    echo "  - $check"
-  done
+echo
+echo "==> validate-codestyle --fast"
+validate_args=(--repo-root "$repo_root" --fast)
+if [[ "$changed_only" -eq 1 ]]; then
+	validate_args+=(--changed-only)
+else
+	validate_args+=(--all)
+fi
+if [[ "$strict_mode" -eq 1 ]]; then
+	validate_args+=(--strict)
 fi
 
-echo "failed:  ${#failed_checks[@]}"
-if ((${#failed_checks[@]} > 0)); then
-  for check in "${failed_checks[@]}"; do
-    echo "  - $check"
-  done
-fi
-
-if ((${#failed_checks[@]} > 0)); then
-  exit 1
-fi
+bash "$repo_root/scripts/validate-codestyle.sh" "${validate_args[@]}"

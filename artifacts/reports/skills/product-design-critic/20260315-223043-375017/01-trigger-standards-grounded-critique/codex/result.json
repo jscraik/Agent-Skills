@@ -1,0 +1,24 @@
+{
+  "runner": "codex",
+  "exit_code": 124,
+  "passed": false,
+  "tier1_failures": [
+    "codex returned non-zero exit code: 124",
+    "regex failed: /(?i)(WCAG|ARIA|NIST|HIG|Fluent|GOV\\.UK|USWDS)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "should_trigger set, but skill selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-223043-375017/01-trigger-standards-grounded-critique/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-223043-375017/01-trigger-standards-grounded-critique/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-223043-375017/01-trigger-standards-grounded-critique/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/product-design-critic/20260315-223043-375017/01-trigger-standards-grounded-critique/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": null
+  },
+  "used_schema": false
+}

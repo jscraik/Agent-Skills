@@ -32,11 +32,11 @@ def load_module(module_name: str, relative_path: str):
 
 parse_plain_review = load_module(
     "parse_plain_review",
-    "Plugins/coderabbit/skills/code-review/scripts/parse_plain_review.py",
+    "Plugins/coderabbit/skills/code_quality_review/code-review/scripts/parse_plain_review.py",
 )
 fetch_unresolved_threads = load_module(
     "fetch_unresolved_threads",
-    "Plugins/coderabbit/skills/autofix/scripts/fetch_unresolved_threads.py",
+    "Plugins/coderabbit/skills/code_quality_review/autofix/scripts/fetch_unresolved_threads.py",
 )
 
 

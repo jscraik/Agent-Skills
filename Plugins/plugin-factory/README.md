@@ -30,9 +30,9 @@ Codex plugin package that bundles the plugin-authoring family in one installable
 
 ## Source Of Truth
 - Canonical writable source (edit here):
-  - `Plugins/plugin-factory/skills/plugin-builder/`
-  - `Plugins/plugin-factory/skills/plugin-creator/`
-  - `Plugins/plugin-factory/skills/plugin-installer/`
+  - `Plugins/plugin-factory/skills/code_quality_review/plugin-builder/`
+  - `Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/`
+  - `Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/`
 - Compatibility aliases (do not edit directly):
   - `Skills/plugin-builder/`
   - `Skills/plugin-creator/`
@@ -80,12 +80,12 @@ bash Infrastructure/scripts/validate_skill_authoring_family.sh
 Validate the package:
 
 ```sh
-python3 Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/plugin-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/plugin-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
 ```
 
 Validate marketplace and compatibility:
 
 ```sh
-python3 Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-compat Plugins/plugin-factory --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
-python3 Plugins/plugin-factory/skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path plugins --allow-legacy-marketplace-path
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-compat Plugins/plugin-factory --marketplace-path .agents/Plugins/marketplace.json --allow-legacy-marketplace-path
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path plugins --allow-legacy-marketplace-path
 ```

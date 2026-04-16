@@ -1,0 +1,18 @@
+**Compact AGENTS Update Summary**
+```md
+AGENTS update
+- Scope: update the repo-root `AGENTS.md` for `/Users/jamiecraik/dev/Agent-Skills`; no repo-local `AGENTS.override.md` files were found, so no nested override is part of this pass.
+- Discovery chain: keep Codex discovery explicit as global `~/.codex/AGENTS.md` -> repo `AGENTS.md`; treat `docs/agents/README.md` and `docs/agents/*.md` as linked progressive-disclosure docs, not additional auto-loaded instruction files.
+- Root AGENTS goal: keep it as a compact operator map only: repo purpose, mandatory workflow snippet, concise preflight, concise validation defaults, instruction routing, and escalation guidance.
+- Linked docs to keep using: `docs/agents/README.md` as the front door, with `01-instruction-map.md`, `02-tooling-policy.md`, `03-local-memory.md`, `04-validation.md`, and `05-contradictions-and-cleanup.md` as the detailed policy homes.
+- Cleanup to make in this refactor: fix the incorrect lowercase repo path references (`/Users/jamiecraik/dev/agent-skills` -> `/Users/jamiecraik/dev/Agent-Skills`) in root and linked docs; remove duplicate long-form policy from root once linked docs are the canonical detail layer; record the path-case issue in contradictions cleanup.
+- Tool-specific docs: keep `CLAUDE.md` and `GEMINI.md` as tool-specific supplements, but avoid letting them carry repo-wide rules that should live in `AGENTS.md` or `docs/agents/*`.
+- Verification handoff: validate links and command references, then run the repo doc checks already documented here (`bash scripts/sync_skills.sh`, `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`, `just validate` or `bash scripts/validate_all.sh`), and include a discovery check that confirms the active instruction chain after the refactor.
+```
+
+**Assumptions**
+- The change is limited to this repository’s AGENTS surfaces, not the global `~/.codex/AGENTS.md`.
+- `docs/agents/` remains the preferred linked-doc tree; we are not moving this repo to an `instructions/` layout.
+- We are improving Codex AGENTS discovery clarity first, not doing a full cross-tool consolidation of `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` in the same pass.
+
+Does this capture the AGENTS change well enough for me to implement?

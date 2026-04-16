@@ -1,0 +1,3 @@
+$skill-builder
+
+This imported skill overlaps existing skills. In the first response, require checking references, assets, and agents from the incoming package for improvements to existing skills before deciding install-new.

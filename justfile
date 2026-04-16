@@ -87,7 +87,7 @@ rollout-drill:
 
 # Check Agentation watch-mode readiness for a project
 watch-readiness project-root='.':
-    mise exec -- uv run --python 3.12 python frontend/tools/agentation/Infrastructure/scripts/check_watch_mode_readiness.py \
+    mise exec -- uv run --python 3.12 python Skills/tools/agentation/scripts/check_watch_mode_readiness.py \
         --project-root {{project-root}} \
         --format json
 

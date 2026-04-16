@@ -1,0 +1,12 @@
+## Inputs
+- Missing: the exact target surface, primary reader, and job-to-be-done for this documentation work.
+- Why this matters: keeping the goal clear prevents scope creep and makes the later validation and ownership decisions more reliable.
+
+## Outputs
+- After discovery confirms the goal, return a tight docs plan or patch scoped to the right surface.
+
+## Next step
+- Round 1 question: what should this skill help you do?
+
+## Failure mode
+- Do not draft or rewrite the docs yet when the workflow is still underspecified; finish round 1 first.

@@ -1,0 +1,1 @@
+Can you help me bootstrap this repo with the harness, but do not run anything yet? I want the safe setup order, validation gates, and which steps still need my credentials.

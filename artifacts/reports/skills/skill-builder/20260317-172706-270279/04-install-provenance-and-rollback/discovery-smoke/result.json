@@ -1,0 +1,25 @@
+{
+  "runner": "discovery-smoke",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(source_ref|pinned.*commit|sha256|allowlisted)/",
+    "regex failed: /(?i)(quarantine|staged|atomic)/",
+    "regex failed: /(?i)(rollback|restored paths)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
+  ],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/04-install-provenance-and-rollback/discovery-smoke",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/04-install-provenance-and-rollback/discovery-smoke/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/04-install-provenance-and-rollback/discovery-smoke/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-172706-270279/04-install-provenance-and-rollback/discovery-smoke/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

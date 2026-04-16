@@ -1,0 +1,19 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/01-strict-security-gates/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/01-strict-security-gates/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/01-strict-security-gates/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/01-strict-security-gates/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

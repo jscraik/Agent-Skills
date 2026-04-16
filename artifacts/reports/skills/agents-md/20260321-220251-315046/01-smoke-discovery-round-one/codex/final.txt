@@ -1,0 +1,9 @@
+## Scope and triggers
+I’m using the `agents-md` skill here because this is exactly the kind of AGENTS refactor that benefits from scoping before we touch structure.
+
+Why this matters: the right cleanup plan is very different depending on whether the mess lives in your home/global instructions, one repo root, or a nested subtree with overrides.
+
+What scope do you want us to untangle first: your global Codex instructions, this repo’s root `AGENTS.md`, or a nested folder setup inside the repo?
+
+## Required inputs
+Once you answer that one scope question, I’ll keep discovery focused on just that layer first and avoid pulling in the wrong instruction chain too early.

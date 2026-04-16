@@ -1,0 +1,21 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?i)(required|must run|should run|rerun|re-run|must also run)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/02-improve-requires-regression-evals/codex",
+    "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/02-improve-requires-regression-evals/codex/final.txt",
+    "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/02-improve-requires-regression-evals/codex/stdout.txt",
+    "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260317-175537-444268/02-improve-requires-regression-evals/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": true
+  },
+  "used_schema": false
+}

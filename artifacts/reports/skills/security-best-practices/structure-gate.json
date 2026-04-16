@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.1",
+  "tool": "skill_gate",
+  "generated_at": "2026-03-31T21:35:22Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/product/security/security-best-practices/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/product/security/security-best-practices/SKILL.md",
+  "name": "security-best-practices",
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
+  "findings": [
+    {
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/golang-general-backend-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/python-fastapi-web-server-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_COMMANDS",
+      "message": "[medium] Command-like instructions detected; ensure commands are gated and safe.",
+      "evidence": "references/python-flask-web-server-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/javascript-typescript-react-web-frontend-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/javascript-typescript-vue-web-frontend-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "references/python-fastapi-web-server-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/javascript-express-web-server-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/javascript-general-web-frontend-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/javascript-typescript-nextjs-web-server-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/javascript-typescript-react-web-frontend-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/python-django-web-server-security.md"
+    },
+    {
+      "level": "WARN",
+      "code": "REPO_ASSETS_UNREFERENCED",
+      "message": "assets/ exists but is not referenced in SKILL.md.",
+      "evidence": ""
+    },
+    {
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=1/5"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_COMMAND_GUARD_MISSING",
+      "message": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat).",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EVALS_PI_CASE_MISSING",
+      "message": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case.",
+      "evidence": "references/evals.yaml"
+    },
+    {
+      "level": "WARN",
+      "code": "SEC_EXAMPLES_MISSING",
+      "message": "Missing recommended section: examples (add a ## heading).",
+      "evidence": ""
+    }
+  ]
+}

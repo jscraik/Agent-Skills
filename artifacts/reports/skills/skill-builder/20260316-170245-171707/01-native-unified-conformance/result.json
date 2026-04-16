@@ -1,0 +1,52 @@
+{
+  "id": "native-unified-conformance",
+  "name": "native unified conformance",
+  "category": "edge",
+  "should_trigger": true,
+  "prepend_skill": true,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 300.0,
+  "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-170245-171707/01-native-unified-conformance",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-170245-171707/01-native-unified-conformance/codex",
+        "final": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-170245-171707/01-native-unified-conformance/codex/final.txt",
+        "stdout": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-170245-171707/01-native-unified-conformance/codex/stdout.txt",
+        "stderr": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-170245-171707/01-native-unified-conformance/codex/stderr.txt",
+        "jsonl": "/Users/jamiecraik/dev/Agent-Skills/artifacts/reports/skills/skill-builder/20260316-170245-171707/01-native-unified-conformance/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 42,
+          "command_count": 12,
+          "unique_command_count": 12,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 1,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 354439,
+            "output_tokens": 3291,
+            "reasoning_tokens": 0,
+            "total_tokens": 357730
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": []
+}

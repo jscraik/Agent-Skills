@@ -1,0 +1,67 @@
+This repo looks already partially harnessed, so the safest path is an update/repair bootstrap, not a first-time greenfield init. I found existing harness state in [harness.contract.json](/Users/jamiecraik/dev/Agent-Skills/harness.contract.json), [environment.toml](/Users/jamiecraik/dev/Agent-Skills/.codex/environments/environment.toml), [.harness/ci-required-checks.json](/Users/jamiecraik/dev/Agent-Skills/.harness/ci-required-checks.json), and [.greptile/config.json](/Users/jamiecraik/dev/Agent-Skills/.greptile/config.json). The notable drift is that `.harness/ci-required-checks.json` still says `github-actions`, while there is no `.circleci/` directory, so we should treat bootstrap here as “inspect, preview, then decide whether to stay on GitHub Actions or migrate to CircleCI” before applying anything.
+
+**Safe Order**
+1. Repo preflight only: verify root, required binaries, and current harness status.
+   Use the repo-approved form, not the stale sourced-shell form: `bash scripts/codex-preflight.sh --stack auto --mode required`.
+2. Command truth check: inspect `harness --help` and `harness init --help`.
+   This matters because some reference docs in the skill still contain older examples.
+3. Non-mutating harness inspection:
+   `harness --version`
+   `harness init --check-updates`
+   `harness init --dry-run`
+   `harness check-environment --json`
+4. Decide lane before any write:
+   If the dry run shows normal scaffold drift only, use the update lane.
+   If you want CircleCI as the target provider, use the CI-migration lane.
+   If this repo should remain GitHub-Actions-based, do not run `ci-migrate`.
+5. Mutating step only after preview review:
+   Update lane: `harness init --update`
+   Fresh re-scaffold lane only if update is not sufficient: `harness init`
+   CI migration lane, only if you explicitly want CircleCI:
+   `harness ci-migrate prepare --provider circleci --dry-run`
+   `harness ci-migrate prepare --provider circleci --apply`
+   `harness ci-migrate verify --snapshot <snapshot-id>`
+   `harness ci-migrate commit --snapshot <snapshot-id>`
+   Rollback path if needed: `harness ci-migrate abort --snapshot <snapshot-id>`
+6. Re-run validation after whichever write path we choose.
+
+**Validation Gates**
+Use the smallest gates first and stop on the first failure.
+
+Local baseline:
+- `bash scripts/codex-preflight.sh --stack auto --mode required`
+- `harness check-environment --json`
+- `harness init --check-updates`
+
+Repo validation from this repo’s own policy:
+- `bash scripts/sync_skills.sh`
+- `python3 scripts/docs_lint.py --mode warn --config docs-policy.json`
+- `just validate` or `bash scripts/validate_all.sh`
+- `python3 ~/.codex/scripts/plan-graph-lint.py .agent/PLANS.md`
+- `bash ~/.codex/scripts/verify-work.sh`
+
+Conditional harness/governance gates:
+- `harness verify-greptile --token ... --owner ... --repo ...`
+- `harness check-authz --contract harness.contract.json --repo <owner>/<repo> --branch main`
+- `harness docs-gate --mode advisory --json`
+- `harness tooling-audit --path <dir> --format table`
+
+One important repo-specific correction: the old `source scripts/codex-preflight.sh && preflight_repo` example in the harness reference is stale for this repo. The authoritative form is in [02-tooling-policy.md](/Users/jamiecraik/dev/Agent-Skills/docs/agents/02-tooling-policy.md).
+
+**Needs Your Credentials**
+These steps still need your credentials or explicit ownership:
+
+- Private package install for `@brainwav/coding-harness`:
+  requires `NPM_TOKEN`, often via 1Password.
+- `npm whoami` / private registry reachability:
+  requires valid npm auth.
+- Branch protection changes:
+  requires a GitHub token with the needed scopes, usually `GITHUB_PERSONAL_ACCESS_TOKEN`.
+- Greptile verification:
+  requires GitHub auth for repo verification, and the Greptile GitHub App must already be installed by you/org admins.
+- CircleCI environment-variable inspection or setup:
+  requires `CIRCLE_TOKEN`, plus manual setup of project env vars like `NPM_TOKEN`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `GREPTILE_API_KEY`, and possibly `LINEAR_API_KEY`.
+- Any actual secret creation or rotation:
+  harness can verify presence, but it cannot mint or rotate these for you.
+
+Because this repo is already harness-shaped, my recommendation is: start with the no-write inspection trio `preflight`, `init --check-updates`, and `init --dry-run`, then decide whether you want an update-only path or a full CI-provider migration. If you want, I can turn this into a repo-specific runbook next, with exact commands grouped into `safe now`, `needs your creds`, and `only after approval`.

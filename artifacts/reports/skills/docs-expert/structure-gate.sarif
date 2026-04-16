@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_OVERRIDE",
+              "name": "PI_OVERRIDE",
+              "shortDescription": {
+                "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_OVERRIDE",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | SKILL.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "product/docs/docs-expert/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

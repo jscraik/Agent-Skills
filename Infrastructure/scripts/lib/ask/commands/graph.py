@@ -25,7 +25,26 @@ def _topic_from_category(category: str) -> str | None:
     def _is(prefix: str) -> bool:
         return category == prefix or category.startswith(prefix + "/")
 
-    if _is("frontend"):
+    # New topic-cluster paths under Skills/
+    if _is("Skills/agent-ops"):
+        return "agent-ops"
+    if _is("Skills/frontend-ui"):
+        return "frontend-ui"
+    if _is("Skills/backend-platform"):
+        return "backend-platform"
+    if _is("Skills/product-strategy"):
+        return "product-strategy"
+    if _is("Skills/security-ops"):
+        return "security-ops"
+    if _is("Skills/content-publishing"):
+        return "content-publishing"
+    if _is("Skills/mobile-native"):
+        return "mobile-native"
+    # .system lane — maintained OpenAI originals and bridge skills
+    if _is(".agents/skills/.system"):
+        return "agent-ops"
+    # Legacy category paths (may still appear in plugin skill dirs)
+    if _is("frontend") or _is("Skills/ui") or _is("Skills/graphics") or _is("Skills/website"):
         return "frontend-ui"
     if _is("backend") or _is("github"):
         return "backend-platform"
@@ -46,8 +65,10 @@ def _topic_from_category(category: str) -> str | None:
         or _is("product/docs")
         or _is("skills-system")
         or _is("utilities")
-        or _is("plugins")
     ):
+        return "agent-ops"
+    # Plugin skills — derive from plugin-level topic cluster or default to agent-ops
+    if _is("Plugins"):
         return "agent-ops"
     return None
 
@@ -57,7 +78,7 @@ def _load_topic_assignments(
 ) -> dict[str, str]:
     """Loads explicit skill->topic assignments from topic-map docs with fallback."""
     assignments = dict(fallback_topic_by_skill)
-    topic_map_dir = repo_root / "docs" / "skill-graphs" / "topic-maps"
+    topic_map_dir = repo_root / "Docs" / "skill-graphs" / "topic-maps"
     if not topic_map_dir.exists():
         return assignments
 
@@ -139,7 +160,7 @@ def _canonicalize_graph(repo_root: Path, data: dict) -> dict:
 
 def _get_graph_path(repo_root: Path) -> Path:
     """Returns the path to skill-edges.json."""
-    return repo_root / "ops" / "metrics" / "graph" / "skill-edges.json"
+    return repo_root / "Infrastructure" / "ops" / "metrics" / "graph" / "skill-edges.json"
 
 def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
     """Loads the skill graph from skill-edges.json.

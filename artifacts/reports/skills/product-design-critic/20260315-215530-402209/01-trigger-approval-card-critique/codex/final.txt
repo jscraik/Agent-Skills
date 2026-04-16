@@ -1,0 +1,33 @@
+**Top Findings (Trust Gaps)**
+1. `Critical`: A single `Approve` click hides consequences. Enterprise admins need to see scope, timing, and blast radius before commitment.
+2. `High`: No explicit reversibility signal. If users don’t know they can undo/rollback, perceived risk spikes.
+3. `High`: Missing accountability cues. Admins expect audit log, actor attribution, and policy references at decision time.
+4. `Medium`: Button label is too vague. `Approve` doesn’t say what is being approved or what changes immediately.
+
+**Recommended Interaction (Better Pattern)**
+Replace one-step approval with a **two-step “Review and Approve” flow**:
+
+1. Card CTA becomes **`Review & Approve`** (not `Approve`).
+2. Clicking opens a side panel/modal with a **preflight summary**:
+   - **What changes** (diff-style bullets)
+   - **Who/what is affected** (counts + links)
+   - **When it takes effect** (now/scheduled)
+   - **Risk level** (low/medium/high)
+   - **Rollback** (“Can be reverted within X” or “Irreversible”)
+   - **Audit trail** (“This action will be logged as Jane Doe at 2:14 PM UTC”)
+3. Confirmation action uses explicit copy:  
+   - **`Approve 24 access requests`** or **`Approve policy update`**
+4. Post-action state shows:
+   - Success summary
+   - **`Undo`** (if possible, time-bounded)
+   - Link to audit log entry
+
+**Microcopy Example**
+- Before click: “Approving will grant `Billing Admin` to 24 users in `EMEA-Finance`.”
+- Confirm button: “Approve 24 role grants”
+- Support text: “Logged to Audit Trail • Reversible for 15 minutes”
+
+**Why this works**
+This interaction shifts trust from “button faith” to **predictability + control + accountability**, which is exactly what enterprise admins need before high-impact actions.
+
+If helpful, I can sketch a low-fidelity card + confirm-panel layout you can hand to design/product today.
