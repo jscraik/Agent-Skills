@@ -18,6 +18,7 @@ import re
 import sys
 from urllib.parse import urlparse
 from urllib.parse import urlparse
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import Optional, Dict, Any
 from urllib.parse import urlparse
@@ -266,8 +267,8 @@ class AuthManager:
             # Try to access NotebookLM
             page = context.new_page()
             page.goto("https://notebooklm.google.com", wait_until="domcontentloaded", timeout=30000)
-
             parsed_url = urlparse(page.url)
+            if parsed_url.scheme == "https" and parsed_url.hostname == "notebooklm.google.com":
             if parsed_url.scheme == "https" and parsed_url.hostname == "notebooklm.google.com":
             if parsed_url.scheme == "https" and parsed_url.hostname == "notebooklm.google.com":
                 print("  ✅ Authentication is valid")
