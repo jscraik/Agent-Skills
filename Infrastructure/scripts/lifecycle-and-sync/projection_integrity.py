@@ -555,12 +555,12 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     """
     source_abs = repo_root / spec.source_path
     projection_abs = repo_root / spec.projection_path
-    if not source_abs.is_dir():
+    if source_abs.is_symlink() or not source_abs.is_dir():
         return {
             "name": spec.name,
             "type": "mirror",
             "status": "error",
-            "reason": "source_missing",
+            "reason": "source_is_symlink" if source_abs.is_symlink() else "source_missing",
             "source": spec.source_path,
             "projection": spec.projection_path,
         }
