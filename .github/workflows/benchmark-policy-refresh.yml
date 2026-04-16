@@ -23,9 +23,9 @@ jobs:
 
       - name: Build benchmark artifact
         run: |
-          python3 Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py \
+          python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/benchmark_skill_portfolio.py \
             --root . \
-            --config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
+            --config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --mode off \
             --format json \
             --output-json Infrastructure/artifacts/industry-benchmark-latest.json
@@ -34,9 +34,9 @@ jobs:
         env:
           CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
         run: |
-          python3 Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py \
+          python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/refresh_benchmark_policy.py \
             --root . \
-            --policy Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
+            --policy Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json \
             --schedule-days 7 \
             --require-context7 \
@@ -70,13 +70,13 @@ jobs:
             Closes #none (automation maintenance update)
 
             ## What changed?
-            - refreshed `Skills/skill-builder/Infrastructure/references/benchmark-policy.json`
+            - refreshed `Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json`
             - ratcheted thresholds from latest benchmark artifact
             - updated policy metadata (`validated_on`, refresh notes)
 
             ## How to test
-            - `python3 Skills/skill-builder/Infrastructure/scripts/benchmark_skill_portfolio.py --root . --config Skills/skill-builder/Infrastructure/references/benchmark-policy.json --mode off --format json --output-json Infrastructure/artifacts/industry-benchmark-latest.json`
-            - `python3 Skills/skill-builder/Infrastructure/scripts/refresh_benchmark_policy.py --root . --policy Skills/skill-builder/Infrastructure/references/benchmark-policy.json --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json --schedule-days 7 --require-context7 --apply --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json --format text`
+            - `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/benchmark_skill_portfolio.py --root . --config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json --mode off --format json --output-json Infrastructure/artifacts/industry-benchmark-latest.json`
+            - `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/refresh_benchmark_policy.py --root . --policy Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json --benchmark-json Infrastructure/artifacts/industry-benchmark-latest.json --schedule-days 7 --require-context7 --apply --report-json Infrastructure/artifacts/benchmark-policy-refresh-report.json --format text`
             - `gh pr checks <PR_NUMBER>`
 
             - [x] Benchmark artifact generated
@@ -133,7 +133,7 @@ jobs:
 
             - Log file: `N/A`
             - Prompt file: `N/A`
-            - Files touched: `Skills/skill-builder/Infrastructure/references/benchmark-policy.json`
+            - Files touched: `Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json`
             - Tests run: benchmark generation + refresh steps in this workflow
             - Human verification: pending reviewer confirmation
 
@@ -153,4 +153,4 @@ jobs:
             ## Release notes
             Release note: Refreshed benchmark policy baselines and metadata via automated workflow.
           add-paths: |
-            Skills/skill-builder/Infrastructure/references/benchmark-policy.json
+            Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json

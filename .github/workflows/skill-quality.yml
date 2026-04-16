@@ -7,10 +7,10 @@ on:
       - "**/Infrastructure/references/evals.yaml"
       - "**/Infrastructure/references/contract.yaml"
       - "**/Infrastructure/references/task-profile.json"
-      - "Skills/skill-builder/Infrastructure/scripts/**"
+      - "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/**"
       - "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/**"
       - "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/Infrastructure/scripts/install-skill-from-github.py"
-      - "Skills/skill-installer/Infrastructure/scripts/install-skill-from-github.py"
+      - "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/scripts/install-skill-from-github.py"
       - "Infrastructure/scripts/validate_skill_authoring_family.sh"
       - "Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py"
       - "Infrastructure/scripts/projection_integrity.py"
@@ -49,11 +49,11 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml pytest
       - name: Tier-1 structure gate (skill_gate)
         run: |
-          python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
+          python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_repo_skill_quality.py \
             --root . \
-            --baseline-file Skills/skill-builder/Infrastructure/references/skill-quality-baseline.json \
+            --baseline-file Plugins/skill-factory/skills/code_quality_review/skill-builder/references/skill-quality-baseline.json \
             --benchmark-mode warn \
-            --benchmark-config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
+            --benchmark-config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
             --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
             --format text
@@ -127,20 +127,20 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml pytest
       - name: Run dual-run evals (requires codex/claude binaries + auth)
         run: |
-          python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
+          python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_repo_skill_quality.py \
             --root . \
             --run-evals \
             --dual-run \
             --capture-jsonl \
             --tier2-mode "${{ inputs.tier2_mode }}" \
             --benchmark-mode warn \
-            --benchmark-config Skills/skill-builder/Infrastructure/references/benchmark-policy.json \
+            --benchmark-config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
             --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
             --format text
       - name: Build dashboard
         run: |
-          python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py \
+          python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/build_skill_eval_dashboard.py \
             --reports-root Infrastructure/artifacts/skills \
             --out-json Infrastructure/artifacts/skills/dashboard.json \
             --out-md Infrastructure/artifacts/skills/dashboard.md

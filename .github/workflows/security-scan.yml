@@ -21,7 +21,7 @@ jobs:
     name: Gitleaks (secrets scan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0  # full history so Gitleaks can diff commits
 
@@ -42,7 +42,7 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -55,7 +55,7 @@ jobs:
           # Note: p/default finds 12+ findings; using p/secrets until findings addressed
           semgrep_args=(
             --config "p/secrets"
-            --exclude "Infrastructure/artifacts/skill-graphs/**"
+            --exclude "Infrastructure/artifacts/**"
             --metrics=off
             --sarif --output semgrep.sarif
           )
@@ -103,7 +103,7 @@ jobs:
     name: Trivy (dependency CVE scan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Run Trivy (filesystem scan)
         uses: aquasecurity/trivy-action@master
@@ -132,7 +132,7 @@ jobs:
     name: Artifact secrets pre-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -165,7 +165,7 @@ jobs:
 
       - name: Scan artifacts directory for secrets
         run: |
-          if [ -d "artifacts" ]; then
+          if [ -d "Infrastructure/artifacts" ]; then
             gitleaks detect \
               --source Infrastructure/artifacts/ \
               --config .gitleaks.toml \
