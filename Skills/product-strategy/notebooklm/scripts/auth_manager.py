@@ -18,6 +18,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Optional, Dict, Any
+from urllib.parse import urlparse
 
 from patchright.sync_api import sync_playwright, BrowserContext
 
@@ -114,8 +115,12 @@ class AuthManager:
             page.goto("https://notebooklm.google.com", wait_until="domcontentloaded")
 
             # Check if already authenticated
-            # nosemgrep: python.lang.security.audit.url-endswith.url-endswith — checking browser redirect target in controlled Playwright session
-            if page.url.startswith("https://notebooklm.google.com") and "accounts.google.com" not in page.url:
+            parsed_url = urlparse(page.url)
+            if (
+                parsed_url.scheme == "https"
+                and parsed_url.hostname == "notebooklm.google.com"
+                and parsed_url.hostname != "accounts.google.com"
+            ):
                 print("  ✅ Already authenticated!")
                 self._save_browser_state(context)
                 return True
