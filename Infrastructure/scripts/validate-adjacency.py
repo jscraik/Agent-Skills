@@ -41,7 +41,6 @@ CANONICAL_PREFIXES = {
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
-    "Plugins/compound-engineering-router/skills/",
     "product/",
     "skills-antigravity/",
     "skills-system/",
