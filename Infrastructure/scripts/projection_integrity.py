@@ -70,13 +70,6 @@ SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
 
 MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
     MirrorProjection(
-        name="cache-coderabbit",
-        source_path="Plugins/coderabbit",
-        projection_path=".agents/plugins-runtime/cache/agent-skills-local/coderabbit",
-        tags=("plugin-caches",),
-        optional_when_missing=True,
-    ),
-    MirrorProjection(
         name="cache-harness-engineering",
         source_path="Plugins/harness-engineering",
         projection_path=".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
