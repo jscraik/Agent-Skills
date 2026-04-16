@@ -13,7 +13,7 @@ from typing import List, Optional
 skill_discovery_path = Path(__file__).resolve().parent / "skill_discovery.py"
 sys.path.insert(0, str(skill_discovery_path.parent))
 
-from lifecycle-and-sync.skill_discovery import main, parse_args, discover_skill_entries, SkillEntry, REPO_ROOT
+from skill_discovery import main, parse_args, discover_skill_entries, SkillEntry, REPO_ROOT
 
 
 @dataclass(frozen=True)

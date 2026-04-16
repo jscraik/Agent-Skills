@@ -194,6 +194,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
   - `codex --cd <subdir> "Show which instruction files are active."`
 - Confirm no contradictory instructions remain unresolved.
 - Fail fast: stop at first critical contradiction and request decision.
+- When the request asks to enforce TypeScript/CI/debug/git/troubleshooting governance, confirm those sections (or equivalent canonical section names) are present with the required command-level wording before completion.
 
 ## Project-tailored repo baseline
 
@@ -204,6 +205,11 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - For Python-capable repos, include a concise `## Python Environment and Dependency Management` baseline section by default when absent, then tailor only paths/overrides to repo evidence.
 - For repos that require preflight, include both the mandatory workflow snippet and `## Preflight Enforcement (REQUIRED)` block by default when absent, using repo-verified commands and supported flags.
 - For coding-standards requests, include a `## Quality Checks` baseline section by default when absent, using repo-native formatter/lint/typecheck/test commands and a pass-before-complete rule.
+- For TypeScript repos, include either `## Code Quality` or `## TypeScript & Formatting` with this mandatory rule: always run `tsc --noEmit` and Biome formatting after code changes, and fix all strict-mode errors before committing.
+- Include `## Testing & CI` when CI workflow guidance is in scope, with an explicit merge gate: verify the actual CI pipeline status is green before merge and never assume tests passed.
+- Include `## Debugging` when failure triage guidance is in scope, with a deterministic CI checklist in this order: test case sensitivity, symlinks/projection sync, CodeQL alerts, Biome formatting, TypeScript strict-mode errors.
+- Include `## Git Workflows` when merge procedures are in scope, requiring full merge-conflict cleanup plus a second-pass check that no unmerged or stashed conflict files remain.
+- Include `## Troubleshooting` when package-install/auth incidents are in scope, requiring immediate `.npmrc` token configuration checks for npm 404/auth failures.
 - Keep `Required tooling` and `Required repo paths` limited to what the repo actually needs.
 - Keep architecture-diagram paths repo-specific: mention `.diagram/`, `.diagrams/`, or another diagram directory only when that exact path is documented or verified in the repo.
 - Keep `.harness/memory/LEARNINGS.md` opt-in at the repo level unless the repo has explicitly adopted the harness-memory convention.
