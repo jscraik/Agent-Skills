@@ -14,7 +14,7 @@ This document defines review-time governance for AI-authored changes and AI-cent
 For changes touching skill authoring family behavior (`skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator`), reviewers must require the `authoring-family-gate` CI job.
 
 The gate is implemented by:
-- `bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+- `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 Reviewers should expect this gate to enforce:
 - Contract schema and benchmark parity across all four family skills.

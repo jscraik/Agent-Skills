@@ -24,7 +24,7 @@ A long-lived PR branch (`codex/context7-skill-wizard-pr-20260410`) became non-me
 During reconciliation, repository hooks also blocked normal commit/push flow:
 
 - commit-time validation failed due projection-integrity drift not caused by the conflict fix;
-- pre-push diagnostics repeatedly terminated during `Infrastructure/scripts/validate_skill_authoring_family.sh` (`Terminated: 15`), preventing normal push despite a clean conflict resolution.
+- pre-push diagnostics repeatedly terminated during `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` (`Terminated: 15`), preventing normal push despite a clean conflict resolution.
 
 ## Resolution
 
@@ -64,10 +64,10 @@ The durable rule is: isolate merge-conflict work from unrelated local edits firs
   - `git commit --no-verify ...`
   - `git push --no-verify origin HEAD:codex/context7-skill-wizard-pr-20260410`
 - Hook failure signal captured during normal flow:
-  - pre-push diagnostics failed with `make: *** [hooks-pre-push] Terminated: 15` while running `Infrastructure/scripts/validate_skill_authoring_family.sh`.
+  - pre-push diagnostics failed with `make: *** [hooks-pre-push] Terminated: 15` while running `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 
 ## Follow-up
 
-- Investigate why `Infrastructure/scripts/validate_skill_authoring_family.sh` intermittently terminates under hook execution even with a clean tree.
+- Investigate why `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` intermittently terminates under hook execution even with a clean tree.
 - Keep conflict-only remediation commits narrowly scoped and avoid bundling repo-wide drift fixes in the same PR.
 - If hook bypass is used, record exact blocker text and verify PR mergeability and CI checks immediately afterward.

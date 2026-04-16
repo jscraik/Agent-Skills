@@ -38,7 +38,7 @@ constraints:
   - Follow existing patterns from recursive_skill_loop.py
 
 output_expectations:
-  - Working Python script at Infrastructure/scripts/run_skill_genome_loop.py
+  - Working Python script at Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py
   - Runbook at docs/skill-graphs/runbooks/skill-genome-loop.md
   - All validation checks pass
   - Acceptance criteria checkboxes updated

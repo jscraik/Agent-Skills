@@ -74,7 +74,7 @@ Validated on 2026-04-04 with:
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case builder-round-metadata-contract`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`
 - `python3 Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
-- `bash Infrastructure/scripts/verify-work.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Follow-up
 

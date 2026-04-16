@@ -43,7 +43,7 @@ Validation treats missing promotion_approved event and missing run/events.jsonl 
 ## Technical Details
 ### Affected files/components
 - `/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py`
-- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/validate_recursive_promotions.sh`
+- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/telemetry/daily-outputs.md`
 
 ## Acceptance Criteria

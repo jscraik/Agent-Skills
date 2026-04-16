@@ -45,7 +45,7 @@ Out of scope:
 ## Current constraints
 
 These are hard constraints from the current repo state and scripts:
-- `Infrastructure/scripts/sync_skills.sh` rejects a symlinked `skills-antigravity` path. Any plan requiring that symlink is invalid.
+- `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` rejects a symlinked `skills-antigravity` path. Any plan requiring that symlink is invalid.
 - local marketplace runtime cache authoritative derived location is `.agents/plugins-runtime/cache/**`.
 - legacy visible local marketplace cache `Plugins/cache/agent-skills-local/**` must stay removed and must not be reintroduced as compatibility output.
 - runtime/projection surfaces (`.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**`) are governed by path-ownership checks and must remain derived.
@@ -246,8 +246,8 @@ Phase 0 must produce baseline artifacts:
 - `GOVERNANCE/runtime-separation/baseline.schema.json`
 
 Required comparator:
-- `python3 Infrastructure/scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current <artifact>`
-- current artifact producer: `python3 Infrastructure/scripts/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`
+- `python3 Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current <artifact>`
+- current artifact producer: `python3 Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`
 
 Comparator output must provide:
 - stable blocker ids;
@@ -264,11 +264,11 @@ Comparator input contract:
 ## Parity artifact contract
 
 Parity gates must compare deterministic fields emitted by the same build paths in both repo-local and profile-home lanes:
-- `python3 Infrastructure/scripts/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json` must emit:
+- `python3 Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json` must emit:
   - `policy_identity` at `summary.policy_identity`;
   - `discovery_identity` at `summary.discovery_identity`;
   - `canonical_root_digest` at `summary.canonical_root_digest`.
-- `bash Infrastructure/scripts/validate_runtime_separation_profile_home.sh` must emit the same fields for profile-home evaluation under the same JSON paths.
+- `bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh` must emit the same fields for profile-home evaluation under the same JSON paths.
 - `policy_identity` is the deterministic hash over exported canonical root sets, discovery precedence, overlap allowlists, and writer-authority assignments after manifest expansion.
 - `discovery_identity` is the deterministic hash over discovery-surface exports: visible runtime identities per surface, precedence order, and overlap-class allowlists after manifest expansion.
 - `canonical_root_digest` is `sha256` over sorted lane-independent logical canonical root identities exported by policy (root ids/templates), not absolute filesystem paths.
@@ -331,22 +331,22 @@ Control-plane ownership rules:
     - targeted baseline plugin status checks from declared slices: `bin/ask plugins status <plugin> --json`
     - `bin/ask plugins doctor --json`
     - `bin/ask repo validate`
-    - `bash Infrastructure/scripts/verify-work.sh --project-governance`
-    - `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-    - `bash Infrastructure/scripts/check_plugin_skill_shadowing.sh`
-    - `bash Infrastructure/scripts/validate_projection_integrity.sh`
+    - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+    - `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+    - `bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh`
+    - `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`
     - `bin/ask repo doctor-catalog --strict`
   - baseline must include `accepted_preexisting_blockers` entries with blocker id, source command, owner, drift class, and rationale.
   - baseline policy is explicit: either `bin/ask repo doctor-catalog --strict` is green, or only allowlisted baseline drift classes are present and no new/worse drift is allowed.
 - Actions:
-  - create `GOVERNANCE/runtime-separation/slices.yaml`, `GOVERNANCE/runtime-separation/slices.schema.json`, and `Infrastructure/scripts/validate_runtime_separation_manifest.py`;
+  - create `GOVERNANCE/runtime-separation/slices.yaml`, `GOVERNANCE/runtime-separation/slices.schema.json`, and `Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py`;
   - create generated authoritative inventory outputs `GOVERNANCE/runtime-separation/readers.yaml` and `GOVERNANCE/runtime-separation/path-consumers.yaml`;
-  - create `GOVERNANCE/runtime-separation/baseline.json`, `GOVERNANCE/runtime-separation/baseline.schema.json`, `Infrastructure/scripts/build_runtime_separation_current.py`, and `Infrastructure/scripts/compare_runtime_separation_baseline.py`;
-  - create `Infrastructure/scripts/verify_runtime_separation_reader_compat.py` with fixture-driven `N`/`N-1` coverage;
-  - create `Infrastructure/scripts/verify_runtime_separation_writer_mutations.sh --strict` for authoritative-writer enforcement;
-  - create `Infrastructure/scripts/validate_runtime_separation_profile_home.sh` for ephemeral profile-home projection validation;
-  - create `Infrastructure/scripts/scan_runtime_separation_consumers.py --emit-readers --emit-path-consumers --emit-digests` and gate stale digest drift;
-  - create `Infrastructure/scripts/verify_wrapper_contract_fixtures.sh --runtime-separation` with fixture set for argv, exit codes, output markers, and JSON schema expectations;
+  - create `GOVERNANCE/runtime-separation/baseline.json`, `GOVERNANCE/runtime-separation/baseline.schema.json`, `Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py`, and `Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py`;
+  - create `Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py` with fixture-driven `N`/`N-1` coverage;
+  - create `Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict` for authoritative-writer enforcement;
+  - create `Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh` for ephemeral profile-home projection validation;
+  - create `Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py --emit-readers --emit-path-consumers --emit-digests` and gate stale digest drift;
+  - create `Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh --runtime-separation` with fixture set for argv, exit codes, output markers, and JSON schema expectations;
   - make scan roots and identity canonical in shared policy (`selection_policy.py`) and ensure loaders consume policy exports rather than hard-coded root sets;
   - add `Infrastructure/catalog/**` root support behind migration flags; flags only enable manifest-aware behavior and may not encode per-slice migration state;
   - codify canonical identity checks in freshness validation;
@@ -369,7 +369,7 @@ Control-plane ownership rules:
 
 1. Phase A: ownership enforcement and projection contract freeze
 - Actions:
-  - enforce boundaries via `Infrastructure/scripts/check_path_ownership_boundaries.sh`;
+  - enforce boundaries via `Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`;
   - publish ownership and projection-read-only policy in docs under `GOVERNANCE/**` and agent docs;
   - freeze external compatibility invariants only for `.agents/**`, `.agent/skills/**`, `runtime/**`, `skills-antigravity/**`, and plugin runtime cache surfaces (allowed writers, discovery/precedence, visibility, and negative tests).
   - defer internal projection-generation behavior freeze until Phase B wrapper/mechanics extraction evidence is green.
@@ -382,9 +382,9 @@ Control-plane ownership rules:
 - Actions:
   - move mechanics internals into `Infrastructure/factory/**`;
   - keep wrapper contracts stable until Phase F cleanup: entrypoint path, supported flags, exit-code semantics, and machine-readable output markers for:
-    - `bash Infrastructure/scripts/sync_skills.sh`
+    - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
     - `bash Infrastructure/scripts/validate_all.sh`
-    - `bash Infrastructure/scripts/verify-work.sh --project-governance`
+    - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
     - `bin/ask repo status`
     - `bin/ask repo validate`
   - migrate writer surfaces (skill/plugin create/install/import/harden flows) to manifest-derived root selection and enforce authoritative writer contract.
@@ -465,19 +465,19 @@ Control-plane ownership rules:
 ## User-facing acceptance matrix
 
 Every phase promotion requires these user-visible flows to pass against the recorded Phase 0 baseline:
-- comparator output from `Infrastructure/scripts/compare_runtime_separation_baseline.py` reports no new blocker ids/classes/severity regressions.
+- comparator output from `Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py` reports no new blocker ids/classes/severity regressions.
 - comparator enforces slice-scoped `planned_deltas` only (no undeclared field/value changes permitted).
 - `bin/ask repo status --json` remains baseline-compatible for comparator fields.
 - `bin/ask skills list --json` remains baseline-compatible for comparator fields.
 - `bin/ask plugins doctor --json` remains baseline-compatible for comparator fields.
 - targeted `plugin_lifecycle_checks` provide baseline-compatible `bin/ask plugins status <plugin> --json` evidence for promoted plugin slices.
 - slice `representative_commands` in `slices.yaml` pass for each promoted slice using the full structured tuple (`command`, `comparison_mode`, `args_legacy`, `args_canonical`, `expected_exit_code`, `normalized_assertions`, `expected_result_ref`) while compatibility artifacts exist.
-- `bash Infrastructure/scripts/validate_projection_integrity.sh` reports no projection-integrity regressions.
-- `bash Infrastructure/scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap` reports no local-marketplace-cache regressions.
-- `bash Infrastructure/scripts/validate_runtime_separation_profile_home.sh` reports no profile-home parity regressions for plugin status/doctor/cache behavior.
+- `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh` reports no projection-integrity regressions.
+- `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap` reports no local-marketplace-cache regressions.
+- `bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh` reports no profile-home parity regressions for plugin status/doctor/cache behavior.
 - targeted-slice `plugin_lifecycle_checks` selected by active phase key (`applies_to_phase` contains promoted phase key or `all`) pass full tuple evaluation (`expected_exit_code` + `normalized_assertions`) and report parity.
 - repo-local and profile-home lanes emit identical `policy_identity`, `discovery_identity`, and `canonical_root_digest`.
-- `bash Infrastructure/scripts/verify_runtime_separation_writer_mutations.sh --strict` reports no non-authoritative writes.
+- `bash Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict` reports no non-authoritative writes.
 - `bin/ask repo doctor-catalog --strict` is baseline-compatible with no new/worse drift classes.
 - `bin/ask repo validate` is baseline-compatible with no new required failures.
 
@@ -486,61 +486,61 @@ If any acceptance flow fails, phase promotion is blocked.
 ## Validation ladder
 
 Phase 0 bootstrap ladder (before new validators exist):
-- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh`
-- `bash Infrastructure/scripts/verify-work.sh --project-governance`
+- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
 - `bin/ask skills list --json`
 - `bin/ask plugins doctor --json`
 - targeted baseline plugin status checks from declared slices: `bin/ask plugins status <plugin> --json`
 - `bin/ask repo validate`
 - `bin/ask repo doctor-catalog --strict`
-- `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-- `bash Infrastructure/scripts/check_plugin_skill_shadowing.sh`
-- `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --quiet`
-- `bash Infrastructure/scripts/validate_projection_integrity.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+- `bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh`
+- `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --quiet`
+- `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`
 
 Phase A-F per-PR mandatory lane (after Phase 0 deliverables land):
 - core lane (all migration PRs):
-- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh`
-- `bash Infrastructure/scripts/verify-work.sh --project-governance`
+- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
 - purge stale derived artifacts for affected slices.
 - regenerate projections/caches for affected slices before any comparator or plugin parity checks.
 - `bin/ask repo validate`
-- `python3 Infrastructure/scripts/validate_runtime_separation_manifest.py --strict`
-- `python3 Infrastructure/scripts/verify_selection_contract.py`
-- `python3 Infrastructure/scripts/scan_runtime_separation_consumers.py --emit-readers --emit-path-consumers --emit-digests --strict`
-- `python3 Infrastructure/scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml`
-- `python3 Infrastructure/scripts/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`
-- `bash Infrastructure/scripts/verify_wrapper_contract_fixtures.sh --runtime-separation`
-- `python3 Infrastructure/scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current GOVERNANCE/runtime-separation/current.json`
-- `bash Infrastructure/scripts/verify_runtime_separation_writer_mutations.sh --strict`
+- `python3 Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py --strict`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_selection_contract.py`
+- `python3 Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py --emit-readers --emit-path-consumers --emit-digests --strict`
+- `python3 Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml`
+- `python3 Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`
+- `bash Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh --runtime-separation`
+- `python3 Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current GOVERNANCE/runtime-separation/current.json`
+- `bash Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict`
 - plugin lane (required when affected slices include plugins or plugin projections):
 - `bin/ask plugins doctor --json`
 - targeted-slice `plugin_lifecycle_checks` selected by active phase key (`applies_to_phase` contains promoted phase key or `all`) with full tuple evaluation (`expected_exit_code` + `normalized_assertions`), including `bin/ask plugins status <plugin> --json` where declared.
-- `bash Infrastructure/scripts/validate_runtime_separation_profile_home.sh`
+- `bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh`
 - runtime/cache lane (required when affected slices touch runtime or cache projections):
-- `bash Infrastructure/scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
+- `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
 
 Phase A-F phase-promotion exhaustive lane:
-- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh`
-- `bash Infrastructure/scripts/verify-work.sh --project-governance`
-- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh` (rerun after verify-work to catch generated-path drift)
+- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (rerun after verify-work to catch generated-path drift)
 - purge stale derived artifacts for all promoted slices.
 - regenerate projections/caches for all promoted slices before exhaustive checks.
 - `bin/ask repo validate`
 - `bin/ask repo doctor-catalog --strict`
-- `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-- `bash Infrastructure/scripts/check_plugin_skill_shadowing.sh`
-- `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --quiet`
-- `bash Infrastructure/scripts/validate_projection_integrity.sh`
-- `bash Infrastructure/scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+- `bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh`
+- `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --quiet`
+- `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`
+- `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
 - full-slice `representative_commands` sweep for all promoted slices using `comparison_mode` and asserting `expected_exit_code` plus `normalized_assertions` against `expected_result_ref`.
 - targeted-slice `plugin_lifecycle_checks` selected by active phase key (`applies_to_phase` contains promoted phase key or `all`) with full tuple evaluation (`expected_exit_code` + `normalized_assertions`).
 
 Additional negative ownership checks for migration PRs:
-- direct edits to `.agents/**`, `skills-antigravity/**`, or `runtime/**` must fail `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh` unless the slice is explicitly marked as projection mechanics;
+- direct edits to `.agents/**`, `skills-antigravity/**`, or `runtime/**` must fail `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` unless the slice is explicitly marked as projection mechanics;
 - direct edits to `.agent/skills/**` must fail the same ownership guard unless the slice is explicitly marked as projection mechanics;
 - cache-path edits must fail without explicit intent and may run only with `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 PATH_OWNERSHIP_GUARD_SCOPE=working`;
-- alias-path and realpath projection behavior must be verified via `bash Infrastructure/scripts/validate_projection_integrity.sh`; do not infer alias safety from git diff output alone;
+- alias-path and realpath projection behavior must be verified via `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`; do not infer alias safety from git diff output alone;
 - manifest schema and lane constraints are required gates for every migration PR.
 
 ## Risks and rollback
@@ -564,18 +564,18 @@ Rollback model:
 Mandatory rollback validation:
 - execute slice `rollback_commands` from manifest;
 - run purge/regenerate steps for affected derived surfaces;
-- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/check_path_ownership_boundaries.sh`
-- `bash Infrastructure/scripts/verify-work.sh --project-governance`
+- `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
 - `bin/ask repo validate`
 - `bin/ask repo doctor-catalog --strict`
-- `bash Infrastructure/scripts/validate_projection_integrity.sh`
+- `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`
 - `bin/ask plugins doctor --json`
 - affected-slice `plugin_lifecycle_checks` with `applies_to_rollback=true`, each with full tuple evaluation (`expected_exit_code` + `normalized_assertions`), including `bin/ask plugins status <plugin> --json` where declared
 - full `representative_commands` sweep for affected slices using `comparison_mode`, `expected_exit_code`, and `normalized_assertions`.
-- `bash Infrastructure/scripts/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
-- `bash Infrastructure/scripts/validate_runtime_separation_profile_home.sh`
-- `python3 Infrastructure/scripts/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`
-- `python3 Infrastructure/scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current GOVERNANCE/runtime-separation/current.json`
+- `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home .agents --cache-rel plugins-runtime/cache --strict --show-overlap`
+- `bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh`
+- `python3 Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py --output GOVERNANCE/runtime-separation/current.json`
+- `python3 Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current GOVERNANCE/runtime-separation/current.json`
 - policy identity, discovery identity, and canonical root digest parity across repo-local/profile-home lanes
 
 ## Definition of done
@@ -593,8 +593,8 @@ Mandatory rollback validation:
 - planned migration output changes are declared via slice-scoped `planned_deltas`; undeclared comparator drift is blocked.
 - promotion/rollback validation includes both repo-local and profile-home lanes for plugin status/doctor/cache parity.
 - command contracts remain compatible at closeout: entrypoint path, supported flags, exit-code semantics, and output schema/text markers for:
-  - `bash Infrastructure/scripts/sync_skills.sh`
+  - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
   - `bash Infrastructure/scripts/validate_all.sh`
-  - `bash Infrastructure/scripts/verify-work.sh --project-governance`
+  - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
   - `bin/ask repo status`
   - `bin/ask repo validate`

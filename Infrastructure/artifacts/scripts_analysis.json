@@ -1,0 +1,1362 @@
+{
+  "check_codex_home_skill_overlap.sh": {
+    "type": "shell",
+    "size": 8644,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "verify_skill_catalog_freshness.py": {
+    "type": "python",
+    "size": 29214,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "pathlib",
+      "json",
+      "datetime",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Verify skill catalog freshness and phase-one lifecycle readiness."
+  },
+  "codex-learn": {
+    "type": "other",
+    "size": 6584,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "test_skill_creator_lifecycle_scaffold.py": {
+    "type": "python",
+    "size": 2462,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "pathlib",
+      "__future__"
+    ],
+    "called_scripts": [
+      "init_skill.py"
+    ],
+    "docstring": "Regression tests for lifecycle-aware skill scaffolding."
+  },
+  "validate_runtime_separation_profile_home.py": {
+    "type": "python",
+    "size": 6192,
+    "imports": [
+      "typing",
+      "argparse",
+      "hashlib",
+      "pathlib",
+      "os",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Emit profile-home runtime-separation artifact from an existing current artifact."
+  },
+  "check_path_ownership_boundaries.sh": {
+    "type": "shell",
+    "size": 6476,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "Use a temporary file for changed paths to avoid bash 3.2 associative-array limitation."
+  },
+  "diagnose_skill.py": {
+    "type": "python",
+    "size": 17427,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "verify_skill_catalog_freshness",
+      "pathlib",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Diagnose why a skill isn't loading in Codex, Claude Code, or Antigravity."
+  },
+  "wiki_lint.py": {
+    "type": "python",
+    "size": 7495,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "sys",
+      "pathlib",
+      "datetime",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Lint the Skill Ops Wiki for link integrity, index coverage, and review freshness."
+  },
+  "test_bootstrap_recursive_skill_graph_artifacts.py": {
+    "type": "python",
+    "size": 4445,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "sys",
+      "pathlib",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [
+      "bootstrap_recursive_skill_graph_artifacts.py"
+    ],
+    "docstring": "Regression tests for the Skill Graph bootstrap utility."
+  },
+  "verify_verify_work_scope_flags.py": {
+    "type": "python",
+    "size": 2119,
+    "imports": [
+      "__future__",
+      "pathlib"
+    ],
+    "called_scripts": [
+      "Infrastructure/scripts/validation-and-linting/verify-work.sh"
+    ],
+    "docstring": "Fail if verify-work usage contract drifts from governance scope contract."
+  },
+  "validate_skill_authoring_family_benchmarks.py": {
+    "type": "python",
+    "size": 32209,
+    "imports": [
+      "datetime",
+      "dataclasses",
+      "typing",
+      "functools",
+      "argparse",
+      "shutil",
+      "__future__",
+      "sys",
+      "pathlib",
+      "importlib.util",
+      "os",
+      "json",
+      "re"
+    ],
+    "called_scripts": [
+      "skill_graph_inventory.py"
+    ],
+    "docstring": "Deterministic benchmark checks for the skill-authoring family."
+  },
+  "validate-adjacency.py": {
+    "type": "python",
+    "size": 7570,
+    "imports": [
+      "os"
+    ],
+    "called_scripts": [],
+    "docstring": "validate-adjacency.py  \u2014  Detect drift between adjacency.yaml and SKILL.md See Also tables."
+  },
+  "verify_router_schema.py": {
+    "type": "python",
+    "size": 15009,
+    "imports": [
+      "skill_router_schema",
+      "typing",
+      "argparse",
+      "sys",
+      "pathlib",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Validate selection/router JSON payloads for schema and telemetry safety."
+  },
+  "codex-preflight.sh": {
+    "type": "shell",
+    "size": 21094,
+    "imports": [],
+    "called_scripts": [
+      "scripts/harness-cli.sh",
+      "./scripts/codex-preflight/codex-preflight.sh"
+    ],
+    "docstring": "usage prints the CLI usage text, available options, examples, and the legacy positional-interface note for the codex preflight script."
+  },
+  "check-related-tests.sh": {
+    "type": "shell",
+    "size": 660,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "test_projection_integrity.py": {
+    "type": "python",
+    "size": 16676,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "sys",
+      "pathlib",
+      "importlib.util",
+      "os",
+      "__future__"
+    ],
+    "called_scripts": [
+      "projection_integrity.py",
+      "script.sh"
+    ],
+    "docstring": "Unit tests for projection integrity helpers and mirror policy."
+  },
+  "verify_ask_cli.py": {
+    "type": "python",
+    "size": 1971,
+    "imports": [
+      "subprocess",
+      "sys",
+      "pathlib",
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "canonical_skill_roots.py": {
+    "type": "python",
+    "size": 3776,
+    "imports": [
+      "__future__",
+      "pathlib",
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": "Shared skill-lane ownership contract for scaffold and validation workflows."
+  },
+  "docs_lint.py": {
+    "type": "python",
+    "size": 24944,
+    "imports": [
+      "subprocess",
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "sys",
+      "pathlib",
+      "os",
+      "json",
+      "datetime",
+      "urllib.parse",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Lint repository docs conventions for Codex-friendly docs governance."
+  },
+  "run_recursive_rollout_drill.sh": {
+    "type": "shell",
+    "size": 5322,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "build_skill_state_map.py": {
+    "type": "python",
+    "size": 51873,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "pathlib",
+      "json",
+      "datetime",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Build a single HTML skill state map from existing recursive-skill artifacts."
+  },
+  "validate_skill_count.py": {
+    "type": "python",
+    "size": 1655,
+    "imports": [
+      "re",
+      "pathlib",
+      "sys"
+    ],
+    "called_scripts": [],
+    "docstring": "Validate that SKILL.md total_skills matches actual skill count."
+  },
+  "check-diagram-freshness.sh": {
+    "type": "shell",
+    "size": 3675,
+    "imports": [],
+    "called_scripts": [
+      "scripts/skill-graph/refresh-diagram-context.sh"
+    ],
+    "docstring": ""
+  },
+  "validate-commit-msg.js": {
+    "type": "other",
+    "size": 3369,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "sync_plugin_factory_family.sh": {
+    "type": "shell",
+    "size": 211,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py"
+    ],
+    "docstring": ""
+  },
+  "gen-skill-graph.py": {
+    "type": "python",
+    "size": 20075,
+    "imports": [
+      "subprocess",
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": "gen-skill-graph.py  \u2014  Generate an interactive skill-graph HTML visualisation."
+  },
+  "lint_openai_skill_format.sh": {
+    "type": "shell",
+    "size": 3560,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "usage prints the help text that describes script invocation and the required and allowed top-level frontmatter keys for SKILL.md linting."
+  },
+  "skill_router_metrics.py": {
+    "type": "python",
+    "size": 3985,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "collections",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Aggregate router telemetry into first-hit and guardrail metrics."
+  },
+  "run_skill_genome_loop.py": {
+    "type": "python",
+    "size": 22982,
+    "imports": [
+      "contextlib",
+      "typing",
+      "argparse",
+      "__future__",
+      "hashlib",
+      "pathlib",
+      "json",
+      "datetime",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Skill Genome Loop - nightly draft PR candidate generator."
+  },
+  "validate_all.sh": {
+    "type": "shell",
+    "size": 12592,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh",
+      "Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh",
+      "Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh",
+      "Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh",
+      "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh",
+      "Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh",
+      "Infrastructure/scripts/validation-and-linting/lint_skill_types.sh",
+      "Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh",
+      "Infrastructure/scripts/validate_all.sh",
+      "Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh",
+      "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh"
+    ],
+    "docstring": "Consolidated validation runner - one command to check everything"
+  },
+  "sync_skills.sh": {
+    "type": "shell",
+    "size": 54996,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to ensure only one sync run runs at a time, waits briefly for in-progress initialisation, and reclaims stale locks (with PID or based on directory mtime) before failing."
+  },
+  "ensure-gh-cli.sh": {
+    "type": "shell",
+    "size": 3405,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "human_promote_recursive_run.sh": {
+    "type": "shell",
+    "size": 25352,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "M-01: run_id must be a safe identifier \u2014 no path separators, dotdot, or"
+  },
+  "test_codex_env_common.py": {
+    "type": "python",
+    "size": 17046,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "pathlib",
+      "os",
+      "__future__"
+    ],
+    "called_scripts": [
+      "codex_env_common.sh"
+    ],
+    "docstring": "Tests for Infrastructure/scripts/codex-preflight/codex_env_common.sh changes introduced in this PR."
+  },
+  "codex-preflight-local-memory-legacy.sh": {
+    "type": "shell",
+    "size": 15840,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "extract_last_json_line prints the last input line that begins with `{`"
+  },
+  "graph-diff.py": {
+    "type": "python",
+    "size": 3207,
+    "imports": [
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": "graph-diff.py  \u2014  Compare two skill-edges JSON snapshots and print a summary."
+  },
+  "check-semgrep-changed.sh": {
+    "type": "shell",
+    "size": 2146,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "verify_wrapper_contract_fixtures.py": {
+    "type": "python",
+    "size": 6641,
+    "imports": [
+      "subprocess",
+      "typing",
+      "argparse",
+      "pathlib",
+      "os",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Validate JSON envelope contracts for ask wrappers used by runtime-separation checks."
+  },
+  "check-environment.sh": {
+    "type": "shell",
+    "size": 13503,
+    "imports": [],
+    "called_scripts": [
+      "scripts/validation-and-linting/check-related-tests.sh",
+      "scripts/validation-and-linting/check-semgrep-changed.sh",
+      "scripts/validation-and-linting/check-staged-secrets.sh",
+      "scripts/validation-and-linting/validate-codestyle.sh",
+      "scripts/validation-and-linting/check-doc-style.sh",
+      "scripts/harness-cli.sh"
+    ],
+    "docstring": "Local environment preflight (strict)"
+  },
+  "skill_scan.py": {
+    "type": "python",
+    "size": 10389,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "pathlib",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Fast shared scanner for repository skill metadata and quality checks."
+  },
+  "build_runtime_separation_current.py": {
+    "type": "python",
+    "size": 19445,
+    "imports": [
+      "subprocess",
+      "typing",
+      "argparse",
+      "sys",
+      "hashlib",
+      "pathlib",
+      "os",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Build the current runtime-separation comparator artifact."
+  },
+  "check-hub-stability.py": {
+    "type": "python",
+    "size": 3262,
+    "imports": [
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": "check-hub-stability.py  \u2014  CI gate: block deletion or rename of SKILL.md files"
+  },
+  "verify_question_lifecycle_contract.py": {
+    "type": "python",
+    "size": 4250,
+    "imports": [
+      "sys",
+      "pathlib",
+      "dataclasses",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Verify repo-wide question lifecycle contract hygiene."
+  },
+  "skill_discovery.py": {
+    "type": "python",
+    "size": 18419,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "__future__",
+      "pathlib",
+      "selection_policy",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Shared skill catalog helpers for counting and rendering the root index."
+  },
+  "check-staged-secrets.sh": {
+    "type": "shell",
+    "size": 557,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "generate-tooling-doc.sh": {
+    "type": "shell",
+    "size": 1738,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/generate-tooling-doc.sh"
+    ],
+    "docstring": "Tooling Inventory"
+  },
+  "test_plugin_creator_lifecycle_scaffold.py": {
+    "type": "python",
+    "size": 3731,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "pathlib",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [
+      "create_basic_plugin.py"
+    ],
+    "docstring": "Regression tests for lifecycle-aware plugin scaffolding."
+  },
+  "verify_ask_cli_final.py": {
+    "type": "python",
+    "size": 2351,
+    "imports": [
+      "subprocess",
+      "sys",
+      "pathlib",
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "bootstrap_recursive_skill_graph_artifacts.py": {
+    "type": "python",
+    "size": 7132,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "pathlib",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Bootstrap Skill Graph control and canonical lesson artifact directories."
+  },
+  "test_plugin_creator_marketplace_security.py": {
+    "type": "python",
+    "size": 3278,
+    "imports": [
+      "unittest",
+      "tempfile",
+      "pathlib",
+      "importlib.util",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [
+      "create_basic_plugin.py"
+    ],
+    "docstring": "Security regression tests for plugin-creator marketplace scaffolding."
+  },
+  "run_recursive_skill_shadow_cycle.sh": {
+    "type": "shell",
+    "size": 9516,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "status.sh": {
+    "type": "shell",
+    "size": 1397,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py",
+      "Infrastructure/scripts/validate_all.sh"
+    ],
+    "docstring": "Quick status overview for agent-skills repository"
+  },
+  "skill_spotlight.py": {
+    "type": "python",
+    "size": 3333,
+    "imports": [
+      "random",
+      "pathlib",
+      "json",
+      "datetime"
+    ],
+    "called_scripts": [],
+    "docstring": "Generate skill spotlight for daily health report."
+  },
+  "codex_env_common.sh": {
+    "type": "shell",
+    "size": 1631,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "Shared Codex environment bootstrap for .codex/environments/environment.toml."
+  },
+  "build_learning_posture_pilot_summary.py": {
+    "type": "python",
+    "size": 13649,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Build pilot conformance summary for learning-preserving posture work."
+  },
+  "validate_plan_graphs.sh": {
+    "type": "shell",
+    "size": 2407,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "compute-edge-weights.py": {
+    "type": "python",
+    "size": 3350,
+    "imports": [
+      "math",
+      "shutil",
+      "itertools",
+      "collections",
+      "json",
+      "datetime"
+    ],
+    "called_scripts": [],
+    "docstring": "compute-edge-weights.py  \u2014  Analyse Codex session logs for skill co-invocation"
+  },
+  "skill_catalog.py": {
+    "type": "python",
+    "size": 1744,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "sys",
+      "pathlib",
+      "skill_discovery"
+    ],
+    "called_scripts": [
+      "skill_discovery.py"
+    ],
+    "docstring": "Compatibility shim for skill_catalog.py \u2192 skill_discovery.py"
+  },
+  "codex-enforced": {
+    "type": "other",
+    "size": 2716,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "scan_runtime_separation_consumers.py": {
+    "type": "python",
+    "size": 3540,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "hashlib",
+      "__future__",
+      "yaml"
+    ],
+    "called_scripts": [],
+    "docstring": "Refresh runtime-separation consumer inventory digests and validate inventory shape."
+  },
+  "validate-codestyle.sh": {
+    "type": "shell",
+    "size": 3202,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "test_wiki_lint_llm_reference.py": {
+    "type": "python",
+    "size": 40953,
+    "imports": [
+      "wiki_lint",
+      "unittest",
+      "tempfile",
+      "__future__",
+      "sys",
+      "pathlib",
+      "datetime",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Tests for the LLM Wiki Reference PR changes."
+  },
+  "check_plugin_skill_shadowing.sh": {
+    "type": "shell",
+    "size": 5019,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
+    ],
+    "docstring": "Safely handle empty arrays under bash 3.x where ${arr[@]} with set -u"
+  },
+  "refresh-diagram-context.sh": {
+    "type": "shell",
+    "size": 9701,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "review_candidates.py": {
+    "type": "python",
+    "size": 10003,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Human review gate for skill genome loop candidates."
+  },
+  "test_skill_lifecycle_validation.py": {
+    "type": "python",
+    "size": 26833,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "textwrap",
+      "sys",
+      "pathlib",
+      "importlib.util",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [
+      "check_plugin_skill_shadowing.sh",
+      "verify_skill_catalog_freshness.py",
+      "selection_policy.py",
+      "skill_discovery.py",
+      "projection_integrity.py",
+      "sync_skills.sh"
+    ],
+    "docstring": "Regression tests for lifecycle readiness validation."
+  },
+  "test_validate_skill_authoring_family_benchmarks.py": {
+    "type": "python",
+    "size": 11040,
+    "imports": [
+      "unittest",
+      "tempfile",
+      "sys",
+      "pathlib",
+      "importlib.util",
+      "__future__"
+    ],
+    "called_scripts": [
+      "validate_skill_authoring_family_benchmarks.py"
+    ],
+    "docstring": "Regression tests for family benchmark path canonicalization."
+  },
+  "README.md": {
+    "type": "other",
+    "size": 2753,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "lint_skill_types.sh": {
+    "type": "shell",
+    "size": 136,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "verify_recursive_skill_graph_artifacts.py": {
+    "type": "python",
+    "size": 21464,
+    "imports": [
+      "dataclasses",
+      "typing",
+      "argparse",
+      "sys",
+      "pathlib",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Verify recursive skill-graph run artifacts and classify parity compliance."
+  },
+  "test_validate_all_runtime_separation.py": {
+    "type": "python",
+    "size": 50857,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "textwrap",
+      "tempfile",
+      "stat",
+      "__future__",
+      "pathlib",
+      "json",
+      "os",
+      "re"
+    ],
+    "called_scripts": [
+      "Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py",
+      "Infrastructure/scripts/validation-and-linting/verify_verify_work_scope_flags.py",
+      "Infrastructure/scripts/validation-and-linting/lint_skill_types.sh",
+      "Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh",
+      "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh",
+      "Infrastructure/scripts/validate_all.sh",
+      "Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py",
+      "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh",
+      "Infrastructure/scripts/validation-and-linting/validate_plan_graphs.sh",
+      "Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh",
+      "Infrastructure/scripts/testing/test_skill_lifecycle_validation.py",
+      "Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py",
+      "scan_runtime_separation_consumers.py",
+      "Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh",
+      "Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py",
+      "Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh",
+      "Infrastructure/scripts/validation-and-linting/verify_question_lifecycle_contract.py",
+      "Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh",
+      "validate_all.sh",
+      "Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",
+      "Infrastructure/scripts/validation-and-linting/docs_lint.py",
+      "Infrastructure/scripts/validation-and-linting/verify_selection_contract.py",
+      "Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py",
+      "Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh",
+      "Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py",
+      "Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh",
+      "Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py",
+      "Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py",
+      "Infrastructure/scripts/validation-and-linting/verify_router_schema.py",
+      "Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py"
+    ],
+    "docstring": "Tests for the runtime-separation checks added to validate_all.sh."
+  },
+  "test_plugin_installer_security.py": {
+    "type": "python",
+    "size": 12458,
+    "imports": [
+      "unittest",
+      "tempfile",
+      "sys",
+      "pathlib",
+      "importlib.util",
+      "os",
+      "__future__"
+    ],
+    "called_scripts": [
+      "install-plugin-from-github.py"
+    ],
+    "docstring": "Security-focused regression tests for plugin-installer GitHub import script."
+  },
+  "verify-work.sh": {
+    "type": "shell",
+    "size": 4093,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "preflight_paths_csv returns a comma-separated list of repository paths required for preflight verification for the given project stack."
+  },
+  "build-adjacency-yaml.py": {
+    "type": "python",
+    "size": 5943,
+    "imports": [
+      "os"
+    ],
+    "called_scripts": [],
+    "docstring": "build-adjacency-yaml.py  \u2014  Extract current See Also adjacency from all SKILL.md"
+  },
+  "validate_runtime_separation_profile_home.sh": {
+    "type": "shell",
+    "size": 693,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "verify_runtime_separation_writer_mutations.sh": {
+    "type": "shell",
+    "size": 1134,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh",
+      "Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh"
+    ],
+    "docstring": ""
+  },
+  "test_plugin_builder_marketplace_paths.py": {
+    "type": "python",
+    "size": 20965,
+    "imports": [
+      "unittest",
+      "tempfile",
+      "argparse",
+      "pathlib",
+      "importlib.util",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [
+      "plugin_builder.py"
+    ],
+    "docstring": "Regression tests for Codex plugin-builder marketplace path handling."
+  },
+  "test_wiki_commands.py": {
+    "type": "python",
+    "size": 4601,
+    "imports": [
+      "contextlib",
+      "unittest",
+      "tempfile",
+      "__future__",
+      "sys",
+      "pathlib",
+      "re",
+      "ask.commands"
+    ],
+    "called_scripts": [],
+    "docstring": "Targeted regression tests for wiki command helpers."
+  },
+  "prepare-worktree.sh": {
+    "type": "shell",
+    "size": 2023,
+    "imports": [],
+    "called_scripts": [
+      "scripts/validation-and-linting/verify-work.sh"
+    ],
+    "docstring": ""
+  },
+  "sync_skills_sandbox_safe.sh": {
+    "type": "shell",
+    "size": 963,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/validation-and-linting/lint_skill_types.sh"
+    ],
+    "docstring": ""
+  },
+  "validate_projection_integrity.sh": {
+    "type": "shell",
+    "size": 1648,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py",
+      "Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh"
+    ],
+    "docstring": ""
+  },
+  "test_skill_installer_security.py": {
+    "type": "python",
+    "size": 7177,
+    "imports": [
+      "contextlib",
+      "unittest",
+      "io",
+      "tempfile",
+      "sys",
+      "zipfile",
+      "pathlib",
+      "unittest.mock",
+      "importlib.util",
+      "os",
+      "__future__"
+    ],
+    "called_scripts": [
+      "install-skill-from-github.py"
+    ],
+    "docstring": "Security-focused regression tests for the skill-installer script."
+  },
+  "check-see-also.py": {
+    "type": "python",
+    "size": 3971,
+    "imports": [
+      "pathlib"
+    ],
+    "called_scripts": [],
+    "docstring": "check-see-also.py  \u2014  CI gate: new SKILL.md files in a PR must have a"
+  },
+  "test_verify_recursive_skill_graph_artifacts.py": {
+    "type": "python",
+    "size": 24428,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "typing",
+      "tempfile",
+      "sys",
+      "pathlib",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [
+      "verify_recursive_skill_graph_artifacts.py"
+    ],
+    "docstring": "Regression tests for recursive skill artifact parity verification."
+  },
+  "query-graph.py": {
+    "type": "python",
+    "size": 14831,
+    "imports": [
+      "collections",
+      "json"
+    ],
+    "called_scripts": [],
+    "docstring": "query-graph.py \u2014 CLI skill graph router."
+  },
+  "validate_runtime_separation_manifest.py": {
+    "type": "python",
+    "size": 14083,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "hashlib",
+      "__future__",
+      "yaml"
+    ],
+    "called_scripts": [],
+    "docstring": "Validate runtime-separation slice manifest invariants."
+  },
+  "sync_mcp.py": {
+    "type": "python",
+    "size": 9239,
+    "imports": [
+      "subprocess",
+      "shutil",
+      "sys",
+      "os",
+      "json",
+      "logging",
+      "re",
+      "shlex"
+    ],
+    "called_scripts": [],
+    "docstring": "Parse TOML via an available Python 3.11+ interpreter when possible."
+  },
+  "projection_integrity.py": {
+    "type": "python",
+    "size": 47670,
+    "imports": [
+      "subprocess",
+      "contextlib",
+      "dataclasses",
+      "typing",
+      "argparse",
+      "shutil",
+      "hashlib",
+      "pathlib",
+      "os",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Synchronize and verify canonical projection trees and aliases."
+  },
+  "setup-git-hooks.js": {
+    "type": "other",
+    "size": 4323,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "run_skill_router_rollback_drill.sh": {
+    "type": "shell",
+    "size": 1392,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "1) Active mode should allow requested policy mode."
+  },
+  "verify_ask_cli_modularity.py": {
+    "type": "python",
+    "size": 4715,
+    "imports": [
+      "pathlib",
+      "__future__",
+      "ast",
+      "argparse"
+    ],
+    "called_scripts": [],
+    "docstring": "Verify `bin/ask` stays parse/dispatch focused."
+  },
+  "lint_progressive_disclosure.sh": {
+    "type": "shell",
+    "size": 147,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "harness-cli.sh": {
+    "type": "shell",
+    "size": 1890,
+    "imports": [],
+    "called_scripts": [
+      "scripts/harness-cli.sh"
+    ],
+    "docstring": ""
+  },
+  "verify_selection_contract.py": {
+    "type": "python",
+    "size": 21391,
+    "imports": [
+      "datetime",
+      "ask.selection_contract",
+      "typing",
+      "argparse",
+      "sys",
+      "collections",
+      "pathlib",
+      "json",
+      "logging",
+      "selection_policy",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Deterministic fixture verifier for selection contract behavior."
+  },
+  "verify_wrapper_contract_fixtures.sh": {
+    "type": "shell",
+    "size": 349,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "selection_policy.py": {
+    "type": "python",
+    "size": 6473,
+    "imports": [
+      "typing",
+      "argparse",
+      "hashlib",
+      "json",
+      "__future__",
+      "shlex"
+    ],
+    "called_scripts": [],
+    "docstring": "Canonical selection/discovery policy shared by route, discovery, and sync."
+  },
+  "install_cron.sh": {
+    "type": "shell",
+    "size": 746,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "Install cron job for skill genome loop"
+  },
+  "verify_runtime_separation_reader_compat.py": {
+    "type": "python",
+    "size": 3402,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "json",
+      "__future__",
+      "yaml"
+    ],
+    "called_scripts": [],
+    "docstring": "Verify runtime-separation reader compatibility across schema versions."
+  },
+  "plan_graph_lint.py": {
+    "type": "python",
+    "size": 6262,
+    "imports": [
+      "typing",
+      "argparse",
+      "sys",
+      "pathlib",
+      "os",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Validate markdown plan files that include fenced YAML task-graph blocks."
+  },
+  "compare_runtime_separation_baseline.py": {
+    "type": "python",
+    "size": 4209,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Compare runtime-separation current artifact against baseline and fail on regressions."
+  },
+  "semgrep-pre-push.yml": {
+    "type": "other",
+    "size": 1004,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "cron_genome_loop.sh": {
+    "type": "shell",
+    "size": 1867,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": "Nightly cron job for skill genome loop"
+  },
+  "validate_skill_authoring_family.sh": {
+    "type": "shell",
+    "size": 24116,
+    "imports": [],
+    "called_scripts": [
+      "scripts/codex-preflight/codex-preflight.sh"
+    ],
+    "docstring": "Run repo preflight before any path-sensitive operations"
+  },
+  "test_sync_mcp.py": {
+    "type": "python",
+    "size": 11298,
+    "imports": [
+      "types",
+      "unittest",
+      "tempfile",
+      "sys",
+      "unittest.mock",
+      "pathlib",
+      "json",
+      "__future__",
+      "sync_mcp"
+    ],
+    "called_scripts": [],
+    "docstring": "Tests for Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py."
+  },
+  "check-doc-style.sh": {
+    "type": "shell",
+    "size": 649,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "gotcha_pipeline.py": {
+    "type": "python",
+    "size": 14784,
+    "imports": [
+      "typing",
+      "argparse",
+      "__future__",
+      "sys",
+      "hashlib",
+      "pathlib",
+      "os",
+      "json",
+      "datetime",
+      "re"
+    ],
+    "called_scripts": [],
+    "docstring": "Gotcha candidate pipeline with Learnings ingestion and question-gate artifacts."
+  },
+  "sync_projection_trees.sh": {
+    "type": "shell",
+    "size": 441,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py"
+    ],
+    "docstring": ""
+  },
+  "test_validate_recursive_promotions_script.py": {
+    "type": "python",
+    "size": 4473,
+    "imports": [
+      "subprocess",
+      "unittest",
+      "tempfile",
+      "shutil",
+      "pathlib",
+      "json",
+      "__future__"
+    ],
+    "called_scripts": [
+      "validate_recursive_promotions.sh"
+    ],
+    "docstring": "Regression tests for validate_recursive_promotions.sh changed-only strict mode."
+  },
+  "normalize_skill_headings.sh": {
+    "type": "shell",
+    "size": 3116,
+    "imports": [],
+    "called_scripts": [],
+    "docstring": ""
+  },
+  "verify_selection_gate_severity.py": {
+    "type": "python",
+    "size": 9586,
+    "imports": [
+      "typing",
+      "argparse",
+      "pathlib",
+      "json",
+      "datetime",
+      "__future__"
+    ],
+    "called_scripts": [],
+    "docstring": "Emit and validate selection gate severity artifact."
+  },
+  "validate_recursive_promotions.sh": {
+    "type": "shell",
+    "size": 9225,
+    "imports": [],
+    "called_scripts": [
+      "Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py"
+    ],
+    "docstring": "Resolve validator only when we actually have promotion files to validate"
+  }
+}

@@ -41,7 +41,7 @@ def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResu
 
     cmd = [
         "python3",
-        "Infrastructure/scripts/wiki_lint.py",
+        "Infrastructure/scripts/validation-and-linting/wiki_lint.py",
         "--wiki-root",
         wiki_root,
         "--max-age-days",
@@ -80,7 +80,7 @@ def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResu
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Failed to execute wiki_lint: {e}",
-                fix_suggestion="Ensure Infrastructure/scripts/wiki_lint.py exists and is executable.",
+                fix_suggestion="Ensure Infrastructure/scripts/validation-and-linting/wiki_lint.py exists and is executable.",
             )
         )
         return result

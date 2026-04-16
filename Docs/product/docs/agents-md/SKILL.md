@@ -64,7 +64,7 @@ Use this section as an adaptation guideline for generated AGENTS.md files, not r
 - Verified commands/paths from repository sources.
 - Active Codex config knobs when present: `project_doc_fallback_filenames`, `project_doc_max_bytes`, and any custom `CODEX_HOME` expectations.
 - Preferred linked-doc tree (`instructions/agents` or `docs/agents`) based on repo convention.
-- Repo preflight command state, including whether `./Infrastructure/scripts/codex-preflight.sh --stack auto --mode required` exists and which flags are supported, such as `--repo-fragment`, `--bins`, and `--paths`.
+- Repo preflight command state, including whether `./Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` exists and which flags are supported, such as `--repo-fragment`, `--bins`, and `--paths`.
 - Root manifest signals for stack detection, such as `package.json`, `pyproject.toml`, or `Cargo.toml`.
 - Required repo paths and whether they are present, especially `docs/`, `Docs/plans/`, and any repo-specific operating folders.
 - Whether the repo has explicitly adopted the harness-memory convention and, if so, whether `.harness/memory/LEARNINGS.md` is part of the required operating surface.

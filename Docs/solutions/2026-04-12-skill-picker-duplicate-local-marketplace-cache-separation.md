@@ -2,7 +2,7 @@
 title: Skill picker duplicate elimination via local marketplace cache separation
 asset_family: skill discovery and runtime projection hygiene
 owner: Agent Skills Team
-source_artifact: Infrastructure/scripts/sync_skills.sh
+source_artifact: Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
 freshness_reviewed_on: 2026-04-12
 last_updated: 2026-04-12
 review_after_days: 60
@@ -43,9 +43,9 @@ This preserves canonical source ownership while keeping plugin runtime paths loa
 
 ## Evidence
 
-- `bash Infrastructure/scripts/sync_skills.sh`
+- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
   - emits cache-root flattening/removal lines for nested plugin variants and removes legacy `Plugins/cache/agent-skills-local`.
-- `bash Infrastructure/scripts/check_codex_home_skill_overlap.sh --codex-home ~/.codex-red --strict --show-overlap`
+- `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home ~/.codex-red --strict --show-overlap`
   - reports overlap counts after reading plugin skills from repaired cache roots.
 - runtime log evidence:
   - inspect `~/.codex-red/logs_2.sqlite` for prior `failed to load plugin: plugin is not installed` entries under `Plugins/cache/<marketplace>/<plugin>`; post-fix runs should stop producing new instances for repaired plugins.
@@ -58,5 +58,5 @@ This preserves canonical source ownership while keeping plugin runtime paths loa
 - Keep `system_bridge_skill_names` scoped to the approved four skills only; do not add additional bridge skills without explicit policy approval.
 - Keep plugin families sourced from plugin scope in Codex profiles; do not reintroduce broad plugin-family projection into flat `.agents/skills`.
 - In profile homes where `Plugins/` is not symlinked, verify both `Plugins/marketplace.json` and `Plugins/<plugin>` source mirrors are present after sync.
-- If a router-skill exception is needed, add it explicitly to `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES`, rerun `bash Infrastructure/scripts/check_plugin_skill_shadowing.sh`, and record why overlap is acceptable.
-- Use `bash Infrastructure/scripts/check_codex_home_skill_overlap.sh --codex-home <home> --strict --show-overlap` as the one-command runtime audit for Codex profiles (`~/.codex`, `~/.codex-red`, and others); add `--remediate-cache-skills` to repair nested cache layouts before overlap checks.
+- If a router-skill exception is needed, add it explicitly to `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES`, rerun `bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh`, and record why overlap is acceptable.
+- Use `bash Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh --codex-home <home> --strict --show-overlap` as the one-command runtime audit for Codex profiles (`~/.codex`, `~/.codex-red`, and others); add `--remediate-cache-skills` to repair nested cache layouts before overlap checks.

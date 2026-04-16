@@ -139,7 +139,7 @@ uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py nor
 ```
 
 Family gate note:
-- `Infrastructure/scripts/validate_skill_authoring_family.sh` now enforces contract/eval/task-profile parity for `plugin-builder`.
+- `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` now enforces contract/eval/task-profile parity for `plugin-builder`.
 - Live Codex smoke+release execution is trusted-lane only with `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1`.
 
 ## Constraints and safety

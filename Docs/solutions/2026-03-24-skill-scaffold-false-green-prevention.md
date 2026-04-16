@@ -26,5 +26,5 @@ Require lifecycle metadata at scaffold time, include an initial review timestamp
 
 - [init_skill.py](/Users/jamiecraik/dev/Agent-Skills/skill-builder/Infrastructure/scripts/init_skill.py)
 - [create_basic_plugin.py](/Users/jamiecraik/dev/Agent-Skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py)
-- [test_skill_creator_lifecycle_scaffold.py](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/test_skill_creator_lifecycle_scaffold.py)
-- [test_plugin_creator_lifecycle_scaffold.py](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/test_plugin_creator_lifecycle_scaffold.py)
+- [test_skill_creator_lifecycle_scaffold.py](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/testing/test_skill_creator_lifecycle_scaffold.py)
+- [test_plugin_creator_lifecycle_scaffold.py](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/testing/test_plugin_creator_lifecycle_scaffold.py)

@@ -13,7 +13,7 @@ A governed repository of **120 canonical skills** for AI coding agents (Codex, C
 
 ```bash
 # One-time per shell: load repo environment and add ask to PATH
-source Infrastructure/scripts/codex_env_common.sh && codex_apply_env
+source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
 # See what's available
 ask graph topics

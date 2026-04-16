@@ -141,7 +141,7 @@ Out of scope:
 
 - Keep local packaging canonical while importing useful upstream improvements; do not let the Anthropic reference reopen local family-boundary churn.
 - This repo works best when the contract is visible in both markdown and the validator or report outputs that maintainers actually use.
-- For repo-focused closeout, the standard broad validation path remains preflight first and `bash Infrastructure/scripts/verify-work.sh` before completion claims.
+- For repo-focused closeout, the standard broad validation path remains preflight first and `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` before completion claims.
 
 ### External References
 
@@ -232,7 +232,7 @@ Design notes:
 - Modify: `Skills/skill-creator/agents/openai.yaml`
 - Create: `Skills/skill-creator/Infrastructure/references/handoff-package-template.md`
 - Modify if needed: `Skills/skill-creator/Infrastructure/scripts/init_skill.py`
-- Test: `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- Test: `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - Test: `python3 Skills/skill-creator/Infrastructure/scripts/quick_validate.py Skills/skill-creator`
 
 **Approach:**
@@ -274,7 +274,7 @@ Design notes:
 - Modify: `Skills/skill-builder/Infrastructure/references/quality-tools.md`
 - Modify: `Skills/skill-builder/Infrastructure/references/release-manifest.template.json`
 - Create if needed: `Skills/skill-builder/Infrastructure/references/comparison-review.template.md`
-- Test: `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- Test: `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 
 **Approach:**
 - Make the canonical loop explicit across docs:
@@ -382,8 +382,8 @@ Design notes:
 - Modify: `Skills/skill-installer/SKILL.md`
 - Modify: `Skills/skill-installer/agents/openai.yaml`
 - Modify: `Skills/plugin-builder/SKILL.md`
-- Test: `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
-- Test: `bash Infrastructure/scripts/sync_skills.sh`
+- Test: `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- Test: `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 
 **Approach:**
 - Update downstream docs so install and plugin packaging clearly depend on contract-valid evidence from the builder loop.
@@ -418,13 +418,13 @@ Design notes:
 
 **Files:**
 - Modify if needed: `Docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md`
-- Test: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`
-- Test: `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- Test: `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
+- Test: `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - Test: `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py Docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md`
 - Test: `python3 Skills/skill-creator/Infrastructure/scripts/quick_validate.py Skills/skill-creator`
 - Test: `python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Skills/skill-builder`
 - Test: `python3 Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
-- Test: `bash Infrastructure/scripts/verify-work.sh`
+- Test: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 **Approach:**
 - Run the narrow validations first and fix forward one gate at a time.
@@ -533,8 +533,8 @@ STEP_ID | status | owner | evidence
 P0 | completed | ce-work | Added non-trivial handoff contract + template in `Skills/skill-creator/SKILL.md`, `Skills/skill-creator/agents/openai.yaml`, and `Skills/skill-creator/Infrastructure/references/handoff-package-template.md`.
 P1 | completed | ce-work | Landed explicit round contract and artifact ownership across `Skills/skill-builder/SKILL.md`, `Skills/skill-builder/agents/openai.yaml`, and builder references (`iteration-and-testing.md`, `description-optimization.md`, `quality-tools.md`, `release-manifest.template.json`).
 P2 | completed | ce-work | Extended harness + eval contracts in `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py`, `Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`, and `Skills/skill-builder/Infrastructure/references/evals.yaml`; `python3 Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py` passed; targeted smoke cases passed: `builder-round-metadata-contract` (`Infrastructure/artifacts/skills/skill-builder/20260404-192346-391682`), `clarification-package-ambiguous` (`Infrastructure/artifacts/skills/skill-builder/20260404-191825-956858`), and `provenance-import-rollback` (`Infrastructure/artifacts/skills/skill-builder/20260404-191825-956931`).
-P3 | completed | ce-work | Updated downstream-only gating language in `Skills/skill-installer/*` and `Skills/plugin-builder/SKILL.md`; ran `bash Infrastructure/scripts/sync_skills.sh` successfully.
-P4 | completed | ce-work | Validation stack completed: preflight, docs lint, plan-graph lint, skill quick validators (`skill-creator` via `uv run --with pyyaml`), harness tests, and `bash Infrastructure/scripts/verify-work.sh` pass (`Infrastructure/artifacts/validation/20260404T181136Z`).
+P3 | completed | ce-work | Updated downstream-only gating language in `Skills/skill-installer/*` and `Skills/plugin-builder/SKILL.md`; ran `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` successfully.
+P4 | completed | ce-work | Validation stack completed: preflight, docs lint, plan-graph lint, skill quick validators (`skill-creator` via `uv run --with pyyaml`), harness tests, and `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` pass (`Infrastructure/artifacts/validation/20260404T181136Z`).
 
 ## Acceptance Checklist
 

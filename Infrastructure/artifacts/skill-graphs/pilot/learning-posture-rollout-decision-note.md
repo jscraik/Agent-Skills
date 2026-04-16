@@ -21,8 +21,8 @@ Rollout posture: keep pilot-only; do not expand to additional skills yet.
   - `frontend/tools/agentation`
   - `Skills/systematic-debugging`
   - `interview/interview-me`
-- `Infrastructure/scripts/verify_skill_catalog_freshness.py --strict` passed.
-- `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check` failed (`legacy_partial` and `missing_mandatory` historical run artifacts).
+- `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict` passed.
+- `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check` failed (`legacy_partial` and `missing_mandatory` historical run artifacts).
 
 ## Risk/Blocker Summary
 
@@ -35,5 +35,5 @@ Rollout posture: keep pilot-only; do not expand to additional skills yet.
 1. Re-run canonical pilot evals with successful runner exits and passing scorecards for all four pilots.
 2. Re-run summary generation + schema validation and confirm conformance reaches at least `partial` with non-zero telemetry coverage.
 3. Resolve or explicitly exempt historical run-artifact strict failures, then rerun:
-   - `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
+   - `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
 4. Re-run final validation bundle and reissue this decision note as `pilot-only` or `expand`.

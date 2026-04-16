@@ -23,7 +23,7 @@ Add this info:
 Run this if docs may be the cause:
 
 ```bash
-python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 ```
 
 ## Security issues

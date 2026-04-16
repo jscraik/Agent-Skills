@@ -95,8 +95,8 @@ permissions:
 |------|---------|
 | Checkout | `actions/checkout@v4` |
 | Validate | `bash Infrastructure/scripts/validate_all.sh` |
-| Diagnose | `python3 Infrastructure/scripts/diagnose_skill.py --all` |
-| Docs lint | `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` |
+| Diagnose | `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all` |
+| Docs lint | `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` |
 
 ---
 
@@ -153,10 +153,10 @@ harness preflight-gate \
 bash Infrastructure/scripts/validate_all.sh
 
 # Skill diagnostics
-python3 Infrastructure/scripts/diagnose_skill.py --all
+python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all
 
 # Docs lint
-python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 
 # Harness preflight (if installed)
  harness preflight-gate \
@@ -178,5 +178,5 @@ Workflow: `.github/workflows/pr-pipeline.yml`
 
 - [PR template](/.github/PULL_REQUEST_TEMPLATE.md)
 - [Validate all script](/Infrastructure/scripts/validate_all.sh)
-- [Skill diagnostics](/Infrastructure/scripts/diagnose_skill.py)
-- [Docs lint](/Infrastructure/scripts/docs_lint.py)
+- [Skill diagnostics](/Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py)
+- [Docs lint](/Infrastructure/scripts/validation-and-linting/docs_lint.py)

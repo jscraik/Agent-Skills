@@ -134,33 +134,33 @@ fi
 echo ""
 
 projection_manifest="$run_dir/projection-integrity.json"
-recursive_artifacts_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --quiet)
+recursive_artifacts_cmd=("${python_cmd[@]}" Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --quiet)
 if [[ "$output_mode" == "ephemeral" ]]; then
   recursive_artifacts_cmd+=(--manifest "$run_dir/artifact-parity-manifest.json")
 fi
-run_check warn plan-graphs "📊 Validating plan graphs..." ./Infrastructure/scripts/validate_plan_graphs.sh
+run_check warn plan-graphs "📊 Validating plan graphs..." ./Infrastructure/scripts/validation-and-linting/validate_plan_graphs.sh
 run_check warn recursive-artifacts "🔄 Verifying skill graph artifacts..." "${recursive_artifacts_cmd[@]}"
-run_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
-run_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
-run_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
-run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py
-run_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" Infrastructure/scripts/verify_skill_catalog_freshness.py --strict
-run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash Infrastructure/scripts/check_plugin_skill_shadowing.sh
-run_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash Infrastructure/scripts/validate_projection_integrity.sh
-run_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." bash Infrastructure/scripts/check_path_ownership_boundaries.sh
-run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash Infrastructure/scripts/lint_skill_types.sh
-run_check required openai-format "🧩 Linting OpenAI skill format..." bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict
-run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode strict
-run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash Infrastructure/scripts/validate_skill_authoring_family.sh
+run_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json
+run_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_verify_work_scope_flags.py
+run_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_question_lifecycle_contract.py
+run_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/testing/test_skill_lifecycle_validation.py
+run_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict
+run_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
+run_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh
+run_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
+run_check required skill-types "🏷️  Linting semantic skill-type tags..." bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
+run_check required openai-format "🧩 Linting OpenAI skill format..." bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
+run_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode strict
+run_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 run_check required skill-graph-profiles "🕸️  Validating skill graph profile contracts..." "${python_cmd[@]}" Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0 --profile-index-out "$run_dir/skill-graph-profile-index.json" --wave-readiness-out "$run_dir/skill-graph-wave-readiness.json"
-run_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" Infrastructure/scripts/gotcha_pipeline.py validate
-selection_contract_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
+run_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate
+selection_contract_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
 if [[ "$output_mode" == "persistent" ]]; then
   selection_contract_cmd+=(--history-path "Infrastructure/artifacts/selection-quality/history.jsonl")
 fi
 run_check required selection-contract "🎯 Verifying selection contract fixtures..." "${selection_contract_cmd[@]}"
-run_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" Infrastructure/scripts/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields
-run_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${python_cmd[@]}" Infrastructure/scripts/verify_ask_cli_modularity.py
+run_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields
+run_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py
 
 runtime_artifact_targets=(
   "GOVERNANCE/runtime-separation/current.json"
@@ -219,7 +219,7 @@ fi
 
 runtime_consumer_scan_cmd=(
   "${python_cmd[@]}"
-  Infrastructure/scripts/scan_runtime_separation_consumers.py
+  Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
   --emit-readers
   --emit-path-consumers
   --strict
@@ -228,16 +228,16 @@ if [[ "$output_mode" == "persistent" ]]; then
   runtime_consumer_scan_cmd+=(--emit-digests)
 fi
 
-run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" Infrastructure/scripts/validate_runtime_separation_manifest.py --strict
+run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py --strict
 run_check required runtime-separation-consumers "🧪 Scanning runtime-separation consumer inventories..." "${runtime_consumer_scan_cmd[@]}"
-run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" Infrastructure/scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
-run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." env RECURSIVE_VALIDATION_GUARD=1 "${python_cmd[@]}" Infrastructure/scripts/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
-run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash Infrastructure/scripts/verify_wrapper_contract_fixtures.sh --runtime-separation
-run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" Infrastructure/scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
-run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash Infrastructure/scripts/verify_runtime_separation_writer_mutations.sh --strict
-run_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash Infrastructure/scripts/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
+run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
+run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." env RECURSIVE_VALIDATION_GUARD=1 "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
+run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh --runtime-separation
+run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
+run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict
+run_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
 
-run_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
+run_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
 
 echo ""
 echo "Validation summary:"

@@ -139,12 +139,12 @@ Governance rules:
 - keep folder taxonomy as-is; semantic tags are a second axis, not a replacement.
 
 Lint and generation expectations:
-- in this sandboxed environment, run `bash Infrastructure/scripts/sync_skills_sandbox_safe.sh` after semantic-tag changes;
-- run full `bash Infrastructure/scripts/sync_skills.sh` only when runtime skill paths are writable;
-- run `bash Infrastructure/scripts/lint_skill_types.sh` and require a clean pass (`Missing: 0`, `Invalid: 0`);
-- run `bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict` and require a clean pass;
-- run `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn` and remediate warnings over time;
-- run `python3 Infrastructure/scripts/gotcha_pipeline.py validate` to ensure candidate-governance artifacts stay contract-safe;
+- in this sandboxed environment, run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh` after semantic-tag changes;
+- run full `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` only when runtime skill paths are writable;
+- run `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh` and require a clean pass (`Missing: 0`, `Invalid: 0`);
+- run `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict` and require a clean pass;
+- run `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn` and remediate warnings over time;
+- run `python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate` to ensure candidate-governance artifacts stay contract-safe;
 - treat `[WARN] Unrecognized metadata.skill-type ...` output as a governance failure to be fixed before claiming completion;
 - confirm `docs/skills-by-type.md` regenerated successfully when tags change.
 
@@ -155,11 +155,11 @@ Source of truth:
 - `Infrastructure/references/governance-contract.md`
 
 Required gates before completion claim:
-- `bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict`
-- `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn`
-- `python3 Infrastructure/scripts/gotcha_pipeline.py validate`
-- `bash Infrastructure/scripts/sync_skills_sandbox_safe.sh` and `bash Infrastructure/scripts/lint_skill_types.sh` when semantic tags changed in this environment
-- full `bash Infrastructure/scripts/sync_skills.sh` when runtime skill paths are writable
+- `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
+- `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn`
+- `python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate`
+- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh` and `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh` when semantic tags changed in this environment
+- full `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` when runtime skill paths are writable
 
 Core policies:
 - use `Do X because Y` style in `SKILL.md` procedure sections;
@@ -234,9 +234,9 @@ Produce only what the request needs, usually:
 - User says: “Can you take `frontend/tools/agentation`, figure out why the skill feels bloated and undertriggers, rewrite it to current OpenAI skill format, and show me the exact gates you ran before we ship it?” Run `improve` mode, confirm category, tighten `description`, split heavy guidance into `Infrastructure/references/`, and report validator outcomes with the final diff.
 
 ## Gotchas
-- Missing required headings -> nested/alias headings used -> promote to exact top-level `##` names -> rerun `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn`.
-- `sync_skills` timeout with `Operation not permitted` -> runtime paths are read-only in sandbox -> run `bash Infrastructure/scripts/sync_skills_sandbox_safe.sh`.
-- Stale type index after tag edits -> semantic sync skipped -> run sandbox-safe sync, then `bash Infrastructure/scripts/lint_skill_types.sh`.
+- Missing required headings -> nested/alias headings used -> promote to exact top-level `##` names -> rerun `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn`.
+- `sync_skills` timeout with `Operation not permitted` -> runtime paths are read-only in sandbox -> run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh`.
+- Stale type index after tag edits -> semantic sync skipped -> run sandbox-safe sync, then `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`.
 - Valuable source context disappears during cleanup -> progressive disclosure was treated as compression -> restore the nuance into `Infrastructure/references/` and add direct signposts from `SKILL.md`.
 
 ## Response format
@@ -314,11 +314,11 @@ Reference files:
 - Use `Infrastructure/references/quality-tools.md` for gate command matrix and strict PI/security expectations.
 - During iteration prefer `run_skill_evals.py --eval-mode smoke`; before promotion or packaging run `--eval-mode release` and keep the generated `release_manifest.json` with the scorecard artifacts.
 - Treat graph-readiness as part of the default repo gate set for `create` and `improve` work:
-  - `python3 Infrastructure/scripts/check-see-also.py . --changed-files <skill>/SKILL.md`
+  - `python3 Infrastructure/scripts/validation-and-linting/check-see-also.py . --changed-files <skill>/SKILL.md`
   - `python3 Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0`
 - When graph-facing skills changed materially, refresh adjacency evidence:
-  - `python3 Infrastructure/scripts/build-adjacency-yaml.py`
-  - `python3 Infrastructure/scripts/validate-adjacency.py`
+  - `python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py`
+  - `python3 Infrastructure/scripts/skill-graph/validate-adjacency.py`
 
 ## Constraints and safety
 - Redact secrets, credentials, tokens, and PII by default.

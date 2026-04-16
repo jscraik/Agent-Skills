@@ -168,7 +168,7 @@ rows:
     match_count: 5
     root: .agents
   -
-    consumer_path: "Infrastructure/scripts/build-adjacency-yaml.py"
+    consumer_path: "Infrastructure/scripts/skill-graph/build-adjacency-yaml.py"
     is_executable: true
     line_numbers:
       - 18
@@ -178,35 +178,35 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Infrastructure/scripts/build-adjacency-yaml.py"
+    consumer_path: "Infrastructure/scripts/skill-graph/build-adjacency-yaml.py"
     is_executable: true
     line_numbers:
       - 22
     match_count: 1
     root: "skills-antigravity"
   -
-    consumer_path: Infrastructure/scripts/build_runtime_separation_current.py
+    consumer_path: Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py
     is_executable: true
     line_numbers:
       - 310
     match_count: 1
     root: Infrastructure/catalog/plugins
   -
-    consumer_path: Infrastructure/scripts/build_runtime_separation_current.py
+    consumer_path: Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py
     is_executable: true
     line_numbers:
       - 310
     match_count: 1
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/build_skill_state_map.py
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py
     is_executable: true
     line_numbers:
       - 27
     match_count: 1
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/check_codex_home_skill_overlap.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_codex_home_skill_overlap.sh
     is_executable: true
     line_numbers:
       - 5
@@ -214,21 +214,21 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/check_path_ownership_boundaries.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
     line_numbers:
       - 116
     match_count: 1
     root: .agent/skills
   -
-    consumer_path: Infrastructure/scripts/check_path_ownership_boundaries.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
     line_numbers:
       - 116
     match_count: 1
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/check_path_ownership_boundaries.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
     line_numbers:
       - 119
@@ -240,7 +240,7 @@ rows:
     match_count: 6
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/check_path_ownership_boundaries.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
     line_numbers:
       - 119
@@ -249,7 +249,7 @@ rows:
     match_count: 3
     root: Plugins/cache
   -
-    consumer_path: Infrastructure/scripts/check_path_ownership_boundaries.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
     line_numbers:
       - 116
@@ -257,14 +257,14 @@ rows:
     match_count: 2
     root: runtime
   -
-    consumer_path: Infrastructure/scripts/check_path_ownership_boundaries.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
     line_numbers:
       - 116
     match_count: 1
     root: "skills-antigravity"
   -
-    consumer_path: Infrastructure/scripts/check_plugin_skill_shadowing.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
     is_executable: true
     line_numbers:
       - 10
@@ -275,14 +275,14 @@ rows:
     match_count: 5
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/check_plugin_skill_shadowing.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
     is_executable: true
     line_numbers:
       - 11
     match_count: 1
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/docs_lint.py
+    consumer_path: Infrastructure/scripts/validation-and-linting/docs_lint.py
     is_executable: true
     line_numbers:
       - 462
@@ -341,7 +341,7 @@ rows:
     match_count: 1
     root: Plugins/cache
   -
-    consumer_path: Infrastructure/scripts/projection_integrity.py
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py
     is_executable: true
     line_numbers:
       - 74
@@ -351,7 +351,7 @@ rows:
     match_count: 4
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/projection_integrity.py
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py
     is_executable: true
     line_numbers:
       - 47
@@ -365,35 +365,35 @@ rows:
     match_count: 8
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 32
     match_count: 1
     root: .agent/skills
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 31
     match_count: 1
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 27
     match_count: 1
     root: Infrastructure/catalog/plugins
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 26
     match_count: 1
     root: Infrastructure/catalog/skills
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 27
@@ -402,35 +402,35 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 29
     match_count: 1
     root: Plugins/cache
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 30
     match_count: 1
     root: runtime
   -
-    consumer_path: Infrastructure/scripts/scan_runtime_separation_consumers.py
+    consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true
     line_numbers:
       - 33
     match_count: 1
     root: "skills-antigravity"
   -
-    consumer_path: Infrastructure/scripts/selection_policy.py
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/selection_policy.py
     is_executable: true
     line_numbers:
       - 30
     match_count: 1
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/skill_discovery.py
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py
     is_executable: true
     line_numbers:
       - 312
@@ -439,14 +439,14 @@ rows:
     match_count: 3
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/skill_discovery.py
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py
     is_executable: true
     line_numbers:
       - 105
     match_count: 1
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/sync_skills.sh
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
     is_executable: true
     line_numbers:
       - 162
@@ -464,7 +464,7 @@ rows:
     match_count: 12
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/sync_skills.sh
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
     is_executable: true
     line_numbers:
       - 420
@@ -474,14 +474,14 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/sync_skills_sandbox_safe.sh
+    consumer_path: Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh
     is_executable: true
     line_numbers:
       - 11
     match_count: 1
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/test_plugin_builder_marketplace_paths.py
+    consumer_path: Infrastructure/scripts/testing/test_plugin_builder_marketplace_paths.py
     is_executable: true
     line_numbers:
       - 59
@@ -495,7 +495,7 @@ rows:
     match_count: 8
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/test_plugin_creator_marketplace_security.py
+    consumer_path: Infrastructure/scripts/testing/test_plugin_creator_marketplace_security.py
     is_executable: true
     line_numbers:
       - 41
@@ -503,7 +503,7 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/test_plugin_installer_security.py
+    consumer_path: Infrastructure/scripts/testing/test_plugin_installer_security.py
     is_executable: true
     line_numbers:
       - 65
@@ -511,7 +511,7 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/test_projection_integrity.py
+    consumer_path: Infrastructure/scripts/testing/test_projection_integrity.py
     is_executable: true
     line_numbers:
       - 49
@@ -532,7 +532,7 @@ rows:
     match_count: 15
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/test_projection_integrity.py
+    consumer_path: Infrastructure/scripts/testing/test_projection_integrity.py
     is_executable: true
     line_numbers:
       - 84
@@ -543,7 +543,7 @@ rows:
     match_count: 5
     root: Plugins/cache
   -
-    consumer_path: Infrastructure/scripts/test_skill_installer_security.py
+    consumer_path: Infrastructure/scripts/testing/test_skill_installer_security.py
     is_executable: true
     line_numbers:
       - 81
@@ -551,14 +551,14 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/test_skill_lifecycle_validation.py
+    consumer_path: Infrastructure/scripts/testing/test_skill_lifecycle_validation.py
     is_executable: true
     line_numbers:
       - 342
     match_count: 1
     root: .agents
   -
-    consumer_path: Infrastructure/scripts/test_skill_lifecycle_validation.py
+    consumer_path: Infrastructure/scripts/testing/test_skill_lifecycle_validation.py
     is_executable: true
     line_numbers:
       - 227
@@ -569,7 +569,7 @@ rows:
     match_count: 5
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/test_validate_skill_authoring_family_benchmarks.py
+    consumer_path: Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py
     is_executable: true
     line_numbers:
       - 36
@@ -591,7 +591,7 @@ rows:
     match_count: 18
     root: plugins
   -
-    consumer_path: "Infrastructure/scripts/validate-adjacency.py"
+    consumer_path: "Infrastructure/scripts/skill-graph/validate-adjacency.py"
     is_executable: true
     line_numbers:
       - 34
@@ -601,14 +601,14 @@ rows:
     match_count: 4
     root: plugins
   -
-    consumer_path: "Infrastructure/scripts/validate-adjacency.py"
+    consumer_path: "Infrastructure/scripts/skill-graph/validate-adjacency.py"
     is_executable: true
     line_numbers:
       - 39
     match_count: 1
     root: "skills-antigravity"
   -
-    consumer_path: Infrastructure/scripts/validate_skill_authoring_family.sh
+    consumer_path: Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
     is_executable: true
     line_numbers:
       - 51
@@ -621,7 +621,7 @@ rows:
     match_count: 7
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py
+    consumer_path: Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
     is_executable: true
     line_numbers:
       - 5
@@ -635,7 +635,7 @@ rows:
     match_count: 8
     root: plugins
   -
-    consumer_path: Infrastructure/scripts/verify_skill_catalog_freshness.py
+    consumer_path: Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py
     is_executable: true
     line_numbers:
       - 52

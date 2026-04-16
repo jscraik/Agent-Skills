@@ -51,7 +51,7 @@ fi
 		exit 1
 	fi
 
-	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml")
+	required_support_files=("scripts/codex-preflight/codex-preflight.sh" "scripts/codex-preflight/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/validation-and-linting/verify-work.sh" "scripts/validation-and-linting/validate-codestyle.sh" "scripts/lifecycle-and-sync/prepare-worktree.sh" "scripts/validation-and-linting/check-staged-secrets.sh" "scripts/validation-and-linting/check-doc-style.sh" "scripts/validation-and-linting/check-related-tests.sh" "scripts/validation-and-linting/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml")
 	for support_file in "${required_support_files[@]}"; do
 		if [[ ! -f "$REPO_ROOT/${support_file}" ]]; then
 			echo "Error: missing required hook support file at $REPO_ROOT/${support_file}"
@@ -135,7 +135,7 @@ fi
 	done
 
 	if [[ -f "$PACKAGE_JSON_PATH" ]]; then
-		required_package_scripts=("codestyle:validate|bash scripts/validate-codestyle.sh" "secrets:staged|bash scripts/check-staged-secrets.sh" "docs:style:changed|bash scripts/check-doc-style.sh" "test:related|bash scripts/check-related-tests.sh" "semgrep:changed|bash scripts/check-semgrep-changed.sh")
+		required_package_scripts=("codestyle:validate|bash scripts/validation-and-linting/validate-codestyle.sh" "secrets:staged|bash scripts/validation-and-linting/check-staged-secrets.sh" "docs:style:changed|bash scripts/validation-and-linting/check-doc-style.sh" "test:related|bash scripts/validation-and-linting/check-related-tests.sh" "semgrep:changed|bash scripts/validation-and-linting/check-semgrep-changed.sh")
 		for script_spec in "${required_package_scripts[@]}"; do
 			script_name="${script_spec%%|*}"
 			script_command="${script_spec#*|}"

@@ -140,7 +140,7 @@ Out of scope:
   - Resolution: first use deterministic evidence-based remediation for missing envelopes in the active window; allow waiver handling only when a tracked waiver artifact explicitly authorizes exclusion and validator logic enforces that contract.
 
 - Should waivers use a new closeout-specific schema or reuse existing verifier waivers?
-  - Resolution: reuse `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py` waiver contract and extend only minimally for readiness scope fields if needed.
+  - Resolution: reuse `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py` waiver contract and extend only minimally for readiness scope fields if needed.
 
 - Should freshness gating check only artifact age or also window alignment?
   - Resolution: enforce both recency (`health_generated_at` max age) and decision-window alignment (`window_start/window_end` matches configured decision window).
@@ -195,12 +195,12 @@ Out of scope:
 **Files:**
 - Modify: `Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py`
 - Modify: `Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py`
-- Modify: `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py` (waiver contract parity only if additional readiness fields are required)
+- Modify: `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py` (waiver contract parity only if additional readiness fields are required)
 - Modify: `docs/skill-graphs/telemetry/daily-skill-health.md`
 - Modify: `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json`
 - Modify: `Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-waivers.json` (only when explicit waivers are required)
 - Test: `Skills/skill-builder/Infrastructure/scripts/test_events_jsonl_required.py`
-- Test: `Infrastructure/scripts/test_verify_recursive_skill_graph_artifacts.py`
+- Test: `Infrastructure/scripts/testing/test_verify_recursive_skill_graph_artifacts.py`
 
 **Approach:**
 - Identify each missing-envelope run in the active health window and classify as remediable or explicitly waivable.
@@ -250,7 +250,7 @@ Out of scope:
 - Modify: `Skills/skill-builder/Infrastructure/scripts/generate_skill_graph_profiles.py`
 - Create: `Infrastructure/artifacts/skill-graphs/onboarding/skill-owner-map.json`
 - Modify: `Infrastructure/artifacts/skill-graphs/onboarding/skill-onboarding-checklist-2026-03-29.md`
-- Test: `Infrastructure/scripts/test_bootstrap_recursive_skill_graph_artifacts.py`
+- Test: `Infrastructure/scripts/testing/test_bootstrap_recursive_skill_graph_artifacts.py`
 
 **Approach:**
 - Extend checklist generation to consume an owner/status input map (with explicit defaults).
@@ -349,9 +349,9 @@ Out of scope:
 - Modify: `Infrastructure/artifacts/validation/latest/*` (via validation workflows)
 - Modify: `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json`
 - Modify: `Infrastructure/artifacts/skill-graphs/onboarding/skill-onboarding-checklist-2026-03-29.md`
-- Test: `bash Infrastructure/scripts/verify-work.sh`
-- Test: `bash Infrastructure/scripts/sync_skills.sh`
-- Test: `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- Test: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
+- Test: `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+- Test: `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - Test: `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
 
 **Approach:**
@@ -456,7 +456,7 @@ P1 | completed | Codex | Event-envelope metrics now include `total/waived/unreso
 P2 | completed | Codex | Deterministic owner map added at `Infrastructure/artifacts/skill-graphs/onboarding/skill-owner-map.json`; regenerated checklist has no placeholder owner/due/status values.
 P3 | completed | Codex | Plan-state reconciliation applied to `.agent/PLANS.md` and onboarding plan docs with explicit closeout references.
 P4 | completed | Codex | Worktree closeout scope classified to onboarding-readiness lane; sandbox-only sync-path constraints documented and resolved for validation by running sync with explicit permission scope.
-P5 | completed | Codex | Validation stack completed: `bash Infrastructure/scripts/verify-work.sh`, `bash Infrastructure/scripts/sync_skills.sh`, `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, `just validate`, `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md`, plus targeted closeout tests.
+P5 | completed | Codex | Validation stack completed: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`, `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, `just validate`, `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md`, plus targeted closeout tests.
 
 ## Acceptance Checklist
 
@@ -480,7 +480,7 @@ Traceability: R6
 - `docs/skill-graphs/telemetry/daily-skill-health.md`
 - `Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py`
 - `Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py`
-- `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py`
+- `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py`
 - `Skills/skill-builder/Infrastructure/scripts/generate_skill_graph_profiles.py`
 - `.agent/PLANS.md`
 - `Docs/agents/04-validation.md`

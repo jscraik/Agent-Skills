@@ -237,5 +237,54 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertEqual(output["trace_id"], "flag-trace-789")  # Flag wins
 
+    def test_robot_mode_recovers_swapped_topic_action(self):
+        """Robot mode should recover clear intent when topic/action are swapped."""
+        cmd = ["python3", "Infrastructure/bin/ask", "list", "skills", "--robot", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"Expected success, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertIn("skills", output.get("data", {}))
+        self.assertIn("correction_note", output.get("metadata", {}))
+
+    def test_robot_mode_recovers_action_after_flags(self):
+        """Robot mode should recover when action token is after option flags."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "--advanced", "ls", "--robot", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"Expected success, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"].get("advanced_mode"))
+        self.assertIn("correction_note", output.get("metadata", {}))
+
+    def test_robot_mode_returns_detailed_error_for_ambiguous_intent(self):
+        """Robot mode should return rich guidance when intent cannot be resolved."""
+        cmd = ["python3", "Infrastructure/bin/ask", "status", "--robot", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        message = output["errors"][0]["message"]
+        self.assertIn("Guidance", message)
+        self.assertIn("Try one of these", message)
+        self.assertIn("repo status", message)
+
+    def test_robot_mode_returns_argument_guidance_when_intent_clear(self):
+        """Robot mode should explain missing arguments with command-specific examples."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "audit", "--robot", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        message = output["errors"][0]["message"]
+        self.assertIn("Command intent was understood", message)
+        self.assertIn("ask skills audit --help", message)
+        self.assertIn("Valid examples", message)
+        self.assertIn("skills audit", message)
+
 if __name__ == "__main__":
     unittest.main()

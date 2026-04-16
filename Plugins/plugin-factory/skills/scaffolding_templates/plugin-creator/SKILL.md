@@ -108,11 +108,11 @@ When a user asks to create a plugin and provides an already-created skill, treat
 Post-adoption sync and checks (required):
 
 ```bash
-bash Infrastructure/scripts/sync_skills.sh
-bash Infrastructure/scripts/sync_projection_trees.sh all
-python3 Infrastructure/scripts/verify_skill_catalog_freshness.py
-bash Infrastructure/scripts/check_plugin_skill_shadowing.sh
-bash Infrastructure/scripts/validate_projection_integrity.sh --all
+bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
+bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all
+python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py
+bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
+bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh --all
 ```
 
 ## Marketplace workflow

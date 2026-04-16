@@ -57,8 +57,10 @@ DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
-DEFAULT_MARKETPLACE_DISPLAY_NAME = "[TODO: Marketplace Display Name]"
+DEFAULT_MARKETPLACE_DISPLAY_NAME = "Local Plugin Marketplace"
 DEFAULT_VERSION = "0.1.0"
+DEFAULT_OWNER_NAME = "Agent Skills Team"
+DEFAULT_REVIEW_CADENCE = "monthly"
 DEFAULT_AUTHOR_EMAIL = "maintainers@example.com"
 DEFAULT_AUTHOR_URL = "https://github.com/example"
 DEFAULT_LICENSE = "MIT"
@@ -175,49 +177,26 @@ def _build_canonical_plugin_json(
     return payload
 
 
-def _build_placeholder_plugin_json(plugin_name: str) -> dict[str, Any]:
-    return {
-        "name": plugin_name,
-        "version": "[TODO: 1.2.0]",
-        "description": "[TODO: Brief plugin description]",
-        "author": {
-            "name": "[TODO: Author Name]",
-            "email": "[TODO: author@example.com]",
-            "url": "[TODO: https://github.com/author]",
-        },
-        "homepage": "[TODO: https://docs.example.com/plugin]",
-        "repository": "[TODO: https://github.com/author/plugin]",
-        "license": "[TODO: MIT]",
-        "keywords": ["[TODO: keyword1]", "[TODO: keyword2]"],
-        "skills": "[TODO: ./skills/]",
-        "hooks": "[TODO: ./hooks.json]",
-        "mcpServers": "[TODO: ./.mcp.json]",
-        "apps": "[TODO: ./.app.json]",
-        "interface": {
-            "displayName": "[TODO: Plugin Display Name]",
-            "shortDescription": "[TODO: Short description for subtitle]",
-            "longDescription": "[TODO: Long description for details page]",
-            "developerName": "[TODO: OpenAI]",
-            "category": "[TODO: Productivity]",
-            "capabilities": ["[TODO: Interactive]", "[TODO: Write]"],
-            "websiteURL": "[TODO: https://openai.com/]",
-            "privacyPolicyURL": "[TODO: https://openai.com/policies/row-privacy-policy/]",
-            "termsOfServiceURL": "[TODO: https://openai.com/policies/row-terms-of-use/]",
-            "defaultPrompt": [
-                "[TODO: Summarize my inbox and draft replies for me.]",
-                "[TODO: Find open bugs and turn them into tickets.]",
-                "[TODO: Review today's meetings and flag gaps.]",
-            ],
-            "brandColor": "[TODO: #3B82F6]",
-            "composerIcon": "[TODO: ./assets/icon.png]",
-            "logo": "[TODO: ./assets/logo.png]",
-            "screenshots": [
-                "[TODO: ./assets/screenshot1.png]",
-                "[TODO: ./assets/screenshot2.png]",
-                "[TODO: ./assets/screenshot3.png]",
-            ],
-        },
-    }
+def _default_description(plugin_name: str) -> str:
+    display_name = _display_name(plugin_name)
+    return f"{display_name} plugin scaffold for Codex workflows."
+
+
+def _resolve_scaffold_metadata(
+    plugin_name: str,
+    *,
+    description: str | None,
+    owner: str | None,
+    review_cadence: str | None,
+) -> tuple[str, str, str]:
+    resolved_description = description.strip() if description and description.strip() else _default_description(plugin_name)
+    resolved_owner = owner.strip() if owner and owner.strip() else DEFAULT_OWNER_NAME
+    resolved_review_cadence = (
+        review_cadence.strip()
+        if review_cadence and review_cadence.strip()
+        else DEFAULT_REVIEW_CADENCE
+    )
+    return resolved_description, resolved_owner, resolved_review_cadence
 
 
 def build_plugin_json(
@@ -228,20 +207,17 @@ def build_plugin_json(
     review_cadence: str | None = None,
     enabled_surfaces: dict[str, bool] | None = None,
 ) -> dict[str, Any]:
-    lifecycle_mode = any((description, owner, review_cadence))
-    if not lifecycle_mode:
-        return _build_placeholder_plugin_json(plugin_name)
-
-    if not description or not owner or not review_cadence:
-        raise ValueError(
-            "Lifecycle scaffold mode requires --description, --owner, and --review-cadence."
-        )
-
+    resolved_description, resolved_owner, resolved_review_cadence = _resolve_scaffold_metadata(
+        plugin_name,
+        description=description,
+        owner=owner,
+        review_cadence=review_cadence,
+    )
     return _build_canonical_plugin_json(
         plugin_name,
-        description=description.strip(),
-        owner=owner.strip(),
-        review_cadence=review_cadence.strip(),
+        description=resolved_description,
+        owner=resolved_owner,
+        review_cadence=resolved_review_cadence,
         enabled_surfaces=enabled_surfaces or {},
     )
 
@@ -379,7 +355,7 @@ def _relative_repo_source_path(
 
 def build_default_marketplace() -> dict[str, Any]:
     return {
-        "name": "[TODO: marketplace-name]",
+        "name": "local-marketplace",
         "interface": {
             "displayName": DEFAULT_MARKETPLACE_DISPLAY_NAME,
         },
@@ -454,7 +430,7 @@ def write_json(path: Path, data: dict, force: bool) -> None:
         handle.write("\n")
 
 
-def create_stub_file(path: Path, payload: dict, force: bool) -> None:
+def create_json_file(path: Path, payload: dict, force: bool) -> None:
     if path.exists() and not force:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -472,23 +448,8 @@ def create_text_file(path: Path, content: str, force: bool) -> None:
 
 def build_readme(plugin_name: str, description: str | None = None) -> str:
     title = _display_name(plugin_name)
-    summary = description.strip() if description and description.strip() else "[TODO: Describe this plugin.]"
+    summary = description.strip() if description and description.strip() else _default_description(plugin_name)
     return f"# {title}\n\n{summary}\n"
-
-
-def validate_lifecycle_scaffold_args(args: argparse.Namespace) -> None:
-    if args.description and (not args.owner or not args.review_cadence):
-        raise SystemExit(
-            "error: lifecycle scaffold mode requires --description, --owner, and --review-cadence."
-        )
-    if args.owner and not args.review_cadence:
-        raise SystemExit("error: --review-cadence is required when --owner is set.")
-    if args.review_cadence and not args.owner:
-        raise SystemExit("error: --owner is required when --review-cadence is set.")
-    if any((args.description, args.owner, args.review_cadence)) and not args.description:
-        raise SystemExit(
-            "error: --description is required when lifecycle scaffold governance fields are set."
-        )
 
 
 def parse_args() -> argparse.Namespace:
@@ -501,10 +462,7 @@ def parse_args() -> argparse.Namespace:
     	argparse.Namespace: Parsed command-line arguments.
     """
     parser = argparse.ArgumentParser(
-        description=(
-            "Create a plugin skeleton with either a placeholder plugin.json "
-            "or a lifecycle-governed canonical manifest."
-        )
+        description="Create a plugin scaffold with a fully populated canonical plugin manifest."
     )
     parser.add_argument("plugin_name")
     parser.add_argument(
@@ -520,8 +478,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory")
     parser.add_argument("--with-scripts", action="store_true", help="Create Infrastructure/scripts/ directory")
     parser.add_argument("--with-assets", action="store_true", help="Create assets/ directory")
-    parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json placeholder")
-    parser.add_argument("--with-apps", action="store_true", help="Create .app.json placeholder")
+    parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json manifest scaffold")
+    parser.add_argument("--with-apps", action="store_true", help="Create .app.json manifest scaffold")
     parser.add_argument(
         "--with-marketplace",
         action="store_true",
@@ -577,22 +535,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
     parser.add_argument(
         "--description",
-        help="Lifecycle scaffold description. Enables governed non-placeholder plugin manifest mode.",
+        help="Plugin description used in manifest and README. Defaults to a generated description.",
     )
     parser.add_argument(
         "--owner",
-        help="Lifecycle scaffold owner for governance metadata.",
+        help=f"Plugin owner for governance metadata (default: {DEFAULT_OWNER_NAME}).",
     )
     parser.add_argument(
         "--review-cadence",
-        help="Lifecycle scaffold review cadence for governance metadata (for example: monthly).",
+        help=f"Review cadence for governance metadata (default: {DEFAULT_REVIEW_CADENCE}).",
     )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    validate_lifecycle_scaffold_args(args)
 
     # Apply defaults if not provided by user
     if args.path is None:
@@ -646,14 +603,14 @@ def main() -> None:
             (plugin_root / folder).mkdir(parents=True, exist_ok=True)
 
     if args.with_mcp:
-        create_stub_file(
+        create_json_file(
             plugin_root / ".mcp.json",
             {"mcpServers": {}},
             args.force,
         )
 
     if args.with_apps:
-        create_stub_file(
+        create_json_file(
             plugin_root / ".app.json",
             {
                 "apps": {},

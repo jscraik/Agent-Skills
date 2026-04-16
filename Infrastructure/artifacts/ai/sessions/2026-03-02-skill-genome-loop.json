@@ -9,14 +9,14 @@
     "type": "feature_implementation",
     "summary": "Implemented Skill Genome Loop draft PR candidate generator",
     "files_modified": [
-      "Infrastructure/scripts/run_skill_genome_loop.py",
+      "Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py",
       "docs/skill-graphs/runbooks/skill-genome-loop.md",
       "docs/skill-graphs/runbooks/index.md",
       "Docs/plans/2026-03-02-feat-skill-genome-loop-draft-pr-copilot-plan.md",
       ".gitignore"
     ],
     "files_created": [
-      "Infrastructure/scripts/run_skill_genome_loop.py",
+      "Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py",
       "docs/skill-graphs/runbooks/skill-genome-loop.md"
     ],
     "loc_added": 829,

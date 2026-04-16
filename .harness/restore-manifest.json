@@ -27,19 +27,19 @@
       "action": "created"
     },
     {
-      "path": "scripts/check-staged-secrets.sh",
+      "path": "scripts/validation-and-linting/check-staged-secrets.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-doc-style.sh",
+      "path": "scripts/validation-and-linting/check-doc-style.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-related-tests.sh",
+      "path": "scripts/validation-and-linting/check-related-tests.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-semgrep-changed.sh",
+      "path": "scripts/validation-and-linting/check-semgrep-changed.sh",
       "action": "created"
     },
     {
@@ -47,11 +47,11 @@
       "action": "created"
     },
     {
-      "path": "scripts/refresh-diagram-context.sh",
+      "path": "scripts/skill-graph/refresh-diagram-context.sh",
       "action": "created"
     },
     {
-      "path": "scripts/check-diagram-freshness.sh",
+      "path": "scripts/skill-graph/check-diagram-freshness.sh",
       "action": "created"
     },
     {
@@ -63,11 +63,11 @@
       "action": "created"
     },
     {
-      "path": "scripts/codex-preflight.sh",
+      "path": "scripts/codex-preflight/codex-preflight.sh",
       "action": "created"
     },
     {
-      "path": "scripts/codex-preflight-local-memory-legacy.sh",
+      "path": "scripts/codex-preflight/codex-preflight-local-memory-legacy.sh",
       "action": "created"
     },
     {
@@ -79,15 +79,15 @@
       "action": "created"
     },
     {
-      "path": "scripts/verify-work.sh",
+      "path": "scripts/validation-and-linting/verify-work.sh",
       "action": "created"
     },
     {
-      "path": "scripts/validate-codestyle.sh",
+      "path": "scripts/validation-and-linting/validate-codestyle.sh",
       "action": "created"
     },
     {
-      "path": "scripts/prepare-worktree.sh",
+      "path": "scripts/lifecycle-and-sync/prepare-worktree.sh",
       "action": "created"
     },
     {

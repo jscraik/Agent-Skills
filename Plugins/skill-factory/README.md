@@ -95,12 +95,12 @@ python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/sk
 Projection sync + parity gate:
 
 ```sh
-bash Infrastructure/scripts/sync_projection_trees.sh skill-factory
-PROJECTION_INTEGRITY_SCOPE=skill-factory bash Infrastructure/scripts/validate_projection_integrity.sh
+bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh skill-factory
+PROJECTION_INTEGRITY_SCOPE=skill-factory bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh
 ```
 
 Authoring-family governance gate (required for skill-authoring family changes):
 
 ```sh
-bash Infrastructure/scripts/validate_skill_authoring_family.sh
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```

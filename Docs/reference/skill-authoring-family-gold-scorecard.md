@@ -27,7 +27,7 @@ plan: Docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-pl
 
 **Governance Requirement:** Any PR modifying skill authoring family behavior must run and pass the `authoring-family-gate` CI job before claiming `gold` status. The check must execute:
 ```bash
-SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash Infrastructure/scripts/validate_skill_authoring_family.sh
+SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 PR approval is conditional on this job passing.
 
@@ -35,7 +35,7 @@ PR approval is conditional on this job passing.
 Structural family gate passes for all 4 members. Trusted live evidence attempted 2026-04-05 — partial evidence captured (quota-limited); quota resets at 11:58 PM UTC. Re-run required before gold claim.
 
 **Live eval attempt summary (2026-04-05):**
-- Run command: `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+- Run command: `SKILL_FAMILY_RELEASE_READY=1 SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 SKILL_FAMILY_CODEX_PROFILE=fast SKILL_EVAL_TIMEOUT_SEC=300 bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 - Model: gpt-5.3-codex-spark (`[profiles.fast]`)
 - Evidence dir: `Infrastructure/artifacts/validation/family-gate/20260405T182450Z/` (partial; evidence-index.json not written)
 - Confirmed passes: 8/19 smoke cases for skill-builder
@@ -99,7 +99,7 @@ Next review due: **2026-07-05**
 2. Compare against:
    - family SKILL.md routing and eval contracts
    - `Skills/skill-builder/Infrastructure/references/evals.yaml` adversarial case set
-   - `Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py` benchmark contract
+   - `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py` benchmark contract
 3. Record findings and update this scorecard.
 4. If changes are required, open a spec update issue before modifying contracts.
 

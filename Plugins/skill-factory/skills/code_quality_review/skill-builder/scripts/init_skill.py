@@ -334,7 +334,7 @@ def render_scaffold(*, structure: str, templates_dir: Path, context: dict[str, s
         return template.format(**context)
     except KeyError as error:
         missing = error.args[0]
-        raise SystemExit(f"[ERROR] Template placeholder '{{{missing}}}' missing from render context.") from error
+        raise SystemExit(f"[ERROR] Template variable '{{{missing}}}' missing from render context.") from error
 
 
 def create_resource_dirs(*, skill_dir: Path, skill_title: str, resources: List[str], include_examples: bool) -> None:

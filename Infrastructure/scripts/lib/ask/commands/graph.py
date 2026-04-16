@@ -173,7 +173,7 @@ def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
         return None, ErrorObject(
             code="ERR_DEPENDENCY",
             message="Skill graph data not found.",
-            fix_suggestion="Run: python3 Infrastructure/scripts/build-adjacency-yaml.py ."
+            fix_suggestion="Run: python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py ."
         )
     try:
         data = json.loads(edges_path.read_text())
@@ -181,7 +181,7 @@ def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
         return None, ErrorObject(
             code="ERR_DEPENDENCY",
             message=f"Skill graph is not valid JSON: {e}",
-            fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/build-adjacency-yaml.py ."
+            fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py ."
         )
 
     # Validate required keys
@@ -189,7 +189,7 @@ def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
         return None, ErrorObject(
             code="ERR_DEPENDENCY",
             message="Skill graph is missing required 'nodes' or 'edges' keys.",
-            fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/build-adjacency-yaml.py ."
+            fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py ."
         )
 
     # Validate node structure
@@ -198,7 +198,7 @@ def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
             return None, ErrorObject(
                 code="ERR_DEPENDENCY",
                 message=f"Skill graph node at index {i} is missing required 'id' field.",
-                fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/build-adjacency-yaml.py ."
+                fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py ."
             )
 
     # Validate edge structure
@@ -207,7 +207,7 @@ def _load_graph(repo_root: Path) -> tuple[dict | None, ErrorObject | None]:
             return None, ErrorObject(
                 code="ERR_DEPENDENCY",
                 message=f"Skill graph edge at index {i} is missing required 'from' or 'to' fields.",
-                fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/build-adjacency-yaml.py ."
+                fix_suggestion="Regenerate the graph with: python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py ."
             )
 
     return _canonicalize_graph(repo_root, data), None

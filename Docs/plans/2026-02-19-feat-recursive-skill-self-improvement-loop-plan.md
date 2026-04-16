@@ -85,7 +85,7 @@ The loop is task-profile driven (e.g., ad concept, video hook, positioning, SEO 
 Found brainstorm from **2026-02-19**: `skill-graph-learning-loop`. Used as source of truth for WHAT to build.
 
 ### Local repo findings (internal)
-- Skill indexing/sync conventions: `Infrastructure/scripts/sync_skills.sh:126`
+- Skill indexing/sync conventions: `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:126`
 - Existing lessons slot: stale reference to `FORJAMIE.md:93` (file not present in repo as of 2026-03-21)
 - Tiered gating model (`report-only -> warn -> fail`): `Skills/skill-builder/Infrastructure/references/tiered-gating-policy.md:5`
 - MUST/SHOULD/MAY rubric pattern: `Skills/skill-builder/Infrastructure/references/gold-skill-rubric.md:1`
@@ -500,7 +500,7 @@ _Baseline protocol (applies to all KPIs unless noted):_
 ## Dependencies & Risks
 
 ### Dependencies
-- Existing skill metadata/indexing conventions (`Infrastructure/scripts/sync_skills.sh`).
+- Existing skill metadata/indexing conventions (`Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`).
 - Existing quality-gate and scorecard patterns (`Skills/skill-builder/Infrastructure/scripts/*`).
 - Governance cadence and evidence requirements (`GOVERNANCE/*`, PR template).
 
@@ -524,7 +524,7 @@ _Baseline protocol (applies to all KPIs unless noted):_
 
 ### Internal references
 - `docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md`
-- `Infrastructure/scripts/sync_skills.sh:126`
+- `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:126`
 - stale `FORJAMIE.md:93` reference (file not present in repo as of 2026-03-21)
 - `.agent/PLANS.md:19`
 - `Skills/skill-builder/Infrastructure/references/tiered-gating-policy.md:5`

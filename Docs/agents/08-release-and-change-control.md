@@ -19,6 +19,6 @@
 
 ## Governance gates
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md` (external dependency)
-- `bash Infrastructure/scripts/verify-work.sh` (repo-local wrapper)
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (repo-local wrapper)
 
 - If either command fails, fix first failure, then rerun until green.

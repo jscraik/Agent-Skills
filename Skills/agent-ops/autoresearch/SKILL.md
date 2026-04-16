@@ -104,7 +104,7 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
   - `./bin/ask plugins doctor --robot`
   - `./bin/ask plugins harden <plugin-path> --robot`
 - Mixed or broad changes:
-  - `bash scripts/verify-work.sh`
+  - `bash scripts/validation-and-linting/verify-work.sh`
 - Keep command-level outcomes in the run artifact.
 
 ## Gotchas

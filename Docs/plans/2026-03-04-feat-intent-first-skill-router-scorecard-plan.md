@@ -56,9 +56,9 @@ Primary motivation carried forward from brainstorm: improve **first-hit routing 
 (All above carried forward from: `docs/brainstorms/2026-03-04-skill-router-brainstorm.md`.)
 
 ### Local repo findings
-- Skill system is canonicalized around `SKILL.md` plus flat symlink sync flow (`README.md:176-180`, `Infrastructure/scripts/sync_skills.sh:126`, `Infrastructure/scripts/sync_skills.sh:158`).
+- Skill system is canonicalized around `SKILL.md` plus flat symlink sync flow (`README.md:176-180`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:126`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:158`).
 - Existing recursive loop explicitly models routing concepts and router execution mode (`docs/skill-graphs/index.md:10`).
-- Genome loop already computes routing confusion and candidate confidence controls (`Infrastructure/scripts/run_skill_genome_loop.py:241`, `Infrastructure/scripts/run_skill_genome_loop.py:391`, `Infrastructure/scripts/run_skill_genome_loop.py:37-39`).
+- Genome loop already computes routing confusion and candidate confidence controls (`Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py:241`, `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py:391`, `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py:37-39`).
 - Existing runbook defines candidate fields and fail-closed redaction posture (`docs/skill-graphs/runbooks/skill-genome-loop.md:92-115`, `docs/skill-graphs/runbooks/skill-genome-loop.md:147`).
 - AGENTS requirements emphasize explicit tooling, discovery order, and docs TOC (`AGENTS.md:74`, `AGENTS.md:101`, `AGENTS.md:14`).
 
@@ -217,14 +217,14 @@ To reduce these failure modes, this plan now adds:
 
 ## Planned File Map
 - `Skills/skill-builder/Infrastructure/scripts/skill_router.py` (new router engine)
-- `Skills/skill-builder/Infrastructure/scripts/skill_catalog.py` (canonical catalog loader + quality checks)
+- `Skills/skill-builder/Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py` (canonical catalog loader + quality checks)
 - `Skills/skill-builder/Infrastructure/scripts/skill_router_schema.py` (schema + confidence contract)
 - `Skills/skill-builder/Infrastructure/scripts/test_skill_router.py` (determinism + edge-case tests)
 - `Skills/skill-builder/Infrastructure/scripts/test_skill_router_fixtures.json` (ranking/adversarial fixtures)
-- `Infrastructure/scripts/verify_router_schema.py` (schema/telemetry contract verifier)
-- `Infrastructure/scripts/verify_skill_catalog_freshness.py` (catalog freshness and metadata quality gates)
-- `Infrastructure/scripts/skill_router_metrics.py` (first-hit + guardrail KPI aggregation)
-- `Infrastructure/scripts/run_skill_router_rollback_drill.sh` (control-precedence rollback drill)
+- `Infrastructure/scripts/validation-and-linting/verify_router_schema.py` (schema/telemetry contract verifier)
+- `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py` (catalog freshness and metadata quality gates)
+- `Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py` (first-hit + guardrail KPI aggregation)
+- `Infrastructure/scripts/lifecycle-and-sync/run_skill_router_rollback_drill.sh` (control-precedence rollback drill)
 - `docs/skill-graphs/schemas/skill-router.schema.md` (versioned contract)
 - `docs/skill-graphs/runbooks/skill-router.md` (operational runbook)
 - `docs/skill-graphs/telemetry/daily-skill-health.md` (metric additions)
@@ -243,7 +243,7 @@ tasks:
     title: Add versioned skill-router schema under docs/skill-graphs/schemas and validator integration
     depends_on: [T0A]
   - id: T0C
-    title: Define catalog freshness contract tied to Infrastructure/scripts/sync_skills.sh and SKILL frontmatter validation
+    title: Define catalog freshness contract tied to Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh and SKILL frontmatter validation
     depends_on: [T0]
   - id: T1
     title: Define router scorecard specification (features, weights, confidence bands, deterministic tie-break order)
@@ -316,7 +316,7 @@ Prioritize these first to reduce the highest-likelihood failure modes identified
 - [x] T0 — Define router invocation contract + control-plane precedence checks
 - [x] T0A — Define privacy-safe telemetry schema (allowlist + forbidden fields + redaction invariants)
 - [x] T0B — Add versioned skill-router schema doc + validator integration scripts
-- [x] T0C — Add catalog freshness + metadata quality validator (`Infrastructure/scripts/verify_skill_catalog_freshness.py`)
+- [x] T0C — Add catalog freshness + metadata quality validator (`Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`)
 - [x] T1 — Define deterministic scorecard/tie-break implementation in router engine
 - [x] T1A — Add benchmark/adversarial fixture corpus (`test_skill_router_fixtures.json`)
 - [x] T1B — Finalize calibration thresholds by actor type (`ACTOR_THRESHOLDS` in `skill_router_schema.py`)
@@ -328,10 +328,10 @@ Prioritize these first to reduce the highest-likelihood failure modes identified
 - [x] T6 — Implement CLI/report outputs with `--json` contract support
 - [x] T7 — Implement low-confidence/no-match style fallback behavior and clarify states
 - [x] T8 — Add routing telemetry event emission (`--events-out`) with redaction-safe payload
-- [x] T8A — Add anti-gaming metrics aggregation (`Infrastructure/scripts/skill_router_metrics.py`)
+- [x] T8A — Add anti-gaming metrics aggregation (`Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py`)
 - [x] T9 — Enforce explicit agent execution defaults and policy gating
 - [x] T9A — Define rollout go/no-go thresholds + auto-downgrade policy artifacts
-- [x] T9B — Execute rollback drill + kill-switch propagation evidence capture (`Infrastructure/scripts/run_skill_router_rollback_drill.sh`)
+- [x] T9B — Execute rollback drill + kill-switch propagation evidence capture (`Infrastructure/scripts/lifecycle-and-sync/run_skill_router_rollback_drill.sh`)
 - [x] T10 — Add integration/adversarial fixture coverage for determinism + contracts
 - [x] T11 — Update schema/runbook docs and validation wiring in repo scripts
 
@@ -389,11 +389,11 @@ From premortem + technical review, carry forward for implementation-resolution:
 
 ## Validation Commands
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py Docs/plans/2026-03-04-feat-intent-first-skill-router-scorecard-plan.md`
-- `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
-- `python3 Infrastructure/scripts/verify_router_schema.py --fail-on-sensitive-fields`
-- `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-- `python3 Infrastructure/scripts/skill_router_metrics.py --events Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json`
-- `bash Infrastructure/scripts/run_skill_router_rollback_drill.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_router_schema.py --fail-on-sensitive-fields`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+- `python3 Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py --events Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json`
+- `bash Infrastructure/scripts/lifecycle-and-sync/run_skill_router_rollback_drill.sh`
 - `bash Infrastructure/scripts/validate_all.sh`
 
 ## Technical Review Deltas (2026-03-04)
@@ -412,15 +412,15 @@ Applied deltas from architecture and security review:
   - `AGENTS.md:74`
   - `AGENTS.md:101`
   - `README.md:176-180`
-  - `Infrastructure/scripts/sync_skills.sh:126`
-  - `Infrastructure/scripts/sync_skills.sh:158`
+  - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:126`
+  - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:158`
 - **Routing/telemetry precedents:**
   - `docs/skill-graphs/index.md:10`
   - `docs/skill-graphs/runbooks/skill-genome-loop.md:92-115`
   - `docs/skill-graphs/runbooks/skill-genome-loop.md:147`
-  - `Infrastructure/scripts/run_skill_genome_loop.py:37-39`
-  - `Infrastructure/scripts/run_skill_genome_loop.py:241`
-  - `Infrastructure/scripts/run_skill_genome_loop.py:391`
+  - `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py:37-39`
+  - `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py:241`
+  - `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py:391`
 - **Related internal artifacts (institutional context):**
   - `docs/brainstorms/2026-02-24-skill-graph-live-auto-learning-brainstorm.md`
   - `Docs/plans/2026-02-24-feat-skill-graph-live-auto-learning-plan.md`

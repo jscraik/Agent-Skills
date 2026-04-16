@@ -28,7 +28,7 @@
 
 ## PR approval gates
 - Treat `authoring-family-gate` as a governance approval gate for skill authoring family changes.
-- The gate is satisfied only when `Infrastructure/scripts/validate_skill_authoring_family.sh` passes for all family members.
+- The gate is satisfied only when `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` passes for all family members.
 - CI executes this gate with `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`, so missing local-memory preflight is warning-only in CI while core contract/eval/security checks remain enforced.
 - Do not mark a skill-authoring-family pull request merge-ready while this gate is failing or missing.
 

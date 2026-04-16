@@ -52,7 +52,7 @@ Each wiki page under `wiki/failures/`, `wiki/playbooks/`, `wiki/assets/ui/`, and
 - Persist high-value answers as new pages.
 
 3. Lint
-- Run `python3 Infrastructure/scripts/wiki_lint.py`.
+- Run `python3 Infrastructure/scripts/validation-and-linting/wiki_lint.py`.
 - Fix missing links, orphan pages, stale review dates, and index gaps.
 
 ## CLI Shortcuts
@@ -69,5 +69,5 @@ A wiki update is complete when:
 
 - Pages are linked from `wiki/index.md`.
 - `wiki/log.md` has a dated record.
-- `Infrastructure/scripts/wiki_lint.py` passes.
+- `Infrastructure/scripts/validation-and-linting/wiki_lint.py` passes.
 - Sources are traceable in page frontmatter.

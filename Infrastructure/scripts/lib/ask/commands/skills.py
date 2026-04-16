@@ -12,6 +12,8 @@ from typing import List, Optional
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
+if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries, get_policy_identity
@@ -450,7 +452,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
     python = _get_python_command(["pyyaml", "jsonschema"])
 
-    diag_cmd = python + ["Infrastructure/scripts/diagnose_skill.py", skill_path]
+    diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
@@ -466,7 +468,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = python + ["Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
+        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
@@ -482,7 +484,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
                 message=message,
                 fix_suggestion=(
                     "Inspect data.family_benchmarks for full output, or run: "
-                    f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
+                    f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
                 ),
             ))
             return result

@@ -67,7 +67,7 @@ Generated index surface:
 - Do not hand-edit runtime/projection surfaces.
 - Treat `Plugins/cache/**` as mirrored output. Edits are blocked by default and allowed only in explicit projection-refresh lanes.
 - For explicit projection-refresh lanes, set `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1` and ensure matching canonical source or projection mechanics updates.
-- Regenerate projections with repository wrappers (`ask skills sync`, `Infrastructure/scripts/sync_skills.sh`) rather than editing projections directly.
+- Regenerate projections with repository wrappers (`ask skills sync`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`) rather than editing projections directly.
 - Guard scope defaults:
   - local runs: staged diff only;
   - CI runs: base-ref diff (`origin/$GITHUB_BASE_REF...HEAD`);
@@ -75,6 +75,6 @@ Generated index surface:
 
 ## Validation
 
-- `bash Infrastructure/scripts/check_path_ownership_boundaries.sh`
+- `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
 - `bash Infrastructure/scripts/validate_all.sh --ephemeral`
-- `bash Infrastructure/scripts/verify-work.sh --project-governance`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`

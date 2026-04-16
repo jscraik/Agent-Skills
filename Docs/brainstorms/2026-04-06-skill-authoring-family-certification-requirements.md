@@ -40,7 +40,7 @@ gaps remain before the family itself can be declared **release-ready**:
 **Gaps 1 and 2 share the same root cause and the same fix.**
 
 `docs/skill-graphs/telemetry/daily-skill-health.md` is produced by
-`Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh`. The same cycle also writes mandatory
+`Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh`. The same cycle also writes mandatory
 artifact files (`capture_record.json`, `events.jsonl`, `evidence_packet.json`,
 `iteration_journal.jsonl`, `lesson_candidates.json`, `promotion_decision.json`) into each
 `Infrastructure/artifacts/skill-graphs/runs/run_*/` directory.
@@ -125,7 +125,7 @@ Running the family gate with:
 SKILL_FAMILY_RELEASE_READY=1 \
 SKILL_FAMILY_LIVE_EVALS=1 \
 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 \
-bash Infrastructure/scripts/validate_skill_authoring_family.sh
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 must exit 0 and write a valid `evidence-index.json` to
 `Infrastructure/artifacts/validation/family-gate/<timestamp>/evidence-index.json`.
@@ -148,7 +148,7 @@ A GitHub Actions workflow (`ci/skill-telemetry.yml` or similar) triggers
 | Wave-0 ready | `wave-readiness.json` → `wave-0-controls.ready: true` |
 | Artifact parity > 0% | `artifact-parity-manifest.json` → `compliance_rate > 0.0` |
 | Evidence index exists | `Infrastructure/artifacts/validation/family-gate/<ts>/evidence-index.json` exists and all four skills show `outcome: passed` |
-| Family gate passes | `bash Infrastructure/scripts/validate_skill_authoring_family.sh` exits 0 in release-ready mode |
+| Family gate passes | `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` exits 0 in release-ready mode |
 
 ## Scope Boundaries
 

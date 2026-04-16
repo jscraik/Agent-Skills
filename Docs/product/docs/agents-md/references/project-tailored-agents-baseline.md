@@ -35,7 +35,7 @@ Source baseline in this revision:
 Use this section when the repo needs operator rules up front.
 
 Preserve these points only after verification:
-- Run `./Infrastructure/scripts/codex-preflight.sh --stack auto --mode required` before substantive changes when that script and flag shape exist in the repo.
+- Run `./Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` before substantive changes when that script and flag shape exist in the repo.
 - Recognize the current flag surface:
   - `--stack <auto|repo|js|py|rust>`
   - `--mode <off|optional|required>`

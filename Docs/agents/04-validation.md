@@ -9,13 +9,13 @@
 - [Failure handling](#failure-handling)
 
 ## Repository checks
-- `bash Infrastructure/scripts/verify-work.sh` (project-local default scope)
-- `bash Infrastructure/scripts/verify-work.sh --workspace-governance` (explicit workspace scope)
-- `bash Infrastructure/scripts/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)
-  - projection-refresh exception only: `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 bash Infrastructure/scripts/check_path_ownership_boundaries.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
+- `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)
+  - projection-refresh exception only: `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
   - default scope is staged diff locally and base-ref diff in CI; override with `PATH_OWNERSHIP_GUARD_SCOPE`.
-- `bash Infrastructure/scripts/sync_skills.sh`
-- `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
@@ -44,7 +44,7 @@
 See [CI Required Checks](/Docs/agents/12-ci-required-checks.md) for the complete dependency policy and workflow orchestration.
 
 ## Authoring-family contract behavior
-`authoring-family-gate` invokes `bash Infrastructure/scripts/validate_skill_authoring_family.sh`.
+`authoring-family-gate` invokes `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 
 CI local-memory policy:
 - In PR CI, `SKILL_FAMILY_LOCAL_MEMORY_MODE` is set to `optional`.
@@ -58,7 +58,7 @@ That script enforces equivalent governance for:
 - `Plugins/plugin-factory/skills/*/plugin-creator`
 
 Validation behavior includes:
-- Contract/eval/security benchmark checks via `Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py`.
+- Contract/eval/security benchmark checks via `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py`.
 - Contract/eval/prompt-injection/security fail criteria from `skill_gate.py` (`CONTRACT_*`, `EVALS_*`, `SEC_EVALS_*`, `PI_*`, `SCRIPT_SECURITY_*`, fail-fast workflow checks).
 - OpenClaw security checks through `openclaw_skill_guard.py --mode both`.
 - Structural eval coverage verification (smoke/release listing), with trusted-lane live eval execution only when explicitly enabled.

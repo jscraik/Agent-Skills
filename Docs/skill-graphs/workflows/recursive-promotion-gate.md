@@ -65,7 +65,7 @@ permissions:
 ### PR Mode (Changed-Only)
 
 ```bash
-bash Infrastructure/scripts/validate_recursive_promotions.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
   --changed-only \
   --base-sha "${{ github.event.pull_request.base.sha }}" \
   --head-sha "${{ github.event.pull_request.head.sha }}" \
@@ -76,7 +76,7 @@ bash Infrastructure/scripts/validate_recursive_promotions.sh \
 ### WDsp Mode (Full)
 
 ```bash
-bash Infrastructure/scripts/validate_recursive_promotions.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
   --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
   --strict-runs
 ```
@@ -105,7 +105,7 @@ bash Infrastructure/scripts/validate_recursive_promotions.sh \
 
 ```bash
 # Validate changed (PR simulation)
-bash Infrastructure/scripts/validate_recursive_promotions.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
   --changed-only \
   --base-sha HEAD~1 \
   --head-sha HEAD \
@@ -113,12 +113,12 @@ bash Infrastructure/scripts/validate_recursive_promotions.sh \
   --strict-runs
 
 # Validate all
-bash Infrastructure/scripts/validate_recursive_promotions.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
   --report-json promotion-validation-report.json \
   --strict-runs
 
 # With custom runs root
-bash Infrastructure/scripts/validate_recursive_promotions.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
   --runs-root Infrastructure/artifacts/skill-graphs/runs \
   --report-json promotion-validation-report.json \
   --strict-runs
@@ -135,6 +135,6 @@ Workflow: `.github/workflows/recursive-promotion-gate.yml`
 ## RELATED
 
 - [Promotion gate workflow](/docs/skill-graphs/workflows/promotion-gate.md)
-- [Validate script](/Infrastructure/scripts/validate_recursive_promotions.sh)
-- [Human promote script](/Infrastructure/scripts/human_promote_recursive_run.sh)
+- [Validate script](/Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh)
+- [Human promote script](/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh)
 - [Validation logic](/Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py)

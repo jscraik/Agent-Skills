@@ -152,11 +152,11 @@ printf '%s' '{"hook_event_name":"Stop","session_id":"thr_test","turn_id":"turn_t
 Repository gates for this skill after updates:
 
 ```bash
-bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict
-bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn
-python3 Infrastructure/scripts/gotcha_pipeline.py validate
-bash Infrastructure/scripts/sync_skills_sandbox_safe.sh
-bash Infrastructure/scripts/lint_skill_types.sh
+bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
+bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn
+python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate
+bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh
+bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
 ```
 
 ## References

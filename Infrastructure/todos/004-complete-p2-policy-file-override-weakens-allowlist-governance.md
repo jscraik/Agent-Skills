@@ -13,8 +13,8 @@ dependencies: []
 Policy and signature paths are user-overridable via CLI, and signature validation only checks policy-file hash equality with provided sig file. This allows self-signed alternate policy files to bypass intended canonical reviewer governance.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/human_promote_recursive_run.sh:35-36 and 78-84, callers can override --policy-file and --policy-sig-file.
-- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/human_promote_recursive_run.sh:221-235 and validate_recursive_promotion.py:116-125, validation ensures only that sig == sha256(policy_raw), not that policy is trusted canonical content.
+- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh:35-36 and 78-84, callers can override --policy-file and --policy-sig-file.
+- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh:221-235 and validate_recursive_promotion.py:116-125, validation ensures only that sig == sha256(policy_raw), not that policy is trusted canonical content.
 - A caller can pass an arbitrary allowlist policy + matching hash signature to satisfy checks.
 
 ## Proposed Solutions
@@ -41,7 +41,7 @@ Policy and signature paths are user-overridable via CLI, and signature validatio
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/human_promote_recursive_run.sh`
+- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh`
 - `/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py`
 - `/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/governance/recursive-loop-approvers.yaml`
 

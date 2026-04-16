@@ -61,7 +61,7 @@ flowchart LR
 |-------|---------|
 | Checkout | `actions/checkout@v6` (full) |
 | Python | `3.12` |
-| GH CLI | `Infrastructure/scripts/ensure-gh-cli.sh` |
+| GH CLI | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh` |
 | Deps | `pip install pyyaml` |
 | Validate | `run_repo_skill_quality.py --root . --baseline-file ... --benchmark-mode warn` |
 | Upload | `Infrastructure/artifacts/industry-benchmark-latest.json` |
@@ -144,7 +144,7 @@ permissions:
 | BM Policy | `Skills/skill-builder/Infrastructure/references/benchmark-policy.json` |
 | Script | `Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py` |
 | Dashboard | `Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py` |
-| Helper | `Infrastructure/scripts/ensure-gh-cli.sh` |
+| Helper | `Infrastructure/scripts/lifecycle-and-sync/ensure-gh-cli.sh` |
 
 ---
 

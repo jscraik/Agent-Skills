@@ -20,8 +20,8 @@ Pass criteria:
 Use when repositories expose these wrappers:
 
 ```bash
-bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required
-bash Infrastructure/scripts/verify-work.sh --fast
+bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required
+bash Infrastructure/scripts/validation-and-linting/verify-work.sh --fast
 ```
 
 ## npm lane

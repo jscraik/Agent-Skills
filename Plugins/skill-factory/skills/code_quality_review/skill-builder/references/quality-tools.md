@@ -5,7 +5,7 @@ Use these scripts to upgrade skill quality before packaging.
 ## check-see-also.py
 
 ```bash
-python3 Infrastructure/scripts/check-see-also.py . --changed-files <skill>/SKILL.md
+python3 Infrastructure/scripts/validation-and-linting/check-see-also.py . --changed-files <skill>/SKILL.md
 ```
 
 Use when:
@@ -34,8 +34,8 @@ Outputs:
 ## build-adjacency-yaml.py + validate-adjacency.py
 
 ```bash
-python3 Infrastructure/scripts/build-adjacency-yaml.py
-python3 Infrastructure/scripts/validate-adjacency.py
+python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py
+python3 Infrastructure/scripts/skill-graph/validate-adjacency.py
 ```
 
 Use when:

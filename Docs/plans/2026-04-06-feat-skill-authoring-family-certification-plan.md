@@ -170,7 +170,7 @@ for the next CI trigger. This is the fastest path to gap closure.
 
 ```bash
 # 1. Run the shadow cycle
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile 2 \
   --window-days 7
 
@@ -180,7 +180,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profile
   --wave-readiness-out Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json
 
 # 3. Regenerate artifact-parity-manifest
-python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py \
+python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py \
   --runs-root Infrastructure/artifacts/skill-graphs/runs \
   --manifest Infrastructure/artifacts/skill-graphs/pilot/artifact-parity-manifest.json
 ```
@@ -261,7 +261,7 @@ expected date range. If this persists after P1, re-run with `--window-days 14`.
 SKILL_FAMILY_RELEASE_READY=1 \
 SKILL_FAMILY_LIVE_EVALS=1 \
 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 \
-bash Infrastructure/scripts/validate_skill_authoring_family.sh
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 
 **Expected output:**

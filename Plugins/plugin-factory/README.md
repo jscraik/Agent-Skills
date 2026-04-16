@@ -62,19 +62,19 @@ ask plugins harden Plugins/my-plugin
 Sync projection trees first:
 
 ```sh
-bash Infrastructure/scripts/sync_projection_trees.sh plugin-factory
+bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh plugin-factory
 ```
 
 Verify projection integrity:
 
 ```sh
-bash Infrastructure/scripts/validate_projection_integrity.sh
+bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh
 ```
 
 Run the required authoring-family gate:
 
 ```sh
-bash Infrastructure/scripts/validate_skill_authoring_family.sh
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 
 Validate the package:

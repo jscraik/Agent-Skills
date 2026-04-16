@@ -14,7 +14,7 @@ Keep the repo-local `design-system` skill synchronized with current project cont
 - Skill target is Codex (repo-local path: `.agents/skills/design-system`) and should stay routing-first.
 - Compatibility posture is canonical-first unless user explicitly asks for compatibility bridges.
 - Deliverables should be artifact-driven and include both token-layer and guidance-policy validation commands.
-- Preflight is required for path-sensitive runs (`bash -lc 'source Infrastructure/scripts/codex-preflight.sh && preflight_repo'`).
+- Preflight is required for path-sensitive runs (`bash -lc 'source Infrastructure/scripts/codex-preflight/codex-preflight.sh && preflight_repo'`).
 
 ## Improvement steps
 1. Re-read current contracts (`CHARTER`, `CONTRACT`, `PROFESSIONAL_UI_CONTRACT`, `AGENT_UI_ROUTING`, and guidance scope config).

@@ -18,7 +18,7 @@ DEFAULT_REF = "main"
 
 
 class ListError(Exception):
-    pass
+    """Raised when remote skill listing cannot be fetched or parsed."""
 
 
 class Args(argparse.Namespace):
@@ -45,7 +45,7 @@ def _canonical_repo_dest() -> str | None:
     """
     Determine the local canonical repository 'github' directory to use for checking installed skills.
     
-    If the environment variable ASK_SKILLS_CANONICAL_DEST is set to a non-empty value (after trimming whitespace), that value is returned. Otherwise, walk upward from the location of this script and return the first parent whose tree contains a `.git` entry and also has `AGENTS.md`, `Infrastructure/scripts/sync_skills.sh` and a `plugins` directory; the returned path is that parent joined with `github`. If no such parent is found, return `None`.
+    If the environment variable ASK_SKILLS_CANONICAL_DEST is set to a non-empty value (after trimming whitespace), that value is returned. Otherwise, walk upward from the location of this script and return the first parent whose tree contains a `.git` entry and also has `AGENTS.md`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` and a `plugins` directory; the returned path is that parent joined with `github`. If no such parent is found, return `None`.
     
     Returns:
         str | None: The filesystem path to the canonical repository's `github` directory, or `None` if no canonical destination can be determined.

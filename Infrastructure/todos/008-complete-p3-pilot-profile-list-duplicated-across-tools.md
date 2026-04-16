@@ -13,7 +13,7 @@ dependencies: []
 Pilot profile identifiers are hard-coded in multiple files, increasing drift risk between run generation and report aggregation.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh:43-48, profiles array is hard-coded.
+- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh:43-48, profiles array is hard-coded.
 - In /Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py:14-19, PILOT_PROFILES repeats same values.
 - A profile update requires synchronized edits in separate shell and Python code paths.
 
@@ -41,7 +41,7 @@ Pilot profile identifiers are hard-coded in multiple files, increasing drift ris
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh`
+- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh`
 - `/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py`
 
 ## Acceptance Criteria

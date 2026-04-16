@@ -33,7 +33,7 @@ rollback_procedure: >
   Re-run with the previous pinned ref or a known-good commit SHA. For regressions in skill-installer
   itself, restore the entire Plugins/skill-factory/skills/infrastructure_ops/skill-installer/ asset set (including SKILL.md,
   Infrastructure/scripts/install-skill-from-github.py, and any other runtime scripts) from git, re-run the exact authoring-family
-  gate command (bash Infrastructure/scripts/validate_skill_authoring_family.sh) to validate the authoring family before redeploying,
+  gate command (bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh) to validate the authoring family before redeploying,
   and verify the provenance manifest and quarantine paths are intact before re-deploying.
   Do not skip the quarantine-to-promote step during recovery.
 observability: >

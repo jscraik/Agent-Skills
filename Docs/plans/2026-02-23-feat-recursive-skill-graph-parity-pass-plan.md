@@ -144,9 +144,9 @@ Execute one consolidated implementation pass with a small rollout sequence:
 - `Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py`
 - `Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py`
 - `Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py`
-- `Infrastructure/scripts/human_promote_recursive_run.sh`
-- `Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh`
-- `Infrastructure/scripts/validate_recursive_promotions.sh`
+- `Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh`
+- `Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh`
+- `Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh`
 - `.github/workflows/recursive-skill-shadow.yml`
 - docs under `docs/skill-graphs/**`
 
@@ -323,7 +323,7 @@ Execute one consolidated implementation pass with a small rollout sequence:
 ### Epic D — Validation and rollout
 
 1. **D1** Add/extend validation checks:
-   - `Infrastructure/scripts/validate_recursive_promotions.sh` includes canonical store validation and reviewer policy checks.
+   - `Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh` includes canonical store validation and reviewer policy checks.
    - add failure-mode unit-like checks for idempotency and expected_version.
    - verification: CI command passes zero errors on healthy fixture set.
 
@@ -465,11 +465,11 @@ tasks:
 
 ## 6) Verification command set
 - `python3 Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py --help`
-- `bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
+- `bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
 - `python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py --runs-root Infrastructure/artifacts/skill-graphs/runs --window-days 3`
-- `bash Infrastructure/scripts/validate_recursive_promotions.sh --changed-only --base-sha HEAD~1 --head-sha HEAD`
+- `bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh --changed-only --base-sha HEAD~1 --head-sha HEAD`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md`
-- `bash ~/.codex/Infrastructure/scripts/verify-work.sh`
+- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ### Enhanced Verification matrix (added)
 
@@ -491,7 +491,7 @@ tasks:
 
 ## 7) Remediation closeout status (2026-02-26)
 
-- [x] T1: Baseline parity manifest collection added (`Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py`) and run directory classification implemented.
+- [x] T1: Baseline parity manifest collection added (`Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py`) and run directory classification implemented.
 - [x] T2: Canonical control/lesson roots are initialized and tracked in-repo with deterministic defaults and schema metadata.
 - [x] T3: Non-destructive verifier/repair tooling added (`--dry-run`, `--prune-empty`) with quarantine semantics for legacy/empty run dirs.
 - [x] T4: Validation layer hardened for mandatory telemetry artifacts, blocker-state checks, and schema-specific error codes.

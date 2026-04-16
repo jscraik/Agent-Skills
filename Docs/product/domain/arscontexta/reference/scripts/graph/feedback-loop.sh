@@ -43,7 +43,7 @@ COMMUNITIES_OUT="$RAW_DIR/communities.tsv"
 "$SCRIPT_DIR/find-communities-leiden.sh" "$NOTES_DIR" > "$COMMUNITIES_OUT"
 
 # ── Compute session co-invocation weights ────────────────────────────────────
-WEIGHTS_SCRIPT="$VAULT_ROOT/Infrastructure/scripts/compute-edge-weights.py"
+WEIGHTS_SCRIPT="$VAULT_ROOT/Infrastructure/scripts/skill-graph/compute-edge-weights.py"
 if [[ -f "$WEIGHTS_SCRIPT" ]]; then
   python3 "$WEIGHTS_SCRIPT" "$VAULT_ROOT" || true
 fi
@@ -338,7 +338,7 @@ cp "$REPORT_PATH" "$REPORT_DIR/latest.md"
 cp "$RECOMMEND_PATH" "$RECOMMEND_DIR/latest.json"
 
 # ── Regenerate visual HTML graph if generator script is present ──────────────
-GRAPH_GEN="$VAULT_ROOT/Infrastructure/scripts/gen-skill-graph.py"
+GRAPH_GEN="$VAULT_ROOT/Infrastructure/scripts/skill-graph/gen-skill-graph.py"
 GRAPH_HTML="${HOME}/.agent/diagrams/skill-graph.html"
 if [[ -f "$GRAPH_GEN" ]] && [[ -f "$EDGES_OUT" ]]; then
   python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" || true

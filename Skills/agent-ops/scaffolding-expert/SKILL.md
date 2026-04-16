@@ -106,8 +106,8 @@ Run the smallest relevant checks first, then broaden:
 bash Infrastructure/scripts/profile-dev-repos.sh --root ~/dev
 
 # Optional when repository provides these wrappers
-bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required
-bash Infrastructure/scripts/verify-work.sh --fast
+bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required
+bash Infrastructure/scripts/validation-and-linting/verify-work.sh --fast
 ```
 
 Lane checks are in `Infrastructure/references/validation-lanes.md`; apply only the lanes touched by the recommendation.

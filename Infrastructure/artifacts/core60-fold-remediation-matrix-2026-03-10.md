@@ -25,7 +25,7 @@ Since that audit, the repo has been remediated in these areas:
   - `product/domain/chatgpt-apps/SKILL.md`
   - `product/security/security-best-practices/SKILL.md`
 - Updated the root skill index so the restored skills are discoverable again.
-- Validated the repaired destination skills with `python3 Infrastructure/scripts/diagnose_skill.py`:
+- Validated the repaired destination skills with `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py`:
   - `skill-builder`
   - `interview-me`
   - `deep-interview`

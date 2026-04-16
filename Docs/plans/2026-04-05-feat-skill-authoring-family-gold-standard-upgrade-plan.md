@@ -84,7 +84,7 @@ Without a focused final hardening pass, the family can appear complete while sti
 - R2. Trusted live smoke and release eval evidence must be required for release-grade readiness.
   Trace: family-gate trusted-lane controls; maturity matrix closeout expectations.
 - R3. Security analyzer warnings in family-critical scripts must be reduced to zero or explicitly risk-accepted with compensating controls.
-  Trace: OpenClaw output from `Infrastructure/scripts/validate_skill_authoring_family.sh`.
+  Trace: OpenClaw output from `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 - R4. Adversarial eval coverage must include broader threat classes beyond minimum PI command-guard checks.
   Trace: benchmark validator requirements + modern LLM security guidance.
 - R5. Family SKILL routing and operator guidance must be strong enough to avoid scope confusion and weak handoffs.
@@ -103,8 +103,8 @@ In scope:
   - `docs/reference/skill-authoring-validation-maturity-matrix.md`
   - `Docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-plan.md`
 - family validation and benchmark scripts:
-  - `Infrastructure/scripts/validate_skill_authoring_family.sh`
-  - `Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py`
+  - `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
+  - `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py`
 - family skills and metadata:
   - `Skills/skill-builder/SKILL.md`
   - `Skills/skill-creator/SKILL.md`
@@ -124,9 +124,9 @@ Out of scope:
 
 ### Relevant Code and Patterns
 
-- `Infrastructure/scripts/validate_skill_authoring_family.sh`
+- `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
   - current canonical family gate; currently structural-only by default unless trusted live mode is explicitly enabled.
-- `Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py`
+- `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py`
   - deterministic family requirements and eval category/security minimum checks.
 - `docs/reference/skill-authoring-validation-maturity-matrix.md`
   - latest readiness matrix and currently marked `meets` critical layer status.
@@ -210,7 +210,7 @@ flowchart TD
 - Modify: `docs/reference/skill-authoring-validation-maturity-matrix.md`
 - Create: `docs/reference/skill-authoring-family-boundary-decision.md`
 - Modify: any active family docs that still frame `plugin-builder` as a core member for this lane
-- Test: `rg -n "skill-creator|skill-builder|skill-installer|plugin-creator|plugin-builder" docs/specs docs/reference Infrastructure/scripts/validate_skill_authoring_family.sh Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py`
+- Test: `rg -n "skill-creator|skill-builder|skill-installer|plugin-creator|plugin-builder" docs/specs docs/reference Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py`
 
 **Approach:**
 
@@ -251,11 +251,11 @@ flowchart TD
 
 **Files:**
 
-- Modify: `Infrastructure/scripts/validate_skill_authoring_family.sh`
+- Modify: `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 - Modify: `docs/reference/skill-authoring-validation-maturity-matrix.md`
 - Modify: relevant validation docs under `Docs/agents/` where family closeout checks are described
-- Test: `bash Infrastructure/scripts/validate_skill_authoring_family.sh`
-- Test: `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+- Test: `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
+- Test: `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1 bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 **Approach:**
 
@@ -308,7 +308,7 @@ flowchart TD
 - Modify: `Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py` (or relevant tests)
 - Create: `docs/reference/skill-authoring-family-risk-acceptance.md` (only if residual findings remain)
 - Test: `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/openclaw_skill_guard.py Skills/skill-builder --mode both --format text`
-- Test: `bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+- Test: `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 **Approach:**
 
@@ -349,7 +349,7 @@ flowchart TD
 - Create: `docs/reference/skill-authoring-family-quality-baseline.md`
 - Test: `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/analyze_skill.py Skills/skill-installer --min-pass 60 --no-emoji`
 - Test: `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/analyze_skill.py Skills/plugin-creator --min-pass 60 --no-emoji`
-- Test: `bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+- Test: `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 **Approach:**
 
@@ -529,8 +529,8 @@ P4 | completed | codex | gold-scorecard.md created; .harness/quality/criteria.md
 - Parent plan: `Docs/plans/2026-04-04-feat-skill-authoring-family-iteration-upgrade-plan.md`
 - Governing spec: `Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
 - Current readiness matrix: `docs/reference/skill-authoring-validation-maturity-matrix.md`
-- Family gate script: `Infrastructure/scripts/validate_skill_authoring_family.sh`
-- Family benchmark script: `Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py`
+- Family gate script: `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
+- Family benchmark script: `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py`
 - Official docs:
   - https://developers.openai.com/codex/skills/
   - https://developers.openai.com/api/docs/guides/tools-skills/

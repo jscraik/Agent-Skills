@@ -113,7 +113,7 @@ uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py val
 ```
 
 Family gate note:
-- `authoring-family-gate` (CI job) runs `bash Infrastructure/scripts/validate_skill_authoring_family.sh`.
+- `authoring-family-gate` (CI job) runs `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 - The merge contract for this family is enforced by `authoring-family-gate`, including structural contract/schema checks plus benchmark/security parity for `plugin-installer`.
 - Live Codex smoke+release execution is trusted-lane only with `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1`.
 

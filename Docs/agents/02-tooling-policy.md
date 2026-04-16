@@ -14,12 +14,12 @@
 - Default to `zsh -lc` for shell tooling; switch to `bash` only when a script relies on bash internals.
 
 ## Command preflight
-- Run `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
+- Run `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
 - The verified optional overrides are `--repo-fragment`, `--bins`, and `--paths`.
 - Confirm `pwd` is `/Users/jamiecraik/dev/Agent-Skills` before edits.
 - Verify required binaries with `which` before running installs.
 - Confirm target paths with `fd` before destructive operations.
-- Do not source `Infrastructure/scripts/codex-preflight.sh` or call `preflight_repo`; the current script is a bash CLI, not a shell function library.
+- Do not source `Infrastructure/scripts/codex-preflight/codex-preflight.sh` or call `preflight_repo`; the current script is a bash CLI, not a shell function library.
 
 ## Verified command style
 - Keep command snippets backed by repo files before documenting them.
@@ -36,11 +36,11 @@
   - `npm --prefix <path> exec <bin>`
 
 ## Useful checks
-- `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`
-- `bash Infrastructure/scripts/sync_skills.sh`
-- `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
+- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md` (external dependency)
-- `bash Infrastructure/scripts/verify-work.sh` (repo-local wrapper preferred over `~/.codex` version)
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (repo-local wrapper preferred over `~/.codex` version)
 
 ## Skill line-budget policy
 

@@ -92,7 +92,7 @@ Every wave blocker in readiness artifacts must include:
 Run the propagation drill:
 
 ```bash
-bash Infrastructure/scripts/run_recursive_rollout_drill.sh
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_rollout_drill.sh
 ```
 
 Evidence artifacts:

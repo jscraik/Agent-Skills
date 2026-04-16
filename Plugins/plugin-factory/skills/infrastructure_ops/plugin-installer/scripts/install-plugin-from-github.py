@@ -48,7 +48,7 @@ UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/ins
 
 
 class InstallError(Exception):
-    pass
+    """Raised when plugin installation input or staged validation fails."""
 
 
 def _utc_now_iso() -> str:

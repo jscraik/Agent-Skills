@@ -69,7 +69,7 @@ class Source:
 
 
 class InstallError(Exception):
-    pass
+    """Raised when skill installation input or staged validation fails."""
 
 
 def _utc_now_iso() -> str:
@@ -766,7 +766,7 @@ def main(argv: list[str]) -> int:
             if isinstance(prepared_repo, tuple):
                 repo_root, fetch_method = prepared_repo
             elif isinstance(prepared_repo, str):
-                # Backward compatibility with callers/tests that still mock
+                # Backward compatibility with callers/tests that still return
                 # _prepare_repo() as a plain repo-root string.
                 repo_root = prepared_repo
                 fetch_method = "unknown"

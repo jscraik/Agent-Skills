@@ -90,7 +90,7 @@ Fail fast: stop at first failed gate and do not proceed. Review the detailed con
 
 Run these checks:
 ```bash
-python3 Infrastructure/scripts/diagnose_skill.py backend/cli-spec
+python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py backend/cli-spec
 python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py backend/cli-spec --mode strict
 ```
 

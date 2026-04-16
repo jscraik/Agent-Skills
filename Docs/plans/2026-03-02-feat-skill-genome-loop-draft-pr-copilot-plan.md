@@ -92,7 +92,7 @@ def load_json(path: Path) -> dict[str, Any] | None:
 
 **References:**
 - `/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py:292-356` (confidence scoring)
-- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py:35-40` (artifact loading)
+- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py:35-40` (artifact loading)
 
 ---
 
@@ -162,7 +162,7 @@ Rejected alternatives:
 ### Leverage Existing Infrastructure
 
 - Reuse existing rollout controls and telemetry contracts (`off | observe_only | active`) instead of inventing a parallel control plane (`Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py:49`, `docs/guides/recursive-skill-loop.md:67`).
-- Preserve required artifact envelope and parity checks (`events.jsonl`, `promotion_decision.json`, capture artifacts) (`Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py:19-25`).
+- Preserve required artifact envelope and parity checks (`events.jsonl`, `promotion_decision.json`, capture artifacts) (`Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py:19-25`).
 - Maintain kill-switch and rollback precedence semantics (`docs/skill-graphs/runbooks/kill-switch-and-escalation.md:51`).
 - Treat data handling as high-risk: enforce redaction/allowlist-only evidence fields and avoid raw transcript persistence.
 
@@ -556,8 +556,8 @@ tasks:
 ### Existing Recursive Artifacts Checks (Keep Green)
 
 ```bash
-python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --runs-root Infrastructure/artifacts/skill-graphs/runs --strict
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh --runs-per-profile 2 --window-days 7
+python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --runs-root Infrastructure/artifacts/skill-graphs/runs --strict
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh --runs-per-profile 2 --window-days 7
 ```
 
 ### New Genome Loop Checks
@@ -825,7 +825,7 @@ candidates:
 - `docs/guides/recursive-skill-loop.md:58-68`
 - `docs/skill-graphs/pilots/2026-02-25-go-no-go-summary.md:12,17,22,43`
 - `Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md:3`
-- `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py:19-25,242-272`
+- `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py:19-25,242-272`
 - `Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py:49,1368-1461,292-356`
 - `docs/skill-graphs/runbooks/kill-switch-and-escalation.md:51`
 

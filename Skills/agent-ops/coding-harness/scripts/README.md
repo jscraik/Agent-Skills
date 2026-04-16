@@ -12,10 +12,10 @@ Available helper scripts:
     - legacy `verify-<provider>` command alias
     - legacy `request-<provider>-review` command alias
     - legacy `<Provider> Review` check label
-    - `source Infrastructure/scripts/codex-preflight.sh && preflight_repo`
+    - `source Infrastructure/scripts/codex-preflight/codex-preflight.sh && preflight_repo`
   - Checks for required patterns:
     - `verify-coderabbit`
-    - `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`
+    - `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
 
 Run:
 

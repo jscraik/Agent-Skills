@@ -33,7 +33,7 @@ $ ask skills install https://github.com/example/test-skill --dry-run
 
 ### 2. Orphaned Script: `sync_mcp.py` → `ask mcp sync` ✓
 
-**Issue:** Script existed at `Infrastructure/scripts/sync_mcp.py` (~150 LOC) but had no CLI integration.
+**Issue:** Script existed at `Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py` (~150 LOC) but had no CLI integration.
 
 **Fix:**
 - Created new `Infrastructure/scripts/lib/ask/commands/mcp.py` module with `sync_mcp()` function
@@ -53,7 +53,7 @@ $ ask mcp sync --dry-run
 
 ### 3. Orphaned Script: `check-hub-stability.py` → `ask repo check-stability` ✓
 
-**Issue:** Script existed at `Infrastructure/scripts/check-hub-stability.py` (~80 LOC) but had no CLI integration.
+**Issue:** Script existed at `Infrastructure/scripts/lifecycle-and-sync/check-hub-stability.py` (~80 LOC) but had no CLI integration.
 
 **Fix:**
 - Added `check_hub_stability()` function to `Infrastructure/scripts/lib/ask/commands/repo.py`
@@ -104,15 +104,15 @@ $ ask skills audit /etc/passwd --json
 ### 6-12. Remaining Orphaned Scripts (Deferred)
 
 The following scripts remain as standalone utilities but are documented as available:
-- `Infrastructure/scripts/skill_router_metrics.py` - Router metrics calculation
-- `Infrastructure/scripts/skill_spotlight.py` - Skill spotlight/reporting
-- `Infrastructure/scripts/run_skill_genome_loop.py` - Skill genome processing
-- `Infrastructure/scripts/build_learning_posture_pilot_summary.py` - Pilot summaries
-- `Infrastructure/scripts/build_skill_state_map.py` - State maps
-- `Infrastructure/scripts/review_candidates.py` - Candidate review
-- `Infrastructure/scripts/graph-diff.py` - Graph diffing
-- `Infrastructure/scripts/gen-skill-graph.py` - Graph generation
-- `Infrastructure/scripts/compute-edge-weights.py` - Edge weight computation
+- `Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py` - Router metrics calculation
+- `Infrastructure/scripts/lifecycle-and-sync/skill_spotlight.py` - Skill spotlight/reporting
+- `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py` - Skill genome processing
+- `Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py` - Pilot summaries
+- `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` - State maps
+- `Infrastructure/scripts/lifecycle-and-sync/review_candidates.py` - Candidate review
+- `Infrastructure/scripts/skill-graph/graph-diff.py` - Graph diffing
+- `Infrastructure/scripts/skill-graph/gen-skill-graph.py` - Graph generation
+- `Infrastructure/scripts/skill-graph/compute-edge-weights.py` - Edge weight computation
 
 These are lower priority and can be integrated incrementally as needed.
 

@@ -22,7 +22,7 @@ Use this guide to create and validate `promotion_decision.json` for a completed 
 ## Approve a run
 
 ```bash
-bash Infrastructure/scripts/human_promote_recursive_run.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh \
   --run-id run_20260220T150021Z_518880 \
   --lesson-id lesson_ui_20260220_001 \
   --reviewer jamie \
@@ -36,7 +36,7 @@ bash Infrastructure/scripts/human_promote_recursive_run.sh \
 ## Reject a run
 
 ```bash
-bash Infrastructure/scripts/human_promote_recursive_run.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh \
   --run-id run_20260220T150021Z_518880 \
   --lesson-id lesson_ui_20260220_001 \
   --reviewer jamie \
@@ -58,7 +58,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion
 Pull requests touching `promotion_decision.json` run:
 
 ```bash
-bash Infrastructure/scripts/validate_recursive_promotions.sh --changed-only --base-sha <base_sha> --head-sha <head_sha>
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh --changed-only --base-sha <base_sha> --head-sha <head_sha>
 ```
 
 Workflow: `.github/workflows/recursive-promotion-gate.yml`.

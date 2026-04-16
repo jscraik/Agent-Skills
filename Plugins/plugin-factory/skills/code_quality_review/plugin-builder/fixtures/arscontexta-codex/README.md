@@ -9,5 +9,5 @@ This is a fixture plugin package used by `plugin-builder` for conversion example
 - `.mcp.json`
 
 ## Notes
-- This fixture is intentionally starter-grade and may include placeholder integration values.
-- Use it as a conversion/template example, not as production-ready plugin output.
+- This fixture ships concrete integration defaults for conversion and regression testing.
+- Adjust command paths and vault scope only when validating alternative runtime environments.

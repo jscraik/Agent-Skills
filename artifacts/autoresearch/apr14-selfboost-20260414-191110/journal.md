@@ -16,11 +16,11 @@
 
 ### Iteration 1
 - hypothesis: command-contract drift is suppressing reproducible broad validation outcomes.
-- change: corrected broad validation command to `bash scripts/verify-work.sh` and added evidence-based hypothesis prioritization order.
+- change: corrected broad validation command to `bash scripts/validation-and-linting/verify-work.sh` and added evidence-based hypothesis prioritization order.
 - validation:
   - `python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py utilities/autoresearch` -> pass
   - `UV_CACHE_DIR=/tmp/uv-cache ./bin/ask skills audit utilities/autoresearch --level strict --robot --json` -> pass
-  - `bash scripts/verify-work.sh` -> pass (`passed: 3`, `failed: 0`)
+  - `bash scripts/validation-and-linting/verify-work.sh` -> pass (`passed: 3`, `failed: 0`)
 - decision: keep
 
 ### Iteration 2
@@ -58,6 +58,6 @@
   - `python3 plugins/skill-factory/skills/skill-creator/scripts/quick_validate.py utilities/autoresearch` -> pass
   - `python3` YAML/JSON parse + weight sum assertion -> pass
   - `UV_CACHE_DIR=/tmp/uv-cache ./bin/ask skills audit utilities/autoresearch --level strict --robot --json` -> pass
-  - `bash scripts/verify-work.sh` -> pass (`passed: 3`, `failed: 0`)
+  - `bash scripts/validation-and-linting/verify-work.sh` -> pass (`passed: 3`, `failed: 0`)
   - `./bin/ask plugins doctor --help` -> pass (confirms command contract without positional plugin path)
 - decision: keep

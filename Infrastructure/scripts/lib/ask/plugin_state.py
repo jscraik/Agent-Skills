@@ -11,6 +11,8 @@ from typing import Any
 SCRIPTS_ROOT = Path(__file__).resolve().parents[2]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
+if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from selection_policy import policy_identity
 
@@ -140,7 +142,7 @@ def _activation_state(
 
 
 def _run_shadowing_check(repo_root: Path) -> dict[str, Any]:
-    cmd = ["bash", "Infrastructure/scripts/check_plugin_skill_shadowing.sh", "--repo-root", str(repo_root)]
+    cmd = ["bash", "Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh", "--repo-root", str(repo_root)]
     proc = subprocess.run(cmd, cwd=str(repo_root), text=True, capture_output=True, check=False)
     stdout_lines = [line for line in proc.stdout.splitlines() if line.strip()]
     stderr_lines = [line for line in proc.stderr.splitlines() if line.strip()]

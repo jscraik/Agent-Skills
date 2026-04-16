@@ -67,7 +67,7 @@ This plan defines implementation order, dependencies, and validation gates so de
 ## Scope and Non-Goals
 In scope:
 - Implement interface delivery in phases aligned with spec lifecycle states (`S0..S5`).
-- Reuse `Infrastructure/scripts/build_skill_state_map.py` pipeline contracts and canonical artifacts.
+- Reuse `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` pipeline contracts and canonical artifacts.
 - Implement deterministic status resolution for `READY`, `DEGRADED`, and `BLOCKED`.
 - Implement observability and validation checks required by spec and runbooks.
 - Add rollout gates and downgrade behavior aligned with existing threshold/runbook contracts.
@@ -232,10 +232,10 @@ tasks:
 ```
 
 ## Planned File Map
-- `Infrastructure/scripts/build_skill_state_map.py`:
+- `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py`:
   - Treat as authoritative composition source for controls, joins, and typed-graph outputs.
   - No semantic rewrite of join/normalization behavior in UI adapter code.
-- `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py`:
+- `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py`:
   - Reuse as rollout evidence source for blocked-path and envelope integrity checks.
 - `Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py`:
   - Reuse envelope error computation to drive degraded-mode fixtures and assertions.
@@ -263,8 +263,8 @@ tasks:
 Dependencies:
 - Spec contract: `Docs/specs/2026-03-09-feat-skills-knowledge-graph-visual-interface-spec.md`.
 - Canonical sources: `docs/skill-graphs/*` schemas/runbooks and `Infrastructure/artifacts/skill-graphs/*`.
-- Existing composition pipeline: `Infrastructure/scripts/build_skill_state_map.py`.
-- Validation scripts: `Infrastructure/scripts/docs_lint.py`, `Infrastructure/scripts/validate_all.sh`, and graph/contract validators.
+- Existing composition pipeline: `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py`.
+- Validation scripts: `Infrastructure/scripts/validation-and-linting/docs_lint.py`, `Infrastructure/scripts/validate_all.sh`, and graph/contract validators.
 
 Risks and mitigations:
 - Risk: interactive UI ships before safety gates.
@@ -306,7 +306,7 @@ Phase-gate evidence paths (required):
 
 Phase-gate command matrix:
 - `Phase 0 -> Phase 1`:
-  - `python3 Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
+  - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
   - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py /Users/jamiecraik/dev/agent-skills/Docs/plans/2026-03-09-feat-skills-knowledge-graph-visual-interface-plan.md`
   - artifact gate: decision record and fixture baseline both present.
 - `Phase 1 -> Phase 2`:
@@ -322,7 +322,7 @@ Phase-gate command matrix:
   - verify gate panel parity and observability threshold checks.
   - artifact gate: gate panel snapshot + threshold evaluation report.
 - `Phase 5 -> completion`:
-  - `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest Infrastructure/artifacts/skill-graphs/telemetry/releases/<YYYYMMDDTHHMMSSZ>/manifest.json`
+  - `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest Infrastructure/artifacts/skill-graphs/telemetry/releases/<YYYYMMDDTHHMMSSZ>/manifest.json`
   - artifact gate: complete evidence bundle with hash-valid `manifest.json`.
 
 ## Test and Validation Strategy
@@ -402,12 +402,12 @@ Safety tests:
 
 Validation commands:
 Authoring checks:
-- `bash Infrastructure/scripts/sync_skills.sh`
-- `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `bash Infrastructure/scripts/validate_all.sh`
 Release gates (blocking):
-- `python3 Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
-- `bash ~/.codex/Infrastructure/scripts/verify-work.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
+- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Rollout / Migration / Monitoring
 Rollout approach:
@@ -575,13 +575,13 @@ Rollback clear and re-entry procedure:
 
 Post-release verification cadence:
 - `+5m`: smoke checks + envelope integrity + control precedence.
-  - command: `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/manifest.json`.
+  - command: `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/manifest.json`.
   - pass/fail: non-zero exit or missing blocked/envelope events is immediate hold.
 - `+1h`: SLO and alert-threshold checks (latency, refresh, ambiguity, degraded frequency).
   - command: `jq -e '.runtime_alerts_checked == true and .runtime_min_samples == 200 and .ui_interaction_latency_ms.p95 <= 100 and .ui_interaction_latency_ms.p99 <= 150 and .ui_interaction_complete_ms.p95 <= 150 and .ui_interaction_complete_ms.p99 <= 250 and .refresh_end_to_end_ms.p95 <= 6000 and .refresh_end_to_end_ms.p99 <= 6000' Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/telemetry-thresholds.json`.
   - pass/fail: threshold breach with sufficient sample volume is hold/escalate.
 - `+24h`: full gate protocol review including trend windows and rollback-drill freshness.
-  - command: `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/manifest.json && jq -e '.rollback_drill_age_days <= 14 and .release_status != \"hold\"' Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/rollout-summary.json`.
+  - command: `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --run-state-check --strict --manifest Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/manifest.json && jq -e '.rollback_drill_age_days <= 14 and .release_status != \"hold\"' Infrastructure/artifacts/skill-graphs/telemetry/releases/<ts>/rollout-summary.json`.
   - pass/fail: hash drift, stale drill evidence, or unresolved holds blocks completion.
 
 Rollback drill freshness gate:
@@ -644,9 +644,9 @@ Pre-deploy artifact freshness gate:
   - `docs/skill-graphs/runbooks/events-jsonl-fix.md`
   - `docs/skill-graphs/pilots/rollback-drill.md`
 - Existing implementation anchors:
-  - `Infrastructure/scripts/build_skill_state_map.py`
+  - `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py`
   - `Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py`
   - `Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py`
   - `Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py`
-  - `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py`
+  - `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py`
   - `Infrastructure/scripts/validate_all.sh`

@@ -7,7 +7,7 @@ default:
 
 # Quick status overview
 status:
-    ./Infrastructure/scripts/status.sh
+    ./Infrastructure/scripts/lifecycle-and-sync/status.sh
 
 # Run all validation
 validate:
@@ -19,27 +19,27 @@ harness-check:
 
 # Diagnose all skills
 diagnose:
-    mise exec -- uv run --python 3.12 python Infrastructure/scripts/diagnose_skill.py --all
+    mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all
 
 # Run skill genome loop (dry-run)
 genome-loop:
-    mise exec -- uv run --python 3.12 python Infrastructure/scripts/run_skill_genome_loop.py --dry-run
+    mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --dry-run
 
 # Run skill genome loop (live)
 genome-loop-live:
-    mise exec -- uv run --python 3.12 python Infrastructure/scripts/run_skill_genome_loop.py
+    mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py
 
 # Sync skills to agent directories
 sync:
-    ./Infrastructure/scripts/sync_skills.sh
+    ./Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
 
 # Install cron job for nightly genome loop
 install-cron:
-    ./Infrastructure/scripts/install_cron.sh
+    ./Infrastructure/scripts/lifecycle-and-sync/install_cron.sh
 
 # Run docs lint
 docs-lint:
-    mise exec -- uv run --python 3.12 python Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+    mise exec -- uv run --python 3.12 python Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 
 # List skill-builder eval cases
 skill-builder-list-evals filters='':
@@ -67,15 +67,15 @@ check-nested-git:
 
 # Count skills
 count-skills:
-    @mise exec -- uv run --python 3.12 python Infrastructure/scripts/skill_catalog.py --count
+    @mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py --count
 
 # Run CI checks locally
 ci-local:
-    ./Infrastructure/scripts/validate_all.sh && mise exec -- uv run --python 3.12 python Infrastructure/scripts/diagnose_skill.py --all && mise exec -- uv run --python 3.12 python Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+    ./Infrastructure/scripts/validate_all.sh && mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all && mise exec -- uv run --python 3.12 python Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 
 # Generate skill spotlight for daily health report (shows skills needing attention)
 spotlight:
-    mise exec -- uv run --python 3.12 python Infrastructure/scripts/skill_spotlight.py
+    mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/skill_spotlight.py
 
 # Generate subject-level scoreboard from skill feedback (ui, backend, security, etc.)
 subject-scoreboard:
@@ -83,7 +83,7 @@ subject-scoreboard:
 
 # Run rollback drill scenarios for resilience testing (kill-switch, rollout modes)
 rollout-drill:
-    bash Infrastructure/scripts/run_recursive_rollout_drill.sh
+    bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_rollout_drill.sh
 
 # Check Agentation watch-mode readiness for a project
 watch-readiness project-root='.':
@@ -93,4 +93,4 @@ watch-readiness project-root='.':
 
 # Analyze router telemetry metrics (first-hit rates, guardrail performance)
 router-metrics events='Infrastructure/artifacts/skill-graphs/telemetry/route-events.jsonl':
-    mise exec -- uv run --python 3.12 python Infrastructure/scripts/skill_router_metrics.py --events {{events}} --json
+    mise exec -- uv run --python 3.12 python Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py --events {{events}} --json

@@ -109,7 +109,7 @@ cases:
     prompt: "What verification command should scaffolded repos run?"
     acceptance:
       - type: contains
-        value: "bash ~/.codex/Infrastructure/scripts/verify-work.sh"
+        value: "bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh"
 
   - id: contradiction-handling
     name: contradiction-handling
@@ -205,7 +205,7 @@ cases:
     prompt: "Update the AGENTS guidance so repository rules, stack detection, required tooling, required repo paths, Local Memory policy, startup workflow, and supplemental context are tailored for each project instead of copied as one fixed template."
     acceptance:
       - type: contains
-        value: "./Infrastructure/scripts/codex-preflight.sh --stack auto --mode required"
+        value: "./Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required"
       - type: contains
         value: "--repo-fragment"
       - type: contains

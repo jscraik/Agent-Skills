@@ -9,8 +9,8 @@
 - None.
 
 ## Resolved contradictions
-- Root `AGENTS.md` and `CLAUDE.md` previously told agents to source `Infrastructure/scripts/codex-preflight.sh` and call `preflight_repo`.
-  - Verified repo behavior is the CLI form: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`
+- Root `AGENTS.md` and `CLAUDE.md` previously told agents to source `Infrastructure/scripts/codex-preflight/codex-preflight.sh` and call `preflight_repo`.
+  - Verified repo behavior is the CLI form: `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
   - Supported overrides were confirmed from the script help and live execution: `--repo-fragment`, `--bins`, `--paths`
   - See [Tooling Policy](/Docs/agents/02-tooling-policy.md) for current preflight command reference.
 - Repo instruction examples previously mixed `/Users/jamiecraik/dev/agent-skills` and `/Users/jamiecraik/dev/Agent-Skills`.

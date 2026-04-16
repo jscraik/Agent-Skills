@@ -145,7 +145,7 @@ def session_start_template() -> str:
           candidate_root="$cwd"
 
           while true; do
-            if [[ -f "$candidate_root/Infrastructure/scripts/codex-preflight.sh" \\
+            if [[ -f "$candidate_root/Infrastructure/scripts/codex-preflight/codex-preflight.sh" \\
                || -f "$candidate_root/AGENTS.md" \\
                || -f "$candidate_root/pnpm-lock.yaml" \\
                || -f "$candidate_root/package-lock.json" \\
@@ -176,7 +176,7 @@ def session_start_template() -> str:
           dirty_count="$(git -C "$git_root" status --porcelain=v1 -- "$repo_root" 2>/dev/null | wc -l | tr -d '[:space:]')"
           dirty_count="${dirty_count:-0}"
 
-          if [[ -f "$repo_root/Infrastructure/scripts/codex-preflight.sh" ]]; then
+          if [[ -f "$repo_root/Infrastructure/scripts/codex-preflight/codex-preflight.sh" ]]; then
             preflight_hint="Use the repo preflight helper before path-sensitive or multi-step work."
           fi
 

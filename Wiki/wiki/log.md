@@ -4,7 +4,7 @@
 
 - Added schema and operating contract in `Wiki/skill-ops-wiki/README.md`.
 - Added index and initial linked pages in `Wiki/skill-ops-wiki/wiki/`.
-- Added `Infrastructure/scripts/wiki_lint.py` for structure and freshness checks.
+- Added `Infrastructure/scripts/validation-and-linting/wiki_lint.py` for structure and freshness checks.
 
 ## [2026-04-09] seed | Added first operational patterns
 

@@ -52,7 +52,7 @@ slices:
           - all
         applies_to_rollback: true
     entry_checks:
-      - bash Infrastructure/scripts/verify-work.sh --project-governance
+      - bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance
     exit_checks:
       - bin/ask plugins status coderabbit --json
     rollback_commands:

@@ -76,7 +76,7 @@ scaffold_mode_contract:
     - AGENT-FIRST-WORKFLOW
   required_commands:
     plan_lint: "python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py <plan-file>"
-    verification: "bash ~/.codex/Infrastructure/scripts/verify-work.sh"
+    verification: "bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh"
 
 non_goals:
   - implementing product code

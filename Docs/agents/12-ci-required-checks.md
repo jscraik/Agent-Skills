@@ -17,7 +17,7 @@ Within `.github/workflows/pr-pipeline.yml`, the governance-critical checks are:
 - `harness-preflight`
 
 `authoring-family-gate` runs:
-- `bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+- `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 CI mode policy:
 - `repo-validate` and `authoring-family-gate` set `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`.

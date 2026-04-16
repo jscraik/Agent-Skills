@@ -168,7 +168,7 @@ Infrastructure/harness.contract.json               — governance contract (sour
 .coderabbit.yaml                    — CodeRabbit review config (repo-scoped)
 .circleci/config.yml                — All CI jobs (lint, test, security, release)
 .github/PULL_REQUEST_TEMPLATE.md    — PR checklist
-Infrastructure/scripts/codex-preflight.sh          — agent preflight script (source at session start)
+Infrastructure/scripts/codex-preflight/codex-preflight.sh          — agent preflight script (source at session start)
 Infrastructure/scripts/check-environment.sh        — harness env readiness script
 .codex/environments/environment.toml — Codex action blocks
 .mise.toml                          — pinned tool versions
@@ -342,7 +342,7 @@ Run this validation ladder in order. Stop on first failure and report.
 
 ```bash
 # 9.1 — Preflight (repo context, required binaries)
-bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required
+bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required
 
 # 9.2 — Environment check (mise tools, harness readiness)
 harness check-environment --json
@@ -404,16 +404,16 @@ Use `harness verify-coderabbit` to validate setup from CLI.
 
 | File | Purpose |
 |---|---|
-| `Infrastructure/scripts/codex-preflight.sh` | Agent preflight — source at every session start |
+| `Infrastructure/scripts/codex-preflight/codex-preflight.sh` | Agent preflight — source at every session start |
 | `Infrastructure/scripts/check-environment.sh` | Harness env readiness check |
 | `Infrastructure/scripts/setup-git-hooks.js` | Git hook installer |
 | `Infrastructure/scripts/validate-commit-msg.js` | Commit message linter |
-| `Infrastructure/scripts/check-staged-secrets.sh` | Pre-commit secret scan |
-| `Infrastructure/scripts/check-doc-style.sh` | Doc style enforcer |
-| `Infrastructure/scripts/check-related-tests.sh` | Test coverage reminder |
-| `Infrastructure/scripts/check-semgrep-changed.sh` | Security scan on changed files |
-| `Infrastructure/scripts/refresh-diagram-context.sh` | Architecture diagram refresh |
-| `Infrastructure/scripts/check-diagram-freshness.sh` | Diagram staleness gate |
+| `Infrastructure/scripts/validation-and-linting/check-staged-secrets.sh` | Pre-commit secret scan |
+| `Infrastructure/scripts/validation-and-linting/check-doc-style.sh` | Doc style enforcer |
+| `Infrastructure/scripts/validation-and-linting/check-related-tests.sh` | Test coverage reminder |
+| `Infrastructure/scripts/validation-and-linting/check-semgrep-changed.sh` | Security scan on changed files |
+| `Infrastructure/scripts/skill-graph/refresh-diagram-context.sh` | Architecture diagram refresh |
+| `Infrastructure/scripts/skill-graph/check-diagram-freshness.sh` | Diagram staleness gate |
 | `Infrastructure/scripts/semgrep-pre-push.yml` | Semgrep config for pre-push |
 
 ### Tooling config
@@ -470,7 +470,7 @@ These are written once by `harness init` but treated as project-owned after that
 | `prek.toml` | Add/remove hooks for this project |
 | `.mise.toml` | Pin additional tools needed by this project |
 | `.gitleaks.toml` | Add project-specific secret scan exclusions |
-| `Infrastructure/scripts/codex-preflight.sh` | Add project-specific preflight checks |
+| `Infrastructure/scripts/codex-preflight/codex-preflight.sh` | Add project-specific preflight checks |
 
 ### Optional tooling — install only if the project needs it
 
@@ -520,6 +520,6 @@ Harness **cannot** do — requires user action:
 | `harness check-environment` reports missing binaries | Tool not installed | Run `mise install -g <tool>` for each missing binary |
 | `harness verify-coderabbit` fails | CodeRabbit App not installed on repo | User must install from github.com/marketplace/coderabbitai |
 | Branch protection not applying | PAT missing `repo` + `admin:repo_hook` scopes | Re-generate PAT with required scopes |
-| Preflight script fails | Old or corrupted `Infrastructure/scripts/codex-preflight.sh` in target repo | Use the existing-repo flow: `harness init --check-updates`, `harness upgrade --dry-run`, then `harness upgrade`. Use `harness init --update` only if tracked baseline files are missing and need re-scaffold |
+| Preflight script fails | Old or corrupted `Infrastructure/scripts/codex-preflight/codex-preflight.sh` in target repo | Use the existing-repo flow: `harness init --check-updates`, `harness upgrade --dry-run`, then `harness upgrade`. Use `harness init --update` only if tracked baseline files are missing and need re-scaffold |
 | CircleCI can't authenticate to npm | `NPM_TOKEN` missing from CircleCI project env vars | Set in CircleCI project settings → Environment Variables |
 | CI fails on `npm pack` / missing `dist/` | Build not run before pack | Verify `.circleci/config.yml` has build step before pack |

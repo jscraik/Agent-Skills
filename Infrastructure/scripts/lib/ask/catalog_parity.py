@@ -242,7 +242,7 @@ def compute_catalog_parity(
     drift_class = "count_mismatch" if drift_detected else None
     blocking_reason = "required_surface_count_mismatch" if drift_detected else None
     operator_action = (
-        "Run `Infrastructure/scripts/sync_skills.sh`, regenerate catalog projections, then rerun doctor-catalog."
+        "Run `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, regenerate catalog projections, then rerun doctor-catalog."
         if drift_detected
         else None
     )

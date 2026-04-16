@@ -202,11 +202,11 @@ tasks:
 ## 7) Verification command set
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py Docs/plans/2026-02-24-feat-skill-graph-live-auto-learning-plan.md`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md`
-- `bash ~/.codex/Infrastructure/scripts/verify-work.sh`
-- `bash Infrastructure/scripts/validate_recursive_promotions.sh`
+- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
+- `bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh`
 
 Optional dry-run checks once implementation starts:
-- `bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
+- `bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh --runs-per-profile 1 --window-days 3`
 - `python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py --runs-root Infrastructure/artifacts/skill-graphs/runs --window-days 3`
 - `python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion.py --runs-root Infrastructure/artifacts/skill-graphs/runs --window-days 3`
 
