@@ -63,6 +63,15 @@ export function parsePort(value: string): number {
 
 - Casting with `as unknown as` hides real typing defects.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[javascript-pro]] | Base JavaScript patterns when runtime compatibility and async flow need attention |
+| [[biome-linting]] | Enforce TypeScript lint and format rules with Biome |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

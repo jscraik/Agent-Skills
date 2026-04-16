@@ -9,23 +9,22 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 4
+- `library_api_reference`: 3
 - `product_verification`: 7
 - `data_fetch_analysis`: 4
 - `team_automation`: 25
 - `scaffolding_templates`: 25
-- `code_quality_review`: 26
+- `code_quality_review`: 24
 - `ci_cd_deployment`: 3
 - `runbook`: 13
 - `infrastructure_ops`: 7
 - `invalid`: 0
-- `total_tagged`: 114
+- `total_tagged`: 111
 
 ## Semantic Types
 
 ### Library Api Reference
 
-- `coderabbit` — `Plugins/coderabbit/skills/library_api_reference`
 - `react-ui-patterns` — `Skills/frontend-ui`
 - `remotion` — `Skills/frontend-ui`
 - `repoprompt` — `Skills/agent-ops`
@@ -105,13 +104,11 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Code Quality Review
 
-- `autofix` — `Plugins/coderabbit/skills/code_quality_review`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
 - `ce-reliability-review` — `Plugins/harness-engineering/skills/code_quality_review`
 - `ce-review` — `Plugins/harness-engineering/skills/code_quality_review`
 - `ce-technical-review` — `Plugins/harness-engineering/skills/code_quality_review`
-- `code-review` — `Plugins/coderabbit/skills/code_quality_review`
 - `codex-home-audit` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`

@@ -65,6 +65,15 @@ func ParsePort(value string) (int, error) {
 
 - Silent ignored errors usually become runtime bugs.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[rust-pro]] | Systems programming with similar error-propagation and ownership concerns |
+| [[systematic-debugging]] | Triage Go runtime errors with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

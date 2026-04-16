@@ -61,6 +61,15 @@ pub fn parse_port(value: &str) -> Result<u16, String> {
 
 - Overusing `clone()` can hide unnecessary allocations.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[go]] | Systems programming with similar error-handling and concurrency patterns |
+| [[systematic-debugging]] | Triage Rust ownership and borrow-checker errors with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

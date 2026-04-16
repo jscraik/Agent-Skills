@@ -68,6 +68,15 @@ services:
 
 - Unquoted values like `on`, `off`, or `no` may coerce unexpectedly.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[toml]] | Schema-aware config review for TOML-based tooling configs |
+| [[systematic-debugging]] | Triage config parsing failures with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

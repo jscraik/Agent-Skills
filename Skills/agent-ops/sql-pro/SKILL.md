@@ -63,6 +63,15 @@ LIMIT 100;
 
 - Non-sargable filters can negate otherwise correct indexes.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[yaml]] | Schema-aware config review for database connection and migration config files |
+| [[systematic-debugging]] | Triage query performance regressions with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

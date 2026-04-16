@@ -66,6 +66,15 @@ ignore = ["E501"]
 
 - Quoting numeric values can silently change type semantics.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[yaml]] | Schema-aware config review for YAML-based tooling configs |
+| [[systematic-debugging]] | Triage config parsing failures with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

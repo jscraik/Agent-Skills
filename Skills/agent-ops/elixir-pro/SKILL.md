@@ -66,6 +66,15 @@ end
 
 - Process state mutations without clear ownership cause flaky behavior.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[rust-pro]] | Systems-level concurrency patterns that share OTP-style supervision thinking |
+| [[systematic-debugging]] | Triage distributed process failures with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

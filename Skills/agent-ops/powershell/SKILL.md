@@ -69,6 +69,15 @@ function Get-UserProfile {
 
 - `Write-Host` should not be used for pipeline data output.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[bash-hygiene]] | Shell scripting hygiene practices that complement PowerShell automation |
+| [[systematic-debugging]] | Triage PowerShell pipeline failures with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

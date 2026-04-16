@@ -64,6 +64,15 @@ func parsePort(_ value: String) throws -> Int {
 
 - Detached tasks can bypass expected cancellation behavior.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[rust-pro]] | Systems-level safety patterns that share Swift's value-type and concurrency thinking |
+| [[systematic-debugging]] | Triage Swift concurrency and actor isolation issues with evidence-first diagnosis |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`

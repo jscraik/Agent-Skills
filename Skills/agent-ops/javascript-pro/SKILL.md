@@ -63,6 +63,15 @@ export async function loadJson(url) {
 
 - Unawaited promises can mask production failures.
 
+## See Also
+
+| Skill | When to use |
+|---|---|
+| [[typescript]] | Typed JavaScript superset when strict contracts and module boundaries are needed |
+| [[biome-linting]] | Enforce JavaScript/TypeScript lint and format rules with Biome |
+
+**Topic map:** [[agent-ops]]
+
 ## References and assets
 
 - Open deep guidance: `Infrastructure/references/deep-guidance.md`
