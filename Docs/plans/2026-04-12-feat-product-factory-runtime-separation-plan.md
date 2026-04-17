@@ -297,7 +297,7 @@ Inventory completeness is machine-checked before slice activation:
 ## Slice contract
 
 All moves run by bounded, declared slices tracked in `GOVERNANCE/runtime-separation/slices.yaml`.
-- Phase 0 must create this file before any path move.
+- Phase 0 must create `GOVERNANCE/runtime-separation/slices.yaml` before any path move.
 - `GOVERNANCE/runtime-separation/slices.yaml` is the single mutable migration-state source for per-slice compatibility axes, precedence, and activation state.
 - manifest top-level schema includes `schema_version`, `reader_min_version`, and `policy_export_version`.
 - minimum per-slice schema: `id`, `phase`, `owner_lane`, `activation_state`, `discovery_compatibility`, `path_compatibility`, `discovery_precedence`, `forwarder_type`, `overlap_class`, `authoritative_write_root`, `inventory_selector`, `path_consumer_inventory_ref`, `path_consumer_inventory_digest`, `reader_inventory_ref`, `reader_inventory_digest`, `policy_export_version`, `canonical_paths`, `legacy_paths`, `planned_deltas`, `representative_commands`, `plugin_lifecycle_checks`, `entry_checks`, `exit_checks`, `rollback_commands`.
