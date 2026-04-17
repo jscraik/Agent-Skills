@@ -12,8 +12,8 @@ fi
 # Override --paths to avoid requiring CODESTYLE.md/Makefile which live at the repo root,
 # not under Infrastructure/. Only check for the scripts directory itself.
 _preflight_paths="scripts"
-if [[ -f "scripts/codex-preflight/codex-preflight.sh" ]]; then
-  bash scripts/codex-preflight/codex-preflight.sh --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3" --paths "$_preflight_paths"
+if [[ -f "scripts/codex-preflight.sh" ]]; then
+  bash scripts/codex-preflight.sh --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3" --paths "$_preflight_paths"
 elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" ]]; then
   bash "$(dirname "${BASH_SOURCE[0]}")/codex-preflight.sh" --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3" --paths "$_preflight_paths"
 else
@@ -60,10 +60,7 @@ skill_dirs=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
   "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
-  "Plugins/skill-factory/skills/scaffolding_templates/skillify"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
-  "Plugins/plugin-factory/skills/code_quality_review/plugin-builder"
-  "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer"
 )
 skill_builder_dir="Plugins/skill-factory/skills/code_quality_review/skill-builder"
 skill_builder_scripts_dir="${skill_builder_dir}/scripts"
@@ -267,7 +264,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
   # Lint only the family validator scripts; legacy utility scripts in scripts/
   # are excluded to avoid pre-existing E401 violations in unrelated tooling.
   family_py_scripts=(
-    scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
+    scripts/validate_skill_authoring_family_benchmarks.py
     "${skill_builder_scripts_dir}/yaml_frontmatter.py"
     "${skill_builder_scripts_dir}/skill_gate.py"
     "${skill_builder_scripts_dir}/analyze_skill.py"
@@ -307,7 +304,7 @@ else
   echo "[family-gate] live eval mode disabled: structural eval contract checks only (smoke+release case listings)"
 fi
 
-"${python_cmd[@]}" scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
+"${python_cmd[@]}" scripts/validate_skill_authoring_family_benchmarks.py
 
 # ---------------------------------------------------------------------------
 # P1.x: pytest unit gate — run validator unit tests
@@ -340,8 +337,8 @@ if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   fi
   if "${pytest_cmd[@]}" \
       "$pytest_skill_gate_path" \
-      scripts/testing/test_validate_skill_authoring_family_benchmarks.py \
-      scripts/testing/test_projection_integrity.py \
+      scripts/test_validate_skill_authoring_family_benchmarks.py \
+      scripts/test_projection_integrity.py \
       -q --tb=short; then
     echo "[family-gate] pytest passed"
   else

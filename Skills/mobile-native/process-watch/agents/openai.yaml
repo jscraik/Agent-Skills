@@ -1,0 +1,6 @@
+interface:
+  display_name: Process Watch
+  short_description: Analyze system processes and resource usage to diagnose runaway
+    CPU/memory/IO, identify culprits, and propose next di...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

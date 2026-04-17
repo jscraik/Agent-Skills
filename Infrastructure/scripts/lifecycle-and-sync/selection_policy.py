@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-16.v12"
+POLICY_VERSION = "2026-04-16.v11"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -39,31 +39,10 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skillgrade-setup",
 )
 
-# Plugin-owned skills promoted into default flat discovery.
-# The current Codex session surface for this repo is driven by `.agents/skills`,
-# so locally built plugin skills need to be projected here to remain visible.
-# Keep remote/cache-backed plugin lanes separate; only expose the repo's local
-# plugin families that are intended for day-to-day use.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
-    "ce-reliability-review",
-    "ce-review",
-    "ce-technical-review",
-    "ce-brainstorm",
-    "ce-compound",
-    "ce-compound-refresh",
-    "ce-deepen-plan",
-    "ce-deepen-spec",
-    "ce-ideate",
-    "ce-plan",
-    "ce-spec",
-    "ce-tdd",
-    "ce-work",
-    "plugin-builder",
-    "skill-builder",
-    "skill-refactor",
-    "skillify",
-    "skill-factory",
-)
+# Plugin router skills promoted into default flat discovery.
+# Keep this empty by default: plugin-authorized skills should surface from
+# plugin scopes, not duplicated into the personal flat picker lane.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills hidden from default flat discovery.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()

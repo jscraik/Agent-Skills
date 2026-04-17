@@ -6,7 +6,7 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 
 usage() {
 	cat <<'USAGE'
-Usage: scripts/lifecycle-and-sync/prepare-worktree.sh [options]
+Usage: scripts/prepare-worktree.sh [options]
 
 Prepare a freshly created git worktree for local hooks and pre-push checks.
 
@@ -79,4 +79,4 @@ else
 fi
 
 echo "[prepare-worktree] ready"
-echo "[prepare-worktree] next: bash scripts/validation-and-linting/verify-work.sh --fast"
+echo "[prepare-worktree] next: bash scripts/verify-work.sh --fast"

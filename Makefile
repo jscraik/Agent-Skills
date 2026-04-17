@@ -18,16 +18,16 @@ install: ## Install dependencies
 setup: install hooks ## Full setup: install deps and configure git hooks
 
 preflight: ## Run repository preflight checks (required local-memory gate by default)
-	@bash ./scripts/codex-preflight/codex-preflight.sh
+	@bash ./scripts/codex-preflight.sh
 
 worktree-ready: ## Bootstrap a fresh git worktree before first push
-	@bash ./scripts/lifecycle-and-sync/prepare-worktree.sh
+	@bash ./scripts/prepare-worktree.sh
 
 verify-work: ## Run canonical repo-local verification wrapper
-	@bash ./scripts/validation-and-linting/verify-work.sh
+	@bash ./scripts/verify-work.sh
 
 codestyle: ## Run fail-closed codestyle validation
-	@bash ./scripts/validation-and-linting/validate-codestyle.sh
+	@bash ./scripts/validate-codestyle.sh
 
 hooks: ## Setup git hooks
 	node scripts/setup-git-hooks.js
@@ -42,7 +42,7 @@ hooks-pre-commit: ## Run local pre-commit gates before creating a commit
 
 hooks-pre-push: ## Run local pre-push governance gates before pushing
 	pnpm exec tsx src/cli.ts docs-gate --mode required --json
-	@bash ./scripts/skill-graph/check-diagram-freshness.sh
+	@bash ./scripts/check-diagram-freshness.sh
 	pnpm exec tsx src/cli.ts tooling-audit --path . --json
 	@bash ./scripts/check-environment.sh
 	$(MAKE) semgrep-changed
@@ -62,7 +62,7 @@ semgrep-changed: ## Run narrow Semgrep rules against changed src implementation 
 	pnpm run semgrep:changed
 
 diagrams-check: ## Refresh architecture diagrams when sensitive paths change and fail on drift
-	@bash ./scripts/skill-graph/check-diagram-freshness.sh
+	@bash ./scripts/check-diagram-freshness.sh
 
 # === Development ===
 
@@ -119,7 +119,7 @@ ci: ## Run CI-equivalent local checks
 # === Diagrams ===
 
 diagrams: ## Generate architecture diagrams
-	@bash ./scripts/skill-graph/refresh-diagram-context.sh --force
+	@bash ./scripts/refresh-diagram-context.sh --force
 
 # === Environment ===
 

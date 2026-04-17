@@ -1,0 +1,6 @@
+interface:
+  display_name: Visual Explainer
+  short_description: Generate self-contained HTML explainers for systems, plans, and
+    comparisons.
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

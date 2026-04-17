@@ -51,7 +51,7 @@ rollback_procedure: >
   If skill-builder produces degraded output (missing required headings, incorrect mode routing, or
   invalid validator evidence), revert to the previous SKILL.md by restoring the last known-good git
   commit for Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md. Re-run the family gate
-  (bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh) to confirm the rollback candidate passes all
+  (bash Infrastructure/scripts/validate_skill_authoring_family.sh) to confirm the rollback candidate passes all
   structural checks before re-deploying. If the regression is in a validator script, revert the
   relevant script and re-run: python Skills/skill-builder/Infrastructure/scripts/skill_gate.py <skill> --format text.
 observability: >

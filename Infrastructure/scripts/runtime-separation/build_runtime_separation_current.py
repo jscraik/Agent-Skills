@@ -305,7 +305,7 @@ def main() -> int:
         int: Process exit code; `0` on success.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[3]
+    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[2]
     if not repo_root.is_absolute():
         repo_root = (Path.cwd() / repo_root).resolve()
 
@@ -318,11 +318,9 @@ def main() -> int:
         baseline_path = (repo_root / baseline_path).resolve()
     baseline = _load_json(baseline_path) if baseline_path.exists() else {}
 
-    scripts_dir = repo_root / "Infrastructure" / "scripts"
+    scripts_dir = repo_root / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
-    if str(scripts_dir / "lifecycle-and-sync") not in sys.path:
-        sys.path.insert(0, str(scripts_dir / "lifecycle-and-sync"))
     from selection_policy import payload as selection_payload, policy_identity  # type: ignore
 
     command_checks: dict[str, Any] = {}

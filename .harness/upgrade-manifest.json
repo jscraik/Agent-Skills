@@ -58,25 +58,25 @@
       "customized": false
     },
     {
-      "path": "scripts/validation-and-linting/check-staged-secrets.sh",
+      "path": "scripts/check-staged-secrets.sh",
       "templateHash": "175f482c76d6581f79b5632b044727b6e9168dd2231ccd364e43243b3ca3258c",
       "version": "0.12.0",
       "customized": false
     },
     {
-      "path": "scripts/validation-and-linting/check-doc-style.sh",
+      "path": "scripts/check-doc-style.sh",
       "templateHash": "2fa6d0f10c368587108b946c776ad7c7cb989c2b6bfd415748ec57a3272d564d",
       "version": "0.12.0",
       "customized": false
     },
     {
-      "path": "scripts/validation-and-linting/check-related-tests.sh",
+      "path": "scripts/check-related-tests.sh",
       "templateHash": "13951ef9cdaadb9e60aa423f4635f726becf90bc4c22d257f04d753ef5dec305",
       "version": "0.12.0",
       "customized": false
     },
     {
-      "path": "scripts/validation-and-linting/check-semgrep-changed.sh",
+      "path": "scripts/check-semgrep-changed.sh",
       "templateHash": "eecb35cf6fbfbf8eee90408e286d1fe33b902b1ab29a236975c4a540a5328bd8",
       "version": "0.12.0",
       "customized": false
@@ -88,13 +88,13 @@
       "customized": false
     },
     {
-      "path": "scripts/skill-graph/refresh-diagram-context.sh",
+      "path": "scripts/refresh-diagram-context.sh",
       "templateHash": "f438b595ebceb0a8f0358fdc6e104d5fa99c69b5425109e1f234011964ee0015",
       "version": "0.12.0",
       "customized": false
     },
     {
-      "path": "scripts/skill-graph/check-diagram-freshness.sh",
+      "path": "scripts/check-diagram-freshness.sh",
       "templateHash": "f5b701254b02fdb97a8470bf3e379fed2a51699d53f76b2c5c30729307736199",
       "version": "0.12.0",
       "customized": false
@@ -136,7 +136,7 @@
       "customized": false
     },
     {
-      "path": "scripts/codex-preflight/codex-preflight.sh",
+      "path": "scripts/codex-preflight.sh",
       "templateHash": "a9c7713481f3072c52d930e7f3f204bbf0ca37e0133542f4e233f395db163a05",
       "version": "0.12.0",
       "customized": false
@@ -154,13 +154,13 @@
       "customized": false
     },
     {
-      "path": "scripts/validation-and-linting/verify-work.sh",
+      "path": "scripts/verify-work.sh",
       "templateHash": "942002c6471cc3a768131a9550500928c87ec53aa672d82d9354300bf221c97d",
       "version": "0.12.0",
       "customized": false
     },
     {
-      "path": "scripts/lifecycle-and-sync/prepare-worktree.sh",
+      "path": "scripts/prepare-worktree.sh",
       "templateHash": "ccbfee0b37d65c43e4f0e991505babd5c865e5e7ccdb916d5afc381e7472e143",
       "version": "0.12.0",
       "customized": false

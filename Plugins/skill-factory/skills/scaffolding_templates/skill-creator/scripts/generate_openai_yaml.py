@@ -1,162 +1,226 @@
 #!/usr/bin/env python3
 """
-generate_openai_yaml.py
-
-Generate agents/openai.yaml for a skill based on its SKILL.md frontmatter.
-
-Why:
-- Keep SKILL.md frontmatter minimal (name + description for discovery)
-- Put Codex UI metadata and MCP dependencies in agents/openai.yaml
+OpenAI YAML Generator - Creates agents/openai.yaml for a skill folder.
 
 Usage:
-    python generate_openai_yaml.py <path/to/skill-dir-or-SKILL.md> [--out agents/openai.yaml]
-
-Notes:
-- This script does not add MCP dependencies automatically; define dependencies explicitly when needed.
-- It will not overwrite an existing file unless you pass --force.
+    generate_openai_yaml.py <skill_dir> [--name <skill_name>] [--interface key=value]
 """
-
-from __future__ import annotations
 
 import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence, Tuple
 
-try:
-    import yaml  # type: ignore
-except ModuleNotFoundError:
-    yaml = None
+ACRONYMS = {
+    "GH",
+    "MCP",
+    "API",
+    "CI",
+    "CLI",
+    "LLM",
+    "PDF",
+    "PR",
+    "UI",
+    "URL",
+    "SQL",
+}
 
+BRANDS = {
+    "openai": "OpenAI",
+    "openapi": "OpenAPI",
+    "github": "GitHub",
+    "pagerduty": "PagerDuty",
+    "datadog": "DataDog",
+    "sqlite": "SQLite",
+    "fastapi": "FastAPI",
+}
 
-_FRONTMATTER_DELIM_RE = re.compile(r"^\s*---\s*$")
+SMALL_WORDS = {"and", "or", "to", "up", "with"}
 
-
-def resolve_skill_md_path(path_like: str) -> Path:
-    p = Path(path_like).expanduser().resolve()
-    if p.is_dir():
-        return p / "SKILL.md"
-    return p
-
-
-def read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return path.read_text(encoding="utf-8", errors="replace")
-
-
-def parse_frontmatter(raw_text: str) -> Tuple[Dict[str, Any], str]:
-    lines = raw_text.splitlines(keepends=True)
-
-    # First non-empty line must be ---
-    first_nonempty: Optional[int] = None
-    for i, line in enumerate(lines):
-        if line.strip():
-            first_nonempty = i
-            break
-    if first_nonempty is None:
-        raise ValueError("SKILL.md is empty")
-
-    if not _FRONTMATTER_DELIM_RE.match(lines[first_nonempty]):
-        raise ValueError("Missing YAML frontmatter. Expected `---` as the first non-empty line.")
-
-    end_idx: Optional[int] = None
-    for j in range(first_nonempty + 1, len(lines)):
-        if _FRONTMATTER_DELIM_RE.match(lines[j]):
-            end_idx = j
-            break
-    if end_idx is None:
-        raise ValueError("Unterminated YAML frontmatter. Missing closing `---`.")
-
-    yaml_text = "".join(lines[first_nonempty + 1 : end_idx])
-    fm_obj = yaml.safe_load(yaml_text) if yaml_text.strip() else {}
-    if fm_obj is None:
-        fm: Dict[str, Any] = {}
-    elif isinstance(fm_obj, dict):
-        fm = fm_obj
-    else:
-        raise ValueError("Frontmatter YAML must be a mapping/object (key: value pairs).")
-
-    body = "".join(lines[end_idx + 1 :]).lstrip("\n")
-    return fm, body
+ALLOWED_INTERFACE_KEYS = {
+    "display_name",
+    "short_description",
+    "icon_small",
+    "icon_large",
+    "brand_color",
+    "default_prompt",
+}
 
 
-def format_display_name(name: str) -> str:
-    # my-awesome-skill -> "My Awesome Skill"
-    parts = name.replace("_", "-").split("-")
-    return " ".join(p.capitalize() for p in parts if p)
+def yaml_quote(value):
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return f'"{escaped}"'
 
 
-def truncate_one_line(text: str, max_len: int) -> str:
-    t = re.sub(r"\s+", " ", text).strip()
-    if len(t) <= max_len:
-        return t
-    # Trim to last whole word if possible
-    cut = t[: max_len - 1]
-    if " " in cut:
-        cut = cut.rsplit(" ", 1)[0]
-    return cut + "…"
+def format_display_name(skill_name):
+    words = [word for word in skill_name.split("-") if word]
+    formatted = []
+    for index, word in enumerate(words):
+        lower = word.lower()
+        upper = word.upper()
+        if upper in ACRONYMS:
+            formatted.append(upper)
+            continue
+        if lower in BRANDS:
+            formatted.append(BRANDS[lower])
+            continue
+        if index > 0 and lower in SMALL_WORDS:
+            formatted.append(lower)
+            continue
+        formatted.append(word.capitalize())
+    return " ".join(formatted)
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
-    p = argparse.ArgumentParser(description="Generate agents/openai.yaml from SKILL.md frontmatter.")
-    p.add_argument("path", help="Path to a skill directory or SKILL.md file")
-    p.add_argument("--out", default=None, help="Output path (default: <skill>/agents/openai.yaml)")
-    p.add_argument("--force", action="store_true", help="Overwrite if the output file exists")
-    p.add_argument("--no-policy", action="store_true", help="Do not include the policy section")
-    p.add_argument("--allow-implicit", action="store_true", help="Set policy.allow_implicit_invocation=true (default false)")
-    args = p.parse_args(list(argv) if argv is not None else None)
-    if yaml is None:
-        print("ERROR: PyYAML is required (pip install pyyaml).", file=sys.stderr)
-        return 1
+def generate_short_description(display_name):
+    description = f"Help with {display_name} tasks"
 
-    skill_md = resolve_skill_md_path(args.path)
+    if len(description) < 25:
+        description = f"Help with {display_name} tasks and workflows"
+    if len(description) < 25:
+        description = f"Help with {display_name} tasks with guidance"
+
+    if len(description) > 64:
+        description = f"Help with {display_name}"
+    if len(description) > 64:
+        description = f"{display_name} helper"
+    if len(description) > 64:
+        description = f"{display_name} tools"
+    if len(description) > 64:
+        suffix = " helper"
+        max_name_length = 64 - len(suffix)
+        trimmed = display_name[:max_name_length].rstrip()
+        description = f"{trimmed}{suffix}"
+    if len(description) > 64:
+        description = description[:64].rstrip()
+
+    if len(description) < 25:
+        description = f"{description} workflows"
+        if len(description) > 64:
+            description = description[:64].rstrip()
+
+    return description
+
+
+def read_frontmatter_name(skill_dir):
+    skill_md = Path(skill_dir) / "SKILL.md"
     if not skill_md.exists():
-        print(f"ERROR: SKILL.md not found at: {skill_md}", file=sys.stderr)
-        return 1
+        print(f"[ERROR] SKILL.md not found in {skill_dir}")
+        return None
+    content = skill_md.read_text()
+    match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
+    if not match:
+        print("[ERROR] Invalid SKILL.md frontmatter format.")
+        return None
+    frontmatter_text = match.group(1)
 
-    fm, _body = parse_frontmatter(read_text(skill_md))
+    import yaml
 
-    name = fm.get("name")
-    description = fm.get("description")
-
+    try:
+        frontmatter = yaml.safe_load(frontmatter_text)
+    except yaml.YAMLError as exc:
+        print(f"[ERROR] Invalid YAML frontmatter: {exc}")
+        return None
+    if not isinstance(frontmatter, dict):
+        print("[ERROR] Frontmatter must be a YAML dictionary.")
+        return None
+    name = frontmatter.get("name", "")
     if not isinstance(name, str) or not name.strip():
-        print("ERROR: SKILL.md frontmatter missing a string `name`.", file=sys.stderr)
-        return 1
-    if not isinstance(description, str) or not description.strip():
-        print("ERROR: SKILL.md frontmatter missing a string `description`.", file=sys.stderr)
-        return 1
+        print("[ERROR] Frontmatter 'name' is missing or invalid.")
+        return None
+    return name.strip()
 
-    display_name = format_display_name(name.strip())
-    short_description = truncate_one_line(description.strip(), 64)
 
-    payload: Dict[str, Any] = {
-        "interface": {
-            "display_name": display_name,
-            "short_description": short_description,
-        }
-    }
+def parse_interface_overrides(raw_overrides):
+    overrides = {}
+    optional_order = []
+    for item in raw_overrides:
+        if "=" not in item:
+            print(f"[ERROR] Invalid interface override '{item}'. Use key=value.")
+            return None, None
+        key, value = item.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            print(f"[ERROR] Invalid interface override '{item}'. Key is empty.")
+            return None, None
+        if key not in ALLOWED_INTERFACE_KEYS:
+            allowed = ", ".join(sorted(ALLOWED_INTERFACE_KEYS))
+            print(f"[ERROR] Unknown interface field '{key}'. Allowed: {allowed}")
+            return None, None
+        overrides[key] = value
+        if key not in ("display_name", "short_description") and key not in optional_order:
+            optional_order.append(key)
+    return overrides, optional_order
 
-    if not args.no_policy:
-        payload["policy"] = {"allow_implicit_invocation": bool(args.allow_implicit)}
 
-    # Always include a commented dependency sample in the file footer (more discoverable than empty YAML keys).
-    rendered = yaml.safe_dump(payload, sort_keys=False, allow_unicode=True).rstrip() + "\n"
-    rendered += "\n# dependencies:\n#   tools:\n#     - type: \"mcp\"\n#       value: \"serverName\"\n#       description: \"MCP server description\"\n#       transport: \"streamable_http\"\n#       url: \"https://example.com/mcp\"\n"
+def write_openai_yaml(skill_dir, skill_name, raw_overrides):
+    overrides, optional_order = parse_interface_overrides(raw_overrides)
+    if overrides is None:
+        return None
 
-    out_path = Path(args.out).expanduser().resolve() if args.out else (skill_md.parent / "agents" / "openai.yaml")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    display_name = overrides.get("display_name") or format_display_name(skill_name)
+    short_description = overrides.get("short_description") or generate_short_description(display_name)
 
-    if out_path.exists() and not args.force:
-        print(f"ERROR: {out_path} already exists. Use --force to overwrite.", file=sys.stderr)
-        return 1
+    if not (25 <= len(short_description) <= 64):
+        print(
+            "[ERROR] short_description must be 25-64 characters "
+            f"(got {len(short_description)})."
+        )
+        return None
 
-    out_path.write_text(rendered, encoding="utf-8")
-    print(f"Wrote {out_path}")
-    return 0
+    interface_lines = [
+        "interface:",
+        f"  display_name: {yaml_quote(display_name)}",
+        f"  short_description: {yaml_quote(short_description)}",
+    ]
+
+    for key in optional_order:
+        value = overrides.get(key)
+        if value is not None:
+            interface_lines.append(f"  {key}: {yaml_quote(value)}")
+
+    agents_dir = Path(skill_dir) / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    output_path = agents_dir / "openai.yaml"
+    output_path.write_text("\n".join(interface_lines) + "\n")
+    print(f"[OK] Created agents/openai.yaml")
+    return output_path
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Create agents/openai.yaml for a skill directory.",
+    )
+    parser.add_argument("skill_dir", help="Path to the skill directory")
+    parser.add_argument(
+        "--name",
+        help="Skill name override (defaults to SKILL.md frontmatter)",
+    )
+    parser.add_argument(
+        "--interface",
+        action="append",
+        default=[],
+        help="Interface override in key=value format (repeatable)",
+    )
+    args = parser.parse_args()
+
+    skill_dir = Path(args.skill_dir).resolve()
+    if not skill_dir.exists():
+        print(f"[ERROR] Skill directory not found: {skill_dir}")
+        sys.exit(1)
+    if not skill_dir.is_dir():
+        print(f"[ERROR] Path is not a directory: {skill_dir}")
+        sys.exit(1)
+
+    skill_name = args.name or read_frontmatter_name(skill_dir)
+    if not skill_name:
+        sys.exit(1)
+
+    result = write_openai_yaml(skill_dir, skill_name, args.interface)
+    if result:
+        sys.exit(0)
+    sys.exit(1)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

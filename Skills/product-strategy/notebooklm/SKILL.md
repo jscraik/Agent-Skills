@@ -5,132 +5,119 @@ metadata:
   skill-type: data_fetch_analysis
 ---
 
-# NotebookLM Automation
+# Notebooklm
 
-Complete programmatic access to Google NotebookLM—including capabilities not exposed in the web UI. Create notebooks, add sources (URLs, YouTube, PDFs, audio, video, images), chat with content, generate all artifact types, and download results in multiple formats.
+Operate NotebookLM workflows with script-backed execution and explicit verification.
 
-## Installation
-
-**From PyPI (Recommended):**
-```bash
-pip install notebooklm-py
-```
-
-**From GitHub (use latest release tag, NOT main branch):**
-```bash
-# Get the latest release tag (using curl)
-LATEST_TAG=$(curl -s https://api.github.com/repos/teng-lin/notebooklm-py/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
-pip install "git+https://github.com/teng-lin/notebooklm-py@${LATEST_TAG}"
-```
-
-⚠️ **DO NOT install from main branch** (`pip install git+https://github.com/teng-lin/notebooklm-py`). The main branch may contain unreleased/unstable changes. Always use PyPI or a specific release tag, unless you are testing unreleased features.
-
-**Skill install methods:**
-
-- `notebooklm skill install` installs this skill into the supported local agent directories managed by the CLI.
-- `npx skills add teng-lin/notebooklm-py` installs this skill from the GitHub repository into compatible agent skill directories.
-- If you are already reading this file inside an agent skill directory, the skill is already installed. You only need the Python package and authentication below.
-
-**CLI-managed install:**
-```bash
-notebooklm skill install
-```
-
-## Prerequisites
-
-**IMPORTANT:** Before using any command, you MUST authenticate:
-
-```bash
-notebooklm login          # Opens browser for Google OAuth
-notebooklm list           # Verify authentication works
-```
-
-If commands fail with authentication errors, re-run `notebooklm login`.
-
-### CI/CD, Multiple Accounts, and Parallel Agents
-
-For automated environments, multiple accounts, or parallel agent workflows:
-
-| Variable | Purpose |
-|----------|---------|
-| `NOTEBOOKLM_HOME` | Custom config directory (default: `~/.notebooklm`) |
-| `NOTEBOOKLM_PROFILE` | Active profile name (default: `default`) |
-| `NOTEBOOKLM_AUTH_JSON` | Inline auth JSON - no file writes needed |
-
-**CI/CD setup:** Set `NOTEBOOKLM_AUTH_JSON` from a secret containing your `storage_state.json` contents.
-
-**Multiple accounts:** Use named profiles (`notebooklm profile create work`, then `notebooklm -p work login`). Alternatively, use different `NOTEBOOKLM_HOME` directories per account.
-
-**Parallel agents:** The CLI stores notebook context in a shared file (`~/.notebooklm/context.json`). Multiple concurrent agents using `notebooklm use` can overwrite each other's context.
-
-**Solutions for parallel workflows:**
-1. **Always use explicit notebook ID** (recommended): Pass `-n <notebook_id>` (for `wait`/`download` commands) or `--notebook <notebook_id>` (for others) instead of relying on `use`
-2. **Per-agent isolation via profiles:** `export NOTEBOOKLM_PROFILE=agent-$ID` (each profile gets its own context file)
-3. **Per-agent isolation via home:** Set unique `NOTEBOOKLM_HOME` per agent: `export NOTEBOOKLM_HOME=/tmp/agent-$ID`
-4. **Use full UUIDs:** Avoid partial IDs in automation (they can become ambiguous)
-
-## Agent Setup Verification
-
-Before starting workflows, verify the CLI is ready:
-
-1. `notebooklm status` → Should show "Authenticated as: email@..."
-2. `notebooklm list --json` → Should return valid JSON (even if empty notebooks list)
-3. If either fails → Run `notebooklm login`
+## Table of Contents
+- [When to use](#when-to-use)
+- [Standards snapshot](#standards-snapshot-march-2026)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Failure mode](#failure-mode)
+- [Philosophy](#philosophy)
+- [Constraints](#constraints)
+- [Procedure](#procedure)
+- [Validation](#validation)
+- [Anti-patterns](#anti-patterns)
+- [Variation](#variation)
+- [Examples](#examples)
+- [Resource map](#resource-map)
+- [Decision feedback protocol](#decision-feedback-protocol)
 
 ## When to use
+- Use this skill for NotebookLM notebook/source management tasks.
+- Use this skill for question answering against notebook content.
+- Use this skill for audio/video overview generation requests.
 
-**Explicit:** User says "/notebooklm", "use notebooklm", or mentions the tool by name
+## Standards snapshot (March 2026)
+- Prefer script-backed NotebookLM operations over ad hoc browser choreography.
+- Always use the `Infrastructure/scripts/run.py` wrapper so the local `.venv` and Python dependencies are bootstrapped before execution.
+- Verify notebook identity and target resources before mutating actions.
+- Treat auth, returned object IDs, and observable side effects as first-class validation gates.
+- Distinguish "stored auth metadata exists" from "this exact notebook URL was verified in the current run".
+- Report blocked or partial outcomes explicitly instead of guessing NotebookLM state.
 
-**Intent detection:** Recognize requests like:
-- "Create a podcast about [topic]"
-- "Summarize these URLs/documents"
-- "Generate a quiz from my research"
-- "Turn this into an audio overview"
-- "Create flashcards for studying"
-- "Generate a video explainer"
-- "Make an infographic"
-- "Create a mind map of the concepts"
-- "Download the quiz as markdown"
-- "Add these sources to NotebookLM"
+## Required inputs
+- User objective and target notebook/source context.
+- Required action type (list, create, add source, ask, generate media).
+- Constraints on output format, latency, or safety boundaries.
 
-## Autonomy Rules
+## Deliverables
+- Completed NotebookLM action or clear blocked state.
+- Evidence summary of commands executed and validation checks.
+- Next action if additional user confirmation is required.
+- If requested, a structured status report with `schema_version: 1` aligned to `Infrastructure/references/contract.yaml`.
 
-**Run automatically (no confirmation):**
-- `notebooklm status` - check context
-- `notebooklm auth check` - diagnose auth issues
-- `notebooklm list` - list notebooks
-- `notebooklm source list` - list sources
-- `notebooklm artifact list` - list artifacts
-- `notebooklm language list` - list supported languages
-- `notebooklm language get` - get current language
-- `notebooklm language set` - set language (global setting)
-- `notebooklm artifact wait` - wait for artifact completion (in subagent context)
-- `notebooklm source wait` - wait for source processing (in subagent context)
-- `notebooklm research status` - check research status
-- `notebooklm research wait` - wait for research (in subagent context)
-- `notebooklm use <id>` - set context (⚠️ SINGLE-AGENT ONLY - use `-n` flag in parallel workflows)
-- `notebooklm create` - create notebook
-- `notebooklm ask "..."` - chat queries (without `--save-as-note`)
-- `notebooklm history` - display conversation history (read-only)
-- `notebooklm source add` - add sources
-- `notebooklm profile list` - list profiles
-- `notebooklm profile create` - create profile
-- `notebooklm profile switch` - switch active profile
-- `notebooklm doctor` - check environment health
+## Failure mode
+If auth is stale, the target notebook/source cannot be identified, or the script result cannot be verified, stop at that blocker, report the exact failed gate, and do not fabricate a successful NotebookLM action.
 
-**Ask before running:**
-- `notebooklm delete` - destructive
-- `notebooklm generate *` - long-running, may fail
-- `notebooklm download *` - writes to filesystem
-- `notebooklm artifact wait` - long-running (when in main conversation)
-- `notebooklm source wait` - long-running (when in main conversation)
-- `notebooklm research wait` - long-running (when in main conversation)
-- `notebooklm ask "..." --save-as-note` - writes a note
-- `notebooklm history --save` - writes a note
+## Philosophy
+- Prefer deterministic script execution over ad hoc browser actions.
+- Keep scope narrow and reversible where possible.
+- What is the smallest safe action that completes the request?
+- What evidence proves completion?
+- Which tradeoff matters here: speed, completeness, or traceability?
 
-## Operational Reference
+## Constraints
+- Redact secrets, tokens, credentials, and sensitive source content by default.
+- Do not run unrelated automation outside NotebookLM scope.
+- Stop and report blockers when auth or required context is missing.
+- Do not treat cached auth files, cookies, or a past login timestamp as proof that a target notebook is currently accessible.
 
-For the CLI quick reference, command output formats, generation parameters, error handling, subagent wait patterns, and comprehensive troubleshooting, read **`references/notebooklm-cli-reference.md`**.
+## Procedure
+1. Confirm the requested NotebookLM operation and the target notebook context.
+2. If the user provides a notebook URL, extract the notebook identifier and verify whether it exists in the local library or will be accessed directly by URL.
+3. Check auth state and library state separately:
+   - auth state (`auth_info.json`, browser state, wrapper status);
+   - notebook registration state (`data/library.json`, active notebook, cached source summaries).
+4. Run NotebookLM scripts through the wrapper only:
+   ```bash
+   python3 Infrastructure/scripts/run.py <script>.py ...
+   ```
+5. Capture outputs and verify success conditions using returned IDs, notebook identity, and observable side effects.
+6. If the notebook is auth-gated or cannot be matched to the requested notebook, stop and report a blocked/partial outcome instead of guessing.
+7. Summarize result, residual risks, and next step.
+
+## Validation
+- Verify script exit status and expected NotebookLM effect.
+- Verify returned IDs/objects match requested target notebook/source.
+- Verify wrapper-backed execution was used for live operations; direct script execution is only acceptable for static inspection such as `--help` checks when no imports fail.
+- Verify notebook identity separately from auth state; a stored auth timestamp or local browser metadata is not enough.
+- Fail fast: stop at first failed gate and report exact blocker.
+
+## Anti-patterns
+- Do not bypass validation after script execution.
+- Never fabricate NotebookLM state when verification fails.
+- Do not mix unrelated repo tasks into this workflow.
+- Avoid repetitive, generic responses when operation context differs.
+- Warn on common pitfalls such as stale auth and missing notebook IDs.
+- Do not claim a specific NotebookLM URL was verified when the local library is empty or the current run never matched the returned notebook ID to that URL.
+- Do not instruct users to run scripts directly when the wrapper is required to provision `patchright`, browser binaries, and the local `.venv`.
+
+## Variation
+- Adapt workflow by operation type: query, source management, or media generation.
+- Use different verification depth for read-only versus mutating actions.
+- Customize response detail for quick status checks versus deep audits.
+
+## Examples
+- List notebooks, then add a source to a selected notebook.
+- Ask a notebook question and return concise answer plus provenance pointers.
+- Generate an audio overview and verify output artifact metadata.
+
+## Resource map
+- Scripts:
+  - `Infrastructure/scripts/run.py` - wrapper that bootstraps `.venv`, dependencies, and browser tooling
+  - `Infrastructure/scripts/auth_manager.py` - auth setup/status/reauth/clear
+  - `Infrastructure/scripts/notebook_manager.py` - notebook library CRUD, activation, source summary refresh
+  - `Infrastructure/scripts/ask_question.py` - question answering against NotebookLM notebooks
+  - `Infrastructure/scripts/add_source.py`, `Infrastructure/scripts/list_sources.py`, `Infrastructure/scripts/remove_source.py` - source management
+  - `Infrastructure/scripts/audio_generator.py`, `Infrastructure/scripts/video_generator.py` - media overview generation
+  - `Infrastructure/scripts/auto_sync.py` - incremental local-folder sync to a notebook
+  - `Infrastructure/scripts/setup_environment.py`, `Infrastructure/scripts/cleanup_manager.py`, `Infrastructure/scripts/source_filter.py`, `Infrastructure/scripts/source_extractor.py` - environment and support utilities
+- References: `Infrastructure/references/contract.yaml`, `Infrastructure/references/evals.yaml`, `Infrastructure/references/api_reference.md`, `Infrastructure/references/troubleshooting.md`
+
+## Decision feedback protocol
 
 ## See Also
 
@@ -152,15 +139,3 @@ For the CLI quick reference, command output formats, generation parameters, erro
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
-
-## When to use
-- Use when the request clearly matches this skill's owned workflow and expected outputs.
-
-## Required inputs
-- Confirm goal, constraints, and required paths or URLs before execution.
-
-## Deliverables
-- Produce concrete outputs with exact paths, commands run, and verification evidence.
-
-## Failure mode
-- Stop at the first blocker, report root cause, and provide the safest next command.

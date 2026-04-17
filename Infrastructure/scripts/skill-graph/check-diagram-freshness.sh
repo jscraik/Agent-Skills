@@ -27,7 +27,7 @@ is_architecture_sensitive_change() {
 	local changed_path="$1"
 
 	case "$changed_path" in
-		package.json|tsconfig.json|.diagramrc|scripts/skill-graph/refresh-diagram-context.sh|scripts/skill-graph/check-diagram-freshness.sh)
+		package.json|tsconfig.json|.diagramrc|scripts/refresh-diagram-context.sh|scripts/check-diagram-freshness.sh)
 			return 0
 			;;
 		.diagram/*)
@@ -136,14 +136,14 @@ fi
 
 echo "Refreshing architecture diagrams for changed sensitive paths..."
 before_snapshot="$(snapshot_artifacts)"
-bash "$REPO_ROOT/scripts/skill-graph/refresh-diagram-context.sh" --force --quiet
+bash "$REPO_ROOT/scripts/refresh-diagram-context.sh" --force --quiet
 after_snapshot="$(snapshot_artifacts)"
 
 if [[ "$before_snapshot" != "$after_snapshot" ]]; then
 	echo "Error: architecture diagram artifacts are stale after refresh."
 	echo "Changed tracked files:"
 	git -C "$REPO_ROOT" diff --name-only -- "${TRACKED_ARTIFACT_PATHS[@]}"
-	echo "Fix: run 'bash scripts/skill-graph/refresh-diagram-context.sh --force' and commit the updated artifacts."
+	echo "Fix: run 'bash scripts/refresh-diagram-context.sh --force' and commit the updated artifacts."
 	exit 1
 fi
 

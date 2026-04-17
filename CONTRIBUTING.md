@@ -50,7 +50,7 @@ This workflow keeps delivery auditable, reversible, and consistent even for solo
 
 ## Required pre-merge gates
 
-- bash scripts/validation-and-linting/validate-codestyle.sh
+- bash scripts/validate-codestyle.sh
 - npm run check
 - test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null
 
@@ -83,32 +83,32 @@ Harness-managed repositories should keep this baseline available locally before 
 Recommended policy:
 
 - Pin repo-managed tooling in `.mise.toml` where possible.
-- Treat `scripts/codex-preflight/codex-preflight.sh` as required project bootstrap infrastructure.
-- Treat `CODESTYLE.md` and `scripts/validation-and-linting/validate-codestyle.sh` as required repo-local contract files.
+- Treat `scripts/codex-preflight.sh` as required project bootstrap infrastructure.
+- Treat `CODESTYLE.md` and `scripts/validate-codestyle.sh` as required repo-local contract files.
 - Keep `CODESTYLE.md` as a real repo-local file in generated repositories even when the harness authoring source is maintained globally.
 - Scaffold `scripts/codex-enforced` and `scripts/codex-learn` together with preflight so repo-local wrappers own repo-local state.
 - Keep `preflight_repo` in `required` mode by default; only relax mode (`optional` or `off`) when the project documents why.
 - Adjust preflight binary/path lists per project scope instead of deleting the script.
 - Keep repo-scoped telemetry and learned overrides under `.harness/memory/`, and global telemetry under `~/.codex/`.
-- Treat `scripts/validation-and-linting/verify-work.sh` as the canonical repo-facing verification command and keep it wired to repo-local preflight defaults.
-- Treat `scripts/validation-and-linting/validate-codestyle.sh` as the fail-closed codestyle gate and require exact proof-of-pass in change summaries and PRs.
-- Treat `scripts/lifecycle-and-sync/prepare-worktree.sh` as required first-push bootstrap for freshly created worktrees so local hooks run with dependencies and canonical hook wiring.
+- Treat `scripts/verify-work.sh` as the canonical repo-facing verification command and keep it wired to repo-local preflight defaults.
+- Treat `scripts/validate-codestyle.sh` as the fail-closed codestyle gate and require exact proof-of-pass in change summaries and PRs.
+- Treat `scripts/prepare-worktree.sh` as required first-push bootstrap for freshly created worktrees so local hooks run with dependencies and canonical hook wiring.
 - Treat `scripts/check-environment.sh` as the local readiness gate for required tooling.
 - Block merge or promotion work when a required CLI is missing rather than silently skipping the corresponding validation lane.
 - For repositories with explicit `ui` / `chatgpt_apps_sdk` capabilities or matching dependency signals, install `@brainwav/design-system-guidance` and treat its absence as a readiness failure.
 
 ## Repo-local verification wrapper
 
-- `harness init` scaffolds `scripts/validation-and-linting/verify-work.sh` as the canonical repo-local verification entrypoint.
-- The wrapper always runs `scripts/codex-preflight/codex-preflight.sh` in `required` Local Memory mode with scaffold-safe path and binary expectations.
-- `scripts/validation-and-linting/validate-codestyle.sh` is the canonical fail-closed codestyle gate and is reused by `verify-work`, local hooks, and downstream repo docs.
+- `harness init` scaffolds `scripts/verify-work.sh` as the canonical repo-local verification entrypoint.
+- The wrapper always runs `scripts/codex-preflight.sh` in `required` Local Memory mode with scaffold-safe path and binary expectations.
+- `scripts/validate-codestyle.sh` is the canonical fail-closed codestyle gate and is reused by `verify-work`, local hooks, and downstream repo docs.
 - Repo-local launches should prefer `./scripts/codex-enforced` so preflight failures are recorded into repo-scoped learn state.
 - Use `./scripts/codex-learn analyze` and `./scripts/codex-learn apply` to inspect repo-scoped failure patterns and write override files into `.harness/memory/`.
-- Use `bash scripts/validation-and-linting/validate-codestyle.sh --fast` during iteration for focused codestyle validation.
-- Use `bash scripts/validation-and-linting/validate-codestyle.sh` before handoff for the fail-closed codestyle bundle.
-- Use `bash scripts/validation-and-linting/verify-work.sh` for the broader verification bundle.
-- Use `bash scripts/validation-and-linting/verify-work.sh --fast` for preflight + codestyle fast lane coverage.
-- Before the first push from a fresh worktree, run `bash scripts/lifecycle-and-sync/prepare-worktree.sh`.
+- Use `bash scripts/validate-codestyle.sh --fast` during iteration for focused codestyle validation.
+- Use `bash scripts/validate-codestyle.sh` before handoff for the fail-closed codestyle bundle.
+- Use `bash scripts/verify-work.sh` for the broader verification bundle.
+- Use `bash scripts/verify-work.sh --fast` for preflight + codestyle fast lane coverage.
+- Before the first push from a fresh worktree, run `bash scripts/prepare-worktree.sh`.
 
 ## Repo-local harness wrapper
 

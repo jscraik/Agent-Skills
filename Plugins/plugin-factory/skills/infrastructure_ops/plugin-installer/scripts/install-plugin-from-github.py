@@ -48,7 +48,7 @@ UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/ins
 
 
 class InstallError(Exception):
-    """Raised when plugin installation input or staged validation fails."""
+    pass
 
 
 def _utc_now_iso() -> str:
@@ -842,27 +842,14 @@ def _write_json_atomic(path: str, payload: dict[str, object]) -> None:
 
 def _plugin_builder_script() -> Path:
     script_path = Path(__file__).resolve()
-    
-    # Locate 'skills' directory in our own parent path to prevent arbitrary upward traversal
-    skills_dir: Path | None = None
-    for parent in script_path.parents:
-        if parent.name == "skills":
-            skills_dir = parent
+    repo_root: Path | None = None
+    for candidate in script_path.parents:
+        if (candidate / ".git").exists() and (candidate / "scripts").is_dir():
+            repo_root = candidate
             break
-            
-    if skills_dir:
-        candidates = (
-            skills_dir / "code_quality_review" / "plugin-builder" / "scripts" / "plugin_builder.py",
-            skills_dir / "plugin-builder" / "scripts" / "plugin_builder.py",
-        )
-        for candidate in candidates:
-            if candidate.exists():
-                return candidate
-                
-    # Direct fallback if skills directory is named differently or missing
-    # Defaults to 3 levels up: `infrastructure_ops` (if present) -> `skills`
-    repo_root = script_path.parents[6] if "infrastructure_ops" in script_path.parts else script_path.parents[5]
-    
+    if repo_root is None:
+        repo_root = script_path.parents[5]
+
     candidates = (
         repo_root / "Plugins" / "plugin-factory" / "skills" / "code_quality_review" / "plugin-builder" / "scripts" / "plugin_builder.py",
         repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder" / "scripts" / "plugin_builder.py",
@@ -872,10 +859,9 @@ def _plugin_builder_script() -> Path:
     for candidate in candidates:
         if candidate.exists():
             return candidate
-            
     raise InstallError(
-        "Plugin validator script not found under relative skill directories "
-        "or fallback paths."
+        "Plugin validator script not found under Plugins/plugin-factory/skills/code_quality_review/plugin-builder "
+        "or Skills/plugin-builder."
     )
 
 

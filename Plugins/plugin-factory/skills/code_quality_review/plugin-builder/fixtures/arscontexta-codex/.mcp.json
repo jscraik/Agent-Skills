@@ -1,17 +1,12 @@
 {
   "schema_version": 1,
   "mcpServers": {
-    "arscontexta-filesystem": {
-      "command": "npx",
+    "arscontexta_placeholder": {
+      "command": "echo",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "./vaults/arscontexta"
+        "Configure Ars Contexta MCP integration for your vault environment"
       ],
-      "env": {
-        "ARSCONTEXTA_VAULT_ROOT": "./vaults/arscontexta"
-      },
-      "notes": "Filesystem MCP access scoped to the Ars Contexta vault root."
+      "notes": "Placeholder only: replace with real MCP server command for your target environment."
     }
   }
 }

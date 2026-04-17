@@ -555,12 +555,12 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     """
     source_abs = repo_root / spec.source_path
     projection_abs = repo_root / spec.projection_path
-    if source_abs.is_symlink() or not source_abs.is_dir():
+    if not source_abs.is_dir():
         return {
             "name": spec.name,
             "type": "mirror",
             "status": "error",
-            "reason": "source_is_symlink" if source_abs.is_symlink() else "source_missing",
+            "reason": "source_missing",
             "source": spec.source_path,
             "projection": spec.projection_path,
         }
@@ -1138,7 +1138,7 @@ def main() -> int:
         exit_code (int): `1` when the generated payload has `status == "fail"`, `0` otherwise.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[3]
+    repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[2]
     payload = run_sync(repo_root, args.scope) if args.mode == "sync" else run_verify(repo_root, args.scope)
 
     if args.manifest_out:
