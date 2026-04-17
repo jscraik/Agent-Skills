@@ -606,7 +606,6 @@ class TestMiseSnippetBehaviour(unittest.TestCase):
             # Run mise snippet in a second repo with the same directory name
             # We can't create another dir with the same name; just verify the slug logic
             # matches by extracting the non-sha part.
-            slug_a = branch_a.replace("codex/", "").replace(f"-worktree-{sha_a}", "")
 
             # Create a fresh repo to run the mise snippet
             repo_c = Path(tmp) / "c-samerepo"
