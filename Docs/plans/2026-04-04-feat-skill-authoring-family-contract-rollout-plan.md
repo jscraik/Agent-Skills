@@ -356,7 +356,7 @@ Out of scope:
 - Verify: `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`
 - Verify: `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py`
 - Verify: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`
-- Test: `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
+- Test: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`
 - Test: `vale Docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md`
 - Test: `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
 - Test: `~/.venvs/pyyaml/bin/python Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py Skills/skill-creator`
@@ -382,7 +382,7 @@ Out of scope:
 **Execution note:** fail fast at the first broken readiness gate, fix it, and rerun from the affected gate upward. If a closeout gate is blocked only by external live-runner connectivity or authentication after repo-local lint, validator, test, and discovery-smoke checks have passed, execution may continue only in degraded evidence-capture mode: update docs, reporting, and follow-up artifacts, but do not treat the blocked gate as satisfied or mark the rollout complete.
 
 **Patterns to follow:**
-- Repo preflight flow from `Infrastructure/scripts/codex-preflight/codex-preflight.sh`
+- Repo preflight flow from `Infrastructure/scripts/codex-preflight.sh`
 - Spec readiness and observability sections
 
 **Test scenarios:**
@@ -469,7 +469,7 @@ P0 | completed | Codex | Commands: `bash Infrastructure/scripts/validation-and-l
 P1 | completed | Codex | Commands: content audit against `skill-creator`, `skill-builder`, `skill-installer`, `plugin-builder` skill docs. Evidence pointers: `Skills/skill-creator/SKILL.md`, `Skills/skill-builder/SKILL.md`, `Skills/skill-installer/SKILL.md`, `Plugins/plugin-factory/skills/plugin-builder/SKILL.md`.
 P2 | completed | Codex | Command: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`. Evidence pointers: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`, `/private/tmp/skill-builder-live-smoke-pair-rerun/skill-builder/20260404-164154-350888/summary.json`.
 P3 | completed | Codex | Commands: installer and plugin packaging contract sweep for trust/pinning/quarantine/rollback language. Evidence pointers: `Skills/skill-installer/SKILL.md`, `Plugins/plugin-factory/skills/plugin-builder/SKILL.md`, `Docs/reference/managed-asset-lifecycle.md`.
-P4 | completed | Codex | Commands: `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`; `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`; targeted eval smoke rerun noted in P2. Evidence pointers: `Infrastructure/scripts/codex-preflight/codex-preflight.sh`, `Infrastructure/scripts/validation-and-linting/verify-work.sh`, `Docs/reference/skill-authoring-validation-maturity-matrix.md`. Residual risk only: one transient live-runner timeout was observed before the final passing pair rerun.
+P4 | completed | Codex | Commands: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`; `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`; targeted eval smoke rerun noted in P2. Evidence pointers: `Infrastructure/scripts/codex-preflight.sh`, `Infrastructure/scripts/validation-and-linting/verify-work.sh`, `Docs/reference/skill-authoring-validation-maturity-matrix.md`. Residual risk only: one transient live-runner timeout was observed before the final passing pair rerun.
 
 ## Acceptance Checklist
 
