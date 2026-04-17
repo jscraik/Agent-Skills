@@ -611,7 +611,7 @@ class TestMiseSnippetBehaviour(unittest.TestCase):
             repo_c = Path(tmp) / "c-samerepo"
             repo_c.mkdir()
             _init_repo(repo_c, branch="main")
-            sha_c = _detach_head(repo_c)
+            _detach_head(repo_c)
             _run_snippet(MISE_SNIPPET, cwd=str(repo_c))
             branch_c = _current_branch(repo_c)
 
