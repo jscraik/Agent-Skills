@@ -12,10 +12,12 @@ from typing import List, Optional
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
+if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject
 from skill_discovery import discover_skill_entries, get_policy_identity
-from selection_policy import REPO_SCAN_ROOTS
+from selection_policy import PLUGIN_HIDDEN_LANE_SKILL_NAMES, REPO_SCAN_ROOTS
 from ask.catalog_parity import compute_catalog_parity
 from ask.selection_contract import (
     EligibleCandidate,
@@ -281,7 +283,7 @@ def list_skills(
     	starter (bool): If true, return a deterministic subset of skills ordered by `archetype` rather than the full set.
     	archetype (str): Archetype key used to choose starter skills; unknown keys fall back to `"general"`.
     	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-    	advanced (bool): If false, omit certain internal "coderabbit lane" skills from the default listing; if true, include them.
+    	advanced (bool): If false, include installed plugin skills but omit hidden lane skills from the default listing; if true, include hidden lane skills too.
     
     Returns:
     	CallResult: Result with `status == "success"` and `data` containing:
@@ -294,18 +296,20 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
-    # _canonical_entries already respects visibility and delegates to discover_skill_entries,
-    # which handles filtering hidden skills appropriately for the requested visibility mode.
+    # Use advanced discovery here so installed plugin skills are surfaced by default.
+    # The default list remains human-friendly by filtering hidden lanes below.
     entries = _canonical_entries(
         repo_root,
         source="auto",
-        visibility="advanced" if advanced else "default",
+        visibility="advanced",
     )
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
         if not advanced and _is_hidden_coderabbit_lane(entry):
+            continue
+        if not advanced and entry.name in PLUGIN_HIDDEN_LANE_SKILL_NAMES:
             continue
         if category and category.lower() not in entry.category.lower():
             continue
@@ -448,7 +452,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
     python = _get_python_command(["pyyaml", "jsonschema"])
 
-    diag_cmd = python + ["Infrastructure/scripts/diagnose_skill.py", skill_path]
+    diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
@@ -464,7 +468,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = python + ["Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
+        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
@@ -480,7 +484,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
                 message=message,
                 fix_suggestion=(
                     "Inspect data.family_benchmarks for full output, or run: "
-                    f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
+                    f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
                 ),
             ))
             return result

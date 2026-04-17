@@ -21,8 +21,23 @@ Rollout posture: keep pilot-only; do not expand to additional skills yet.
   - `frontend/tools/agentation`
   - `Skills/systematic-debugging`
   - `interview/interview-me`
-- `Infrastructure/scripts/verify_skill_catalog_freshness.py --strict` passed.
-- `Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check` failed (`legacy_partial` and `missing_mandatory` historical run artifacts).
+  - Evidence timestamp (UTC): `2026-03-11T10:29:12.729871Z`
+  - Evidence artifacts:
+    - `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
+    - `Infrastructure/artifacts/skill-graphs/pilot/telemetry/utilities__skill-builder.json`
+    - `Infrastructure/artifacts/skill-graphs/pilot/telemetry/frontend__tools__agentation.json`
+    - `Infrastructure/artifacts/skill-graphs/pilot/telemetry/utilities__systematic-debugging.json`
+    - `Infrastructure/artifacts/skill-graphs/pilot/telemetry/interview__interview-me.json`
+- `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict` passed.
+  - Evidence timestamp (UTC): `2026-03-11T10:29:12.729871Z`
+  - Evidence artifacts:
+    - `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
+    - `Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json`
+- `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check` failed (`legacy_partial` and `missing_mandatory` historical run artifacts).
+  - Evidence timestamp (UTC): `2026-03-11T10:29:12.729871Z`
+  - Evidence artifacts:
+    - `Infrastructure/artifacts/skill-graphs/graph-adapter/notes/blocker--parity-legacy-partial.md`
+    - `Infrastructure/artifacts/skill-graphs/graph-adapter/notes/blocker--parity-missing-mandatory.md`
 
 ## Risk/Blocker Summary
 
@@ -35,5 +50,5 @@ Rollout posture: keep pilot-only; do not expand to additional skills yet.
 1. Re-run canonical pilot evals with successful runner exits and passing scorecards for all four pilots.
 2. Re-run summary generation + schema validation and confirm conformance reaches at least `partial` with non-zero telemetry coverage.
 3. Resolve or explicitly exempt historical run-artifact strict failures, then rerun:
-   - `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
+   - `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
 4. Re-run final validation bundle and reissue this decision note as `pilot-only` or `expand`.

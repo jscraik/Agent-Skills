@@ -96,17 +96,17 @@ Out of scope:
   - authoritative repo guidance for in-file truth versus derived views
 - `docs/skill-graphs/question-lifecycle.md`
   - canonical `route_clarification` timing and ownership contract
-- `Infrastructure/scripts/lint_openai_skill_format.sh`
+- `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`
   - repo-level frontmatter enforcement surface that must cover `compatibility`
-- `Skills/skill-creator/Infrastructure/scripts/quick_validate.py`
+- `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py`
   - family helper validator currently missing `compatibility` support
-- `Skills/skill-builder/Infrastructure/scripts/quick_validate.py`
+- `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py`
   - existing validator surface whose compatibility messaging also needs parity
 - `Skills/skill-builder/Infrastructure/references/evals.yaml`
   - current concrete eval surface already owning routing and provenance-like cases
-- `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py`
+- `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`
   - runnable eval harness with existing smoke/release modes and path-based invocation
-- `Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
+- `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py`
   - existing test surface for eval-runner behavior
 - `Skills/skill-builder/agents/openai.yaml`
   - current under-scoped metadata surface for `skill-builder`
@@ -146,7 +146,7 @@ Out of scope:
   - Resolution: no. The spec remains authoritative in phase one. A derived family reference doc is optional follow-up only if execution proves it helps discoverability without creating a second authority source.
 
 - Should the plan assume a new eval harness?
-  - Resolution: no. Phase one extends `Skills/skill-builder/Infrastructure/references/evals.yaml` and `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py`.
+  - Resolution: no. Phase one extends `Skills/skill-builder/Infrastructure/references/evals.yaml` and `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`.
 
 ### Deferred to Implementation
 
@@ -171,21 +171,21 @@ Out of scope:
 **Files:**
 - Modify: `Skills/skill-builder/SKILL.md`
 - Modify: `Skills/skill-creator/SKILL.md`
-- Modify: `Infrastructure/scripts/lint_openai_skill_format.sh`
-- Modify: `Skills/skill-creator/Infrastructure/scripts/quick_validate.py`
-- Modify: `Skills/skill-builder/Infrastructure/scripts/quick_validate.py`
-- Test: `bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict`
-- Test: `~/.venvs/pyyaml/bin/python Skills/skill-creator/Infrastructure/scripts/quick_validate.py Skills/skill-creator`
-- Test: `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/quick_validate.py Skills/skill-builder`
+- Modify: `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`
+- Modify: `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py`
+- Modify: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py`
+- Test: `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
+- Test: `~/.venvs/pyyaml/bin/python Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py Skills/skill-creator`
+- Test: `~/.venvs/pyyaml/bin/python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py Skills/skill-builder`
 
 **Approach:**
 - Update all governed guidance that still says only `license`, `allowed-tools`, and `metadata` are optional keys.
 - Bring helper validator error messages and allowed-key sets into parity with the spec.
 - Ensure validator guidance is path-aware and runtime-aware where commands are surfaced to users.
-- Expand `Infrastructure/scripts/lint_openai_skill_format.sh` coverage to include `skills-system`, or land an equivalent mandatory family-wide lint path that proves `skill-creator` and `skill-installer` are governed by the same format contract as `Skills/skill-builder`.
+- Expand `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh` coverage to include `skills-system`, or land an equivalent mandatory family-wide lint path that proves `skill-creator` and `skill-installer` are governed by the same format contract as `Skills/skill-builder`.
 
 **Patterns to follow:**
-- Existing validator CLI shape in `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py`
+- Existing validator CLI shape in `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`
 - Current spec observability and readiness checks in `Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
 
 **Test scenarios:**
@@ -260,12 +260,12 @@ Out of scope:
 
 **Files:**
 - Modify: `Skills/skill-builder/Infrastructure/references/evals.yaml`
-- Modify: `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py`
-- Modify: `Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --list-cases --eval-mode smoke`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --runner discovery-smoke --eval-mode smoke --case discovery-round-six --format json`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case clarification-package-ambiguous`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case provenance-import-rollback`
+- Modify: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`
+- Modify: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --list-cases --eval-mode smoke`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --runner discovery-smoke --eval-mode smoke --case discovery-round-six --format json`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case clarification-package-ambiguous`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case provenance-import-rollback`
 
 **Approach:**
 - Add cases for:
@@ -284,7 +284,7 @@ Out of scope:
 
 **Patterns to follow:**
 - Existing case taxonomy and runner behavior in `Skills/skill-builder/Infrastructure/references/evals.yaml`
-- Existing runner tests in `Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py`
+- Existing runner tests in `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py`
 
 **Test scenarios:**
 - Ambiguous "package this" prompts fail to clarification or route to the right packaging owner based on explicit deliverable language.
@@ -353,17 +353,18 @@ Out of scope:
 - Verify: `Skills/skill-installer/agents/openai.yaml`
 - Verify: `Skills/plugin-builder/SKILL.md`
 - Verify: `Skills/skill-builder/agents/openai.yaml`
-- Verify: `Infrastructure/scripts/lint_openai_skill_format.sh`
-- Verify: `Skills/skill-creator/Infrastructure/scripts/quick_validate.py`
-- Verify: `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py`
+- Verify: `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`
+- Verify: `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py`
+- Verify: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`
 - Test: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`
-- Test: `bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict`
-- Test: `~/.venvs/pyyaml/bin/python Skills/skill-creator/Infrastructure/scripts/quick_validate.py Skills/skill-creator`
-- Test: `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/quick_validate.py Skills/skill-builder`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --list-cases --eval-mode smoke`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --runner discovery-smoke --eval-mode smoke --case discovery-round-six --format json`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case clarification-package-ambiguous`
-- Test: `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case provenance-import-rollback`
+- Test: `vale Docs/plans/2026-04-04-feat-skill-authoring-family-contract-rollout-plan.md`
+- Test: `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
+- Test: `~/.venvs/pyyaml/bin/python Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py Skills/skill-creator`
+- Test: `~/.venvs/pyyaml/bin/python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py Skills/skill-builder`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --list-cases --eval-mode smoke`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --runner discovery-smoke --eval-mode smoke --case discovery-round-six --format json`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case clarification-package-ambiguous`
+- Test: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --case provenance-import-rollback`
 
 **Approach:**
 - Run the full readiness stack from repo root.
@@ -451,7 +452,7 @@ tasks:
   - Mitigation: treat P3 as a dedicated pass instead of burying it inside general copy cleanup.
 
 - Dependency: `~/.venvs/pyyaml/bin/python` remains the repo-friendly interpreter for validator scripts that require `PyYAML`.
-- Dependency: `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py` remains the phase-one family eval harness unless intentionally replaced in a later contract update.
+- Dependency: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py` remains the phase-one family eval harness unless intentionally replaced in a later contract update.
 - Dependency: April 2026 best-practice comparisons for the maturity matrix must stay derived from current official guidance and cannot silently rely on stale repo assumptions.
 
 ## Documentation and Operational Notes
@@ -464,11 +465,11 @@ tasks:
 ## Execution Ledger (Planning Mode)
 
 STEP_ID | status | owner | evidence
-P0 | completed | Codex | `Infrastructure/scripts/lint_openai_skill_format.sh` now covers `skills-system`, both quick validators accept `compatibility`, and direct validator commands passed; temp fixture with `compatibility: codex` also passed both helper validators.
-P1 | completed | Codex | Family copy and metadata now distinguish starter authoring, lifecycle maintenance, installation, and plugin packaging across `skill-creator`, `skill-builder`, `skill-installer`, and `plugin-builder`.
-P2 | completed | Codex | New clarification, packaging-boundary, mixed authoring/install, validation-first, and provenance cases were added; `run_skill_evals.py` now preserves runner-failure truth, live Codex-home preflight, and timeout-profile routing; `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback` passed with both family cases green in `/private/tmp/skill-builder-live-smoke-pair-rerun/skill-builder/20260404-164154-350888/summary.json`.
-P3 | completed | Codex | Installer and plugin-packaging surfaces now expose trusted-source, pinned-ref, quarantine, staged-validation, rollback, and validation-first handoff guidance, and the family packaging boundary remains explicit between standalone skills and plugin packaging.
-P4 | completed | Codex | Repo-root readiness proof now passes across preflight, strict format lint, helper validation, eval inventory, discovery smoke, targeted live smoke, docs lint, and `bash Infrastructure/scripts/verify-work.sh`; the derived maturity matrix remains in `docs/reference/skill-authoring-validation-maturity-matrix.md`. Residual risk only: one transient live-runner timeout was observed before the final passing pair rerun.
+P0 | completed | Codex | Commands: `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`; `python3 Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py --help`; `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py --help`. Evidence pointers: `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`, `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py`, `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py`.
+P1 | completed | Codex | Commands: content audit against `skill-creator`, `skill-builder`, `skill-installer`, `plugin-builder` skill docs. Evidence pointers: `Skills/skill-creator/SKILL.md`, `Skills/skill-builder/SKILL.md`, `Skills/skill-installer/SKILL.md`, `Plugins/plugin-factory/skills/plugin-builder/SKILL.md`.
+P2 | completed | Codex | Command: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`. Evidence pointers: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`, `Skills/skill-builder/Infrastructure/references/evals.yaml`.
+P3 | completed | Codex | Commands: installer and plugin packaging contract sweep for trust/pinning/quarantine/rollback language. Evidence pointers: `Skills/skill-installer/SKILL.md`, `Plugins/plugin-factory/skills/plugin-builder/SKILL.md`, `Docs/reference/managed-asset-lifecycle.md`.
+P4 | completed | Codex | Commands: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`; `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`; targeted eval smoke rerun noted in P2. Evidence pointers: `Infrastructure/scripts/codex-preflight.sh`, `Infrastructure/scripts/validation-and-linting/verify-work.sh`, `Docs/reference/skill-authoring-validation-maturity-matrix.md`. Residual risk only: one transient live-runner timeout was observed before the final passing pair rerun.
 
 ## Acceptance Checklist
 
@@ -495,14 +496,14 @@ Traceability: R5, R6, R7, R8; spec observability + readiness checks, `SA21`, `SA
 
 ## Sources and References
 
-- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](/Users/jamiecraik/dev/agent-skills/docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
-- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](/Users/jamiecraik/dev/agent-skills/Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
-- Managed asset doctrine: [managed-asset-lifecycle.md](/Users/jamiecraik/dev/agent-skills/docs/reference/managed-asset-lifecycle.md)
-- Question lifecycle: [question-lifecycle.md](/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/question-lifecycle.md)
+- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](/Docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
+- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](/Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
+- Managed asset doctrine: [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md)
+- Question lifecycle: [question-lifecycle.md](/Docs/skill-graphs/question-lifecycle.md)
 - Validation surfaces:
-  - [lint_openai_skill_format.sh](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lint_openai_skill_format.sh)
-  - [quick_validate.py](/Users/jamiecraik/dev/agent-skills/Skills/skill-creator/Infrastructure/scripts/quick_validate.py)
-  - [run_skill_evals.py](/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py)
-  - [test_run_skill_evals.py](/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py)
+  - [lint_openai_skill_format.sh](/Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
+  - [quick_validate.py](/Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py)
+  - [run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py)
+  - [test_run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py)
 - Derived readiness artifact:
-  - [skill-authoring-validation-maturity-matrix.md](/Users/jamiecraik/dev/agent-skills/docs/reference/skill-authoring-validation-maturity-matrix.md)
+- [skill-authoring-validation-maturity-matrix.md](/Docs/reference/skill-authoring-validation-maturity-matrix.md)

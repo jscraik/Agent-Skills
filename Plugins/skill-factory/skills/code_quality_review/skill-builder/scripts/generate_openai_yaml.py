@@ -12,7 +12,7 @@ Usage:
     python generate_openai_yaml.py <path/to/skill-dir-or-SKILL.md> [--out agents/openai.yaml]
 
 Notes:
-- This script does not add MCP dependencies automatically (leave placeholders).
+- This script does not add MCP dependencies automatically; define dependencies explicitly when needed.
 - It will not overwrite an existing file unless you pass --force.
 """
 

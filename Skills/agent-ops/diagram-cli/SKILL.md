@@ -114,8 +114,8 @@ If `analyze`, diagram generation, manifest validation, or context-pack refresh f
    - If a repo has a refresh helper script, use it (dry-run first).
    - For this repository (`diagram-cli`), use:
      ```bash
-     Infrastructure/scripts/refresh-diagram-context.sh --dry-run
-     Infrastructure/scripts/refresh-diagram-context.sh --force
+     Infrastructure/scripts/skill-graph/refresh-diagram-context.sh --dry-run
+     Infrastructure/scripts/skill-graph/refresh-diagram-context.sh --force
      ```
 
 6. **Explain the project clearly**

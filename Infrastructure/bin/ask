@@ -14,7 +14,7 @@ import argparse
 import time
 import difflib
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Add Infrastructure/scripts/lib and scripts to path
 repo_root_path = Path(__file__).resolve().parents[1]
@@ -43,6 +43,7 @@ from ask.commands.plugins import (
     list_plugins_state,
     status_plugin_state,
     doctor_plugins_state,
+    uninstall_plugin,
 )
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
@@ -70,12 +71,87 @@ VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog"],
     "skills": ["list", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
-    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden"],
+    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden", "uninstall"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
     "wiki": ["lint", "ingest", "add", "query", "add-asset"],
 }
+
+TOPIC_EXAMPLES: Dict[str, List[str]] = {
+    "repo": [
+        "ask repo status",
+        "ask repo validate --ephemeral",
+        "ask repo doctor-catalog --strict",
+        "ask repo check-stability --changed-files Skills/backend-platform/cli-spec/SKILL.md",
+    ],
+    "skills": [
+        "ask skills list",
+        "ask skills route \"find the right security skill\"",
+        "ask skills goal \"implement this feature safely\"",
+        "ask skills audit Skills/backend-platform/cli-spec --level strict",
+    ],
+    "plugins": [
+        "ask plugins list",
+        "ask plugins status plugin-factory",
+        "ask plugins harden Plugins/plugin-factory",
+    ],
+    "evals": [
+        "ask evals run Skills/backend-platform/cli-spec --mode smoke",
+        "ask evals benchmark",
+        "ask evals dashboard",
+    ],
+    "graph": [
+        "ask graph find security",
+        "ask graph related skill-builder --depth 2",
+        "ask graph info cli-spec",
+    ],
+    "mcp": [
+        "ask mcp sync",
+        "ask mcp sync --dry-run",
+    ],
+    "wiki": [
+        "ask wiki lint",
+        "ask wiki add --interactive",
+        "ask wiki query \"1password signing\"",
+    ],
+}
+
+COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
+    ("repo", "doctor-catalog"): [
+        "ask repo doctor-catalog",
+        "ask repo doctor-catalog --strict",
+    ],
+    ("skills", "audit"): [
+        "ask skills audit Skills/backend-platform/cli-spec --level compat",
+        "ask skills audit Skills/backend-platform/cli-spec --level strict",
+    ],
+    ("skills", "goal"): [
+        "ask skills goal \"implement auth safely\"",
+        "ask goal \"implement auth safely\"",
+    ],
+    ("skills", "route"): [
+        "ask skills route \"debug flaky tests\"",
+        "ask skills route \"improve UI accessibility\" --top-k 5",
+    ],
+    ("skills", "install"): [
+        "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --remediate",
+        "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --dry-run",
+    ],
+    ("wiki", "add-asset"): [
+        "ask wiki add-asset ./tmp/screenshot.png --title \"Checkout\" --summary \"Reference layout\"",
+        "ask wiki add-asset --interactive",
+    ],
+}
+
+ACTION_TO_TOPICS: Dict[str, List[str]] = {
+    action: []
+    for actions in VALID_ACTIONS.values()
+    for action in actions
+}
+for _topic, _actions in VALID_ACTIONS.items():
+    for _action in _actions:
+        ACTION_TO_TOPICS[_action].append(_topic)
 
 # Common mistakes and their corrections
 FUZZY_MATCHES = {
@@ -152,6 +228,45 @@ def format_correction(original: str, corrected: str, robot_mode: bool = False) -
     return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
 
 
+def _normalize_token(token: str) -> str:
+    """Normalize a command token for robust fuzzy matching."""
+    return token.strip().lower().replace("_", "-")
+
+
+def _extract_argparse_error(stderr_text: Optional[str]) -> Optional[str]:
+    """Extract the actionable argparse error line."""
+    if not stderr_text:
+        return None
+    lines = [line.strip() for line in stderr_text.splitlines() if line.strip()]
+    for line in lines:
+        if line.startswith("ask: error:"):
+            return line.replace("ask: error:", "", 1).strip()
+    return lines[-1] if lines else None
+
+
+def _example_commands(topic: Optional[str], action: Optional[str], *, limit: int = 3) -> List[str]:
+    """Return contextual command examples, preferring command-specific examples."""
+    if topic and action and (topic, action) in COMMAND_EXAMPLES:
+        return COMMAND_EXAMPLES[(topic, action)][:limit]
+    if topic and topic in TOPIC_EXAMPLES:
+        return TOPIC_EXAMPLES[topic][:limit]
+    fallback = []
+    for fallback_topic in ("skills", "repo", "graph"):
+        fallback.extend(TOPIC_EXAMPLES.get(fallback_topic, []))
+    return fallback[:limit]
+
+
+def _merge_corrections(existing: Optional[str], new_note: Optional[str]) -> Optional[str]:
+    """Merge correction notes without duplicating text blocks."""
+    if not existing:
+        return new_note
+    if not new_note:
+        return existing
+    if new_note in existing:
+        return existing
+    return f"{existing}\n{new_note}"
+
+
 def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
     """Split leading global flags from positional command tokens."""
     global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
@@ -169,98 +284,159 @@ def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[st
     return prefix_flags, raw_args[idx:]
 
 
-def build_helpful_error(topic: Optional[str], action: Optional[str], raw_args: List[str], repo_root: Path) -> CallResult:
-    """Build a helpful error message with examples."""
+def build_helpful_error(
+    topic: Optional[str],
+    action: Optional[str],
+    raw_args: List[str],
+    *,
+    parser_error: Optional[str] = None,
+) -> CallResult:
+    """Build a detailed error message when command intent is unclear."""
     result = CallResult()
     result.status = "error"
 
-    error_msg = "I couldn't understand that command."
-    suggestions = []
-    examples = []
+    entered = "ask " + " ".join(raw_args) if raw_args else "ask"
+    _, working_args = consume_global_prefix_flags(raw_args)
+    parsed_error = _extract_argparse_error(parser_error)
+    error_msg = "I couldn't reliably determine command intent."
+    suggestions: List[str] = []
+    examples = _example_commands(topic, action, limit=3)
 
     # Try to figure out what they meant
     if not topic:
         error_msg = "Missing or unknown command topic."
-        suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
-        if raw_args:
-            guess = get_closest_match(raw_args[0], VALID_TOPICS)
-            if guess:
-                suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+        suggestions.append(f"Start with a topic: {', '.join(VALID_TOPICS)}")
+        if working_args:
+            first = _normalize_token(working_args[0])
+            action_topics = ACTION_TO_TOPICS.get(first, [])
+            if len(action_topics) == 1:
+                guessed_topic = action_topics[0]
+                suggestions.append(f"'{first}' is an action under '{guessed_topic}'. Try 'ask {guessed_topic} {first}'.")
+                examples = _example_commands(guessed_topic, first, limit=3)
+            elif len(action_topics) > 1:
+                topics_text = ", ".join(action_topics)
+                suggestions.append(f"'{first}' is ambiguous and exists under topics: {topics_text}.")
+            else:
+                guess = get_closest_match(first, VALID_TOPICS)
+                if guess:
+                    suggestions.append(f"Closest topic guess: 'ask {guess}'.")
     elif topic not in VALID_TOPICS:
-        guess = get_closest_match(topic, VALID_TOPICS)
-        if guess:
+        normalized_topic = _normalize_token(topic)
+        action_topics = ACTION_TO_TOPICS.get(normalized_topic, [])
+        if len(action_topics) == 1:
+            inferred_topic = action_topics[0]
             error_msg = f"Unknown topic: '{topic}'"
-            suggestions.append(f"💡 Did you mean 'ask {guess}'?")
+            suggestions.append(
+                f"'{normalized_topic}' is an action under '{inferred_topic}'. Try 'ask {inferred_topic} {normalized_topic}'."
+            )
+            examples = _example_commands(inferred_topic, normalized_topic, limit=3)
+        elif len(action_topics) > 1:
+            error_msg = f"Unknown topic: '{topic}'"
+            options = ", ".join(action_topics)
+            suggestions.append(
+                f"'{normalized_topic}' is ambiguous and can belong to: {options}. Use an explicit topic."
+            )
+            examples = [f"ask {candidate_topic} {normalized_topic}" for candidate_topic in action_topics[:3]]
+            examples.extend(_example_commands(None, None, limit=max(0, 3 - len(examples))))
         else:
-            error_msg = f"Unknown topic: '{topic}'"
-            suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
+            guess = get_closest_match(normalized_topic, VALID_TOPICS)
+            if guess:
+                error_msg = f"Unknown topic: '{topic}'"
+                suggestions.append(f"Closest topic guess: 'ask {guess}'.")
+                examples = _example_commands(guess, None, limit=3)
+            else:
+                error_msg = f"Unknown topic: '{topic}'"
+                suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
     elif not action:
         error_msg = f"Missing action for 'ask {topic}'"
         valid_actions = VALID_ACTIONS.get(topic, [])
-        suggestions.append(f"Valid actions: {', '.join(valid_actions)}")
+        suggestions.append(f"Valid actions for '{topic}': {', '.join(valid_actions)}")
+        examples = _example_commands(topic, None, limit=3)
     elif action not in VALID_ACTIONS.get(topic, []):
         valid = VALID_ACTIONS.get(topic, [])
         guess = get_closest_match(action, valid)
         if guess:
             error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"💡 Did you mean 'ask {topic} {guess}'?")
+            suggestions.append(f"Closest action guess: 'ask {topic} {guess}'.")
+            examples = _example_commands(topic, guess, limit=3)
         else:
             error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"Valid actions: {', '.join(valid)}")
-
-    # Add relevant examples based on context
-    if topic == "skills" or not topic:
-        examples.extend([
-            "ask skills list",
-            "ask skills route \"find me the right skill for this request\"",
-            "ask skills goal \"implement this feature safely\"",
-            "ask skills starter --archetype delivery",
-            "ask skills audit backend/cli-spec --level strict",
-            "ask skills init my-skill --category backend --description 'Does something useful'",
-        ])
-    if topic == "graph" or not topic:
-        examples.extend([
-            "ask graph find security",
-            "ask graph related skill-builder --depth 2",
-            "ask graph info cli-spec",
-        ])
-    if topic == "repo" or not topic:
-        examples.extend([
-            "ask repo status",
-            "ask repo validate --ephemeral",
-            "ask repo doctor-catalog --strict",
-            "ask repo check-stability",
-        ])
-    if topic == "mcp" or not topic:
-        examples.extend([
-            "ask mcp sync",
-            "ask mcp sync --dry-run",
-        ])
-    if topic == "wiki" or not topic:
-        examples.extend([
-            "ask wiki lint",
-            "ask wiki ingest 'Title' --summary 'Summary' --source '<source>'",
-            "ask wiki add --interactive",
-            "ask wiki query '1password signing'",
-            "ask wiki add-asset /path/to/screenshot.png --title 'Checkout flow' --summary 'Reference layout' --status verified",
-            "ask wiki add-asset --interactive",
-        ])
+            suggestions.append(f"Valid actions for '{topic}': {', '.join(valid)}")
+            examples = _example_commands(topic, None, limit=3)
 
     # Build the full error message
-    full_message = f"❌ {error_msg}\n"
+    full_message = f"❌ {error_msg}\n\n   Entered: `{entered}`"
+    if parsed_error:
+        full_message += f"\n   Parser detail: {parsed_error}"
     if suggestions:
-        full_message += "\n" + "\n".join(f"   {s}" for s in suggestions)
+        full_message += "\n\n🧭 Guidance:\n"
+        full_message += "\n".join(f"   • {s}" for s in suggestions)
     if examples:
-        full_message += "\n\n📚 Examples:\n"
-        full_message += "\n".join(f"   • {e}" for e in examples[:4])
+        full_message += "\n\n📚 Try one of these:\n"
+        full_message += "\n".join(f"   • {e}" for e in examples[:3])
 
     result.errors.append(ErrorObject(
         code=ErrorCode.ERR_VALIDATION,
         message=full_message,
-        fix_suggestion="Use 'ask --help' for full usage information."
+        fix_suggestion="Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
     ))
 
     return result
+
+
+def build_argument_error(
+    topic: str,
+    action: str,
+    raw_args: List[str],
+    *,
+    parser_error: Optional[str] = None,
+) -> CallResult:
+    """Build a detailed error when command intent is clear but args are invalid."""
+    result = CallResult()
+    result.status = "error"
+    entered = "ask " + " ".join(raw_args) if raw_args else f"ask {topic} {action}"
+    parsed_error = _extract_argparse_error(parser_error) or "Argument syntax was invalid for this command."
+    examples = _example_commands(topic, action, limit=3)
+
+    message_lines = [
+        "❌ Command intent was understood, but argument syntax is invalid.",
+        "",
+        f"   Entered: `{entered}`",
+        f"   Parsed intent: `ask {topic} {action}`",
+        f"   Parser detail: {parsed_error}",
+        "",
+        "🧭 Guidance:",
+        f"   • Run `ask {topic} {action} --help` to see required/optional arguments.",
+    ]
+    if examples:
+        message_lines.append("   • Use one of the valid example forms below.")
+        message_lines.append("")
+        message_lines.append("📚 Valid examples:")
+        for example in examples:
+            message_lines.append(f"   • {example}")
+
+    result.errors.append(
+        ErrorObject(
+            code=ErrorCode.ERR_VALIDATION,
+            message="\n".join(message_lines),
+            fix_suggestion=f"Run 'ask {topic} {action} --help' and retry with the shown argument shape.",
+        )
+    )
+    return result
+
+
+def parse_args_with_capture(parser: argparse.ArgumentParser, argv: List[str]) -> Tuple[Optional[argparse.Namespace], Optional[int], str]:
+    """Parse CLI args while capturing argparse stderr for richer error reporting."""
+    import contextlib
+    import io
+
+    stderr_buffer = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(stderr_buffer):
+            parsed = parser.parse_args(argv)
+        return parsed, None, stderr_buffer.getvalue()
+    except SystemExit as exc:
+        return None, int(exc.code), stderr_buffer.getvalue()
 
 
 def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:
@@ -276,67 +452,105 @@ def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Opti
     if not working_args:
         return None, None, raw_args, None
 
-    correction_note = None
+    correction_note: Optional[str] = None
+    first_token = _normalize_token(working_args[0])
+    second_token = _normalize_token(working_args[1]) if len(working_args) > 1 else None
 
     # Alias normalization:
     # - ask goal "<intent>" -> ask skills goal "<intent>"
     # - ask doctor catalog -> ask repo doctor-catalog
-    if working_args[0] == "goal":
+    if first_token == "goal":
         topic = "skills"
         action = "goal"
         return topic, action, prefix_flags + working_args[1:], format_correction("goal", "skills goal", robot_mode)
-    if len(working_args) >= 2 and working_args[0] == "doctor" and working_args[1] == "catalog":
+    if len(working_args) >= 2 and first_token == "doctor" and second_token == "catalog":
         topic = "repo"
         action = "doctor-catalog"
         return topic, action, prefix_flags + working_args[2:], format_correction("doctor catalog", "repo doctor-catalog", robot_mode)
 
-    topic = working_args[0]
+    # Swapped ordering recovery: `ask list skills` -> `ask skills list`
+    if len(working_args) >= 2:
+        swapped_topic_candidate = second_token
+        swapped_action_candidate = first_token
+        if swapped_topic_candidate in VALID_TOPICS:
+            swapped_valid_actions = VALID_ACTIONS.get(swapped_topic_candidate, [])
+            resolved_swapped_action = None
+            if swapped_action_candidate in swapped_valid_actions:
+                resolved_swapped_action = swapped_action_candidate
+            else:
+                mapped_action = FUZZY_MATCHES.get(swapped_action_candidate)
+                if mapped_action in swapped_valid_actions:
+                    resolved_swapped_action = mapped_action
+                else:
+                    guess_action = get_closest_match(swapped_action_candidate, swapped_valid_actions)
+                    if guess_action:
+                        resolved_swapped_action = guess_action
+            if resolved_swapped_action:
+                correction_note = format_correction(
+                    f"{working_args[0]} {working_args[1]}",
+                    f"{swapped_topic_candidate} {resolved_swapped_action}",
+                    robot_mode,
+                )
+                return (
+                    swapped_topic_candidate,
+                    resolved_swapped_action,
+                    prefix_flags + working_args[2:],
+                    correction_note,
+                )
+
+    topic = first_token
     remaining = working_args[1:]
 
-    # Try fuzzy match on topic
+    # Topic recovery:
+    # 1) explicit typo maps
+    # 2) close match on known topics
+    # 3) infer topic from action when action is unique to one topic
     if topic not in VALID_TOPICS:
-        # Check direct fuzzy matches
-        if topic in FUZZY_MATCHES:
+        if topic in FUZZY_MATCHES and FUZZY_MATCHES[topic] in VALID_TOPICS:
             corrected = FUZZY_MATCHES[topic]
-            if corrected in VALID_TOPICS:
-                correction_note = format_correction(topic, corrected, robot_mode)
-                topic = corrected
+            correction_note = format_correction(working_args[0], corrected, robot_mode)
+            topic = corrected
         else:
-            # Try difflib
             guess = get_closest_match(topic, VALID_TOPICS)
             if guess:
-                correction_note = format_correction(topic, guess, robot_mode)
+                correction_note = format_correction(working_args[0], guess, robot_mode)
                 topic = guess
+            else:
+                unique_topics = ACTION_TO_TOPICS.get(topic, [])
+                if len(unique_topics) == 1:
+                    inferred_topic = unique_topics[0]
+                    correction_note = format_correction(working_args[0], f"{inferred_topic} {topic}", robot_mode)
+                    return inferred_topic, topic, prefix_flags + working_args[1:], correction_note
 
-    # Get action if available
+    # Resolve action token; permit flags before action in robot mode.
     action = None
-    if remaining:
-        action = remaining[0]
-        valid_actions = VALID_ACTIONS.get(topic, [])
+    action_index = None
+    for idx, token in enumerate(remaining):
+        if token.startswith("-"):
+            continue
+        action = _normalize_token(token)
+        action_index = idx
+        break
 
+    if action is not None:
+        valid_actions = VALID_ACTIONS.get(topic, [])
+        original_action = action
         if action not in valid_actions:
-            # Try fuzzy match on action
-            if action in FUZZY_MATCHES:
-                corrected = FUZZY_MATCHES[action]
-                if corrected in valid_actions:
-                    if correction_note:
-                        correction_note += f"\n   Also interpreting '{action}' as '{corrected}'"
-                    else:
-                        correction_note = format_correction(action, corrected, robot_mode)
-                    action = corrected
+            mapped_action = FUZZY_MATCHES.get(action)
+            if mapped_action in valid_actions:
+                action = mapped_action
             else:
                 guess = get_closest_match(action, valid_actions)
                 if guess:
-                    if correction_note:
-                        correction_note += f"\n   Also interpreting '{action}' as '{guess}'"
-                    else:
-                        correction_note = format_correction(action, guess, robot_mode)
                     action = guess
+        if action != original_action:
+            correction_note = _merge_corrections(
+                correction_note,
+                format_correction(original_action, action, robot_mode),
+            )
 
-            # If we couldn't match to a valid action, preserve the original action
-            # so later VALID_ACTIONS validation can produce the proper unknown-action message
-
-        remaining = remaining[1:]
+        # Remove just the action token; keep all other args/flags in order.
+        remaining = remaining[:action_index] + remaining[action_index + 1:]
 
     # Combine prefix flags with remaining args for downstream processing
     full_remaining = prefix_flags + remaining
@@ -388,10 +602,12 @@ def main():
     raw_args = sys.argv[1:]
     alias_correction_note = None
     prefix_flags, positional_args = consume_global_prefix_flags(raw_args)
-    if positional_args and positional_args[0] == "goal":
+    first_positional = _normalize_token(positional_args[0]) if positional_args else None
+    second_positional = _normalize_token(positional_args[1]) if len(positional_args) > 1 else None
+    if first_positional == "goal":
         raw_args = [*prefix_flags, "skills", "goal", *positional_args[1:]]
         alias_correction_note = "💡 Alias: 'ask goal' maps to 'ask skills goal'."
-    elif len(positional_args) >= 2 and positional_args[0] == "doctor" and positional_args[1] == "catalog":
+    elif first_positional == "doctor" and second_positional == "catalog":
         raw_args = [*prefix_flags, "repo", "doctor-catalog", *positional_args[2:]]
         alias_correction_note = "💡 Alias: 'ask doctor catalog' maps to 'ask repo doctor-catalog'."
 
@@ -406,19 +622,31 @@ def main():
     global_parser.add_argument("--json", action="store_true", help="Output results in JSON format for programmatic use")
     global_parser.add_argument("--trace-id", help="Trace ID for correlating logs", default=os.environ.get("ASK_TRACE_ID"))
     global_parser.add_argument("--robot", "--agent-mode", "-r", dest="robot_mode", action="store_true",
-                               help="Enable AI-friendly mode: flexible parsing, helpful corrections, verbose guidance")
+                               help="AI-agent mode: honors clear intent despite minor syntax issues, emits correction notes, and returns detailed guided errors on ambiguity")
 
     parser = argparse.ArgumentParser(
         prog="ask",
-        description="Agent Skills Kit CLI - Designed for AI coding agents. Use --robot for maximum flexibility.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "Agent Skills Kit CLI. Use --robot / --agent-mode / -r for AI-agent workflows: "
+            "it auto-recovers clear-intent syntax mistakes, prints canonical command corrections, "
+            "and returns actionable error guidance when intent is ambiguous."
+        ),
         parents=[global_parser],
-        epilog="Examples:\n"
-               "  ask repo status                    # Check repository health\n"
-               "  ask skills list --json             # List skills as JSON\n"
-               "  ask graph find security --robot    # Fuzzy search with corrections\n"
-               "  ask skills audit backend/cli-spec  # Validate a skill\n"
-               "  ask wiki add --interactive         # Triage and file a wiki note\n"
-               "\n🤖 Robot mode (--robot): Auto-corrects minor syntax errors when intent is clear."
+        epilog=(
+            "Quick Start:\n"
+            "  ask repo status\n"
+            "  ask skills list --json\n"
+            "  ask skills audit Skills/backend-platform/cli-spec --level strict\n"
+            "\n"
+            "Robot Mode (--robot | --agent-mode | -r):\n"
+            "  1) Honors clear intent with minor syntax issues.\n"
+            "     - ask skill ls --robot                -> ask skills list\n"
+            "     - ask list skills --robot             -> ask skills list\n"
+            "     - ask skills --advanced list --robot  -> ask skills list --advanced\n"
+            "  2) Prints correction notes so future calls use canonical syntax.\n"
+            "  3) If intent is ambiguous, returns a detailed error with likely fixes and examples."
+        ),
     )
     subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
     
@@ -532,6 +760,10 @@ def main():
 
     plugins_import_parser = plugins_subparsers.add_parser("import", help="Alias for plugins install", parents=[global_parser])
     _add_plugin_install_args(plugins_import_parser)
+    
+    plugins_uninstall_parser = plugins_subparsers.add_parser("uninstall", help="Uninstall a plugin and sync config", parents=[global_parser])
+    plugins_uninstall_parser.add_argument("name", help="Name of plugin to uninstall")
+    plugins_uninstall_parser.add_argument("--dry-run", action="store_true", help="Preview uninstallation without making changes")
 
     plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
     plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: Plugins/my-plugin)")
@@ -647,120 +879,100 @@ def main():
         parser.print_help()
         sys.exit(0)
 
-    # Try fuzzy parsing if robot mode or if initial parse fails
     parsed_topic = None
     parsed_action = None
-    remaining_args = []
     correction_note = alias_correction_note
-    fuzzy_matched = False  # Track if fuzzy matching was used
+    args: Optional[argparse.Namespace] = None
 
-    try:
-        # In robot mode, suppress parser error output to stderr since we handle
-        # fuzzy corrections ourselves. This prevents parser noise from contaminating
-        # structured output flows that expect clean results.
-        if robot_mode:
-            import contextlib
-            with open(os.devnull, 'w') as devnull:
-                with contextlib.redirect_stderr(devnull):
-                    args = parser.parse_args(raw_args)
-        else:
-            args = parser.parse_args(raw_args)
+    parsed_args, parse_exit_code, parser_stderr = parse_args_with_capture(parser, raw_args)
+    if parsed_args is not None:
+        args = parsed_args
         parsed_topic = args.topic
-        parsed_action = getattr(args, 'action', None)
-    except SystemExit as e:
-        # argparse raises SystemExit(0) for --help, SystemExit(2) for errors
-        # Re-raise if it's a help request (code 0)
-        if e.code == 0:
+        parsed_action = getattr(args, "action", None)
+    else:
+        if parse_exit_code == 0:
             sys.exit(0)
-        # Parse failed - determine if it's an unknown command or bad arguments
-        # Extract potential topic/action from raw_args for validation
-        potential_topic, potential_action, _, _ = try_fuzzy_parse(raw_args, robot_mode=False)
-        is_known_command = (
-            potential_topic in VALID_TOPICS and
-            potential_action in VALID_ACTIONS.get(potential_topic, [])
-        )
-        if is_known_command:
-            # Known command with bad/missing arguments - preserve argparse's error
-            result = CallResult()
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"Invalid arguments for 'ask {potential_topic} {potential_action}'",
-                fix_suggestion=f"Run 'ask {potential_topic} {potential_action} --help' for usage."
-            ))
-            if "--json" in raw_args:
-                print(result.to_json())
-            else:
-                print(f"❌ {result.errors[0].message}")
-                print(f"\n💡 {result.errors[0].fix_suggestion}")
-            sys.exit(2)
-        # Parse failed - try fuzzy matching if robot mode
+
         if robot_mode:
-            parsed_topic, parsed_action, remaining_args, correction_note = try_fuzzy_parse(raw_args, robot_mode=True)
-            fuzzy_matched = parsed_topic is not None
-            if not parsed_topic or not parsed_action:
-                # Still couldn't parse - show helpful error
-                repo_root = find_repo_root()
-                result = build_helpful_error(parsed_topic, parsed_action, raw_args, repo_root)
+            fuzzy_topic, fuzzy_action, remaining_args, fuzzy_note = try_fuzzy_parse(raw_args, robot_mode=True)
+            correction_note = _merge_corrections(correction_note, fuzzy_note)
+            parsed_topic = fuzzy_topic
+            parsed_action = fuzzy_action
+
+            can_attempt_reparse = (
+                parsed_topic in VALID_TOPICS
+                and parsed_action in VALID_ACTIONS.get(parsed_topic, [])
+            )
+            if can_attempt_reparse:
+                corrected_args = [parsed_topic, parsed_action, *remaining_args]
+                corrected_parsed_args, corrected_exit_code, corrected_stderr = parse_args_with_capture(parser, corrected_args)
+                if corrected_parsed_args is not None:
+                    args = corrected_parsed_args
+                else:
+                    if corrected_exit_code == 0:
+                        sys.exit(0)
+                    result = build_argument_error(
+                        parsed_topic,
+                        parsed_action,
+                        raw_args,
+                        parser_error=corrected_stderr or parser_stderr,
+                    )
+                    result.metadata["command"] = " ".join(sys.argv[1:])
+                    if correction_note:
+                        result.metadata["correction_note"] = correction_note.replace("\n", " ")
+                    if "--json" in raw_args:
+                        print(result.to_json())
+                    else:
+                        if correction_note:
+                            print(f"{correction_note}\n")
+                        print(result.errors[0].message)
+                    sys.exit(2)
+            else:
+                result = build_helpful_error(
+                    parsed_topic,
+                    parsed_action,
+                    raw_args,
+                    parser_error=parser_stderr,
+                )
+                result.metadata["command"] = " ".join(sys.argv[1:])
+                if correction_note:
+                    result.metadata["correction_note"] = correction_note.replace("\n", " ")
                 if "--json" in raw_args:
                     print(result.to_json())
                 else:
+                    if correction_note:
+                        print(f"{correction_note}\n")
                     print(result.errors[0].message)
                 sys.exit(2)
-            # Valid topic/action found - will reparse below
         else:
-            # Not in robot mode - show standard error with hint
+            potential_topic, potential_action, _, _ = try_fuzzy_parse(raw_args, robot_mode=False)
+            is_known_command = (
+                potential_topic in VALID_TOPICS and
+                potential_action in VALID_ACTIONS.get(potential_topic, [])
+            )
+            if is_known_command:
+                result = build_argument_error(
+                    potential_topic,
+                    potential_action,
+                    raw_args,
+                    parser_error=parser_stderr,
+                )
+            else:
+                result = build_helpful_error(
+                    potential_topic,
+                    potential_action,
+                    raw_args,
+                    parser_error=parser_stderr,
+                )
+            result.metadata["command"] = " ".join(sys.argv[1:])
             if "--json" in raw_args:
-                result = CallResult()
-                result.status = "error"
-                result.errors.append(ErrorObject(
-                    code=ErrorCode.ERR_VALIDATION,
-                    message="Unknown command. Use --robot to enable flexible parsing.",
-                    fix_suggestion=f"Valid topics: {', '.join(VALID_TOPICS)}"
-                ))
                 print(result.to_json())
             else:
-                print("❌ Unknown command. Use --robot to enable flexible parsing.")
-                print("\n📚 Quick examples:")
-                print("  ask skills list")
-                print("  ask repo status")
-                print("  ask graph find security")
-                print("  ask wiki add --interactive")
+                print(result.errors[0].message)
             sys.exit(2)
 
-    # If fuzzy matching failed to produce valid command
-    if parsed_topic and (parsed_topic not in VALID_TOPICS or parsed_action not in VALID_ACTIONS.get(parsed_topic, [])):
-        # Still invalid after fuzzy matching
-        repo_root = find_repo_root()
-        result = build_helpful_error(parsed_topic, parsed_action, raw_args, repo_root)
-        if "--json" in raw_args:
-            print(result.to_json())
-        else:
-            print(result.errors[0].message)
-            if correction_note:
-                print(f"\n{correction_note}")
-        sys.exit(2)
-
-    # Re-parse with corrected values if needed (only if we came from fuzzy matching path)
-    # fuzzy_matched indicates try_fuzzy_parse was used successfully
-    if fuzzy_matched and parsed_topic and parsed_topic in VALID_TOPICS:
-        # Rebuild the command line with corrected values from fuzzy match
-        corrected_args = [parsed_topic]
-        if parsed_action:
-            corrected_args.append(parsed_action)
-        corrected_args.extend(remaining_args)
-        # Add back any flags
-        for flag in ["--json", "--trace-id"]:
-            if flag in raw_args:
-                idx = raw_args.index(flag)
-                corrected_args.append(flag)
-                if idx + 1 < len(raw_args) and not raw_args[idx + 1].startswith("-"):
-                    corrected_args.append(raw_args[idx + 1])
-
-        args = parser.parse_args(corrected_args)
-
     # Guard: args must be initialized before use (catches robot-mode parse edge cases)
-    if 'args' not in locals() or args is None:
+    if args is None:
         result = CallResult()
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -908,6 +1120,12 @@ def main():
                 run_compat=not args.skip_compat,
                 run_marketplace_audit=not args.skip_marketplace_audit,
                 allow_legacy_marketplace_path=not args.strict_marketplace_path,
+            )
+        elif args.action == "uninstall":
+            result = uninstall_plugin(
+                repo_root,
+                name=args.name,
+                dry_run=args.dry_run,
             )
         else:
             result.status = "error"
@@ -1513,9 +1731,15 @@ def main():
                         print(f"  Command: {run.get('command')}")
                         print(f"  Return code: {run.get('returncode')}")
                         if run.get('stdout'):
-                            print(f"  Stdout:\n{run.get('stdout')}")
+                            if getattr(args, 'verbose', False):
+                                print(f"  Stdout:\n{repr(run.get('stdout'))}")
+                            else:
+                                print("  (Stdout elided. Use --verbose to view)")
                         if run.get('stderr'):
-                            print(f"  Stderr:\n{run.get('stderr')}")
+                            if getattr(args, 'verbose', False):
+                                print(f"  Stderr:\n{repr(run.get('stderr'))}")
+                            else:
+                                print("  (Stderr elided. Use --verbose to view)")
                 print("\n📚 Plugin examples:")
                 print("   ask plugins init my-plugin --category third-party --with-marketplace")
                 print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")

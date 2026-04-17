@@ -9,7 +9,7 @@ Prefer numbered steps, and add a short Troubleshooting section for the most comm
 Good guide topics for this repo:
 
 - Add a new skill folder and `SKILL.md`
-- Run `Infrastructure/scripts/sync_skills.sh` and confirm `/SKILL.md` updates
+- Run `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` and confirm `/SKILL.md` updates
 - Validate a skill before you open a PR
 - Apply governance scope defaults: [hook-governance-scope-defaults.md](/docs/guides/hook-governance-scope-defaults.md)
 - Run the recursive skill loop MVP: [recursive-skill-loop.md](/docs/guides/recursive-skill-loop.md)

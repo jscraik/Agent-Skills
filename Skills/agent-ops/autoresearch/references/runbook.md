@@ -50,7 +50,7 @@ python3 Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts
 ### Broad or mixed edits
 
 ```bash
-bash Infrastructure/scripts/verify-work.sh --fast
+bash Infrastructure/scripts/validation-and-linting/verify-work.sh --fast
 ```
 
 Record outcomes in `journal.md`.

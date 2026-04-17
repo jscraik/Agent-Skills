@@ -39,7 +39,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py \
 ## Shadow cycle automation
 
 ```bash
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile 2 \
   --profiles-file docs/skill-graphs/schemas/examples/pilot-profiles.json \
   --window-days 7
@@ -48,7 +48,7 @@ bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
 Focused rerun example:
 
 ```bash
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile 1 \
   --profiles-file docs/skill-graphs/schemas/examples/pilot-profiles.frontend-ui-design.json \
   --window-days 7
@@ -92,7 +92,7 @@ After the shadow report is built, the cycle now also creates an Ars Contexta int
 ## Verify graph plans
 
 ```bash
-python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" .agent/PLANS.md
+python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" .agents/PLANS.md
 python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" Docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md
 ```
 

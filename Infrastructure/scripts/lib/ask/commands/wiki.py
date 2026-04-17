@@ -41,7 +41,7 @@ def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResu
 
     cmd = [
         "python3",
-        "Infrastructure/scripts/wiki_lint.py",
+        "Infrastructure/scripts/validation-and-linting/wiki_lint.py",
         "--wiki-root",
         wiki_root,
         "--max-age-days",
@@ -80,7 +80,7 @@ def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResu
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Failed to execute wiki_lint: {e}",
-                fix_suggestion="Ensure Infrastructure/scripts/wiki_lint.py exists and is executable.",
+                fix_suggestion="Ensure Infrastructure/scripts/validation-and-linting/wiki_lint.py exists and is executable.",
             )
         )
         return result
@@ -600,6 +600,19 @@ def wiki_add_asset(
         asset_input = (repo_root / asset_input).resolve()
     else:
         asset_input = asset_input.resolve()
+
+    try:
+        asset_input.relative_to(repo_root.resolve())
+    except ValueError:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Asset path escapes repository boundaries.",
+                fix_suggestion="Ensure the asset is located within the repository before adding it.",
+            )
+        )
+        return result
 
     if not asset_input.exists() or not asset_input.is_file():
         result.status = "error"

@@ -165,7 +165,7 @@ Policy note:
 - Modify: `Docs/agents/04-validation.md`
 - Create or modify: `docs/reference/` files if a small canonical metadata reference is needed
 - Test: `Infrastructure/scripts/validate_all.sh`
-- Test: `Infrastructure/scripts/verify_skill_catalog_freshness.py`
+- Test: `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
 
 **Approach:**
 - Materialize the spec's in-file authoritative metadata model and document derivation rules for any subordinate views.
@@ -219,10 +219,10 @@ Policy note:
 - Modify: `Skills/skill-creator/Infrastructure/scripts/init_skill.py`
 - Modify: `Infrastructure/templates/SKILL.md.template`
 - Modify: `Skills/plugin-creator/Infrastructure/references/plugin-json-spec.md`
-- Create: `Infrastructure/scripts/test_skill_creator_lifecycle_scaffold.py`
-- Create: `Infrastructure/scripts/test_plugin_creator_lifecycle_scaffold.py`
-- Test: `Infrastructure/scripts/test_skill_creator_lifecycle_scaffold.py`
-- Test: `Infrastructure/scripts/test_plugin_creator_lifecycle_scaffold.py`
+- Create: `Infrastructure/scripts/testing/test_skill_creator_lifecycle_scaffold.py`
+- Create: `Infrastructure/scripts/testing/test_plugin_creator_lifecycle_scaffold.py`
+- Test: `Infrastructure/scripts/testing/test_skill_creator_lifecycle_scaffold.py`
+- Test: `Infrastructure/scripts/testing/test_plugin_creator_lifecycle_scaffold.py`
 
 **Approach:**
 - capture required lifecycle fields at creation time or fail/warn clearly
@@ -260,11 +260,11 @@ Policy note:
 **Dependencies:** P0, P1
 
 **Files:**
-- Modify: `Infrastructure/scripts/diagnose_skill.py`
+- Modify: `Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py`
 - Modify: `Infrastructure/scripts/validate_all.sh`
-- Modify: `Infrastructure/scripts/verify_skill_catalog_freshness.py`
-- Create: `Infrastructure/scripts/test_skill_lifecycle_validation.py`
-- Test: `Infrastructure/scripts/test_skill_lifecycle_validation.py`
+- Modify: `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
+- Create: `Infrastructure/scripts/testing/test_skill_lifecycle_validation.py`
+- Test: `Infrastructure/scripts/testing/test_skill_lifecycle_validation.py`
 - Test: `Infrastructure/scripts/validate_all.sh`
 
 **Approach:**
@@ -283,7 +283,7 @@ Policy note:
 
 **Patterns to follow:**
 - [validate_all.sh](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/validate_all.sh)
-- [verify_skill_catalog_freshness.py](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/verify_skill_catalog_freshness.py)
+- [verify_skill_catalog_freshness.py](/Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py)
 
 **Test harness note:** New validation tests should remain in the `Infrastructure/scripts/test_*.py` family and be wired into the chosen repo-native validation path rather than creating a parallel runner.
 
@@ -315,7 +315,7 @@ Policy note:
 - Create: `docs/solutions/solution-entry-template.md`
 - Modify: `README.md`
 - Modify: `docs/index.md`
-- Test: `Infrastructure/scripts/docs_lint.py`
+- Test: `Infrastructure/scripts/validation-and-linting/docs_lint.py`
 
 **Approach:**
 - define what belongs in `docs/solutions/` and what does not
@@ -353,8 +353,8 @@ Policy note:
 - Modify: `Plugins/compound-engineering-router/.codex-plugin/plugin.json`
 - Create: `docs/solutions/2026-03-24-skill-scaffold-false-green-prevention.md`
 - Create: `docs/solutions/2026-03-24-lifecycle-metadata-representation-decision.md`
-- Test: `Infrastructure/scripts/diagnose_skill.py`
-- Test: `Infrastructure/scripts/verify_skill_catalog_freshness.py`
+- Test: `Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py`
+- Test: `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
 
 **Approach:**
 - choose a bounded seed set of canonical skills, packaged skills, and plugin packages representative enough to prove the phase-one model
@@ -406,8 +406,8 @@ Policy note:
 - Modify: `Docs/plans/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-plan.md`
 - Modify: `Docs/specs/2026-03-24-feat-skill-lifecycle-scaffold-memory-program-spec.md`
 - Test: `Infrastructure/scripts/validate_all.sh`
-- Test: `Infrastructure/scripts/verify_skill_catalog_freshness.py`
-- Test: `Infrastructure/scripts/docs_lint.py`
+- Test: `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
+- Test: `Infrastructure/scripts/validation-and-linting/docs_lint.py`
 
 **Approach:**
 - run the broad repo checks chosen in prior phases
@@ -500,12 +500,12 @@ Evidence paths to keep synchronized:
 ## Execution Ledger (Planning Mode)
 
 STEP_ID | status | owner | evidence
-P0 | completed | Codex | Lifecycle baseline documented in `docs/reference/managed-asset-lifecycle.md`; targeted checks passed via `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` and `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-P1 | completed | Codex | Canonical scaffold updated in `Skills/skill-builder/Infrastructure/scripts/init_skill.py`; plugin scaffold updated in `Skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py`; regression tests passed via `python3 Infrastructure/scripts/test_skill_creator_lifecycle_scaffold.py` and `python3 Infrastructure/scripts/test_plugin_creator_lifecycle_scaffold.py`
-P2 | completed | Codex | Lifecycle readiness classification landed in `Infrastructure/scripts/verify_skill_catalog_freshness.py` and `Infrastructure/scripts/diagnose_skill.py`; regression coverage passed via `python3 Infrastructure/scripts/test_skill_lifecycle_validation.py`
+P0 | completed | Codex | Lifecycle baseline documented in `docs/reference/managed-asset-lifecycle.md`; targeted checks passed via `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` and `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+P1 | completed | Codex | Canonical scaffold updated in `Skills/skill-builder/Infrastructure/scripts/init_skill.py`; plugin scaffold updated in `Skills/plugin-creator/Infrastructure/scripts/create_basic_plugin.py`; regression tests passed via `python3 Infrastructure/scripts/testing/test_skill_creator_lifecycle_scaffold.py` and `python3 Infrastructure/scripts/testing/test_plugin_creator_lifecycle_scaffold.py`
+P2 | completed | Codex | Lifecycle readiness classification landed in `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py` and `Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py`; regression coverage passed via `python3 Infrastructure/scripts/testing/test_skill_lifecycle_validation.py`
 P3 | completed | Codex | Governed `docs/solutions/` layer created with README, template, and validation-aligned frontmatter contract
 P4 | completed | Codex | Seeded lifecycle metadata on `Skills/skill-builder/SKILL.md`, `Skills/coding-harness/SKILL.md`, `product/Infrastructure/ops/compound-engineering-router/SKILL.md`, and `Plugins/compound-engineering-router/.codex-plugin/plugin.json`; added two governed solution entries
-P5 | in_progress | Codex | Targeted final evidence passed via `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`, `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, and `python3 Infrastructure/scripts/diagnose_skill.py compound-engineering-router`; one broad `bash Infrastructure/scripts/validate_all.sh` run surfaced schema-placement and missing task-graph issues, both were fixed, and the exact rerun was then blocked by sandbox policy before a fresh all-green capture could be recorded
+P5 | in_progress | Codex | Targeted final evidence passed via `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`, `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, and `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py compound-engineering-router`; one broad `bash Infrastructure/scripts/validate_all.sh` run surfaced schema-placement and missing task-graph issues, both were fixed, and the exact rerun was then blocked by sandbox policy before a fresh all-green capture could be recorded
 
 ## Acceptance Checklist
 

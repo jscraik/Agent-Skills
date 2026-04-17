@@ -5,7 +5,7 @@ status: active
 last_reviewed: 2026-04-09
 sources:
   - artifacts
-  - Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py
+  - Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py
 ---
 
 # Validation Artifact Consistency

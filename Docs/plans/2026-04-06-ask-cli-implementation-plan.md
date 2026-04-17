@@ -51,14 +51,14 @@ Goal: Create the CLI entry point and ensure it returns valid JSON envelopes.
 Goal: Implement context discovery and repository-level health checks.
 
 - [x] **P1.1: Git Root Discovery.** Implement the `.git` search logic in `Infrastructure/scripts/lib/ask/context.py`.
-- [x] **P1.2: `repo status`.** Port logic from `Infrastructure/scripts/status.sh` to the new CLI.
+- [x] **P1.2: `repo status`.** Port logic from `Infrastructure/scripts/lifecycle-and-sync/status.sh` to the new CLI.
 - [ ] **P1.3: `repo validate`.** Wrap `Infrastructure/scripts/validate_all.sh` with structured JSON error reporting.
 - [x] **AC2:** `ask repo status` correctly identifies `<REPO_ROOT>`. (Traceable to spec CA1).
 
 ## P2: Skill Lifecycle (Read-Only)
 Goal: Implement listing and auditing skills with high-fidelity output.
 
-- [x] **P2.1: `skills list`.** Wrap `Infrastructure/scripts/skill_catalog.py` to support category filtering and JSON output.
+- [x] **P2.1: `skills list`.** Wrap `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py` to support category filtering and JSON output.
 - [ ] **P2.2: `skills audit`.** Integrate `skill_gate.py` and `diagnose_skill.py`.
 - [ ] **P2.3: Type-Safe Signatures.** Ensure `ask --help` and `ask <cmd> --help` display the TS-style signatures from the spec.
 - [ ] **AC3:** `ask skills audit <path>` returns `ERR_PI_GUARD` string code on security failure. (Traceable to spec CA4).
@@ -76,7 +76,7 @@ Goal: Implement state-changing operations with dry-run and atomic promotion.
 | Layer | Tool | Requirement |
 | :--- | :--- | :--- |
 | **Unit** | `unittest` | Validate `CallResult` serialization and redaction logic. |
-| **Contract** | `Infrastructure/scripts/verify_ask_cli.py` | Verify every command returns schema-valid JSON. |
+| **Contract** | `Infrastructure/scripts/validation-and-linting/verify_ask_cli.py` | Verify every command returns schema-valid JSON. |
 | **E2E** | `bats` or `pytest` | Run the `CA1` through `CA6` scenarios defined in the spec. |
 
 ## Rollout & Safety

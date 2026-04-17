@@ -13,7 +13,7 @@ A governed repository of **120 canonical skills** for AI coding agents (Codex, C
 
 ```bash
 # One-time per shell: load repo environment and add ask to PATH
-source Infrastructure/scripts/codex_env_common.sh && codex_apply_env
+source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
 # See what's available
 ask graph topics
@@ -173,7 +173,7 @@ agent-skills/
 Ownership boundaries:
 - Canonical authoring: `Skills/<topic-cluster>/**` (7 clusters: agent-ops, frontend-ui, backend-platform, product-strategy, security-ops, content-publishing, mobile-native) plus `Plugins/<plugin>/skills/**`
 - Factory mechanics: `Infrastructure/scripts/**`, validation/governance contracts
-- Runtime/projection surfaces: `.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
+- Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
 - Full policy: [Docs/agents/14-path-ownership-boundaries.md](Docs/agents/14-path-ownership-boundaries.md)
 
 ## Documentation

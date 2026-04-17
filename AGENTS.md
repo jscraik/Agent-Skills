@@ -28,7 +28,7 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 
 ```bash
 # One-time per shell: load repo environment and add ask to PATH
-source Infrastructure/scripts/codex_env_common.sh && codex_apply_env
+source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
 ask repo status          # Check repo health
 ask skills list          # List available skills
@@ -50,14 +50,20 @@ All agents (Gemini, Codex, Claude) MUST use `bin/ask` for repo operations.
 
 ## Robot Mode
 
-The CLI is designed for AI agents. Use `--robot` (or `--agent-mode`, `-r`) for fuzzy command matching.
+Use `--robot` (or `--agent-mode`, `-r`) for AI-agent command handling.
 
-**Examples:**
-- `ask skill list` → corrected to `ask skills list`
-- `ask graph search X` → corrected to `ask graph find X`
-- `ask skills ls` → corrected to `ask skills list`
+Behavior contract:
+- If intent is clear, `ask` executes the command even with minor syntax mistakes and prints a correction note.
+- If intent is ambiguous, `ask` returns a detailed error that explains what failed, suggests likely fixes, and includes relevant valid examples.
 
-When intent is clear but syntax is off, the CLI honors your command and shows correct syntax for next time.
+**Examples (intent recovered):**
+- `ask skill list --robot` → runs as `ask skills list`
+- `ask list skills --robot` → runs as `ask skills list`
+- `ask skills --advanced list --robot` → runs as `ask skills list --advanced`
+
+**Examples (needs clarification):**
+- `ask status --robot` → error explains ambiguity (`repo status` vs `plugins status`) with concrete examples.
+- `ask skills audit --robot` → error explains missing args and shows correct `skills audit` forms.
 
 ## Agent-Specific Guidance
 

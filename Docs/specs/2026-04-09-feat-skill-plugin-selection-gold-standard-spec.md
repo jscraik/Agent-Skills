@@ -202,8 +202,8 @@ Lifecycle ownership rule:
 - Catalog diagnostics must not mutate catalog sources.
 - Plugin visibility must not mutate plugin activation/install state.
 - Canonical manifest/projection ownership is explicit:
-  - `Infrastructure/scripts/skill_catalog.py` owns canonical catalog manifest derivation.
-  - `Infrastructure/scripts/sync_skills.sh` owns required projection refresh for root `SKILL.md` and `README.md`.
+  - `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py` owns canonical catalog manifest derivation.
+  - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` owns required projection refresh for root `SKILL.md` and `README.md`.
 - Strict trend history ownership is explicit:
   - `Infrastructure/artifacts/selection-quality/history.jsonl` is append-only per completed validation run.
   - retention pruning is oldest-first under explicit cap and must preserve schema-valid entries.
@@ -237,9 +237,9 @@ Governance and parity dependencies:
 
 - Canonical discovery policy identity from selection policy/discovery layer.
 - Canonical catalog manifest and projection generators used by docs and CLI surfaces.
-  - Canonical manifest source: `Infrastructure/scripts/skill_catalog.py`.
-  - Projection refresh source: `Infrastructure/scripts/sync_skills.sh`.
-- Validation wrappers (`Infrastructure/scripts/verify-work.sh`, `ask repo validate`) to run fail-fast parity and routing quality gates.
+  - Canonical manifest source: `Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py`.
+  - Projection refresh source: `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`.
+- Validation wrappers (`Infrastructure/scripts/validation-and-linting/verify-work.sh`, `ask repo validate`) to run fail-fast parity and routing quality gates.
 - Canonical routing-quality trend history source at `Infrastructure/artifacts/selection-quality/history.jsonl`, consumed by strict catalog diagnostics and validation trend checks.
 
 Contract versioning dependencies:
@@ -427,13 +427,13 @@ Required implementation and verification targets:
   - `Infrastructure/tests/test_ask_skills_starter.py`
   - `Infrastructure/tests/test_ask_plugins_state.py`
 - Contract and schema validators:
-  - `Infrastructure/scripts/verify_selection_contract.py`
-  - `Infrastructure/scripts/verify_router_schema.py`
-  - `Infrastructure/scripts/verify_ask_cli.py`
-  - `Infrastructure/scripts/verify_ask_cli_final.py`
+  - `Infrastructure/scripts/validation-and-linting/verify_selection_contract.py`
+  - `Infrastructure/scripts/validation-and-linting/verify_router_schema.py`
+  - `Infrastructure/scripts/validation-and-linting/verify_ask_cli.py`
+  - `Infrastructure/scripts/validation-and-linting/verify_ask_cli_final.py`
 - Catalog and lifecycle parity gates:
-  - `Infrastructure/scripts/verify_skill_catalog_freshness.py`
-  - `Infrastructure/scripts/test_skill_lifecycle_validation.py`
+  - `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
+  - `Infrastructure/scripts/testing/test_skill_lifecycle_validation.py`
 - Aggregate release-readiness gate:
   - `Infrastructure/scripts/validate_all.sh`
 

@@ -120,7 +120,7 @@ B0 PREFLIGHT -> B1 DEPS -> B2 INIT_PREVIEW -> B3 INIT_APPLY -> B4 VALIDATE -> B5
 
 | S | E | G | A | N |
 | --- | --- | --- | --- | --- |
-| `B0 PREFLIGHT` | `preflight_ok` | preflight script passes | `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required` | `B1 DEPS` |
+| `B0 PREFLIGHT` | `preflight_ok` | preflight script passes | `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` | `B1 DEPS` |
 | `B1 DEPS` | `deps_installed` | `pnpm` available | `pnpm install` | `B2 INIT_PREVIEW` |
 | `B2 INIT_PREVIEW` | `preview_ok` | dry-run exits clean | `harness init --dry-run` | `B3 INIT_APPLY` |
 | `B3 INIT_APPLY` | `init_applied` | templates generated | `harness init` | `B4 VALIDATE` |

@@ -55,7 +55,7 @@ Without a spec-level contract, future UI work risks:
 - Define observability and validation gates so `/prompts:workflow-plan` can produce implementation phases without inventing behavior.
 
 ## Non-Goals
-- No implementation patching of `Infrastructure/scripts/build_skill_state_map.py` or front-end code in this spec.
+- No implementation patching of `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` or front-end code in this spec.
 - No schema redesign of existing skill-graph contracts (`task-profile`, `evidence-packet`, event envelope).
 - No expansion of rollout policy/governance thresholds beyond current runbook thresholds.
 - No replacement of existing generated artifacts; the interface is a consumer of canonical outputs, not a new source of truth.
@@ -163,7 +163,7 @@ Primary local contracts:
 - `docs/skill-graphs/runbooks/skill-genome-loop.md`
 
 v1 UI input contract (authoritative):
-- UI must consume only pipeline-composed outputs from `Infrastructure/scripts/build_skill_state_map.py` adapters and canonical telemetry summaries.
+- UI must consume only pipeline-composed outputs from `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` adapters and canonical telemetry summaries.
 - Raw artifact files are upstream/transitive dependencies and must not be independently parsed by UI code paths.
 
 Primary upstream artifact dependencies (transitive via composed outputs):
@@ -176,7 +176,7 @@ Primary upstream artifact dependencies (transitive via composed outputs):
 - `Infrastructure/artifacts/skill-graphs/telemetry/daily-skill-health.md`
 
 Implementation anchor (existing pipeline):
-- `Infrastructure/scripts/build_skill_state_map.py` remains the authoritative state composition pipeline for input shape and join semantics.
+- `Infrastructure/scripts/lifecycle-and-sync/build_skill_state_map.py` remains the authoritative state composition pipeline for input shape and join semantics.
 - v1 ingestion contract: UI consumes canonical pipeline-composed outputs; direct raw artifact ingestion is out of scope.
 - v1 decision artifact: `docs/decisions/2026-03-09-skills-graph-ui-v1-decisions.md` is required input for persona/export defaults.
 
@@ -372,9 +372,9 @@ Operational validation:
 - Validate refresh exits for all branches (`S5 -> S2|S3|S4`) with atomic snapshot consistency.
 
 Validation command set (spec verification hygiene):
-- `bash Infrastructure/scripts/sync_skills.sh`
-- `python3 Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
-- `bash ~/.codex/Infrastructure/scripts/verify-work.sh`
+- `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Open Questions
 - No blocking open questions for v1.

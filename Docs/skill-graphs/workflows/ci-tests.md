@@ -51,7 +51,7 @@ permissions:
 |--------|-------|
 | Runner | `ubuntu-latest` |
 | Python | `3.11` |
-| Command | `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` |
+| Command | `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` |
 
 ---
 
@@ -61,7 +61,7 @@ permissions:
 |--------|-------|
 | Runner | `ubuntu-latest` |
 | Python | `3.11` |
-| Command | `python3 Infrastructure/scripts/diagnose_skill.py --all` |
+| Command | `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all` |
 
 ---
 
@@ -69,10 +69,10 @@ permissions:
 
 ```bash
 # Docs lint
-python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 
 # Skill diagnostics
-python3 Infrastructure/scripts/diagnose_skill.py --all
+python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all
 ```
 
 ---
@@ -85,5 +85,5 @@ Workflow: `.github/workflows/ci-tests.yml`
 
 ## RELATED
 
-- [Docs lint script](/Infrastructure/scripts/docs_lint.py)
-- [Skill diagnostics](/Infrastructure/scripts/diagnose_skill.py)
+- [Docs lint script](/Infrastructure/scripts/validation-and-linting/docs_lint.py)
+- [Skill diagnostics](/Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py)

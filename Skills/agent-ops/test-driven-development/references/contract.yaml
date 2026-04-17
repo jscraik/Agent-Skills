@@ -1,0 +1,28 @@
+schema_version: "1.0"
+
+purpose: >
+  Enforce Red-Green-Refactor execution so behavior changes are driven by failing
+  tests and verified with explicit evidence.
+
+triggers:
+  - User requests implementing a feature or bug fix with test-first discipline
+  - The task needs regression-proof behavior validation
+
+inputs:
+  - Behavior requirement or bug reproduction
+  - Test command and repository context
+  - Target files or modules
+
+outputs:
+  - Failing test evidence (RED)
+  - Passing test evidence after minimal implementation (GREEN)
+  - Summary of behavior covered and verification gates
+
+non_goals:
+  - Broad refactors unrelated to target behavior
+  - Shipping code without test evidence
+
+risks:
+  - False confidence from weak tests
+  - Over-scoped implementation during GREEN
+  - Hidden regressions from skipping related checks

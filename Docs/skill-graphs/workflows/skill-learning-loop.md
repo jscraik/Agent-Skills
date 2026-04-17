@@ -155,5 +155,5 @@ python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion
 Docs quality:
 
 ```bash
-python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
 ```

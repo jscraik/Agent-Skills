@@ -263,7 +263,7 @@ Disallowed transitions:
 - `docs/skill-graphs/workflows/reviewer-rubric.md`
   - Reviewer criteria remain explicit and evidence-based.
 
-- `Infrastructure/scripts/verify_skill_catalog_freshness.py`
+- `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
   - Existing metadata quality gates remain in effect.
 
 - `Infrastructure/scripts/validate_all.sh`

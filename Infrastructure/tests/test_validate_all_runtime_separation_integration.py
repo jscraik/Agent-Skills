@@ -32,18 +32,18 @@ RUNTIME_SEPARATION_SLUGS = [
 
 # Bash scripts called by the new run_check calls (need stubs in tmpdir)
 NEW_BASH_SCRIPTS = [
-    "Infrastructure/scripts/verify_wrapper_contract_fixtures.sh",
-    "Infrastructure/scripts/verify_runtime_separation_writer_mutations.sh",
-    "Infrastructure/scripts/validate_runtime_separation_profile_home.sh",
+    "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh",
+    "Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh",
+    "Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh",
 ]
 
 # Python scripts called by the new run_check calls (handled via PYTHON_BIN stub)
 NEW_PYTHON_SCRIPTS = [
-    "Infrastructure/scripts/validate_runtime_separation_manifest.py",
-    "Infrastructure/scripts/scan_runtime_separation_consumers.py",
-    "Infrastructure/scripts/verify_runtime_separation_reader_compat.py",
-    "Infrastructure/scripts/build_runtime_separation_current.py",
-    "Infrastructure/scripts/compare_runtime_separation_baseline.py",
+    "Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py",
+    "Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py",
+    "Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py",
+    "Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py",
+    "Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py",
 ]
 
 
@@ -185,7 +185,7 @@ class TestRuntimeConsumerScanCommand(unittest.TestCase):
 
             runtime_consumer_scan_cmd=(
               "${{python_cmd[@]}}"
-              Infrastructure/scripts/scan_runtime_separation_consumers.py
+              Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
               --emit-readers
               --emit-path-consumers
               --strict
@@ -244,7 +244,7 @@ class TestRuntimeConsumerScanCommand(unittest.TestCase):
         for mode in ("ephemeral", "persistent"):
             with self.subTest(mode=mode):
                 cmd = self._build_cmd(mode)
-                self.assertIn("Infrastructure/scripts/scan_runtime_separation_consumers.py", cmd)
+                self.assertIn("Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py", cmd)
 
     def test_python_bin_is_first_element(self):
         """The command must start with the python binary."""
@@ -346,7 +346,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
         for rel_path in NEW_BASH_SCRIPTS:
             self._create_bash_stub(os.path.join(tmpdir, rel_path), args_log_dir)
 
-        # Create minimal stub for ./Infrastructure/scripts/validate_plan_graphs.sh (called with ./ prefix)
+        # Create minimal stub for ./Infrastructure/scripts/validation-and-linting/validate_plan_graphs.sh (called with ./ prefix)
         self._create_bash_stub(os.path.join(scripts_dir, "validate_plan_graphs.sh"), args_log_dir)
 
         # Create minimal GOVERNANCE files expected by reader-compat check

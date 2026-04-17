@@ -15,15 +15,12 @@
  */
 
 import React from 'react';
-// Note for Agent: The '@' alias refers to the target project's src directory.
-// Ensure src/data/mockData.ts is created before generating this component.
-import { cardData } from '../data/mockData';
 
 /**
  * Gold Standard: ActivityCard
  * This file serves as the definitive reference for the agent.
  */
-interface ActivityCardProps {
+export interface ActivityCardProps {
   readonly id: string;
   readonly username: string;
   readonly action: 'MERGED' | 'COMMIT';
@@ -31,6 +28,15 @@ interface ActivityCardProps {
   readonly avatarUrl: string;
   readonly repoName: string;
 }
+
+export const ACTIVITY_CARD_EXAMPLE: ActivityCardProps = {
+  id: 'evt_01',
+  username: 'jamie.craik',
+  action: 'MERGED',
+  timestamp: '2m ago',
+  avatarUrl: 'https://avatars.githubusercontent.com/u/583231?v=4',
+  repoName: 'Agent-Skills',
+};
 
 export const ActivityCard: React.FC<ActivityCardProps> = ({
   username,
@@ -55,8 +61,11 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
             {username}
           </a>
 
-          <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${isMerged ? 'bg-purple-500/30 text-purple-300' : 'bg-primary/30 text-primary'
-            }`}>
+          <span
+            className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
+              isMerged ? 'bg-purple-500/30 text-purple-300' : 'bg-primary/30 text-primary'
+            }`}
+          >
             {action}
           </span>
 

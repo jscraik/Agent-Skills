@@ -1,1 +1,0 @@
-Clean up literal spacing and color usage in our Storybook design-system stories.

@@ -3,7 +3,7 @@ title: Skill Authoring Family — Boundary Decision Record
 type: reference
 status: active
 date: 2026-04-05
-authority: Infrastructure/scripts/validate_skill_authoring_family.sh
+authority: Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ---
 
 # Skill Authoring Family — Boundary Decision Record
@@ -40,7 +40,7 @@ This decision closes the boundary drift where the gate script used `plugin-creat
 | `skill-builder` | Enhancement layer | Lifecycle hardening; validators, evals, baseline comparison, and packaging |
 | `skill-installer` | Downstream lifecycle | Install and import of already-valid skill packages |
 
-Enforced by: `Infrastructure/scripts/validate_skill_authoring_family.sh`
+Enforced by: `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 ## Adjacent Surface
 
@@ -54,7 +54,7 @@ Enforced by: `Infrastructure/scripts/validate_skill_authoring_family.sh`
 
 When family membership language conflicts across surfaces, use this resolution order (highest to lowest):
 
-1. **Gate enforcement script** — `Infrastructure/scripts/validate_skill_authoring_family.sh` (runtime truth)
+1. **Gate enforcement script** — `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` (runtime truth)
 2. **Active spec** — `Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md`
 3. **Reference matrix** — `docs/reference/skill-authoring-validation-maturity-matrix.md`
 4. **This document** — boundary decision record
@@ -70,7 +70,7 @@ The following sources were updated on 2026-04-05 to reflect the canonical bounda
 | `docs/reference/skill-authoring-validation-maturity-matrix.md` | Purpose section: replaced `Skills/plugin-builder` with `Skills/plugin-creator`; added boundary note |
 | `Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md` | System Boundary, Core Domain Model, role table, invariant, and SA1: distinguish active gate family from adjacent surface |
 
-The gate script `Infrastructure/scripts/validate_skill_authoring_family.sh` already used the correct membership — no change required.
+The gate script `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` already used the correct membership — no change required.
 
 ## Layered Ownership Model
 
@@ -101,7 +101,7 @@ This decision record is linked from the governance scorecard at:
 
 If a downstream contract consumer breaks because `plugin-creator` was promoted into a gate it cannot yet satisfy, the rollback is:
 
-1. Remove `Skills/plugin-creator` from the `skill_dirs` array in `Infrastructure/scripts/validate_skill_authoring_family.sh`.
+1. Remove `Skills/plugin-creator` from the `skill_dirs` array in `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 2. Revert the boundary-membership changes in the spec and matrix (restore `plugin-builder` as the gate member).
 3. Record the regression in `.harness/memory/LEARNINGS.md` with root cause.
 4. Open a follow-up issue before re-attempting the promotion.

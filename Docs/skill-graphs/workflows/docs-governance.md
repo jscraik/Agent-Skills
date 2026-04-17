@@ -20,7 +20,7 @@ Enforces documentation policy with mode-aware linting and GitHub summary publish
 
 | EVENT | BRANCH | PATHS |
 |-------|--------|-------|
-| PR | Any | `docs/**`, `CONTRIBUTING.md`, `Infrastructure/docs-policy.json`, `Infrastructure/scripts/docs_lint.py`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/workflows/docs-governance.yml` |
+| PR | Any | `Docs/**`, `CONTRIBUTING.md`, `Infrastructure/docs-policy.json`, `Infrastructure/scripts/validation-and-linting/docs_lint.py`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/workflows/docs-governance.yml` |
 | Push | `main` | Same as PR |
 | WDsp | — | Same as PR (manual override) |
 
@@ -94,7 +94,7 @@ if block_after and today >= block_after:
 CHANGED_ONLY=""
 [ "${{ github.event_name }}" = "pull_request" ] && CHANGED_ONLY="--changed-only"
 
-python3 Infrastructure/scripts/docs_lint.py \
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
   --mode "${MODE}" \
   --report-json /tmp/docs-lint-report.json \
@@ -125,20 +125,20 @@ Output: `GITHUB_STEP_SUMMARY`
 
 ```bash
 # Full scan (warn mode)
-python3 Infrastructure/scripts/docs_lint.py \
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
   --mode warn \
   --report-json docs-lint-report.json
 
 # Changed-only scan
-python3 Infrastructure/scripts/docs_lint.py \
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
   --mode warn \
   --changed-only \
   --report-json docs-lint-report.json
 
 # Block mode (fails on errors)
-python3 Infrastructure/scripts/docs_lint.py \
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
   --mode block \
   --report-json docs-lint-report.json
@@ -154,6 +154,6 @@ Workflow: `.github/workflows/docs-governance.yml`
 
 ## RELATED
 
-- [Docs lint script](/Infrastructure/scripts/docs_lint.py)
+- [Docs lint script](/Infrastructure/scripts/validation-and-linting/docs_lint.py)
 - [Docs policy](/Infrastructure/docs-policy.json)
 - [Contributing guide](/CONTRIBUTING.md)

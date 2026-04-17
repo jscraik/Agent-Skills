@@ -137,7 +137,7 @@ tasks:
 - [ ] AC2: Every in-scope active `SKILL.md` has `knowledge_graph_profile` binding.
 - [ ] AC3: `profile-index.json` and `wave-readiness.json` are generated and machine-validated.
 - [ ] AC4: Approver policy includes >=2 approvers.
-- [ ] AC5: `.agent/PLANS.md` includes migration DAG tasks and dependencies.
+- [ ] AC5: `.agents/PLANS.md` includes migration DAG tasks and dependencies.
 - [ ] AC6: Wave promotion remains blocked when telemetry envelope errors are non-zero.
 
 ## Test scenarios

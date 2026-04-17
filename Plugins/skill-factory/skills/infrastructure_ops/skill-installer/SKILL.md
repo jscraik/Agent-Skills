@@ -15,13 +15,13 @@ Use the helper scripts based on the task:
 - Install from the curated list when the user provides a skill name.
 - Install from another repo when the user provides a GitHub repo/path (including private repos).
 
-## When To Use
+## When to use
 
 - The user asks to list installable skills from curated or experimental catalogs.
 - The user asks to install one or more skills from `openai/skills` or another GitHub repo/path.
 - The user asks to install skills from a private GitHub repository with existing credentials.
 
-## Inputs
+## Required inputs
 
 - User intent: list mode vs install mode.
 - Source details: `--repo` + `--path`, or GitHub tree URL.
@@ -48,7 +48,7 @@ bash Skills/codex-agent-creator/Infrastructure/scripts/install_role.sh --agent-n
 
 5. Report one explicit mode in the closeout: `reuse-existing` or `create-purpose-built`.
 
-## Outputs
+## Deliverables
 
 - A clear summary of what was listed or installed.
 - Concrete paths for installed skills (`<repo-root>/<category>/<skill-name>`).
@@ -171,3 +171,9 @@ python3 Infrastructure/scripts/install-skill-from-github.py --url https://github
 | [[skill-creator]] | Author or repair local skill packages before installation |
 
 **Topic map:** [[agent-ops]]
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

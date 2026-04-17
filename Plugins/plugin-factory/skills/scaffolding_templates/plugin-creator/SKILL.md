@@ -108,11 +108,11 @@ When a user asks to create a plugin and provides an already-created skill, treat
 Post-adoption sync and checks (required):
 
 ```bash
-bash Infrastructure/scripts/sync_skills.sh
-bash Infrastructure/scripts/sync_projection_trees.sh all
-python3 Infrastructure/scripts/verify_skill_catalog_freshness.py
-bash Infrastructure/scripts/check_plugin_skill_shadowing.sh
-bash Infrastructure/scripts/validate_projection_integrity.sh --all
+bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
+bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all
+python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py
+bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
+bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh --all
 ```
 
 ## Marketplace workflow
@@ -223,3 +223,18 @@ Fail-fast rule:
 | [[plugin-installer]] | Install and verify a contract-valid plugin after packaging work is complete |
 
 **Topic map:** [[agent-ops]]
+
+## When to use
+- Use when the request clearly matches this skill's owned workflow and expected outputs.
+
+## Required inputs
+- Confirm goal, constraints, and required paths or URLs before execution.
+
+## Deliverables
+- Produce concrete outputs with exact paths, commands run, and verification evidence.
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

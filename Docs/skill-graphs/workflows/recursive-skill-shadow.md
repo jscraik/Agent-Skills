@@ -57,7 +57,7 @@ permissions:
 |--------|-------|
 | Runner | `ubuntu-latest` |
 | Python | `3.12` |
-| Script | `Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh` |
+| Script | `Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh` |
 
 ### Inputs
 
@@ -69,7 +69,7 @@ permissions:
 ### Script Flags
 
 ```bash
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile "$RUNS_PER_PROFILE" \
   --window-days "$WINDOW_DAYS" \
   --out-root "Infrastructure/artifacts/skill-graphs/runs" \
@@ -126,7 +126,7 @@ Official references:
 | Output | `/tmp/docs-lint-shadow.json` |
 
 ```bash
-python3 Infrastructure/scripts/docs_lint.py \
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
   --mode warn \
   --report-json /tmp/docs-lint-shadow.json
@@ -154,12 +154,12 @@ python3 Infrastructure/scripts/docs_lint.py \
 
 ```bash
 # Run shadow cycle
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile 2 \
   --window-days 7
 
 # With custom profiles
-bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh \
   --runs-per-profile 3 \
   --window-days 14 \
   --profiles-file custom-profiles.json
@@ -168,7 +168,7 @@ bash Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh \
 sed -n '1,220p' docs/skill-graphs/pilots/arscontexta-intervention-queue.md
 
 # Docs lint
-python3 Infrastructure/scripts/docs_lint.py \
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
   --config Infrastructure/docs-policy.json \
   --mode warn \
   --report-json docs-lint-report.json
@@ -184,7 +184,7 @@ Workflow: `.github/workflows/recursive-skill-shadow.yml`
 
 ## RELATED
 
-- [Shadow cycle script](/Infrastructure/scripts/run_recursive_skill_shadow_cycle.sh)
+- [Shadow cycle script](/Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh)
 - [Pilot profiles example](/docs/skill-graphs/schemas/examples/pilot-profiles.json)
 - [UI skills shadow results](/docs/skill-graphs/pilots/ui-skills-shadow-results.md)
 - [Ars Contexta intervention queue](/docs/skill-graphs/pilots/arscontexta-intervention-queue.md)

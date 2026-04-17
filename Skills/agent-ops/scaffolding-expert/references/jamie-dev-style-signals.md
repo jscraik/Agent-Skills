@@ -20,8 +20,8 @@ These values came from a scan over `~/dev` in this workspace:
 - git repos discovered: `20`
 - `AGENTS.md`: `17`
 - `.codex/environments/environment.toml`: `18`
-- `Infrastructure/scripts/codex-preflight.sh`: `15`
-- `Infrastructure/scripts/verify-work.sh`: `5`
+- `Infrastructure/scripts/codex-preflight/codex-preflight.sh`: `15`
+- `Infrastructure/scripts/validation-and-linting/verify-work.sh`: `5`
 - `.harness/ci-required-checks.json`: `9`
 - `Infrastructure/harness.contract.json`: `11`
 - `Docs/agents/tooling.md`: `12`

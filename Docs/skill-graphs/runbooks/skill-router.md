@@ -39,9 +39,9 @@ Unknown/invalid controls fail closed to safe state (`observe_only`).
 
 ## Validation
 ```bash
-python3 Infrastructure/scripts/verify_router_schema.py --input /tmp/router-result.json --fail-on-sensitive-fields
-python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict
-python3 Infrastructure/scripts/skill_router_metrics.py --events Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json
+python3 Infrastructure/scripts/validation-and-linting/verify_router_schema.py --input /tmp/router-result.json --fail-on-sensitive-fields
+python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict
+python3 Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py --events Infrastructure/artifacts/skill-graphs/telemetry/skill-router-events.jsonl --json
 ```
 
 Calibration profile (v1):
@@ -60,7 +60,7 @@ If routing quality or safety guardrails regress:
 
 Rollback drill command:
 ```bash
-bash Infrastructure/scripts/run_skill_router_rollback_drill.sh
+bash Infrastructure/scripts/lifecycle-and-sync/run_skill_router_rollback_drill.sh
 ```
 
 Go/no-go thresholds:

@@ -108,5 +108,5 @@ Repo-local tooling inventory generated from `Docs/agents/tooling.contract.json`.
 ## Regeneration
 
 ```bash
-bash Infrastructure/scripts/generate-tooling-doc.sh
+bash Infrastructure/scripts/lifecycle-and-sync/generate-tooling-doc.sh
 ```

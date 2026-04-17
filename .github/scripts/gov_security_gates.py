@@ -139,7 +139,7 @@ def get_changed_files(base_sha: str | None, head_sha: str | None):
 
 def is_bootstrap_pr(changed_status: dict[str, str]) -> bool:
     """Allow one-time baseline PRs to merge while introducing the gate itself."""
-    if changed_status.get('.github/Infrastructure/scripts/gov_security_gates.py') != 'A':
+    if changed_status.get('.github/scripts/gov_security_gates.py') != 'A':
         return False
 
     allowed_prefixes = (
@@ -173,7 +173,7 @@ def should_gate(changed_files):
         "EVALUATION/",
         ".github/branch-protection-manifest.md",
         ".github/workflows/gov-security-gates.yml",
-        ".github/Infrastructure/scripts/gov_security_gates.py",
+        ".github/scripts/gov_security_gates.py",
         ".github/PULL_REQUEST_TEMPLATE.md",
         ".github/CODEOWNERS",
         "CODE_OF_CONDUCT.md",

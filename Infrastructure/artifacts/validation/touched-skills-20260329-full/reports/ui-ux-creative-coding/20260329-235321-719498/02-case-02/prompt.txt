@@ -1,3 +1,0 @@
-$ui-ux-creative-coding
-
-I need help building a Remotion composition with scene transitions and render settings for a video export.

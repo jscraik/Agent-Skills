@@ -40,12 +40,12 @@ metadata:
 - Prefer retrieval-led reasoning: inspect canonical files before proposing answers/changes.
 - This skill is a design/brand map for the repo; when token or visual guidance is requested, validate both design contracts (`docs/design-system/CHARTER.md`, `docs/design-system/UPSTREAM_ALIGNMENT.md`) and canonical token sources before editing.
 - Use `zsh -lc`, `rg`, `fd`, and `jq`; avoid `grep`/`find` for repo-wide scans.
-- For multi-step or path-sensitive work, run `bash -lc 'source Infrastructure/scripts/codex-preflight.sh && preflight_repo'` before editing.
+- For multi-step or path-sensitive work, run `bash -lc 'source Infrastructure/scripts/codex-preflight/codex-preflight.sh && preflight_repo'` before editing.
 - Artifact boundary:
   - Local CLI: write outputs to `./Infrastructure/artifacts/`
   - Hosted shell: write outputs to `/mnt/data/`
 
-## Scope and triggers
+## When to use
 - Use this skill when the user asks about design-system behavior, token usage, typography, spacing, iconography, theme variables, or UI styling consistency in this repo.
 - Use this skill when implementing or auditing changes touching `packages/tokens`, `packages/ui/src/styles`, `packages/ui/src/icons`, or design-system docs/stories.
 - Do **not** use this skill for backend-only, infra-only, or MCP server tasks that do not affect UI/design-system layers.
@@ -146,7 +146,7 @@ If the request is ambiguous, ask one focused clarification question.
 1. **Classify the request mode**
    - `audit`, `implementation`, `migration`, or `Q&A`.
 2. **Build a focused system snapshot**
-   - For path-sensitive work, run repo preflight first (`source Infrastructure/scripts/codex-preflight.sh && preflight_repo` via `bash`).
+   - For path-sensitive work, run repo preflight first (`source Infrastructure/scripts/codex-preflight/codex-preflight.sh && preflight_repo` via `bash`).
    - Verify brand posture with `docs/design-system/CHARTER.md` and `ADOPTION_CHECKLIST.md` before touching tokens or theme.
    - Use `jq` for DTCG keys/values and `rg`/`fd` for CSS variable and component usage.
    - Record only relevant pillars: color, typography, spacing, radius/size/shadow, motion, icons, brand-mode behavior.

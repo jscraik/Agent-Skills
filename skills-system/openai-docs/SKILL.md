@@ -1,6 +1,8 @@
 ---
 name: "openai-docs"
 description: "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains."
+metadata:
+  skill-type: library_api_reference
 ---
 
 
@@ -67,3 +69,18 @@ Read only what you need:
 - Always use MCP doc tools before any web search for OpenAI-related questions.
 - If the MCP server is installed but returns no meaningful results, then use web search as a fallback.
 - When falling back to web search, restrict to official OpenAI domains (developers.openai.com, platform.openai.com) and cite sources.
+
+## When to use
+- Use when the request clearly matches this skill's owned workflow and expected outputs.
+
+## Required inputs
+- Confirm goal, constraints, and required paths or URLs before execution.
+
+## Deliverables
+- Produce concrete outputs with exact paths, commands run, and verification evidence.
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

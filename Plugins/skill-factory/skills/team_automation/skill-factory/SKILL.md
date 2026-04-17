@@ -69,7 +69,7 @@ Collect only the minimum needed to route safely:
 - target artifact path or source repo/path (if provided)
 - constraints (security, policy, portability, timeline)
 
-## Outputs
+## Deliverables
 
 Return one compact routing handoff object in this shape:
 
@@ -94,7 +94,7 @@ confidence: "high|medium|low"
 - Confirm the selected lane matches the user's primary intent and constraints.
 - Confirm all required inputs for that lane are either present or explicitly listed as missing.
 - Confirm `next_skill` is one of: `[[skill-creator]]`, `[[skill-builder]]`, `[[skill-refactor]]`, `[[skill-installer]]`, `[[skillify]]`.
-- For skill-authoring family changes (`skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator`), require CI `authoring-family-gate` and script `bash Infrastructure/scripts/validate_skill_authoring_family.sh`.
+- For skill-authoring family changes (`skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator`), require CI `authoring-family-gate` and script `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 - Do not run lane-specific scripts from this router.
 - Fail fast: stop at the first failed gate, fix or report the blocker, and do not continue with downstream execution.
 
@@ -140,3 +140,6 @@ If intent cannot be classified with safe confidence:
 - `Infrastructure/references/contract.yaml`
 - `Infrastructure/references/evals.yaml`
 - `Infrastructure/references/task-profile.json`
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

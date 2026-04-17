@@ -26,7 +26,7 @@ This document records the frozen pre-uplift baseline and post-uplift target scor
 
 **Governed skills:** `Skills/skill-installer`, `Skills/plugin-creator`  
 **Analyzer:** `Skills/skill-builder/Infrastructure/scripts/analyze_skill.py`  
-**Gate:** `bash Infrastructure/scripts/validate_skill_authoring_family.sh`
+**Gate:** `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`
 
 ## Baseline Methodology
 
@@ -118,7 +118,7 @@ These rules apply to any future SKILL.md changes for `skill-installer` and `plug
 ~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/analyze_skill.py Skills/plugin-creator --min-pass 60 --no-emoji
 
 # Full family gate
-bash Infrastructure/scripts/validate_skill_authoring_family.sh
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 
 ## Baseline Freeze Metadata

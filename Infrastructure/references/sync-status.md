@@ -6,7 +6,7 @@
 
 ## Auto-synced paths
 
-Running `Infrastructure/scripts/sync_skills.sh` automatically creates/updates:
+Running `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` automatically creates/updates:
 
 | Tool | Path | Status |
 |------|------|--------|

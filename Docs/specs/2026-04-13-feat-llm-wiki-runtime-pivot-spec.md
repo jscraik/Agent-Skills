@@ -141,8 +141,8 @@ Not owned by this spec:
 | exception_code                      | lane_id | blocker_code                           | owner_role                         | evidence_command                                             | freshness_window_hours | expiry_policy |
 | ----------------------------------- | ------- | -------------------------------------- | ---------------------------------- | ------------------------------------------------------------ | ---------------------- | ------------- |
 | `compat.ask.error_code_unreachable` | 4       | `BLOCKER_ASK_CONTRACT_DRIFT`           | `ask-contract-owner`               | `bin/ask repo validate`                                      | 24                     | `never`       |
-| `compat.runtime.parity_regression`  | 2       | `BLOCKER_RUNTIME_SEPARATION_DRIFT`     | `runtime-separation-owner`         | `bash scripts/verify-work.sh --project-governance`           | 24                     | `never`       |
-| `compat.cert.evidence_stale`        | 1       | `BLOCKER_CERTIFICATION_EVIDENCE_STALE` | `skill-family-certification-owner` | `python3 scripts/verify_skill_catalog_freshness.py --strict` | 24                     | `never`       |
+| `compat.runtime.parity_regression`  | 2       | `BLOCKER_RUNTIME_SEPARATION_DRIFT`     | `runtime-separation-owner`         | `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`           | 24                     | `never`       |
+| `compat.cert.evidence_stale`        | 1       | `BLOCKER_CERTIFICATION_EVIDENCE_STALE` | `skill-family-certification-owner` | `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict` | 24                     | `never`       |
 
 ### Lane owner and escalation policy (normative)
 
@@ -223,8 +223,8 @@ Governance and validation dependencies:
 
 - `bin/ask repo doctor-catalog --strict`
 - `bin/ask repo validate`
-- `bash scripts/verify-work.sh --project-governance`
-- `python3 scripts/verify_skill_catalog_freshness.py --strict`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
 - `python3 scripts/validate_health_counters.py <snapshot.json> --json`
 - `python3 scripts/validate_freshness_state.py <snapshot.json> --json`
 - `python3 scripts/validate_blocker_completeness.py <snapshot.json> --json`

@@ -154,7 +154,7 @@
 			"id": "validate",
 			"label": "End-to-end validation",
 			"steps": [
-				"bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required",
+				"bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required",
 				"harness check-environment --json",
 				"harness init --check-updates",
 				"pnpm check",
@@ -188,16 +188,16 @@
 			"CONTRIBUTING.md"
 		],
 		"scripts": [
-			"Infrastructure/scripts/codex-preflight.sh",
+			"Infrastructure/scripts/codex-preflight/codex-preflight.sh",
 			"Infrastructure/scripts/check-environment.sh",
 			"Infrastructure/scripts/setup-git-hooks.js",
 			"Infrastructure/scripts/validate-commit-msg.js",
-			"Infrastructure/scripts/check-staged-secrets.sh",
-			"Infrastructure/scripts/check-doc-style.sh",
-			"Infrastructure/scripts/check-related-tests.sh",
-			"Infrastructure/scripts/check-semgrep-changed.sh",
-			"Infrastructure/scripts/refresh-diagram-context.sh",
-			"Infrastructure/scripts/check-diagram-freshness.sh",
+			"Infrastructure/scripts/validation-and-linting/check-staged-secrets.sh",
+			"Infrastructure/scripts/validation-and-linting/check-doc-style.sh",
+			"Infrastructure/scripts/validation-and-linting/check-related-tests.sh",
+			"Infrastructure/scripts/validation-and-linting/check-semgrep-changed.sh",
+			"Infrastructure/scripts/skill-graph/refresh-diagram-context.sh",
+			"Infrastructure/scripts/skill-graph/check-diagram-freshness.sh",
 			"Infrastructure/scripts/semgrep-pre-push.yml"
 		],
 		"tooling": [

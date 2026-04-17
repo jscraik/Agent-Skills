@@ -14,23 +14,23 @@ Define compact, enforceable quality rules for skill authoring and improvement wo
 Run these gates before claiming completion for `create` or `improve` work.
 
 `GATE-OPENAI-FORMAT`
-- Command: `bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict`
+- Command: `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
 - Pass criteria: `Errors: 0`
 - Scope: frontmatter contract (`name`, `description`, optional key whitelist)
 
 `GATE-PROGRESSIVE-DISCLOSURE`
-- Command: `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn`
+- Command: `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn`
 - Pass criteria: no hard-cap or structural errors; warnings are triaged with explicit remediation plan
 - Scope: concise `SKILL.md`, key section presence, helper-material placement
 
 `GATE-GOTCHA-GOVERNANCE`
-- Command: `python3 Infrastructure/scripts/gotcha_pipeline.py validate`
+- Command: `python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate`
 - Pass criteria: validation success with no contract violations
 - Scope: gotcha structure and candidate-governance integrity
 
 `GATE-GRAPH-READINESS`
 - Commands:
-  - `python3 Infrastructure/scripts/check-see-also.py . --changed-files <skill>/SKILL.md`
+  - `python3 Infrastructure/scripts/validation-and-linting/check-see-also.py . --changed-files <skill>/SKILL.md`
   - `python3 Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0`
 - Pass criteria:
   - changed skills have a `## See Also` table with at least 2 real skill links
@@ -39,8 +39,8 @@ Run these gates before claiming completion for `create` or `improve` work.
 
 `GATE-SEMANTIC-TAGS` (only when tags changed)
 - Commands:
-  - `bash Infrastructure/scripts/sync_skills.sh`
-  - `bash Infrastructure/scripts/lint_skill_types.sh`
+  - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+  - `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`
 - Pass criteria: `Missing: 0` and `Invalid: 0`
 - Scope: taxonomy integrity and generated index consistency
 

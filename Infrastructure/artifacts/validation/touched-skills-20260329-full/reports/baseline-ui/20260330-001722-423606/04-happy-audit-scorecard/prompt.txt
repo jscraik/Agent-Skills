@@ -1,3 +1,0 @@
-$baseline-ui
-
-Run baseline-ui in audit mode for checkout page and provide scorecard output with total /20, P0-P3 findings, and positive findings.

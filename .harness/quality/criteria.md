@@ -50,4 +50,4 @@ This file is the authoritative quality gate for the active skill-authoring famil
 - `docs/reference/skill-authoring-family-quality-baseline.md` — analyzer baselines and thresholds
 - `docs/reference/skill-authoring-family-risk-acceptance.md` — residual risk register (created when needed)
 - `docs/reference/skill-authoring-validation-maturity-matrix.md` — readiness matrix (optional)
-- `Infrastructure/scripts/validate_skill_authoring_family.sh` — enforcement gate
+- `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` — enforcement gate

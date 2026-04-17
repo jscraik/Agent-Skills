@@ -31,7 +31,7 @@ Handoffs:
 - to `plugin-creator` for first-pass local scaffold creation;
 - to `skill-installer` when installed skills need lifecycle hardening or contract/eval upgrades.
 
-## Inputs
+## Required inputs
 
 Install mode minimum inputs:
 - install source (`--repo` or `--url`, plus `--path` plugin root);
@@ -41,7 +41,7 @@ Install mode minimum inputs:
 - validation policy (`--validation-level strict|compat`).
 - note: repo wrappers such as `ask plugins install` may set a repo-local destination default (for example `Plugins/third-party`) to support vendored plugin workflows.
 
-## Outputs
+## Deliverables
 
 Expected outputs from a successful run:
 - installed plugin directory at `<dest>/<plugin-name>`;
@@ -113,7 +113,7 @@ uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py val
 ```
 
 Family gate note:
-- `authoring-family-gate` (CI job) runs `bash Infrastructure/scripts/validate_skill_authoring_family.sh`.
+- `authoring-family-gate` (CI job) runs `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 - The merge contract for this family is enforced by `authoring-family-gate`, including structural contract/schema checks plus benchmark/security parity for `plugin-installer`.
 - Live Codex smoke+release execution is trusted-lane only with `SKILL_FAMILY_LIVE_EVALS=1 SKILL_FAMILY_LIVE_EVALS_TRUSTED=1`.
 
@@ -125,3 +125,9 @@ Family gate note:
 | [[plugin-creator]] | Scaffold a fresh local plugin package before install/distribution workflows |
 
 **Topic map:** [[agent-ops]]
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

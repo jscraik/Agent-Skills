@@ -18,6 +18,17 @@ agent-browser:
   fixing-accessibility: Probe ARIA and keyboard behaviour via browser automation
   playwright-interactive: Use for iterative UI automation when Playwright is better
   ui-visual-regression: Capture snapshots with agent-browser for regression checks
+agent-native-architecture:
+  agent-native-audit: Audit whether an existing repo or workflow already meets agent-native
+    operating principles
+  architecture-interview: Structure tradeoff-heavy architecture choices into an ADR-style
+    decision
+  chatgpt-apps: Apply agent-native patterns inside a ChatGPT Apps SDK product
+  mcp-builder: Build general MCP servers once the tool surface is clear
+agent-native-audit:
+  agents-md: Tighten repo instructions after finding discoverability gaps
+  codex-home-audit: Audit the Codex home surface instead of a single repo
+  gh-workflow: Land follow-up fixes through the GitHub workflow
 agentation:
   agent-browser: Run deterministic browser interactions against the app once Agentation
     wiring is healthy
@@ -27,6 +38,10 @@ agentation:
     inspection or debugging
   visual-explainer: Turn the integration state machine or failure path into a visual
     handoff artifact
+agents-md:
+  codex-agent-creator: Create agent roles that AGENTS.md will reference
+  codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
+  docs-expert: Apply docs polish and community-health guidance to AGENTS.md
 alignment-checkpoint:
   brainstorming: Explore approaches once intent is aligned
   ce-plan: Move from approved intent to an execution-ready plan
@@ -88,6 +103,14 @@ bootstrap:
   fix-mise: Repair mise trust issues blocking the bootstrapped environment
   gh-workflow: Set up GitHub PR workflow after bootstrap
   verification-before-completion: Verify the bootstrap is working before continuing
+brainstorming:
+  architecture-interview: When the brainstorm reveals a significant architecture decision
+    needing structured review
+  ce-plan: After spec is agreed, use to turn it into a sequenced execution plan
+  interview-me: Use when the idea needs deeper requirements discovery beyond a quick
+    brainstorm
+  product-spec: Hand off the chosen direction to this skill to produce implementation-ready
+    specs
 ce-brainstorm:
   brainstorming: Use when the user needs a broader, non-compound brainstorming workflow
   ce-plan: Hand off low-risk, well-resolved brainstorm outputs into implementation
@@ -162,6 +185,16 @@ ce-work:
   ce-plan: Build execution-ready plan
   ce-review: Review after execution
   test-browser: Browser verification
+changelog:
+  every-style-editor: Polish the final changelog for a branded external audience
+  feature-video: Pair a release-note summary with a visual walkthrough artifact
+  gh-workflow: Inspect PRs, branches, and merge state before drafting the summary
+  release: Cut the release after the changelog content is ready
+chatgpt-apps:
+  fixing-metadata: Ensure App pages have correct meta and CSP headers
+  mcp-builder: Build the underlying MCP server the Apps SDK connects to
+  oak-api: Integrate Oak curriculum content into ChatGPT App workflows
+  openai-docs: Reference official Apps SDK documentation
 claude-alias:
   bootstrap: Bootstrap a local development environment from a GitHub repository URL
   fix-mise: Diagnose and repair mise trust/runtime issues
@@ -201,17 +234,20 @@ coding-harness:
     applying fixes
   verification-before-completion: Add a stronger final verification pass before claiming
     a repo change is complete
-compound-engineering-router:
-  architecture-interview: Route architecture decisions through the structured interview
-  brainstorming: Start with brainstorming before routing to a compound workflow
-  product-spec: Produce a spec before routing to the work or review mode
-  skill-builder: Build skills that compound workflows will invoke
-  writing-plans: Generate the implementation plan the compound mode targets
+context7:
+  backend-engineer: Use Context7 to check API docs during backend work
+  mcp-builder: Reference Context7 docs when building MCP tool schemas
+  openai-docs: Use OpenAI docs MCP for OpenAI-specific library content
+  repoprompt: Combine repo context with Context7 library docs
 create-auth:
   1password: Inject auth secrets via 1Password CLI
   mcp-builder: Secure MCP server authentication using Better Auth
   security-best-practices: Apply secure defaults during auth implementation
   security-threat-model: Model auth attack surface before implementing
+decide-build-primitive:
+  ce-plan: Use when the capability is CE-scoped and needs concrete stage planning
+  codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
+    automation contract
 deep-interview:
   architecture-interview: Use when deep-interview surfaces a major architectural tradeoff
     requiring structured review
@@ -232,6 +268,13 @@ diagram-cli:
   ce-plan: Use architecture diagrams to ground implementation plans
   docs-expert: Embed diagrams into repository documentation
   visual-explainer: Render diagram artifacts as a polished HTML explainer
+docs-expert:
+  agents-md: Refactor or tighten AGENTS.md and related repo instruction routing
+  fixing-metadata: Repair page metadata and SEO surfaces after docs or web content
+    edits
+  markdown-converter: Convert source materials into clean Markdown before docs restructuring
+  visual-explainer: Present a complex system, workflow, or docs audit as a visual
+    artifact
 elixir-pro:
   rust-pro: Systems-level concurrency patterns that share OTP-style supervision thinking
   systematic-debugging: Triage distributed process failures with evidence-first diagnosis
@@ -244,10 +287,27 @@ evals-router:
     prompt validation tests
   verification-before-completion: Gate "eval is ready" claims with concrete calibration
     or human-label evidence
+every-style-editor:
+  changelog: Edit engineering summaries for a clearer external or community audience
+  docs-expert: Improve repository documentation instead of brand-editorial prose
+  youtube-hooks-scripts: Shape the longer-form video script before applying Every-style
+    edits
+  youtube-titles-thumbnails: Tighten packaging copy once the tone and messaging are
+    set
+fallback-release:
+  production-deployment: Deploy fallback-built artifacts to production
+  release: Primary release path when CI is healthy
+  verification-before-completion: Validate fallback artifacts before publication
 favicon-generator:
   design-system: Keep favicon palette consistent with design-system tokens
   fixing-metadata: Pair with metadata fixes to ensure correct favicon references
   og-image-builder: Generate OG images alongside favicons for complete brand suite
+feature-video:
+  gh-workflow: Attach the final artifact to a PR or delivery note
+  remotion: Create or review a custom Remotion composition
+  sora: Generate synthetic video only when the request is not tied to real product
+    footage
+  stitch-remotion: Build a walkthrough from Stitch screens
 fix-mise:
   bootstrap: Fix mise before retrying the bootstrap
   codex-home-audit: Address mise issues found during a home directory audit
@@ -303,6 +363,12 @@ javascript-pro:
   biome-linting: Enforce JavaScript/TypeScript lint and format rules with Biome
   typescript: Typed JavaScript superset when strict contracts and module boundaries
     are needed
+llm-wiki:
+  context7: Pull current external API/library docs to enrich wiki source material.
+  docs-expert: Improve surrounding repository docs and runbooks once the workflow
+    is chosen.
+  project-brain: Operate project memory systems when the ask is broader than a single
+    wiki pattern.
 markdown-converter:
   docs-expert: Polish converted docs to meet repository quality standards
   notebooklm: Feed converted markdown to NotebookLM for analysis
@@ -335,6 +401,11 @@ npm-workflow-discipline:
     behavior
   coding-harness: Validate and enforce repository quality gates in CI and local workflows
   release: Apply package and script contract checks during release readiness and cutover
+oak-api:
+  chatgpt-apps: Build a ChatGPT App that surfaces Oak curriculum content
+  fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
+  mcp-builder: Expose Oak API as MCP tools for agent workflows
+  product-spec: Spec the learning experience before implementing
 og-image-builder:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
@@ -380,6 +451,24 @@ process-watch:
   systematic-debugging: Use alongside process-watch for root-cause diagnosis
   verification-before-completion: Confirm processes are healthy before marking work
     done
+product-design-critic:
+  brainstorming: Explore design alternatives before critical review
+  interview-me: Run a requirements interview before critiquing the surface
+  product-spec: Critique the product surface after speccing, before build
+  visual-explainer: Present critique findings as a visual explainer page
+product-spec:
+  architecture-interview: Use when `arch_spec` mode reveals open design decisions
+    needing review
+  brainstorming: Use first when idea is unclear — brainstorm resolves direction, this
+    skill writes the spec
+  ce-plan: After spec approval, use to decompose the spec into an execution plan
+  interview-me: Use for deep requirements discovery when the spec needs user-research
+    grounding
+  security-threat-model: Use on the resulting spec/API to identify and model security
+    risks early
+production-deployment:
+  1password: Inject deployment secrets via 1Password CLI
+  release: Orchestrate the release flow before deployment
 project-brain:
   codex-home-audit: Pair when the user wants Codex control-plane drift analysis across
     agents, hooks, skills, and memory surfaces.
@@ -387,6 +476,12 @@ project-brain:
     gates, and tooling audits in a managed repository.
   docs-expert: Use for follow-on documentation hardening after Project Brain bootstrap
     or rollout changes land.
+project-improver:
+  architecture-interview: Validate architectural improvements via structured interview
+  brainstorming: Brainstorm improvement ideas before running the improver
+  ce-plan: Convert approved improvements into an execution-ready plan
+  product-spec: Produce a revised spec after high-leverage improvements are identified
+  security-threat-model: Include security improvements in the improvement scope
 rclone:
   1password: Inject remote credentials or secrets safely into the runtime
   feature-video: Upload generated demo artifacts after rendering or capture
@@ -413,6 +508,10 @@ recon-workbench:
     mitigations
   systematic-debugging: Debug confirmed runtime behavior after recon narrows the target
     surface
+release:
+  ce-plan: Plan the release checklist before executing
+  gh-workflow: Manage the PR and merge lifecycle before cutting a release
+  verification-before-completion: Validate all checks pass before tagging
 remotion:
   design-system: Keep caption, overlay, and UI-adjacent typography and token usage
     aligned with system governance
@@ -435,6 +534,12 @@ resolve-pr-parallel:
     fan-out
   systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
     feedback
+resolve-todo-parallel:
+  ce-compound: Capture durable learnings that emerge from repeated todo fixes
+  ce-work: Execute a single scoped implementation path instead of a todo sweep
+  orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and an
+    explicit user delegation request allow it
+  triage: Review pending todo findings before execution begins
 rust-pro:
   go: Systems programming with similar error-handling and concurrency patterns
   systematic-debugging: Triage Rust ownership and borrow-checker errors with evidence-first
@@ -444,6 +549,25 @@ scaffolding-expert:
   context7: External docs grounding for version-sensitive dependencies
   npm-workflow-discipline: Lockfile discipline and script contract normalization
   uv-python-project-setup: uv-managed Python project and execution contract setup
+security-best-practices:
+  1password: Findings involving secrets management — use for secure injection patterns
+  create-auth: Security review often surfaces auth issues — use this for implementation
+  security-ownership-map: Find who owns the highest-risk code after identifying findings
+  security-threat-model: Run first to identify trust boundaries and threat model;
+    this skill remediates specific findings
+security-ownership-map:
+  gh-workflow: Create GitHub issues for identified owners
+  recon-workbench: Correlate recon findings with ownership data
+  security-best-practices: Route best-practice remediation to the right owners
+  security-threat-model: Use ownership map to assign threat model mitigations
+security-threat-model:
+  architecture-interview: When the system design is still unclear — clarify before
+    threat modeling
+  recon-workbench: When authorized recon evidence is needed to ground the threat model
+  security-best-practices: Run after threat modeling to get language-specific remediation
+    guidance
+  security-ownership-map: Use to identify which engineers are responsible for the
+    highest-risk code areas
 shadcn-ui:
   baseline-ui: Validate shadcn/ui component usage against baseline rules
   design-system: Override shadcn/ui tokens with design-system aliases
@@ -548,6 +672,12 @@ threejs-builder:
 toml:
   systematic-debugging: Triage config parsing failures with evidence-first diagnosis
   yaml: Schema-aware config review for YAML-based tooling configs
+triage:
+  ce-work: Execute the approved work once triage decisions are made
+  resolve-todo-parallel: Resolve a batch of approved todo items in parallel rather
+    than triaging them
+  systematic-debugging: Diagnose unclear or flaky findings before deciding whether
+    they belong in the queue
 typescript:
   biome-linting: Enforce TypeScript lint and format rules with Biome
   javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
@@ -588,6 +718,11 @@ verification-before-completion:
     fix worked
   test-driven-development: Write failing tests before fixing; this skill verifies
     they now pass
+video-transcript-downloader:
+  markdown-converter: Convert transcript text to clean markdown
+  notebooklm: Feed transcripts to NotebookLM for summarisation
+  youtube-hooks-scripts: Create scripts for videos whose transcripts you've studied
+  youtube-titles-thumbnails: Package videos after reviewing competitor transcripts
 visual-explainer:
   beautiful-mermaid: Render Mermaid diagrams as image assets for the explainer
   design-system: Align the explainer’s token and visual language with the repo’s design
@@ -608,3 +743,13 @@ writing-plans:
 yaml:
   systematic-debugging: Triage config parsing failures with evidence-first diagnosis
   toml: Schema-aware config review for TOML-based tooling configs
+youtube-hooks-scripts:
+  notebooklm: Use NotebookLM to generate audio overviews from scripts
+  product-spec: Spec the content series before scripting individual videos
+  video-transcript-downloader: Study competitor transcripts before writing hooks
+  youtube-titles-thumbnails: Create titles and thumbnails to pair with the script
+youtube-titles-thumbnails:
+  imagegen: Generate thumbnail concept images
+  video-transcript-downloader: Research competitor videos before writing titles
+  visual-explainer: Present A/B thumbnail options in a visual comparison page
+  youtube-hooks-scripts: Pair with a hook and script for complete video packaging

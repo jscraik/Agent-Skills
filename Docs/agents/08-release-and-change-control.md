@@ -15,10 +15,10 @@
 
 ## Release prerequisites
 - Confirm changed files are intentional and minimal.
-- Keep `.agent/PLANS.md` idempotent when plan work touches it.
+- Keep `.agents/PLANS.md` idempotent when plan work touches it.
 
 ## Governance gates
-- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md` (external dependency)
-- `bash Infrastructure/scripts/verify-work.sh` (repo-local wrapper)
+- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md` (external dependency)
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (repo-local wrapper)
 
 - If either command fails, fix first failure, then rerun until green.

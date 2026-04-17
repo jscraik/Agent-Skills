@@ -5,11 +5,11 @@
 - [1. Dead UI Controls (CLI Arguments Defined but Not Used)](#1-dead-ui-controls-cli-arguments-defined-but-not-used)
   - [Issue: `--dry-run` for `ask skills install`](#issue---dry-run-for-ask-skills-install)
 - [2. Orphaned Standalone Scripts (Implemented but No CLI Integration)](#2-orphaned-standalone-scripts-implemented-but-no-cli-integration)
-  - [2.1 `Infrastructure/scripts/sync_mcp.py`](#21-scriptssync_mcppy)
-  - [2.2 `Infrastructure/scripts/check-hub-stability.py`](#22-scriptscheck-hub-stabilitypy)
-  - [2.3 `Infrastructure/scripts/skill_router_metrics.py`](#23-scriptsskill_router_metricspy)
-  - [2.4 `Infrastructure/scripts/skill_spotlight.py`](#24-scriptsskill_spotlightpy)
-  - [2.5 `Infrastructure/scripts/run_skill_genome_loop.py`](#25-scriptsrun_skill_genome_looppy)
+  - [2.1 `Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py`](#21-infrastructurescriptslifecycle-and-syncsync_mcppy)
+  - [2.2 `Infrastructure/scripts/lifecycle-and-sync/check-hub-stability.py`](#22-infrastructurescriptslifecycle-and-synccheck-hub-stabilitypy)
+  - [2.3 `Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py`](#23-infrastructurescriptslifecycle-and-syncskill_router_metricspy)
+  - [2.4 `Infrastructure/scripts/lifecycle-and-sync/skill_spotlight.py`](#24-infrastructurescriptslifecycle-and-syncskill_spotlightpy)
+  - [2.5 `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py`](#25-infrastructurescriptslifecycle-and-syncrun_skill_genome_looppy)
   - [2.6 Analysis/Build Scripts (No CLI Wiring)](#26-analysisbuild-scripts-no-cli-wiring)
 - [3. Unused Error Codes (Defined but Never Emitted)](#3-unused-error-codes-defined-but-never-emitted)
 - [4. Partially Implemented Features](#4-partially-implemented-features)
@@ -52,7 +52,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 
 ## 2. Orphaned Standalone Scripts (Implemented but No CLI Integration)
 
-### 2.1 `Infrastructure/scripts/sync_mcp.py`
+### 2.1 `Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py`
 **Purpose:** Sync MCP (Model Context Protocol) configuration between Codex and Antigravity
 **Lines of Code:** ~150
 **Status:** Fully implemented but unreachable
@@ -79,7 +79,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 
 ---
 
-### 2.2 `Infrastructure/scripts/check-hub-stability.py`
+### 2.2 `Infrastructure/scripts/lifecycle-and-sync/check-hub-stability.py`
 **Purpose:** CI gate to block deletion/rename of stable skills
 **Lines of Code:** ~80
 **Status:** Implemented, has `--changed-files` flag, not integrated
@@ -90,7 +90,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 # Option 1: Integrate into validate
 # In repo_validate(), add:
 # if check_stability:
-#     subprocess.run(["python3", "Infrastructure/scripts/check-hub-stability.py", str(repo_root)])
+#     subprocess.run(["python3", "Infrastructure/scripts/lifecycle-and-sync/check-hub-stability.py", str(repo_root)])
 #
 # Option 2: New command
 # repo_subparsers.add_parser("check-stability", help="Check stable skill changes")
@@ -104,7 +104,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 
 ---
 
-### 2.3 `Infrastructure/scripts/skill_router_metrics.py`
+### 2.3 `Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py`
 **Purpose:** Router metrics calculation
 **Lines of Code:** ~100
 **Status:** Standalone script, no CLI integration
@@ -118,7 +118,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 
 ---
 
-### 2.4 `Infrastructure/scripts/skill_spotlight.py`
+### 2.4 `Infrastructure/scripts/lifecycle-and-sync/skill_spotlight.py`
 **Purpose:** Skill spotlight/reporting
 **Lines of Code:** ~80
 **Status:** Standalone script, no CLI integration
@@ -130,7 +130,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 
 ---
 
-### 2.5 `Infrastructure/scripts/run_skill_genome_loop.py`
+### 2.5 `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py`
 **Purpose:** Run skill genome processing loop
 **Lines of Code:** ~150
 **Status:** Standalone script, no CLI integration

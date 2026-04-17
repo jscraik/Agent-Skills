@@ -26,7 +26,7 @@
 | Risk/Assumption | Impact | Uncertainty | Mitigation |
 
 ## 6) ExecPlan gate (only if significant build work is required)
-- If recovery requires a significant feature or refactor, follow the ExecPlan sequence in `~/.codex/instructions/plans.md` (or repo `.agent/PLANS.md`).
+- If recovery requires a significant feature or refactor, follow the ExecPlan sequence in `~/.codex/instructions/plans.md` (or repo `.agents/PLANS.md`).
 
 ## 7) Evidence
 - Sources:

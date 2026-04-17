@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skill_scan.py" lint-skill-types "$@"
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bash "$SCRIPT_DIR/validation-and-linting/lint_skill_types.sh" "$@"

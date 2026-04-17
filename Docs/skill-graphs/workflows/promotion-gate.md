@@ -121,7 +121,7 @@ def invoke_boundary():
 
 ```bash
 # Approve run
-bash Infrastructure/scripts/human_promote_recursive_run.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh \
   --run-id <run_id> \
   --lesson-id <lesson_id> \
   --reviewer <reviewer_id> \
@@ -135,7 +135,7 @@ python3 Skills/skill-builder/Infrastructure/scripts/validate_recursive_promotion
   --lesson-file <path_to_lesson_file>
 
 # CI validation
-bash Infrastructure/scripts/validate_recursive_promotions.sh \
+bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
   --changed-only --base-sha <base_sha> --head-sha <head_sha>
 ```
 

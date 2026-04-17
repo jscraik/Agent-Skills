@@ -159,10 +159,10 @@ For non-trivial `skillify` runs, include:
 ```bash
 python3 plugins/skill-factory/skills/skill-builder/scripts/quick_validate.py plugins/skill-factory/skills/skillify --mode compat
 ./bin/ask skills audit plugins/skill-factory/skills/skillify --level strict --robot
-bash scripts/lint_openai_skill_format.sh --mode strict
-bash scripts/lint_progressive_disclosure.sh --mode warn
-python3 scripts/gotcha_pipeline.py validate
-bash scripts/validate_skill_authoring_family.sh
+bash scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
+bash scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn
+python3 scripts/lifecycle-and-sync/gotcha_pipeline.py validate
+bash scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 
 - Fail fast and fix the first reported issue before final handoff.

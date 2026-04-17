@@ -31,6 +31,7 @@
 - ✅ `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/skill_gate.py personas/benjitaylor-persona` (PASS with one non-blocking description warning)
 - ✅ `~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/openclaw_skill_guard.py personas/benjitaylor-persona --mode both` (0 critical, 0 warn, info only)
 - ✅ `/Users/jamiecraik/.codex/Infrastructure/scripts/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills` (pass)
+  - Current equivalent path: `/Users/jamiecraik/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills`
 
 # Status — superpowers skill gap audit (2026-02-22)
 
@@ -63,6 +64,7 @@
 - Ran `/Users/jamiecraik/.codex/Infrastructure/scripts/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills`; overall run failed on pre-existing unrelated gates:
   - `skill-gate:Skills/test-driven-development`
   - `skill-gate:Skills/verification-before-completion`
+  - Current equivalent path: `/Users/jamiecraik/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills`
 
 ## Safe improvements applied
 - Added `## Encouraging variation` and `## Remember` to `product/design/ui-ux-creative-coding/SKILL.md`.
@@ -89,6 +91,7 @@
   - `pr_receive_review`
 - Updated `github/gh-workflow/Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` for new modes.
 - Regenerated root skill index via `Infrastructure/scripts/sync_skills.sh`.
+  - Current equivalent path: `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 
 ## Validation run
 - ✅ `quick_validate.py` passed for:
@@ -102,6 +105,7 @@
 - ✅ `skill_gate.py` passed for the same set (warnings only, no FAIL).
 - ✅ `openclaw_skill_guard.py --mode both` passed for the same set (no critical failures).
 - ✅ `/Users/jamiecraik/.codex/Infrastructure/scripts/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills` passed.
+  - Current equivalent path: `/Users/jamiecraik/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh --repo-root /Users/jamiecraik/dev/agent-skills`
 
 ## Notes
 - `verify-work.sh` reported existing warning-only findings for `github/gh-workflow` script subprocess/network patterns and binary asset scanning; no new critical/warn regressions were introduced for the new skills.
@@ -160,6 +164,7 @@
   - `upgrade_skill.py` no suggestions
 - Regenerated root skills index and refreshed flat symlink view via:
   - `bash /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/sync_skills.sh`
+  - Current equivalent path: `bash /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 
 ## Verification
 - Index entry present in `/Users/jamiecraik/dev/agent-skills/SKILL.md` (`design-system`).

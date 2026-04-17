@@ -16,10 +16,8 @@
 
 import React from 'react';
 
-// Use a valid identifier like 'StitchComponent' as the placeholder
-interface StitchComponentProps {
+interface StitchComponentProps extends React.HTMLAttributes<HTMLDivElement> {
   readonly children?: React.ReactNode;
-  readonly className?: string;
 }
 
 export const StitchComponent: React.FC<StitchComponentProps> = ({

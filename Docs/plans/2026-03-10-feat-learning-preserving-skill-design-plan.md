@@ -119,10 +119,10 @@ Work:
   - do evals test posture-specific behavior?
   - do telemetry/conformance artifacts distinguish `pass | partial | blocked`?
 - Run current-state diagnostics for each pilot skill:
-  - `python3 Infrastructure/scripts/diagnose_skill.py skill-builder`
-  - `python3 Infrastructure/scripts/diagnose_skill.py agentation`
-  - `python3 Infrastructure/scripts/diagnose_skill.py systematic-debugging`
-  - `python3 Infrastructure/scripts/diagnose_skill.py interview-me`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py skill-builder`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py agentation`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py systematic-debugging`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py interview-me`
 - Confirm each pilot skill currently has both `Infrastructure/references/task-profile.json` and `Infrastructure/references/evals.yaml` before metadata design begins.
 - Persist a dated baseline snapshot bundle for each pilot (`SKILL.md`, `Infrastructure/references/task-profile.json`, `Infrastructure/references/evals.yaml`, plus raw diagnostics) for replayability and evidence diffs.
 - Record a per-pilot no-regression matrix before any edits:
@@ -159,7 +159,7 @@ Work:
 - Extend `Infrastructure/templates/SKILL.md.template` with a reusable pilot-ready contract shape for posture guidance.
 - If needed, add a short reference doc for posture semantics rather than overloading `SKILL.md` bodies.
 - Keep repo-level language aligned with the existing all-skills onboarding contract so the new posture language reads as an additive layer, not a replacement vocabulary.
-- Run `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` immediately after this phase.
+- Run `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` immediately after this phase.
 
 Exit criteria:
 - There is one authoritative repo-level definition of `LearningPosture`.
@@ -197,8 +197,8 @@ Work:
 - Keep legacy compatibility behavior explicit and bounded.
 - Prefer extending existing freshness/diagnostic checks before inventing a parallel validator entrypoint.
 - Validation sequence for this phase:
-  - `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-  - pilot-skill reruns of `python3 Infrastructure/scripts/diagnose_skill.py <skill-name>`
+  - `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+  - pilot-skill reruns of `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py <skill-name>`
 - Gate command required before Phase 3 starts:
   - ```bash
     python3 - <<'PY'
@@ -255,8 +255,8 @@ Work:
 - Change one pilot skill at a time and finish its full validation comparison before editing the next pilot skill.
 - Keep prose/routing changes separate from harness, validator, or telemetry changes so regressions can be attributed cleanly.
 - After each pilot skill update:
-  - run `python3 Infrastructure/scripts/diagnose_skill.py <skill-name>`
-  - rerun `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` if the change touches shared docs or linked references
+  - run `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py <skill-name>`
+  - rerun `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` if the change touches shared docs or linked references
   - rerun the full five-gate matrix for that skill and compare it to the Phase 0 baseline before moving on
 
 Exit criteria:
@@ -329,7 +329,7 @@ Work:
 - Produce one canonical pilot summary under existing skill-graph artifact trees:
   - `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
 - Build and generate this summary with one canonical script so it is always machine-produced, never hand-edited:
-  - `python3 Infrastructure/scripts/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
 - Validate against the schema in the same phase:
   - `python3 -m jsonschema -i Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json docs/skill-graphs/schemas/learning-posture-pilot-conformance-summary.schema.json`
 - Freshness gate for rollout:
@@ -426,9 +426,9 @@ Work:
   - expand to more skills
   - revise contract before expansion
 - Required gate commands for this phase:
-  - `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
-  - `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-  - `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
+  - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+  - `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+  - `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
   - `bash Infrastructure/scripts/validate_all.sh`
 
 Exit criteria:
@@ -497,9 +497,9 @@ tasks:
   - records the fork decision and approver for machine-readable posture metadata location
 - `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json`
   - optional companion metadata home if `Infrastructure/references/task-profile.json` cannot be safely extended
-- `Infrastructure/scripts/build_learning_posture_pilot_summary.py`
+- `Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py`
   - authoritative pilot conformance summary generator
-- `Infrastructure/scripts/verify_skill_catalog_freshness.py`
+- `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py`
   - candidate validator surface for posture declaration or metadata quality checks
 - `Infrastructure/scripts/validate_all.sh`
   - broader validation runner
@@ -541,7 +541,7 @@ tasks:
   - Required decision keys include `approver`, `approval`, `decision_status: approved`, and `decided_at`.
   - If `Infrastructure/references/task-profile.json` is unsafe, approved fallback is `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json`.
 - Which script is the canonical producer for the pilot conformance summary?
-  - `python3 Infrastructure/scripts/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`.
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`.
   - Canonical summary schema: `docs/skill-graphs/schemas/learning-posture-pilot-conformance-summary.schema.json`.
 - Which evaluator command is the canonical gate for each pilot `Infrastructure/references/evals.yaml`?
   - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py <pilot-path> --runner codex` for each pilot:
@@ -598,19 +598,19 @@ Primary evidence paths:
 - [Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home.json)
 - [Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/pilot/learning-posture-metadata-home-decision.json)
 - [Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json)
-- [Infrastructure/scripts/diagnose_skill.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/diagnose_skill.py)
-- [Infrastructure/scripts/verify_skill_catalog_freshness.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/verify_skill_catalog_freshness.py)
-- [Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py)
-- [Infrastructure/scripts/build_learning_posture_pilot_summary.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/build_learning_posture_pilot_summary.py)
+- [Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py)
+- [Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py)
+- [Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py)
+- [Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py)
 
 Gate commands:
 - Baseline per-skill diagnostics:
-  - `python3 Infrastructure/scripts/diagnose_skill.py skill-builder`
-  - `python3 Infrastructure/scripts/diagnose_skill.py agentation`
-  - `python3 Infrastructure/scripts/diagnose_skill.py systematic-debugging`
-  - `python3 Infrastructure/scripts/diagnose_skill.py interview-me`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py skill-builder`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py agentation`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py systematic-debugging`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py interview-me`
 - Metadata and catalog integrity:
-  - `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
+  - `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
 - Metadata-home decision verification:
   - `python3 - <<'PY'
 from pathlib import Path
@@ -642,7 +642,7 @@ if payload.get("decision_status") != "approved":
 print("metadata-home decision artifact verified")
 PY`
 - Pilot conformance summary generation and freshness check:
-  - `python3 Infrastructure/scripts/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/build_learning_posture_pilot_summary.py --out-json Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
   - `python3 - <<'PY'
 from pathlib import Path
 artifact = Path("Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json")
@@ -663,10 +663,10 @@ if not artifact.exists() or artifact.stat().st_mtime < max(p.stat().st_mtime for
 print("conformance summary freshness check passed")
 PY`
 - Repo docs and plan structure:
-  - `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+  - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
   - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py /Users/jamiecraik/dev/agent-skills/Docs/plans/2026-03-10-feat-learning-preserving-skill-design-plan.md`
 - Artifact and telemetry integrity:
-  - `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
+  - `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
 - Final broad verification:
   - `bash Infrastructure/scripts/validate_all.sh`
 
@@ -680,15 +680,15 @@ Focused checks after each major phase:
 - Phase 5: artifact/conformance verification after telemetry summary changes
 
 Broader checks before completion:
-- `python3 Infrastructure/scripts/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py Docs/plans/2026-03-10-feat-learning-preserving-skill-design-plan.md`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/skill-builder --runner codex`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py frontend/tools/agentation --runner codex`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/systematic-debugging --runner codex`
 - `python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py interview/interview-me --runner codex`
 - `bash Infrastructure/scripts/validate_all.sh`
-- `python3 Infrastructure/scripts/verify_skill_catalog_freshness.py --strict`
-- `python3 Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+- `python3 Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check`
 
 Coverage expectations:
 - invalid posture/mode pairings are blocked or degraded explicitly
@@ -733,7 +733,7 @@ Migration notes:
 - [x] Pilot machine-readable posture metadata and validation hooks are implemented safely
 - [x] Phase 2 metadata-home decision artifact is approved before pilot skill propagation starts
 - [ ] All four pilot skills are updated without changing their core routing intent
-- [x] All four pilot skills pass `python3 Infrastructure/scripts/diagnose_skill.py <skill-name>` after updates
+- [x] All four pilot skills pass `python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py <skill-name>` after updates
 - [x] Pilot evals cover posture-sensitive behavior
 - [x] Pilot telemetry/conformance reporting exists and is machine-diffable
 - [x] Invalid or degraded posture/mode combinations are surfaced explicitly rather than normalized silently

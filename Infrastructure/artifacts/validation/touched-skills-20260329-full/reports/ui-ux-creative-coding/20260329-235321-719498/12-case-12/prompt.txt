@@ -1,1 +1,0 @@
-I want to compare a couple drawer patterns from component.gallery and inspect implementation tradeoffs for React + Tailwind.

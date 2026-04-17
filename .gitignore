@@ -1,6 +1,7 @@
 # OS/editor noise
 .DS_Store
 **/.DS_Store
+.obsidian/
 
 # Local runtime/state directories
 .system/
@@ -25,6 +26,10 @@ node_modules/
 
 # Python/build artifacts
 **/__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
 .venv/
 .venv-skillpack/
 .venv-skill-builder/
@@ -115,6 +120,11 @@ Docs/product/Archive.zip
 logs/
 environment.toml
 
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+
 # Install journal logs (timestamped runtime artifacts)
 .install-journal/
 
@@ -132,3 +142,8 @@ Infrastructure/artifacts/policy/
 /Infrastructure/artifacts/validation/latest/
 /Infrastructure/artifacts/validation/family-gate/
 Plugins/cache/
+# Ensure agent components are kept tracked despite .agents/ ignore
+!.agents/PLANS.md
+!.agents/workflows/
+.agents/workflows/*
+!.agents/workflows/**

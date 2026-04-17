@@ -1,0 +1,32 @@
+schema_version: "1.0"
+
+purpose: >
+  Provide a safe, repeatable, platform-aware workflow for isolated worktree setup
+  across Codex app threads/automations and Claude CLI sessions.
+
+triggers:
+  - User asks to start isolated parallel work in Codex or Claude
+  - User asks for worktree-to-local sync strategy or branch collision guidance
+  - User needs manual git worktree setup/cleanup commands
+
+inputs:
+  - Environment target (codex, claude, or manual git)
+  - Repo path and starting branch/commit
+  - Verification strategy (work directly in worktree or sync to local)
+  - Baseline verification command(s)
+
+outputs:
+  - Recommended workflow for the selected environment
+  - Worktree path and branch/detached-head state
+  - Verification + sync guidance (Apply vs Overwrite when applicable)
+  - Cleanup guidance with safety caveats
+
+non_goals:
+  - Performing feature implementation itself
+  - Force-deleting branches/worktrees without explicit request
+  - Hiding branch exclusivity constraints
+
+risks:
+  - Branch checkout collisions across local and worktree contexts
+  - Data loss from unsafe overwrite/remove flows
+  - Incorrect assumptions for non-git repositories

@@ -1,0 +1,6 @@
+interface:
+  display_name: CLI Spec
+  short_description: Create an implementation-grade CLI specification when the user
+    requests a binding technical contract for a new or exi...
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png

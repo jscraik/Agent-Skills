@@ -18,7 +18,7 @@ Validates governance and security compliance on PRs affecting policy files.
 
 | EVENT | BRANCH | PATHS |
 |-------|--------|-------|
-| PR | `main` | `GOVERNANCE/**`, `COMPLIANCE/**`, `SECURITY/**`, `EVALUATION/**`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/branch-protection-manifest.md`, `.github/workflows/gov-security-gates.yml`, `.github/Infrastructure/scripts/gov_security_gates.py`, `.github/CODEOWNERS`, `CODEOWNERS`, `SUPPORT.md`, `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` |
+| PR | `main` | `GOVERNANCE/**`, `COMPLIANCE/**`, `SECURITY/**`, `EVALUATION/**`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/branch-protection-manifest.md`, `.github/workflows/gov-security-gates.yml`, `.github/scripts/gov_security_gates.py`, `.github/CODEOWNERS`, `CODEOWNERS`, `SUPPORT.md`, `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` |
 
 ---
 
@@ -51,12 +51,12 @@ permissions:
 | Runner | `ubuntu-latest` |
 | Checkout | Full history (`fetch-depth: 0`) |
 | Python | `3.12` |
-| Script | `.github/Infrastructure/scripts/gov_security_gates.py` |
+| Script | `.github/scripts/gov_security_gates.py` |
 
 ### Command
 
 ```bash
-python3 .github/Infrastructure/scripts/gov_security_gates.py
+python3 .github/scripts/gov_security_gates.py
 ```
 
 ---
@@ -65,7 +65,7 @@ python3 .github/Infrastructure/scripts/gov_security_gates.py
 
 ```bash
 # Run governance security gates
-python3 .github/Infrastructure/scripts/gov_security_gates.py
+python3 .github/scripts/gov_security_gates.py
 ```
 
 ---
@@ -78,4 +78,4 @@ Workflow: `.github/workflows/gov-security-gates.yml`
 
 ## RELATED
 
-- [GSG script](/.github/Infrastructure/scripts/gov_security_gates.py)
+- [GSG script](/.github/scripts/gov_security_gates.py)

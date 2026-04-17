@@ -41,7 +41,7 @@ Route elsewhere when:
 - The task is general shell alias customization unrelated to Claude providers.
 - The user is asking for app-level Claude usage help, not alias reliability.
 
-## Inputs
+## Required inputs
 
 - Config repo root (default: `/Users/jamiecraik/dev/configs`)
 - Expected canonical alias targets:

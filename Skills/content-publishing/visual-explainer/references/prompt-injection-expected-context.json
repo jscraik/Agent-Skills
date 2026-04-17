@@ -1,0 +1,21 @@
+{
+  "path_patterns": [
+    "SKILL.md",
+    "prompts/diff-review.md",
+    "prompts/generate-web-diagram.md",
+    "prompts/plan-review.md",
+    "prompts/project-recap.md",
+    "Infrastructure/references/evals*.yaml",
+    "Infrastructure/references/css-patterns.md",
+    "Infrastructure/references/libraries.md",
+    "Infrastructure/references/slide-patterns.md"
+  ],
+  "context_signals": [
+    "visual explainer",
+    "data uri",
+    "diagram theming"
+  ],
+  "skip_binary_globs": [
+    "banner.png"
+  ]
+}

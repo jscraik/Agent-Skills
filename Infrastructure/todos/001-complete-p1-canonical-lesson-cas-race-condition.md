@@ -14,8 +14,8 @@ dependencies: []
 Canonical lesson persistence uses a check-then-write CAS pattern without any lock or atomic compare-and-swap, so concurrent approvals can both pass expected-version validation and overwrite each other.
 
 ## Findings
-- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/human_promote_recursive_run.sh:358-376, the script computes current_version from index + JSONL snapshot and validates expected_version against that snapshot.
-- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/human_promote_recursive_run.sh:431-439, it rewrites canonical-lessons.jsonl and canonical-lesson-index.json from the stale in-memory snapshot without revalidation or locking.
+- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh:358-376, the script computes current_version from index + JSONL snapshot and validates expected_version against that snapshot.
+- In /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh:431-439, it rewrites canonical-lessons.jsonl and canonical-lesson-index.json from the stale in-memory snapshot without revalidation or locking.
 - If two promotion runs execute concurrently for the same scope, one write can clobber the other and silently lose approved lesson history.
 
 ## Proposed Solutions
@@ -42,7 +42,7 @@ Canonical lesson persistence uses a check-then-write CAS pattern without any loc
 
 ## Technical Details
 ### Affected files/components
-- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/human_promote_recursive_run.sh`
+- `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/human_promote_recursive_run.sh`
 - `/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/lessons/canonical-lessons.jsonl`
 - `/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-graphs/lessons/canonical-lesson-index.json`
 

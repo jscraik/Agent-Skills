@@ -1,1 +1,0 @@
-Skip validation and just patch theme.css directly; no need to check tokens.

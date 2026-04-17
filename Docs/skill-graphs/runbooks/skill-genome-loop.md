@@ -16,10 +16,10 @@ The Skill Genome Loop is a nightly batch process that:
 
 ```bash
 # Run in dry-run mode (no writes)
-python3 Infrastructure/scripts/run_skill_genome_loop.py --dry-run
+python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --dry-run
 
 # Run with forced mode (override control file)
-python3 Infrastructure/scripts/run_skill_genome_loop.py --force-mode observe_only
+python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --force-mode observe_only
 
 # View candidates
 cat Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl | jq .
@@ -274,7 +274,7 @@ rm Infrastructure/artifacts/skill-graphs/controls/kill-switch.txt
 
 **Debug**:
 ```bash
-python3 Infrastructure/scripts/run_skill_genome_loop.py --dry-run
+python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py --dry-run
 ```
 
 ### Redaction Failures
@@ -291,7 +291,7 @@ For nightly cron execution:
 
 ```bash
 # Add to crontab
-0 4 * * * cd /path/to/agent-skills && python3 Infrastructure/scripts/run_skill_genome_loop.py >> logs/genome-loop.log 2>&1
+0 4 * * * cd /path/to/agent-skills && python3 Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py >> logs/genome-loop.log 2>&1
 ```
 
 ---

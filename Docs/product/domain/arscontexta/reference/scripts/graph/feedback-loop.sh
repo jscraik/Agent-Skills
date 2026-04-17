@@ -43,8 +43,8 @@ COMMUNITIES_OUT="$RAW_DIR/communities.tsv"
 "$SCRIPT_DIR/find-communities-leiden.sh" "$NOTES_DIR" > "$COMMUNITIES_OUT"
 
 # ── Compute session co-invocation weights ────────────────────────────────────
-WEIGHTS_SCRIPT="$VAULT_ROOT/Infrastructure/scripts/compute-edge-weights.py"
-if [[ -f "$WEIGHTS_SCRIPT" ]]; then
+WEIGHTS_SCRIPT="$VAULT_ROOT/Infrastructure/scripts/skill-graph/compute-edge-weights.py"
+if [[ -e "$WEIGHTS_SCRIPT" ]]; then
   python3 "$WEIGHTS_SCRIPT" "$VAULT_ROOT" || true
 fi
 
@@ -338,11 +338,15 @@ cp "$REPORT_PATH" "$REPORT_DIR/latest.md"
 cp "$RECOMMEND_PATH" "$RECOMMEND_DIR/latest.json"
 
 # ── Regenerate visual HTML graph if generator script is present ──────────────
-GRAPH_GEN="$VAULT_ROOT/Infrastructure/scripts/gen-skill-graph.py"
-GRAPH_HTML="${HOME}/.agent/diagrams/skill-graph.html"
-if [[ -f "$GRAPH_GEN" ]] && [[ -f "$EDGES_OUT" ]]; then
-  python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" || true
-  echo "graph:    $GRAPH_HTML"
+GRAPH_GEN="$VAULT_ROOT/Infrastructure/scripts/skill-graph/gen-skill-graph.py"
+GRAPH_HTML="${HOME}/.agents/diagrams/skill-graph.html"
+if [[ -e "$GRAPH_GEN" ]] && [[ -e "$EDGES_OUT" ]]; then
+  mkdir -p "$(dirname "$GRAPH_HTML")"
+  if python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" && [[ -e "$GRAPH_HTML" ]]; then
+    echo "graph:    $GRAPH_HTML"
+  else
+    echo "WARN: graph generation failed: $GRAPH_HTML" >&2
+  fi
 fi
 
 echo "feedback-loop: PASS"

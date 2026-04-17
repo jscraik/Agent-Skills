@@ -1,0 +1,7 @@
+interface:
+  display_name: Test Driven Development
+  short_description: "Create test-first Red-Green-Refactor delivery for behavior\u2026"
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+policy:
+  allow_implicit_invocation: false

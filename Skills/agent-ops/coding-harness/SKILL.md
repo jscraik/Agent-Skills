@@ -80,7 +80,7 @@ Produce only what the request needs, usually:
 
 2. Preflight the repository.
 - Do confirm repo root, toolchain availability, and current harness state because path-sensitive or multi-step work is fragile without preflight.
-- Do run `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required` when available because harness-enabled repos often encode extra local policy there.
+- Do run `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` when available because harness-enabled repos often encode extra local policy there.
 
 3. Install or upgrade harness conservatively.
 - Do prefer `mise install -g npm:@brainwav/coding-harness` for consumer repos because it matches the current recommended global install posture.
@@ -148,13 +148,13 @@ harness health --auto-fix --dry-run --json
 Canonical skill maintenance gates after edits:
 
 ```bash
-bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict
-bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn
-python3 Infrastructure/scripts/gotcha_pipeline.py validate
-python3 Infrastructure/scripts/check-see-also.py . --changed-files Skills/coding-harness/SKILL.md
+bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
+bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn
+python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate
+python3 Infrastructure/scripts/validation-and-linting/check-see-also.py . --changed-files Skills/coding-harness/SKILL.md
 python3 Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0
-bash Infrastructure/scripts/sync_skills_sandbox_safe.sh
-bash Infrastructure/scripts/lint_skill_types.sh
+bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh
+bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
 python3 Skills/skill-builder/Infrastructure/scripts/skill_gate.py Skills/coding-harness --require-fail-fast --require-security-evals
 python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/coding-harness --eval-mode release --runner codex --capture-jsonl --timeout-profile codex-heavy --profile d --codex-fallback-profile ''
 ```

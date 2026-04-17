@@ -9,7 +9,7 @@ Prioritized remediation queue for high-severity progressive-disclosure findings.
 
 ## Source
 
-- Snapshot command: `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn`
+- Snapshot command: `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn`
 - Snapshot artifact: `/tmp/pd-lint.out`
 - High-severity findings (4):
   - `frontend/tools/agentation/SKILL.md`: `SKILL.md exceeds hard cap (lines=488, cap=360)`
@@ -50,7 +50,7 @@ Fix target:
 
 ## Execution checklist
 
-- After each file/class fix: run `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode warn`.
+- After each file/class fix: run `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn`.
 - After the full queue: run `bash Infrastructure/scripts/validate_all.sh`.
 - Keep OpenAI skill format contract intact:
   - required frontmatter: `name`, `description`
