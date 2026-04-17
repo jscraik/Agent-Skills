@@ -202,7 +202,7 @@ tasks:
 ## 7) Verification command set
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py Docs/plans/2026-02-24-feat-skill-graph-live-auto-learning-plan.md`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
-- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 - `bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh`
 
 Optional dry-run checks once implementation starts:

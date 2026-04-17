@@ -111,7 +111,12 @@ if [ -s "$system_bridge_names_file" ]; then
   done < "$system_bridge_names_file"
 fi
 
-find -L plugins -type f -path '*/skills/*/SKILL.md' 2>/dev/null \
+plugins_root="Plugins"
+if [ ! -d "$plugins_root" ] && [ -d "plugins" ]; then
+  plugins_root="plugins"
+fi
+
+find -L "$plugins_root" -type f -path '*/skills/*/SKILL.md' 2>/dev/null \
   | awk -F/ '{print $(NF-1)}' \
   | sort -u > "$plugin_names_file"
 

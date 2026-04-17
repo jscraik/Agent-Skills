@@ -1,53 +1,73 @@
 #!/usr/bin/env bash
-set -ex
+set -euo pipefail
 
-cd /Users/jamiecraik/dev/Agent-Skills
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+missing=0
+move_or_track() {
+  local src="$1"
+  local dst="$2"
+  if [[ -e "$src" ]]; then
+    git mv "$src" "$dst"
+  else
+    echo "Missing expected path: $src" >&2
+    missing=$((missing + 1))
+  fi
+}
 
 # Restore skills-system root
 mkdir -p skills-system
-git mv Skills/skills-system/imagegen skills-system/ || true
-git mv Skills/skills-system/openai-docs skills-system/ || true
-rmdir Skills/skills-system || true
+move_or_track Skills/skills-system/imagegen skills-system/
+move_or_track Skills/skills-system/openai-docs skills-system/
+if [[ -d Skills/skills-system ]]; then
+  rmdir Skills/skills-system || true
+fi
 
 # Move Docs/product/security/*
-git mv Docs/product/security/security-threat-model Skills/security-ops/ || true
-git mv Docs/product/security/security-best-practices Skills/security-ops/ || true
-git mv Docs/product/security/security-ownership-map Skills/security-ops/ || true
+move_or_track Docs/product/security/security-threat-model Skills/security-ops/
+move_or_track Docs/product/security/security-best-practices Skills/security-ops/
+move_or_track Docs/product/security/security-ownership-map Skills/security-ops/
 
 # Move Docs/product/specs/*
-git mv Docs/product/specs/product-spec Skills/product-strategy/ || true
+move_or_track Docs/product/specs/product-spec Skills/product-strategy/
 
 # Move Docs/product/content/*
-git mv Docs/product/content/changelog Skills/content-publishing/ || true
-git mv Docs/product/content/youtube-hooks-scripts Skills/content-publishing/ || true
-git mv Docs/product/content/every-style-editor Skills/content-publishing/ || true
-git mv Docs/product/content/feature-video Skills/content-publishing/ || true
-git mv Docs/product/content/youtube-titles-thumbnails Skills/content-publishing/ || true
-git mv Docs/product/content/video-transcript-downloader Skills/content-publishing/ || true
+move_or_track Docs/product/content/changelog Skills/content-publishing/
+move_or_track Docs/product/content/youtube-hooks-scripts Skills/content-publishing/
+move_or_track Docs/product/content/every-style-editor Skills/content-publishing/
+move_or_track Docs/product/content/feature-video Skills/content-publishing/
+move_or_track Docs/product/content/youtube-titles-thumbnails Skills/content-publishing/
+move_or_track Docs/product/content/video-transcript-downloader Skills/content-publishing/
 
 # Move Docs/product/docs/*
-git mv Docs/product/docs/context7 Skills/agent-ops/ || true
-git mv Docs/product/docs/agents-md Skills/agent-ops/ || true
-git mv Docs/product/docs/llm-wiki Skills/content-publishing/ || true
-git mv Docs/product/docs/docs-expert Skills/agent-ops/ || true
+move_or_track Docs/product/docs/context7 Skills/agent-ops/
+move_or_track Docs/product/docs/agents-md Skills/agent-ops/
+move_or_track Docs/product/docs/llm-wiki Skills/content-publishing/
+move_or_track Docs/product/docs/docs-expert Skills/agent-ops/
 
 # Move Docs/product/review/*
-git mv Docs/product/review/agent-native-audit Skills/agent-ops/ || true
+move_or_track Docs/product/review/agent-native-audit Skills/agent-ops/
 
 # Move Docs/product/ops/*
-git mv Docs/product/ops/fallback-release Skills/agent-ops/ || true
-git mv Docs/product/ops/release Skills/agent-ops/ || true
-git mv Docs/product/ops/triage Skills/agent-ops/ || true
-git mv Docs/product/ops/resolve-todo-parallel Skills/agent-ops/ || true
-git mv Docs/product/ops/production-deployment Skills/agent-ops/ || true
-git mv Docs/product/ops/decide-build-primitive Skills/agent-ops/ || true
+move_or_track Docs/product/ops/fallback-release Skills/agent-ops/
+move_or_track Docs/product/ops/release Skills/agent-ops/
+move_or_track Docs/product/ops/triage Skills/agent-ops/
+move_or_track Docs/product/ops/resolve-todo-parallel Skills/agent-ops/
+move_or_track Docs/product/ops/production-deployment Skills/agent-ops/
+move_or_track Docs/product/ops/decide-build-primitive Skills/agent-ops/
 
 # Move Docs/product/domain/*
-git mv Docs/product/domain/agent-native-architecture Skills/backend-platform/ || true
-git mv Docs/product/domain/oak-api Skills/backend-platform/ || true
-git mv Docs/product/domain/chatgpt-apps Skills/product-strategy/ || true
+move_or_track Docs/product/domain/agent-native-architecture Skills/backend-platform/
+move_or_track Docs/product/domain/oak-api Skills/backend-platform/
+move_or_track Docs/product/domain/chatgpt-apps Skills/product-strategy/
 
 # Move Docs/product/strategy/*
-git mv Docs/product/strategy/project-improver Skills/product-strategy/ || true
-git mv Docs/product/strategy/product-design-critic Skills/product-strategy/ || true
-git mv Docs/product/strategy/brainstorming Skills/product-strategy/ || true
+move_or_track Docs/product/strategy/project-improver Skills/product-strategy/
+move_or_track Docs/product/strategy/product-design-critic Skills/product-strategy/
+move_or_track Docs/product/strategy/brainstorming Skills/product-strategy/
+
+if (( missing > 0 )); then
+  echo "Aborting: $missing expected moves were skipped." >&2
+  exit 1
+fi

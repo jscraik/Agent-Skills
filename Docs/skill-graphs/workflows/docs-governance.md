@@ -20,7 +20,7 @@ Enforces documentation policy with mode-aware linting and GitHub summary publish
 
 | EVENT | BRANCH | PATHS |
 |-------|--------|-------|
-| PR | Any | `docs/**`, `CONTRIBUTING.md`, `Infrastructure/docs-policy.json`, `Infrastructure/scripts/validation-and-linting/docs_lint.py`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/workflows/docs-governance.yml` |
+| PR | Any | `Docs/**`, `CONTRIBUTING.md`, `Infrastructure/docs-policy.json`, `Infrastructure/scripts/validation-and-linting/docs_lint.py`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/workflows/docs-governance.yml` |
 | Push | `main` | Same as PR |
 | WDsp | — | Same as PR (manual override) |
 

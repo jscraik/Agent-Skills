@@ -141,8 +141,8 @@ Not owned by this spec:
 | exception_code                      | lane_id | blocker_code                           | owner_role                         | evidence_command                                             | freshness_window_hours | expiry_policy |
 | ----------------------------------- | ------- | -------------------------------------- | ---------------------------------- | ------------------------------------------------------------ | ---------------------- | ------------- |
 | `compat.ask.error_code_unreachable` | 4       | `BLOCKER_ASK_CONTRACT_DRIFT`           | `ask-contract-owner`               | `bin/ask repo validate`                                      | 24                     | `never`       |
-| `compat.runtime.parity_regression`  | 2       | `BLOCKER_RUNTIME_SEPARATION_DRIFT`     | `runtime-separation-owner`         | `bash scripts/validation-and-linting/verify-work.sh --project-governance`           | 24                     | `never`       |
-| `compat.cert.evidence_stale`        | 1       | `BLOCKER_CERTIFICATION_EVIDENCE_STALE` | `skill-family-certification-owner` | `python3 scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict` | 24                     | `never`       |
+| `compat.runtime.parity_regression`  | 2       | `BLOCKER_RUNTIME_SEPARATION_DRIFT`     | `runtime-separation-owner`         | `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`           | 24                     | `never`       |
+| `compat.cert.evidence_stale`        | 1       | `BLOCKER_CERTIFICATION_EVIDENCE_STALE` | `skill-family-certification-owner` | `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict` | 24                     | `never`       |
 
 ### Lane owner and escalation policy (normative)
 

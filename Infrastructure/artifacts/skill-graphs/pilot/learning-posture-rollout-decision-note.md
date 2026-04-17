@@ -22,7 +22,13 @@ Rollout posture: keep pilot-only; do not expand to additional skills yet.
   - `Skills/systematic-debugging`
   - `interview/interview-me`
 - `Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict` passed.
+  - Evidence timestamp (UTC): `2026-03-11T10:29:12.729871Z`
+  - Evidence artifact: `Infrastructure/artifacts/skill-graphs/pilot/learning-posture-pilot-conformance-summary.json`
 - `Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py --strict --run-state-check` failed (`legacy_partial` and `missing_mandatory` historical run artifacts).
+  - Evidence timestamp (UTC): `2026-03-11T10:29:12.729871Z`
+  - Evidence artifacts:
+    - `Infrastructure/artifacts/skill-graphs/graph-adapter/notes/blocker--parity-legacy-partial.md`
+    - `Infrastructure/artifacts/skill-graphs/graph-adapter/notes/blocker--parity-missing-mandatory.md`
 
 ## Risk/Blocker Summary
 

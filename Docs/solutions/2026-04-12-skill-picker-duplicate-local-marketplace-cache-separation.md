@@ -3,8 +3,8 @@ title: Skill picker duplicate elimination via local marketplace cache separation
 asset_family: skill discovery and runtime projection hygiene
 owner: Agent Skills Team
 source_artifact: Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
-freshness_reviewed_on: 2026-04-12
-last_updated: 2026-04-12
+freshness_reviewed_on: 2026-04-17
+last_updated: 2026-04-17
 review_after_days: 60
 ---
 

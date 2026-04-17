@@ -162854,7 +162854,7 @@
         "bash npx --yes @brainwav/diagram all . --output-dir .diagram",
         "bash npx --yes @brainwav/diagram analyze . --json > Infrastructure/artifacts/diagrams/analyze.json",
         "bash npx --yes @brainwav/diagram test . --format console",
-        "bash Infrastructure/scripts/skill-graph/refresh-diagram-context.sh --dry-run Infrastructure/scripts/skill-graph/refresh-diagram-context.sh --force",
+        "bash Infrastructure/scripts/skill-graph/refresh-diagram-context.sh --dry-run --force",
         "npx --yes @brainwav/diagram",
         "sweep and concise summary. - for large repos: narrow patterns/focus first, then expand iteratively. - for ci: prefer"
       ],

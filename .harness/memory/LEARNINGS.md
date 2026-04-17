@@ -16,7 +16,7 @@ Repo-specific agent knowledge base. Append-only.
 > **Scope:** This repo only. Universal gotchas → `~/.codex/instructions/Learnings.md`.
 > **Format:** `**YYYY-MM-DD [Agent]:** <problem> → <fix>`
 
-- **2026-03-09 [Codex]:** `Infrastructure/scripts/validation-and-linting/docs_lint.py` does not accept a `--files` selector; passing it exits with argparse error. Use supported global flags (`--mode`, `--config`, optional report flags) and lint the configured scope.
+- **2026-03-09 [Codex]:** `Infrastructure/scripts/docs_lint.py` does not accept a `--files` selector; passing it exits with argparse error. Use supported global flags (`--mode`, `--config`, optional report flags) and lint the configured scope.
 
 - **2026-03-12 [Codex]:** `run_skill_evals.py --smoke` uses a contract-derived discovery response rather than domain-specific skill output; avoid false regex failures by defining dedicated `smoke_mode` cases and filtering smoke runs to those cases.
 
@@ -48,7 +48,7 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-03-12 [Codex]:** In Ars Contexta skill-source lookups, `fd` with quoted wildcards like `fd "*pipeline*"` is parsed as regex and fails (`repetition operator missing expression`); use `fd --glob "*pipeline*"` for filename matching.
 
-- **2026-03-15 [Gemini]:** Antigravity `/` slash command shows no skills when `~/.gemini/antigravity/skills` symlink and `~/.gemini/antigravity/skills.txt` are missing, or when `skills-antigravity/` in the repo is empty. → Run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` (or `just sync`) from this repo to rebuild the `skills-antigravity/` projection, create the symlink at `~/.gemini/antigravity/skills`, and write `skills.txt`. Also run `python3 Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py` if MCP tools are missing. Restart Antigravity or type `/refresh` after syncing.
+- **2026-03-15 [Gemini]:** Antigravity `/` slash command shows no skills when `~/.gemini/antigravity/skills` symlink and `~/.gemini/antigravity/skills.txt` are missing, or when `skills-antigravity/` in the repo is empty. → Run `bash Infrastructure/scripts/sync_skills.sh` (or `just sync`) from this repo to rebuild the `skills-antigravity/` projection, create the symlink at `~/.gemini/antigravity/skills`, and write `skills.txt`. Also run `python3 Infrastructure/scripts/sync_mcp.py` if MCP tools are missing. Restart Antigravity or type `/refresh` after syncing.
 
 - **2026-03-16 [Gemini]:** Skill graph had 92 isolated nodes and 0 density. → Created 7 topic-map MOC files under `docs/skill-graphs/topic-maps/` (frontend-ui, backend-platform, agent-ops, product-strategy, security-ops, content-publishing, mobile-native, plus `index.md`) and added `## See Also` tables to 19 SKILL.md files with `[[wiki-link]]` cross-refs. After running `bash feedback-loop.sh`, graph health moved from HIGH drift to LOW/stable_state. Sync with `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` after any batch SKILL.md edit.
 
@@ -66,11 +66,11 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-03-17 [Gemini]:** When validating SKILL.md See Also vs adjacency.yaml drift, a threshold of 0 is too strict if the YAML is rebuilt from a different canonical SKILL.md than what the validator walks. Use `DRIFT_THRESHOLD=5` in CI and run `build-adjacency-yaml.py` + `validate-adjacency.py` in sequence to detect real drift vs. symlink-induced false positives.
 
-- **2026-03-17 [Gemini]:** `Infrastructure/scripts/skill-graph/query-graph.py` provides BFS-based skill routing with colour output, weight display, and `--reverse` in-link traversal. This is the fastest way for agents to answer "what should I chain with skill X" — append the one-liner to the agent-ops topic map and repo README to ensure discoverability.
+- **2026-03-17 [Gemini]:** `Infrastructure/scripts/query-graph.py` provides BFS-based skill routing with colour output, weight display, and `--reverse` in-link traversal. This is the fastest way for agents to answer "what should I chain with skill X" — append the one-liner to the agent-ops topic map and repo README to ensure discoverability.
 
 - **2026-03-17 [Codex]:** `run_skill_evals.py` case failures with empty final output can be environment-caused (usage-limit/auth errors) rather than skill regression → inspect report `codex/stderr.txt` and `stdout.txt` before changing skill logic.
 
-- **2026-03-17 [Codex]:** `run_skill_evals.py` and `docs_lint.py` false negatives are often caused by stale or missing skill sync artifacts; rebuild projections with `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` and verify `/skills-antigravity/` plus `skills.txt` before blaming skill logic for missing invocations.
+- **2026-03-17 [Codex]:** `run_skill_evals.py` and `docs_lint.py` false negatives are often caused by stale or missing skill sync artifacts; rebuild projections with `bash Infrastructure/scripts/sync_skills.sh` and verify `/skills-antigravity/` plus `skills.txt` before blaming skill logic for missing invocations.
 
 - **2026-03-17 [Codex]:** During skill install review, validating import quality before enforcing a full fold/merge-first deconflict pass against existing operational skills can delay the correct consolidation call. → Fix: run a mandatory capability overlap matrix first (existing skills vs incoming skill), record an explicit `merge|fold|improve-existing|install-new` decision before any install edits, and treat prior duplicate incidents as hard guardrails.
 
@@ -86,7 +86,7 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-04-05 [Codex]:** `skill-installer` diagnostic logs that echo override payloads can trigger CodeQL `Clear-text logging of sensitive information` alerts. -> Log redacted metadata (for example override count/presence) instead of raw override values.
 
-- **2026-04-07 [Codex]:** `python3 Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py` can fail on macOS when system Python 3.9 lacks `tomli`, and `shutil.which("python3.12")` can still miss the interpreter in constrained PATH sessions. -> Add a TOML-load fallback that probes absolute interpreter paths (`/usr/local/bin/python3.12`, `/opt/homebrew/bin/python3.12`, etc.) and parses via `tomllib` in that subprocess.
+- **2026-04-07 [Codex]:** `python3 Infrastructure/scripts/sync_mcp.py` can fail on macOS when system Python 3.9 lacks `tomli`, and `shutil.which("python3.12")` can still miss the interpreter in constrained PATH sessions. -> Add a TOML-load fallback that probes absolute interpreter paths (`/usr/local/bin/python3.12`, `/opt/homebrew/bin/python3.12`, etc.) and parses via `tomllib` in that subprocess.
 
 - **2026-04-08 [Codex]:** Repo harness: login-shell automation used by this repo can fail with `Could not open a connection to your authentication agent` when `SSH_AUTH_SOCK` is exported only in `.zshrc`. -> Export the 1Password agent socket from `.zprofile` (and keep `.zshrc` aligned), then verify with `zsh -lc 'ssh-add -l'` and `ssh -T git@github.com` before running repo workflows. GitHub SSH success may still return exit code `1`; for harness checks, match the banner `Hi USERNAME! You've successfully authenticated, but GitHub does not provide shell access.` instead of relying on exit code alone.
 
@@ -94,8 +94,10 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-04-12 [Codex]:** Plugin disappearance in `~/.codex-red` came from cache layout mismatch: runtime resolves plugins at `~/.codex-*/Plugins/cache/<marketplace>/<plugin>`, but cache content had been nested under `local/` or `<version|sha>/`, causing `failed to load plugin: plugin is not installed`. -> Fix by flattening cache roots during sync and in overlap-remediation paths.
 - **2026-04-12 [Codex]:** Cache-path separation alone was insufficient: Codex profile homes also require projected `Plugins/marketplace.json` plus repaired plugin-cache roots. -> Keep plugin families loaded from plugin scope and repair cache roots before overlap checks in Codex homes.
-- **2026-04-12 [Codex]:** Duplicate prevention policy in this repo no longer keeps plugin families in flat projection. -> `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` must gate plugin-owned skills through `is_plugin_visible_router_skill_name`; default policy keeps router list empty and allows only the `.system` bridge quartet in flat projection.
+- **2026-04-12 [Codex]:** Duplicate prevention policy in this repo no longer keeps plugin families in flat projection. -> `Infrastructure/scripts/sync_skills.sh` must gate plugin-owned skills through `is_plugin_visible_router_skill_name`; default policy keeps router list empty and allows only the `.system` bridge quartet in flat projection.
 - **2026-04-12 [Codex]:** Overlap auditing must allow both configured router exceptions and `system_bridge_skill_names` (`skill-creator`, `skill-installer`, `plugin-creator`, `plugin-installer`) so runtime checks fail only on real unintended duplication.
 - **2026-04-12 [Codex]:** In non-symlinked Codex profile homes (for example `~/.codex-red/plugins` as a real directory), projecting `marketplace.json` without `~/.codex-*/Plugins/<plugin>` source mirrors breaks `./Plugins/<plugin>` resolution and can hide local plugin families. -> During profile sync, create/update per-plugin source symlinks under the profile `Plugins/` directory.
 - **2026-04-12 [Codex]:** Cache flattening failed silently when rsync tried to prune stale nested plugin directories without force-delete semantics (`cannot delete non-empty directory: 0.1.0/...`). -> Use `rsync --delete --force` in runtime cache projection and remediation paths so versioned cache ghosts are actually removed.
 - **2026-04-12 [Codex]:** `.system` bridge policy must stay explicit: only `skill-creator`, `skill-installer`, `plugin-creator`, and `plugin-installer` should route through `.agents/skills/.system/*`; route them after `.system` link creation to keep plugin picker visibility stable while avoiding broad hidden-lane drift.
+
+- **2026-04-17 [Codex]:** Repository script paths evolved after March/April refactors (`sync_skills.sh`, `verify-work.sh`, and `docs_lint.py` moved into scoped directories), but this file remains append-only. Preserve historical command strings as-run and append new entries for current-equivalent paths instead of rewriting older bullets in place.

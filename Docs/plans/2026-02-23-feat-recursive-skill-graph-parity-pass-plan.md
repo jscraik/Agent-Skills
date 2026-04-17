@@ -469,7 +469,7 @@ tasks:
 - `python3 Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py --runs-root Infrastructure/artifacts/skill-graphs/runs --window-days 3`
 - `bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh --changed-only --base-sha HEAD~1 --head-sha HEAD`
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
-- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ### Enhanced Verification matrix (added)
 

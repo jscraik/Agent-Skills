@@ -374,7 +374,7 @@ Operational validation:
 Validation command set (spec verification hygiene):
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
-- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Open Questions
 - No blocking open questions for v1.

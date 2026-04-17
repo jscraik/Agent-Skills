@@ -495,14 +495,14 @@ Traceability: R5, R6, R7, R8; spec observability + readiness checks, `SA21`, `SA
 
 ## Sources and References
 
-- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](/Users/jamiecraik/dev/agent-skills/docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
-- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](/Users/jamiecraik/dev/agent-skills/Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
-- Managed asset doctrine: [managed-asset-lifecycle.md](/Users/jamiecraik/dev/agent-skills/docs/reference/managed-asset-lifecycle.md)
-- Question lifecycle: [question-lifecycle.md](/Users/jamiecraik/dev/agent-skills/docs/skill-graphs/question-lifecycle.md)
+- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](/docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
+- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](/Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
+- Managed asset doctrine: [managed-asset-lifecycle.md](/docs/reference/managed-asset-lifecycle.md)
+- Question lifecycle: [question-lifecycle.md](/docs/skill-graphs/question-lifecycle.md)
 - Validation surfaces:
-  - [lint_openai_skill_format.sh](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
-  - [quick_validate.py](/Users/jamiecraik/dev/agent-skills/Skills/skill-creator/Infrastructure/scripts/quick_validate.py)
-  - [run_skill_evals.py](/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py)
-  - [test_run_skill_evals.py](/Users/jamiecraik/dev/agent-skills/Skills/skill-builder/Infrastructure/scripts/test_run_skill_evals.py)
+  - [lint_openai_skill_format.sh](/Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
+  - [quick_validate.py](/Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py)
+  - [run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py)
+  - [test_run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py)
 - Derived readiness artifact:
-  - [skill-authoring-validation-maturity-matrix.md](/Users/jamiecraik/dev/agent-skills/docs/reference/skill-authoring-validation-maturity-matrix.md)
+- [skill-authoring-validation-maturity-matrix.md](/docs/reference/skill-authoring-validation-maturity-matrix.md)

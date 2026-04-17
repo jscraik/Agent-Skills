@@ -407,7 +407,7 @@ Authoring checks:
 - `bash Infrastructure/scripts/validate_all.sh`
 Release gates (blocking):
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
-- `bash ~/.codex/Infrastructure/scripts/validation-and-linting/verify-work.sh`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Rollout / Migration / Monitoring
 Rollout approach:

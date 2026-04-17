@@ -341,8 +341,12 @@ cp "$RECOMMEND_PATH" "$RECOMMEND_DIR/latest.json"
 GRAPH_GEN="$VAULT_ROOT/Infrastructure/scripts/skill-graph/gen-skill-graph.py"
 GRAPH_HTML="${HOME}/.agents/diagrams/skill-graph.html"
 if [[ -e "$GRAPH_GEN" ]] && [[ -e "$EDGES_OUT" ]]; then
-  python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" || true
-  echo "graph:    $GRAPH_HTML"
+  mkdir -p "$(dirname "$GRAPH_HTML")"
+  if python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" && [[ -e "$GRAPH_HTML" ]]; then
+    echo "graph:    $GRAPH_HTML"
+  else
+    echo "WARN: graph generation failed: $GRAPH_HTML" >&2
+  fi
 fi
 
 echo "feedback-loop: PASS"
