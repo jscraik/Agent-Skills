@@ -13,6 +13,7 @@ and the linter's behaviour against synthetic wiki fixtures.
 
 from __future__ import annotations
 
+import importlib.util
 import re
 import sys
 import tempfile
@@ -22,10 +23,19 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 WIKI_ROOT = REPO_ROOT / "docs" / "skill-ops-wiki" / "wiki"
+WIKI_LINT_PATH = REPO_ROOT / "scripts" / "validation-and-linting" / "wiki_lint.py"
 
-# Put Infrastructure/scripts/ on the path so we can import wiki_lint helpers.
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-from validation-and-linting import wiki_lint  # noqa: E402
+def _load_wiki_lint_module():
+    spec = importlib.util.spec_from_file_location("wiki_lint_under_test", WIKI_LINT_PATH)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load wiki_lint module from {WIKI_LINT_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+wiki_lint = _load_wiki_lint_module()
 
 # ---------------------------------------------------------------------------
 # Helpers

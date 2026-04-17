@@ -9,6 +9,7 @@ import time
 import sys
 from typing import Any, Dict, Optional
 from pathlib import Path
+from urllib.parse import urlparse
 
 from patchright.sync_api import BrowserContext, Page
 
@@ -60,8 +61,9 @@ class BrowserSession:
             # Navigate to notebook
             self.page.goto(self.notebook_url, wait_until="domcontentloaded", timeout=30000)
 
-            # Check if login is needed — controlled Playwright session, not user-supplied URL
-            if "accounts.google.com" in self.page.url:
+            # Check if login is needed.
+            page_host = (urlparse(self.page.url).hostname or "").lower()
+            if page_host == "accounts.google.com":
                 raise RuntimeError("Authentication required. Please run auth_manager.py setup first.")
 
             # Wait for page to be ready

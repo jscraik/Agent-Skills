@@ -94,24 +94,50 @@ function extractYouTubeId(input) {
   return m ? m[1] : null;
 }
 
+const NAMED_HTML_ENTITIES = Object.freeze({
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+});
+
 function decodeHtmlEntities(input) {
   if (!input) return input;
-  // Some transcripts come back double-encoded (e.g. "&amp;#39;").
-  // Decode up to 2 passes; stop once stable.
-  let text = input;
-  for (let i = 0; i < 2; i++) {
-    const decoded = text
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'")
-      .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
-      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)));
-    if (decoded === text) break;
-    text = decoded;
+  return String(input).replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos);/g, (_, entity) => {
+    let codePoint = null;
+    if (entity.startsWith("#x")) {
+      codePoint = parseInt(entity.slice(2), 16);
+    } else if (entity.startsWith("#")) {
+      codePoint = Number(entity.slice(1));
+    } else {
+      return NAMED_HTML_ENTITIES[entity] ?? `&${entity};`;
+    }
+    if (!Number.isFinite(codePoint)) return `&${entity};`;
+    try {
+      return String.fromCodePoint(codePoint);
+    } catch {
+      return `&${entity};`;
+    }
+  });
+}
+
+function stripMarkup(input) {
+  if (!input) return input;
+  let inTag = false;
+  let output = "";
+  for (const ch of String(input)) {
+    if (ch === "<") {
+      inTag = true;
+      continue;
+    }
+    if (ch === ">") {
+      inTag = false;
+      continue;
+    }
+    if (!inTag) output += ch;
   }
-  return text;
+  return output;
 }
 
 function formatTimestamp(seconds) {
@@ -133,8 +159,7 @@ function cleanSegments(segments, { keepBrackets } = {}) {
       .trim();
     if (!s) continue;
 
-    // Subtitles often contain HTML-ish tags; strip them.
-    const withoutTags = s.replace(/<[^>]+>/g, "").trim();
+    const withoutTags = stripMarkup(s).trim();
     const withoutBrackets = keepBrackets ? withoutTags : withoutTags.replace(/\[[^\]]*\]/g, "").trim();
     const withoutCurlies = withoutBrackets.replace(/\{[^}]+\}/g, "").replace(/♪/g, "").trim();
     const t = withoutCurlies.replace(/\s+/g, " ").trim();

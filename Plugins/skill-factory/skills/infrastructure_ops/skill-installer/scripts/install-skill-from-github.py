@@ -581,22 +581,12 @@ def _resolve_dest_root(dest: str | None) -> str:
 def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_suffix(path.suffix + ".tmp")
-    tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    fd = os.open(tmp_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(rendered)
     tmp_path.replace(path)
-
-
-def _redact_manifest_payload_for_storage(payload: dict[str, object]) -> dict[str, object]:
-    sanitized = json.loads(json.dumps(payload))
-    security_policy = sanitized.get("security_policy")
-    if isinstance(security_policy, dict):
-        signer_allowlist = security_policy.get("signer_allowlist")
-        if isinstance(signer_allowlist, dict):
-            signer_allowlist["emails"] = ["[redacted]"] if signer_allowlist.get("emails") else []
-            signer_allowlist["domains"] = ["[redacted]"] if signer_allowlist.get("domains") else []
-            signer_allowlist["logins"] = ["[redacted]"] if signer_allowlist.get("logins") else []
-        if "trusted_repos" in security_policy:
-            security_policy["trusted_repos"] = ["[redacted]"]
-    return sanitized
+    os.chmod(path, 0o600)
 
 
 def _redact_manifest_payload_for_storage(payload: dict[str, object]) -> dict[str, object]:

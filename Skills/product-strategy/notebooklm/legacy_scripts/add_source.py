@@ -12,6 +12,7 @@ import time
 import re
 import traceback
 from pathlib import Path
+from urllib.parse import urlparse
 
 from patchright.sync_api import sync_playwright
 
@@ -206,8 +207,9 @@ def add_url_source(notebook_url: str, source_url: str, headless: bool = True) ->
         print("  URL cannot be empty")
         return None
 
-    # URL content check for source type classification (not used for security decisions)
-    is_youtube = "youtube.com" in source_url or "youtu.be" in source_url
+    parsed_source = urlparse(source_url.strip())
+    source_host = (parsed_source.hostname or "").lower()
+    is_youtube = source_host in {"youtube.com", "www.youtube.com", "youtu.be"} or source_host.endswith(".youtube.com")
     source_type = "YouTube" if is_youtube else "Website"
 
     print(f"  Adding {source_type} source: {source_url}")

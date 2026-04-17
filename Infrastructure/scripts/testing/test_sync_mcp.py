@@ -14,6 +14,7 @@ Run with:
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import sys
 import tempfile
@@ -50,8 +51,20 @@ def _ensure_tomli_available() -> None:
     sys.modules["tomli"] = fallback_module
 
 _ensure_tomli_available()
-sys.path.insert(0, str(SCRIPT_DIR))
-from lifecycle-and-sync import sync_mcp  # noqa: E402
+SYNC_MCP_PATH = SCRIPT_DIR.parent / "lifecycle-and-sync" / "sync_mcp.py"
+
+
+def _load_sync_mcp_module():
+    spec = importlib.util.spec_from_file_location("sync_mcp_under_test", SYNC_MCP_PATH)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load sync_mcp module from {SYNC_MCP_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+sync_mcp = _load_sync_mcp_module()
 
 # ---------------------------------------------------------------------------
 # Helper
