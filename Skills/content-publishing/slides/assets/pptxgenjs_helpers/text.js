@@ -220,7 +220,6 @@ function calcTextBox(fontSizePt, opts = {}) {
   const paraSpaceAfterPt = toNumber(opts.paraSpaceAfter, 0) || 0; // points
   const lineHeightIn = (fontSizePt / 72) * leading;
   const margins = normalizeMargins(opts.margin);
-  const measurer = TEXT_MEASURER;
 
   const hasLines = Number.isFinite(toNumber(opts.lines, NaN));
   const hasWidth = Number.isFinite(toNumber(opts.w, NaN));
