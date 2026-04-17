@@ -22,7 +22,7 @@ entry = "bash -lc 'make hooks-commit-msg HOOK_COMMIT_MSG_FILE=\"$1\"' --"
 language = "system"
 stages = ["commit-msg"]
 pass_filenames = true
-always_run = true
+always_run = false
 
 [[repos.hooks]]
 id = "hooks-pre-push"
