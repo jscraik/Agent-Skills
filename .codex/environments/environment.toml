@@ -6,6 +6,12 @@ name = "harness local environment"
 script = '''
 set -euo pipefail
 
+if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  # shellcheck source=.codex/environments/detach-head-helper.sh
+  source "$repo_root/.codex/environments/detach-head-helper.sh"
+  codex_attach_detached_head
+fi
+mise trust --yes .mise.toml
 mise install
 npm install
 '''
@@ -16,6 +22,12 @@ icon = "tool"
 command = '''
 set -euo pipefail
 
+if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  # shellcheck source=.codex/environments/detach-head-helper.sh
+  source "$repo_root/.codex/environments/detach-head-helper.sh"
+  codex_attach_detached_head
+fi
+mise trust --yes .mise.toml
 mise install
 npm install
 '''
@@ -87,6 +99,12 @@ command = '''
 set -euo pipefail
 
 command -v mise >/dev/null 2>&1
+if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  # shellcheck source=.codex/environments/detach-head-helper.sh
+  source "$repo_root/.codex/environments/detach-head-helper.sh"
+  codex_attach_detached_head
+fi
+mise trust --yes .mise.toml
 mise install
 '''
 
