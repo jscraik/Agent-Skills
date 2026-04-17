@@ -349,9 +349,9 @@ Out of scope:
 - Modify: `Infrastructure/artifacts/validation/latest/*` (via validation workflows)
 - Modify: `Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json`
 - Modify: `Infrastructure/artifacts/skill-graphs/onboarding/skill-onboarding-checklist-2026-03-29.md`
-- Test: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 - Test: `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - Test: `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- Test: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 - Test: `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
 
 **Approach:**
@@ -456,7 +456,7 @@ P1 | completed | Codex | Event-envelope metrics now include `total/waived/unreso
 P2 | completed | Codex | Deterministic owner map added at `Infrastructure/artifacts/skill-graphs/onboarding/skill-owner-map.json`; regenerated checklist has no placeholder owner/due/status values.
 P3 | completed | Codex | Plan-state reconciliation applied to `.agents/PLANS.md` and onboarding plan docs with explicit closeout references.
 P4 | completed | Codex | Worktree closeout scope classified to onboarding-readiness lane; sandbox-only sync-path constraints documented and resolved for validation by running sync with explicit permission scope.
-P5 | completed | Codex | Validation stack completed: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`, `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, `just validate`, `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`, plus targeted closeout tests.
+P5 | completed | Codex | Validation stack completed: `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`, `just validate`, `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`, plus targeted closeout tests.
 
 ## Acceptance Checklist
 

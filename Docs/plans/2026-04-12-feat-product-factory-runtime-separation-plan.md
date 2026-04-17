@@ -488,6 +488,7 @@ If any acceptance flow fails, phase promotion is blocked.
 Phase 0 bootstrap ladder (before new validators exist):
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `vale **/*.md **/*.mdx **/*.adoc **/*.rst` (required for documentation linting)
 - `bin/ask skills list --json`
 - `bin/ask plugins doctor --json`
 - targeted baseline plugin status checks from declared slices: `bin/ask plugins status <plugin> --json`
@@ -502,6 +503,7 @@ Phase A-F per-PR mandatory lane (after Phase 0 deliverables land):
 - core lane (all migration PRs):
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `vale **/*.md **/*.mdx **/*.adoc **/*.rst` (required for documentation linting)
 - purge stale derived artifacts for affected slices.
 - regenerate projections/caches for affected slices before any comparator or plugin parity checks.
 - `bin/ask repo validate`
@@ -523,6 +525,7 @@ Phase A-F per-PR mandatory lane (after Phase 0 deliverables land):
 Phase A-F phase-promotion exhaustive lane:
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `vale **/*.md **/*.mdx **/*.adoc **/*.rst` (required for documentation linting)
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (rerun after verify-work to catch generated-path drift)
 - purge stale derived artifacts for all promoted slices.
 - regenerate projections/caches for all promoted slices before exhaustive checks.
@@ -566,6 +569,7 @@ Mandatory rollback validation:
 - run purge/regenerate steps for affected derived surfaces;
 - `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `vale **/*.md **/*.mdx **/*.adoc **/*.rst` (required for documentation linting)
 - `bin/ask repo validate`
 - `bin/ask repo doctor-catalog --strict`
 - `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`
