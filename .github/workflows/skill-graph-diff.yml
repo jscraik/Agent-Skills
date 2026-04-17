@@ -61,7 +61,7 @@ jobs:
       - name: Generate graph diff comment
         id: diff
         run: |
-          python3 head/Infrastructure/scripts/graph-diff.py /tmp/base-edges.json /tmp/head-edges.json > /tmp/graph-diff.md
+          python3 head/Infrastructure/scripts/skill-graph/graph-diff.py /tmp/base-edges.json /tmp/head-edges.json > /tmp/graph-diff.md
           echo "body<<EOF" >> $GITHUB_OUTPUT
           cat /tmp/graph-diff.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
