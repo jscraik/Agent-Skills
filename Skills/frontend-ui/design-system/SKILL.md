@@ -45,7 +45,7 @@ metadata:
   - Local CLI: write outputs to `./Infrastructure/artifacts/`
   - Hosted shell: write outputs to `/mnt/data/`
 
-## Scope and triggers
+## When to use
 - Use this skill when the user asks about design-system behavior, token usage, typography, spacing, iconography, theme variables, or UI styling consistency in this repo.
 - Use this skill when implementing or auditing changes touching `packages/tokens`, `packages/ui/src/styles`, `packages/ui/src/icons`, or design-system docs/stories.
 - Do **not** use this skill for backend-only, infra-only, or MCP server tasks that do not affect UI/design-system layers.

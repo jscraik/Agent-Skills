@@ -44,12 +44,12 @@ Primary triggers:
 - "Refactor this legacy CLI into a Gold Standard 2026 interface."
 - "Define the command tree, JSON schema, and safety gates for [tool]."
 
-## Inputs
+## Required inputs
 - **Source:** A brainstorm path, feature description, or legacy tool definition.
 - **Audience:** Human-first, Agent-first, or Dual-mode hybrid.
 - **Constraints:** Secret handling requirements, platform limits, and ecosystem (Rust, Go, etc.).
 
-## Outputs
+## Deliverables
 - **Technical Contract:** A markdown file in `docs/cli-specs/` following the `schema_version: 1` standard.
 - **CA Matrix:** A set of stable CLI Acceptance IDs for verification.
 - **JSON Schemas:** Machine-readable definitions for all command outputs.

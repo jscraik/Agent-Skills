@@ -19,7 +19,7 @@ metadata:
 - User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
 - User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
 
-## Scope and triggers
+## When to use
 - Focus on standalone custom-agent authoring, installation, and validation for Codex.
 - Default to canonical global write targets in this workspace (`~/dev/configs/codex/agents/`, `~/dev/configs/codex/config.toml`).
 - Do not use this skill for orchestrating active subagent threads or deciding whether the capability should be a skill, prompt, or automation.

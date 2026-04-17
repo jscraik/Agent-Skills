@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-roots=(auth backend frontend github interview product utilities)
+roots=("Skills" "skills-antigravity" "skills-system" "plugins/harness-engineering" "plugins/plugin-factory" "plugins/skill-factory")
 modified=0
 checked=0
 

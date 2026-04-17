@@ -77,7 +77,7 @@ Before starting workflows, verify the CLI is ready:
 2. `notebooklm list --json` → Should return valid JSON (even if empty notebooks list)
 3. If either fails → Run `notebooklm login`
 
-## When This Skill Activates
+## When to use
 
 **Explicit:** User says "/notebooklm", "use notebooklm", or mentions the tool by name
 
@@ -152,3 +152,15 @@ For the CLI quick reference, command output formats, generation parameters, erro
 
 ## Gotchas
 - None yet. Capture recurring failures here as symptom -> cause -> do instead -> check.
+
+## When to use
+- Use when the request clearly matches this skill's owned workflow and expected outputs.
+
+## Required inputs
+- Confirm goal, constraints, and required paths or URLs before execution.
+
+## Deliverables
+- Produce concrete outputs with exact paths, commands run, and verification evidence.
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.

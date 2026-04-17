@@ -40,7 +40,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - Use parallel specialist review for coverage, then one integrated edit pass.
 - Refactor in small reversible steps and keep validation tight after each meaningful edit cluster.
 
-## When to Use
+## When to use
 
 Use this skill when:
 
@@ -53,7 +53,7 @@ Use this skill when:
 Do not use this skill for net-new feature development with no existing diff.
 Do not use this skill for broad architecture rewrites across untouched areas.
 
-## Inputs
+## Required inputs
 
 - Git repository with accessible working tree.
 - Diff context available from staged or unstaged changes.
@@ -68,7 +68,7 @@ Choose one mode before review and keep it explicit in the handoff.
 - `delegated-parallel`: only when the user explicitly requested subagent delegation and true parallel launch is supported.
 - `delegated-serial`: when delegation is requested but true parallel launch is unavailable.
 
-## Outputs
+## Deliverables
 
 Return a single handoff envelope in this shape:
 
@@ -245,3 +245,9 @@ Run after fixes:
 - `../coderabbit/Infrastructure/references/coderabbit-docs/finishing-touches-simplify.md`
 - `Infrastructure/references/modern-hardening-2026.md`
 - `Infrastructure/references/refactor-playbook.md`
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

@@ -24,7 +24,7 @@ Create and evolve Codex skills that are reusable, auditable, and easy for anothe
 - [Examples](#examples)
 - [References](#references)
 
-## When to Use
+## When to use
 
 Use this skill when work involves:
 
@@ -44,7 +44,7 @@ Treat skill authoring as durable systems design:
 - Prefer reusable artifacts over repeated one-off prose.
 - Optimize for maintainability by another agent with no prior context.
 
-## Inputs
+## Required inputs
 
 Collect these inputs before editing:
 
@@ -82,7 +82,7 @@ bash Skills/codex-agent-creator/scripts/install_role.sh --agent-name <name> --ag
 
 5. Include the agent route in handoff notes as `agent_injection_mode: reuse-existing|create-purpose-built`.
 
-## Outputs
+## Deliverables
 
 Produce these deliverables:
 
@@ -189,3 +189,9 @@ Read these files based on the task:
 | [[skillify]] | Convert hand-authored or rough skills into canonical, graph-aware skill packages |
 
 **Topic map:** [[agent-ops]]
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

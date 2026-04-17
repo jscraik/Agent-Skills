@@ -31,7 +31,7 @@ Handoffs:
 - to `plugin-creator` for first-pass local scaffold creation;
 - to `skill-installer` when installed skills need lifecycle hardening or contract/eval upgrades.
 
-## Inputs
+## Required inputs
 
 Install mode minimum inputs:
 - install source (`--repo` or `--url`, plus `--path` plugin root);
@@ -41,7 +41,7 @@ Install mode minimum inputs:
 - validation policy (`--validation-level strict|compat`).
 - note: repo wrappers such as `ask plugins install` may set a repo-local destination default (for example `Plugins/third-party`) to support vendored plugin workflows.
 
-## Outputs
+## Deliverables
 
 Expected outputs from a successful run:
 - installed plugin directory at `<dest>/<plugin-name>`;
@@ -125,3 +125,9 @@ Family gate note:
 | [[plugin-creator]] | Scaffold a fresh local plugin package before install/distribution workflows |
 
 **Topic map:** [[agent-ops]]
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

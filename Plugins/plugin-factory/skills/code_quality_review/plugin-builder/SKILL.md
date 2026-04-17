@@ -66,7 +66,7 @@ Produce only what the request needs:
 - `Infrastructure/references/operational-spec.md` and `Infrastructure/references/deconflict-report.md` when hardening/conversion is in scope;
 - validator evidence summary and explicit blocker notes when checks fail.
 
-## Outputs
+## Deliverables
 
 Return one machine-checkable envelope:
 

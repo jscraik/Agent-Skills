@@ -69,7 +69,7 @@ Collect only the minimum needed to route safely:
 - target artifact path or source repo/path (if provided)
 - constraints (security, policy, portability, timeline)
 
-## Outputs
+## Deliverables
 
 Return one compact routing handoff object in this shape:
 
@@ -140,3 +140,6 @@ If intent cannot be classified with safe confidence:
 - `Infrastructure/references/contract.yaml`
 - `Infrastructure/references/evals.yaml`
 - `Infrastructure/references/task-profile.json`
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.

@@ -223,3 +223,18 @@ Fail-fast rule:
 | [[plugin-installer]] | Install and verify a contract-valid plugin after packaging work is complete |
 
 **Topic map:** [[agent-ops]]
+
+## When to use
+- Use when the request clearly matches this skill's owned workflow and expected outputs.
+
+## Required inputs
+- Confirm goal, constraints, and required paths or URLs before execution.
+
+## Deliverables
+- Produce concrete outputs with exact paths, commands run, and verification evidence.
+
+## Failure mode
+- Stop at the first blocker, report root cause, and provide the safest next command.
+
+## Gotchas
+- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.
