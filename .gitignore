@@ -26,6 +26,10 @@ node_modules/
 
 # Python/build artifacts
 **/__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
 .venv/
 .venv-skillpack/
 .venv-skill-builder/
@@ -115,6 +119,11 @@ FORJAMIE-*.md
 Docs/product/Archive.zip
 logs/
 environment.toml
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
 
 # Install journal logs (timestamped runtime artifacts)
 .install-journal/
