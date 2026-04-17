@@ -39,5 +39,14 @@ codex_attach_detached_head() {
 		git fetch --quiet origin main
 		git branch --set-upstream-to=origin/main "$branch_name" >/dev/null 2>&1 || true
 		echo "[codex] tracking origin/main for $branch_name"
+
+		# Fast-forward if the branch is behind origin/main
+		local branch_tip origin_main_tip
+		branch_tip="$(git rev-parse "$branch_name")"
+		origin_main_tip="$(git rev-parse origin/main)"
+		if [[ "$branch_tip" != "$origin_main_tip" ]]; then
+			echo "[codex] fast-forwarding $branch_name to origin/main"
+			git branch -f "$branch_name" origin/main
+		fi
 	fi
 }

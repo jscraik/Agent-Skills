@@ -83,6 +83,13 @@ class TestEnvironmentTomlContract(unittest.TestCase):
             self.assertIn("mise trust --yes .mise.toml", command)
             self.assertNotIn("mise trust --yes .mise.toml || true", command)
 
+            # Assert that "mise trust" appears before "mise install"
+            trust_idx = command.find("mise trust --yes .mise.toml")
+            install_idx = command.find("mise install")
+            self.assertGreater(trust_idx, -1, "Expected 'mise trust --yes .mise.toml' in command")
+            self.assertGreater(install_idx, -1, "Expected 'mise install' in command")
+            self.assertLess(trust_idx, install_idx, "Expected 'mise trust' to appear before 'mise install'")
+
     def test_guard_branch_skips_when_git_unavailable(self) -> None:
         guard_snippet = """
 if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then

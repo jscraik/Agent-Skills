@@ -155,12 +155,27 @@ class TestDetachHeadHelperBehavior(unittest.TestCase):
             )
 
             _detach_head(clone)
+
+            # Create a new commit on seed and push to origin/main
+            (seed / "update.txt").write_text("update\n", encoding="utf-8")
+            _run_git(seed, "add", ".")
+            _run_git(seed, "commit", "-m", "update")
+            _run_git(seed, "push", "origin", "main")
+
+            # Get the new commit hash from seed
+            new_commit = _run_git(seed, "rev-parse", "HEAD").stdout.strip()
+
             result = _run_snippet(HELPER_SNIPPET, clone)
             self.assertEqual(result.returncode, 0, result.stderr)
             upstream = _run_git(clone, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}")
             self.assertEqual(upstream.stdout.strip(), "origin/main")
+
+            # Assert that fast-forward happened
+            main_commit = _run_git(clone, "rev-parse", "main").stdout.strip()
+            self.assertEqual(main_commit, new_commit)
+
             self.assertIn("[codex] tracking origin/main", result.stdout)
-            self.assertNotIn("[codex] fast-forwarding", result.stdout)
+            self.assertIn("[codex] fast-forwarding", result.stdout)
 
     def test_skips_tracking_without_origin_main(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
