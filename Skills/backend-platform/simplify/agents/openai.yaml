@@ -1,5 +1,0 @@
-interface:
-  display_name: CodeRabbit Simplify
-  short_description: Review changed code for maintainability and behavior-safe simplification
-  icon_small: "../assets/icon-small.png"
-  icon_large: "../assets/icon.png"

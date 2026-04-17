@@ -55,7 +55,7 @@ This spec defines a new contract that makes `llm-wiki` the primary knowledge ope
 - Keep Obsidian as graph-view consumer only, never canonical source-of-truth.
 - Reorganize scaffold authority so canonical sources, factory mechanics, and runtime projections are unambiguous.
 - Absorb blocked lanes 1, 2, and 4 into one contract family without split ownership.
-- Enforce installation governance with a required skill stack: `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, `baseline-ui`.
+- Enforce installation governance with a required skill stack: `llm-wiki`, `simplify`, `uv-python-project-setup`, `baseline-ui`.
 - Enforce inspection-role checks (`@skill-inspector`, `@plugin-inspector`) with deterministic fallback and fail-closed gating.
 - Make blocker taxonomy, ownership, and closeout health reporting deterministic and machine-checkable.
 
@@ -95,7 +95,7 @@ Not owned by this spec:
 
 - `InstallationOrchestrationContract`
   - Fields: `required_skills[]`, `inspector_roles[]`, `fallback_roles[]`, `fail_closed`, `evidence_requirements[]`.
-  - Required skills: `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, `baseline-ui`.
+  - Required skills: `llm-wiki`, `simplify`, `uv-python-project-setup`, `baseline-ui`.
   - Required inspector roles: `skill-inspector`, `plugin-inspector`.
   - Canonical fallback roles when a required inspector role is temporarily unavailable: `repo-research-analyst`, `project-standards-reviewer`.
   - Additional fields: `role_resolution_policy`, `role_resolution_evidence`, `skill_coverage_ratio`.
@@ -233,7 +233,7 @@ Governance and validation dependencies:
 Skill dependencies for installation lane:
 
 - `product/docs/llm-wiki/SKILL.md`
-- `plugins/cache/agent-skills-local/coderabbit/0.1.0/skills/simplify/SKILL.md`
+- `Skills/agent-ops/simplify/SKILL.md`
 - `utilities/uv-python-project-setup/SKILL.md`
 - `frontend/ui/baseline-ui/SKILL.md`
 
@@ -335,7 +335,7 @@ Closeout reporting requirements:
 | SA1  | Mode contract                 | `llm_wiki_primary` is the only primary operating mode and `degraded_compatibility` is explicitly defined for skill-graph | Spec/frontmatter and governance contract show explicit mode ownership and blocking exceptions |
 | SA2  | Source of truth               | Canonical wiki root is explicit and source ownership split (raw/wiki/schema/projection) is unambiguous                   | Authority map and ownership documentation expose single-writer policy per surface             |
 | SA3  | Obsidian boundary             | Obsidian is defined as viewer-only and cannot become canonical writer                                                    | Contract text and validation checks reject source-of-truth ambiguity                          |
-| SA4  | Installation stack            | Installation/migration contract requires `llm-wiki`, `coderabbit:simplify`, `uv-python-project-setup`, `baseline-ui`     | Installation gate evidence includes all required skills or blocks with explicit reason        |
+| SA4  | Installation stack            | Installation/migration contract requires `llm-wiki`, `simplify`, `uv-python-project-setup`, `baseline-ui`                 | Installation gate evidence includes all required skills or blocks with explicit reason        |
 | SA5  | Inspector roles               | `skill-inspector` and `plugin-inspector` are checked before execution with deterministic fallback behavior               | Gate evidence records inspector presence, fallback mapping, and decision path                 |
 | SA6  | Fail-closed governance        | Missing required skills, missing inspector coverage, or missing lane evidence blocks promotion                           | Blocking precedence is exercised in closeout report and promotion denied                      |
 | SA7  | Lane-1 absorption             | Certification/readiness obligations are owned by this pivot contract and cannot remain orphan blockers                   | Lane-1 evaluation recorded in closeout health with explicit pass/block result                 |

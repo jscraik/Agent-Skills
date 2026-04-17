@@ -1,7 +1,0 @@
-interface:
-  display_name: GH Workflow
-  short_description: Canonical GitHub lifecycle orchestration
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png
-  default_prompt: 'Handle this GitHub workflow end-to-end: intake context, perform
-    the requested mode, and return evidence-backed status.'

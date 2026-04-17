@@ -1,6 +1,8 @@
 ---
 name: "imagegen"
 description: "Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas."
+metadata:
+  skill-type: infrastructure_ops
 ---
 
 # Image Generation Skill
@@ -57,6 +59,31 @@ Fallback-only docs/resources for CLI mode:
 - Creating simple shapes, diagrams, wireframes, or icons that are better produced directly in SVG, HTML/CSS, or canvas
 - Making a small project-local asset edit when the source file already exists in an editable native format
 - Any task where the user clearly wants deterministic code-native output instead of a generated bitmap
+
+## Required inputs
+- A concrete prompt describing the requested image outcome.
+- The intended output use: preview-only, or workspace-bound artifact.
+- For edits: the exact target image and unchanged invariants.
+- Any required exact text that must render verbatim.
+- Any explicit avoid-list constraints (style, objects, text, branding).
+
+## Deliverables
+- Generated or edited image output from the built-in `image_gen` tool, or explicit CLI fallback only when requested.
+- For workspace-bound assets, the final image placed at the agreed project path.
+- Final prompt (or prompt delta) used for the accepted output.
+- Clear note of execution mode used: built-in tool or explicit CLI fallback.
+
+## Failure mode
+- If prompt details are insufficient for a high-confidence output, ask a targeted clarification question.
+- If built-in tooling fails, report the failure and offer explicit CLI fallback requirements (`OPENAI_API_KEY`) without auto-switching.
+- If text rendering drifts or invariants break, iterate with a single constrained prompt delta.
+- If output is rejected after iteration, preserve traceability by reporting what changed and what remained fixed.
+
+## Gotchas
+- Do not rely on OS temp-path assumptions for built-in outputs; default is under `$CODEX_HOME/generated_images/...`.
+- Do not claim filesystem-path edit semantics for built-in mode without first loading local images into context.
+- Do not overwrite workspace assets unless explicit replacement is requested.
+- Do not substitute SVG/HTML/CSS placeholders when the user requested a raster asset.
 
 ## Decision tree
 

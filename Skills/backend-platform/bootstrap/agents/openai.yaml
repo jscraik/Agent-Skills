@@ -1,6 +1,0 @@
-interface:
-  display_name: Bootstrap
-  short_description: Bootstrap a local development environment from a GitHub repository
-    URL
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

@@ -264,7 +264,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
   # Lint only the family validator scripts; legacy utility scripts in scripts/
   # are excluded to avoid pre-existing E401 violations in unrelated tooling.
   family_py_scripts=(
-    scripts/validate_skill_authoring_family_benchmarks.py
+    Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
     "${skill_builder_scripts_dir}/yaml_frontmatter.py"
     "${skill_builder_scripts_dir}/skill_gate.py"
     "${skill_builder_scripts_dir}/analyze_skill.py"
@@ -304,7 +304,7 @@ else
   echo "[family-gate] live eval mode disabled: structural eval contract checks only (smoke+release case listings)"
 fi
 
-"${python_cmd[@]}" scripts/validate_skill_authoring_family_benchmarks.py
+"${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
 
 # ---------------------------------------------------------------------------
 # P1.x: pytest unit gate — run validator unit tests
@@ -329,16 +329,10 @@ fi
 if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   echo "[family-gate] running pytest unit tests..."
   pytest_skill_gate_path="${skill_builder_scripts_dir}/test_skill_gate.py"
-  if [[ "$pytest_skill_gate_path" == Plugins/* ]]; then
-    lowercase_pytest_skill_gate_path="plugins/${pytest_skill_gate_path#Plugins/}"
-    if [[ -f "$lowercase_pytest_skill_gate_path" ]]; then
-      pytest_skill_gate_path="$lowercase_pytest_skill_gate_path"
-    fi
-  fi
   if "${pytest_cmd[@]}" \
       "$pytest_skill_gate_path" \
-      scripts/test_validate_skill_authoring_family_benchmarks.py \
-      scripts/test_projection_integrity.py \
+      Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py \
+      Infrastructure/scripts/testing/test_projection_integrity.py \
       -q --tb=short; then
     echo "[family-gate] pytest passed"
   else

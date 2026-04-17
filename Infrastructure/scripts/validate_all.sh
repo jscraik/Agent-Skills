@@ -48,17 +48,27 @@ if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
   python_cmd_display="$PYTHON_BIN"
 elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
-  if mise exec -- uv run --python 3.12 python -c "import sys" >/dev/null 2>&1; then
+  if mise exec -- uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1; then
     python_cmd=(mise exec -- uv run --python 3.12 python)
     python_cmd_display="mise exec -- uv run --python 3.12 python"
-  elif uv run --python 3.12 python -c "import sys" >/dev/null 2>&1; then
+  elif uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1; then
     python_cmd=(uv run --python 3.12 python)
     python_cmd_display="uv run --python 3.12 python"
-    echo "⚠️  Python launcher fallback: mise/uv probe failed, using uv directly"
+    echo "⚠️  Python launcher fallback: mise probe failed, using uv directly"
+  elif python3 -c "import sys, yaml" >/dev/null 2>&1; then
+    python_cmd=(python3)
+    python_cmd_display="python3"
+    echo "⚠️  Python launcher fallback: uv runtime missing yaml, using python3"
   fi
 elif command -v uv >/dev/null 2>&1; then
-  python_cmd=(uv run --python 3.12 python)
-  python_cmd_display="uv run --python 3.12 python"
+  if uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1; then
+    python_cmd=(uv run --python 3.12 python)
+    python_cmd_display="uv run --python 3.12 python"
+  elif python3 -c "import sys, yaml" >/dev/null 2>&1; then
+    python_cmd=(python3)
+    python_cmd_display="python3"
+    echo "⚠️  Python launcher fallback: uv runtime missing yaml, using python3"
+  fi
 fi
 
 if [[ "$output_mode" == "ephemeral" ]]; then
@@ -219,7 +229,7 @@ fi
 
 runtime_consumer_scan_cmd=(
   "${python_cmd[@]}"
-  Infrastructure/scripts/scan_runtime_separation_consumers.py
+  Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
   --emit-readers
   --emit-path-consumers
   --strict
@@ -228,16 +238,16 @@ if [[ "$output_mode" == "persistent" ]]; then
   runtime_consumer_scan_cmd+=(--emit-digests)
 fi
 
-run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" Infrastructure/scripts/validate_runtime_separation_manifest.py --strict
+run_check required runtime-separation-manifest "🧬 Validating runtime-separation manifest..." "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py --strict
 run_check required runtime-separation-consumers "🧪 Scanning runtime-separation consumer inventories..." "${runtime_consumer_scan_cmd[@]}"
-run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" Infrastructure/scripts/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
-run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." env RECURSIVE_VALIDATION_GUARD=1 "${python_cmd[@]}" Infrastructure/scripts/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
-run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash Infrastructure/scripts/verify_wrapper_contract_fixtures.sh --runtime-separation
-run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" Infrastructure/scripts/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
-run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash Infrastructure/scripts/verify_runtime_separation_writer_mutations.sh --strict
-run_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash Infrastructure/scripts/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
+run_check required runtime-separation-reader-compat "🧪 Verifying runtime-separation reader compatibility..." "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py --schema-current GOVERNANCE/runtime-separation/slices.yaml --schema-prev GOVERNANCE/runtime-separation/fixtures/schema-prev.yaml
+run_check required runtime-separation-current "🧱 Building runtime-separation current artifact..." env RECURSIVE_VALIDATION_GUARD=1 "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py --output "$runtime_separation_current" --recursive-validation-guard
+run_check required runtime-separation-wrapper-fixtures "🧾 Verifying runtime-separation wrapper fixtures..." bash Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh --runtime-separation
+run_check required runtime-separation-baseline-compare "🧭 Comparing runtime-separation baseline..." "${python_cmd[@]}" Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py --baseline GOVERNANCE/runtime-separation/baseline.json --current "$runtime_separation_current"
+run_check required runtime-separation-writer-mutations "🛡️  Verifying runtime-separation writer authority..." bash Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh --strict
+run_check required runtime-separation-profile-home "🏠 Building runtime-separation profile-home artifact..." bash Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh --repo-current "$runtime_separation_current" --output "$run_dir/runtime-separation-profile-home.json"
 
-run_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
+run_check required selection-gate-severity "📦 Emitting selection gate severity artifact..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py --check-results "$check_results_file" --output "$run_dir/selection-gate-severity.json" --schema "Infrastructure/config/schemas/selection-gate-severity.v1.schema.json" --run-id "$run_id" --required-check selection-contract --required-check router-schema --required-check skill-catalog --required-check docs-lint --required-check ask-cli-modularity
 
 echo ""
 echo "Validation summary:"

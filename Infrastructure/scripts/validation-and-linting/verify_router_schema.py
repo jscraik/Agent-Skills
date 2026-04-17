@@ -9,7 +9,18 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+def _discover_repo_root() -> Path:
+    resolved = Path(__file__).resolve()
+    for candidate in resolved.parents:
+        if (candidate / ".git").exists():
+            return candidate
+    for candidate in resolved.parents:
+        if (candidate / "Infrastructure").is_dir() and (candidate / "scripts").is_dir():
+            return candidate
+    return resolved.parents[2]
+
+
+REPO_ROOT = _discover_repo_root()
 schema_lib_candidates = [
     REPO_ROOT / "utilities" / "skill-builder" / "scripts",
     REPO_ROOT / "Skills" / "skill-builder" / "scripts",

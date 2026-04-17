@@ -48,7 +48,7 @@ def _marketplace_payload(repo_root: Path) -> tuple[dict[str, Any], str | None, P
 def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
     installed: list[dict[str, Any]] = []
     resolved_repo_root = repo_root.resolve()
-    seen_plugin_dirs: set[Path] = set()
+    seen_plugin_ids: set[tuple[int, int]] = set()
     manifest_patterns = (
         "plugins/*/.codex-plugin/plugin.json",
         "Plugins/*/.codex-plugin/plugin.json",
@@ -63,9 +63,14 @@ def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
                 continue
             plugin_dir = manifest_path.parent.parent
             plugin_dir_resolved = plugin_dir.resolve()
-            if plugin_dir_resolved in seen_plugin_dirs:
+            try:
+                stat = plugin_dir_resolved.stat()
+                plugin_key = (stat.st_dev, stat.st_ino)
+            except OSError:
+                plugin_key = (-1, hash(str(plugin_dir_resolved)))
+            if plugin_key in seen_plugin_ids:
                 continue
-            seen_plugin_dirs.add(plugin_dir_resolved)
+            seen_plugin_ids.add(plugin_key)
 
             payload, error = _load_json(manifest_path)
             if payload is None:
@@ -102,6 +107,50 @@ def _activation_state(
     installed: list[dict[str, Any]],
     marketplace: dict[str, Any],
 ) -> dict[str, Any]:
+    def _normalized_marketplace_name(raw: Any) -> str | None:
+        if isinstance(raw, str):
+            normalized = raw.strip()
+            if normalized:
+                return normalized
+        return None
+
+    def _cache_present(
+        *,
+        plugin_name: str,
+        marketplace_name: str | None,
+        entry: dict[str, Any] | None,
+    ) -> bool:
+        candidates: list[str] = []
+
+        if isinstance(entry, dict):
+            direct_market = _normalized_marketplace_name(entry.get("marketplace"))
+            if direct_market:
+                candidates.append(direct_market)
+            source = entry.get("source")
+            if isinstance(source, dict):
+                source_market = _normalized_marketplace_name(source.get("marketplace"))
+                if source_market:
+                    candidates.append(source_market)
+
+        if marketplace_name:
+            candidates.append(marketplace_name)
+
+        # Backward-compat fallback used by existing local plugin cache projections.
+        candidates.append("agent-skills-local")
+
+        deduped_candidates = tuple(dict.fromkeys(candidates))
+        cache_roots = (
+            repo_root / ".agents" / "plugins-runtime" / "cache",
+            repo_root / "plugins" / "cache",
+            repo_root / "Plugins" / "cache",
+        )
+        for cache_root in cache_roots:
+            for market in deduped_candidates:
+                if (cache_root / market / plugin_name).exists():
+                    return True
+        return False
+
+    marketplace_name = _normalized_marketplace_name(marketplace.get("name"))
     entries = marketplace.get("plugins", [])
     by_name = {}
     if isinstance(entries, list):
@@ -116,22 +165,25 @@ def _activation_state(
     for item in installed:
         name = item.get("name")
         entry = by_name.get(name)
+        cache_present = (
+            _cache_present(
+                plugin_name=str(name),
+                marketplace_name=marketplace_name,
+                entry=entry if isinstance(entry, dict) else None,
+            )
+            if isinstance(name, str) and name
+            else False
+        )
         plugin_rows.append(
             {
                 "name": name,
+                "marketplace_name": marketplace_name,
                 "registered_in_marketplace": bool(entry),
                 "marketplace_source_path": (
                     ((entry.get("source") or {}).get("path")) if isinstance(entry, dict) else None
                 ),
                 "workspace_plugin_path": item.get("path"),
-                "cache_present": (
-                    repo_root
-                    / ".agents"
-                    / "plugins-runtime"
-                    / "cache"
-                    / "agent-skills-local"
-                    / str(name)
-                ).exists(),
+                "cache_present": cache_present,
             }
         )
 

@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Plugins/skill-factory/skills/skillify",
-  "scope_skill": "Plugins/skill-factory/skills/skillify",
-  "scope_profile": "skills-system",
+  "profile_id": "Plugins-skill-factory-skills-scaffolding_templates-skillify",
+  "scope_skill": "Plugins/skill-factory/skills/scaffolding_templates/skillify",
+  "scope_profile": "Plugins",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -38,7 +38,7 @@
     }
   ],
   "delegation": {
-    "mode": "manual",
+    "mode": "co-pilot",
     "human_baseline_minutes": 45.0,
     "ai_process_minutes": 18.0,
     "probability_of_success": 0.72,

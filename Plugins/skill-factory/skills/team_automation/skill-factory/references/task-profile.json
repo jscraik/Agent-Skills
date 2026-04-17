@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "plugins-skill-factory-router",
+  "profile_id": "Plugins-skill-factory-skills-team_automation-skill-factory",
   "scope_skill": "Plugins/skill-factory/skills/team_automation/skill-factory",
-  "scope_profile": "skills-system",
+  "scope_profile": "Plugins",
   "rubric_version": "2026-04-09",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -38,7 +38,7 @@
     }
   ],
   "delegation": {
-    "mode": "manual",
+    "mode": "co-pilot",
     "human_baseline_minutes": 15.0,
     "ai_process_minutes": 6.0,
     "probability_of_success": 0.84,

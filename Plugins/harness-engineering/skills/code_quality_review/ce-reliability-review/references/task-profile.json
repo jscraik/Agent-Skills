@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "product-ops-ce-reliability-review",
-  "scope_skill": "product/Infrastructure/ops/ce-reliability-review",
-  "scope_profile": "product",
+  "profile_id": "Plugins-harness-engineering-skills-code_quality_review-ce-reliability-review",
+  "scope_skill": "Plugins/harness-engineering/skills/code_quality_review/ce-reliability-review",
+  "scope_profile": "Plugins",
   "rubric_version": "2026-04-07",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -19,28 +19,28 @@
       "id": "clarity",
       "label": "Instructional clarity",
       "threshold": 0.72,
-      "weight": 0.30,
+      "weight": 0.3,
       "critical": true
     },
     {
       "id": "specificity",
       "label": "Concrete failure scenario detail",
       "threshold": 0.68,
-      "weight": 0.30,
+      "weight": 0.3,
       "critical": true
     },
     {
       "id": "safety",
       "label": "Safety/compliance",
       "threshold": 0.85,
-      "weight": 0.20,
+      "weight": 0.2,
       "critical": true
     },
     {
       "id": "reliability_coverage",
       "label": "Resilience pattern coverage breadth",
-      "threshold": 0.70,
-      "weight": 0.20,
+      "threshold": 0.7,
+      "weight": 0.2,
       "critical": true
     }
   ],
@@ -48,7 +48,7 @@
     "mode": "co-pilot",
     "human_baseline_minutes": 60.0,
     "ai_process_minutes": 20.0,
-    "probability_of_success": 0.70,
+    "probability_of_success": 0.7,
     "rationale": "Co-pilot mode: reliability review requires architectural context and judgment about acceptable risk levels."
   }
 }

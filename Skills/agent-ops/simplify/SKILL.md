@@ -1,7 +1,6 @@
 ---
 name: simplify
 description: Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
-<<<<<<<< HEAD:Skills/agent-ops/simplify/SKILL.md
 metadata:
   skill-type: code_quality_review
   version: 0.1.0
@@ -11,17 +10,6 @@ metadata:
     - simplify.?code
     - simplify.?changes
     - cr.?simplify
-========
-version: 0.1.0
-triggers:
-  - coderabbit.?simplify
-  - simplify.?coderabbit
-  - simplify.?code
-  - simplify.?changes
-  - cr.?simplify
-metadata:
-  skill-type: code_quality_review
->>>>>>>> origin/main:Skills/backend-platform/simplify/SKILL.md
 ---
 
 # Simplify
