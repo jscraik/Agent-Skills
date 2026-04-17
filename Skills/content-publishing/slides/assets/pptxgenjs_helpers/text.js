@@ -205,7 +205,6 @@ function autoFontSize(textOrRuns, fontFace, opts = {}) {
 // Throws when insufficient info is provided.
 function calcTextBox(fontSizePt, opts = {}) {
   const textInput = opts.text ?? "";
-  const text = normalizeText(textInput || "");
   const face =
     typeof opts.fontFace === "string" && opts.fontFace.trim().length > 0
       ? opts.fontFace.trim()
