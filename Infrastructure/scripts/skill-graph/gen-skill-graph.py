@@ -8,7 +8,7 @@ Usage:
 Defaults:
   vault_root  = . (current directory)
   edges_json  = Infrastructure/ops/metrics/graph/skill-edges.json   (auto-extracted by feedback-loop.sh)
-  output_html = ~/.agent/diagrams/skill-graph.html
+  output_html = ~/.agents/diagrams/skill-graph.html
 
 The edges_json is produced by:
   product/domain/arscontexta/reference/Infrastructure/scripts/graph/extract-skill-edges.py
@@ -21,7 +21,7 @@ import json, pathlib, re, sys
 
 ROOT      = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 EDGES_IN  = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "Infrastructure/ops/metrics/graph/skill-edges.json"
-HTML_OUT  = pathlib.Path(sys.argv[3]) if len(sys.argv) > 3 else pathlib.Path.home() / ".agent/diagrams/skill-graph.html"
+HTML_OUT  = pathlib.Path(sys.argv[3]) if len(sys.argv) > 3 else pathlib.Path.home() / ".agents/diagrams/skill-graph.html"
 
 if not EDGES_IN.exists():
     # Fallback: re-extract on the fly

@@ -19,7 +19,7 @@ brainstorm: docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md
 2. Added **security + abuse** controls (poisoning, prompt-injection, PII/log retention, rollback).
 3. Added **telemetry schema + daily health outputs** for recursive improvement quality loops.
 4. Added **canonical lesson lifecycle** and **run recovery/concurrency** requirements.
-5. Added **repo governance alignment tasks** (`.agent/PLANS.md`, `plan-graph-lint`, `verify-work.sh`).
+5. Added **repo governance alignment tasks** (`.agents/PLANS.md`, `plan-graph-lint`, `verify-work.sh`).
 
 ### New Considerations Discovered
 - LLM-as-judge reliability requires calibration, mirrored pairwise checks, drift monitoring, and non-single-judge decisions.
@@ -90,7 +90,7 @@ Found brainstorm from **2026-02-19**: `skill-graph-learning-loop`. Used as sourc
 - Tiered gating model (`report-only -> warn -> fail`): `Skills/skill-builder/Infrastructure/references/tiered-gating-policy.md:5`
 - MUST/SHOULD/MAY rubric pattern: `Skills/skill-builder/Infrastructure/references/gold-skill-rubric.md:1`
 - Docs governance cutoff model: `Infrastructure/docs-policy.json:2`
-- Task dependency graph convention: `.agent/PLANS.md:19`
+- Task dependency graph convention: `.agents/PLANS.md:19`
 - Session-scan learning extraction precedent: `Skills/skill-refactor/Infrastructure/scripts/scan_codex_sessions.py:5`
 - Eval scorecard/gate precedent: `Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py:14`
 
@@ -435,7 +435,7 @@ tasks:
     title: Add run recovery and concurrency/idempotency contract
     depends_on: [T2, T3]
   - id: T15
-    title: Align with repo governance checks (.agent/PLANS.md, plan-graph-lint, verify-work)
+    title: Align with repo governance checks (.agents/PLANS.md, plan-graph-lint, verify-work)
     depends_on: [T8]
   - id: T16
     title: Define expansion gate scorecard with explicit pass/fail thresholds
@@ -526,7 +526,7 @@ _Baseline protocol (applies to all KPIs unless noted):_
 - `docs/brainstorms/2026-02-19-skill-graph-learning-loop-brainstorm.md`
 - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh:126`
 - stale `FORJAMIE.md:93` reference (file not present in repo as of 2026-03-21)
-- `.agent/PLANS.md:19`
+- `.agents/PLANS.md:19`
 - `Skills/skill-builder/Infrastructure/references/tiered-gating-policy.md:5`
 - `Skills/skill-builder/Infrastructure/references/gold-skill-rubric.md:1`
 - `Skills/skill-refactor/Infrastructure/scripts/scan_codex_sessions.py:5`

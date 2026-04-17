@@ -9,7 +9,7 @@ All significant implementation plans MUST use task graphs with explicit dependen
 Validation command:
 
 ```bash
-python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md
+python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md
 ```
 
 Current implementation plan:

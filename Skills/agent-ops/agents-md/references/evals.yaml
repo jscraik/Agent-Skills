@@ -91,7 +91,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you document the `.agent/PLANS.md` contract for this repo, including the required fields and validation command?"
+    prompt: "Can you document the `.agents/PLANS.md` contract for this repo, including the required fields and validation command?"
     acceptance:
       - type: contains
         value: "tasks"

@@ -17,7 +17,7 @@
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
 - `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
-- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agent/PLANS.md`
+- `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
 - Scope policy reference: [hook-governance-scope-defaults.md](/Docs/guides/hook-governance-scope-defaults.md).
 - Path ownership policy: [14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md).

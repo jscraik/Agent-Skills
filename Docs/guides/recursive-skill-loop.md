@@ -92,7 +92,7 @@ After the shadow report is built, the cycle now also creates an Ars Contexta int
 ## Verify graph plans
 
 ```bash
-python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" .agent/PLANS.md
+python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" .agents/PLANS.md
 python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" Docs/plans/2026-02-19-feat-recursive-skill-self-improvement-loop-plan.md
 ```
 

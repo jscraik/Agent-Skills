@@ -108,7 +108,7 @@ class HandoffPackage:
         return json.dumps(self.to_dict(), indent=2)
 
     def write(self, repo_root: Path) -> Path:
-        """Write handoff package to .agent/handoff/ directory."""
+        """Write handoff package to .agents/handoff/ directory."""
         handoff_dir = repo_root / ".agent" / "handoff"
         handoff_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")

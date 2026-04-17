@@ -219,7 +219,7 @@ rows:
     line_numbers:
       - 116
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
@@ -370,7 +370,7 @@ rows:
     line_numbers:
       - 32
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true

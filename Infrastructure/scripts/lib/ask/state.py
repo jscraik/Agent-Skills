@@ -102,7 +102,7 @@ class SkillState:
             self.block_reason = None
 
     def write(self, repo_root: Path) -> Path:
-        """Write state to .agent/state/ directory atomically.
+        """Write state to .agents/state/ directory atomically.
 
         Uses temp-file + atomic rename to prevent corruption during concurrent writes.
         Also sets restrictive permissions (0o600) on the state file.
