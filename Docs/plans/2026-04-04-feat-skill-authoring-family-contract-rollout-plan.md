@@ -496,14 +496,14 @@ Traceability: R5, R6, R7, R8; spec observability + readiness checks, `SA21`, `SA
 
 ## Sources and References
 
-- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](Docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
-- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
-- Managed asset doctrine: [managed-asset-lifecycle.md](Docs/reference/managed-asset-lifecycle.md)
-- Question lifecycle: [question-lifecycle.md](Docs/skill-graphs/question-lifecycle.md)
+- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](/Docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
+- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](/Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
+- Managed asset doctrine: [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md)
+- Question lifecycle: [question-lifecycle.md](/Docs/skill-graphs/question-lifecycle.md)
 - Validation surfaces:
-  - [lint_openai_skill_format.sh](Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
-  - [quick_validate.py](Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py)
-  - [run_skill_evals.py](Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py)
-  - [test_run_skill_evals.py](Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py)
+  - [lint_openai_skill_format.sh](/Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
+  - [quick_validate.py](/Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py)
+  - [run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py)
+  - [test_run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py)
 - Derived readiness artifact:
-- [skill-authoring-validation-maturity-matrix.md](Docs/reference/skill-authoring-validation-maturity-matrix.md)
+- [skill-authoring-validation-maturity-matrix.md](/Docs/reference/skill-authoring-validation-maturity-matrix.md)
