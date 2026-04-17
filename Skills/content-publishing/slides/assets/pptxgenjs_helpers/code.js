@@ -7,26 +7,6 @@ let THEME_MAP;
 
 function loadPrismLanguage(lang) {
   const normalized = String(lang || "plaintext").toLowerCase();
-  const known = new Set([
-    "markup",
-    "html",
-    "xml",
-    "svg",
-    "mathml",
-    "css",
-    "clike",
-    "javascript",
-    "js",
-    "typescript",
-    "ts",
-    "python",
-    "py",
-    "bash",
-    "sh",
-    "json",
-    "yaml",
-    "yml",
-  ]);
   const map = {
     js: "javascript",
     ts: "typescript",
