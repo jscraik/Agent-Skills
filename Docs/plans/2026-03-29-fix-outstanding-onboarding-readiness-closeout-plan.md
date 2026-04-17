@@ -354,6 +354,7 @@ Out of scope:
 - Test: `vale **/*.md **/*.mdx **/*.adoc **/*.rst`
 - Test: `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 - Test: `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
+- Evidence artifact: `Infrastructure/artifacts/validation/latest/docs-lint.log` (captures docs lint + Vale output for this closeout lane)
 
 **Approach:**
 - Run validation stack in repo-prescribed order.
@@ -457,7 +458,7 @@ P1 | completed | Codex | Event-envelope metrics now include `total/waived/unreso
 P2 | completed | Codex | Deterministic owner map added at `Infrastructure/artifacts/skill-graphs/onboarding/skill-owner-map.json`; regenerated checklist has no placeholder owner/due/status values.
 P3 | completed | Codex | Plan-state reconciliation applied to `.agents/PLANS.md` and onboarding plan docs with explicit closeout references.
 P4 | completed | Codex | Worktree closeout scope classified to onboarding-readiness lane; sandbox-only sync-path constraints documented and resolved for validation by running sync with explicit permission scope.
-P5 | completed | Codex | Validation stack completed: `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, `vale **/*.md **/*.mdx **/*.adoc **/*.rst`, `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`, `just validate`, `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`, plus targeted closeout tests.
+P5 | completed | Codex | Validation stack completed: `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`, `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`, `vale **/*.md **/*.mdx **/*.adoc **/*.rst`, `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`, `just validate`, `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`, plus targeted closeout tests. Evidence ledger includes `Infrastructure/artifacts/validation/latest/docs-lint.log` for the explicit Vale run.
 
 ## Acceptance Checklist
 
