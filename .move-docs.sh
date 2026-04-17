@@ -21,7 +21,11 @@ mkdir -p skills-system
 move_or_track Skills/skills-system/imagegen skills-system/
 move_or_track Skills/skills-system/openai-docs skills-system/
 if [[ -d Skills/skills-system ]]; then
-  rmdir Skills/skills-system || true
+  if ! rmdir Skills/skills-system; then
+    echo "Aborting: Skills/skills-system is not empty after migration." >&2
+    find Skills/skills-system -mindepth 1 -maxdepth 1 -print >&2 || true
+    exit 1
+  fi
 fi
 
 # Move Docs/product/security/*

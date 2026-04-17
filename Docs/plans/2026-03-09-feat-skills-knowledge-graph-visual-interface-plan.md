@@ -307,7 +307,7 @@ Phase-gate evidence paths (required):
 Phase-gate command matrix:
 - `Phase 0 -> Phase 1`:
   - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
-  - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py /Users/jamiecraik/dev/agent-skills/Docs/plans/2026-03-09-feat-skills-knowledge-graph-visual-interface-plan.md`
+  - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py /Users/jamiecraik/dev/Agent-Skills/Docs/plans/2026-03-09-feat-skills-knowledge-graph-visual-interface-plan.md`
   - artifact gate: decision record and fixture baseline both present.
 - `Phase 1 -> Phase 2`:
   - run control/envelope transition test suites with CI-required status.

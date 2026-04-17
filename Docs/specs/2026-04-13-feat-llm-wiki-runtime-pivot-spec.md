@@ -223,8 +223,8 @@ Governance and validation dependencies:
 
 - `bin/ask repo doctor-catalog --strict`
 - `bin/ask repo validate`
-- `bash scripts/validation-and-linting/verify-work.sh --project-governance`
-- `python3 scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
+- `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --project-governance`
+- `python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py --strict`
 - `python3 scripts/validate_health_counters.py <snapshot.json> --json`
 - `python3 scripts/validate_freshness_state.py <snapshot.json> --json`
 - `python3 scripts/validate_blocker_completeness.py <snapshot.json> --json`
