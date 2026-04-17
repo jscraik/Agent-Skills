@@ -601,7 +601,7 @@ class TestMiseSnippetBehaviour(unittest.TestCase):
             _init_repo(repo_a)
             _detach_head(repo_a)
             _run_snippet(SETUP_TOOLS_SNIPPET, cwd=str(repo_a))
-            branch_a = _current_branch(repo_a)
+            _unused_branch_a = _current_branch(repo_a)
 
             # Run mise snippet in a second repo with the same directory name
             # We can't create another dir with the same name; just verify the slug logic
