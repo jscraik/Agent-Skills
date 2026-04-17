@@ -1,6 +1,7 @@
 # OS/editor noise
 .DS_Store
 **/.DS_Store
+.obsidian/
 
 # Local runtime/state directories
 .system/
