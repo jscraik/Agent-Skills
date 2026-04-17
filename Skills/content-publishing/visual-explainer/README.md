@@ -52,7 +52,7 @@ If you have [surf-cli](https://github.com/nicobailon/surf-cli) installed, the sk
 
 ## Usage
 
-The agent loads the skill when you mention diagrams, architecture, flowcharts, schemas, or visualizations. It also kicks in automatically when it's about to dump a complex table in the terminal (4+ rows or 3+ columns) — it renders HTML instead and opens it in the browser. Output goes to `~/.agent/diagrams/`.
+The agent loads the skill when you mention diagrams, architecture, flowcharts, schemas, or visualizations. It also kicks in automatically when it's about to dump a complex table in the terminal (4+ rows or 3+ columns) — it renders HTML instead and opens it in the browser. Output goes to `~/.agents/diagrams/`.
 
 The skill ships with six prompt templates:
 
@@ -105,7 +105,7 @@ Infrastructure/templates/            ← agent reads the matching reference temp
 ├── mermaid-flowchart.html (Mermaid + ELK + handDrawn — teal/cyan palette)
 └── data-table.html   (tables with KPIs and badges — rose/cranberry palette)
     ↓
-~/.agent/diagrams/filename.html → opens in browser
+~/.agents/diagrams/filename.html → opens in browser
 ```
 
 The agent picks an aesthetic direction, reads the right reference template, generates a self-contained HTML file with both light and dark themes, and opens it. The three templates use deliberately different palettes so the agent learns variety rather than defaulting to one look. The skill handles 11 diagram types — Mermaid for anything with connections (flowcharts, sequences, ER, state machines, mind maps), CSS Grid for text-heavy architecture overviews, HTML tables for data, Chart.js for dashboards — and routes to the right approach automatically.

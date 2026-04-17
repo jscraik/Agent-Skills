@@ -1,7 +1,7 @@
 row_count: 383
 rows:
   -
-    consumer_path: ".agent/workflows/sync-skills.md"
+    consumer_path: ".agents/workflows/sync-skills.md"
     is_executable: false
     line_numbers:
       - 43
@@ -251,7 +251,7 @@ rows:
     line_numbers:
       - 164
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: README.md
     is_executable: false
@@ -1320,7 +1320,7 @@ rows:
     line_numbers:
       - 57
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: "Docs/agents/14-path-ownership-boundaries.md"
     is_executable: false
@@ -1429,7 +1429,7 @@ rows:
       - 580
       - 695
     match_count: 5
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: "Docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md"
     is_executable: false
@@ -2839,7 +2839,7 @@ rows:
     line_numbers:
       - 29
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: Infrastructure/scripts/README.md
     is_executable: false
@@ -2930,7 +2930,7 @@ rows:
     line_numbers:
       - 116
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
     is_executable: true
@@ -3081,7 +3081,7 @@ rows:
     line_numbers:
       - 32
     match_count: 1
-    root: .agent/skills
+    root: .agents/skills
   -
     consumer_path: Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py
     is_executable: true

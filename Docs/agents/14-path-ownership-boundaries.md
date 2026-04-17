@@ -53,7 +53,7 @@ Factory and governance mechanics:
 
 Runtime/projection surfaces (non-canonical):
 - `.agents/**`
-- `.agent/skills/**`
+- `.agents/skills/**`
 - `skills-antigravity/**`
 - `Plugins/cache/**`
 - `runtime/**` (whenever introduced by migration phases)

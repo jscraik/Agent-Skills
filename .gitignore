@@ -142,3 +142,8 @@ Infrastructure/artifacts/policy/
 /Infrastructure/artifacts/validation/latest/
 /Infrastructure/artifacts/validation/family-gate/
 Plugins/cache/
+# Ensure agent components are kept tracked despite .agents/ ignore
+!.agents/PLANS.md
+!.agents/workflows/
+.agents/workflows/*
+!.agents/workflows/**

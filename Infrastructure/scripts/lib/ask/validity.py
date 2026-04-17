@@ -107,7 +107,7 @@ class ContractValidityEvidence:
         }
 
     def write(self, repo_root: Path) -> Path:
-        """Write validity evidence to .agent/validity/ directory."""
+        """Write validity evidence to .agents/validity/ directory."""
         validity_dir = repo_root / ".agent" / "validity"
         validity_dir.mkdir(parents=True, exist_ok=True)
         path = validity_dir / f"{self.skill_name}.json"

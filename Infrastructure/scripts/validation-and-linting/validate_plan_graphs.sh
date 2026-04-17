@@ -6,7 +6,7 @@ usage() {
 Usage:
   Infrastructure/scripts/validation-and-linting/validate_plan_graphs.sh
 
-Runs plan graph lint against .agent/PLANS.md and Docs/plans/*.md.
+Runs plan graph lint against .agents/PLANS.md and Docs/plans/*.md.
 USAGE
 }
 
@@ -69,7 +69,7 @@ run_plan_graph_linter() {
   "$lint_python" "$LINTER" "$path"
 }
 
-paths=(".agent/PLANS.md")
+paths=(".agents/PLANS.md")
 for plans_dir in docs/plans Docs/plans; do
   if [[ -d "$plans_dir" ]]; then
     while IFS= read -r path; do

@@ -19,6 +19,6 @@ Required behavior:
 - If `surf` is available (`which surf`), optionally generate 2-4 supporting images when they materially improve comprehension.
 
 Output:
-- Write a self-contained HTML deck to `~/.agent/diagrams/` with a `-slides.html` suffix.
+- Write a self-contained HTML deck to `~/.agents/diagrams/` with a `-slides.html` suffix.
 - Open it in the browser.
 - Report the final file path.

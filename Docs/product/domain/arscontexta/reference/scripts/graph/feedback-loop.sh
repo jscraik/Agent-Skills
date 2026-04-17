@@ -339,7 +339,7 @@ cp "$RECOMMEND_PATH" "$RECOMMEND_DIR/latest.json"
 
 # ── Regenerate visual HTML graph if generator script is present ──────────────
 GRAPH_GEN="$VAULT_ROOT/Infrastructure/scripts/skill-graph/gen-skill-graph.py"
-GRAPH_HTML="${HOME}/.agent/diagrams/skill-graph.html"
+GRAPH_HTML="${HOME}/.agents/diagrams/skill-graph.html"
 if [[ -f "$GRAPH_GEN" ]] && [[ -f "$EDGES_OUT" ]]; then
   python3 "$GRAPH_GEN" "$VAULT_ROOT" "$EDGES_OUT" "$GRAPH_HTML" || true
   echo "graph:    $GRAPH_HTML"

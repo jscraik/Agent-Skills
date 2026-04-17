@@ -113,7 +113,7 @@ trap 'rm -f "$_changed_paths_file" "$_dedup_file" "$runtime_violations_file" "$c
 while IFS= read -r path; do
   [[ -z "$path" ]] && continue
   case "$path" in
-    .agents/*|.agent/skills/*|skills-antigravity/*|runtime/*)
+    .agents/*|.agents/skills/*|skills-antigravity/*|runtime/*)
       printf '%s\n' "$path" >> "$runtime_violations_file"
       ;;
     Plugins/cache/*)

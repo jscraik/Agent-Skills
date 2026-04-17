@@ -29,8 +29,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="~/.agent/diagrams",
-        help="Output directory for generated HTML (default: ~/.agent/diagrams).",
+        default="~/.agents/diagrams",
+        help="Output directory for generated HTML (default: ~/.agents/diagrams).",
     )
     parser.add_argument(
         "--open",

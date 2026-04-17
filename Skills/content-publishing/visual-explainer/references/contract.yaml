@@ -15,7 +15,7 @@ inputs:
   - optional aesthetic constraints (theme, palette, brand direction)
 
 outputs:
-  - one self-contained HTML file in ~/.agent/diagrams/
+  - one self-contained HTML file in ~/.agents/diagrams/
   - a concise explanation of what the visual shows
   - explicit file path for reopening/sharing
 

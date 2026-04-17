@@ -48,7 +48,7 @@ These are hard constraints from the current repo state and scripts:
 - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` rejects a symlinked `skills-antigravity` path. Any plan requiring that symlink is invalid.
 - local marketplace runtime cache authoritative derived location is `.agents/plugins-runtime/cache/**`.
 - legacy visible local marketplace cache `Plugins/cache/agent-skills-local/**` must stay removed and must not be reintroduced as compatibility output.
-- runtime/projection surfaces (`.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**`) are governed by path-ownership checks and must remain derived.
+- runtime/projection surfaces (`.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**`) are governed by path-ownership checks and must remain derived.
 - governance ownership docs use the existing uppercase root `GOVERNANCE/**` for control-plane policy content.
 
 ## Target layout
@@ -209,7 +209,7 @@ Package-root resolution contract:
 
 ## Derived artifact lifecycle contract
 
-Derived surfaces (`runtime/**`, `.agents/**`, `.agent/skills/**`, `skills-antigravity/**`, `.agents/plugins-runtime/cache/**`) require deterministic lifecycle handling:
+Derived surfaces (`runtime/**`, `.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `.agents/plugins-runtime/cache/**`) require deterministic lifecycle handling:
 - before slice activation or rollback validation, purge stale derived artifacts for affected slices;
 - regenerate projections/caches from declared canonical roots;
 - run validation only after clean reprojection; previous artifacts are not considered valid evidence;
@@ -371,7 +371,7 @@ Control-plane ownership rules:
 - Actions:
   - enforce boundaries via `Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`;
   - publish ownership and projection-read-only policy in docs under `GOVERNANCE/**` and agent docs;
-  - freeze external compatibility invariants only for `.agents/**`, `.agent/skills/**`, `runtime/**`, `skills-antigravity/**`, and plugin runtime cache surfaces (allowed writers, discovery/precedence, visibility, and negative tests).
+  - freeze external compatibility invariants only for `.agents/**`, `.agents/skills/**`, `runtime/**`, `skills-antigravity/**`, and plugin runtime cache surfaces (allowed writers, discovery/precedence, visibility, and negative tests).
   - defer internal projection-generation behavior freeze until Phase B wrapper/mechanics extraction evidence is green.
 - Exit criteria:
   - path-ownership gates block direct runtime/projection edits, including alias-path writes.
@@ -458,7 +458,7 @@ Control-plane ownership rules:
 | Plugin skill sources | `Infrastructure/catalog/Plugins/<plugin>/skills/<category>/<skill>/SKILL.md` | `discovery_compatibility: dual_read -> catalog_only`; `path_compatibility: combined -> filesystem_forwarder` (resolver-only deferred until marketplace-contract migration) | plugin shadowing + runtime-identity duplicate checks + activation/status parity |
 | Plugin package manifest | `Infrastructure/catalog/Plugins/<plugin>/.codex-plugin/plugin.json` | generated compatibility package-root projection at `Plugins/<plugin>` while `source.path=./Plugins/<plugin>` remains contract-required | targeted `plugin_lifecycle_checks` (`plugins status <plugin> --json`) + marketplace `source.path` parity + manifest-asset parity |
 | Mechanics commands | `Infrastructure/factory/**` internals + `Infrastructure/scripts/*` wrappers | wrapper delegation only | command-contract compatibility gates |
-| Runtime projection tree | `runtime/**`, `.agents/**`, and `.agent/skills/**` derived outputs | no direct compatibility writes | path-ownership guard blocks source edits |
+| Runtime projection tree | `runtime/**`, `.agents/**`, and `.agents/skills/**` derived outputs | no direct compatibility writes | path-ownership guard blocks source edits |
 | Local marketplace cache | `.agents/plugins-runtime/cache/**` | canonical hidden cache only | block reintroduction of `Plugins/cache/agent-skills-local/**` |
 | Antigravity projection lane | `skills-antigravity/**` real directory | `filesystem_forwarder` via wrapper/index only | reject symlinked `skills-antigravity` sync-source paths |
 
@@ -538,7 +538,7 @@ Phase A-F phase-promotion exhaustive lane:
 
 Additional negative ownership checks for migration PRs:
 - direct edits to `.agents/**`, `skills-antigravity/**`, or `runtime/**` must fail `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` unless the slice is explicitly marked as projection mechanics;
-- direct edits to `.agent/skills/**` must fail the same ownership guard unless the slice is explicitly marked as projection mechanics;
+- direct edits to `.agents/skills/**` must fail the same ownership guard unless the slice is explicitly marked as projection mechanics;
 - cache-path edits must fail without explicit intent and may run only with `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 PATH_OWNERSHIP_GUARD_SCOPE=working`;
 - alias-path and realpath projection behavior must be verified via `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`; do not infer alias safety from git diff output alone;
 - manifest schema and lane constraints are required gates for every migration PR.
