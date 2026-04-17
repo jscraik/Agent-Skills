@@ -236,13 +236,11 @@ Run after fixes:
 | Skill | When to use |
 |---|---|
 | [[code-review]] | Run CodeRabbit CLI review to surface and prioritize risk findings before fix work |
-| [[autofix]] | Resolve unresolved CodeRabbit PR review comments in guided or batch mode |
 
 **Topic map:** [[code-quality]]
 
 ## References
 
-- `../coderabbit/Infrastructure/references/coderabbit-docs/finishing-touches-simplify.md`
 - `Infrastructure/references/modern-hardening-2026.md`
 - `Infrastructure/references/refactor-playbook.md`
 

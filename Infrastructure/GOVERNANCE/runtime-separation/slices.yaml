@@ -10,11 +10,11 @@ slices:
     path_compatibility:
       - combined
     discovery_precedence:
-      - Plugins/coderabbit
-      - Infrastructure/catalog/Plugins/coderabbit
+      - Plugins/cache/openai-curated/coderabbit
+      - Infrastructure/catalog/Plugins/cache/openai-curated/coderabbit
     forwarder_type: package_root_projection
     overlap_class: none
-    authoritative_write_root: Plugins/coderabbit
+    authoritative_write_root: Plugins/cache/openai-curated/coderabbit
     inventory_selector:
       reader_roots:
         - plugins_status.coderabbit
@@ -28,7 +28,7 @@ slices:
     reader_inventory_digest: "008cd191ead8c88dacc01594273425658cf96b6ce00cb9deeac1b0ffa70bfb68"
     policy_export_version: "2026-04-12.v9"
     canonical_paths:
-      - Plugins/coderabbit
+      - Plugins/cache/openai-curated/coderabbit
     legacy_paths:
       - Plugins/coderabbit
     planned_deltas: []
@@ -56,4 +56,4 @@ slices:
     exit_checks:
       - bin/ask plugins status coderabbit --json
     rollback_commands:
-      - git checkout -- Plugins/coderabbit
+      - git checkout -- Plugins/cache/openai-curated/coderabbit

@@ -510,13 +510,13 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         Verify default visibility only includes allowlisted plugin router skills.
 
         Creates flat SKILL.md entries for plugin-owned skills (`coderabbit`,
-        `autofix`, `code-review`), then patches discovery to treat
+        `code-review`), then patches discovery to treat
         those dirs as plugin-owned. Default visibility should return only names
         present in `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES`; advanced visibility
         should return all plugin-owned skills.
         """
         skill_discovery = load_skill_discovery_module()
-        skill_names = ("coderabbit", "autofix", "code-review")
+        skill_names = ("coderabbit", "code-review")
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir).resolve()
             flat_root = repo_root / ".agents" / "skills"
@@ -564,7 +564,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         Ensure advanced discovery can merge plugin lanes when flat projection is missing them.
         
         Sets up a repository where the runtime (flat) projection exposes only `coderabbit` while the
-        plugin canonical source contains lane skills (`autofix`, `code-review`). Asserts that
+        plugin canonical source contains lane skills (`code-review`). Asserts that
         default visibility returns what flat projects and advanced visibility merges in plugin lanes.
         """
         skill_discovery = load_skill_discovery_module()
@@ -586,7 +586,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             )
 
             # Canonical plugin source still contains lane skills.
-            for lane in ("autofix", "code-review"):
+            for lane in ("code-review",):
                 write_text(
                     plugin_root / lane / "SKILL.md",
                     f"""
@@ -614,7 +614,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         default_names = sorted(entry.name for entry in default_entries)
         advanced_names = sorted(entry.name for entry in advanced_entries)
         self.assertEqual(default_names, ["coderabbit"])
-        self.assertEqual(advanced_names, ["autofix", "code-review", "coderabbit"])
+        self.assertEqual(advanced_names, ["code-review", "coderabbit"])
 
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         """

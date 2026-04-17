@@ -102,7 +102,7 @@ class _RouterSkill:
     skill_path: str
 
 
-CODERABBIT_HIDDEN_LANE_SKILLS = {"autofix", "code-review"}
+CODERABBIT_HIDDEN_LANE_SKILLS = {"code-review"}
 
 
 STARTER_ARCHETYPES = {

@@ -40,7 +40,7 @@ class TestAskSkillsStarter(unittest.TestCase):
         """
         Verify default skill listing hides plugin lane skills while preserving standalone simplify.
         
-        Mocks canonical entries that include one router skill, two coderabbit lane skills under
+        Mocks canonical entries that include one router skill, one coderabbit lane skill under
         Plugins/coderabbit/skills, and a standalone simplify skill under Skills/agent-ops. Calls
         list_skills with default options and asserts the result includes router + standalone simplify
         (while hidden plugin lanes are excluded).
@@ -51,12 +51,6 @@ class TestAskSkillsStarter(unittest.TestCase):
                 source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
                 category="Plugins/coderabbit/skills",
                 description="router",
-            ),
-            SimpleNamespace(
-                name="autofix",
-                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "autofix",
-                category="Plugins/coderabbit/skills",
-                description="lane",
             ),
             SimpleNamespace(
                 name="code-review",
@@ -97,8 +91,8 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="router",
             ),
             SimpleNamespace(
-                name="autofix",
-                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "autofix",
+                name="code-review",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "code-review",
                 category="Plugins/coderabbit/skills",
                 description="lane",
             ),
@@ -109,7 +103,7 @@ class TestAskSkillsStarter(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(names, ["coderabbit", "autofix"])
+        self.assertEqual(names, ["coderabbit", "code-review"])
         self.assertTrue(result.data.get("advanced_mode"))
 
 

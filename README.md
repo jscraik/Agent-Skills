@@ -154,7 +154,6 @@ agent-skills/
 │   └── content-publishing/   #  2 skills: markdown-converter, spreadsheet
 │
 ├── plugins/                  # Plugin packages (skills live inside plugins)
-│   ├── coderabbit/           #   autofix, code-review, simplify
 │   ├── skill-factory/        #   skill-builder, skill-creator, skill-installer, …
 │   ├── plugin-factory/       #   plugin-builder, plugin-creator, plugin-installer
 │   ├── harness-engineering/  #   ce-brainstorm, ce-plan, ce-spec, …
