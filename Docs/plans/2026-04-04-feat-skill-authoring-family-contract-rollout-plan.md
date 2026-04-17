@@ -467,7 +467,7 @@ tasks:
 STEP_ID | status | owner | evidence
 P0 | completed | Codex | Commands: `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`; `python3 Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py --help`; `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py --help`. Evidence pointers: `Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh`, `Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py`, `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/quick_validate.py`.
 P1 | completed | Codex | Commands: content audit against `skill-creator`, `skill-builder`, `skill-installer`, `plugin-builder` skill docs. Evidence pointers: `Skills/skill-creator/SKILL.md`, `Skills/skill-builder/SKILL.md`, `Skills/skill-installer/SKILL.md`, `Plugins/plugin-factory/skills/plugin-builder/SKILL.md`.
-P2 | completed | Codex | Command: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`. Evidence pointers: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`, `/private/tmp/skill-builder-live-smoke-pair-rerun/skill-builder/20260404-164154-350888/summary.json`.
+P2 | completed | Codex | Command: `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py Skills/skill-builder --eval-mode smoke --runner codex --case clarification-package-ambiguous --case provenance-import-rollback`. Evidence pointers: `Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py`, `Skills/skill-builder/Infrastructure/references/evals.yaml`.
 P3 | completed | Codex | Commands: installer and plugin packaging contract sweep for trust/pinning/quarantine/rollback language. Evidence pointers: `Skills/skill-installer/SKILL.md`, `Plugins/plugin-factory/skills/plugin-builder/SKILL.md`, `Docs/reference/managed-asset-lifecycle.md`.
 P4 | completed | Codex | Commands: `bash Infrastructure/scripts/codex-preflight.sh --stack auto --mode required`; `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`; targeted eval smoke rerun noted in P2. Evidence pointers: `Infrastructure/scripts/codex-preflight.sh`, `Infrastructure/scripts/validation-and-linting/verify-work.sh`, `Docs/reference/skill-authoring-validation-maturity-matrix.md`. Residual risk only: one transient live-runner timeout was observed before the final passing pair rerun.
 
@@ -496,14 +496,14 @@ Traceability: R5, R6, R7, R8; spec observability + readiness checks, `SA21`, `SA
 
 ## Sources and References
 
-- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](/Docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
-- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](/Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
-- Managed asset doctrine: [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md)
-- Question lifecycle: [question-lifecycle.md](/Docs/skill-graphs/question-lifecycle.md)
+- Requirements: [2026-04-03-skill-authoring-family-contract-requirements.md](Docs/brainstorms/2026-04-03-skill-authoring-family-contract-requirements.md)
+- Spec: [2026-04-03-feat-skill-authoring-family-contract-spec.md](Docs/specs/2026-04-03-feat-skill-authoring-family-contract-spec.md)
+- Managed asset doctrine: [managed-asset-lifecycle.md](Docs/reference/managed-asset-lifecycle.md)
+- Question lifecycle: [question-lifecycle.md](Docs/skill-graphs/question-lifecycle.md)
 - Validation surfaces:
-  - [lint_openai_skill_format.sh](/Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
-  - [quick_validate.py](/Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py)
-  - [run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py)
-  - [test_run_skill_evals.py](/Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py)
+  - [lint_openai_skill_format.sh](Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh)
+  - [quick_validate.py](Plugins/skill-factory/skills/scaffolding_templates/skill-creator/scripts/quick_validate.py)
+  - [run_skill_evals.py](Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_skill_evals.py)
+  - [test_run_skill_evals.py](Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_run_skill_evals.py)
 - Derived readiness artifact:
-- [skill-authoring-validation-maturity-matrix.md](/Docs/reference/skill-authoring-validation-maturity-matrix.md)
+- [skill-authoring-validation-maturity-matrix.md](Docs/reference/skill-authoring-validation-maturity-matrix.md)
