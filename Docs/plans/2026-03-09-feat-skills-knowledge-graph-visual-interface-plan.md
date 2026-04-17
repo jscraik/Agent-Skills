@@ -404,9 +404,11 @@ Validation commands:
 Authoring checks:
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `vale Docs/plans/2026-03-09-feat-skills-knowledge-graph-visual-interface-plan.md`
 - `bash Infrastructure/scripts/validate_all.sh`
 Release gates (blocking):
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode block --config Infrastructure/docs-policy.json`
+- `vale Docs/plans/2026-03-09-feat-skills-knowledge-graph-visual-interface-plan.md`
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh`
 
 ## Rollout / Migration / Monitoring
