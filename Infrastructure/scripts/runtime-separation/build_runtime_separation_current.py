@@ -54,8 +54,8 @@ def _discover_repo_root(default_from_file: Path) -> Path:
         )
         if proc.returncode == 0 and proc.stdout.strip():
             return Path(proc.stdout.strip()).resolve()
-    except OSError:
-        pass
+    except OSError as exc:
+        print(f"warning: git repo-root discovery failed ({exc}); using fallback candidates", file=sys.stderr)
 
     fallback_candidates = (
         default_from_file.parents[2],
