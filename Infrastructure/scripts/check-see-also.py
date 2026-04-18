@@ -6,13 +6,13 @@ from __future__ import annotations
 import runpy
 from pathlib import Path
 
-TARGET = (
+target = (
     Path(__file__).resolve().parent
     / "validation-and-linting"
     / "check-see-also.py"
 )
 
-if not TARGET.is_file():
-    raise FileNotFoundError(f"Missing target script: {TARGET}")
+if not target.is_file():
+    raise FileNotFoundError(f"Missing target script: {target}")
 
-runpy.run_path(str(TARGET), run_name="__main__")
+runpy.run_path(str(target), run_name="__main__")

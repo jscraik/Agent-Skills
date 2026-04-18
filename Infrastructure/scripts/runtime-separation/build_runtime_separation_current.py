@@ -339,7 +339,7 @@ def _collect_plugin_targets(
     if targets:
         return sorted(targets)
 
-    return ["coderabbit", "harness-engineering", "plugin-factory", "skill-factory"]
+    return ["coderabbit", "harness-engineering", "openai-curated", "plugin-factory", "skill-factory"]
 
 
 def main() -> int:
