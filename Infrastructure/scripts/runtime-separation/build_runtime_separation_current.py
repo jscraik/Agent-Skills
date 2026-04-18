@@ -58,8 +58,8 @@ def _discover_repo_root(default_from_file: Path) -> Path:
         print(f"warning: git repo-root discovery failed ({exc}); using fallback candidates", file=sys.stderr)
 
     fallback_candidates = (
-        default_from_file.parents[2],
-        default_from_file.parents[3] if len(default_from_file.parents) > 3 else default_from_file.parents[2],
+        default_from_file.parents[3],
+        default_from_file.parents[4] if len(default_from_file.parents) > 4 else default_from_file.parents[3],
     )
     for candidate in fallback_candidates:
         if (candidate / "Infrastructure" / "bin" / "ask").exists() or (candidate / "bin" / "ask").exists():
@@ -339,7 +339,7 @@ def _collect_plugin_targets(
     if targets:
         return sorted(targets)
 
-    return ["coderabbit", "harness-engineering", "openai-curated", "plugin-factory", "skill-factory"]
+    return ["coderabbit", "harness-engineering", "plugin-factory", "skill-factory"]
 
 
 def main() -> int:
@@ -513,11 +513,25 @@ def main() -> int:
             "plugins_doctor": command_checks["plugins_doctor"].get("drift_class"),
             "repo_doctor_catalog": command_checks["repo_doctor_catalog"].get("drift_class"),
         },
-        "visible_cache_absent": not (repo_root / "plugins" / "cache").exists(),
+        "visible_cache_absent": not any(
+            (repo_root / path).exists()
+            for path in [
+                Path(".agents") / "plugins-runtime" / "cache",
+                Path("plugins") / "cache",
+                Path("Plugins") / "cache",
+            ]
+        ),
         "plugin_activation_parity": {
             "checked_plugins": checked_plugins,
             "doctor_status": checker_status.get("status"),
-            "cache_absent": not (repo_root / ".agents" / "plugins-runtime" / "cache").exists(),
+            "cache_absent": not any(
+                (repo_root / path).exists()
+                for path in [
+                    Path(".agents") / "plugins-runtime" / "cache",
+                    Path("plugins") / "cache",
+                    Path("Plugins") / "cache",
+                ]
+            ),
             "status_blockers": plugin_status_blockers,
         },
         "plugin_package_root_parity": plugin_package_root_parity,
