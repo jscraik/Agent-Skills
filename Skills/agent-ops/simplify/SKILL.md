@@ -236,6 +236,7 @@ Run after fixes:
 | Skill | When to use |
 |---|---|
 | [[code-review]] | Run CodeRabbit CLI review to surface and prioritize risk findings before fix work |
+| [[systematic-debugging]] | Use when simplify findings indicate likely regressions or uncertain root cause needing evidence-first diagnosis |
 
 **Topic map:** [[code-quality]]
 
