@@ -1,0 +1,2 @@
+Plugins
+Infrastructure/tests/test_coderabbit_scripts.py

@@ -4,7 +4,21 @@
     "displayName": "Agent Skills Local"
   },
   "plugins": [
-
+    {
+      "name": "coderabbit",
+      "source": {
+        "source": "local",
+        "path": "./Plugins/coderabbit"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "category": "Productivity"
+    },
     {
       "name": "harness-engineering",
       "source": {

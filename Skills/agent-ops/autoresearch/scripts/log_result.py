@@ -63,7 +63,7 @@ def main() -> int:
     parser.add_argument("--validation-evidence", required=True)
     args = parser.parse_args()
 
-    repo_root = Path(__file__).resolve().parents[3]
+    repo_root = Path(__file__).resolve().parents[4]
     allowed_root = (repo_root / "artifacts" / "autoresearch").resolve()
     run_dir = Path(args.run_dir).resolve()
     if allowed_root not in run_dir.parents:

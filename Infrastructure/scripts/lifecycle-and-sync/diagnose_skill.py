@@ -19,13 +19,20 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT))
+if str(SCRIPTS_ROOT / "validation-and-linting") not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT / "validation-and-linting"))
+
 from verify_skill_catalog_freshness import analyze_skill_file, canonical_skill_map, discover_skill_files
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 SKILL_INDEX = REPO_ROOT / "SKILL.md"
 
