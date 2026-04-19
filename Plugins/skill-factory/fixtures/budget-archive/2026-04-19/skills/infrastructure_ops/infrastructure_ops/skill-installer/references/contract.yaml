@@ -1,0 +1,23 @@
+schema_version: "1.1"
+purpose: "Operational contract for skill-installer routing and execution boundaries."
+triggers:
+  - "user requests skill-installer behavior"
+inputs:
+  - "task intent"
+  - "target path or source context"
+outputs:
+  - "structured response with explicit status"
+non_goals:
+  - "unrelated implementation work outside skill scope"
+risks:
+  - "ambiguous intent can cause wrong lane selection"
+output_contract:
+  schema_version: "1"
+  required_fields:
+    - "schema_version"
+    - "mode"
+    - "validation_evidence"
+  optional_fields:
+    - "blocked_by"
+rollback_procedure: "Revert edited files and rerun validation gates before continuing."
+observability: "Track pass/fail/blocked outcomes for each validation command in run output."

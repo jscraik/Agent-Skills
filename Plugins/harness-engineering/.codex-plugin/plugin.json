@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Bundle the compound-engineering lifecycle for ideation, spec, planning, execution, reliability review, and readiness review.",
+  "description": "Route CE lifecycle stages with a router-first plugin.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -41,7 +41,9 @@
     "websiteURL": "https://github.com/jscraik/Agent-Skills",
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
-    "defaultPrompt": "Use ce-compound to route this request to the right CE stage and provide exact next-step commands.",
+    "defaultPrompt": [
+      "Use ce-router to choose one CE stage and the next command."
+    ],
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png"

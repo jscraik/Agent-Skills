@@ -35,6 +35,7 @@ Use `coding-harness` instead when you need:
   - `ce-deepen-spec`
   - `ce-ideate`
   - `ce-plan`
+  - `ce-router`
   - `ce-reliability-review`
   - `ce-review`
   - `ce-spec`
@@ -53,12 +54,16 @@ Use `coding-harness` instead when you need:
 When updating CE lifecycle behavior, keep packaged skills and the routing map aligned.
 
 ## Usage
-Start with `ce-compound` when users do not know the exact stage:
-- It routes requests to the right CE stage using `Infrastructure/references/routing-map.json`.
+Start with `ce-router` when users do not know the exact stage:
+- It picks the primary CE stage and returns the exact next command.
+- It escalates to `ce-compound` when lifecycle-orchestration is needed.
+
+Use `ce-compound` when the user needs lifecycle orchestration:
+- It routes requests to the right CE stage using `references/routing-map.json`.
 - It outputs a stage decision, required inputs, and next command.
 
 Call stage skills directly when stage intent is explicit:
-- `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-deepen-spec`, `ce-plan`, `ce-deepen-plan`, `ce-work`, `ce-review`, `ce-technical-review`, `ce-reliability-review`, `ce-tdd`, `ce-compound`, `ce-compound-refresh`.
+- `ce-router`, `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-deepen-spec`, `ce-plan`, `ce-deepen-plan`, `ce-work`, `ce-review`, `ce-technical-review`, `ce-reliability-review`, `ce-tdd`, `ce-compound`, `ce-compound-refresh`.
 
 ## Validation
 Validate plugin contract and marketplace registration:

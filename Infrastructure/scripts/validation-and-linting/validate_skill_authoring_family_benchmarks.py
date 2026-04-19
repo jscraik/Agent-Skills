@@ -206,16 +206,16 @@ def _load_schema(schema_path: Path) -> Any:
     """Load a YAML schema file; return None if unavailable."""
     if not schema_path.exists():
         return None
+    try:
+        return yaml.safe_load(schema_path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def _skill_markdown_body(raw: str) -> str:
     """Return SKILL.md content without frontmatter for semantic checks."""
     parts = raw.split("---", 2)
     return parts[2] if len(parts) >= 3 else raw
-    try:
-        return yaml.safe_load(schema_path.read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001
-        return None
 
 
 def _validate_with_schema(

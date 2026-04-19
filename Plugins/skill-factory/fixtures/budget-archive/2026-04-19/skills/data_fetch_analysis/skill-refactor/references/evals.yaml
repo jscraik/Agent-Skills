@@ -1,0 +1,19 @@
+schema_version: "2.0"
+skill_name: "skill-refactor"
+cases:
+  - id: happy-basic
+    name: happy
+    category: happy
+    eval_modes: [smoke]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use skill-refactor for a standard request with structured output."
+    acceptance: [{type: contains, value: "schema_version"}]
+  - id: negative-nonmatch
+    name: negative
+    category: negative
+    eval_modes: [release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Write a short poem about weather."
+    acceptance: [{type: not_contains, value: "skill-refactor"}]

@@ -11,15 +11,15 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 - `library_api_reference`: 6
 - `product_verification`: 8
-- `data_fetch_analysis`: 5
-- `team_automation`: 33
-- `scaffolding_templates`: 25
-- `code_quality_review`: 26
+- `data_fetch_analysis`: 4
+- `team_automation`: 34
+- `scaffolding_templates`: 23
+- `code_quality_review`: 27
 - `ci_cd_deployment`: 4
-- `runbook`: 14
-- `infrastructure_ops`: 5
+- `runbook`: 15
+- `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 126
+- `total_tagged`: 125
 
 ## Semantic Types
 
@@ -48,7 +48,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `insight-report` — `Skills/agent-ops`
 - `notebooklm` — `Skills/product-strategy`
 - `security-ownership-map` — `Skills/security-ops`
-- `skill-refactor` — `Plugins/skill-factory/skills/data_fetch_analysis`
 - `spreadsheet` — `Skills/content-publishing`
 
 ### Team Automation
@@ -64,6 +63,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `ce-deepen-spec` — `Plugins/harness-engineering/skills/team_automation`
 - `ce-ideate` — `Plugins/harness-engineering/skills/team_automation`
 - `ce-plan` — `Plugins/harness-engineering/skills/team_automation`
+- `ce-router` — `Plugins/harness-engineering/skills`
 - `ce-spec` — `Plugins/harness-engineering/skills/team_automation`
 - `ce-tdd` — `Plugins/harness-engineering/skills/team_automation`
 - `ce-work` — `Plugins/harness-engineering/skills/team_automation`
@@ -75,11 +75,11 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `interview-me` — `Skills/product-strategy`
 - `markdown-converter` — `Skills/content-publishing`
 - `orchestrating-subagents` — `Skills/agent-ops`
+- `plugin-router` — `Plugins/plugin-factory/skills/team_automation`
 - `product-design-critic` — `Skills/product-strategy`
 - `product-spec` — `Skills/product-strategy`
 - `production-deployment` — `Skills/agent-ops`
 - `resolve-todo-parallel` — `Skills/agent-ops`
-- `skill-factory` — `Plugins/skill-factory/skills/team_automation`
 - `slides` — `Skills/content-publishing`
 - `triage` — `Skills/agent-ops`
 - `video-transcript-downloader` — `Skills/content-publishing`
@@ -107,8 +107,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `og-image-creator` — `Skills/frontend-ui`
 - `plugin-creator` — `Plugins/plugin-factory/skills/scaffolding_templates`
 - `shadcn-ui` — `Skills/frontend-ui`
-- `skill-creator` — `Plugins/skill-factory/skills/scaffolding_templates`
-- `skillify` — `Plugins/skill-factory/skills/scaffolding_templates`
 - `stitch-loop` — `Skills/frontend-ui`
 - `stitch-react-components` — `Skills/frontend-ui`
 - `stitch-remotion` — `Skills/frontend-ui`
@@ -118,11 +116,13 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 ### Code Quality Review
 
 - `agents-md` — `Skills/agent-ops`
+- `autofix` — `Plugins/coderabbit/skills/code_quality_review`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
 - `ce-reliability-review` — `Plugins/harness-engineering/skills/code_quality_review`
 - `ce-review` — `Plugins/harness-engineering/skills/code_quality_review`
 - `ce-technical-review` — `Plugins/harness-engineering/skills/code_quality_review`
+- `code-review` — `Plugins/coderabbit/skills/code_quality_review`
 - `codex-home-audit` — `Skills/agent-ops`
 - `docs-expert` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
@@ -136,7 +136,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `rust-pro` — `Skills/agent-ops`
 - `security-best-practices` — `Skills/security-ops`
 - `simplify` — `Skills/agent-ops`
-- `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
 - `swift-development` — `Skills/agent-ops`
 - `test-driven-development` — `Skills/agent-ops`
 - `toml` — `Skills/agent-ops`
@@ -167,6 +166,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `security-threat-model` — `Skills/security-ops`
 - `systematic-debugging` — `Skills/agent-ops`
 - `uv-python-project-setup` — `Skills/agent-ops`
+- `vale` — `Skills/agent-ops`
 
 ### Infrastructure Ops
 
@@ -174,7 +174,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `claude-alias` — `Skills/agent-ops`
 - `fix-mise` — `Skills/agent-ops`
 - `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
-- `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
 
 ## Validation Notes
 
