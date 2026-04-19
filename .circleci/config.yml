@@ -18,7 +18,7 @@ jobs:
       - run:
           name: Validate Repository
           command: |
-            bash Infrastructure/scripts/validate_all.sh --ephemeral
+            python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all
 
 workflows:
   pr-pipeline:
