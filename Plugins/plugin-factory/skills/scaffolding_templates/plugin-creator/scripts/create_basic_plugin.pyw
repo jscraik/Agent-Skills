@@ -268,8 +268,11 @@ def build_marketplace_entry(
 
 
 def load_json(path: Path) -> dict[str, Any]:
-    with path.open(encoding="utf-8") as handle:
-        return json.load(handle)
+    try:
+        with path.open(encoding="utf-8") as handle:
+            return json.load(handle)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{path} contains invalid JSON: {exc}") from exc
 
 
 def _normalize_policy_products(raw_products: Any) -> tuple[list[str], list[str]]:
