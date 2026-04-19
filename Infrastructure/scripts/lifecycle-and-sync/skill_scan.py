@@ -29,6 +29,18 @@ REQUIRED_HEADINGS = (
     "Failure mode",
     "Gotchas",
 )
+RELOCATION_GUARD_SKILL_FILES = {
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+}
+CONTEXT_POLICY_PATTERNS = (
+    re.compile(r"never drop required context", re.IGNORECASE),
+    re.compile(r"required operational context is never removed", re.IGNORECASE),
+    re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+)
+READ_WHEN_PATTERN = re.compile(r"read when\s*:", re.IGNORECASE)
+REFERENCE_LINK_PATTERN = re.compile(r"\]\([^)]*references/[^)]*\)", re.IGNORECASE)
 
 
 @dataclass
@@ -141,6 +153,23 @@ def title_case(value: str) -> str:
 
 
 def cmd_lint_progressive_disclosure(mode: str) -> int:
+    """
+    Validate progressive-disclosure and structural rules across discovered SKILL.md files.
+    
+    Per-skill checks include:
+    - Line-count limits (hard cap and target) and requirement for an Infrastructure/references/ directory when length exceeds target.
+    - Presence of an Infrastructure/scripts/ directory when many code fences are present.
+    - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
+    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-preservation policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
+    
+    The function prints per-file error/warning messages and a final summary to stdout.
+    
+    Parameters:
+        mode (str): Severity mode; "strict" treats missing recommended items as errors, otherwise as warnings.
+    
+    Returns:
+        int: Exit code — `1` if `mode` is "strict" and any errors were found, otherwise `0`.
+    """
     skills = all_skills()
     errors = 0
     warnings = 0
@@ -171,6 +200,29 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
             if heading not in skill.headings:
                 severity = "error" if mode == "strict" else "warn"
                 emit(severity, skill.relative_path, f"missing recommended section heading: ## {heading}")
+
+        skill_directory = str(Path(skill.relative_path).parent).replace("\\", "/")
+        if skill_directory.lower() in RELOCATION_GUARD_SKILL_FILES:
+            severity = "error" if mode == "strict" else "warn"
+            body = skill.path.read_text(encoding="utf-8", errors="ignore")
+
+            if not any(pattern.search(body) for pattern in CONTEXT_POLICY_PATTERNS):
+                emit(
+                    severity,
+                    skill.relative_path,
+                    "missing context-preservation policy; required context must be relocated to references, not trimmed",
+                )
+            if READ_WHEN_PATTERN.search(body) is None:
+                emit(severity, skill.relative_path, "missing `Read when:` progressive-disclosure signpost")
+            if REFERENCE_LINK_PATTERN.search(body) is None:
+                emit(severity, skill.relative_path, "missing markdown link into references/ for relocated context")
+
+            refs_dir = skill.skill_dir / "references"
+            has_ref_docs = refs_dir.is_dir() and any(
+                path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir()
+            )
+            if not has_ref_docs:
+                emit(severity, skill.relative_path, "references/ directory must contain relocation target documents")
 
     print(f"Checked files: {len(skills)}")
     print(f"Errors: {errors}")

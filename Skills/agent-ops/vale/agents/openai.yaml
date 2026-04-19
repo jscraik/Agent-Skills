@@ -1,0 +1,3 @@
+interface:
+  display_name: "Vale Setup"
+  short_description: "Install, configure, sync, and verify Vale linting"

@@ -212,6 +212,157 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
         )
         self.assertEqual(resolved, "product/ops/ce-spec")
 
+    def test_context_relocation_guard_passes_for_targeted_skill(self) -> None:
+        """
+        Validates relocation guard success when policy text, Read-when signpost, and references link exist.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_rel = "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
+            skill_dir = root / skill_rel
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: skill-creator
+description: test
+---
+
+Never drop required context for brevity; move it into references.
+Read when: you need full detail.
+See [details](./references/details.md).
+""",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                canonical = self.module._canonical_skill_rel(skill_rel)
+                findings = self.module._validate_context_relocation(skill_rel, canonical, skill_dir)
+
+            self.assertEqual(findings, [])
+
+    def test_context_relocation_guard_fails_when_signposts_missing(self) -> None:
+        """
+        Ensures relocation guard emits explicit FAIL codes for missing policy/signpost/link.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_rel = "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+            skill_dir = root / skill_rel
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "note.md").write_text("# note\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: skill-installer
+description: test
+---
+
+Install skills from trusted sources.
+""",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                canonical = self.module._canonical_skill_rel(skill_rel)
+                findings = self.module._validate_context_relocation(skill_rel, canonical, skill_dir)
+
+            codes = {f.code for f in findings}
+            self.assertIn("CONTEXT_RELOCATION_POLICY_MISSING", codes)
+            self.assertIn("CONTEXT_RELOCATION_READ_WHEN_MISSING", codes)
+            self.assertIn("CONTEXT_RELOCATION_REFERENCE_LINK_MISSING", codes)
+
+    def test_context_relocation_guard_ignores_non_targeted_skills(self) -> None:
+        """
+        Ensures relocation guard is scoped to the skill-authoring trio and does not fire elsewhere.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_rel = "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
+            skill_dir = root / skill_rel
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: plugin-creator
+description: test
+---
+
+No relocation signposts on purpose.
+""",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                canonical = self.module._canonical_skill_rel(skill_rel)
+                findings = self.module._validate_context_relocation(skill_rel, canonical, skill_dir)
+
+            self.assertEqual(findings, [])
+
+    def test_context_relocation_guard_accepts_infrastructure_reference_links(self) -> None:
+        """
+        Ensure links pointing to Infrastructure/references/... are accepted by the context relocation reference-link validation for the skill-builder sample.
+        
+        Creates a temporary skill fixture with a local governance reference and a SKILL.md containing required relocation signposting and a reference link that targets Infrastructure/references/governance-contract.md, then asserts that _validate_context_relocation produces no findings.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+            skill_dir = root / skill_rel
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "governance-contract.md").write_text("# contract\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: skill-builder
+description: test
+---
+
+Preserve valuable context by relocating it with explicit signposting.
+Read when: policy nuance matters.
+See [governance](Infrastructure/references/governance-contract.md).
+""",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                canonical = self.module._canonical_skill_rel(skill_rel)
+                findings = self.module._validate_context_relocation(skill_rel, canonical, skill_dir)
+
+            self.assertEqual(findings, [])
+
+    def test_context_relocation_guard_ignores_frontmatter_for_policy_checks(self) -> None:
+        """
+        Ensures relocation policy checks are based on SKILL body content, not frontmatter metadata text.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_rel = "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
+            skill_dir = root / skill_rel
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: skill-creator
+description: never drop required context
+---
+
+## When to use
+Generic content.
+""",
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(self.module, "REPO_ROOT", root):
+                canonical = self.module._canonical_skill_rel(skill_rel)
+                findings = self.module._validate_context_relocation(skill_rel, canonical, skill_dir)
+
+            codes = {f.code for f in findings}
+            self.assertIn("CONTEXT_RELOCATION_POLICY_MISSING", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

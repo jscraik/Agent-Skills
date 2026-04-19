@@ -131,9 +131,30 @@ _RUBRIC_VERSION_DIVERGENCE_DAYS = 90
 # Optional contract fields expected at gold standard; absence produces WARN (not FAIL).
 _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 
+# Family members that must preserve context via progressive disclosure.
+_RELOCATION_GUARD_SKILLS = {
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+}
+
+_CONTEXT_POLICY_PATTERNS = (
+    re.compile(r"never drop required context", re.IGNORECASE),
+    re.compile(r"required operational context is never removed", re.IGNORECASE),
+    re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+)
+
 
 @lru_cache(maxsize=1)
-def _load_scope_skill_resolver():
+def _load_scope_skill_resolver() -> Any:
+    """
+    Load and return a scope-skill resolver function from the skill builder's inventory script.
+    
+    Attempts to import `scripts/skill_graph_inventory.py` under the configured skill-builder root and extract a callable named `resolve_scope_skill_for_path`. Does not raise on import or execution errors; failures result in `None`.
+    
+    Returns:
+        Callable[[str], str] or None: The `resolve_scope_skill_for_path` function if present and callable, `None` otherwise.
+    """
     resolver_path = _SKILL_BUILDER_ROOT / "scripts" / "skill_graph_inventory.py"
     if not resolver_path.exists():
         return None
@@ -189,8 +210,45 @@ def _load_json(path: Path) -> Dict[str, Any]:
     return obj
 
 
+def _skill_markdown_body(raw: str) -> str:
+    """
+    Extract the body of a SKILL.md file by removing leading YAML frontmatter if present.
+
+    Parameters:
+        raw (str): The full SKILL.md content.
+
+    Returns:
+        str: The markdown content after the closing frontmatter marker `---` if a leading YAML frontmatter block exists; otherwise the original `raw` text.
+    """
+    # Strip optional BOM/leading whitespace
+    stripped = raw.lstrip('\ufeff \t')
+
+    # Check if file starts with frontmatter delimiter
+    if not stripped.startswith('---\n') and not stripped.startswith('---\r\n'):
+        return raw
+
+    # Find the closing delimiter on its own line
+    lines = stripped.split('\n')
+    for i in range(1, len(lines)):
+        line = lines[i].rstrip('\r')
+        if line == '---':
+            # Found closing delimiter, return content after it
+            return '\n'.join(lines[i+1:])
+
+    # No closing delimiter found, return original
+    return raw
+
+
 def _load_schema(schema_path: Path) -> Any:
-    """Load a YAML schema file; return None if unavailable."""
+    """
+    Load a YAML schema file from the given path and return its parsed contents or `None` if the file is absent.
+
+    Parameters:
+        schema_path (Path): Filesystem path to the schema file.
+
+    Returns:
+        The parsed YAML schema as a Python object, or `None` if the file does not exist.
+    """
     if not schema_path.exists():
         return None
     try:
@@ -576,9 +634,13 @@ def _validate_task_profile(skill_rel: str, skill_dir: Path, *, expected_scope_sk
 
 
 def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
-    """P2.4: Scan SKILL.md body and non-eval reference files for indirect PI language.
-
-    evals.yaml is intentionally excluded — PI language there is test coverage.
+    """
+    Scan SKILL.md and non-eval files under references/ for indirect prompt-injection patterns and emit warnings for matches.
+    
+    This function ignores `references/evals.yaml` (indirect PI language there is treated as test coverage).
+    
+    Returns:
+        findings (List[Finding]): A list of WARN findings describing each detected indirect prompt-injection occurrence.
     """
     findings: List[Finding] = []
 
@@ -586,9 +648,7 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
     skill_md = skill_dir / "SKILL.md"
     if skill_md.exists():
         raw = skill_md.read_text(encoding="utf-8", errors="replace")
-        # Strip frontmatter before scanning
-        parts = raw.split("---", 2)
-        body = parts[2] if len(parts) >= 3 else raw
+        body = _skill_markdown_body(raw)
         if _INDIRECT_PI_TOKENS.search(body):
             findings.append(
                 Finding(
@@ -626,7 +686,118 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
     return findings
 
 
+def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: Path) -> List[Finding]:
+    """
+    Validate that a skill enforces progressive-disclosure context relocation and return findings for any missing signals.
+    
+    This check applies only to skills listed in the relocation-guard set; for other skills it returns an empty list. When applicable, it inspects SKILL.md and the references/ directory and emits FAIL findings for each missing requirement: an explicit context-preservation policy, a "Read when:" signpost, a Markdown link into references/, and at least one document-like file in references/.
+    
+    Parameters:
+        skill_rel (str): Repository-relative skill path used as the `skill` field on findings.
+        canonical_rel (str): Canonicalized repository-relative path used to decide whether the relocation guard applies.
+        skill_dir (Path): Filesystem path to the skill directory to inspect.
+    
+    Returns:
+        List[Finding]: A list of findings describing each missing progressive-disclosure relocation requirement; empty if none are missing or the guard does not apply.
+    """
+    if canonical_rel.lower() not in _RELOCATION_GUARD_SKILLS:
+        return []
+
+    findings: List[Finding] = []
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        return findings
+
+    body = _skill_markdown_body(skill_md.read_text(encoding="utf-8", errors="replace"))
+
+    if not any(pattern.search(body) for pattern in _CONTEXT_POLICY_PATTERNS):
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_POLICY_MISSING",
+                skill_rel,
+                "missing explicit context-preservation policy in SKILL.md; "
+                "required context must be relocated to references, not trimmed",
+            )
+        )
+
+    if re.search(r"read when\s*:", body, re.IGNORECASE) is None:
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_READ_WHEN_MISSING",
+                skill_rel,
+                "missing `Read when:` progressive-disclosure signpost in SKILL.md",
+            )
+        )
+
+    refs_dir = skill_dir / "references"
+
+    # Extract all referenced paths and verify they exist
+    ref_link_pattern = re.compile(r"\]\((references/[^\)]*)\)", re.IGNORECASE)
+    ref_matches = ref_link_pattern.findall(body)
+
+    if not ref_matches:
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_REFERENCE_LINK_MISSING",
+                skill_rel,
+                "missing SKILL.md link into references/ for relocated context",
+            )
+        )
+    else:
+        # Verify each referenced file actually exists
+        allowed_suffixes = {".md", ".yaml", ".yml", ".json"}
+        for ref_path in ref_matches:
+            # Resolve the reference path relative to the skill directory
+            # ref_path is like "references/file.md" or "references/subdir/file.md"
+            resolved_path = skill_dir / ref_path
+
+            # Check if file exists and has allowed suffix
+            if not resolved_path.exists():
+                findings.append(
+                    Finding(
+                        "FAIL",
+                        "CONTEXT_RELOCATION_REFERENCE_MISSING",
+                        skill_rel,
+                        f"referenced file '{ref_path}' does not exist",
+                    )
+                )
+            elif resolved_path.suffix not in allowed_suffixes:
+                findings.append(
+                    Finding(
+                        "FAIL",
+                        "CONTEXT_RELOCATION_REFERENCE_MISSING",
+                        skill_rel,
+                        f"referenced file '{ref_path}' has disallowed suffix (expected: {', '.join(allowed_suffixes)})",
+                    )
+                )
+
+    has_ref_docs = refs_dir.is_dir() and any(path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir())
+    if not has_ref_docs:
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_REFERENCES_EMPTY",
+                skill_rel,
+                "references/ must contain relocation targets for progressive disclosure",
+            )
+        )
+
+    return findings
+
+
 def _validate_skill(skill_rel: str) -> List[Finding]:
+    """
+    Validate a single skill directory and collect findings for contract, evals, task-profile, reference PI, and context-relocation checks.
+    
+    Parameters:
+    	skill_rel (str): Repository-relative path to the skill to validate.
+    
+    Returns:
+    	List[Finding]: Accumulated findings (FAIL/WARN) detected for the given skill. If the skill directory is missing, returns a single `FAIL` finding with code `SKILL_DIR_MISSING`. Findings reference the provided `skill_rel`.
+    """
     skill_dir = (REPO_ROOT / skill_rel).resolve()
     canonical_rel = _canonical_skill_rel(skill_rel)
     findings: List[Finding] = []
@@ -648,6 +819,7 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
     findings.extend(_validate_evals(skill_rel, skill_dir))
     findings.extend(_validate_task_profile(skill_rel, skill_dir, expected_scope_skill=expected_scope_skill))
     findings.extend(_validate_reference_pi(skill_rel, skill_dir))
+    findings.extend(_validate_context_relocation(skill_rel, canonical_rel, skill_dir))
     return findings
 
 

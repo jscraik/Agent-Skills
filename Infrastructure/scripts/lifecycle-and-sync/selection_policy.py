@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-16.v11"
+POLICY_VERSION = "2026-04-18.v12"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -34,6 +34,7 @@ EXCLUDED_SCAN_SEGMENTS: tuple[str, ...] = (
 
 # Internal skills intentionally hidden from flat runtime discovery.
 HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
+    "circleci",
     "linear",
     "skillgrade-graders",
     "skillgrade-setup",
