@@ -10,4 +10,7 @@ def test_plugin_builder_wrapper_points_to_impl() -> None:
 
     assert script_path.exists()
     assert impl_path.exists()
+    wrapper_source = script_path.read_text(encoding="utf-8")
+    assert "runpy.run_path" in wrapper_source
+    assert ".pyw" in wrapper_source
 
