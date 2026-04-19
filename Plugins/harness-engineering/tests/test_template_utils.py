@@ -7,13 +7,17 @@ import pytest
 
 
 MODULE_PATH = (
-    Path(__file__).resolve().parents[1]
+    Path(__file__).resolve().parents[2]
+    / "plugin-factory"
     / "skills"
     / "_template_utils.py"
 )
 
 SPEC = importlib.util.spec_from_file_location("template_utils", MODULE_PATH)
-assert SPEC is not None and SPEC.loader is not None
+if SPEC is None:
+    raise RuntimeError(f"Unable to build import spec for {MODULE_PATH}")
+if SPEC.loader is None:
+    raise RuntimeError(f"Unable to load module from {MODULE_PATH}")
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
