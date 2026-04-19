@@ -145,7 +145,7 @@ _CONTEXT_POLICY_PATTERNS = (
 )
 
 
-`@lru_cache`(maxsize=1)
+@lru_cache(maxsize=1)
 def _load_scope_skill_resolver() -> Any:
     """
     Load and return a scope-skill resolver function from the skill builder's inventory script.
