@@ -143,6 +143,45 @@ def _write_json_file(path: Path, payload: Dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def _load_allowed_structure_failures_from_baseline(baseline_path: Path) -> List[str]:
+    """
+    Load allowed structure failures from a baseline JSON file.
+
+    Supports both direct baselines with `allowed_structure_failures` and
+    progressive-disclosure stubs that point to an archived baseline via
+    an `archive` path.
+    """
+    try:
+        baseline_obj = json.loads(baseline_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        return []
+
+    if isinstance(baseline_obj, dict) and isinstance(baseline_obj.get("allowed_structure_failures"), list):
+        return [str(x) for x in baseline_obj["allowed_structure_failures"]]
+
+    if not isinstance(baseline_obj, dict):
+        return []
+
+    archive_rel = baseline_obj.get("archive")
+    if not archive_rel:
+        return []
+
+    archive_candidate = (baseline_path.parent / str(archive_rel)).resolve()
+    if not archive_candidate.exists():
+        archive_candidate = (baseline_path.parent.parent / str(archive_rel)).resolve()
+    if not archive_candidate.exists():
+        return []
+
+    try:
+        archive_obj = json.loads(archive_candidate.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        return []
+
+    if isinstance(archive_obj, dict) and isinstance(archive_obj.get("allowed_structure_failures"), list):
+        return [str(x) for x in archive_obj["allowed_structure_failures"]]
+    return []
+
+
 def merge_sarif_reports(paths: List[Path], destination: Path) -> Dict[str, Any]:
     merged: Dict[str, Any] = {
         "version": "2.1.0",
@@ -224,12 +263,7 @@ def main() -> int:
     if args.baseline_file:
         baseline_path = Path(args.baseline_file).expanduser().resolve()
         if baseline_path.exists():
-            try:
-                baseline_obj = json.loads(baseline_path.read_text(encoding="utf-8"))
-                if isinstance(baseline_obj, dict) and isinstance(baseline_obj.get("allowed_structure_failures"), list):
-                    baseline_allowed = [str(x) for x in baseline_obj["allowed_structure_failures"]]
-            except (json.JSONDecodeError, OSError, UnicodeDecodeError):
-                baseline_allowed = []
+            baseline_allowed = _load_allowed_structure_failures_from_baseline(baseline_path)
 
     if args.run_evals:
         for skill in skills:
