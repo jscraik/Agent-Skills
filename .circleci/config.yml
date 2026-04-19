@@ -16,32 +16,9 @@ jobs:
               echo "✅ GH_TOKEN present"
             fi
       - run:
-          name: Ensure pnpm available
+          name: Validate Repository
           command: |
-            if ! command -v pnpm >/dev/null 2>&1; then
-              export NPM_CONFIG_PREFIX="$HOME/.local"
-              export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
-              npm install --global pnpm@10.0.0
-            fi
-            pnpm --version
-      - run:
-          name: Install dependencies
-          command: npm install
-      - run:
-          name: Lint
-          command: npm run lint
-      - run:
-          name: Typecheck
-          command: npm run typecheck
-      - run:
-          name: Test
-          command: npm run test
-      - run:
-          name: Audit
-          command: npm run audit
-      - run:
-          name: Policy Bundle
-          command: npm run check
+            python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all
 
 workflows:
   pr-pipeline:

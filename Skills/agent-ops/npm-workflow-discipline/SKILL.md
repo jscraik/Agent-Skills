@@ -175,7 +175,7 @@ npm run check --if-present
 | Skill | When to use |
 |---|---|
 | [[coding-harness]] | Validate and enforce repository quality gates in CI and local workflows |
-| [[circleci]] | Align deterministic npm install and script contracts with CircleCI pipeline behavior |
+| [[circleci:circleci-cli]] | Align deterministic npm install and script contracts with CircleCI pipeline behavior |
 | [[release]] | Apply package and script contract checks during release readiness and cutover |
 
 **Topic map:** [[agent-ops]]

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "plugin-factory",
   "version": "0.1.0",
-  "description": "Bundle the plugin-authoring family in one plugin: plugin-builder, plugin-creator, and plugin-installer with their scripts and reference materials.",
+  "description": "Plugin authoring toolkit with router, builder, creator, and installer lanes.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -13,6 +13,7 @@
   "keywords": [
     "plugin",
     "plugin-factory",
+    "plugin-router",
     "plugin-builder",
     "plugin-creator",
     "plugin-installer",
@@ -26,11 +27,11 @@
     "last_reviewed": "2026-04-08",
     "metadata_source": "plugin_manifest"
   },
-  "skills": "./skills/",
+  "skills": "./skills_index/",
   "interface": {
     "displayName": "Plugin Factory",
-    "shortDescription": "Create, harden, and install Codex plugins",
-    "longDescription": "A Codex plugin package that bundles the plugin-authoring family: plugin-builder, plugin-creator, and plugin-installer.",
+    "shortDescription": "Route, create, harden, and install Codex plugins",
+    "longDescription": "A Codex plugin package that bundles the plugin-authoring family: plugin-router, plugin-builder, plugin-creator, and plugin-installer.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [
@@ -41,7 +42,9 @@
     "websiteURL": "https://github.com/jscraik/Agent-Skills",
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
-    "defaultPrompt": "Help me create, harden, and install a Codex plugin package.",
+    "defaultPrompt": [
+      "Route this plugin task to the right lane."
+    ],
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png"

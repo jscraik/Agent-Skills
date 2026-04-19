@@ -1,6 +1,6 @@
 ---
 name: plugin-creator
-description: Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/Plugins/marketplace.json` entries for plugin ordering and availability metadata.
+description: Scaffold a minimal Codex plugin package and optional marketplace entry. Use when the user needs first-pass plugin creation.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -9,232 +9,67 @@ metadata:
 
 ## Core Philosophy
 
-- Create the smallest viable plugin package first, then expand only where the user asks.
-- Keep discovery and install behavior predictable: canonical paths, canonical manifest shape, explicit defaults.
-- Bias toward safe scaffolding over opinionated completion; placeholders are intentional and easier to review.
-- Preserve single canonical ownership: when an existing skill is being pluginized, adopt it by move, not duplicate copy.
+- Start minimal, then add only requested surfaces.
+- Keep naming and manifest shape deterministic.
 
-## Anti-Patterns to Avoid
+## When to Use
 
-- Do not generate plugin files without the required `.codex-plugin/plugin.json`.
-- Do not write marketplace entries with missing `policy.installation`, `policy.authentication`, or `category`.
-- Do not assume repo-local versus home-local targets when the request is ambiguous.
-- Do not reorder existing marketplace plugin entries unless explicitly requested.
-- Do not keep the same skill as active canonical source in both standalone and plugin paths.
+Use for initial plugin scaffolding.
 
-## Scope Guardrails
+## Inputs
 
-- First pass should stay focused on 2-3 surfaces: scaffold, manifest placeholders, and optional marketplace entry.
-- Add optional folders (`skills/`, `hooks/`, `Infrastructure/scripts/`, `assets/`, `.mcp.json`, `.app.json`) only when requested.
-- Treat policy product gating as out of scope by default unless the user explicitly asks for `policy.products`.
-- Existing-skill adoption should remain deterministic and minimal: move source, sync projections, validate parity.
+- plugin name and destination scope
+- optional marketplace update intent
+- optional existing skill path to adopt by move
+
+## Outputs
+
+Return: `schema_version`, `plugin_name`, `plugin_path`, `validation`, optional `blocked_by`.
+
+## Workflow
+
+Use the detailed scaffold procedure in `references/workflow.md`.
+
+Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+
+Read when:
+- You need full plugin scaffold and marketplace update flow: [references/workflow.md](./references/workflow.md).
+
+## Required Behavior
+
+- folder name must equal manifest `name`
+- keep required policy/category fields
 
 ## Encouraging Variation
 
-- Adapt scaffolding detail to context: repo plugin, home-local plugin, or migration patch.
-- Keep the canonical contract unchanged while varying examples, command shape, and guidance depth.
-- Avoid one-size-fits-all responses when the user requests partial scaffolds or path-specific behavior.
-
-## Quick Start
-
-1. Run the scaffold script:
-
-```bash
-  # Plugin names are normalized to lower-case hyphen-case and must be <= 64 chars.
-  # The generated folder and plugin.json name are always the same.
-# Run from repo root.
-# By default creates in <repo_root>/Plugins/<plugin-name>.
-python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
-```
-
-2. Open `<plugin-path>/.codex-plugin/plugin.json` and replace the sample values with your real plugin metadata.
-
-3. Generate or update the repo marketplace entry when the plugin should appear in Codex UI ordering:
-
-```bash
-# marketplace.json always lives at <repo-root>/.agents/Plugins/marketplace.json
-python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py my-plugin --with-marketplace
-```
-
-For a home-local plugin, treat `<home>` as the root and use:
-
-```bash
-python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py my-plugin \
-  --path ~/plugins \
-  --marketplace-path ~/.agents/Plugins/marketplace.json \
-  --with-marketplace
-```
-
-4. Generate/adjust optional companion folders as needed:
-
-```bash
-python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py my-plugin --path <parent-plugin-directory> \
-  --with-skills --with-hooks --with-scripts --with-assets --with-mcp --with-apps --with-marketplace
-```
-
-`<parent-plugin-directory>` is the directory where the plugin folder `<plugin-name>` will be created (for example `~/code/plugins`).
-
-## What this skill creates
-
-- If the user has not made the plugin location explicit, ask whether they want a repo-local plugin or a home-local plugin before generating marketplace entries.
-- Creates plugin root at `/<parent-plugin-directory>/<plugin-name>/`.
-- Always creates `/<parent-plugin-directory>/<plugin-name>/.codex-plugin/plugin.json`.
-- Fills the manifest with the full schema shape, placeholder values, and the complete `interface` section.
-- Creates or updates `<repo-root>/.agents/Plugins/marketplace.json` when `--with-marketplace` is set.
-  - If the marketplace file does not exist yet, seed top-level `name` plus `interface.displayName` placeholders before adding the first plugin entry.
-- `<plugin-name>` is normalized using skill-creator naming rules:
-  - `My Plugin` → `my-plugin`
-  - `My--Plugin` → `my-plugin`
-  - underscores, spaces, and punctuation are converted to `-`
-  - result is lower-case hyphen-delimited with consecutive hyphens collapsed
-- Supports optional creation of:
-  - `skills/`
-  - `hooks/`
-  - `Infrastructure/scripts/`
-  - `assets/`
-  - `.mcp.json`
-  - `.app.json`
-
-## Existing Skill Adoption (Default)
-
-When a user asks to create a plugin and provides an already-created skill, treat adoption as default behavior:
-
-- Move the existing skill into `Plugins/<plugin-name>/skills/<skill-name>`; do not duplicate it.
-- Prefer `git mv` for tracked repository paths. Fall back to `mv` only when git move is not applicable.
-- Keep a single canonical source path after adoption; remove duplicate active source locations.
-- Only ask follow-up questions when source-path intent is ambiguous or multiple candidate skills match.
-- If a user explicitly requests a temporary duplicate/migration copy, do that as an exception and state the risk.
-
-Post-adoption sync and checks (required):
-
-```bash
-bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
-bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all
-python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py
-bash Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
-bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh --all
-```
-
-## Marketplace workflow
-
-- `marketplace.json` always lives at `<repo-root>/.agents/Plugins/marketplace.json`.
-- For a home-local plugin, use the same convention with `<home>` as the root:
-  `~/.agents/Plugins/marketplace.json` plus `./Plugins/<plugin-name>`.
-- Marketplace root metadata supports top-level `name` plus optional `interface.displayName`.
-- Treat plugin order in `plugins[]` as render order in Codex. Append new entries unless a user explicitly asks to reorder the list.
-- `displayName` belongs inside the marketplace `interface` object, not individual `plugins[]` entries.
-- Each generated marketplace entry must include all of:
-  - `policy.installation`
-  - `policy.authentication`
-  - `category`
-- Default new entries to:
-  - `policy.installation: "AVAILABLE"`
-  - `policy.authentication: "ON_INSTALL"`
-- Override defaults only when the user explicitly specifies another allowed value.
-- Allowed `policy.installation` values:
-  - `NOT_AVAILABLE`
-  - `AVAILABLE`
-  - `INSTALLED_BY_DEFAULT`
-- Allowed `policy.authentication` values:
-  - `ON_INSTALL`
-  - `ON_USE`
-- Treat `policy.products` as an override. Omit it unless the user explicitly requests product gating.
-- The generated plugin entry shape is:
-
-```json
-{
-  "name": "plugin-name",
-  "source": {
-    "source": "local",
-    "path": "./Plugins/plugin-name"
-  },
-  "policy": {
-    "installation": "AVAILABLE",
-    "authentication": "ON_INSTALL"
-  },
-  "category": "Productivity"
-}
-```
-
-- Use `--force` only when intentionally replacing an existing marketplace entry for the same plugin name.
-- If `<repo-root>/.agents/Plugins/marketplace.json` does not exist yet, create it with top-level `"name"`, an `"interface"` object containing `"displayName"`, and a `plugins` array, then add the new entry.
-
-- For a brand-new marketplace file, the root object should look like:
-
-```json
-{
-  "name": "example-marketplace",
-  "interface": {
-    "displayName": "Example Marketplace"
-  },
-  "plugins": [
-    {
-      "name": "plugin-name",
-      "source": {
-        "source": "local",
-        "path": "./Plugins/plugin-name"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    }
-  ]
-}
-```
-
-## Required behavior
-
-- Outer folder name and `plugin.json` `"name"` are always the same normalized plugin name.
-- Do not remove required structure; keep `.codex-plugin/plugin.json` present.
-- Keep manifest values as placeholders until a human or follow-up step explicitly fills them.
-- If creating files inside an existing plugin path, use `--force` only when overwrite is intentional.
-- Preserve any existing marketplace `interface.displayName`.
-- When generating marketplace entries, always write `policy.installation`, `policy.authentication`, and `category` even if their values are defaults.
-- Add `policy.products` only when the user explicitly asks for that override.
-- Keep marketplace `source.path` relative to repo root as `./Plugins/<plugin-name>`.
-- If an existing skill is supplied during plugin creation, adopt by move into the plugin skill path by default; avoid duplicate canonical copies.
-
-## Reference to exact spec sample
-
-For the exact canonical sample JSON for both plugin manifests and marketplace entries, use:
-
-- `Infrastructure/references/plugin-json-spec.md`
+- adapt only to requested scope (repo-local, home-local, or migration)
+- include optional surfaces only when requested
 
 ## Validation
 
-After editing `SKILL.md`, run:
-
 ```bash
 python3 Skills/skill-builder/Infrastructure/scripts/quick_validate.py Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
 ```
 
-Fail-fast rule:
+Fail fast: stop at first failed gate and report blocker text.
 
-- Stop at the first failed validation check and do not continue packaging or marketplace edits until the failure is fixed.
-- If quick validation fails, report the exact failing command output and rerun validation only after applying a targeted fix.
+## Anti-Patterns to Avoid
 
-## See Also
+- missing `.codex-plugin/plugin.json`
+- partial marketplace policy fields
+- copying existing skills instead of moving canonical ownership
 
-| Skill | When to use together |
-|---|---|
-| [[plugin-builder]] | Harden scaffolded plugins, run compatibility checks, and emit deconflict evidence before release |
-| [[plugin-installer]] | Install and verify a contract-valid plugin after packaging work is complete |
+## Constraints
 
-**Topic map:** [[agent-ops]]
+- redact secrets and tokens in generated examples
+- do not overwrite existing plugin roots unless force semantics are explicit
 
-## When to use
-- Use when the request clearly matches this skill's owned workflow and expected outputs.
+## References
 
-## Required inputs
-- Confirm goal, constraints, and required paths or URLs before execution.
-
-## Deliverables
-- Produce concrete outputs with exact paths, commands run, and verification evidence.
-
-## Failure mode
-- Stop at the first blocker, report root cause, and provide the safest next command.
-
-## Gotchas
-- Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.
+- `references/workflow.md`
+- `references/contract.yaml`
+- `references/evals.yaml`
+- `references/task-profile.json`
+- `references/plugin-json-spec.md`
+- `assets/`

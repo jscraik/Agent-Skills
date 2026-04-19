@@ -1,0 +1,3 @@
+Budget-relocated reference.
+
+Full original content: fixtures/budget-archive/2026-04-19/skills/infrastructure_ops/skill-installer/LICENSE.txt

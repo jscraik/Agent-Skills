@@ -1,0 +1,29 @@
+schema_version: "1.1"
+purpose: >
+  Run CodeRabbit CLI review on requested change scope and normalize findings into
+  a severity-ranked action envelope for safe follow-up.
+triggers:
+  - user asks to run CodeRabbit review on branch or diff changes
+  - user wants risk-focused review findings before merge
+  - user asks for plain-output normalization into actionable severity buckets
+inputs:
+  - requested review scope such as all, committed, or uncommitted changes
+  - CodeRabbit CLI availability and authentication status
+  - optional base reference or output mode preferences
+outputs:
+  - severity-ranked findings grouped as critical warning and info
+  - prioritized next actions tied to changed files
+  - validation outcomes captured as pass fail or blocked
+non_goals:
+  - unresolved-thread remediation that belongs in autofix workflow
+  - live SaaS account administration or billing operations
+  - unrelated refactors outside review findings
+risks:
+  - stale branch context can produce outdated findings and wrong priorities
+  - unauthenticated CLI runs can be mistaken for successful review output
+rollback_procedure: >
+  If review-normalization changes introduce regressions, restore prior scripts and
+  references from git and rerun strict skill audit before re-enabling the lane.
+observability: >
+  Monitor lane health with strict skill-audit status, script unittest pass rates,
+  and review command failure trends in local validation output.

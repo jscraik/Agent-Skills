@@ -29,7 +29,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 ## Standards snapshot (March 2026)
 - Use GitHub CLI and GraphQL as the source of truth for unresolved review threads and resolution status.
 - Separate readiness review from remediation. Audit first, fix second.
-- Keep CI-provider strategy separate from review-thread remediation. This skill verifies thread state and requested fixes; CircleCI workflow design or CircleCI-specific diagnosis belongs to [`circleci`](/Skills/circleci/SKILL.md).
+- Keep CI-provider strategy separate from review-thread remediation. This skill verifies thread state and requested fixes; CircleCI workflow design or CircleCI-specific diagnosis belongs to [`circleci:circleci-cli`](/.agents/plugins-runtime/cache/agent-skills-local/circleci/1.0.0/skills/cli/SKILL.md).
 - Do not resolve a review thread until the requested change or reviewer reply is actually ready.
 - Keep parallel fanout bounded. Run at most 4 remediation workers at a time unless the user explicitly wants a different policy.
 - Re-fetch unresolved, non-outdated threads after push before claiming completion.
@@ -44,7 +44,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - Do not use for PR readiness, policy, or merge-blocker review. Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `pr_readiness` mode.
 - Do not use for broad GitHub lifecycle work like PR creation, review requests, or server-side merge. Use [`gh-workflow`](/github/gh-workflow/SKILL.md).
 - Do not use for CI-only diagnosis. Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `ci_diagnose` mode.
-- Do not use for CircleCI workflow design, migration, policy, or CircleCI-specific pipeline diagnosis. Use [`circleci`](/Skills/circleci/SKILL.md).
+- Do not use for CircleCI workflow design, migration, policy, or CircleCI-specific pipeline diagnosis. Use [`circleci:circleci-cli`](/.agents/plugins-runtime/cache/agent-skills-local/circleci/1.0.0/skills/cli/SKILL.md).
 - Do not use for a generic code review or technical critique with no remediation ask. Use [`ce-review`](/product/Infrastructure/ops/ce-review/SKILL.md) or [`ce-technical-review`](/product/Infrastructure/ops/ce-technical-review/SKILL.md).
 - Do not use when the user only wants to address one or two specifically named comments manually. Use `gh-workflow` in `pr_review_comments` mode instead.
 
@@ -104,7 +104,7 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 - Read [`Infrastructure/references/overlap-matrix.md`](/github/resolve-pr-parallel/Infrastructure/references/overlap-matrix.md) before widening this skill's trigger wording.
 - Use [`gh-workflow`](/github/gh-workflow/SKILL.md) in `pr_readiness` mode when the user wants to know whether a PR is ready, not to fix it.
 - Use [`gh-workflow`](/github/gh-workflow/SKILL.md) when the work is a selected-comment response, broader PR lifecycle task, or one-mode GitHub operation.
-- Use [`circleci`](/Skills/circleci/SKILL.md) when the blocker is CircleCI workflow design, migration, policy, or provider-specific diagnosis rather than GitHub thread remediation.
+- Use [`circleci:circleci-cli`](/.agents/plugins-runtime/cache/agent-skills-local/circleci/1.0.0/skills/cli/SKILL.md) when the blocker is CircleCI workflow design, migration, policy, or provider-specific diagnosis rather than GitHub thread remediation.
 - Use [`ce-review`](/product/Infrastructure/ops/ce-review/SKILL.md) or [`ce-technical-review`](/product/Infrastructure/ops/ce-technical-review/SKILL.md) when the user wants critique rather than remediation.
 
 ## Upstream preservation

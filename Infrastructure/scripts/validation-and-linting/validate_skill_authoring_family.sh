@@ -8,9 +8,8 @@ if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" ]]; the
   exit 1
 fi
 
-# The codex-preflight.sh WORKSPACE_ROOT resolves to Infrastructure/ (parent of scripts/).
-# Override --paths to avoid requiring CODESTYLE.md/Makefile which live at the repo root,
-# not under Infrastructure/. Only check for the scripts directory itself.
+# Keep preflight path checks lightweight for this family gate. The script only needs
+# the scripts tree at this stage; broader repo checks run elsewhere in validate_all.
 _preflight_paths="scripts"
 if [[ -f "scripts/codex-preflight.sh" ]]; then
   bash scripts/codex-preflight.sh --stack auto --mode "$preflight_mode" --bins "git,bash,sed,jq,curl,python3" --paths "$_preflight_paths"
@@ -62,8 +61,21 @@ skill_dirs=(
   "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
 )
-skill_builder_dir="Plugins/skill-factory/skills/code_quality_review/skill-builder"
-skill_builder_scripts_dir="${skill_builder_dir}/scripts"
+skill_builder_dir_candidates=(
+  "plugins/skill-factory/skills/code_quality_review/skill-builder"
+  "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+  "plugins/skill-factory/skills/skill-builder"
+  "Plugins/skill-factory/skills/skill-builder"
+)
+skill_builder_dir=""
+skill_builder_scripts_dir=""
+for candidate in "${skill_builder_dir_candidates[@]}"; do
+  if [[ -f "${candidate}/scripts/skill_gate.py" ]]; then
+    skill_builder_dir="$candidate"
+    skill_builder_scripts_dir="${candidate}/scripts"
+    break
+  fi
+done
 
 if [[ ! -d "$skill_builder_scripts_dir" ]]; then
   echo "[family-gate] ERROR: missing skill-builder scripts directory: $skill_builder_scripts_dir"
@@ -328,7 +340,25 @@ fi
 
 if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   echo "[family-gate] running pytest unit tests..."
-  pytest_skill_gate_path="${skill_builder_scripts_dir}/test_skill_gate.py"
+  pytest_skill_gate_path=""
+  pytest_skill_gate_candidates=(
+    "plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
+    "plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
+    "Plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
+  )
+  for candidate in "${pytest_skill_gate_candidates[@]}"; do
+    if [[ -f "$candidate" ]]; then
+      pytest_skill_gate_path="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$pytest_skill_gate_path" ]]; then
+    echo "[family-gate] ERROR: missing skill-gate pytest target"
+    exit 2
+  fi
+
   if "${pytest_cmd[@]}" \
       "$pytest_skill_gate_path" \
       Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py \

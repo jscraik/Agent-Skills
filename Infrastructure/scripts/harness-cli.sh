@@ -2,7 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT_FALLBACK="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+if REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null)"; then
+	:
+else
+	REPO_ROOT="${REPO_ROOT_FALLBACK}"
+fi
 
 if ! command -v node >/dev/null 2>&1; then
 	echo "Error: node is required to run scripts/harness-cli.sh." >&2
@@ -12,7 +17,7 @@ fi
 
 set +e
 CLI_PATH="$(
-	REPO_ROOT="$REPO_ROOT" node <<'NODE'
+	REPO_ROOT="$REPO_ROOT" node -e '
 const { createRequire } = require("node:module");
 const { resolve } = require("node:path");
 
@@ -36,7 +41,7 @@ try {
 	console.error(error instanceof Error ? error.message : String(error));
 	process.exit(43);
 }
-NODE
+'
 )"
 resolution_status=$?
 set -e

@@ -224,7 +224,7 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 | Skill | When to use |
 |---|---|
 | [[bootstrap]] | Clone and bootstrap a repository before coding-harness setup begins |
-| [[circleci]] | Work on CircleCI-specific pipeline design or migration details beyond the harness wrapper |
+| [[circleci:circleci-cli]] | Work on CircleCI-specific pipeline design or migration details beyond the harness wrapper |
 | [[verification-before-completion]] | Add a stronger final verification pass before claiming a repo change is complete |
 | [[systematic-debugging]] | Root-cause failing harness commands or broken repo state before applying fixes |
 

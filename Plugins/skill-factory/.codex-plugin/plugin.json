@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "skill-factory",
   "version": "0.1.0",
-  "description": "Bundle the skill-authoring family in one plugin: skill-creator, skill-builder, skill-refactor, skillify, and skill-installer with their scripts and reference materials.",
+  "description": "Bundle for creating, improving, and installing Codex skills.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -31,7 +31,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Skill Factory",
-    "shortDescription": "Create, improve, audit, and install Codex skills",
+    "shortDescription": "Create and improve Codex skills",
     "longDescription": "A Codex plugin package that bundles the skill-authoring family: skill-creator, skill-builder, skill-refactor, skillify, and skill-installer.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
@@ -43,7 +43,9 @@
     "websiteURL": "https://github.com/jscraik/Agent-Skills",
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
-    "defaultPrompt": "Help me create, improve, audit, skillify, or distribute a Codex skill workflow.",
+    "defaultPrompt": [
+      "Help me create or improve a Codex skill."
+    ],
     "brandColor": "#3B82F6",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png"

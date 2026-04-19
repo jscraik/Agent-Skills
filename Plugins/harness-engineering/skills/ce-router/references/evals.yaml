@@ -1,0 +1,57 @@
+schema_version: "2.0"
+
+skill_name: "ce-router"
+
+cases:
+  - id: ambiguous-ce-request
+    name: route ambiguous ce request
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I need help with compound engineering but I am not sure which stage to run next."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-router"
+      - type: regex
+        value: "(?i)(ce-(compound|ideate|brainstorm|spec|plan|work|review|tdd))"
+
+  - id: explicit-implementation-route
+    name: route to implementation
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The plan is approved. Route me to the right CE stage to implement now."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-router"
+      - type: regex
+        value: "(?i)(ce-work|implementation)"
+
+  - id: explicit-review-route
+    name: route to review
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "We already built this. Which CE review stage should we run before merge?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ce-router"
+      - type: regex
+        value: "(?i)(ce-review|ce-technical-review|ce-reliability-review)"
+
+  - id: direct-stage-non-router
+    name: direct stage request should not force router
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Use ce-spec to write the spec for this approved direction."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "ce-router"
+      - type: regex
+        value: "(?i)(ce-spec|spec)"
+

@@ -144,14 +144,28 @@ _CONTEXT_POLICY_PATTERNS = (
     re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
 )
 
+_HARNESS_CACHE_SCOPE_PATTERN = re.compile(
+    r"^plugins/cache/agent-skills-local/harness-engineering/[^/]+/skills/([^/]+)$",
+    re.IGNORECASE,
+)
+
+
+def _normalize_scope_alias(scope: str) -> str:
+    """Normalize known path aliases into canonical scope taxonomy strings."""
+    normalized = scope.strip().strip("/").replace("\\", "/")
+    harness_match = _HARNESS_CACHE_SCOPE_PATTERN.match(normalized)
+    if harness_match:
+        return f"product/ops/{harness_match.group(1)}"
+    return normalized
+
 
 @lru_cache(maxsize=1)
 def _load_scope_skill_resolver() -> Any:
     """
     Load and return a scope-skill resolver function from the skill builder's inventory script.
-    
+
     Attempts to import `scripts/skill_graph_inventory.py` under the configured skill-builder root and extract a callable named `resolve_scope_skill_for_path`. Does not raise on import or execution errors; failures result in `None`.
-    
+
     Returns:
         Callable[[str], str] or None: The `resolve_scope_skill_for_path` function if present and callable, `None` otherwise.
     """
@@ -179,13 +193,13 @@ def _resolve_scope_skill_for_path(relative_skill_dir: str) -> str:
     resolver = _load_scope_skill_resolver()
     if resolver is not None:
         try:
-            resolved = str(resolver(relative_skill_dir)).strip().strip("/")
+            resolved = _normalize_scope_alias(str(resolver(relative_skill_dir)))
             if resolved:
                 return resolved
             raise RuntimeError(f"scope resolver returned empty scope for {relative_skill_dir}")
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError(f"scope resolver failed for {relative_skill_dir}: {exc}") from exc
-    return relative_skill_dir
+    return _normalize_scope_alias(relative_skill_dir)
 
 
 @dataclass(frozen=True)
@@ -636,9 +650,9 @@ def _validate_task_profile(skill_rel: str, skill_dir: Path, *, expected_scope_sk
 def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
     """
     Scan SKILL.md and non-eval files under references/ for indirect prompt-injection patterns and emit warnings for matches.
-    
+
     This function ignores `references/evals.yaml` (indirect PI language there is treated as test coverage).
-    
+
     Returns:
         findings (List[Finding]): A list of WARN findings describing each detected indirect prompt-injection occurrence.
     """
@@ -689,14 +703,14 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
 def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: Path) -> List[Finding]:
     """
     Validate that a skill enforces progressive-disclosure context relocation and return findings for any missing signals.
-    
+
     This check applies only to skills listed in the relocation-guard set; for other skills it returns an empty list. When applicable, it inspects SKILL.md and the references/ directory and emits FAIL findings for each missing requirement: an explicit context-preservation policy, a "Read when:" signpost, a Markdown link into references/, and at least one document-like file in references/.
-    
+
     Parameters:
         skill_rel (str): Repository-relative skill path used as the `skill` field on findings.
         canonical_rel (str): Canonicalized repository-relative path used to decide whether the relocation guard applies.
         skill_dir (Path): Filesystem path to the skill directory to inspect.
-    
+
     Returns:
         List[Finding]: A list of findings describing each missing progressive-disclosure relocation requirement; empty if none are missing or the guard does not apply.
     """
@@ -733,8 +747,8 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
 
     refs_dir = skill_dir / "references"
 
-    # Extract all referenced paths and verify they exist
-    ref_link_pattern = re.compile(r"\]\((references/[^\)]*)\)", re.IGNORECASE)
+    # Accept both local and repo-level references links.
+    ref_link_pattern = re.compile(r"\]\(([^)]*references/[^)]*)\)", re.IGNORECASE)
     ref_matches = ref_link_pattern.findall(body)
 
     if not ref_matches:
@@ -747,32 +761,33 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
             )
         )
     else:
-        # Verify each referenced file actually exists
+        # Verify local references targets exist; repo-level links are allowed as signposts.
         allowed_suffixes = {".md", ".yaml", ".yml", ".json"}
         for ref_path in ref_matches:
-            # Resolve the reference path relative to the skill directory
-            # ref_path is like "references/file.md" or "references/subdir/file.md"
-            resolved_path = skill_dir / ref_path
+            normalized_ref = ref_path.strip()
+            if normalized_ref.startswith("./"):
+                normalized_ref = normalized_ref[2:]
 
-            # Check if file exists and has allowed suffix
-            if not resolved_path.exists():
-                findings.append(
-                    Finding(
-                        "FAIL",
-                        "CONTEXT_RELOCATION_REFERENCE_MISSING",
-                        skill_rel,
-                        f"referenced file '{ref_path}' does not exist",
+            if normalized_ref.lower().startswith("references/"):
+                resolved_path = skill_dir / normalized_ref
+                if not resolved_path.exists():
+                    findings.append(
+                        Finding(
+                            "FAIL",
+                            "CONTEXT_RELOCATION_REFERENCE_MISSING",
+                            skill_rel,
+                            f"referenced file '{ref_path}' does not exist",
+                        )
                     )
-                )
-            elif resolved_path.suffix not in allowed_suffixes:
-                findings.append(
-                    Finding(
-                        "FAIL",
-                        "CONTEXT_RELOCATION_REFERENCE_MISSING",
-                        skill_rel,
-                        f"referenced file '{ref_path}' has disallowed suffix (expected: {', '.join(allowed_suffixes)})",
+                elif resolved_path.suffix.lower() not in allowed_suffixes:
+                    findings.append(
+                        Finding(
+                            "FAIL",
+                            "CONTEXT_RELOCATION_REFERENCE_MISSING",
+                            skill_rel,
+                            f"referenced file '{ref_path}' has disallowed suffix (expected: {', '.join(sorted(allowed_suffixes))})",
+                        )
                     )
-                )
 
     has_ref_docs = refs_dir.is_dir() and any(path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir())
     if not has_ref_docs:
@@ -791,12 +806,12 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
 def _validate_skill(skill_rel: str) -> List[Finding]:
     """
     Validate a single skill directory and collect findings for contract, evals, task-profile, reference PI, and context-relocation checks.
-    
+
     Parameters:
-    	skill_rel (str): Repository-relative path to the skill to validate.
-    
+        skill_rel (str): Repository-relative path to the skill to validate.
+
     Returns:
-    	List[Finding]: Accumulated findings (FAIL/WARN) detected for the given skill. If the skill directory is missing, returns a single `FAIL` finding with code `SKILL_DIR_MISSING`. Findings reference the provided `skill_rel`.
+        List[Finding]: Accumulated findings (FAIL/WARN) detected for the given skill. If the skill directory is missing, returns a single `FAIL` finding with code `SKILL_DIR_MISSING`. Findings reference the provided `skill_rel`.
     """
     skill_dir = (REPO_ROOT / skill_rel).resolve()
     canonical_rel = _canonical_skill_rel(skill_rel)

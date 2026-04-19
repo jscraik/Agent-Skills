@@ -15,4 +15,4 @@ if [[ "$#" -gt 0 && "${1:0:1}" != "-" ]]; then
   shift
 fi
 
-python3 Infrastructure/scripts/projection_integrity.py sync --scope "$scope" "$@"
+python3 Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py sync --scope "$scope" "$@"

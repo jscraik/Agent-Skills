@@ -135,11 +135,11 @@ class SkillScanProgressiveDisclosureTests(TestCase):
         """
         Verify the strict progressive-disclosure relocation guard does not apply to skills located under non-targeted repository paths.
         
-        Creates a temporary repository tree with a skill placed under Plugins/plugin-factory/... that intentionally lacks relocation signposting, runs cmd_lint_progressive_disclosure("strict") with REPO_ROOT and ROOTS patched to scan only Plugins, and asserts the command returns 0.
+        Creates a temporary repository tree with a skill placed under a non-targeted plugin-factory path that intentionally lacks relocation signposting, runs cmd_lint_progressive_disclosure("strict") with REPO_ROOT and ROOTS patched to scan only Plugins, and asserts the command returns 0.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_dir = root / "Plugins" / "plugin-factory" / "skills" / "scaffolding_templates" / "plugin-creator"
+            skill_dir = root / "Plugins" / "plugin-factory" / "skills" / "team_automation" / "not-router"
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
             (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
@@ -167,7 +167,10 @@ class SkillScanProgressiveDisclosureTests(TestCase):
             skill_dir = root / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder"
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
-            (refs_dir / "governance.md").write_text("# governance\n", encoding="utf-8")
+            (refs_dir / "placeholder.md").write_text("# placeholder\n", encoding="utf-8")
+            infra_refs_dir = skill_dir / "Infrastructure" / "references"
+            infra_refs_dir.mkdir(parents=True, exist_ok=True)
+            (infra_refs_dir / "governance.md").write_text("# governance\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 _skill_with_required_headings(
                     "Preserve valuable context by relocating it with explicit signposting.\n"

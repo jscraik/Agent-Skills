@@ -15,10 +15,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 106
+- `total_skills`: 107
 - `catalog_source`: repository skill scan
 - `visibility`: default
-- `policy_identity`: 7b5d4c75b7d19338
+- `policy_identity`: a4d137082c750ef9
 
 ## Catalog
 
@@ -74,6 +74,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `triage` — Triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
 - `typescript` — Use when authoring or reviewing TypeScript code that requires strict type safety, explicit module contracts, and predictable runtime boundaries.
 - `uv-python-project-setup` — Python project initialization and dependency management with uv. Use when starting new CLI tools or libraries, configuring pyproject.toml, managing virtual environments, or setting up development workflows. Covers project types, dependency commands, and environment synchronization.
+- `vale` — Set up and verify Vale prose linting across local, pre-commit, and CI workflows. Use when users ask to install Vale, repair broken config or style sync, or enforce docs linting gates.
 - `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
 - `yaml` — Write and review YAML files with safe indentation, schema-aware structure, and low-surprise serialization.
 

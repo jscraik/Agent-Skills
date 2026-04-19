@@ -87,9 +87,19 @@ def find_skill_dir(skill_name: str) -> Optional[Path]:
     # Search plugin directories
     plugins_root = REPO_ROOT / "Plugins"
     if plugins_root.is_dir():
+        plugin_candidates: List[Path] = []
         for plugin_skill_dir in plugins_root.rglob(skill_name):
-            if plugin_skill_dir.is_dir() and (plugin_skill_dir / "SKILL.md").exists():
-                return plugin_skill_dir
+            if not (plugin_skill_dir.is_dir() and (plugin_skill_dir / "SKILL.md").exists()):
+                continue
+            rel_parts = plugin_skill_dir.relative_to(plugins_root).parts
+            # Archived fixture snapshots are not loadable runtime skills.
+            if "fixtures" in rel_parts and "budget-archive" in rel_parts:
+                continue
+            plugin_candidates.append(plugin_skill_dir)
+
+        if plugin_candidates:
+            plugin_candidates.sort(key=lambda path: (len(path.parts), str(path)))
+            return plugin_candidates[0]
 
     return None
 
