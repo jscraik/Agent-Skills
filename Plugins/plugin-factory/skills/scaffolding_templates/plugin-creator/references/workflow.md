@@ -20,7 +20,7 @@ python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scrip
 ## Optional Flags Guidance
 
 - `--with-marketplace`: create/update marketplace entry with explicit policy fields.
-- `--plugin-root <path>`: set custom destination root.
+- `--path <path>`: set custom destination root (parent directory for plugin creation).
 - `--force`: replace an existing scaffold only with explicit overwrite intent.
 
 ## Completion Contract
