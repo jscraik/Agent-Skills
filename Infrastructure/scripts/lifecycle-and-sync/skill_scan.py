@@ -153,6 +153,23 @@ def title_case(value: str) -> str:
 
 
 def cmd_lint_progressive_disclosure(mode: str) -> int:
+    """
+    Validate progressive-disclosure and structural rules across discovered SKILL.md files.
+    
+    Per-skill checks include:
+    - Line-count limits (hard cap and target) and requirement for an Infrastructure/references/ directory when length exceeds target.
+    - Presence of an Infrastructure/scripts/ directory when many code fences are present.
+    - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
+    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-preservation policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
+    
+    The function prints per-file error/warning messages and a final summary to stdout.
+    
+    Parameters:
+        mode (str): Severity mode; "strict" treats missing recommended items as errors, otherwise as warnings.
+    
+    Returns:
+        int: Exit code — `1` if `mode` is "strict" and any errors were found, otherwise `0`.
+    """
     skills = all_skills()
     errors = 0
     warnings = 0

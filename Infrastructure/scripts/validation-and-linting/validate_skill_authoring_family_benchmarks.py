@@ -147,6 +147,14 @@ _CONTEXT_POLICY_PATTERNS = (
 
 @lru_cache(maxsize=1)
 def _load_scope_skill_resolver():
+    """
+    Load and return a scope-skill resolver function from the skill builder's inventory script.
+    
+    Attempts to import `scripts/skill_graph_inventory.py` under the configured skill-builder root and extract a callable named `resolve_scope_skill_for_path`. Does not raise on import or execution errors; failures result in `None`.
+    
+    Returns:
+        Callable[[str], str] or None: The `resolve_scope_skill_for_path` function if present and callable, `None` otherwise.
+    """
     resolver_path = _SKILL_BUILDER_ROOT / "scripts" / "skill_graph_inventory.py"
     if not resolver_path.exists():
         return None
@@ -203,13 +211,29 @@ def _load_json(path: Path) -> Dict[str, Any]:
 
 
 def _load_schema(schema_path: Path) -> Any:
-    """Load a YAML schema file; return None if unavailable."""
+    """
+    Load a YAML schema file from the given path and return its parsed contents or `None` if the file is absent.
+    
+    Parameters:
+        schema_path (Path): Filesystem path to the schema file.
+    
+    Returns:
+        The parsed YAML schema as a Python object, or `None` if the file does not exist.
+    """
     if not schema_path.exists():
         return None
 
 
 def _skill_markdown_body(raw: str) -> str:
-    """Return SKILL.md content without frontmatter for semantic checks."""
+    """
+    Extract the body of a SKILL.md file by removing leading YAML frontmatter if present.
+    
+    Parameters:
+        raw (str): The full SKILL.md content.
+    
+    Returns:
+        str: The markdown content after the closing frontmatter marker `---` if a leading YAML frontmatter block exists; otherwise the original `raw` text.
+    """
     parts = raw.split("---", 2)
     return parts[2] if len(parts) >= 3 else raw
     try:
@@ -595,9 +619,13 @@ def _validate_task_profile(skill_rel: str, skill_dir: Path, *, expected_scope_sk
 
 
 def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
-    """P2.4: Scan SKILL.md body and non-eval reference files for indirect PI language.
-
-    evals.yaml is intentionally excluded — PI language there is test coverage.
+    """
+    Scan SKILL.md and non-eval files under references/ for indirect prompt-injection patterns and emit warnings for matches.
+    
+    This function ignores `references/evals.yaml` (indirect PI language there is treated as test coverage).
+    
+    Returns:
+        findings (List[Finding]): A list of WARN findings describing each detected indirect prompt-injection occurrence.
     """
     findings: List[Finding] = []
 
@@ -644,10 +672,18 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
 
 
 def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: Path) -> List[Finding]:
-    """Fail when required progressive-disclosure relocation signals are missing.
-
-    This is intentionally scoped to the skill-authoring trio where user-facing
-    contract text requires "move to references, do not trim context".
+    """
+    Validate that a skill enforces progressive-disclosure context relocation and return findings for any missing signals.
+    
+    This check applies only to skills listed in the relocation-guard set; for other skills it returns an empty list. When applicable, it inspects SKILL.md and the references/ directory and emits FAIL findings for each missing requirement: an explicit context-preservation policy, a "Read when:" signpost, a Markdown link into references/, and at least one document-like file in references/.
+    
+    Parameters:
+        skill_rel (str): Repository-relative skill path used as the `skill` field on findings.
+        canonical_rel (str): Canonicalized repository-relative path used to decide whether the relocation guard applies.
+        skill_dir (Path): Filesystem path to the skill directory to inspect.
+    
+    Returns:
+        List[Finding]: A list of findings describing each missing progressive-disclosure relocation requirement; empty if none are missing or the guard does not apply.
     """
     if canonical_rel.lower() not in _RELOCATION_GUARD_SKILLS:
         return []
@@ -706,6 +742,15 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
 
 
 def _validate_skill(skill_rel: str) -> List[Finding]:
+    """
+    Validate a single skill directory and collect findings for contract, evals, task-profile, reference PI, and context-relocation checks.
+    
+    Parameters:
+    	skill_rel (str): Repository-relative path to the skill to validate.
+    
+    Returns:
+    	List[Finding]: Accumulated findings (FAIL/WARN) detected for the given skill. If the skill directory is missing, returns a single `FAIL` finding with code `SKILL_DIR_MISSING`. Findings reference the provided `skill_rel`.
+    """
     skill_dir = (REPO_ROOT / skill_rel).resolve()
     canonical_rel = _canonical_skill_rel(skill_rel)
     findings: List[Finding] = []

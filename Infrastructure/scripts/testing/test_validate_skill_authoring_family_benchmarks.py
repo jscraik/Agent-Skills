@@ -303,7 +303,9 @@ No relocation signposts on purpose.
 
     def test_context_relocation_guard_accepts_infrastructure_reference_links(self) -> None:
         """
-        Verifies `Infrastructure/references/...` links satisfy relocation-link checks for skill-builder.
+        Ensure links pointing to Infrastructure/references/... are accepted by the context relocation reference-link validation for the skill-builder sample.
+        
+        Creates a temporary skill fixture with a local governance reference and a SKILL.md containing required relocation signposting and a reference link that targets Infrastructure/references/governance-contract.md, then asserts that _validate_context_relocation produces no findings.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
