@@ -4,7 +4,7 @@
 
 What should this skill help you do?
 
-## Copy paste payload examples
+## Copy-paste payload examples
 
 ```yaml
 schema_version: 1

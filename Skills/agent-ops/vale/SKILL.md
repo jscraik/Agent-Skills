@@ -142,6 +142,7 @@ residual_risks:
 - `Infrastructure/scripts/verify-vale-setup.sh`
 
 ## See Also
+
 | Skill | When to use together |
 |---|---|
 | `[[context7]]` | Pull current Vale docs and integration guidance before changing commands or flags |

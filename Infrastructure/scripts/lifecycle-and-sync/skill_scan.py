@@ -30,9 +30,9 @@ REQUIRED_HEADINGS = (
     "Gotchas",
 )
 RELOCATION_GUARD_SKILL_FILES = {
-    "plugins/skill-factory/skills/scaffolding_templates/skill-creator/skill.md",
-    "plugins/skill-factory/skills/infrastructure_ops/skill-installer/skill.md",
-    "plugins/skill-factory/skills/code_quality_review/skill-builder/skill.md",
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
 }
 CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
