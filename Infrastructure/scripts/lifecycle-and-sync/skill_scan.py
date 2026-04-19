@@ -29,6 +29,18 @@ REQUIRED_HEADINGS = (
     "Failure mode",
     "Gotchas",
 )
+RELOCATION_GUARD_SKILL_FILES = {
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator/skill.md",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer/skill.md",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder/skill.md",
+}
+CONTEXT_POLICY_PATTERNS = (
+    re.compile(r"never drop required context", re.IGNORECASE),
+    re.compile(r"required operational context is never removed", re.IGNORECASE),
+    re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+)
+READ_WHEN_PATTERN = re.compile(r"read when\s*:", re.IGNORECASE)
+REFERENCE_LINK_PATTERN = re.compile(r"\]\([^)]*references/[^)]*\)", re.IGNORECASE)
 
 
 @dataclass
@@ -171,6 +183,28 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
             if heading not in skill.headings:
                 severity = "error" if mode == "strict" else "warn"
                 emit(severity, skill.relative_path, f"missing recommended section heading: ## {heading}")
+
+        if skill.relative_path.lower() in RELOCATION_GUARD_SKILL_FILES:
+            severity = "error" if mode == "strict" else "warn"
+            body = skill.path.read_text(encoding="utf-8", errors="ignore")
+
+            if not any(pattern.search(body) for pattern in CONTEXT_POLICY_PATTERNS):
+                emit(
+                    severity,
+                    skill.relative_path,
+                    "missing context-preservation policy; required context must be relocated to references, not trimmed",
+                )
+            if READ_WHEN_PATTERN.search(body) is None:
+                emit(severity, skill.relative_path, "missing `Read when:` progressive-disclosure signpost")
+            if REFERENCE_LINK_PATTERN.search(body) is None:
+                emit(severity, skill.relative_path, "missing markdown link into references/ for relocated context")
+
+            refs_dir = skill.skill_dir / "references"
+            has_ref_docs = refs_dir.is_dir() and any(
+                path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir()
+            )
+            if not has_ref_docs:
+                emit(severity, skill.relative_path, "references/ directory must contain relocation target documents")
 
     print(f"Checked files: {len(skills)}")
     print(f"Errors: {errors}")

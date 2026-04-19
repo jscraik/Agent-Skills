@@ -131,6 +131,19 @@ _RUBRIC_VERSION_DIVERGENCE_DAYS = 90
 # Optional contract fields expected at gold standard; absence produces WARN (not FAIL).
 _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 
+# Family members that must preserve context via progressive disclosure.
+_RELOCATION_GUARD_SKILLS = {
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+}
+
+_CONTEXT_POLICY_PATTERNS = (
+    re.compile(r"never drop required context", re.IGNORECASE),
+    re.compile(r"required operational context is never removed", re.IGNORECASE),
+    re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+)
+
 
 @lru_cache(maxsize=1)
 def _load_scope_skill_resolver():
@@ -193,6 +206,12 @@ def _load_schema(schema_path: Path) -> Any:
     """Load a YAML schema file; return None if unavailable."""
     if not schema_path.exists():
         return None
+
+
+def _skill_markdown_body(raw: str) -> str:
+    """Return SKILL.md content without frontmatter for semantic checks."""
+    parts = raw.split("---", 2)
+    return parts[2] if len(parts) >= 3 else raw
     try:
         return yaml.safe_load(schema_path.read_text(encoding="utf-8"))
     except Exception:  # noqa: BLE001
@@ -586,9 +605,7 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
     skill_md = skill_dir / "SKILL.md"
     if skill_md.exists():
         raw = skill_md.read_text(encoding="utf-8", errors="replace")
-        # Strip frontmatter before scanning
-        parts = raw.split("---", 2)
-        body = parts[2] if len(parts) >= 3 else raw
+        body = _skill_markdown_body(raw)
         if _INDIRECT_PI_TOKENS.search(body):
             findings.append(
                 Finding(
@@ -626,6 +643,68 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
     return findings
 
 
+def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: Path) -> List[Finding]:
+    """Fail when required progressive-disclosure relocation signals are missing.
+
+    This is intentionally scoped to the skill-authoring trio where user-facing
+    contract text requires "move to references, do not trim context".
+    """
+    if canonical_rel.lower() not in _RELOCATION_GUARD_SKILLS:
+        return []
+
+    findings: List[Finding] = []
+    skill_md = skill_dir / "SKILL.md"
+    if not skill_md.exists():
+        return findings
+
+    body = _skill_markdown_body(skill_md.read_text(encoding="utf-8", errors="replace"))
+
+    if not any(pattern.search(body) for pattern in _CONTEXT_POLICY_PATTERNS):
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_POLICY_MISSING",
+                skill_rel,
+                "missing explicit context-preservation policy in SKILL.md; "
+                "required context must be relocated to references, not trimmed",
+            )
+        )
+
+    if re.search(r"read when\s*:", body, re.IGNORECASE) is None:
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_READ_WHEN_MISSING",
+                skill_rel,
+                "missing `Read when:` progressive-disclosure signpost in SKILL.md",
+            )
+        )
+
+    if re.search(r"\]\([^)]*references/[^)]*\)", body, re.IGNORECASE) is None:
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_REFERENCE_LINK_MISSING",
+                skill_rel,
+                "missing SKILL.md link into references/ for relocated context",
+            )
+        )
+
+    refs_dir = skill_dir / "references"
+    has_ref_docs = refs_dir.is_dir() and any(path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir())
+    if not has_ref_docs:
+        findings.append(
+            Finding(
+                "FAIL",
+                "CONTEXT_RELOCATION_REFERENCES_EMPTY",
+                skill_rel,
+                "references/ must contain relocation targets for progressive disclosure",
+            )
+        )
+
+    return findings
+
+
 def _validate_skill(skill_rel: str) -> List[Finding]:
     skill_dir = (REPO_ROOT / skill_rel).resolve()
     canonical_rel = _canonical_skill_rel(skill_rel)
@@ -648,6 +727,7 @@ def _validate_skill(skill_rel: str) -> List[Finding]:
     findings.extend(_validate_evals(skill_rel, skill_dir))
     findings.extend(_validate_task_profile(skill_rel, skill_dir, expected_scope_skill=expected_scope_skill))
     findings.extend(_validate_reference_pi(skill_rel, skill_dir))
+    findings.extend(_validate_context_relocation(skill_rel, canonical_rel, skill_dir))
     return findings
 
 

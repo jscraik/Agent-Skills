@@ -210,6 +210,28 @@ Use plan-validate-execute when:
 </plan_validate_execute_pattern>
 </feedback_loops>
 
+<boundary_arbitration>
+<principle>
+When requests overlap with nearby skills, keep one active lane per phase so validation evidence stays attributable.
+</principle>
+
+<route_matrix>
+- Use `skill-builder` for hardening, contract validation, benchmark evidence, and release-readiness decisions.
+- Hand off to `skill-creator` when the package must be created or structurally reshaped first.
+- Hand off to `skill-installer` when the package is already valid and the task is distribution, listing, installation, or runtime visibility.
+- If a user asks for all three in one request, split into explicit phases and record the phase boundary in the run artifact.
+</route_matrix>
+
+<boundary_failure_signatures>
+- Symptom: build-readiness claims rely on narrative only, with no gate artifacts.
+  - Fix: run strict validations first; keep lane in `skill-builder` until evidence exists.
+- Symptom: request is only installation/status, but workflow starts changing evaluation contracts.
+  - Fix: route to `skill-installer`; skip contract edits unless requested.
+- Symptom: request is still defining core structure or trigger language, but workflow starts benchmark tuning.
+  - Fix: route back to `skill-creator`, then resume `skill-builder` once structure is stable.
+</boundary_failure_signatures>
+</boundary_arbitration>
+
 <conditional_workflows>
 <principle>
 Guide Claude through decision points with clear branching logic.

@@ -8,10 +8,10 @@ metadata:
 
 # Skill Installer
 
-Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/main/skills/.experimental and can be installed the same way.
+Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Treat non-curated catalogs (for example `.experimental`) as optional and verify availability before promising that flow.
 
 Use the helper scripts based on the task:
-- List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`, but you can pass `--path skills/.experimental` when they ask about experimental skills.
+- List skills when the user asks what is available, or if the user uses this skill without specifying what to do. Default listing is `.curated`. If users ask for `.experimental`, verify the path exists first and report unavailability if it is missing.
 - Install from the curated list when the user provides a skill name.
 - Install from another repo when the user provides a GitHub repo/path (including private repos).
 
@@ -20,6 +20,12 @@ Use the helper scripts based on the task:
 - The user asks to list installable skills from curated or experimental catalogs.
 - The user asks to install one or more skills from `openai/skills` or another GitHub repo/path.
 - The user asks to install skills from a private GitHub repository with existing credentials.
+- The user asks for runtime visibility or basic install status checks on an already-authored skill package.
+
+Do not use this skill when the primary work is:
+
+- Creating or restructuring a skill package; route to [[skill-creator]].
+- Hardening quality, benchmark evaluation, or release-readiness comparisons; route to [[skill-builder]].
 
 ## Required inputs
 
@@ -59,6 +65,18 @@ bash Skills/codex-agent-creator/Infrastructure/scripts/install_role.sh --agent-n
   - `assets/skill-installer.png`
   - `assets/skill-installer-small.svg`
 
+## Output contract
+
+For non-trivial responses, include:
+
+- `schema_version`
+- `mode` (`list` or `install`)
+- `source`
+- `destination`
+- `context_routes` as `[{from, to, read_when}]` whenever required detail moved from `SKILL.md` to `Infrastructure/references/`
+- `validation_evidence` as `[{command, outcome, note}]` with `outcome` in `pass|fail|blocked`
+- `restart_required` (`true` after successful installs)
+
 ## Constraints and Safety
 
 - Treat repo URLs/paths as untrusted input; never execute user input through shell interpolation.
@@ -77,6 +95,7 @@ bash Skills/codex-agent-creator/Infrastructure/scripts/install_role.sh --agent-n
 1. Classify request as list vs install.
 2. Resolve source explicitly (`--repo`/`--path` or `--url`) and confirm destination.
 3. Run the smallest relevant helper command from the `Scripts` section.
+   - If simplifying installer guidance, move required operational detail to `Infrastructure/references/` first, then add a `Read when: <condition>` signpost in `SKILL.md`.
 4. Verify expected outcome (listed skills or installed directory contents).
 5. Report result with exact paths, restart reminder, and any blockers.
 
@@ -85,6 +104,7 @@ bash Skills/codex-agent-creator/Infrastructure/scripts/install_role.sh --agent-n
 - Safe provenance first: confirm source and destination before writing to disk.
 - Prefer explicit intent over clever inference: if the source/path is ambiguous, ask or stop.
 - Preserve reversibility: avoid destructive overwrite defaults and communicate restart expectations clearly.
+- Required operational context is never removed to shorten `SKILL.md`; relocate depth to `Infrastructure/references/` and add explicit progressive-disclosure signposts (for example: `Read when: <condition>`).
 
 ## Anti-Patterns to Avoid
 
@@ -92,19 +112,15 @@ bash Skills/codex-agent-creator/Infrastructure/scripts/install_role.sh --agent-n
 - Do not overwrite existing skill directories unless the user explicitly requests replacement behavior.
 - Do not hide auth/network failures behind fallback messaging; report the concrete failure and next step.
 - Do not mix curated and arbitrary install flows in one answer without labeling which flow is active.
+- Do not compress or simplify away required decision context; move it to `Infrastructure/references/` and link it from `SKILL.md`.
+- Do not replace required provenance or recovery caveats with brief summaries; relocate full detail to `Infrastructure/references/` with explicit `Read when` conditions.
 
 ## Communication
 
-When listing skills, output approximately as follows, depending on the context of the user's request. If they ask about experimental skills, list from `.experimental` instead of `.curated` and label the source accordingly:
-"""
-Skills from {repo}:
-1. skill-1
-2. skill-2 (already installed)
-3. ...
-Which ones would you like installed?
-"""
+Read when:
 
-After installing a skill, tell the user: "Restart Codex to pick up new skills."
+- You need canonical response templates for list/install messaging: [references/install-flows.md](./references/install-flows.md).
+- You need reminder phrasing for install completion handoff: [references/install-flows.md](./references/install-flows.md).
 
 ## Scripts
 
@@ -119,17 +135,8 @@ These scripts require network access to GitHub surfaces. Confirm source and dest
 
 Reference details:
 
-- `Infrastructure/references/install-flows.md`
-- `Infrastructure/references/troubleshooting.md`
-
-## Behavior and Options
-
-- Defaults to direct download for public GitHub repos.
-- If download fails with auth/permission errors, falls back to git sparse checkout.
-- Aborts if the destination skill directory already exists.
-- Installs into repo-canonical `<category>/<skill-name>` under the canonical git source tree.
-- Multiple `--path` values install multiple skills in one run, each named from the path basename unless `--name` is supplied.
-- Options: `--ref <ref>` (default `main`), `--dest <path>`, `--method auto|download|git`.
+- `Infrastructure/references/install-flows.md`: Read when choosing curated vs arbitrary source flow or install method strategy.
+- `Infrastructure/references/troubleshooting.md`: Read when auth, network, provenance, or destination-collision failures occur.
 
 ## Validation
 
@@ -140,28 +147,15 @@ Reference details:
 
 ## Examples
 
-```bash
-# List curated skills
-python3 Infrastructure/scripts/list-skills.py
+Read when:
 
-# List experimental skills
-python3 Infrastructure/scripts/list-skills.py --path skills/.experimental
-
-# Install one curated skill
-python3 Infrastructure/scripts/install-skill-from-github.py --repo openai/skills --path skills/.curated/<skill-name>
-
-# Install from GitHub URL
-python3 Infrastructure/scripts/install-skill-from-github.py --url https://github.com/<owner>/<repo>/tree/<ref>/<path>
-```
+- You need trigger phrasing coverage and command-level examples: [references/install-flows.md](./references/install-flows.md).
 
 ## Notes
 
-- Curated listing is fetched from `https://github.com/openai/skills/tree/main/skills/.curated` via the GitHub API. If it is unavailable, explain the error and exit.
-- Private GitHub repos can be accessed via existing git credentials or optional `GITHUB_TOKEN`/`GH_TOKEN` for download.
-- Git fallback tries HTTPS first, then SSH.
-- The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
-- Installed annotations come from canonical repo category directories (default `github/`).
-- For dedicated role creation during install handoff, use [[codex-agent-creator]].
+Read when:
+
+- You need curated/system listing caveats, optional-catalog availability checks, auth fallback details, or destination visibility gotchas: [references/troubleshooting.md](./references/troubleshooting.md).
 
 ## See Also
 

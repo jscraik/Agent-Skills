@@ -61,6 +61,7 @@ Use this skill when the user asks to:
 - prepare a contract-valid skill for install/distribute handoff or finish bounded distribution work when lifecycle judgment is already settled.
 
 Keep this skill out of scope for: first-draft skill scaffolding (`skill-creator`); pure install/import or runtime-visibility work once the skill is already valid (`skill-installer`); unrelated app feature coding; generic bug-fixing outside skill quality; routine non-skill docs edits; plugin conversion (`plugin-builder`); session-scan coverage (`skill-refactor`).
+Boundary triage for ambiguous requests: use `skill-creator` for create/reshape work, `skill-builder` for hardening and readiness gates, and `skill-installer` for acquisition/install/runtime-visibility tasks.
 
 ## Iteration Round Contract
 For non-trivial lifecycle work, use one explicit round model:
@@ -106,7 +107,8 @@ Start with:
 Enforce OpenAI/Codex skill format by default:
 - frontmatter uses official keys only:
   - required: `name`, `description`
-  - optional: `license`, `compatibility`, `allowed-tools`, `metadata`
+  - optional: `metadata` in `SKILL.md` frontmatter when repo governance needs classification tags
+- keep optional runtime metadata in `agents/openai.yaml` (for interface details, invocation policy, and tool dependencies) instead of overloading frontmatter
 - for this repository, use `metadata.skill-type` to classify skills for semantic indexing and governance checks
 - keep `description` as routing logic (what + when), not a procedure dump;
 - keep `SKILL.md` as the map:
@@ -152,7 +154,7 @@ Lint and generation expectations:
 Use this contract for `create` and `improve` mode in this repository.
 
 Source of truth:
-- `Infrastructure/references/governance-contract.md`
+- [Infrastructure/references/governance-contract.md](./references/governance-contract.md)
 
 Required gates before completion claim:
 - `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
@@ -271,6 +273,7 @@ For non-trivial `create`, `improve`, `eval`, or `benchmark-lite`, include:
 - `schema_version`
 - `mode`
 - `skill_path`
+- `context_routes` as `[{from, to, read_when}]` whenever required detail moved from `SKILL.md` to `Infrastructure/references/`
 - `findings`
 - `validations`
 - `security`
@@ -345,9 +348,6 @@ Reference files:
 | [[codex-agent-creator]] | Reuse existing agent TOMLs or create role-specific custom agents for skill-linked delegation flows |
 
 **Topic map:** [[agent-ops]]
-
-## Remember
-The agent is capable of extraordinary work in this domain. These guidelines unlock that potential—they don't constrain it. Use judgment, adapt to context, and push boundaries when appropriate.
 
 ## Failure mode
 - If out of scope, say why and offer the nearest next skill-appropriate next step.
