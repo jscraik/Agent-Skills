@@ -51,9 +51,24 @@ def _discover_repo_root() -> Path:
     )
 
 
-REPO_ROOT = _discover_repo_root()
-DEFAULT_PLUGIN_PARENT = REPO_ROOT / "Plugins" / "third-party"
-DEFAULT_MARKETPLACE_PATH = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
+REPO_ROOT: Path | None = None
+DEFAULT_PLUGIN_PARENT: Path | None = None
+DEFAULT_MARKETPLACE_PATH: Path | None = None
+
+
+def _get_repo_root() -> Path:
+    global REPO_ROOT
+    if REPO_ROOT is None:
+        REPO_ROOT = _discover_repo_root()
+    return REPO_ROOT
+
+
+def _get_default_plugin_parent() -> Path:
+    return _get_repo_root() / "Plugins" / "third-party"
+
+
+def _get_default_marketplace_path() -> Path:
+    return _get_repo_root() / OPENAI_MARKETPLACE_RELATIVE_PATH
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
