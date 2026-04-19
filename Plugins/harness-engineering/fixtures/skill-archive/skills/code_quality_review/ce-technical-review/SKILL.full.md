@@ -256,7 +256,7 @@ Use `Infrastructure/references/review-modes.md` for:
 Typical next steps after technical review:
 - fix the critical and important findings in `ce-work`
 - strengthen the contract in `ce-deepen-spec` or `ce-deepen-plan`
-- run a broader `review` stage when package-level readiness is needed
+- run a broader `ce-review` stage when package-level readiness is needed
 
 When the target is a document, preserve the score and readiness recommendation in the handoff so the next stage can decide whether to revise, deepen, or proceed.
 
