@@ -7,8 +7,7 @@ import importlib.util
 import sys
 import tempfile
 from pathlib import Path
-import unittest
-from unittest import mock
+from unittest import TestCase, main, mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -52,7 +51,7 @@ Gotchas here.
 """
 
 
-class SkillScanProgressiveDisclosureTests(unittest.TestCase):
+class SkillScanProgressiveDisclosureTests(TestCase):
     def setUp(self) -> None:
         self.module = load_module()
 
@@ -146,4 +145,4 @@ class SkillScanProgressiveDisclosureTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
