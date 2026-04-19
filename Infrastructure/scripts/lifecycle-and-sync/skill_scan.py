@@ -186,7 +186,12 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
 
         if skill.relative_path.lower() in RELOCATION_GUARD_SKILL_FILES:
             severity = "error" if mode == "strict" else "warn"
-            body = skill.path.read_text(encoding="utf-8", errors="ignore")
+            raw_text = skill.path.read_text(encoding="utf-8", errors="ignore")
+            lines = raw_text.splitlines()
+            fm = frontmatter_block(raw_text)
+            if fm:
+                lines = lines[len(fm) + 2 :]
+            body = "\n".join(lines)
 
             if not any(pattern.search(body) for pattern in CONTEXT_POLICY_PATTERNS):
                 emit(
