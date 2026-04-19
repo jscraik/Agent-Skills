@@ -5,6 +5,11 @@ from pathlib import Path
 
 
 def test_creator_wrappers_point_to_impls() -> None:
+    """
+    Smoke test that verifies wrapper scripts in the repository's scripts directory have corresponding implementation files with a `.pyw` suffix.
+    
+    Asserts that the wrapper files referenced by this test exist in the sibling `scripts` directory and that each has a same-named `.pyw` implementation; assertion failures indicate missing wrapper or implementation files.
+    """
     scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
     script_names = (
         "create_basic_plugin.py",

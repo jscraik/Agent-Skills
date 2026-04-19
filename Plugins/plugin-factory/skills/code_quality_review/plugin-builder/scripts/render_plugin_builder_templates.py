@@ -54,6 +54,21 @@ def render_from_paths(*, template_path: Path, context: dict[str, str]) -> str:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for rendering plugin-builder hooks templates.
+    
+    Parameters:
+        argv (list[str] | None): Argument list to parse; if None, defaults to process arguments.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes:
+            - template (str): Path to the template file.
+            - output (str): Path to the rendered output file.
+            - vars_json (str | None): Path to an optional JSON file with template variables.
+            - var (list[str]): Inline variable overrides as `KEY=VALUE` strings.
+            - no_defaults (bool): Whether to disable seeding with built-in defaults.
+            - stdout (bool): Whether to print rendered output to stdout instead of writing a file.
+    """
     parser = argparse.ArgumentParser(description="Render plugin-builder hooks template sample.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered output file.")

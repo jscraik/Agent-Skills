@@ -205,7 +205,7 @@ class FamilyBenchmarkCanonicalizationTests(unittest.TestCase):
 
     def test_scope_resolver_supports_versioned_harness_cache_paths(self) -> None:
         """
-        Ensures harness cache aliases resolve regardless of cache plugin version segment.
+        Check that the scope resolver maps harness cache skill paths containing a versioned plugin segment to the canonical `product/ops/...` skill path.
         """
         resolved = self.module._resolve_scope_skill_for_path(
             "plugins/cache/agent-skills-local/harness-engineering/9.9.9/skills/ce-spec"
@@ -244,7 +244,9 @@ See [details](./references/details.md).
 
     def test_context_relocation_guard_fails_when_signposts_missing(self) -> None:
         """
-        Ensures relocation guard emits explicit FAIL codes for missing policy/signpost/link.
+        Verifies that context relocation validation reports explicit failure codes when a targeted skill's SKILL.md is missing required policy wording, the "Read when" signpost, and the expected reference link.
+        
+        This test creates a minimal skill fixture with only a generic note in references and SKILL.md containing frontmatter plus a brief body, runs canonicalization and context-relocation validation, and asserts the findings include the codes: CONTEXT_RELOCATION_POLICY_MISSING, CONTEXT_RELOCATION_READ_WHEN_MISSING, and CONTEXT_RELOCATION_REFERENCE_LINK_MISSING.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

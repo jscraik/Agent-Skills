@@ -7,7 +7,10 @@ Use this file only after routing has been selected by `SKILL.md`.
 - `create` -> `[[plugin-creator]]`
 - `harden|convert` -> `[[plugin-builder]]`
 - `install` -> `[[plugin-installer]]`
-- `troubleshoot` -> lane owning the failing stage
+- `troubleshoot` -> route to the lane owning the failing stage:
+  - install failures -> `[[plugin-installer]]`
+  - validation/hardening failures -> `[[plugin-builder]]`
+  - scaffold failures -> `[[plugin-creator]]`
 
 ## Procedure
 

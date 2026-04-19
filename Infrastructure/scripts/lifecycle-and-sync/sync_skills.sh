@@ -1164,7 +1164,7 @@ resolve_marketplace_source_dir() {
 
 # Keep home-level plugin source paths aligned with the canonical repo plugins.
 # Some plugin installers resolve marketplace relative paths (./Plugins/<name>)
-# sync_home_plugin_mirrors creates or updates symlinks in a home plugins directory for local plugins listed in a marketplace JSON file, skipping unsafe plugin names and leaving existing non-symlink targets untouched.
+# sync_home_plugin_mirrors creates or updates symlinks in a home plugins directory for local plugins listed in a marketplace JSON file, skipping unsafe plugin names, leaving existing non-symlink targets untouched, and avoiding mirrors when the canonical source and target resolve to the same real path.
 sync_home_plugin_mirrors() {
   local marketplace_file="$1"
   local canonical_plugins_dir="$2"
@@ -1478,7 +1478,8 @@ materialize_plugin_cache_roots() {
 }
 
 # sync_codex_profile_homes synchronises skills, plugin runtime cache and marketplace metadata into each Codex profile home found under $HOME.
-# It accepts two arguments: a cache source directory and a marketplace JSON file path; for each profile home it ensures skills are projected, copies the plugin cache (mode=copy), materialises plugin cache roots, installs the marketplace manifest to <profile>/Plugins/marketplace.json, and creates home plugin mirrors so local plugin installs resolve against <profile>/Plugins/<plugin-name>.
+# sync_codex_profile_homes projects skills, plugin cache snapshots, and marketplace manifests into each Codex profile home and ensures profile-local plugin mirrors so local plugin installs resolve under each profile's Plugins directory.
+# Arguments: cache_source — path to the repository runtime cache to copy into each profile; marketplace_file — path to a marketplace JSON file to install into each profile's Plugins/marketplace.json.
 sync_codex_profile_homes() {
   local cache_source="$1"
   local marketplace_file="$2"
