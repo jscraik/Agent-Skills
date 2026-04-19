@@ -185,6 +185,55 @@ class SkillScanProgressiveDisclosureTests(TestCase):
 
             self.assertEqual(rc, 0)
 
+    def test_strict_mode_ignores_relocation_in_frontmatter(self) -> None:
+        """
+        Verify that strict progressive-disclosure linting ignores relocation-style text in YAML frontmatter and only validates the body.
+
+        Creates a temporary plugin skill with a SKILL.md whose frontmatter contains relocation/signposting language but whose body omits relocation signposts, runs cmd_lint_progressive_disclosure("strict"), and asserts the command returns 1 because the linter should fail when relocation text appears only in frontmatter.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_dir = root / "plugins" / "skill-factory" / "skills" / "scaffolding_templates" / "skill-creator"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
+
+            # Create SKILL.md with relocation text in frontmatter but not in body
+            frontmatter_with_relocation = """---
+name: sample-skill
+description: "Required operational context is never removed. Read when: details needed."
+metadata:
+  skill-type: scaffolding_templates
+  notes: "See references/details.md for relocated context"
+---
+
+## When to use
+Use this for tests.
+
+## Required inputs
+Inputs here.
+
+## Deliverables
+Deliverables here.
+
+## Failure mode
+Failure handling here.
+
+## Gotchas
+Gotchas here.
+
+Keep this concise.
+"""
+            (skill_dir / "SKILL.md").write_text(frontmatter_with_relocation, encoding="utf-8")
+
+            with (
+                mock.patch.object(self.module, "REPO_ROOT", root),
+                mock.patch.object(self.module, "ROOTS", ("plugins",)),
+            ):
+                rc = self.module.cmd_lint_progressive_disclosure("strict")
+
+            self.assertEqual(rc, 1)
+
 
 if __name__ == "__main__":
     main()

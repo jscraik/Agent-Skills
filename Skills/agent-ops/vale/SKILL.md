@@ -90,7 +90,7 @@ Use this skill to make Vale actually work end-to-end: install, `.vale.ini` setup
 - `vale sync` (when `.vale.ini` has `Packages = ...`)
 - `vale --output=line --minAlertLevel=error docs/`
 - `vale --output=JSON docs/`
-- `bash Infrastructure/scripts/verify-vale-setup.sh docs/` (from this skill package)
+- `bash Skills/agent-ops/vale/Infrastructure/scripts/verify-vale-setup.sh docs/` (from this skill package)
 - Stop on first failure and report the exact command and stderr.
 
 ## Gotchas
@@ -108,7 +108,7 @@ Use this skill to make Vale actually work end-to-end: install, `.vale.ini` setup
 ## Output contract
 
 ```yaml
-schema_version: 1
+schema_version: "1.0"
 status: complete|partial|blocked
 summary: "<what was configured or fixed>"
 commands:
@@ -135,11 +135,11 @@ residual_risks:
 - Non-triggering prompt: "Please rewrite this release note to sound friendlier."
 
 ## References
-- `Infrastructure/references/context7-notes.md`
-- `Infrastructure/references/contract.yaml`
-- `Infrastructure/references/evals.yaml`
-- `Infrastructure/references/discovery-interview.md`
-- `Infrastructure/scripts/verify-vale-setup.sh`
+- `Skills/agent-ops/vale/references/context7-notes.md`
+- `Skills/agent-ops/vale/references/contract.yaml`
+- `Skills/agent-ops/vale/references/evals.yaml`
+- `Skills/agent-ops/vale/references/discovery-interview.md`
+- `Skills/agent-ops/vale/Infrastructure/scripts/verify-vale-setup.sh`
 
 ## See Also
 

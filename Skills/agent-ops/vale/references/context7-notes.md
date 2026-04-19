@@ -3,7 +3,7 @@
 - Retrieval path: `cli_primary`
 - Auth wrapper: `op run --env-file $CODEX_ENV_FILE -- ...` (replace `$CODEX_ENV_FILE` with your env file path)
 - Library ids: `/errata-ai/vale`, `/websites/vale_sh`
-- Freshness check: `/errata-ai/vale` lastUpdateDate `2026-03-14T22:19:37.568Z`
+- Freshness check: `/errata-ai/vale` lastUpdateDate `2026-03-14T22:19:37.568Z` (refresh via `ctx7 library show /errata-ai/vale --json | jq -r .lastUpdateDate`)
 
 ## Queried commands
 

@@ -201,7 +201,8 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
                 severity = "error" if mode == "strict" else "warn"
                 emit(severity, skill.relative_path, f"missing recommended section heading: ## {heading}")
 
-        if skill.relative_path.lower() in RELOCATION_GUARD_SKILL_FILES:
+        skill_directory = str(Path(skill.relative_path).parent).replace("\\", "/")
+        if skill_directory.lower() in RELOCATION_GUARD_SKILL_FILES:
             severity = "error" if mode == "strict" else "warn"
             body = skill.path.read_text(encoding="utf-8", errors="ignore")
 
