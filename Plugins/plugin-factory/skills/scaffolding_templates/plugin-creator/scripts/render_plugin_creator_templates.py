@@ -47,7 +47,10 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "KEYWORD_2": "agent-workflow",
     "INTERFACE_DISPLAY_NAME": "Symphony Orchestrator",
     "INTERFACE_SHORT_DESCRIPTION": "Run issue-driven coding workflows with guardrails.",
-    "INTERFACE_LONG_DESCRIPTION": "A plugin for deterministic issue polling, workspace isolation, and coding-agent orchestration.",
+    "INTERFACE_LONG_DESCRIPTION": (
+        "A plugin for deterministic issue polling, workspace isolation, "
+        "and coding-agent orchestration."
+    ),
     "INTERFACE_DEVELOPER_NAME": "Symphony Maintainers",
     "INTERFACE_CATEGORY": "Productivity",
     "INTERFACE_WEBSITE_URL": "https://example.com/Plugins/symphony-orchestrator",

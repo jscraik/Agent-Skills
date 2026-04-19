@@ -60,7 +60,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--vars-json", help="Optional JSON object with template variables.")
     parser.add_argument("--var", action="append", default=[], help="Inline variable override (KEY=VALUE).")
     parser.add_argument("--no-defaults", action="store_true", help="Do not pre-seed context with built-in defaults.")
-    parser.add_argument("--stdout", action="store_true", help="Print rendered output to stdout instead of writing file.")
+    parser.add_argument(
+        "--stdout",
+        action="store_true",
+        help="Print rendered output to stdout instead of writing file.",
+    )
     return parser.parse_args(argv)
 
 
