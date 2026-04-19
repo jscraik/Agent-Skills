@@ -270,7 +270,7 @@ IMPORTANT: Outputs should vary based on the behavior under test, the risk level,
 - Vary test granularity by risk: tiny unit tests for pure logic, integration tests for boundary behavior.
 - Adapt assertion style to context-specific failure modes instead of repeating a generic template.
 - Customize test data to reflect unique domain invariants; avoid repetitive cookie-cutter fixtures.
-- Use different verification depth for small bugfixes versus larger refactors.
+- Use different verification depth for small bug fixes versus larger refactors.
 - Greenfield code gets strict TDD; legacy code may need characterization tests first.
 - Do not converge on one pattern when a context-specific approach is safer.
 
