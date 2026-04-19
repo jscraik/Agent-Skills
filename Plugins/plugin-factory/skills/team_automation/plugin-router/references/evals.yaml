@@ -25,6 +25,8 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(selected_lane[:=].*harden|\\[\\[plugin-builder\\]\\])"
+      - type: regex
+        value: "(?i)(handoff|required_inputs|reason)"
 
   - id: route-install-intent
     name: route install intent
