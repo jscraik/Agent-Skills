@@ -244,8 +244,13 @@ def _skill_markdown_body(raw: str) -> str:
     Returns:
         str: SKILL.md content excluding the leading YAML frontmatter when present.
     """
-    parts = raw.split("---", 2)
-    return parts[2] if len(parts) >= 3 else raw
+    lines = raw.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return raw
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            return "".join(lines[index + 1 :])
+    return raw
 
 
 def _validate_with_schema(
