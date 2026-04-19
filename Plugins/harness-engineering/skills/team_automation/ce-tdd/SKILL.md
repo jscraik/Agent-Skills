@@ -24,6 +24,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Full guide: [../../../fixtures/skill-archive/skills/team_automation/ce-tdd/SKILL.full.md](../../../fixtures/skill-archive/skills/team_automation/ce-tdd/SKILL.full.md)
 - Stage references: [./references](./references)
+- Approval flow: [../shared/references/approval-flow.md](../shared/references/approval-flow.md)
 - Stage scripts: [./scripts](./scripts)
 - Agent config: [./agents](./agents)
 

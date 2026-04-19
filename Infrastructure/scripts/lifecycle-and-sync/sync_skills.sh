@@ -1522,7 +1522,7 @@ sync_codex_profile_homes() {
       fi
       # Keep profile-local marketplace source paths resolvable at
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
-      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root/Plugins"
+      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
     fi
   done < <({
     [ -d "$HOME/.codex" ] && printf '%s\n' "$HOME/.codex"

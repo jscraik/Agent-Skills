@@ -19,19 +19,19 @@ if [[ ! -f "${CONFIG_FILE}" ]]; then
 fi
 
 echo "==> Active Vale config"
-vale ls-config
+vale --config="${CONFIG_FILE}" ls-config
 
 if grep -Eq '^[[:space:]]*Packages[[:space:]]*=' "${CONFIG_FILE}"; then
   echo "==> Packages detected in ${CONFIG_FILE}; running vale sync"
-  vale sync
+  vale --config="${CONFIG_FILE}" sync
 else
   echo "==> No Packages key detected; skipping vale sync"
 fi
 
 echo "==> Lint check (line output, error threshold)"
-vale --output=line --minAlertLevel=error "${TARGET_PATH}"
+vale --config="${CONFIG_FILE}" --output=line --minAlertLevel=error "${TARGET_PATH}"
 
 echo "==> Lint check (JSON output)"
-vale --output=JSON "${TARGET_PATH}" >/dev/null
+vale --config="${CONFIG_FILE}" --output=JSON "${TARGET_PATH}" >/dev/null
 
 echo "Vale verification completed successfully."

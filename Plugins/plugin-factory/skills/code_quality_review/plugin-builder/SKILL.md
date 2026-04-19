@@ -38,6 +38,11 @@ Return: `schema_version`, `execution_mode`, `plugin_path`, `validation`, `artifa
 
 Use the detailed procedure and command matrix in `references/workflow.md`.
 
+Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+
+Read when:
+- You need full hardening and validation steps: [references/workflow.md](./references/workflow.md).
+
 ## Validation
 
 ```bash

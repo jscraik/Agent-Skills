@@ -43,6 +43,11 @@ Return a routing handoff object with:
 
 Use the detailed routing protocol in `references/workflow.md`.
 
+Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+
+Read when:
+- You need full lane-selection and handoff protocol details: [references/workflow.md](./references/workflow.md).
+
 ## Examples
 
 - "Create a new plugin with marketplace entry." -> route to `[[plugin-creator]]`

@@ -1,6 +1,8 @@
 ---
 name: skill-factory-router
 description: Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden, install, audit, or skillify skills.
+metadata:
+  skill-type: team_automation
 ---
 
 # Skill Factory Router

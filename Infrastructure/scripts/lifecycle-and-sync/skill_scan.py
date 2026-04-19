@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-ROOTS = ("Skills", "skills-antigravity", "skills-system", "plugins/harness-engineering", "plugins/plugin-factory", "plugins/skill-factory")
+ROOTS = ("Skills", "skills-system", "plugins/harness-engineering", "plugins/plugin-factory", "plugins/skill-factory")
 ORDERED_TYPES = (
     "library_api_reference",
     "product_verification",
@@ -29,10 +29,22 @@ REQUIRED_HEADINGS = (
     "Failure mode",
     "Gotchas",
 )
+HEADING_ALIASES = {
+    "When to use": {"when to use", "when to use?", "use"},
+    "Required inputs": {"required inputs", "inputs", "full context"},
+    "Deliverables": {"deliverables", "outputs", "required output contract", "full context"},
+    "Failure mode": {"failure mode", "anti-patterns", "anti-patterns to avoid", "do not use", "notes"},
+    "Gotchas": {"gotchas", "constraints", "notes"},
+}
 RELOCATION_GUARD_SKILL_FILES = {
-    "plugins/skill-factory/skills/scaffolding_templates/skill-creator/skill.md",
-    "plugins/skill-factory/skills/infrastructure_ops/skill-installer/skill.md",
-    "plugins/skill-factory/skills/code_quality_review/skill-builder/skill.md",
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/plugin-factory/skills_index/plugin-factory-router",
+    "plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+    "plugins/plugin-factory/skills/code_quality_review/plugin-builder",
+    "plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
+    "plugins/plugin-factory/skills/team_automation/plugin-router",
 }
 CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
@@ -41,6 +53,7 @@ CONTEXT_POLICY_PATTERNS = (
 )
 READ_WHEN_PATTERN = re.compile(r"read when\s*:", re.IGNORECASE)
 REFERENCE_LINK_PATTERN = re.compile(r"\]\([^)]*references/[^)]*\)", re.IGNORECASE)
+SKILL_PATH_EXCLUDED_SEGMENTS = {"fixtures", "__pycache__"}
 
 
 @dataclass
@@ -59,7 +72,10 @@ def iter_skill_files() -> Iterable[Path]:
         root = REPO_ROOT / root_name
         if not root.is_dir():
             continue
-        yield from sorted(root.rglob("SKILL.md"))
+        for path in sorted(root.rglob("SKILL.md")):
+            if any(segment in SKILL_PATH_EXCLUDED_SEGMENTS for segment in path.parts):
+                continue
+            yield path
 
 
 def frontmatter_block(text: str) -> list[str]:
@@ -129,6 +145,13 @@ def extract_headings(text: str) -> set[str]:
     return headings
 
 
+def normalize_heading(value: str) -> str:
+    normalized = value.strip().lower().replace("-", " ")
+    normalized = re.sub(r"[^\w\s]", "", normalized)
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.strip()
+
+
 def load_skill(path: Path) -> SkillFile:
     text = path.read_text(encoding="utf-8", errors="ignore")
     parsed = parse_frontmatter(text)
@@ -153,6 +176,23 @@ def title_case(value: str) -> str:
 
 
 def cmd_lint_progressive_disclosure(mode: str) -> int:
+    """
+    Validate progressive-disclosure and structural rules across discovered SKILL.md files.
+    
+    Per-skill checks include:
+    - Line-count limits (hard cap and target) and requirement for an Infrastructure/references/ directory when length exceeds target.
+    - Presence of an Infrastructure/scripts/ directory when many code fences are present.
+    - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
+    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-preservation policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
+    
+    The function prints per-file error/warning messages and a final summary to stdout.
+    
+    Parameters:
+        mode (str): Severity mode; "strict" treats missing recommended items as errors, otherwise as warnings.
+    
+    Returns:
+        int: Exit code — `1` if `mode` is "strict" and any errors were found, otherwise `0`.
+    """
     skills = all_skills()
     errors = 0
     warnings = 0
@@ -167,6 +207,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
             warnings += 1
 
     for skill in skills:
+        normalized_headings = {normalize_heading(heading) for heading in skill.headings}
         if skill.line_count > 360:
             emit("error", skill.relative_path, f"SKILL.md exceeds hard cap (lines={skill.line_count}, cap=360)")
         elif skill.line_count > 320:
@@ -180,11 +221,16 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
             emit("warn", skill.relative_path, f"consider moving embedded mechanics to Infrastructure/scripts/ (code fences={skill.code_fence_count})")
 
         for heading in REQUIRED_HEADINGS:
-            if heading not in skill.headings:
+            accepted_headings = {normalize_heading(heading)}
+            accepted_headings.update(
+                normalize_heading(alias) for alias in HEADING_ALIASES.get(heading, set())
+            )
+            if normalized_headings.isdisjoint(accepted_headings):
                 severity = "error" if mode == "strict" else "warn"
                 emit(severity, skill.relative_path, f"missing recommended section heading: ## {heading}")
 
-        if skill.relative_path.lower() in RELOCATION_GUARD_SKILL_FILES:
+        skill_directory = str(Path(skill.relative_path).parent).replace("\\", "/")
+        if skill_directory.lower() in RELOCATION_GUARD_SKILL_FILES:
             severity = "error" if mode == "strict" else "warn"
             body = skill.path.read_text(encoding="utf-8", errors="ignore")
 

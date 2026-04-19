@@ -90,7 +90,7 @@ Use this skill to make Vale actually work end-to-end: install, `.vale.ini` setup
 - `vale sync` (when `.vale.ini` has `Packages = ...`)
 - `vale --output=line --minAlertLevel=error docs/`
 - `vale --output=JSON docs/`
-- `bash Infrastructure/scripts/verify-vale-setup.sh docs/` (from this skill package)
+- `bash Skills/agent-ops/vale/Infrastructure/scripts/verify-vale-setup.sh docs/` (from this skill package)
 - Stop on first failure and report the exact command and stderr.
 
 ## Gotchas
@@ -108,7 +108,7 @@ Use this skill to make Vale actually work end-to-end: install, `.vale.ini` setup
 ## Output contract
 
 ```yaml
-schema_version: 1
+schema_version: "1.0"
 status: complete|partial|blocked
 summary: "<what was configured or fixed>"
 commands:
@@ -135,13 +135,15 @@ residual_risks:
 - Non-triggering prompt: "Please rewrite this release note to sound friendlier."
 
 ## References
-- `Infrastructure/references/context7-notes.md`
-- `Infrastructure/references/contract.yaml`
-- `Infrastructure/references/evals.yaml`
-- `Infrastructure/references/discovery-interview.md`
+- `references/context7-notes.md`
+- `references/contract.yaml`
+- `references/evals.yaml`
+- `references/discovery-interview.md`
+- `references/task-profile.json`
 - `Infrastructure/scripts/verify-vale-setup.sh`
 
 ## See Also
+
 | Skill | When to use together |
 |---|---|
 | `[[context7]]` | Pull current Vale docs and integration guidance before changing commands or flags |

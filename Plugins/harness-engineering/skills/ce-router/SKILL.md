@@ -28,6 +28,10 @@ It chooses one primary next CE stage, explains why, and returns one executable n
 - One sentence rationale.
 - One exact next command/prompt to run.
 
+## Failure mode
+
+- If stage intent remains materially ambiguous after one clarification, return blocked with the missing routing input.
+
 ## Routing Rules
 
 1. If the request is lifecycle coordination or stage recovery, route to `ce-compound`.

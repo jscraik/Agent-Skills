@@ -1,0 +1,69 @@
+# Example Codex rules file: prompt/block destructive commands outside the sandbox.
+#
+# Copy this file to: ~/.codex/rules/default.rules
+# Restart Codex after changing rules.
+#
+# Rules syntax: see Codex "Rules" documentation.
+
+# Prompt before file deletions.
+prefix_rule(
+    pattern = ["rm"],
+    decision = "prompt",
+    justification = "Deletion is destructive; require explicit approval.",
+    match = [
+        "rm -rf build",
+        "rm -r tmp",
+        "rm important.txt",
+    ],
+)
+
+# Prompt before force-resetting Git state.
+prefix_rule(
+    pattern = ["git", "reset"],
+    decision = "prompt",
+    justification = "Git reset can discard work; require approval.",
+    match = [
+        "git reset --hard",
+        "git reset --hard HEAD~1",
+    ],
+)
+
+# Prompt before pushing to remotes.
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Remote writes should require approval.",
+    match = [
+        "git push",
+        "git push origin main",
+    ],
+)
+
+# Prompt before publishing packages.
+prefix_rule(
+    pattern = ["npm", "publish"],
+    decision = "prompt",
+    justification = "Publishing is irreversible; require approval.",
+    match = [
+        "npm publish",
+    ],
+)
+
+# Prompt before making raw network requests outside the sandbox.
+prefix_rule(
+    pattern = ["curl"],
+    decision = "prompt",
+    justification = "Network calls can exfiltrate data; require approval.",
+    match = [
+        "curl https://example.com",
+    ],
+)
+
+prefix_rule(
+    pattern = ["wget"],
+    decision = "prompt",
+    justification = "Network calls can exfiltrate data; require approval.",
+    match = [
+        "wget https://example.com/file.txt",
+    ],
+)

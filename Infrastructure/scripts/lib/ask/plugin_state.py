@@ -237,6 +237,20 @@ def _local_asset_warning(plugin_path: Path, asset_key: str, asset_ref: str) -> s
     return None
 
 
+def _is_external_cached_plugin(repo_root: Path, plugin_path: Path) -> bool:
+    """
+    Return True when plugin_path is a mirrored bundled/curated cache snapshot.
+    """
+    cache_root = (repo_root / "plugins" / "cache").resolve()
+    try:
+        rel = plugin_path.resolve().relative_to(cache_root)
+    except ValueError:
+        return False
+    if not rel.parts:
+        return False
+    return rel.parts[0] in {"openai-curated", "openai-bundled"}
+
+
 def _package_quality_check(repo_root: Path, installed: list[dict[str, Any]]) -> dict[str, Any]:
     required_manifest_fields = ("schema_version", "name", "version", "description", "interface")
     required_interface_fields = (
@@ -257,6 +271,7 @@ def _package_quality_check(repo_root: Path, installed: list[dict[str, Any]]) -> 
         plugin_name = str(plugin.get("name") or "unknown")
         plugin_path = repo_root / str(plugin.get("path") or "")
         manifest_path = repo_root / str(plugin.get("manifest_path") or "")
+        is_external_cache = _is_external_cached_plugin(repo_root, plugin_path)
 
         issues: list[str] = []
         warnings: list[str] = []
@@ -271,15 +286,27 @@ def _package_quality_check(repo_root: Path, installed: list[dict[str, Any]]) -> 
         else:
             missing_manifest_fields = _missing_or_blank_fields(manifest_payload, required_manifest_fields)
             if missing_manifest_fields:
-                issues.append(f"manifest missing core fields: {', '.join(missing_manifest_fields)}")
+                message = f"manifest missing core fields: {', '.join(missing_manifest_fields)}"
+                if is_external_cache:
+                    warnings.append(f"{message} (allowed for external cached plugin)")
+                else:
+                    issues.append(message)
 
             interface_payload = manifest_payload.get("interface")
             if not isinstance(interface_payload, dict):
-                issues.append("manifest interface payload is missing or invalid")
+                message = "manifest interface payload is missing or invalid"
+                if is_external_cache:
+                    warnings.append(f"{message} (allowed for external cached plugin)")
+                else:
+                    issues.append(message)
             else:
                 missing_interface_fields = _missing_or_blank_fields(interface_payload, required_interface_fields)
                 if missing_interface_fields:
-                    issues.append(f"manifest interface missing core fields: {', '.join(missing_interface_fields)}")
+                    message = f"manifest interface missing core fields: {', '.join(missing_interface_fields)}"
+                    if is_external_cache:
+                        warnings.append(f"{message} (allowed for external cached plugin)")
+                    else:
+                        issues.append(message)
 
                 for asset_key in ("composerIcon", "logo"):
                     asset_ref = interface_payload.get(asset_key)

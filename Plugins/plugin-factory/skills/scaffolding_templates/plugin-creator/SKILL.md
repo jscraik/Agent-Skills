@@ -30,6 +30,11 @@ Return: `schema_version`, `plugin_name`, `plugin_path`, `validation`, optional `
 
 Use the detailed scaffold procedure in `references/workflow.md`.
 
+Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+
+Read when:
+- You need full plugin scaffold and marketplace update flow: [references/workflow.md](./references/workflow.md).
+
 ## Required Behavior
 
 - folder name must equal manifest `name`
