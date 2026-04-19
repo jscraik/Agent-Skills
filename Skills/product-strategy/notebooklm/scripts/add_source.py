@@ -12,6 +12,7 @@ import time
 import re
 import traceback
 from pathlib import Path
+from urllib.parse import urlparse
 
 from patchright.sync_api import sync_playwright
 
@@ -30,6 +31,16 @@ from config import (
     INSERT_BUTTON_SELECTORS,
 )
 from browser_utils import BrowserFactory, StealthUtils
+
+
+def _parse_hostname(raw_url: str) -> str:
+    """Return a normalized hostname for URL classification."""
+    candidate = raw_url.strip()
+    parsed = urlparse(candidate)
+    if not parsed.scheme:
+        # Allow host-only inputs for classification by normalizing to https://
+        parsed = urlparse(f"https://{candidate}")
+    return (parsed.hostname or "").lower()
 
 
 def find_and_click(page, selectors: list, description: str, timeout: int = 5000) -> bool:
@@ -206,8 +217,9 @@ def add_url_source(notebook_url: str, source_url: str, headless: bool = True) ->
         print("  URL cannot be empty")
         return None
 
-    # URL content check for source type classification (not used for security decisions)
-    is_youtube = "youtube.com" in source_url or "youtu.be" in source_url
+    # URL classification based on parsed hostname (not substring checks).
+    hostname = _parse_hostname(source_url)
+    is_youtube = hostname == "youtu.be" or hostname == "youtube.com" or hostname.endswith(".youtube.com")
     source_type = "YouTube" if is_youtube else "Website"
 
     print(f"  Adding {source_type} source: {source_url}")

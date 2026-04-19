@@ -35,10 +35,6 @@ const componentPath = path.join(absDir, `${name}.tsx`);
 const storyPath = path.join(absDir, `${name}.stories.tsx`);
 const specPath = path.join(absDir, `${name}.spec.md`);
 
-if (fs.existsSync(componentPath) || fs.existsSync(storyPath) || fs.existsSync(specPath)) {
-  die(`One or more files already exist in ${absDir} for ${name}.`);
-}
-
 const component = `import * as React from "react";
 
 function cx(...parts: Array<string | undefined | null | false>) {
@@ -155,9 +151,17 @@ const spec = `# ${name} — Component Spec
 - [ ] Intent and density attributes generate expected selectors.
 `;
 
-fs.writeFileSync(componentPath, component, "utf8");
-fs.writeFileSync(storyPath, story, "utf8");
-fs.writeFileSync(specPath, spec, "utf8");
+try {
+  fs.writeFileSync(componentPath, component, { encoding: "utf8", flag: "wx" });
+  fs.writeFileSync(storyPath, story, { encoding: "utf8", flag: "wx" });
+  fs.writeFileSync(specPath, spec, { encoding: "utf8", flag: "wx" });
+} catch (error) {
+  const err = /** @type {NodeJS.ErrnoException} */ (error);
+  if (err.code === "EEXIST") {
+    die(`One or more files already exist in ${absDir} for ${name}.`);
+  }
+  throw error;
+}
 
 console.log(`[scaffold_component] Created:
 - ${componentPath}

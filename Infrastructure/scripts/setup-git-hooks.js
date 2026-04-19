@@ -12,7 +12,7 @@
  *   4. Runs package-manager install to activate hooks
  */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
@@ -33,17 +33,11 @@ const POSTINSTALL_BOOTSTRAP =
 	"command -v simple-git-hooks >/dev/null 2>&1 && simple-git-hooks || true";
 
 function main() {
-	if (!existsSync(PACKAGE_JSON_PATH)) {
-		console.error("Error: package.json not found in current directory");
-		console.error("  Run this script from your project root.");
-		process.exit(1);
-	}
-
 	let packageJson;
 	try {
 		packageJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
 	} catch {
-		console.error("Error: Failed to parse package.json");
+		console.error("Error: package.json not found or failed to parse");
 		process.exit(1);
 	}
 
