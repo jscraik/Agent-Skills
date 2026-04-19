@@ -28,4 +28,4 @@ risks:
   - wrong-stage routing; mitigate with explicit rule checks and one blocking clarification when needed
   - stage sprawl; mitigate by enforcing exactly one primary stage
   - generic handoff text; mitigate by requiring one executable next command
-
+   - generic handoff text; mitigate by requiring one executable next command
