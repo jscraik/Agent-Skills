@@ -134,7 +134,9 @@ Ask one question at a time, prefer concise single-select choices when natural op
 3. **Repo-first** - Use external docs only when stale claims depend on current framework behavior.
 4. **Evaluate document-set shape** - Consolidate overlapping docs instead of preserving silent drift.
 5. **Precision over frenzy** - Refresh work should feel like gardening, not a repo-wide cleanup.
-Read when: you need April 2026 standards rationale, operating philosophy, discoverability policy, or empowerment guardrails -> `Infrastructure/references/style-and-operating-guidance.md`.
+5. **Precision over frenzy** - Refresh work should feel like gardening, not a repo-wide cleanup.
+
+> **Read when:** you need April 2026 standards rationale, operating philosophy, discoverability policy, or empowerment guardrails → `Infrastructure/references/style-and-operating-guidance.md`.
 
 ## Workflow
 ### Phase 0: Detect mode and scope
