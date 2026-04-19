@@ -38,9 +38,12 @@ class TestAskSkillsStarter(unittest.TestCase):
 
     def test_default_list_hides_coderabbit_lane_skills(self) -> None:
         """
-        Verify default skill listing hides 'lane' skills from coderabbit and does not enable advanced mode.
+        Verify default skill listing hides plugin lane skills while preserving standalone simplify.
         
-        Mocks canonical entries that include one router skill and several 'lane' skills under Plugins/coderabbit/skills, calls list_skills with default options, and asserts the result contains only the router skill ("coderabbit") and that `advanced_mode` is falsy or absent.
+        Mocks canonical entries that include one router skill, one coderabbit lane skill under
+        Plugins/coderabbit/skills, and a standalone simplify skill under Skills/agent-ops. Calls
+        list_skills with default options and asserts the result includes router + standalone simplify
+        (while hidden plugin lanes are excluded).
         """
         entries = [
             SimpleNamespace(
@@ -50,12 +53,6 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="router",
             ),
             SimpleNamespace(
-                name="autofix",
-                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "autofix",
-                category="Plugins/coderabbit/skills",
-                description="lane",
-            ),
-            SimpleNamespace(
                 name="code-review",
                 source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "code-review",
                 category="Plugins/coderabbit/skills",
@@ -63,9 +60,9 @@ class TestAskSkillsStarter(unittest.TestCase):
             ),
             SimpleNamespace(
                 name="simplify",
-                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "simplify",
-                category="Plugins/coderabbit/skills",
-                description="lane",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "simplify",
+                category="Skills/agent-ops",
+                description="standalone",
             ),
         ]
 
@@ -78,11 +75,11 @@ class TestAskSkillsStarter(unittest.TestCase):
         with patch("ask.commands.skills.discover_skill_entries", side_effect=_discover_with_visibility) as mocked_discover:
             result = list_skills(REPO_ROOT)
 
-        mocked_discover.assert_called_once_with(source="auto", visibility="default")
+        mocked_discover.assert_called_once_with(source="auto", visibility="advanced")
 
         self.assertEqual(result.status, "success")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(names, ["coderabbit"])
+        self.assertEqual(names, ["coderabbit", "simplify"])
         self.assertFalse(result.data.get("advanced_mode"))
 
     def test_advanced_list_includes_coderabbit_lane_skills(self) -> None:
@@ -94,8 +91,8 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="router",
             ),
             SimpleNamespace(
-                name="autofix",
-                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "autofix",
+                name="code-review",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "code-review",
                 category="Plugins/coderabbit/skills",
                 description="lane",
             ),
@@ -106,7 +103,7 @@ class TestAskSkillsStarter(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(names, ["coderabbit", "autofix"])
+        self.assertEqual(names, ["coderabbit", "code-review"])
         self.assertTrue(result.data.get("advanced_mode"))
 
 

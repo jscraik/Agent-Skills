@@ -89,6 +89,29 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(result.data["activation_state"]["plugin_count"], 1)
         self.assertEqual(result.data["health_state"]["status"], "healthy")
 
+    def test_list_plugins_state_detects_openai_curated_cache(self) -> None:
+        marketplace = self.repo_root / ".agents" / "plugins" / "marketplace.json"
+        payload = json.loads(marketplace.read_text(encoding="utf-8"))
+        payload["name"] = "openai-curated"
+        marketplace.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+        cache_dir = (
+            self.repo_root
+            / ".agents"
+            / "plugins-runtime"
+            / "cache"
+            / "openai-curated"
+            / "example-plugin"
+        )
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        result = list_plugins_state(self.repo_root)
+        self.assertEqual(result.status, "success")
+        activation_plugins = result.data["activation_state"]["plugins"]
+        self.assertEqual(len(activation_plugins), 1)
+        self.assertEqual(activation_plugins[0]["name"], "example-plugin")
+        self.assertTrue(activation_plugins[0]["cache_present"])
+
     def test_status_plugin_state_errors_when_missing(self) -> None:
         result = status_plugin_state(self.repo_root, "missing-plugin")
         self.assertEqual(result.status, "error")

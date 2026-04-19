@@ -102,7 +102,7 @@ class _RouterSkill:
     skill_path: str
 
 
-CODERABBIT_HIDDEN_LANE_SKILLS = {"autofix", "code-review", "simplify"}
+CODERABBIT_HIDDEN_LANE_SKILLS = {"code-review", "autofix"}
 
 
 STARTER_ARCHETYPES = {
@@ -261,8 +261,8 @@ def _is_hidden_coderabbit_lane(entry) -> bool:
     source_dir = getattr(entry, "source_dir", None)
     if not isinstance(source_dir, Path):
         return False
-    parts = source_dir.parts
-    return "plugins" in parts and "coderabbit" in parts and "skills" in parts
+    parts_lower = {part.lower() for part in source_dir.parts}
+    return "plugins" in parts_lower and "coderabbit" in parts_lower and "skills" in parts_lower
 
 
 def list_skills(

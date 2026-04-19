@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "product-ops-ce-review",
-  "scope_skill": "product/Infrastructure/ops/ce-review",
-  "scope_profile": "product",
+  "profile_id": "Plugins-harness-engineering-skills-code_quality_review-ce-review",
+  "scope_skill": "Plugins/harness-engineering/skills/code_quality_review/ce-review",
+  "scope_profile": "Plugins",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

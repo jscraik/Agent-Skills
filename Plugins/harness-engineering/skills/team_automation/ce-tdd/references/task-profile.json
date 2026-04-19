@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "product-ops-ce-tdd",
-  "scope_skill": "product/Infrastructure/ops/ce-tdd",
-  "scope_profile": "product",
+  "profile_id": "Plugins-harness-engineering-skills-team_automation-ce-tdd",
+  "scope_skill": "Plugins/harness-engineering/skills/team_automation/ce-tdd",
+  "scope_profile": "Plugins",
   "rubric_version": "2026-04-07",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -24,8 +24,8 @@
     },
     {
       "id": "specificity",
-      "label": "Concrete RED→GREEN evidence requirements",
-      "threshold": 0.70,
+      "label": "Concrete RED\u2192GREEN evidence requirements",
+      "threshold": 0.7,
       "weight": 0.25,
       "critical": true
     },
@@ -33,14 +33,14 @@
       "id": "safety",
       "label": "Safety and fail-fast guardrails",
       "threshold": 0.85,
-      "weight": 0.20,
+      "weight": 0.2,
       "critical": true
     },
     {
       "id": "tdd_discipline",
       "label": "Vertical-slice and public-interface TDD discipline",
       "threshold": 0.75,
-      "weight": 0.30,
+      "weight": 0.3,
       "critical": true
     }
   ],

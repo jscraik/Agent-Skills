@@ -1,0 +1,65 @@
+{
+  "schema_version": "projection-parity.v1",
+  "generated_at": "2026-04-17T21:52:55.160403+00:00",
+  "mode": "verify",
+  "scope": "all",
+  "status": "fail",
+  "results": [
+    {
+      "name": "skill-factory-skill-creator-alias",
+      "type": "symlink",
+      "status": "drift",
+      "reason": "canonical_missing",
+      "alias": "skills-system/skill-creator",
+      "canonical": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
+    },
+    {
+      "name": "skill-factory-skill-installer-alias",
+      "type": "symlink",
+      "status": "drift",
+      "reason": "canonical_missing",
+      "alias": "skills-system/skill-installer",
+      "canonical": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+    },
+    {
+      "name": "plugin-factory-plugin-creator-alias",
+      "type": "symlink",
+      "status": "drift",
+      "reason": "canonical_missing",
+      "alias": "skills-system/plugin-creator",
+      "canonical": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
+    },
+    {
+      "name": "plugin-factory-plugin-installer-alias",
+      "type": "symlink",
+      "status": "drift",
+      "reason": "canonical_missing",
+      "alias": "skills-system/plugin-installer",
+      "canonical": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer"
+    },
+    {
+      "name": "cache-harness-engineering",
+      "type": "mirror",
+      "source": "Plugins/harness-engineering",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
+      "status": "drift",
+      "reason": "source_missing"
+    },
+    {
+      "name": "cache-plugin-factory",
+      "type": "mirror",
+      "source": "Plugins/plugin-factory",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/plugin-factory",
+      "status": "drift",
+      "reason": "source_missing"
+    },
+    {
+      "name": "cache-skill-factory",
+      "type": "mirror",
+      "source": "Plugins/skill-factory",
+      "projection": ".agents/plugins-runtime/cache/agent-skills-local/skill-factory",
+      "status": "drift",
+      "reason": "source_missing"
+    }
+  ]
+}

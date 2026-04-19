@@ -129,6 +129,24 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def default_repo_root(script_path: Path) -> Path:
+    """
+    Resolve the repository root for this script path.
+
+    Prefers the nearest ancestor containing `.git` (works for normal repos and
+    worktrees). Falls back to an ancestor that contains both `Infrastructure/`
+    and `scripts/`, then to the historical depth-based default.
+    """
+    resolved = script_path.resolve()
+    for candidate in resolved.parents:
+        if (candidate / ".git").exists():
+            return candidate
+    for candidate in resolved.parents:
+        if (candidate / "Infrastructure").is_dir() and (candidate / "scripts").is_dir():
+            return candidate
+    return resolved.parents[2]
+
+
 def is_ignored(path: Path) -> bool:
     """
     Decides whether a filesystem path should be skipped by the projection scanner.
@@ -556,6 +574,16 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     source_abs = repo_root / spec.source_path
     projection_abs = repo_root / spec.projection_path
     if not source_abs.is_dir():
+        if spec.optional_when_missing:
+            return {
+                "name": spec.name,
+                "type": "mirror",
+                "status": "ok",
+                "reason": "source_missing_optional",
+                "source": spec.source_path,
+                "projection": spec.projection_path,
+                "changed": False,
+            }
         return {
             "name": spec.name,
             "type": "mirror",
@@ -815,7 +843,10 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         "projection": spec.projection_path,
     }
     if not source_abs.is_dir():
-        result.update({"status": "drift", "reason": "source_missing"})
+        if spec.optional_when_missing:
+            result.update({"status": "pass", "reason": "source_missing_optional"})
+        else:
+            result.update({"status": "drift", "reason": "source_missing"})
         return result
     if projection_abs.is_symlink():
         result.update(
@@ -1138,7 +1169,7 @@ def main() -> int:
         exit_code (int): `1` when the generated payload has `status == "fail"`, `0` otherwise.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[2]
+    repo_root = Path(args.repo_root).resolve() if args.repo_root else default_repo_root(Path(__file__))
     payload = run_sync(repo_root, args.scope) if args.mode == "sync" else run_verify(repo_root, args.scope)
 
     if args.manifest_out:

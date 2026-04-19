@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -242,8 +243,23 @@ def discover_plugin_manifests(repo_root: Path) -> List[Path]:
     )
     for pattern in patterns:
         for path in repo_root.glob(pattern):
-            manifests[path.resolve().as_posix()] = path
+            manifests[path_identity_key(path)] = path
     return sorted(manifests.values(), key=lambda item: item.as_posix())
+
+
+def file_digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def path_identity_key(path: Path) -> str:
+    return str(path.resolve()).casefold()
+
+
+def canonicalize_paths(paths: List[Path]) -> List[Path]:
+    deduped: Dict[str, Path] = {}
+    for path in paths:
+        deduped.setdefault(path_identity_key(path), path)
+    return [deduped[key] for key in sorted(deduped)]
 
 
 def discover_solution_files(repo_root: Path) -> List[Path]:
@@ -680,7 +696,16 @@ def analyze_repo(repo_root: Path, *, today: Optional[date] = None) -> Tuple[List
     for solution_entry in discover_solution_files(repo_root):
         reports.append(analyze_solution_entry(solution_entry, repo_root, today=today))
 
-    duplicate_names = {name: paths for name, paths in names_seen.items() if len(paths) > 1 and name}
+    duplicate_names: Dict[str, List[Path]] = {}
+    for name, paths in names_seen.items():
+        if not name:
+            continue
+        unique_paths = canonicalize_paths(paths)
+        if len(unique_paths) <= 1:
+            continue
+        digests = {file_digest(path) for path in unique_paths}
+        if len(digests) > 1:
+            duplicate_names[name] = unique_paths
     return reports, duplicate_names
 
 

@@ -45,16 +45,10 @@ Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/*
 !Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/
 Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/*
 !Skills/codex-plugin-builder/fixtures/arscontexta-codex/skills/arscontexta/SKILL.md
-# Keep coderabbit plugin skills tracked despite global skills/ ignore.
-!Plugins/coderabbit/skills/
-Plugins/coderabbit/skills/*
-!Plugins/coderabbit/skills/**
 # Keep harness-engineering plugin skills tracked despite global skills/ ignore.
 !Plugins/harness-engineering/skills/
 Plugins/harness-engineering/skills/*
 !Plugins/harness-engineering/skills/**
-Plugins/coderabbit/skills/**/.DS_Store
-Plugins/coderabbit/skills/**/__pycache__/
 Plugins/harness-engineering/skills/**/.DS_Store
 Plugins/harness-engineering/skills/**/__pycache__/
 # Keep skill-factory plugin skills tracked despite global skills/ ignore.

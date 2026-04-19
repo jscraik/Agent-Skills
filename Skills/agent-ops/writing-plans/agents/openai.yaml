@@ -1,7 +1,0 @@
-interface:
-  display_name: Writing Plans
-  short_description: "Create execution-ready implementation plans with task\u2026"
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png
-policy:
-  allow_implicit_invocation: false

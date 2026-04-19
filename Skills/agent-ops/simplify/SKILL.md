@@ -1,7 +1,6 @@
 ---
 name: simplify
 description: Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
-<<<<<<<< HEAD:Skills/agent-ops/simplify/SKILL.md
 metadata:
   skill-type: code_quality_review
   version: 0.1.0
@@ -11,17 +10,6 @@ metadata:
     - simplify.?code
     - simplify.?changes
     - cr.?simplify
-========
-version: 0.1.0
-triggers:
-  - coderabbit.?simplify
-  - simplify.?coderabbit
-  - simplify.?code
-  - simplify.?changes
-  - cr.?simplify
-metadata:
-  skill-type: code_quality_review
->>>>>>>> origin/main:Skills/backend-platform/simplify/SKILL.md
 ---
 
 # Simplify
@@ -248,13 +236,12 @@ Run after fixes:
 | Skill | When to use |
 |---|---|
 | [[code-review]] | Run CodeRabbit CLI review to surface and prioritize risk findings before fix work |
-| [[autofix]] | Resolve unresolved CodeRabbit PR review comments in guided or batch mode |
+| [[systematic-debugging]] | Use when simplify findings indicate likely regressions or uncertain root cause needing evidence-first diagnosis |
 
 **Topic map:** [[code-quality]]
 
 ## References
 
-- `../coderabbit/Infrastructure/references/coderabbit-docs/finishing-touches-simplify.md`
 - `Infrastructure/references/modern-hardening-2026.md`
 - `Infrastructure/references/refactor-playbook.md`
 

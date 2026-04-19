@@ -54,6 +54,9 @@ SKILL_BUILDER_INIT = REPO_ROOT / "Skills" / "skill-builder" / "scripts" / "init_
 SHARED_SKILL_CONTRACT_DIR = REPO_ROOT / "Infrastructure" / "scripts"
 if str(SHARED_SKILL_CONTRACT_DIR) not in sys.path:
     sys.path.insert(0, str(SHARED_SKILL_CONTRACT_DIR))
+LIFECYCLE_SYNC_DIR = SHARED_SKILL_CONTRACT_DIR / "lifecycle-and-sync"
+if str(LIFECYCLE_SYNC_DIR) not in sys.path:
+    sys.path.insert(0, str(LIFECYCLE_SYNC_DIR))
 from canonical_skill_roots import CANONICAL_STANDALONE_SKILL_ROOTS  # noqa: E402
 
 CODEX_AGENT_WRITER = (
@@ -2631,12 +2634,15 @@ def _check_plugin_skill_surface(plugin_root: Path, payload: dict[str, Any]) -> l
     if not skills_root.exists() or not skills_root.is_dir():
         return []
 
-    skill_packages = sorted(skills_root.glob("*/SKILL.md"))
+    skill_packages = sorted(skills_root.glob("*/SKILL.md")) + sorted(
+        skills_root.glob("*/*/SKILL.md")
+    )
     if skill_packages:
         return []
     return [
         "plugin.json field 'skills' points to a directory without any plugin-owned skill packages. "
-        "Use skill-builder to create at least one `skills/<name>/SKILL.md` bundle."
+        "Use skill-builder to create at least one plugin skill bundle "
+        "(`skills/<name>/SKILL.md` or `skills/<family>/<name>/SKILL.md`)."
     ]
 
 
@@ -2649,7 +2655,13 @@ def _check_duplicate_skill_ownership(plugin_root: Path, payload: dict[str, Any])
     if not skills_root.exists() or not skills_root.is_dir():
         return []
 
-    plugin_skill_names = {path.parent.name for path in skills_root.glob("*/SKILL.md")}
+    plugin_skill_names = {
+        path.parent.name
+        for path in (
+            list(skills_root.glob("*/SKILL.md"))
+            + list(skills_root.glob("*/*/SKILL.md"))
+        )
+    }
     if not plugin_skill_names:
         return []
 

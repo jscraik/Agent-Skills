@@ -5,7 +5,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  bash Skills/autoresearch/scripts/init_run.sh --tag <run-tag> --targets "<path1,path2,...>" [--out <artifacts-root>]
+  bash Skills/agent-ops/autoresearch/scripts/init_run.sh --tag <run-tag> --targets "<path1,path2,...>" [--out <artifacts-root>]
 
 Options:
   --tag       Required run tag (lowercase letters, digits, hyphens)

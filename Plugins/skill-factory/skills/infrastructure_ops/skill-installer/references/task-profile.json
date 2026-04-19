@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "profile_id": "skills-system-skill-installer",
+  "profile_id": "Plugins-skill-factory-skills-infrastructure_ops-skill-installer",
   "scope_skill": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-  "scope_profile": "skills-system",
+  "scope_profile": "Plugins",
   "rubric_version": "2026-04-05",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",

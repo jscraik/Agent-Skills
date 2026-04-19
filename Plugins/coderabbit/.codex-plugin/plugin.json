@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "name": "coderabbit",
+  "version": "0.1.0",
+  "description": "CodeRabbit plugin bundle for docs-backed review and unresolved-thread autofix workflows.",
+  "author": {
+    "name": "Jamie Craik",
+    "url": "https://github.com/jscraik"
+  },
+  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "repository": "https://github.com/jscraik/Agent-Skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "coderabbit",
+    "code-review",
+    "autofix",
+    "plugin"
+  ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "canonical",
+    "owner": "Agent Skills Team",
+    "review_cadence": "quarterly",
+    "last_reviewed": "2026-04-18",
+    "metadata_source": "plugin_manifest"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "CodeRabbit",
+    "shortDescription": "CodeRabbit review and autofix workflows",
+    "longDescription": "A Codex plugin package that bundles CodeRabbit operational skills for docs-backed code review and unresolved thread autofix workflows.",
+    "developerName": "Jamie Craik",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://www.coderabbit.ai",
+    "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
+    "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
+    "defaultPrompt": "Help me run CodeRabbit review and resolve unresolved CodeRabbit PR feedback safely."
+  }
+}

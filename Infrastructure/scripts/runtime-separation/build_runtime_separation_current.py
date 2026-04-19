@@ -44,6 +44,29 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _discover_repo_root(default_from_file: Path) -> Path:
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(default_from_file.parent), "rev-parse", "--show-toplevel"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            return Path(proc.stdout.strip()).resolve()
+    except OSError as exc:
+        print(f"warning: git repo-root discovery failed ({exc}); using fallback candidates", file=sys.stderr)
+
+    fallback_candidates = (
+        default_from_file.parents[3],
+        default_from_file.parents[4] if len(default_from_file.parents) > 4 else default_from_file.parents[3],
+    )
+    for candidate in fallback_candidates:
+        if (candidate / "Infrastructure" / "bin" / "ask").exists() or (candidate / "bin" / "ask").exists():
+            return candidate.resolve()
+    return fallback_candidates[0].resolve()
+
+
 def _sha256_json(value: Any) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
@@ -284,15 +307,39 @@ def _command_check(
     }
 
 
-def _collect_plugin_targets(baseline: dict[str, Any]) -> list[str]:
+def _collect_plugin_names(rows: Any) -> set[str]:
+    names: set[str] = set()
+    if not isinstance(rows, list):
+        return names
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("name")
+        if isinstance(name, str) and name.strip():
+            names.add(name.strip())
+    return names
+
+
+def _collect_plugin_targets(
+    baseline: dict[str, Any],
+    plugins_doctor_fields: dict[str, Any] | None = None,
+) -> list[str]:
+    targets: set[str] = set()
+
     summary = baseline.get("summary") if isinstance(baseline, dict) else {}
     checks = summary.get("command_checks") if isinstance(summary, dict) else {}
     plugin_checks = checks.get("plugins_status") if isinstance(checks, dict) else {}
     if isinstance(plugin_checks, dict):
-        targets = [key for key in plugin_checks if isinstance(key, str) and key]
-        if targets:
-            return sorted(targets)
-    return ["coderabbit", "harness-engineering", "plugin-factory", "skill-factory"]
+        targets.update(key.strip() for key in plugin_checks if isinstance(key, str) and key.strip())
+
+    if isinstance(plugins_doctor_fields, dict):
+        targets.update(_collect_plugin_names(plugins_doctor_fields.get("installed_plugins")))
+        targets.update(_collect_plugin_names(plugins_doctor_fields.get("activation_plugins")))
+
+    if targets:
+        return sorted(targets)
+
+    return ["coderabbit", "harness-engineering", "openai-curated", "plugin-factory", "skill-factory"]
 
 
 def main() -> int:
@@ -305,7 +352,8 @@ def main() -> int:
         int: Process exit code; `0` on success.
     """
     args = parse_args()
-    repo_root = Path(args.repo_root).expanduser() if args.repo_root else Path(__file__).resolve().parents[2]
+    default_root = _discover_repo_root(Path(__file__).resolve())
+    repo_root = Path(args.repo_root).expanduser() if args.repo_root else default_root
     if not repo_root.is_absolute():
         repo_root = (Path.cwd() / repo_root).resolve()
 
@@ -318,9 +366,14 @@ def main() -> int:
         baseline_path = (repo_root / baseline_path).resolve()
     baseline = _load_json(baseline_path) if baseline_path.exists() else {}
 
-    scripts_dir = repo_root / "scripts"
-    if str(scripts_dir) not in sys.path:
-        sys.path.insert(0, str(scripts_dir))
+    selection_policy_dirs = (
+        repo_root / "scripts" / "lifecycle-and-sync",
+        repo_root / "Infrastructure" / "scripts" / "lifecycle-and-sync",
+        repo_root / "scripts",
+    )
+    for directory in selection_policy_dirs:
+        if directory.exists() and str(directory) not in sys.path:
+            sys.path.insert(0, str(directory))
     from selection_policy import payload as selection_payload, policy_identity  # type: ignore
 
     command_checks: dict[str, Any] = {}
@@ -352,7 +405,10 @@ def main() -> int:
         evidence_ref=evidence,
     )
 
-    plugin_targets = _collect_plugin_targets(baseline)
+    plugins_doctor_fields = command_checks["plugins_doctor"].get("normalized_fields")
+    if not isinstance(plugins_doctor_fields, dict):
+        plugins_doctor_fields = {}
+    plugin_targets = _collect_plugin_targets(baseline, plugins_doctor_fields)
     plugins_status_checks: dict[str, Any] = {}
     for plugin in plugin_targets:
         rc, payload, evidence = _run_json(
@@ -427,7 +483,7 @@ def main() -> int:
     plugin_status_blockers = {
         plugin: check.get("blocker_id") for plugin, check in plugins_status_checks.items()
     }
-    checker_status = command_checks["plugins_doctor"]["normalized_fields"]
+    checker_status = plugins_doctor_fields
     checked_plugins = [
         plugin.get("name")
         for plugin in checker_status.get("activation_plugins", [])
@@ -457,11 +513,25 @@ def main() -> int:
             "plugins_doctor": command_checks["plugins_doctor"].get("drift_class"),
             "repo_doctor_catalog": command_checks["repo_doctor_catalog"].get("drift_class"),
         },
-        "visible_cache_absent": not (repo_root / "plugins" / "cache" / "agent-skills-local").exists(),
+        "visible_cache_absent": not any(
+            (repo_root / path).exists()
+            for path in [
+                Path(".agents") / "plugins-runtime" / "cache",
+                Path("plugins") / "cache",
+                Path("Plugins") / "cache",
+            ]
+        ),
         "plugin_activation_parity": {
             "checked_plugins": checked_plugins,
             "doctor_status": checker_status.get("status"),
-            "cache_absent": not (repo_root / "plugins" / "cache" / "agent-skills-local").exists(),
+            "cache_absent": not any(
+                (repo_root / path).exists()
+                for path in [
+                    Path(".agents") / "plugins-runtime" / "cache",
+                    Path("plugins") / "cache",
+                    Path("Plugins") / "cache",
+                ]
+            ),
             "status_blockers": plugin_status_blockers,
         },
         "plugin_package_root_parity": plugin_package_root_parity,

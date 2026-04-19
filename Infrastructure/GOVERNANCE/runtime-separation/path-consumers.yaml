@@ -1782,7 +1782,7 @@ rows:
     match_count: 2
     root: plugins
   -
-    consumer_path: "Plugins/coderabbit/skills/code_quality_review/simplify/Infrastructure/references/task-profile.json"
+    consumer_path: "Skills/agent-ops/simplify/references/task-profile.json"
     is_executable: false
     line_numbers:
       - 4

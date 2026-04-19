@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-backend-platform-simplify",
-  "scope_skill": "Skills/backend-platform/simplify",
+  "profile_id": "Skills-agent-ops-simplify",
+  "scope_skill": "Skills/agent-ops/simplify",
   "scope_profile": "Skills",
   "rubric_version": "2026-04-08",
   "evaluator_version": "v1",
