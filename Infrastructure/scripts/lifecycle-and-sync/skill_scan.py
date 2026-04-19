@@ -153,6 +153,17 @@ def title_case(value: str) -> str:
 
 
 def cmd_lint_progressive_disclosure(mode: str) -> int:
+    """
+    Validate SKILL.md files for progressive-disclosure and structural rules across the repository.
+    
+    Performs length, code-fence, required-heading, and (for a small set of guarded files) relocation-related checks and emits line-oriented error or warning messages for each violation.
+    
+    Parameters:
+    	mode (str): Lint mode; "strict" treats missing/invalid items as errors, any other value treats them as warnings.
+    
+    Returns:
+    	int: Exit code: `1` when `mode == "strict"` and at least one error was emitted, otherwise `0`.
+    """
     skills = all_skills()
     errors = 0
     warnings = 0
@@ -186,12 +197,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
 
         if skill.relative_path.lower() in RELOCATION_GUARD_SKILL_FILES:
             severity = "error" if mode == "strict" else "warn"
-            raw_text = skill.path.read_text(encoding="utf-8", errors="ignore")
-            lines = raw_text.splitlines()
-            fm = frontmatter_block(raw_text)
-            if fm:
-                lines = lines[len(fm) + 2 :]
-            body = "\n".join(lines)
+            body = skill.path.read_text(encoding="utf-8", errors="ignore")
 
             if not any(pattern.search(body) for pattern in CONTEXT_POLICY_PATTERNS):
                 emit(

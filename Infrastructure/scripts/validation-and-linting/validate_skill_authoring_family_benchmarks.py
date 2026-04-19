@@ -147,6 +147,18 @@ _CONTEXT_POLICY_PATTERNS = (
 
 @lru_cache(maxsize=1)
 def _load_scope_skill_resolver():
+    """
+    Load and return the optional scope-skill resolver from the skill builder's
+    scripts/skill_graph_inventory.py, if present and importable.
+    
+    The resolver, when available, is expected to be a callable that accepts a
+    repo-relative skill path (str) and returns the resolved scope skill string.
+    
+    Returns:
+        callable(str) -> str: The resolver callable, or `None` if the resolver
+        file is missing, the callable is not present, or the module fails to load
+        (syntax/import errors are suppressed and result in `None`).
+    """
     resolver_path = _SKILL_BUILDER_ROOT / "scripts" / "skill_graph_inventory.py"
     if not resolver_path.exists():
         return None
@@ -203,7 +215,15 @@ def _load_json(path: Path) -> Dict[str, Any]:
 
 
 def _load_schema(schema_path: Path) -> Any:
-    """Load a YAML schema file; return None if unavailable."""
+    """
+    Load and parse a YAML schema file if present.
+    
+    Parameters:
+        schema_path (Path): Path to the schema file to read.
+    
+    Returns:
+        Any: Parsed YAML content as Python objects, or `None` if the file does not exist or cannot be read/parsed.
+    """
     if not schema_path.exists():
         return None
     try:
@@ -213,7 +233,17 @@ def _load_schema(schema_path: Path) -> Any:
 
 
 def _skill_markdown_body(raw: str) -> str:
-    """Return SKILL.md content without frontmatter for semantic checks."""
+    """
+    Return the body of a SKILL.md file with YAML frontmatter removed.
+    
+    If the input contains a leading YAML frontmatter block delimited by `---`, this returns the text after the closing frontmatter marker; otherwise it returns the original input.
+    
+    Parameters:
+        raw (str): Raw SKILL.md content.
+    
+    Returns:
+        str: SKILL.md content excluding the leading YAML frontmatter when present.
+    """
     parts = raw.split("---", 2)
     return parts[2] if len(parts) >= 3 else raw
 
@@ -225,10 +255,13 @@ def _validate_with_schema(
     fail_code: str,
     context: str,
 ) -> List[Finding]:
-    """Validate *data* against a JSON Schema YAML file using jsonschema.
-
-    Returns a FAIL finding for each schema violation, or a WARN if jsonschema
-    is not installed (soft dependency so CI without the package still runs).
+    """
+    Validate the given data against a JSON Schema (YAML) and produce findings for any schema issues.
+    
+    If the jsonschema package is unavailable or the schema file cannot be loaded/parsed, a single `WARN` finding is returned describing the problem. If the schema is valid, returns a `FAIL` finding for each validation error found in `data`, with the finding code derived from `fail_code` and messages prefixed by `context`.
+    
+    Returns:
+        List[Finding]: Collected findings: a `WARN` when schema validation is skipped or the schema is invalid/missing, otherwise one `FAIL` per schema violation.
     """
     findings: List[Finding] = []
     if not _JSONSCHEMA_AVAILABLE:
@@ -595,9 +628,17 @@ def _validate_task_profile(skill_rel: str, skill_dir: Path, *, expected_scope_sk
 
 
 def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
-    """P2.4: Scan SKILL.md body and non-eval reference files for indirect PI language.
-
-    evals.yaml is intentionally excluded — PI language there is test coverage.
+    """
+    Scan SKILL.md body and non-eval reference files for indirect prompt-injection language.
+    
+    Searches the SKILL.md body (text after any YAML frontmatter) and files under references/ with extensions .md, .yaml, or .yml for tokens matching indirect PI patterns. The file references/evals.yaml is intentionally excluded from this scan because PI-like language there is treated as test coverage.
+    
+    Parameters:
+        skill_rel (str): Repository-relative skill path used as the `skill` field in emitted findings.
+        skill_dir (Path): Filesystem path to the skill directory to scan.
+    
+    Returns:
+        List[Finding]: A list of WARN findings describing files that contain indirect prompt-injection patterns.
     """
     findings: List[Finding] = []
 
@@ -644,10 +685,18 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
 
 
 def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: Path) -> List[Finding]:
-    """Fail when required progressive-disclosure relocation signals are missing.
-
-    This is intentionally scoped to the skill-authoring trio where user-facing
-    contract text requires "move to references, do not trim context".
+    """
+    Enforces progressive-disclosure relocation requirements for specific guarded skills.
+    
+    Checks only apply when `canonical_rel.lower()` is listed in `_RELOCATION_GUARD_SKILLS`. If applicable, the function reads SKILL.md (after removing YAML frontmatter) and emits FAIL findings for any of the following missing requirements: a context-preservation policy matching `_CONTEXT_POLICY_PATTERNS`, a "Read when:" progressive-disclosure signpost, an inline link from SKILL.md into the `references/` directory, and at least one document-like relocation target inside `references/`. If SKILL.md is absent or the skill is not guarded, no findings are produced.
+    
+    Parameters:
+        skill_rel (str): Repository-relative skill path as originally requested.
+        canonical_rel (str): Canonicalized repository-relative skill path.
+        skill_dir (Path): Filesystem path to the skill directory.
+    
+    Returns:
+        List[Finding]: A list of `Finding` objects describing any missing relocation-related requirements; empty when no checks apply or all checks pass.
     """
     if canonical_rel.lower() not in _RELOCATION_GUARD_SKILLS:
         return []
@@ -706,6 +755,17 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
 
 
 def _validate_skill(skill_rel: str) -> List[Finding]:
+    """
+    Run all validations for a single skill path and return the aggregated findings.
+    
+    Performs resolution of the expected scope skill (records a `TASK_PROFILE_SCOPE_RESOLVER` failure and falls back to the canonical skill path if resolution fails), verifies the skill directory exists, records a `SKILL_MD_MISSING` failure if SKILL.md is absent, and then runs contract, evals, task-profile, reference PI, and context-relocation validations, aggregating all findings.
+    
+    Parameters:
+        skill_rel (str): Repository-relative path to the skill directory being validated.
+    
+    Returns:
+        List[Finding]: Collected findings from all validations for the given skill.
+    """
     skill_dir = (REPO_ROOT / skill_rel).resolve()
     canonical_rel = _canonical_skill_rel(skill_rel)
     findings: List[Finding] = []

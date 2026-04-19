@@ -16,6 +16,15 @@ SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "skil
 
 
 def load_module():
+    """
+    Dynamically load and return the skill_scan module from the SCRIPT path.
+    
+    Returns:
+        module (types.ModuleType): The imported module object.
+    
+    Raises:
+        RuntimeError: If the import spec or its loader cannot be created for SCRIPT.
+    """
     spec = importlib.util.spec_from_file_location("skill_scan", SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load module from {SCRIPT}")
@@ -26,6 +35,15 @@ def load_module():
 
 
 def _skill_with_required_headings(extra_body: str) -> str:
+    """
+    Builds a SKILL.md markdown document containing required YAML frontmatter and the standard sections, then appends additional body content.
+    
+    Parameters:
+        extra_body (str): Markdown content to append after the standard sections.
+    
+    Returns:
+        str: Complete SKILL.md document as a string.
+    """
     return f"""---
 name: sample-skill
 description: test
@@ -54,6 +72,11 @@ Gotchas here.
 
 class SkillScanProgressiveDisclosureTests(unittest.TestCase):
     def setUp(self) -> None:
+        """
+        Prepare each test by loading the target skill_scan module.
+        
+        Loads the `skill_scan.py` module using `load_module()` and stores the resulting module object on `self.module` for use by the test methods.
+        """
         self.module = load_module()
 
     def test_strict_mode_fails_for_missing_relocation_signposts(self) -> None:
@@ -121,6 +144,11 @@ class SkillScanProgressiveDisclosureTests(unittest.TestCase):
             self.assertEqual(rc, 0)
 
     def test_strict_mode_accepts_infrastructure_references_links(self) -> None:
+        """
+        Verifies that strict progressive-disclosure linting accepts relocation signposting that links to an `Infrastructure/references/...` document.
+        
+        Creates a temporary Plugins skill with a SKILL.md containing required headings, explicit relocation signposting, and a link using the `Infrastructure/references/governance.md` path, then asserts `cmd_lint_progressive_disclosure("strict")` returns 0.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             skill_dir = root / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder"
