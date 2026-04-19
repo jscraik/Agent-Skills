@@ -1172,6 +1172,8 @@ sync_home_plugin_mirrors() {
   local plugin_name=""
   local source_dir=""
   local target_dir=""
+  local source_real=""
+  local target_real=""
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping home plugin mirrors)."
@@ -1191,6 +1193,13 @@ sync_home_plugin_mirrors() {
 
     if [ ! -d "$source_dir" ]; then
       echo "[WARN] Plugin listed in marketplace but missing in canonical dir: $source_dir"
+      continue
+    fi
+
+    source_real="$(cd "$source_dir" 2>/dev/null && pwd -P || true)"
+    target_real="$(cd "$target_dir" 2>/dev/null && pwd -P || true)"
+    if [ -n "$source_real" ] && [ -n "$target_real" ] && [ "$source_real" = "$target_real" ]; then
+      echo "[INFO] Skipping mirror because source and target resolve to same path: $target_dir"
       continue
     fi
 
@@ -1476,6 +1485,10 @@ sync_codex_profile_homes() {
   local profile_home=""
   local profile_plugins=""
   local profile_plugins_root=""
+  local profile_cache_target=""
+  local cache_source_real=""
+  local profile_cache_target_real=""
+  local marketplace_target=""
 
   while IFS= read -r profile_home; do
     [ -n "$profile_home" ] || continue
@@ -1485,20 +1498,31 @@ sync_codex_profile_homes() {
 
     profile_plugins="$profile_home/plugins"
     profile_plugins_root="$profile_home/Plugins"
-    mkdir -p "$profile_plugins"
+    mkdir -p "$profile_plugins_root"
     if [ -L "$profile_plugins" ]; then
-      echo "[WARN] Skipping profile plugin-cache projection for symlinked path: $profile_plugins"
-      continue
+      echo "[WARN] Profile plugin path is symlinked: $profile_plugins (continuing with guarded projection)."
     fi
 
-    sync_user_skills "$cache_source" "$profile_plugins_root/cache" 0 copy
-    materialize_plugin_cache_roots "$profile_plugins_root/cache"
+    profile_cache_target="$profile_plugins_root/cache"
+    cache_source_real="$(cd "$cache_source" 2>/dev/null && pwd -P || true)"
+    profile_cache_target_real="$(cd "$profile_cache_target" 2>/dev/null && pwd -P || true)"
+    if [ -n "$cache_source_real" ] && [ -n "$profile_cache_target_real" ] && [ "$cache_source_real" = "$profile_cache_target_real" ]; then
+      echo "[INFO] Skipping profile cache copy for identical source/target: $profile_cache_target"
+    else
+      sync_user_skills "$cache_source" "$profile_cache_target" 0 copy
+      materialize_plugin_cache_roots "$profile_cache_target"
+    fi
     if [ -f "$marketplace_file" ]; then
-      cp "$marketplace_file" "$profile_plugins_root/marketplace.json"
-      echo "[OK] Synced profile marketplace manifest: $profile_plugins_root/marketplace.json"
+      marketplace_target="$profile_plugins_root/marketplace.json"
+      if [ -e "$marketplace_target" ] && cmp -s "$marketplace_file" "$marketplace_target"; then
+        echo "[INFO] Profile marketplace manifest already points at canonical source: $marketplace_target"
+      else
+        cp "$marketplace_file" "$marketplace_target"
+        echo "[OK] Synced profile marketplace manifest: $marketplace_target"
+      fi
       # Keep profile-local marketplace source paths resolvable at
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
-      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
+      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root/Plugins"
     fi
   done < <({
     [ -d "$HOME/.codex" ] && printf '%s\n' "$HOME/.codex"
