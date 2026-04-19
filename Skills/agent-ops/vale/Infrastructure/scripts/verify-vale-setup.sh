@@ -13,7 +13,7 @@ fi
 echo "==> Vale version"
 vale --version
 
-if [[ ! -f "${CONFIG_FILE}" ]]; then
+if [ ! -e "${CONFIG_FILE}" ]; then
   echo "ERROR: Vale config not found at ${CONFIG_FILE}" >&2
   exit 1
 fi
