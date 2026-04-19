@@ -210,32 +210,47 @@ def _load_json(path: Path) -> Dict[str, Any]:
     return obj
 
 
+def _skill_markdown_body(raw: str) -> str:
+    """
+    Extract the body of a SKILL.md file by removing leading YAML frontmatter if present.
+
+    Parameters:
+        raw (str): The full SKILL.md content.
+
+    Returns:
+        str: The markdown content after the closing frontmatter marker `---` if a leading YAML frontmatter block exists; otherwise the original `raw` text.
+    """
+    # Strip optional BOM/leading whitespace
+    stripped = raw.lstrip('\ufeff \t')
+
+    # Check if file starts with frontmatter delimiter
+    if not stripped.startswith('---\n') and not stripped.startswith('---\r\n'):
+        return raw
+
+    # Find the closing delimiter on its own line
+    lines = stripped.split('\n')
+    for i in range(1, len(lines)):
+        line = lines[i].rstrip('\r')
+        if line == '---':
+            # Found closing delimiter, return content after it
+            return '\n'.join(lines[i+1:])
+
+    # No closing delimiter found, return original
+    return raw
+
+
 def _load_schema(schema_path: Path) -> Any:
     """
     Load a YAML schema file from the given path and return its parsed contents or `None` if the file is absent.
-    
+
     Parameters:
         schema_path (Path): Filesystem path to the schema file.
-    
+
     Returns:
         The parsed YAML schema as a Python object, or `None` if the file does not exist.
     """
     if not schema_path.exists():
         return None
-
-
-def _skill_markdown_body(raw: str) -> str:
-    """
-    Extract the body of a SKILL.md file by removing leading YAML frontmatter if present.
-    
-    Parameters:
-        raw (str): The full SKILL.md content.
-    
-    Returns:
-        str: The markdown content after the closing frontmatter marker `---` if a leading YAML frontmatter block exists; otherwise the original `raw` text.
-    """
-    parts = raw.split("---", 2)
-    return parts[2] if len(parts) >= 3 else raw
     try:
         return yaml.safe_load(schema_path.read_text(encoding="utf-8"))
     except Exception:  # noqa: BLE001
@@ -716,7 +731,13 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
             )
         )
 
-    if re.search(r"\]\([^)]*references/[^)]*\)", body, re.IGNORECASE) is None:
+    refs_dir = skill_dir / "references"
+
+    # Extract all referenced paths and verify they exist
+    ref_link_pattern = re.compile(r"\]\((references/[^\)]*)\)", re.IGNORECASE)
+    ref_matches = ref_link_pattern.findall(body)
+
+    if not ref_matches:
         findings.append(
             Finding(
                 "FAIL",
@@ -725,8 +746,34 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
                 "missing SKILL.md link into references/ for relocated context",
             )
         )
+    else:
+        # Verify each referenced file actually exists
+        allowed_suffixes = {".md", ".yaml", ".yml", ".json"}
+        for ref_path in ref_matches:
+            # Resolve the reference path relative to the skill directory
+            # ref_path is like "references/file.md" or "references/subdir/file.md"
+            resolved_path = skill_dir / ref_path
 
-    refs_dir = skill_dir / "references"
+            # Check if file exists and has allowed suffix
+            if not resolved_path.exists():
+                findings.append(
+                    Finding(
+                        "FAIL",
+                        "CONTEXT_RELOCATION_REFERENCE_MISSING",
+                        skill_rel,
+                        f"referenced file '{ref_path}' does not exist",
+                    )
+                )
+            elif resolved_path.suffix not in allowed_suffixes:
+                findings.append(
+                    Finding(
+                        "FAIL",
+                        "CONTEXT_RELOCATION_REFERENCE_MISSING",
+                        skill_rel,
+                        f"referenced file '{ref_path}' has disallowed suffix (expected: {', '.join(allowed_suffixes)})",
+                    )
+                )
+
     has_ref_docs = refs_dir.is_dir() and any(path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir())
     if not has_ref_docs:
         findings.append(
