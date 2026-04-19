@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Entry-point stub that loads the implementation from the sibling .pyw file."""
 from pathlib import Path
 import runpy
 

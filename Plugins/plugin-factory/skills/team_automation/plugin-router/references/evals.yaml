@@ -59,7 +59,7 @@ cases:
     prompt: "Troubleshoot why my plugin install visibility failed after a GitHub import."
     acceptance:
       - type: regex
-        value: "(?i)(selected_lane[:=].*troubleshoot|\\[\\[plugin-installer\\]\\]|\\[\\[plugin-builder\\]\\])"
+        value: "(?i)(selected_lane[:=].*troubleshoot|\\[\\[plugin-installer\\]\\]|\\[\\[plugin-builder\\]\\]|\\[\\[plugin-creator\\]\\])"
       - type: regex
         value: "(?i)(handoff_order|reason|required_inputs)"
 
