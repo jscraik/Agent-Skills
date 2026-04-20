@@ -75,6 +75,21 @@ def render_from_paths(*, template_path: Path, context: dict[str, str]) -> str:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for the review-todo renderer.
+    
+    Parameters:
+        argv (list[str] | None): Optional list of arguments to parse (typically sys.argv[1:]). If None, arguments are read from the environment.
+    
+    Returns:
+        argparse.Namespace: Namespace with parsed options:
+            - template: Path to the template file.
+            - output: Path to the rendered markdown file.
+            - vars_json: Optional path to a JSON file containing template variables.
+            - var: List of inline KEY=VALUE overrides.
+            - no_defaults: Boolean flag to disable built-in default context.
+            - stdout: Boolean flag to print rendered output to stdout.
+    """
     parser = argparse.ArgumentParser(description="Render he-review/review-todo.md.tmpl to markdown.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")

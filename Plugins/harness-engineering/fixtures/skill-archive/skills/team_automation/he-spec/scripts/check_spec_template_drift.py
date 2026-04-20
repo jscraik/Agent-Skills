@@ -21,6 +21,22 @@ from render_spec_template import (
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Create and return the command-line argument namespace for the he-spec drift checker.
+    
+    Parameters:
+        argv (list[str] | None): Optional list of argument strings to parse; if None, parses the process' command-line arguments.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with these attributes:
+            template: path to the template file
+            output: path to the rendered markdown baseline
+            vars_json: optional JSON file path for template variables
+            var: list of inline KEY=VALUE overrides
+            no_defaults: whether to disable built-in default context seeding
+            update: whether to overwrite the output baseline with rendered content
+            max_diff_lines: maximum number of diff lines to print
+    """
     parser = argparse.ArgumentParser(description="Check drift for he-spec rendered template output.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")

@@ -21,6 +21,22 @@ from render_plan_template import (
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for the he-plan template drift checker.
+    
+    Parameters:
+        argv (list[str] | None): Sequence of argument strings to parse. If None, uses sys.argv.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes:
+            - template: Path to the template file.
+            - output: Path to the rendered markdown file.
+            - vars_json: Optional JSON file with template variables.
+            - var: List of inline variable overrides (`KEY=VALUE`).
+            - no_defaults: True if built-in defaults should not be seeded into the context.
+            - update: True to rewrite the output file with the newly rendered content.
+            - max_diff_lines: Maximum number of diff lines to print when drift is detected.
+    """
     parser = argparse.ArgumentParser(description="Check drift for he-plan rendered template output.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")

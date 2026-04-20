@@ -61,6 +61,15 @@ def render_from_paths(*, template_path: Path, context: dict[str, str]) -> str:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for rendering the finding template.
+    
+    Parameters:
+        argv (list[str] | None): Optional list of CLI arguments to parse; if None, parses from sys.argv.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes: `template`, `output`, `vars_json`, `var` (list of KEY=VALUE strings), `no_defaults`, and `stdout`.
+    """
     parser = argparse.ArgumentParser(description="Render he-technical-review/finding.md.tmpl to markdown.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")

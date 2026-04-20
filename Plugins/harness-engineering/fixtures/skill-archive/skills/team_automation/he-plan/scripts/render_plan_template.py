@@ -90,6 +90,21 @@ def render_from_paths(*, template_path: Path, context: dict[str, str]) -> str:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for rendering the he-plan template.
+    
+    Parameters:
+        argv: Sequence of command-line arguments to parse; if None, the process's argv is used.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes:
+            - template: Path to the template file.
+            - output: Path to the rendered markdown file.
+            - vars_json: Optional path to a JSON file containing template variables.
+            - var: List of inline KEY=VALUE overrides.
+            - no_defaults: True when built-in defaults should not be seeded into the context.
+            - stdout: True when the rendered output should be written to stdout instead of a file.
+    """
     parser = argparse.ArgumentParser(description="Render he-plan/plan.md.tmpl to markdown.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")
