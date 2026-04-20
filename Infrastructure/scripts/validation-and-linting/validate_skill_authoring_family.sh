@@ -62,10 +62,10 @@ skill_dirs=(
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
 )
 skill_builder_dir_candidates=(
-  "plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
-  "plugins/skill-factory/skills/skill-builder"
   "Plugins/skill-factory/skills/skill-builder"
+  "plugins/skill-factory/skills/code_quality_review/skill-builder"
+  "plugins/skill-factory/skills/skill-builder"
 )
 skill_builder_dir=""
 skill_builder_scripts_dir=""
@@ -88,8 +88,8 @@ run_skill_builder_script() {
   "${python_cmd[@]}" "${skill_builder_scripts_dir}/${script_name}" "$@"
 }
 
-ce_work_skill="Plugins/harness-engineering/skills/team_automation/ce-work/SKILL.md"
-ce_tdd_skill="Plugins/harness-engineering/skills/team_automation/ce-tdd/SKILL.md"
+he_work_skill="Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md"
+he_tdd_skill="Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md"
 ce_shared_approval_doc="Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 ce_shared_approval_ref="../shared/references/approval-flow.md"
 
@@ -221,15 +221,15 @@ fi
 
 echo "[family-gate] using python: $python_cmd_display"
 
-echo "[family-gate] validating ce-work/ce-tdd approval-flow linkage"
+echo "[family-gate] validating he-work/he-tdd approval-flow linkage"
 if [[ ! -f "$ce_shared_approval_doc" ]]; then
   echo "[family-gate] ERROR: missing shared approval flow document: $ce_shared_approval_doc"
   exit 1
 fi
 
-for skill_doc in "$ce_work_skill" "$ce_tdd_skill"; do
+for skill_doc in "$he_work_skill" "$he_tdd_skill"; do
   if [[ ! -f "$skill_doc" ]]; then
-    echo "[family-gate] ERROR: missing CE skill doc: $skill_doc"
+    echo "[family-gate] ERROR: missing HE skill doc: $skill_doc"
     exit 1
   fi
 
@@ -244,7 +244,7 @@ for skill_doc in "$ce_work_skill" "$ce_tdd_skill"; do
     exit 1
   fi
 done
-echo "[family-gate] ce-work/ce-tdd approval-flow linkage passed"
+echo "[family-gate] he-work/he-tdd approval-flow linkage passed"
 
 # ---------------------------------------------------------------------------
 # P1.2: shellcheck gate — lint all gate/validation shell scripts
@@ -342,10 +342,10 @@ if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   echo "[family-gate] running pytest unit tests..."
   pytest_skill_gate_path=""
   pytest_skill_gate_candidates=(
-    "plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
     "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
-    "plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
     "Plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
+    "plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
+    "plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
   )
   for candidate in "${pytest_skill_gate_candidates[@]}"; do
     if [[ -f "$candidate" ]]; then

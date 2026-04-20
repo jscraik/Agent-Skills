@@ -28,20 +28,20 @@ Use `coding-harness` instead when you need:
 - `.codex-plugin/plugin.json`
 - `Infrastructure/references/routing-map.json`
 - `skills/`
-  - `ce-brainstorm`
-  - `ce-compound`
-  - `ce-compound-refresh`
-  - `ce-deepen-plan`
-  - `ce-deepen-spec`
-  - `ce-ideate`
-  - `ce-plan`
-  - `ce-router`
-  - `ce-reliability-review`
-  - `ce-review`
-  - `ce-spec`
-  - `ce-tdd`
-  - `ce-technical-review`
-  - `ce-work`
+  - `he-brainstorm`
+  - `he-compound`
+  - `he-compound-refresh`
+  - `he-deepen-plan`
+  - `he-deepen-spec`
+  - `he-ideate`
+  - `he-plan`
+  - `he-router`
+  - `he-reliability-review`
+  - `he-review`
+  - `he-spec`
+  - `he-tdd`
+  - `he-technical-review`
+  - `he-work`
 
 ## Source Of Truth
 - Source skill family:
@@ -54,29 +54,40 @@ Use `coding-harness` instead when you need:
 When updating CE lifecycle behavior, keep packaged skills and the routing map aligned.
 
 ## Usage
-Start with `ce-router` when users do not know the exact stage:
-- It picks the primary CE stage and returns the exact next command.
-- It escalates to `ce-compound` when lifecycle-orchestration is needed.
+Start with `he-router` when users do not know the exact stage:
+- It picks the primary HE stage and returns the exact next command.
+- It escalates to `he-compound` when lifecycle-orchestration is needed.
+- It now returns a stage-specific subagent plan derived from `references/routing-map.json`.
 
-Use `ce-compound` when the user needs lifecycle orchestration:
+Use `he-compound` when the user needs lifecycle orchestration:
 - It routes requests to the right CE stage using `references/routing-map.json`.
 - It outputs a stage decision, required inputs, and next command.
 
 Call stage skills directly when stage intent is explicit:
-- `ce-router`, `ce-ideate`, `ce-brainstorm`, `ce-spec`, `ce-deepen-spec`, `ce-plan`, `ce-deepen-plan`, `ce-work`, `ce-review`, `ce-technical-review`, `ce-reliability-review`, `ce-tdd`, `ce-compound`, `ce-compound-refresh`.
+- `he-router`, `he-ideate`, `he-brainstorm`, `he-spec`, `he-deepen-spec`, `he-plan`, `he-deepen-plan`, `he-work`, `he-review`, `he-technical-review`, `he-reliability-review`, `he-tdd`, `he-compound`, `he-compound-refresh`.
+
+## Subagent Orchestration
+- Canonical mapping: `Plugins/harness-engineering/references/subagent-routing.md`
+- Machine-readable policy map: `Plugins/harness-engineering/references/routing-map.json`
+- Agent availability source: `~/.codex/agents/manifest.json`
+
+Runtime behavior:
+- Stage skills resolve mapped roles from `~/.codex/agents/manifest.json` before delegation.
+- Stages apply policy per map (`always`, `conditional`, `manual-only`).
+- If automatic spawning is unavailable, stage outputs must continue inline and provide explicit manual launch guidance for the same mapped roles.
 
 ## Validation
 Validate plugin contract and marketplace registration:
 
 ```sh
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path Plugins/marketplace.json
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
 ```
 
 Audit marketplace alignment:
 
 ```sh
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-marketplace --marketplace-path Plugins/marketplace.json --plugins-path plugins
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```
 
 Troubleshooting note:
-- Use `--allow-legacy-marketplace-path` only as an explicit temporary compatibility override.
+- If `.agents/Plugins/marketplace.json` is unavailable in your checkout, use `--allow-legacy-marketplace-path --marketplace-path Plugins/marketplace.json` as a temporary compatibility override.
