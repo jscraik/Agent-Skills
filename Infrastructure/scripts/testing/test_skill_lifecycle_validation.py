@@ -649,6 +649,42 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             content,
         )
 
+    def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
+        """
+        Ensure sync removes legacy visible local cache roots.
+
+        OpenAI-curated plugins should not surface from accidental local cache
+        families under `plugins/cache/local` or the older
+        `plugins/cache/agent-skills-local` path.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn(
+            'cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"',
+            content,
+        )
+        self.assertIn(
+            'cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"',
+            content,
+        )
+        self.assertIn(
+            'cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"',
+            content,
+        )
+
+    def test_sync_script_uses_entry_marketplace_for_local_cache_routing(self) -> None:
+        """
+        Ensure local-source plugins route to their declared marketplace family.
+
+        Curated plugins are declared with `marketplace` metadata per entry and
+        must stay under that cache family rather than inheriting the manifest
+        top-level marketplace name.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn(
+            "(.marketplace // $source.marketplace // $default_market | tostring | trim) as $market",
+            content,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
