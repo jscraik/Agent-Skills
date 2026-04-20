@@ -1275,11 +1275,12 @@ sync_local_marketplace_cache() {
   jq -r '
     def trim: gsub("^\\s+|\\s+$"; "");
     def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
-    (.name // "agent-skills-local" | tostring | trim) as $market
+    (.name // "agent-skills-local" | tostring | trim) as $default_market
     | .plugins[]?
     | select(type == "object")
     | .name as $name
     | .source as $source
+    | (.marketplace // $source.marketplace // $default_market | tostring | trim) as $market
     | select(($name | type) == "string")
     | select(($source | type) == "object")
     | select($source.source == "local")
@@ -1531,7 +1532,8 @@ sync_codex_profile_homes() {
   } | sort -u)
 }
 
-# cleanup_legacy_local_marketplace_cache removes a legacy local marketplace cache directory or symlink if it exists.
+# cleanup_legacy_local_marketplace_cache removes a legacy visible local marketplace
+# cache directory or symlink if it exists.
 cleanup_legacy_local_marketplace_cache() {
   local legacy_cache_root="$1"
   if [ -d "$legacy_cache_root" ] || [ -L "$legacy_cache_root" ]; then
@@ -1557,6 +1559,8 @@ sync_repo_cache_snapshots_to_runtime_cache "$plugins_dir/cache" "$runtime_cache_
 sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$runtime_cache_root"
 materialize_plugin_cache_roots "$runtime_cache_root"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"
+cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"
+cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"
 sync_plugin_cache_projections
 # On case-insensitive filesystems (e.g. default macOS), "skills" aliases
 # "Skills"; forcing a lowercase symlink would replace the canonical tracked
