@@ -59,6 +59,21 @@ def render_from_paths(*, template_path: Path, context: Dict[str, str]) -> str:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for the template rendering tool.
+    
+    Parameters:
+        argv (list[str] | None): List of argument strings to parse; if `None`, parse arguments from `sys.argv`.
+    
+    Returns:
+        args (argparse.Namespace): Parsed arguments with attributes:
+            - template: path to the template file
+            - output: path for the rendered markdown
+            - vars_json: optional JSON file path containing template variables
+            - var: list of inline KEY=VALUE overrides
+            - no_defaults: flag to disable built-in default context
+            - stdout: flag to write output to stdout instead of a file
+    """
     parser = argparse.ArgumentParser(description="Render he-spec/spec.md.tmpl to markdown.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")

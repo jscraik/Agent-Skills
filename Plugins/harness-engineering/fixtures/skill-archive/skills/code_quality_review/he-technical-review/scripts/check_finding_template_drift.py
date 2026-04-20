@@ -21,6 +21,22 @@ from render_finding_template import (
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for the drift checker for the he-technical-review rendered template.
+    
+    Parameters:
+        argv (list[str] | None): List of argument strings to parse. If None, the system command-line arguments are used.
+    
+    Returns:
+        argparse.Namespace: Namespace with parsed attributes:
+            template (str): Path to the template file.
+            output (str): Path to the rendered markdown baseline file.
+            vars_json (str | None): Path to a JSON file providing template variables, or None.
+            var (list[str]): List of inline KEY=VALUE variable overrides.
+            no_defaults (bool): True if built-in defaults should not be pre-seeded into the context.
+            update (bool): True to overwrite the output file with the newly rendered content.
+            max_diff_lines (int): Maximum number of diff lines to print when drift is detected.
+    """
     parser = argparse.ArgumentParser(description="Check drift for he-technical-review rendered template output.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered markdown file.")
