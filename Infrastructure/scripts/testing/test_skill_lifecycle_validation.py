@@ -681,6 +681,10 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
+            '(.name // "agent-skills-local" | tostring | trim) as $default_market',
+            content,
+        )
+        self.assertIn(
             "(.marketplace // $source.marketplace // $default_market | tostring | trim) as $market",
             content,
         )
