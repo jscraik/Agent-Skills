@@ -107,17 +107,17 @@ CODERABBIT_HIDDEN_LANE_SKILLS = {"code-review", "autofix"}
 
 STARTER_ARCHETYPES = {
     "general": (
-        "ce-brainstorm",
-        "ce-spec",
-        "ce-plan",
-        "ce-work",
-        "ce-technical-review",
+        "he-brainstorm",
+        "he-spec",
+        "he-plan",
+        "he-work",
+        "he-technical-review",
         "gh-workflow",
         "docs-expert",
         "context7",
     ),
-    "delivery": ("ce-plan", "ce-work", "ce-review", "gh-workflow", "coding-harness"),
-    "review": ("ce-technical-review", "ce-review", "agent-native-audit", "security-best-practices"),
+    "delivery": ("he-plan", "he-work", "he-review", "gh-workflow", "coding-harness"),
+    "review": ("he-technical-review", "he-review", "agent-native-audit", "security-best-practices"),
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 

@@ -255,13 +255,18 @@
     },
     {
       "category" : "Productivity",
+      "marketplace" : "openai-bundled",
       "name" : "computer-use",
       "policy" : {
         "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE"
+        "installation" : "AVAILABLE",
+        "products" : [
+          "CODEX"
+        ]
       },
       "source" : {
-        "path" : "./.codex/plugins/computer-use",
+        "marketplace" : "openai-bundled",
+        "path" : "./Plugins/cache/openai-bundled/computer-use/1.0.750",
         "source" : "local"
       }
     }

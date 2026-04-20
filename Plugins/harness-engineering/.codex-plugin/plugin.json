@@ -42,7 +42,7 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use ce-router to choose one CE stage and the next command."
+      "Use he-router to choose one CE stage and the next command."
     ],
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",
