@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-16T12:22:20.492969+00:00",
+  "generated_at": "2026-04-21T04:59:44.949625+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -38,22 +38,6 @@
       "target": "../Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer"
     },
     {
-      "name": "cache-coderabbit",
-      "type": "mirror",
-      "source": "Plugins/coderabbit",
-      "projection": ".agents/plugins-runtime/cache/agent-skills-local/coderabbit",
-      "policy": "hash-manifest-plus-path-diff",
-      "missing_in_projection": [],
-      "extra_in_projection": [],
-      "mismatched_files": [],
-      "unstamped_files": [],
-      "checked_files": 210,
-      "source_manifest_sha256": "4ea2612826afc220e848eb1efaf199c9ed791cbbf8e6c661a4fbd66ff26ffd71",
-      "projection_manifest_sha256": "4ea2612826afc220e848eb1efaf199c9ed791cbbf8e6c661a4fbd66ff26ffd71",
-      "manifest_mismatch": false,
-      "status": "pass"
-    },
-    {
       "name": "cache-harness-engineering",
       "type": "mirror",
       "source": "Plugins/harness-engineering",
@@ -63,9 +47,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 198,
-      "source_manifest_sha256": "6334692a8eb7b15e31eb9d6830da7e53318d116dcfc3c870b6811cbaf001b077",
-      "projection_manifest_sha256": "6334692a8eb7b15e31eb9d6830da7e53318d116dcfc3c870b6811cbaf001b077",
+      "checked_files": 371,
+      "source_manifest_sha256": "a371c378c3bdc75b5568a1284fd19a5221e1ecba460eac1da1bc9e1c58c29474",
+      "projection_manifest_sha256": "a371c378c3bdc75b5568a1284fd19a5221e1ecba460eac1da1bc9e1c58c29474",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +63,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 66,
-      "source_manifest_sha256": "8a4d1ca0f69fe06bb880078dbd40adf0f9b0dbb80682875929d28e3b3655b7a4",
-      "projection_manifest_sha256": "8a4d1ca0f69fe06bb880078dbd40adf0f9b0dbb80682875929d28e3b3655b7a4",
+      "checked_files": 108,
+      "source_manifest_sha256": "e50bb31e5ebb64cfacd4d0e1fcaf844749870764cda304a4c2cf75b0aa0d6f47",
+      "projection_manifest_sha256": "e50bb31e5ebb64cfacd4d0e1fcaf844749870764cda304a4c2cf75b0aa0d6f47",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -95,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 196,
-      "source_manifest_sha256": "17ef46d278ff5ccf15b6fe3d4a9e555eb235c929ae453f7a85f2c2a3e7617367",
-      "projection_manifest_sha256": "17ef46d278ff5ccf15b6fe3d4a9e555eb235c929ae453f7a85f2c2a3e7617367",
+      "checked_files": 505,
+      "source_manifest_sha256": "b261af928accb2afc1ef8e6dd3d09679b1c78d645bd139021cf69b560b6ec421",
+      "projection_manifest_sha256": "b261af928accb2afc1ef8e6dd3d09679b1c78d645bd139021cf69b560b6ec421",
       "manifest_mismatch": false,
       "status": "pass"
     }
