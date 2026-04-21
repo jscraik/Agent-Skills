@@ -28,6 +28,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - Companion mode: sandbox-safe (no protected runtime path mutations).
 - Validation command:
   - `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`
+  - `vale Docs/skills-by-type.md` (or the repo wrapper that runs Vale for Markdown)
 
 ## Canonical Values
 
