@@ -60,6 +60,18 @@ Create, edit, analyze, and validate spreadsheets with strong defaults for formul
 - `Infrastructure/scripts/spreadsheet_workflows.sh paths`
   - Prints canonical temporary and output directories used by this skill.
 
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
 ## Tooling and references
 - Use `openpyxl` for workbook-preserving `.xlsx` edits and formatting.
 - Use `pandas` for analysis-heavy tabular transforms.

@@ -87,6 +87,13 @@ Do not use this skill when:
 - Verify saved artifacts exist when screenshots or captures are promised.
 - Verify the chosen browser operator matches the requested environment instead of defaulting blindly to one tool.
 
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
 ## References
 
 - `Infrastructure/references/agent-browser-runbook.md`

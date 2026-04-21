@@ -79,6 +79,24 @@ Use this skill for precise metadata remediation, not broad SEO platform rewrites
 - Verify OG and Twitter image URLs are absolute and point to real assets.
 - If JSON-LD is added, check that it reflects visible page content rather than invented data.
 
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
+
 ## References
 - Contract: `Infrastructure/references/contract.yaml`
 - Evals: `Infrastructure/references/evals.yaml`

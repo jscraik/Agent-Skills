@@ -1,6 +1,6 @@
 ---
 name: elixir-pro
-description: Write idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Masters concurrency, fault tolerance, and distributed systems.
+description: Create and review idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Use when building or debugging Elixir services that need reliable concurrency and fault tolerance.
 metadata:
   skill-type: code_quality_review
 ---
@@ -74,6 +74,36 @@ end
 | [[he-fix-bugs]] | Triage distributed process failures with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
+
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Procedure
+
+1. Confirm scope, constraints, and required inputs before edits.
+2. Apply focused changes tied directly to the requested outcome.
+3. Re-run the highest-signal validations and capture concrete evidence.
+
+## Validation
+
+- Run the relevant local checks for touched files and workflow contracts.
+- Fail fast: stop at the first blocking validation failure and report exact evidence.
+- Re-run checks after fixes and record residual risk if any remains.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
 
 ## References and assets
 

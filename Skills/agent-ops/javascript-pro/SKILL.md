@@ -1,6 +1,6 @@
 ---
 name: javascript-pro
-description: Master modern JavaScript with ES6+, async patterns, and Node.js APIs. Handles promises, event loops, and browser/Node compatibility.
+description: Create and debug modern JavaScript code with ES6+, async patterns, and Node.js APIs. Use when working on runtime behavior, promises, or browser and Node compatibility.
 metadata:
   skill-type: code_quality_review
 ---
@@ -45,6 +45,8 @@ metadata:
 - Use `Promise.all` only for truly independent operations.
 - Surface actionable errors with context.
 
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
 ## Examples
 
 ```javascript
@@ -71,6 +73,30 @@ export async function loadJson(url) {
 | [[biome-linting]] | Enforce JavaScript/TypeScript lint and format rules with Biome |
 
 **Topic map:** [[agent-ops]]
+
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Procedure
+
+1. Confirm scope, constraints, and required inputs before edits.
+2. Apply focused changes tied directly to the requested outcome.
+3. Re-run the highest-signal validations and capture concrete evidence.
+
+## Validation
+
+- Run the relevant local checks for touched files and workflow contracts.
+- Fail fast: stop at the first blocking validation failure and report exact evidence.
+- Re-run checks after fixes and record residual risk if any remains.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
 
 ## References and assets
 

@@ -161,3 +161,15 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 | [[he-fix-bugs]] | Diagnose a stubborn defect before continuing to resolve review feedback |
 
 **Topic map:** [[backend-platform]]
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
+
