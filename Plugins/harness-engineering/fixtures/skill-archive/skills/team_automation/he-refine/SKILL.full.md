@@ -137,8 +137,10 @@ Summarize what was refined, what remains, and route to next stage:
 - `scripts/resolve-port.sh`
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[he-improve]] | Run measurable optimization experiments instead of browser-led polish |
 | [[he-work]] | Execute larger implementation changes after refinement choices are settled |
 | [[he-code-review]] | Run readiness review before merge |
+
