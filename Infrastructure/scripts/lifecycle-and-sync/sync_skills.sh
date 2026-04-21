@@ -1142,6 +1142,45 @@ sync_user_skills() {
   fi
 }
 
+# ensure_real_home_plugin_root replaces a repo-backed plugin-root symlink with a
+# real directory so home/plugin surfaces stop aliasing the repository vendored
+# plugin tree.
+ensure_real_home_plugin_root() {
+  local target_dir="$1"
+  local canonical_plugins_dir="$2"
+  local label="${3:-home plugin root}"
+  local target_link=""
+  local link_target_real=""
+  local canonical_plugins_real=""
+
+  mkdir -p "$(dirname "$target_dir")"
+  canonical_plugins_real="$(cd "$canonical_plugins_dir" 2>/dev/null && pwd -P || true)"
+  if [ -z "$canonical_plugins_real" ]; then
+    echo "[WARN] Could not resolve canonical plugins dir for $label: $canonical_plugins_dir"
+    return 0
+  fi
+
+  if [ -L "$target_dir" ]; then
+    target_link="$(readlink "$target_dir" || true)"
+    if [ -n "$target_link" ]; then
+      link_target_real="$(cd "$(dirname "$target_dir")" 2>/dev/null && cd "$target_link" 2>/dev/null && pwd -P || true)"
+    fi
+    case "$link_target_real" in
+      "$canonical_plugins_real"|"$canonical_plugins_real"/*)
+        rm -f -- "$target_dir"
+        mkdir -p "$target_dir"
+        echo "[OK] Replaced repo-backed symlinked $label with directory: $target_dir"
+        return 0
+        ;;
+    esac
+  fi
+
+  if [ ! -e "$target_dir" ]; then
+    mkdir -p "$target_dir"
+    echo "[OK] Created $label directory: $target_dir"
+  fi
+}
+
 # sync_skill_path_file writes a small file at the specified target containing the canonicalised source directory path with a trailing slash to support loaders that expect a directory-path file.
 sync_skill_path_file() {
   local source_dir="$1"
@@ -1203,11 +1242,17 @@ sync_home_plugin_mirrors() {
   local marketplace_file="$1"
   local canonical_plugins_dir="$2"
   local home_plugins_dir="$3"
+  local state_dir=""
+  local keep_file=""
   local plugin_name=""
   local source_dir=""
   local target_dir=""
+  local existing_dir=""
   local source_real=""
   local target_real=""
+  local link_target=""
+  local link_target_real=""
+  local canonical_plugins_real=""
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping home plugin mirrors)."
@@ -1215,6 +1260,11 @@ sync_home_plugin_mirrors() {
   fi
 
   mkdir -p "$home_plugins_dir"
+  state_dir="$(mktemp -d)"
+  cleanup_paths+=("$state_dir")
+  keep_file="$state_dir/home-plugins.keep"
+  : > "$keep_file"
+  canonical_plugins_real="$(cd "$canonical_plugins_dir" 2>/dev/null && pwd -P || true)"
 
   while IFS= read -r plugin_name; do
     [ -n "$plugin_name" ] || continue
@@ -1224,6 +1274,7 @@ sync_home_plugin_mirrors() {
     fi
     source_dir="$canonical_plugins_dir/$plugin_name"
     target_dir="$home_plugins_dir/$plugin_name"
+    printf '%s\n' "$target_dir" >> "$keep_file"
 
     if [ ! -d "$source_dir" ]; then
       echo "[WARN] Plugin listed in marketplace but missing in canonical dir: $source_dir"
@@ -1267,6 +1318,26 @@ sync_home_plugin_mirrors() {
       | select(is_safe_identifier)
     ' "$marketplace_file"
   )
+
+  while IFS= read -r existing_dir; do
+    [ -n "$existing_dir" ] || continue
+    if grep -Fqx "$existing_dir" "$keep_file"; then
+      continue
+    fi
+    if [ ! -L "$existing_dir" ]; then
+      continue
+    fi
+    link_target="$(readlink "$existing_dir" || true)"
+    [ -n "$link_target" ] || continue
+    link_target_real="$(cd "$(dirname "$existing_dir")" 2>/dev/null && cd "$link_target" 2>/dev/null && pwd -P || true)"
+    [ -n "$link_target_real" ] || continue
+    case "$link_target_real" in
+      "$canonical_plugins_real"/*)
+        rm -f -- "$existing_dir"
+        echo "[OK] Removed stale home plugin symlink: $existing_dir"
+        ;;
+    esac
+  done < <(find "$home_plugins_dir" -mindepth 1 -maxdepth 1 -print)
 }
 
 # Keep repo-local plugin caches aligned with the marketplace so Codex surfaces
@@ -1521,6 +1592,7 @@ sync_codex_profile_homes() {
   local profile_home=""
   local profile_plugins=""
   local profile_plugins_root=""
+  local profile_agents_plugins=""
   local profile_cache_target=""
   local cache_source_real=""
   local profile_cache_target_real=""
@@ -1534,10 +1606,10 @@ sync_codex_profile_homes() {
 
     profile_plugins="$profile_home/plugins"
     profile_plugins_root="$profile_home/Plugins"
-    mkdir -p "$profile_plugins_root"
-    if [ -L "$profile_plugins" ]; then
-      echo "[WARN] Profile plugin path is symlinked: $profile_plugins (continuing with guarded projection)."
-    fi
+    profile_agents_plugins="$profile_home/.agents/plugins"
+    ensure_real_home_plugin_root "$profile_plugins" "$plugins_dir" "profile plugin root"
+    ensure_real_home_plugin_root "$profile_plugins_root" "$plugins_dir" "profile Plugins root"
+    ensure_real_home_plugin_root "$profile_agents_plugins" "$plugins_dir" "profile .agents plugin root"
 
     profile_cache_target="$profile_plugins_root/cache"
     cache_source_real="$(cd "$cache_source" 2>/dev/null && pwd -P || true)"
@@ -1559,6 +1631,7 @@ sync_codex_profile_homes() {
       # Keep profile-local marketplace source paths resolvable at
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
+      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"
     fi
   done < <({
     [ -d "$HOME/.codex" ] && printf '%s\n' "$HOME/.codex"
@@ -1611,6 +1684,7 @@ if [[ "$sync_scope" == "workspace" ]]; then
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
+  ensure_real_home_plugin_root "$HOME/plugins" "$plugins_dir" "home plugin root"
   sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
   # Antigravity app requires a flat copy (no symlinks) in its own config dir
   sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy

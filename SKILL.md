@@ -9,6 +9,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Plugins — Harness Engineering — Skills — Code_Quality_Review](#plugins-harness-engineering-skills-code_quality_review)
 - [Plugins — Harness Engineering — Skills — Team_Automation](#plugins-harness-engineering-skills-team_automation)
 - [Plugins — Plugin Factory — Skills — Infrastructure_Ops](#plugins-plugin-factory-skills-infrastructure_ops)
+- [Plugins — Plugin Factory — Skills — Scaffolding_Templates](#plugins-plugin-factory-skills-scaffolding_templates)
+- [Plugins — Plugin Factory — Skills_Index](#plugins-plugin-factory-skills_index)
+- [Plugins — Skill Factory — Skills — Infrastructure_Ops](#plugins-skill-factory-skills-infrastructure_ops)
+- [Plugins — Skill Factory — Skills — Scaffolding_Templates](#plugins-skill-factory-skills-scaffolding_templates)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
@@ -23,7 +27,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 131
+- `total_skills`: 132
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: d8f37e43ba560c95
@@ -60,6 +64,22 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Plugins — Plugin Factory — Skills — Infrastructure_Ops
 
 - `plugin-installer` — Install validated plugins with provenance and rollback safety
+
+## Plugins — Plugin Factory — Skills — Scaffolding_Templates
+
+- `plugin-creator` — Scaffold a minimal Codex plugin package and optional marketplace entry. Use when the user needs first-pass plugin creation.
+
+## Plugins — Plugin Factory — Skills_Index
+
+- `plugin-factory-router` — Front-door entrypoint for plugin-factory. Use when a plugin task needs lane routing.
+
+## Plugins — Skill Factory — Skills — Infrastructure_Ops
+
+- `skill-installer` — Install curated skills from openai/skills or other repos
+
+## Plugins — Skill Factory — Skills — Scaffolding_Templates
+
+- `skill-creator` — Create or update a skill
 
 ## Skills — Agent Ops
 
@@ -205,7 +225,4 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
-- `skill-creator` — Create or update a skill
-- `skill-installer` — Install curated skills from openai/skills or other repos
 

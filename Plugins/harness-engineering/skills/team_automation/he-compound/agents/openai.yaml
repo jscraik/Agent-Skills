@@ -1,0 +1,3 @@
+interface:
+  display_name: "Harness Engineering Compound"
+  short_description: "Analyze Harness Engineering lifecycle state, plan the correct stage routing, and capture..."

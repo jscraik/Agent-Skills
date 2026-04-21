@@ -664,6 +664,47 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             content,
         )
 
+    def test_sync_script_prunes_stale_home_plugin_symlinks(self) -> None:
+        """
+        Ensure removed local-marketplace entries do not linger in profile homes.
+
+        When vendored curated plugins are removed from the local marketplace,
+        stale `~/.codex/Plugins/<name>` symlinks should be removed if they
+        still point into the canonical repo plugin tree.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('keep_file="$state_dir/home-plugins.keep"', content)
+        self.assertIn('Removed stale home plugin symlink', content)
+
+    def test_sync_script_repairs_repo_backed_home_plugin_root_symlinks(self) -> None:
+        """
+        Ensure sync repairs repo-backed plugin-root symlinks into directories.
+
+        Home/plugin roots that resolve straight back into the repository
+        vendored plugin tree cause curated plugin families to appear as local
+        installs. The sync script should actively replace those symlinks with
+        real directories before mirroring the current marketplace set.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("ensure_real_home_plugin_root()", content)
+        self.assertIn("Replaced repo-backed symlinked", content)
+        self.assertIn(
+            'ensure_real_home_plugin_root "$profile_plugins" "$plugins_dir" "profile plugin root"',
+            content,
+        )
+        self.assertIn(
+            'ensure_real_home_plugin_root "$profile_plugins_root" "$plugins_dir" "profile Plugins root"',
+            content,
+        )
+        self.assertIn(
+            'ensure_real_home_plugin_root "$profile_agents_plugins" "$plugins_dir" "profile .agents plugin root"',
+            content,
+        )
+        self.assertIn(
+            'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"',
+            content,
+        )
+
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
         """
         Ensure sync removes legacy visible local cache roots.

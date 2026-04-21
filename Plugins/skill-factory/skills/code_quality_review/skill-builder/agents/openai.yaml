@@ -1,0 +1,3 @@
+interface:
+  display_name: "Skill Builder"
+  short_description: "Analyze and harden Codex skills and plugin packages for contract quality, eval coverage, and..."

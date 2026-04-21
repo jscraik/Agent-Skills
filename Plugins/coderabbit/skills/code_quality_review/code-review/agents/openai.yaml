@@ -1,0 +1,3 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Run CodeRabbit CLI review for staged, committed, or all changes when users request..."

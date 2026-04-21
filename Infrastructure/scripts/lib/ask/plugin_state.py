@@ -56,6 +56,12 @@ def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
         "Plugins/*/*/.codex-plugin/plugin.json",
     )
 
+    def _display_plugin_path(plugin_dir_resolved: Path) -> str:
+        try:
+            return plugin_dir_resolved.relative_to(resolved_repo_root).as_posix()
+        except ValueError:
+            return plugin_dir_resolved.as_posix()
+
     for pattern in manifest_patterns:
         for manifest_path in sorted(repo_root.glob(pattern)):
             rel = manifest_path.relative_to(repo_root).as_posix()
@@ -77,7 +83,7 @@ def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
                 installed.append(
                     {
                         "name": plugin_dir.name,
-                        "path": plugin_dir_resolved.relative_to(resolved_repo_root).as_posix(),
+                        "path": _display_plugin_path(plugin_dir_resolved),
                         "manifest_path": rel,
                         "manifest_valid": False,
                         "manifest_error": error,
@@ -90,7 +96,7 @@ def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
                     "name": str(payload.get("name") or plugin_dir.name),
                     "version": payload.get("version"),
                     "description": payload.get("description"),
-                    "path": plugin_dir_resolved.relative_to(resolved_repo_root).as_posix(),
+                    "path": _display_plugin_path(plugin_dir_resolved),
                     "manifest_path": rel,
                     "manifest_valid": True,
                     "governance": payload.get("governance", {}),
