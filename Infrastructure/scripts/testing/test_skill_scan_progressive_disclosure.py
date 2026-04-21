@@ -190,9 +190,9 @@ class SkillScanProgressiveDisclosureTests(TestCase):
 
     def test_strict_mode_ignores_relocation_in_frontmatter(self) -> None:
         """
-        Verify that strict progressive-disclosure linting ignores relocation-style text in YAML frontmatter and only validates the body.
-
-        Creates a temporary plugin skill with a SKILL.md whose frontmatter contains relocation/signposting language but whose body omits relocation signposts, runs cmd_lint_progressive_disclosure("strict"), and asserts the command returns 1 because the linter should fail when relocation text appears only in frontmatter.
+        Verify strict progressive-disclosure linting ignores relocation-style text in YAML front matter and validates only the document body.
+        
+        Asserts that running cmd_lint_progressive_disclosure("strict") returns 1 when relocation or signposting language appears only in the SKILL.md YAML front matter and not in the body.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

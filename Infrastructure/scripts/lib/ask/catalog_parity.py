@@ -25,10 +25,7 @@ def _extract_readme_count(readme_path: Path) -> int | None:
     """
     Extract the bolded skills count from a README file.
     
-    Looks for a bold integer immediately followed by the word "skills" (for example `**123 skills**`) and returns that integer. If the file does not exist or the expected pattern is not found, returns `None`.
-    
-    Parameters:
-        readme_path (Path): Path to the README file to inspect.
+    Recognizes formats like **123 skills** or **123 canonical skills** and returns the parsed integer when present; if the file is missing or no matching pattern is found, returns None.
     
     Returns:
         int | None: The parsed skills count if present, `None` otherwise.

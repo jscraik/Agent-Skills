@@ -895,7 +895,7 @@ HEADER
 }
 
 # generate_skill_type_index generates a skills-by-type markdown index from `metadata.skill-type` tags, grouping discovered skills into canonical semantic types, emitting counts, per-type lists and validation notes.
-# generate_skill_type_index generates a skills-by-type index at the specified output path by scanning all SKILL.md files and grouping entries by the canonical `metadata.skill-type` values.
+# generate_skill_type_index generates a skills-by-type index at the specified output path by scanning SKILL.md files and grouping entries by the canonical `metadata.skill-type` values, emitting counts, per-type lists, and validation notes for unrecognized tags.
 generate_skill_type_index() {
   local index_file="$1"
   local temp_dir=""
@@ -1144,7 +1144,7 @@ sync_user_skills() {
 
 # ensure_real_home_plugin_root replaces a repo-backed plugin-root symlink with a
 # real directory so home/plugin surfaces stop aliasing the repository vendored
-# plugin tree.
+# ensure_real_home_plugin_root ensures the given target_dir exists as a real directory, replacing a symlink that points into canonical_plugins_dir with a real directory and creating the directory (and its parent) if it does not exist; prints status messages.
 ensure_real_home_plugin_root() {
   local target_dir="$1"
   local canonical_plugins_dir="$2"
@@ -1239,7 +1239,7 @@ resolve_marketplace_source_dir() {
 # Some plugin installers resolve marketplace relative paths (./Plugins/<name>)
 # sync_home_plugin_mirrors copies local plugins from the canonical repo plugins
 # tree into a home plugins directory, pruning stale copied plugin entries while
-# preserving reserved runtime files such as marketplace.json and cache/.
+# sync_home_plugin_mirrors mirrors local plugins declared in a marketplace JSON into a home plugins directory as real copies, writes a source marker, materializes runtime skill symlink aliases, preserves reserved entries (`marketplace.json` and `cache`), and removes stale home plugin entries not listed in the marketplace.
 sync_home_plugin_mirrors() {
   local marketplace_file="$1"
   local canonical_plugins_dir="$2"
@@ -1273,6 +1273,8 @@ sync_home_plugin_mirrors() {
   : > "$keep_file"
   canonical_plugins_real="$(cd "$canonical_plugins_dir" 2>/dev/null && pwd -P || true)"
 
+  # is_repo_managed_home_plugin_copy determines whether the given directory is a repository-managed copy of a plugin from the canonical plugins directory.
+  # It returns exit status 0 if a marker file points into the canonical plugins real path or the `.codex-plugin/plugin.json` in the directory matches the canonical source; returns 1 otherwise.
   is_repo_managed_home_plugin_copy() {
     local existing_dir="$1"
     local legacy_source_dir="$canonical_plugins_dir/$(basename "$existing_dir")"
@@ -1295,6 +1297,7 @@ sync_home_plugin_mirrors() {
     cmp -s -- "$source_manifest" "$existing_manifest"
   }
 
+  # materialize_runtime_plugin_skill_aliases replaces symlinked entries directly under <plugin_dir>/skills with real copied directories (preserving attributes), skipping non-symlinks and a fixed set of meta directories; prints "[OK] Materialized runtime skill alias: <path>" for each materialized alias.
   materialize_runtime_plugin_skill_aliases() {
     local plugin_dir="$1"
     local skills_dir="$plugin_dir/skills"
@@ -1642,6 +1645,7 @@ materialize_plugin_cache_roots() {
 
 # sync_codex_profile_homes synchronises skills, plugin runtime cache and marketplace metadata into each Codex profile home found under $HOME.
 # sync_codex_profile_homes projects skills, plugin cache snapshots, and marketplace manifests into each Codex profile home and ensures profile-local plugin mirrors so local plugin installs resolve under each profile's Plugins directory.
+# sync_codex_profile_homes syncs the repository runtime cache and marketplace manifest into each detected Codex profile home, ensures profile plugin-root directories are real, mirrors marketplace-listed local plugins into each profile, and materializes plugin cache roots.
 # Arguments: cache_source — path to the repository runtime cache to copy into each profile; marketplace_file — path to a marketplace JSON file to install into each profile's Plugins/marketplace.json.
 sync_codex_profile_homes() {
   local cache_source="$1"

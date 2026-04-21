@@ -64,6 +64,7 @@ for raw_line in sys.stdin:
 ' "$repo_root" "${HOME:-}"
 }
 
+# run_plan_graph_linter runs the configured plan-graph linter on the provided plan file path.
 run_plan_graph_linter() {
   local path="$1"
   "$lint_python" "$LINTER" "$path"
@@ -71,6 +72,7 @@ run_plan_graph_linter() {
 
 paths=(".agents/PLANS.md")
 dedupe_manifest="$(mktemp "${TMPDIR:-/tmp}/agent-skills-plan-graphs.XXXXXX")"
+# cleanup removes the temporary dedupe manifest file used to track and deduplicate plan files.
 cleanup() {
   rm -f "$dedupe_manifest"
 }

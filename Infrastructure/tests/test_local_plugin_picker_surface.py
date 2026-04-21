@@ -66,6 +66,11 @@ EXPECTED_PLUGIN_KEYWORDS = {
 
 class LocalPluginPickerSurfaceTests(unittest.TestCase):
     def test_local_marketplace_lists_only_expected_local_plugins(self) -> None:
+        """
+        Verify the repository marketplace lists exactly the expected local plugins.
+        
+        Reads Plugins/marketplace.json and asserts the set of plugin `name` entries equals EXPECTED_PLUGIN_SKILLS.
+        """
         marketplace_path = REPO_ROOT / "Plugins" / "marketplace.json"
         payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
         names = {
@@ -76,6 +81,11 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         self.assertEqual(names, set(EXPECTED_PLUGIN_SKILLS))
 
     def test_local_plugins_use_canonical_marketplace_source_paths(self) -> None:
+        """
+        Verify that each expected local plugin uses the canonical './Plugins/<plugin-name>' marketplace source path.
+        
+        Asserts that every plugin listed in the repository marketplace manifest exposes a `source.path` exactly equal to the canonical `./Plugins/<plugin-name>` value from EXPECTED_MARKETPLACE_SOURCE_PATHS.
+        """
         marketplace_path = REPO_ROOT / "Plugins" / "marketplace.json"
         payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
         by_name = {
@@ -93,6 +103,11 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             )
 
     def test_local_plugins_use_first_level_skills_root(self) -> None:
+        """
+        Verify each expected plugin's `.codex-plugin/plugin.json` declares the skills root as "./skills/".
+        
+        Raises an assertion failure for any plugin whose `skills` field is not exactly "./skills/".
+        """
         for plugin_name in EXPECTED_PLUGIN_SKILLS:
             manifest_path = REPO_ROOT / "Plugins" / plugin_name / ".codex-plugin" / "plugin.json"
             payload = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -103,6 +118,11 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             )
 
     def test_local_plugins_expose_all_expected_skills_at_first_level(self) -> None:
+        """
+        Verify each expected local plugin exposes exactly the declared first-level skills.
+        
+        For each plugin in EXPECTED_PLUGIN_SKILLS, scan Plugins/<plugin>/skills for immediate subdirectories that contain a SKILL.md file and assert the set of those direct skill names equals the expected set; failures use the message "<plugin> first-level plugin picker surface drifted".
+        """
         for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
             skills_root = REPO_ROOT / "Plugins" / plugin_name / "skills"
             direct_skill_names = {
@@ -117,6 +137,11 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             )
 
     def test_local_plugins_expose_openai_metadata_for_first_level_skills(self) -> None:
+        """
+        Verify each expected first-level skill directory contains an agents/openai.yaml metadata file.
+        
+        For each plugin declared in EXPECTED_PLUGIN_SKILLS, the test checks every expected skill (sorted) under Plugins/<plugin>/skills/<skill>/agents/openai.yaml; any missing file paths are collected (relative to REPO_ROOT) and the test fails if the collection is non-empty.
+        """
         for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
             skills_root = REPO_ROOT / "Plugins" / plugin_name / "skills"
             missing = []
@@ -128,6 +153,11 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.assertEqual([], missing, f"{plugin_name} is missing skill-level OpenAI metadata")
 
     def test_local_plugin_manifests_describe_visible_skill_surface(self) -> None:
+        """
+        Validate that each local plugin manifest describes its visible skill surface.
+        
+        For every plugin listed in EXPECTED_PLUGIN_KEYWORDS, assert that the manifest's `keywords` include the expected visible-skill keywords and do not contain the disallowed keywords `skill-refactor` or `skillify`.
+        """
         for plugin_name, expected_keywords in EXPECTED_PLUGIN_KEYWORDS.items():
             manifest_path = REPO_ROOT / "Plugins" / plugin_name / ".codex-plugin" / "plugin.json"
             payload = json.loads(manifest_path.read_text(encoding="utf-8"))

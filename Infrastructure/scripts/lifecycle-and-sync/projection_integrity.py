@@ -399,28 +399,24 @@ def write_text(path: Path, content: str) -> None:
 
 def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object]:
     """
-    Ensure an alias path exists as a symlink pointing to the specified canonical directory, creating or replacing the symlink under repo_root as required.
+    Ensure the alias path under `repo_root` is a symlink pointing to the spec's canonical directory.
     
-    If the canonical directory does not exist the function returns an error. If an existing path at the alias is a regular file or an incorrect symlink it is removed and replaced. If the existing alias is a real directory the function does not modify it and returns an error indicating manual migration is required.
+    If the canonical directory does not exist the function returns an error. If the alias already exists as a symlink that resolves to the canonical directory the result indicates no change. If the alias exists as a symlink pointing elsewhere, as a regular file, or as a non-managed directory it is removed and replaced by a symlink. If the alias exists as a real directory and the alias path does not start with "skills-system/", the function returns an error requiring manual migration; managed "skills-system/" directories are removed and replaced.
     
     Parameters:
-        repo_root (Path): Repository root used to resolve the spec's paths.
+        repo_root (Path): Repository root used to resolve the spec paths.
         spec (SymlinkProjection): Projection spec containing `name`, `alias_path`, and `canonical_path`.
     
     Returns:
-        dict[str, object]: Result object containing:
-          - `name`: spec name.
-          - `type`: the string `"symlink"`.
-          - `status`: one of:
-              - `"ok"` (alias already pointed correctly),
-              - `"synced"` (created new symlink),
-              - `"replaced"` (replaced an existing incorrect entry),
-              - `"error"` (operation failed).
-          - `reason` (optional): when `status == "error"`, a short code such as `"canonical_missing"` or `"alias_requires_manual_migration"`.
-          - `alias`: the spec's alias_path.
-          - `canonical`: the spec's canonical_path.
-          - `target` (when applicable): the symlink target written (relative path).
-          - `changed`: `true` when the alias was created or changed, `false` when no change was needed.
+        dict[str, object]: Result containing:
+          - `name` (str): spec name.
+          - `type` (str): `"symlink"`.
+          - `status` (str): one of `"ok"`, `"synced"`, `"replaced"`, or `"error"`.
+          - `reason` (str, optional): error code when `status == "error"` (e.g., `"canonical_missing"`, `"alias_requires_manual_migration"`).
+          - `alias` (str): the spec's alias_path.
+          - `canonical` (str): the spec's canonical_path.
+          - `target` (str, optional): the symlink target written (relative path) or current target when `status == "ok"`.
+          - `changed` (bool): `True` when the alias was created or modified, `False` when no change was needed.
     """
     alias_abs = repo_root / spec.alias_path
     canonical_abs = repo_root / spec.canonical_path

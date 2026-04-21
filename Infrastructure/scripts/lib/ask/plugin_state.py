@@ -46,6 +46,24 @@ def _marketplace_payload(repo_root: Path) -> tuple[dict[str, Any], str | None, P
 
 
 def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
+    """
+    Collect installed Ask plugin manifests under the repository root and produce normalized per-plugin entries.
+    
+    Searches for plugin manifest files matching platform- and case-variants under the given repo root, ignores any paths under `plugins/cache/` or `Plugins/cache/`, and deduplicates plugins by filesystem identity (st_dev, st_ino) with a fallback key when `stat()` fails. For each discovered manifest the function attempts to parse the manifest JSON; entries for unreadable/invalid manifests include `manifest_valid: False` and `manifest_error`. Valid entries include common manifest fields and a `governance` dict when present. Returned entries are sorted by plugin name or path.
+    
+    Parameters:
+        repo_root (Path): Repository root used as the base directory for manifest discovery.
+    
+    Returns:
+        list[dict[str, Any]]: A list of plugin descriptors. Each descriptor contains keys such as:
+            - `name`: plugin name (from manifest or directory name)
+            - `version`, `description` (when present)
+            - `path`: displayable plugin path (repo-relative when possible)
+            - `manifest_path`: repo-relative path to the manifest file
+            - `manifest_valid` (bool)
+            - `manifest_error` (present when `manifest_valid` is False)
+            - `governance` (dict, when present)
+    """
     installed: list[dict[str, Any]] = []
     resolved_repo_root = repo_root.resolve()
     seen_plugin_ids: set[tuple[int, int]] = set()
@@ -57,6 +75,15 @@ def _installed_plugins(repo_root: Path) -> list[dict[str, Any]]:
     )
 
     def _display_plugin_path(plugin_dir_resolved: Path) -> str:
+        """
+        Return a human-readable POSIX path for a plugin directory, using a repository-relative path when possible.
+        
+        Parameters:
+            plugin_dir_resolved (Path): The plugin directory path resolved to an absolute path.
+        
+        Returns:
+            str: A POSIX-style path string relative to the resolved repository root if `plugin_dir_resolved` is under that root, otherwise the absolute POSIX path.
+        """
         try:
             return plugin_dir_resolved.relative_to(resolved_repo_root).as_posix()
         except ValueError:

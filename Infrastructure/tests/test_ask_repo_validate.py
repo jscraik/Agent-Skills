@@ -17,16 +17,41 @@ from ask.commands.repo import repo_validate
 
 class _FakePopen:
     def __init__(self, lines: list[str], returncode: int = 0):
+        """
+        Initialize a fake subprocess with predetermined stdout lines and an exit code.
+        
+        Parameters:
+            lines (list[str]): Lines to be yielded by the subprocess's stdout iterator in order.
+            returncode (int): Exit code that wait() will return; defaults to 0.
+        """
         self.stdout = iter(lines)
         self.returncode = returncode
 
     def __enter__(self):
+        """
+        Return the context manager instance.
+        
+        Returns:
+            self: The context manager instance to be bound to the target of the `with` statement.
+        """
         return self
 
     def __exit__(self, exc_type, exc, tb):
+        """
+        Indicate that exceptions raised inside the context should propagate.
+        
+        @return:
+            `False` to ensure any exception raised within the context manager is not suppressed and is re-raised.
+        """
         return False
 
     def wait(self) -> int:
+        """
+        Return the preconfigured process exit code.
+        
+        Returns:
+            int: The configured process return code.
+        """
         return self.returncode
 
 

@@ -509,6 +509,11 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
     def test_selection_policy_promotes_all_harness_engineering_public_skills_for_flat_visibility(self) -> None:
+        """
+        Ensure the selection policy exposes exactly the harness-engineering public skills (directories named with the `he-` prefix) as router-visible flat skills.
+        
+        Loads the selection_policy module and asserts its `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES` matches the sorted set of skill directory names under `Plugins/harness-engineering/skills/**/SKILL.md` whose parent directory name starts with `he-`.
+        """
         selection_policy = load_selection_policy_module()
         he_skill_names = sorted(
             path.parent.name
@@ -651,12 +656,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_sync_script_projects_profile_plugin_source_mirrors(self) -> None:
         """
-        Ensure profile-home sync keeps marketplace source paths resolvable.
-
-        Codex profile homes (for example ~/.codex-red) receive a copied
-        marketplace.json. This test enforces that sync_skills also mirrors
-        plugin source dirs into <profile>/Plugins/<name> so marketplace
-        source.path entries like ./Plugins/<name> remain valid.
+        Verify the sync script mirrors plugin source directories into profile plugin roots so marketplace source paths remain resolvable.
+        
+        Asserts that sync_skills.sh invokes sync_home_plugin_mirrors with both the profile plugins root and individual profile plugins paths, ensuring copied marketplace.json entries like ./Plugins/<name> continue to point to valid plugin locations.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
@@ -690,12 +692,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_sync_script_repairs_repo_backed_home_plugin_root_symlinks(self) -> None:
         """
-        Ensure sync repairs repo-backed plugin-root symlinks into directories.
-
-        Home/plugin roots that resolve straight back into the repository
-        vendored plugin tree cause curated plugin families to appear as local
-        installs. The sync script should actively replace those symlinks with
-        real directories before mirroring the current marketplace set.
+        Verify the sync script replaces repo-backed home plugin-root symlinks with real directories before mirroring profile plugin roots.
+        
+        Asserts the sync script contains the repair helper invocation `ensure_real_home_plugin_root()`, a replacement log message, and specific calls for profile plugin roots and subsequent `sync_home_plugin_mirrors` invocation.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("ensure_real_home_plugin_root()", content)
@@ -719,10 +718,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_sync_script_installs_home_plugins_as_copied_directories(self) -> None:
         """
-        Ensure local plugins install into home runtimes as copies, not symlinks.
-
-        Home runtimes should be a generated installed surface that can travel
-        across machines after sync, while the repo remains the canonical source.
+        Checks that the sync script installs home plugins as copied directories rather than symlinks.
+        
+        Asserts the script invokes the copy-based installer invocation, writes a marker file containing the source real path into the target, and contains the log message `Installed home plugin copy`.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('sync_user_skills "$source_dir" "$target_dir" 0 copy', content)
@@ -732,11 +730,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_sync_script_materializes_visible_runtime_skill_aliases(self) -> None:
         """
-        Ensure copied plugin runtimes expose real first-level skill directories.
-
-        The repo package can keep canonical nested layout, but runtime-visible
-        entries like he-plan or plugin-builder must not remain symlinks or the
-        UI may only surface the non-aliased router entries.
+        Verify the sync script materializes runtime-visible plugin skill aliases as real directories.
+        
+        Asserts that the sync script contains the call to `materialize_runtime_plugin_skill_aliases()`, uses a directory copy (`cp -a "$resolved" "$child"`) to materialize resolved skill directories, and invokes the materialization function on a target directory (`materialize_runtime_plugin_skill_aliases "$target_dir"`).
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("materialize_runtime_plugin_skill_aliases()", content)

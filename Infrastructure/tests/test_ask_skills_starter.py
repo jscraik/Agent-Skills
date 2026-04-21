@@ -15,9 +15,9 @@ from ask.commands.skills import list_skills
 class TestAskSkillsStarter(unittest.TestCase):
     def test_starter_mode_returns_deterministic_subset(self) -> None:
         """
-        Verify listing skills in starter mode returns a deterministic, limited subset.
+        Verify starter-mode skill listing returns a deterministic, archetype-filtered subset.
         
-        Patches discovered canonical skill entries to a fixed set, calls list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3) and asserts the result reports starter mode with the specified archetype and that the returned skill names are exactly ["ce-plan", "ce-work", "gh-workflow"] in that order.
+        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names are exactly ["he-plan", "he-work", "gh-workflow"] in that order.
         """
         entries = [
             SimpleNamespace(name="he-work", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-work", category="Plugins/harness-engineering/skills", description="he-work"),

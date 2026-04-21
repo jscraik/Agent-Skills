@@ -90,7 +90,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         """
         Verify that routing reports an unresolved ambiguity when two similarly scored low-risk candidates are returned.
         
-        Patches discovery, router builder and catalog parity to produce two candidate entries with close confidence scores and an uncertainty marker `["top_candidates_close_score"]`. Asserts the result is an error with `decision_status` "unresolved_ambiguity", `failure_class` "AMBIGUITY_UNRESOLVED", an `ambiguity_set` containing both candidates, and that `operator_action` suggests narrowing the request.
+        Patches discovery, router builder, and catalog parity to produce two candidates with close confidence and an uncertainty marker "top_candidates_close_score", then asserts the result has status "error" and that the decision contains decision_status "unresolved_ambiguity", failure_class "AMBIGUITY_UNRESOLVED", an ambiguity_set with both candidates, and an operator_action recommending narrowing the request.
         """
         entries = [
             SimpleNamespace(
@@ -206,6 +206,11 @@ class TestAskSkillsRoute(unittest.TestCase):
         self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "code-review")
 
     def test_route_preserves_default_window_while_adding_advanced_only_lanes(self):
+        """
+        Verifies that advanced-only (hidden-lane) skills are added to the total considered set while the router still receives the original default window of skills.
+        
+        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `chatgpt-apps`, `considered_total` reflects inclusion of advanced-only entries (22), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
+        """
         default_entries = [
             SimpleNamespace(
                 name=f"skill-{index:02d}",
@@ -239,10 +244,28 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         class _CapturingRouterStub(_RouterStub):
             def __init__(self, ranked, uncertainty):
+                """
+                Initialize a capturing router stub that returns the provided ranked candidates and uncertainty while recording route calls.
+                
+                Parameters:
+                    ranked (list): Pre-ranked candidate objects to be returned by route().
+                    uncertainty (list): Uncertainty indicators to be returned by route().
+                """
                 super().__init__(ranked, uncertainty)
                 self.calls = []
 
             def route(self, query, skills, top_k=3):
+                """
+                Capture the names of the provided skills and delegate routing to the parent implementation.
+                
+                Parameters:
+                    query: The routing query object passed through to the parent router.
+                    skills: An iterable of skill objects; each object must have a `name` attribute. The method records these names in `self.calls`.
+                    top_k (int): Maximum number of top candidates to request from the parent router.
+                
+                Returns:
+                    tuple: A pair (ranked_candidates, uncertainty_indicators) as returned by the superclass `route` method.
+                """
                 self.calls.append([skill.name for skill in skills])
                 return super().route(query, skills, top_k=top_k)
 
@@ -260,6 +283,15 @@ class TestAskSkillsRoute(unittest.TestCase):
         )
 
         def _discover(*, advanced=False):
+            """
+            Selects which catalog entries list to return based on the `advanced` flag.
+            
+            Parameters:
+                advanced (bool): If True, return the advanced catalog entries set; otherwise return the default set.
+            
+            Returns:
+                list: `default_entries` when `advanced` is False, `advanced_entries` when `advanced` is True.
+            """
             return advanced_entries if advanced else default_entries
 
         with patch("ask.commands.skills.discover_catalog_entries", side_effect=_discover) as mocked_discover:
