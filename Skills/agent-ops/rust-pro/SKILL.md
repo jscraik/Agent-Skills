@@ -66,7 +66,7 @@ pub fn parse_port(value: &str) -> Result<u16, String> {
 | Skill | When to use |
 |---|---|
 | [[go]] | Systems programming with similar error-handling and concurrency patterns |
-| [[systematic-debugging]] | Triage Rust ownership and borrow-checker errors with evidence-first diagnosis |
+| [[he-fix-bugs]] | Triage Rust ownership and borrow-checker errors with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
 

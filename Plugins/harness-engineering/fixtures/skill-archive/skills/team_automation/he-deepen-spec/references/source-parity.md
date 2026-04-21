@@ -1,4 +1,4 @@
-# CE Deepen Spec Prompt Parity Map
+# HE Deepen Spec Prompt Parity Map
 
 Read when: you need to verify that the legacy `deepen-spec` prompt was migrated into `he-deepen-spec` without losing behavior, or when packaging this skill into another surface.
 
@@ -16,7 +16,7 @@ This document maps the original spec-deepening prompt in `configs/codex/prompts/
 - `configs/codex/prompts/deepen-spec.md`
 - donor patterns borrowed intentionally from `product/Infrastructure/ops/he-deepen-plan/`
 - spec-structure alignment borrowed intentionally from `product/Infrastructure/ops/he-spec/`
-- lightweight review doctrine imported from upstream `document-review` (`EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`)
+- lightweight review doctrine imported from upstream `ce-doc-review` (`EveryInc/compound-engineering-plugin` commit `d8436b9a3c5b5370e51ec168a251ccb45f0d826e`)
 - migration target: `product/Infrastructure/ops/he-deepen-spec/`
 
 ## Parity mapping
@@ -45,7 +45,7 @@ This document maps the original spec-deepening prompt in `configs/codex/prompts/
 - The `he-deepen-plan` pattern of `direct` versus `artifact-backed` research execution was adopted so large high-risk deepening passes stay manageable without dropping findings.
 - Slash-command references like `/prompts:technical_review` and `/prompts:workflow-plan` were translated into durable handoff guidance such as technical review and `he-plan`.
 - `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` were added to meet current skill quality requirements and improve routing reliability.
-- The upstream `document-review` workflow was preserved as a lightweight pre-planning refinement pass for requirements/spec docs via `Infrastructure/references/document-review-pass.md`, rather than as a duplicate sibling skill.
+- The upstream `ce-doc-review` workflow was preserved as a lightweight pre-planning refinement pass for requirements/spec docs via `Infrastructure/references/document-review-pass.md`, rather than as a duplicate sibling skill.
 
 ## No-loss checklist
 - Existing specs are still the required input.

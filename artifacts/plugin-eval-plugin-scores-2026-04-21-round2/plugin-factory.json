@@ -1,0 +1,1579 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "plugin-eval",
+    "version": "0.1.0"
+  },
+  "createdAt": "2026-04-21T04:15:50.559Z",
+  "target": {
+    "kind": "plugin",
+    "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+    "entryPath": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+    "name": "plugin-factory",
+    "relativePath": "Plugins/plugin-factory"
+  },
+  "summary": {
+    "score": 95,
+    "grade": "A",
+    "riskLevel": "medium",
+    "riskReasons": [
+      "Contains 1 warning signal that still need attention."
+    ],
+    "scoreBreakdown": {
+      "startingScore": 100,
+      "totalDeductions": 4.75,
+      "finalScore": 95,
+      "gradeThresholds": {
+        "A": 93,
+        "B": 85,
+        "C": 70,
+        "D": 55
+      }
+    },
+    "checkCounts": {
+      "total": 2,
+      "pass": 0,
+      "warn": 1,
+      "fail": 0,
+      "info": 2,
+      "error": 0,
+      "warning": 1
+    },
+    "deductions": [
+      {
+        "id": "deferred_cost_tokens-budget-high",
+        "category": "budget",
+        "severity": "warning",
+        "status": "warn",
+        "message": "deferred_cost_tokens is heavy relative to the current Codex baseline.",
+        "penalty": 4.5,
+        "remediation": [
+          "Reduce repeated instruction text and move detail into deferred supporting files."
+        ],
+        "source": "core"
+      },
+      {
+        "id": "coverage-artifacts-unavailable",
+        "category": "coverage",
+        "severity": "info",
+        "status": "info",
+        "message": "No coverage artifacts were found for this target.",
+        "penalty": 0.25,
+        "remediation": [
+          "Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring."
+        ],
+        "source": "core"
+      }
+    ],
+    "categoryDeductions": [
+      {
+        "category": "budget",
+        "totalPenalty": 4.5,
+        "checks": 1
+      },
+      {
+        "category": "coverage",
+        "totalPenalty": 0.25,
+        "checks": 1
+      }
+    ],
+    "topRecommendations": [
+      "Reduce repeated instruction text and move detail into deferred supporting files."
+    ],
+    "whyBullets": [
+      "1 warning signal still need cleanup before this feels polished.",
+      "budget is the largest source of score loss at -4.5 points.",
+      "Budget pressure is not the dominant issue right now.",
+      "No observed usage is attached yet, so budget conclusions are still based on static estimates."
+    ],
+    "fixFirst": [
+      {
+        "id": "deferred_cost_tokens-budget-high",
+        "category": "budget",
+        "severity": "warning",
+        "status": "warn",
+        "message": "deferred_cost_tokens is heavy relative to the current Codex baseline.",
+        "why": "Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast.",
+        "remediation": [
+          "Reduce repeated instruction text and move detail into deferred supporting files."
+        ],
+        "penalty": 4.5,
+        "source": "core"
+      }
+    ],
+    "watchNext": []
+  },
+  "budgets": {
+    "method": "estimated-static",
+    "trigger_cost_tokens": {
+      "value": 51,
+      "band": "moderate",
+      "thresholds": {
+        "goodMax": 38,
+        "moderateMax": 59,
+        "heavyMax": 434
+      },
+      "components": [
+        {
+          "label": "plugin-description",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+          "tokens": 19,
+          "note": "Plugin marketplace summary"
+        },
+        {
+          "label": "default-prompts",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+          "tokens": 11,
+          "note": "Starter prompts visible in the UI"
+        },
+        {
+          "label": "plugin-factory-router-description",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills_index/plugin-factory-router/SKILL.md",
+          "tokens": 21,
+          "note": "Skill trigger description exposed through the plugin"
+        }
+      ]
+    },
+    "invoke_cost_tokens": {
+      "value": 869,
+      "band": "moderate",
+      "thresholds": {
+        "goodMax": 425,
+        "moderateMax": 1196,
+        "heavyMax": 8667
+      },
+      "components": [
+        {
+          "label": "plugin-manifest",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+          "tokens": 434,
+          "note": "Manifest load cost"
+        },
+        {
+          "label": "plugin-factory-router-skill-file",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills_index/plugin-factory-router/SKILL.md",
+          "tokens": 435,
+          "note": "Skill invocation cost ceiling"
+        }
+      ]
+    },
+    "deferred_cost_tokens": {
+      "value": 10001,
+      "band": "heavy",
+      "thresholds": {
+        "goodMax": 26,
+        "moderateMax": 511,
+        "heavyMax": 16773
+      },
+      "components": [
+        {
+          "label": "README.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/README.md",
+          "tokens": 63,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/_template_utils.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/_template_utils.py",
+          "tokens": 104,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/SKILL.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+          "tokens": 456,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/agents/openai.yaml",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/agents/openai.yaml",
+          "tokens": 82,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.app.json",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.app.json",
+          "tokens": 100,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.codex-plugin/plugin.json",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.codex-plugin/plugin.json",
+          "tokens": 326,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.mcp.json",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.mcp.json",
+          "tokens": 79,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/README.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/README.md",
+          "tokens": 98,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/hooks.json",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/hooks.json",
+          "tokens": 57,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/arscontexta-quickstart.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/arscontexta-quickstart.md",
+          "tokens": 168,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/contract.yaml",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/contract.yaml",
+          "tokens": 182,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/evals.yaml",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/evals.yaml",
+          "tokens": 211,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/operational-spec.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/operational-spec.md",
+          "tokens": 1027,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py",
+          "tokens": 783,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
+          "tokens": 65,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/scripts/render_plugin_builder_templates.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/render_plugin_builder_templates.py",
+          "tokens": 1110,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/code_quality_review/plugin-builder/tests/test_wrappers.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/tests/test_wrappers.py",
+          "tokens": 127,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/infrastructure_ops/plugin-installer/SKILL.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
+          "tokens": 491,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/infrastructure_ops/plugin-installer/agents/openai.yaml",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/agents/openai.yaml",
+          "tokens": 61,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/infrastructure_ops/plugin-installer/assets/skill-installer-small.svg",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/assets/skill-installer-small.svg",
+          "tokens": 231,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/infrastructure_ops/plugin-installer/scripts/github_utils.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/github_utils.py",
+          "tokens": 435,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
+          "tokens": 68,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/infrastructure_ops/plugin-installer/tests/test_wrappers.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/tests/test_wrappers.py",
+          "tokens": 94,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/SKILL.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
+          "tokens": 534,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/agents/openai.yaml",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/agents/openai.yaml",
+          "tokens": 84,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/assets/plugin-creator-small.svg",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/assets/plugin-creator-small.svg",
+          "tokens": 330,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/scripts/check_plugin_creator_template_drift.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/check_plugin_creator_template_drift.py",
+          "tokens": 71,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+          "tokens": 67,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/scripts/render_plugin_creator_templates.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/render_plugin_creator_templates.py",
+          "tokens": 1161,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/scaffolding_templates/plugin-creator/tests/test_wrappers.py",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/tests/test_wrappers.py",
+          "tokens": 194,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills/team_automation/plugin-router/SKILL.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
+          "tokens": 535,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "skills_index/plugin-factory-router/references/workflow.md",
+          "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills_index/plugin-factory-router/references/workflow.md",
+          "tokens": 607,
+          "note": "Deferred supporting file"
+        }
+      ]
+    },
+    "total_tokens": {
+      "value": 10921,
+      "band": "heavy"
+    }
+  },
+  "observedUsage": null,
+  "checks": [
+    {
+      "id": "deferred_cost_tokens-budget-high",
+      "category": "budget",
+      "severity": "warning",
+      "status": "warn",
+      "message": "deferred_cost_tokens is heavy relative to the current Codex baseline.",
+      "evidence": [
+        "Value: 10001 tokens",
+        "Baseline samples: skills=2, plugins=108"
+      ],
+      "remediation": [
+        "Reduce repeated instruction text and move detail into deferred supporting files."
+      ],
+      "source": "core"
+    },
+    {
+      "id": "coverage-artifacts-unavailable",
+      "category": "coverage",
+      "severity": "info",
+      "status": "info",
+      "message": "No coverage artifacts were found for this target.",
+      "evidence": [
+        "Plugins/plugin-factory"
+      ],
+      "remediation": [
+        "Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring."
+      ],
+      "source": "core"
+    }
+  ],
+  "metrics": [
+    {
+      "id": "skill:plugin-factory-router:skill_line_count",
+      "category": "budget",
+      "value": 54,
+      "unit": "lines",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory/skills_index/plugin-factory-router"
+    },
+    {
+      "id": "skill:plugin-factory-router:description_length_chars",
+      "category": "budget",
+      "value": 84,
+      "unit": "chars",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory/skills_index/plugin-factory-router"
+    },
+    {
+      "id": "skill:plugin-factory-router:relative_link_count",
+      "category": "documentation",
+      "value": 2,
+      "unit": "links",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory/skills_index/plugin-factory-router"
+    },
+    {
+      "id": "skill:plugin-factory-router:code_fence_count",
+      "category": "readability",
+      "value": 1,
+      "unit": "blocks",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory/skills_index/plugin-factory-router"
+    },
+    {
+      "id": "skill:plugin-factory-router:support_file_count",
+      "category": "documentation",
+      "value": 1,
+      "unit": "files",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory/skills_index/plugin-factory-router"
+    },
+    {
+      "id": "plugin_skill_count",
+      "category": "manifest",
+      "value": 1,
+      "unit": "skills",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory"
+    },
+    {
+      "id": "plugin_keyword_count",
+      "category": "manifest",
+      "value": 7,
+      "unit": "keywords",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory"
+    },
+    {
+      "id": "plugin_default_prompt_count",
+      "category": "manifest",
+      "value": 1,
+      "unit": "prompts",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Plugins/plugin-factory"
+    },
+    {
+      "id": "trigger_cost_tokens",
+      "category": "budget",
+      "value": 51,
+      "unit": "tokens",
+      "band": "moderate",
+      "source": "core"
+    },
+    {
+      "id": "invoke_cost_tokens",
+      "category": "budget",
+      "value": 869,
+      "unit": "tokens",
+      "band": "moderate",
+      "source": "core"
+    },
+    {
+      "id": "deferred_cost_tokens",
+      "category": "budget",
+      "value": 10001,
+      "unit": "tokens",
+      "band": "heavy",
+      "source": "core"
+    },
+    {
+      "id": "py_file_count",
+      "category": "code-quality",
+      "value": 12,
+      "unit": "files",
+      "band": "good",
+      "source": "core"
+    },
+    {
+      "id": "py_function_count",
+      "category": "code-quality",
+      "value": 0,
+      "unit": "functions",
+      "band": "info",
+      "source": "core"
+    },
+    {
+      "id": "py_max_cyclomatic_complexity",
+      "category": "complexity",
+      "value": 13,
+      "unit": "score",
+      "band": "moderate",
+      "source": "core"
+    },
+    {
+      "id": "py_average_function_length",
+      "category": "readability",
+      "value": 0,
+      "unit": "lines",
+      "band": "good",
+      "source": "core"
+    },
+    {
+      "id": "py_max_nesting_depth",
+      "category": "complexity",
+      "value": 0,
+      "unit": "levels",
+      "band": "good",
+      "source": "core"
+    },
+    {
+      "id": "py_comment_ratio",
+      "category": "readability",
+      "value": 0.033,
+      "unit": "ratio",
+      "band": "good",
+      "source": "core"
+    },
+    {
+      "id": "py_test_file_count",
+      "category": "best-practice",
+      "value": 3,
+      "unit": "files",
+      "band": "good",
+      "source": "core"
+    },
+    {
+      "id": "coverage_artifact_count",
+      "category": "coverage",
+      "value": 0,
+      "unit": "files",
+      "band": "info",
+      "source": "core"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "skill:plugin-factory-router:skill-link-inventory",
+      "type": "inventory",
+      "label": "Skill relative links",
+      "description": "Relative links found in SKILL.md.",
+      "source": "core",
+      "data": {
+        "links": [
+          "./references/workflow.md",
+          "./references/workflow.md"
+        ]
+      }
+    },
+    {
+      "id": "plugin-skill-inventory",
+      "type": "inventory",
+      "label": "Plugin skills",
+      "description": "Discoverable skills under the plugin.",
+      "source": "core",
+      "data": {
+        "skills": [
+          "skills_index/plugin-factory-router"
+        ]
+      }
+    },
+    {
+      "id": "budget-breakdown",
+      "type": "budget",
+      "label": "Budget breakdown",
+      "description": "Trigger, invoke, and deferred token budget analysis.",
+      "source": "core",
+      "data": {
+        "budgets": {
+          "method": "estimated-static",
+          "trigger_cost_tokens": {
+            "value": 51,
+            "band": "moderate",
+            "thresholds": {
+              "goodMax": 38,
+              "moderateMax": 59,
+              "heavyMax": 434
+            },
+            "components": [
+              {
+                "label": "plugin-description",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+                "tokens": 19,
+                "note": "Plugin marketplace summary"
+              },
+              {
+                "label": "default-prompts",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+                "tokens": 11,
+                "note": "Starter prompts visible in the UI"
+              },
+              {
+                "label": "plugin-factory-router-description",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills_index/plugin-factory-router/SKILL.md",
+                "tokens": 21,
+                "note": "Skill trigger description exposed through the plugin"
+              }
+            ]
+          },
+          "invoke_cost_tokens": {
+            "value": 869,
+            "band": "moderate",
+            "thresholds": {
+              "goodMax": 425,
+              "moderateMax": 1196,
+              "heavyMax": 8667
+            },
+            "components": [
+              {
+                "label": "plugin-manifest",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+                "tokens": 434,
+                "note": "Manifest load cost"
+              },
+              {
+                "label": "plugin-factory-router-skill-file",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills_index/plugin-factory-router/SKILL.md",
+                "tokens": 435,
+                "note": "Skill invocation cost ceiling"
+              }
+            ]
+          },
+          "deferred_cost_tokens": {
+            "value": 10001,
+            "band": "heavy",
+            "thresholds": {
+              "goodMax": 26,
+              "moderateMax": 511,
+              "heavyMax": 16773
+            },
+            "components": [
+              {
+                "label": "README.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/README.md",
+                "tokens": 63,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/_template_utils.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/_template_utils.py",
+                "tokens": 104,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/SKILL.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+                "tokens": 456,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/agents/openai.yaml",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/agents/openai.yaml",
+                "tokens": 82,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.app.json",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.app.json",
+                "tokens": 100,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.codex-plugin/plugin.json",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.codex-plugin/plugin.json",
+                "tokens": 326,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.mcp.json",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.mcp.json",
+                "tokens": 79,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/README.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/README.md",
+                "tokens": 98,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/hooks.json",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/hooks.json",
+                "tokens": 57,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/arscontexta-quickstart.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/arscontexta-quickstart.md",
+                "tokens": 168,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/contract.yaml",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/contract.yaml",
+                "tokens": 182,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/evals.yaml",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/evals.yaml",
+                "tokens": 211,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/operational-spec.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/references/operational-spec.md",
+                "tokens": 1027,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py",
+                "tokens": 783,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
+                "tokens": 65,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/scripts/render_plugin_builder_templates.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/render_plugin_builder_templates.py",
+                "tokens": 1110,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/code_quality_review/plugin-builder/tests/test_wrappers.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/code_quality_review/plugin-builder/tests/test_wrappers.py",
+                "tokens": 127,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/infrastructure_ops/plugin-installer/SKILL.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
+                "tokens": 491,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/infrastructure_ops/plugin-installer/agents/openai.yaml",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/agents/openai.yaml",
+                "tokens": 61,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/infrastructure_ops/plugin-installer/assets/skill-installer-small.svg",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/assets/skill-installer-small.svg",
+                "tokens": 231,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/infrastructure_ops/plugin-installer/scripts/github_utils.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/github_utils.py",
+                "tokens": 435,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
+                "tokens": 68,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/infrastructure_ops/plugin-installer/tests/test_wrappers.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/tests/test_wrappers.py",
+                "tokens": 94,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/SKILL.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
+                "tokens": 534,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/agents/openai.yaml",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/agents/openai.yaml",
+                "tokens": 84,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/assets/plugin-creator-small.svg",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/assets/plugin-creator-small.svg",
+                "tokens": 330,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/scripts/check_plugin_creator_template_drift.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/check_plugin_creator_template_drift.py",
+                "tokens": 71,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+                "tokens": 67,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/scripts/render_plugin_creator_templates.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/render_plugin_creator_templates.py",
+                "tokens": 1161,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/scaffolding_templates/plugin-creator/tests/test_wrappers.py",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/tests/test_wrappers.py",
+                "tokens": 194,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills/team_automation/plugin-router/SKILL.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
+                "tokens": 535,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "skills_index/plugin-factory-router/references/workflow.md",
+                "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/skills_index/plugin-factory-router/references/workflow.md",
+                "tokens": 607,
+                "note": "Deferred supporting file"
+              }
+            ]
+          },
+          "total_tokens": {
+            "value": 10921,
+            "band": "heavy"
+          }
+        },
+        "baselineEvidence": {
+          "skillSamples": 2,
+          "pluginSamples": 108,
+          "sourceRoots": [
+            "../../../skills",
+            "../../../plugins/cache/openai-curated",
+            "../../../.tmp/plugins/plugins"
+          ]
+        }
+      }
+    },
+    {
+      "id": "py-per-file-analysis",
+      "type": "analysis",
+      "label": "Python per-file analysis",
+      "description": "Heuristic Python quality and complexity breakdown by file.",
+      "source": "core",
+      "data": {
+        "files": [
+          {
+            "path": "skills/_template_utils.py",
+            "functionCount": 0,
+            "complexity": 5,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py",
+            "functionCount": 0,
+            "complexity": 10,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
+            "functionCount": 0,
+            "complexity": 3,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/code_quality_review/plugin-builder/scripts/render_plugin_builder_templates.py",
+            "functionCount": 0,
+            "complexity": 9,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/code_quality_review/plugin-builder/tests/test_wrappers.py",
+            "functionCount": 0,
+            "complexity": 2,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/infrastructure_ops/plugin-installer/scripts/github_utils.py",
+            "functionCount": 0,
+            "complexity": 13,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
+            "functionCount": 0,
+            "complexity": 3,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/infrastructure_ops/plugin-installer/tests/test_wrappers.py",
+            "functionCount": 0,
+            "complexity": 2,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/scaffolding_templates/plugin-creator/scripts/check_plugin_creator_template_drift.py",
+            "functionCount": 0,
+            "complexity": 3,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+            "functionCount": 0,
+            "complexity": 3,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/scaffolding_templates/plugin-creator/scripts/render_plugin_creator_templates.py",
+            "functionCount": 0,
+            "complexity": 11,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          },
+          {
+            "path": "skills/scaffolding_templates/plugin-creator/tests/test_wrappers.py",
+            "functionCount": 0,
+            "complexity": 4,
+            "maxFunctionLength": 0,
+            "maxNesting": 0,
+            "longLines": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "measurement-plan",
+      "type": "measurement-plan",
+      "label": "Measurement plan",
+      "description": "Recommended toolsets for measuring the real-world effect of this skill or plugin.",
+      "source": "core",
+      "data": {
+        "recommendedToolsets": [
+          "token-usage-observer",
+          "task-outcome-scorecard",
+          "tool-call-audit"
+        ],
+        "toolsets": [
+          {
+            "id": "token-usage-observer",
+            "label": "Token Usage Observer",
+            "priority": "high",
+            "goal": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+            "why": "Static estimates are useful guardrails, but observed usage is what tells you whether a real workflow is affordable and whether caching or reasoning changes the picture.",
+            "signals": [
+              "observed_usage_sample_count",
+              "observed_input_tokens_avg",
+              "observed_total_tokens_avg",
+              "estimate_vs_observed_input_ratio"
+            ],
+            "evidenceSources": [
+              "Responses API usage logs",
+              "Codex-like session exports",
+              "JSONL traces captured from local benchmarking harnesses"
+            ],
+            "starterPack": {
+              "manifestName": "token-usage-pack",
+              "focus": "Validate sample size, cold-start versus warm-cache behavior, and estimate drift over time."
+            }
+          },
+          {
+            "id": "task-outcome-scorecard",
+            "label": "Task Outcome Scorecard",
+            "priority": "high",
+            "goal": "Measure whether the skill helps users finish the intended job with fewer retries and less cleanup.",
+            "why": "A low-token skill is still a miss if it fails the task, and a verbose skill may be worth it if it consistently improves first-pass success.",
+            "signals": [
+              "task_success_rate",
+              "first_pass_success_rate",
+              "retry_rate",
+              "human_override_rate"
+            ],
+            "evidenceSources": [
+              "Task run logs",
+              "Structured user acceptance checklist",
+              "Before/after comparison runs on the same prompts"
+            ],
+            "starterPack": {
+              "manifestName": "task-outcomes-pack",
+              "focus": "Score success, retries, and manual intervention across a fixed prompt set."
+            }
+          },
+          {
+            "id": "tool-call-audit",
+            "label": "Tool Call Audit",
+            "priority": "high",
+            "goal": "Check whether the agent uses the right tools, arguments, and sequencing when the skill is active.",
+            "why": "For Codex plugins and many higher-agency skills, tool correctness is often the real determinant of user value.",
+            "signals": [
+              "tool_call_success_rate",
+              "invalid_tool_argument_rate",
+              "recoverable_tool_failure_rate"
+            ],
+            "evidenceSources": [
+              "Tool invocation traces",
+              "Recorded sessions",
+              "Golden-path scenario replays"
+            ],
+            "starterPack": {
+              "manifestName": "tool-audit-pack",
+              "focus": "Flag wrong tool selection, malformed args, and missing follow-up calls."
+            }
+          },
+          {
+            "id": "latency-efficiency",
+            "label": "Latency And Efficiency",
+            "priority": "medium",
+            "goal": "Track whether the skill speeds users up enough to justify its cost.",
+            "why": "DX improvements usually win when they reduce waiting or rework, not only when they reduce absolute token counts.",
+            "signals": [
+              "p50_time_to_first_acceptable_answer_seconds",
+              "p95_time_to_task_completion_seconds",
+              "tokens_per_successful_run"
+            ],
+            "evidenceSources": [
+              "Benchmark harness timings",
+              "Manual stopwatch runs on canonical tasks",
+              "Responses API timestamps combined with usage logs"
+            ],
+            "starterPack": {
+              "manifestName": "latency-efficiency-pack",
+              "focus": "Measure time-to-value and cost-per-success on a stable prompt suite."
+            }
+          },
+          {
+            "id": "human-rubric-review",
+            "label": "Human Rubric Review",
+            "priority": "medium",
+            "goal": "Capture clarity, trust, and usefulness signals that automated checks will miss.",
+            "why": "The best skills often reduce confusion and editing effort in ways that do not show up in static lint-like checks.",
+            "signals": [
+              "clarity_score_avg",
+              "confidence_score_avg",
+              "follow_up_question_rate"
+            ],
+            "evidenceSources": [
+              "Reviewer scorecards",
+              "Team rubric sheets",
+              "Annotated transcripts"
+            ],
+            "starterPack": {
+              "manifestName": "human-rubric-pack",
+              "focus": "Collect 1 to 5 scores for clarity, trust, and edit burden across a small evaluator panel."
+            }
+          },
+          {
+            "id": "regression-suite",
+            "label": "Regression Suite",
+            "priority": "medium",
+            "goal": "Protect the repository behavior that the skill is supposed to improve.",
+            "why": "If a skill is meant to help coding workflows, outcomes should be paired with deterministic repo checks so quality gains do not come from cutting corners.",
+            "signals": [
+              "test_pass_rate",
+              "lint_pass_rate",
+              "regression_escape_count"
+            ],
+            "evidenceSources": [
+              "Unit and integration test runs",
+              "Coverage deltas",
+              "Snapshot or golden-file checks"
+            ],
+            "starterPack": {
+              "manifestName": "regression-pack",
+              "focus": "Blend repository test outcomes with evaluation-task success metrics."
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "extensions": [],
+  "measurementPlan": {
+    "kind": "measurement-plan",
+    "createdAt": "2026-04-21T04:15:51.325Z",
+    "target": {
+      "kind": "plugin",
+      "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+      "entryPath": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+      "name": "plugin-factory",
+      "relativePath": "Plugins/plugin-factory"
+    },
+    "title": "Measurement plan for plugin-factory",
+    "summary": "Combine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.",
+    "recommendedToolsets": [
+      "token-usage-observer",
+      "task-outcome-scorecard",
+      "tool-call-audit"
+    ],
+    "toolsets": [
+      {
+        "id": "token-usage-observer",
+        "label": "Token Usage Observer",
+        "priority": "high",
+        "goal": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+        "why": "Static estimates are useful guardrails, but observed usage is what tells you whether a real workflow is affordable and whether caching or reasoning changes the picture.",
+        "signals": [
+          "observed_usage_sample_count",
+          "observed_input_tokens_avg",
+          "observed_total_tokens_avg",
+          "estimate_vs_observed_input_ratio"
+        ],
+        "evidenceSources": [
+          "Responses API usage logs",
+          "Codex-like session exports",
+          "JSONL traces captured from local benchmarking harnesses"
+        ],
+        "starterPack": {
+          "manifestName": "token-usage-pack",
+          "focus": "Validate sample size, cold-start versus warm-cache behavior, and estimate drift over time."
+        }
+      },
+      {
+        "id": "task-outcome-scorecard",
+        "label": "Task Outcome Scorecard",
+        "priority": "high",
+        "goal": "Measure whether the skill helps users finish the intended job with fewer retries and less cleanup.",
+        "why": "A low-token skill is still a miss if it fails the task, and a verbose skill may be worth it if it consistently improves first-pass success.",
+        "signals": [
+          "task_success_rate",
+          "first_pass_success_rate",
+          "retry_rate",
+          "human_override_rate"
+        ],
+        "evidenceSources": [
+          "Task run logs",
+          "Structured user acceptance checklist",
+          "Before/after comparison runs on the same prompts"
+        ],
+        "starterPack": {
+          "manifestName": "task-outcomes-pack",
+          "focus": "Score success, retries, and manual intervention across a fixed prompt set."
+        }
+      },
+      {
+        "id": "tool-call-audit",
+        "label": "Tool Call Audit",
+        "priority": "high",
+        "goal": "Check whether the agent uses the right tools, arguments, and sequencing when the skill is active.",
+        "why": "For Codex plugins and many higher-agency skills, tool correctness is often the real determinant of user value.",
+        "signals": [
+          "tool_call_success_rate",
+          "invalid_tool_argument_rate",
+          "recoverable_tool_failure_rate"
+        ],
+        "evidenceSources": [
+          "Tool invocation traces",
+          "Recorded sessions",
+          "Golden-path scenario replays"
+        ],
+        "starterPack": {
+          "manifestName": "tool-audit-pack",
+          "focus": "Flag wrong tool selection, malformed args, and missing follow-up calls."
+        }
+      },
+      {
+        "id": "latency-efficiency",
+        "label": "Latency And Efficiency",
+        "priority": "medium",
+        "goal": "Track whether the skill speeds users up enough to justify its cost.",
+        "why": "DX improvements usually win when they reduce waiting or rework, not only when they reduce absolute token counts.",
+        "signals": [
+          "p50_time_to_first_acceptable_answer_seconds",
+          "p95_time_to_task_completion_seconds",
+          "tokens_per_successful_run"
+        ],
+        "evidenceSources": [
+          "Benchmark harness timings",
+          "Manual stopwatch runs on canonical tasks",
+          "Responses API timestamps combined with usage logs"
+        ],
+        "starterPack": {
+          "manifestName": "latency-efficiency-pack",
+          "focus": "Measure time-to-value and cost-per-success on a stable prompt suite."
+        }
+      },
+      {
+        "id": "human-rubric-review",
+        "label": "Human Rubric Review",
+        "priority": "medium",
+        "goal": "Capture clarity, trust, and usefulness signals that automated checks will miss.",
+        "why": "The best skills often reduce confusion and editing effort in ways that do not show up in static lint-like checks.",
+        "signals": [
+          "clarity_score_avg",
+          "confidence_score_avg",
+          "follow_up_question_rate"
+        ],
+        "evidenceSources": [
+          "Reviewer scorecards",
+          "Team rubric sheets",
+          "Annotated transcripts"
+        ],
+        "starterPack": {
+          "manifestName": "human-rubric-pack",
+          "focus": "Collect 1 to 5 scores for clarity, trust, and edit burden across a small evaluator panel."
+        }
+      },
+      {
+        "id": "regression-suite",
+        "label": "Regression Suite",
+        "priority": "medium",
+        "goal": "Protect the repository behavior that the skill is supposed to improve.",
+        "why": "If a skill is meant to help coding workflows, outcomes should be paired with deterministic repo checks so quality gains do not come from cutting corners.",
+        "signals": [
+          "test_pass_rate",
+          "lint_pass_rate",
+          "regression_escape_count"
+        ],
+        "evidenceSources": [
+          "Unit and integration test runs",
+          "Coverage deltas",
+          "Snapshot or golden-file checks"
+        ],
+        "starterPack": {
+          "manifestName": "regression-pack",
+          "focus": "Blend repository test outcomes with evaluation-task success metrics."
+        }
+      }
+    ],
+    "artifact": {
+      "id": "measurement-plan",
+      "type": "measurement-plan",
+      "label": "Measurement plan",
+      "description": "Recommended toolsets for measuring the real-world effect of this skill or plugin.",
+      "source": "core",
+      "data": {
+        "recommendedToolsets": [
+          "token-usage-observer",
+          "task-outcome-scorecard",
+          "tool-call-audit"
+        ],
+        "toolsets": [
+          {
+            "id": "token-usage-observer",
+            "label": "Token Usage Observer",
+            "priority": "high",
+            "goal": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+            "why": "Static estimates are useful guardrails, but observed usage is what tells you whether a real workflow is affordable and whether caching or reasoning changes the picture.",
+            "signals": [
+              "observed_usage_sample_count",
+              "observed_input_tokens_avg",
+              "observed_total_tokens_avg",
+              "estimate_vs_observed_input_ratio"
+            ],
+            "evidenceSources": [
+              "Responses API usage logs",
+              "Codex-like session exports",
+              "JSONL traces captured from local benchmarking harnesses"
+            ],
+            "starterPack": {
+              "manifestName": "token-usage-pack",
+              "focus": "Validate sample size, cold-start versus warm-cache behavior, and estimate drift over time."
+            }
+          },
+          {
+            "id": "task-outcome-scorecard",
+            "label": "Task Outcome Scorecard",
+            "priority": "high",
+            "goal": "Measure whether the skill helps users finish the intended job with fewer retries and less cleanup.",
+            "why": "A low-token skill is still a miss if it fails the task, and a verbose skill may be worth it if it consistently improves first-pass success.",
+            "signals": [
+              "task_success_rate",
+              "first_pass_success_rate",
+              "retry_rate",
+              "human_override_rate"
+            ],
+            "evidenceSources": [
+              "Task run logs",
+              "Structured user acceptance checklist",
+              "Before/after comparison runs on the same prompts"
+            ],
+            "starterPack": {
+              "manifestName": "task-outcomes-pack",
+              "focus": "Score success, retries, and manual intervention across a fixed prompt set."
+            }
+          },
+          {
+            "id": "tool-call-audit",
+            "label": "Tool Call Audit",
+            "priority": "high",
+            "goal": "Check whether the agent uses the right tools, arguments, and sequencing when the skill is active.",
+            "why": "For Codex plugins and many higher-agency skills, tool correctness is often the real determinant of user value.",
+            "signals": [
+              "tool_call_success_rate",
+              "invalid_tool_argument_rate",
+              "recoverable_tool_failure_rate"
+            ],
+            "evidenceSources": [
+              "Tool invocation traces",
+              "Recorded sessions",
+              "Golden-path scenario replays"
+            ],
+            "starterPack": {
+              "manifestName": "tool-audit-pack",
+              "focus": "Flag wrong tool selection, malformed args, and missing follow-up calls."
+            }
+          },
+          {
+            "id": "latency-efficiency",
+            "label": "Latency And Efficiency",
+            "priority": "medium",
+            "goal": "Track whether the skill speeds users up enough to justify its cost.",
+            "why": "DX improvements usually win when they reduce waiting or rework, not only when they reduce absolute token counts.",
+            "signals": [
+              "p50_time_to_first_acceptable_answer_seconds",
+              "p95_time_to_task_completion_seconds",
+              "tokens_per_successful_run"
+            ],
+            "evidenceSources": [
+              "Benchmark harness timings",
+              "Manual stopwatch runs on canonical tasks",
+              "Responses API timestamps combined with usage logs"
+            ],
+            "starterPack": {
+              "manifestName": "latency-efficiency-pack",
+              "focus": "Measure time-to-value and cost-per-success on a stable prompt suite."
+            }
+          },
+          {
+            "id": "human-rubric-review",
+            "label": "Human Rubric Review",
+            "priority": "medium",
+            "goal": "Capture clarity, trust, and usefulness signals that automated checks will miss.",
+            "why": "The best skills often reduce confusion and editing effort in ways that do not show up in static lint-like checks.",
+            "signals": [
+              "clarity_score_avg",
+              "confidence_score_avg",
+              "follow_up_question_rate"
+            ],
+            "evidenceSources": [
+              "Reviewer scorecards",
+              "Team rubric sheets",
+              "Annotated transcripts"
+            ],
+            "starterPack": {
+              "manifestName": "human-rubric-pack",
+              "focus": "Collect 1 to 5 scores for clarity, trust, and edit burden across a small evaluator panel."
+            }
+          },
+          {
+            "id": "regression-suite",
+            "label": "Regression Suite",
+            "priority": "medium",
+            "goal": "Protect the repository behavior that the skill is supposed to improve.",
+            "why": "If a skill is meant to help coding workflows, outcomes should be paired with deterministic repo checks so quality gains do not come from cutting corners.",
+            "signals": [
+              "test_pass_rate",
+              "lint_pass_rate",
+              "regression_escape_count"
+            ],
+            "evidenceSources": [
+              "Unit and integration test runs",
+              "Coverage deltas",
+              "Snapshot or golden-file checks"
+            ],
+            "starterPack": {
+              "manifestName": "regression-pack",
+              "focus": "Blend repository test outcomes with evaluation-task success metrics."
+            }
+          }
+        ]
+      }
+    },
+    "nextAction": {
+      "label": "Start with Token Usage Observer",
+      "why": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+      "command": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'What should I run next?' --format markdown",
+      "chatPrompt": "What should I run next?",
+      "toolsetId": "token-usage-observer"
+    }
+  },
+  "improvementBrief": {
+    "title": "Improve plugin-factory",
+    "target": {
+      "kind": "plugin",
+      "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+      "entryPath": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+      "name": "plugin-factory",
+      "relativePath": "Plugins/plugin-factory"
+    },
+    "summary": "Raise the evaluation from grade A (95/100) with a focus on the highest-signal structural and budget issues first.",
+    "goals": [
+      "Reduce repeated instruction text and move detail into deferred supporting files."
+    ],
+    "measurementGoals": [
+      "token-usage-observer",
+      "task-outcome-scorecard",
+      "tool-call-audit"
+    ],
+    "requiredFixes": [],
+    "recommendedFixes": [
+      {
+        "id": "deferred_cost_tokens-budget-high",
+        "message": "deferred_cost_tokens is heavy relative to the current Codex baseline.",
+        "remediation": [
+          "Reduce repeated instruction text and move detail into deferred supporting files."
+        ]
+      }
+    ],
+    "suggestedPrompt": "Use the skill-creator guidance to improve plugin-factory. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard, tool-call-audit. Address deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline."
+  },
+  "nextAction": {
+    "label": "Fix the top findings and rerun the report",
+    "why": "A short pass on the highest-value findings will improve trust, readability, and the signal quality of future benchmarks.",
+    "command": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'What should I fix first?' --format markdown",
+    "chatPrompt": "What should I fix first?"
+  },
+  "workflowGuide": {
+    "kind": "workflow-guide",
+    "createdAt": "2026-04-21T04:15:51.327Z",
+    "target": {
+      "kind": "plugin",
+      "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+      "entryPath": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.codex-plugin/plugin.json",
+      "name": "plugin-factory",
+      "relativePath": "Plugins/plugin-factory"
+    },
+    "requestedGoal": "evaluate",
+    "requestedChatPrompt": null,
+    "requestRouting": null,
+    "recommendedWorkflowId": "evaluate",
+    "recommendedWorkflow": {
+      "id": "evaluate",
+      "label": "Evaluate Plugin",
+      "chatPrompt": "Evaluate this plugin.",
+      "summary": "Start here when you want the overall report for a plugin, including structure, budgets, and code checks.",
+      "firstCommand": "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+      "commands": [
+        "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown"
+      ],
+      "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Evaluate this plugin.' --format markdown"
+    },
+    "workflowStatus": {
+      "hasBenchmarkConfig": false,
+      "hasUsageLog": false
+    },
+    "beginnerSummary": "Start with a natural chat request, then let plugin-eval show the exact local command sequence behind it.",
+    "startHere": {
+      "chatPrompt": "Evaluate this plugin.",
+      "label": "Evaluate Plugin",
+      "summary": "Start here when you want the overall report for a plugin, including structure, budgets, and code checks.",
+      "routingExplanation": "Plugin Eval recommended Evaluate Plugin from the current local state for this plugin.",
+      "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Evaluate this plugin.' --format markdown",
+      "firstCommand": "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+      "commands": [
+        "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown"
+      ]
+    },
+    "entrypoints": [
+      {
+        "id": "analysis",
+        "label": "Full Plugin Analysis",
+        "chatPrompt": "Give me a full analysis of this plugin, including benchmark setup.",
+        "summary": "Use this when you want the full report and starter benchmark setup for this plugin in one guided path.",
+        "firstCommand": "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+        "commands": [
+          "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+          "plugin-eval init-benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+          "plugin-eval benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --config ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.plugin-eval/benchmark.json"
+        ],
+        "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Give me a full analysis of this plugin, including benchmark setup.' --format markdown"
+      },
+      {
+        "id": "evaluate",
+        "label": "Evaluate Plugin",
+        "chatPrompt": "Evaluate this plugin.",
+        "summary": "Start here when you want the overall report for a plugin, including structure, budgets, and code checks.",
+        "firstCommand": "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+        "commands": [
+          "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Evaluate this plugin.' --format markdown"
+      },
+      {
+        "id": "budget",
+        "label": "Explain Token Budget",
+        "chatPrompt": "Explain the token budget for this plugin.",
+        "summary": "Use this when the main question is why the plugin feels expensive before you collect any live measurements.",
+        "firstCommand": "plugin-eval explain-budget ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+        "commands": [
+          "plugin-eval explain-budget ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Explain the token budget for this plugin.' --format markdown"
+      },
+      {
+        "id": "measure",
+        "label": "Measure Real Token Usage",
+        "chatPrompt": "Measure the real token usage of this plugin.",
+        "summary": "Use this when you want real token usage instead of only the static estimate.",
+        "firstCommand": "plugin-eval init-benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+        "commands": [
+          "plugin-eval init-benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+          "plugin-eval benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --config ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.plugin-eval/benchmark.json",
+          "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --observed-usage ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory/.plugin-eval/benchmark-usage.jsonl --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Measure the real token usage of this plugin.' --format markdown"
+      },
+      {
+        "id": "benchmark",
+        "label": "Benchmark With Starter Scenarios",
+        "chatPrompt": "Help me benchmark this plugin.",
+        "summary": "Use this when you want starter scenarios and a repeatable real-Codex benchmark run for this plugin.",
+        "firstCommand": "plugin-eval init-benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory",
+        "commands": [
+          "plugin-eval init-benchmark ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory"
+        ],
+        "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'Help me benchmark this plugin.' --format markdown"
+      },
+      {
+        "id": "next",
+        "label": "Start Here",
+        "chatPrompt": "What should I run next?",
+        "summary": "If you are new to plugin-eval, start with the overall evaluation report for this plugin.",
+        "firstCommand": "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+        "commands": [
+          "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --request 'What should I run next?' --format markdown"
+      }
+    ],
+    "nextSteps": [
+      "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown"
+    ],
+    "nextAction": {
+      "label": "Evaluate Plugin",
+      "why": "Plugin Eval recommended Evaluate Plugin from the current local state for this plugin.",
+      "command": "plugin-eval analyze ~/.codex/worktrees/b79d/agent-skills/Plugins/plugin-factory --format markdown",
+      "chatPrompt": "Evaluate this plugin."
+    }
+  }
+}

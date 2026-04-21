@@ -1,6 +1,6 @@
-# CE Brainstorm Source Parity Map
+# HE Brainstorm Source Parity Map
 
-Read when: you need to verify that `he-brainstorm` preserves the legacy brainstorm prompt behavior while incorporating the newer upstream `compound-engineering-plugin` skill updates without losing repo-local contracts.
+Read when: you need to verify that `he-brainstorm` preserves the legacy brainstorm prompt behavior while incorporating the newer upstream `compound-engineering-plugin` `ce-brainstorm` updates without losing repo-local contracts.
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -10,11 +10,11 @@ Read when: you need to verify that `he-brainstorm` preserves the legacy brainsto
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `he-brainstorm` skill to the local skill at `Plugins/harness-engineering/skills/team_automation/he-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
+This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `ce-brainstorm` skill to the local skill at `Plugins/harness-engineering/skills/team_automation/he-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
 
 ## Source inputs
 - legacy prompt: `configs/codex/prompts/workflow-brainstorm.md`
-- upstream donor skill (current review baseline): `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa/Plugins/compound-engineering/skills/he-brainstorm/SKILL.md`
+- upstream donor skill (current review baseline): `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/e1524287f73ea1ec9598aa63c05a31745ff503c7/plugins/compound-engineering/skills/ce-brainstorm/SKILL.md`
 - migration target: `Plugins/harness-engineering/skills/team_automation/he-brainstorm/`
 - lightweight review doctrine adapted locally in `Infrastructure/references/document-review-pass.md`
 
@@ -37,19 +37,20 @@ This document maps the legacy brainstorm prompt plus the upstream `compound-engi
 | create a durable requirements doc with stable IDs and blocking/deferred questions | `## Workflow` -> `Phase 4` | Preserved from upstream and aligned to local planning contracts |
 | include visual aids when they materially improve comprehension | `## Workflow` -> `Phase 4` | Preserved from upstream |
 | run a lightweight document-review pass after writing the requirements doc | `## Workflow` -> `Phase 5`, `Infrastructure/references/document-review-pass.md` | Preserved from upstream via local adaptation |
-| hand off into spec, planning, or direct work only when blocker state permits it | `## Workflow` -> `Phase 6` | Preserved and adapted to local CE skill names |
+| hand off into spec, planning, or direct work only when blocker state permits it | `## Workflow` -> `Phase 6` | Preserved and adapted to local HE skill names |
 | concise completion or pause summary | `## Output summary` | Preserved directly |
 | fail-fast validation and anti-pattern boundaries | `## Validation`, `## Anti-patterns`, `Infrastructure/references/brainstorm-workflow-details.md` | Preserved and upgraded with repo-specific checks |
 
 
 ## Intentional modernizations
-- The April 12, 2026 source review kept local advanced workflow structure and selectively pulled two durable upstream clarifications:
+- The April 20, 2026 source review kept the local advanced workflow structure and selectively pulled durable upstream clarifications from the pinned `ce-brainstorm` donor:
   - explicit prohibition on absolute file paths in generated artifacts to preserve cross-machine/worktree portability,
   - clearer software-domain classification language so topical software mentions do not misroute non-software brainstorms.
+- The same refresh also pulled the donor's optional Slack-context guidance into Phase 1.1, but kept it opt-in and non-blocking so the local workflow still runs cleanly without Slack tooling.
 - Prompt-only control syntax such as `argument-hint` and slash-command handoffs were translated into durable skill guidance plus local `he-spec`, `he-plan`, and `he-work` handoff language.
 - The upstream `requirements doc` contract was adopted for new substantial work because local `he-plan` already prefers `docs/brainstorms/*-requirements.md` as the primary planning source.
 - Legacy `docs/brainstorms/*-brainstorm.md` artifacts remain supported for resume-in-place compatibility rather than forced renames.
-- The upstream `document-review` step was preserved via the local `Infrastructure/references/document-review-pass.md` adaptation, matching how other CE skills in this repo keep lightweight review behavior without creating a duplicate sibling skill.
+- The upstream `document-review` step was preserved via the local `Infrastructure/references/document-review-pass.md` adaptation, matching how other HE skills in this repo keep lightweight review behavior without creating a duplicate sibling skill.
 - Internal delegation guidance was retained, but made explicit that it only applies when the runtime and session policy permit it.
 - Detailed pressure-test prompts, output closeout templates, and validation checklist remain preserved in `Infrastructure/references/brainstorm-workflow-details.md` to keep `SKILL.md` routing-focused without context loss.
 - `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` remain the local source of truth for packaging-grade validation.

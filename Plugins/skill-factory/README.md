@@ -1,2 +1,1 @@
-# Reference Stub
-Read when: full content is needed at fixtures/budget-archive/2026-04-19/README.md
+fixtures/budget-archive/2026-04-21/deferred-store/README.md

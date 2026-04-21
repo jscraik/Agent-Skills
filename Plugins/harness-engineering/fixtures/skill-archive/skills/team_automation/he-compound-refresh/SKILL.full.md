@@ -1,11 +1,11 @@
 ---
 name: he-compound-refresh
-description: Review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation when multiple docs now cover the same ground after refactors, migrations, or dependency upgrades.
+description: Use when Harness Engineering needs to review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation after refactors, migrations, or dependency upgrades.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Compound Refresh
+# Harness Engineering Compound Refresh
 
 **Note: The current year is 2026.** Use this when dating refresh artifacts and searching for recent documentation.
 
@@ -45,7 +45,7 @@ This workflow produces refreshed, consolidated, or marked-stale documentation. I
 Use this skill when the user wants stale or drifting `docs/solutions/` learnings and pattern docs reviewed against the current codebase and refreshed with the smallest trustworthy maintenance action.
 
 Primary triggers:
-- "run `ce:compound-refresh` on auth"
+- "run `he:compound-refresh` on auth"
 - "review `docs/solutions/` for stale learnings"
 - "this pattern doc no longer matches the code"
 - "after the refactor, update or archive the old solution docs"
@@ -58,7 +58,7 @@ Primary triggers:
 Non-triggers:
 - the user wants to capture a newly solved issue for the first time; use `he-compound`
 - the user wants implementation or bug fixing; use `he-work`
-- the user wants broad readiness critique of a PR or artifact; use `he-review` or `he-technical-review`
+- the user wants broad readiness critique of a PR or artifact; use `he-code-review` or `he-technical-review`
 - the user only wants wording cleanup, typo fixes, or editorial polish with no accuracy drift
 
 ## Required inputs
@@ -90,7 +90,7 @@ If the user gives no scope hint:
 ## Failure mode
 If no candidate docs exist under `docs/solutions/`, stop and say:
 
-`No candidate docs found in docs/solutions/. Run ce:compound after solving problems to start building your knowledge base.`
+`No candidate docs found in docs/solutions/. Run he:compound after solving problems to start building your knowledge base.`
 
 If a scope hint finds no matches, report the miss clearly. In interactive mode, ask for one narrower clarification. In autonomous mode, stop without guessing.
 
@@ -133,7 +133,6 @@ Ask one question at a time, prefer concise single-select choices when natural op
 2. **Doc accuracy over doc age** - Match documentation to current repo truth.
 3. **Repo-first** - Use external docs only when stale claims depend on current framework behavior.
 4. **Evaluate document-set shape** - Consolidate overlapping docs instead of preserving silent drift.
-5. **Precision over frenzy** - Refresh work should feel like gardening, not a repo-wide cleanup.
 5. **Precision over frenzy** - Refresh work should feel like gardening, not a repo-wide cleanup.
 
 > **Read when:** you need April 2026 standards rationale, operating philosophy, discoverability policy, or empowerment guardrails → `Infrastructure/references/style-and-operating-guidance.md`.
@@ -277,7 +276,7 @@ Use `autonomous` when:
 - AVOID broad stale-doc sweeps that skip triage, evidence gathering, or per-file reporting
 
 ## Examples
-- User says: "Run `ce:compound-refresh auth` after the auth refactor."
+- User says: "Run `he:compound-refresh auth` after the auth refactor."
 - User asks: "Use `mode:autonomous` to apply safe maintenance across docs/solutions."
 - User says: "Consolidate overlapping retry learnings and show which doc becomes canonical."
 - User asks: "Refresh solution docs that no longer match the current codebase."
@@ -299,7 +298,7 @@ When `.harness/` exists, refresh both locations per `Infrastructure/references/p
 | Skill | When to use together |
 |---|---|
 | [[he-compound]] | Capture new issues before/after refresh |
-| [[he-review]] | Validate implementation readiness |
+| [[he-code-review]] | Validate implementation readiness |
 | [[he-technical-review]] | Audit technical correctness |
 | Project Brain | When `.harness/` exists for knowledge refresh |
 

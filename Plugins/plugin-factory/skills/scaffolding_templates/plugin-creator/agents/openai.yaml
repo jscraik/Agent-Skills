@@ -1,6 +1,1 @@
-interface:
-  display_name: "Plugin Creator"
-  short_description: "Scaffold plugins and marketplace entries"
-  default_prompt: "Use $plugin-creator to scaffold a fully populated plugin manifest, optional structure, and a marketplace.json entry."
-  icon_small: "../assets/plugin-creator.png"
-  icon_large: "../assets/plugin-creator.png"
+../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/scaffolding_templates/plugin-creator/agents/openai.yaml

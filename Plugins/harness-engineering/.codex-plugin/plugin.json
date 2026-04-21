@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Route CE lifecycle stages with a router-first plugin.",
+  "description": "Route Harness Engineering lifecycle stages with one canonical router.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -13,7 +13,6 @@
   "keywords": [
     "plugin",
     "harness-engineering",
-    "compound-engineering",
     "planning",
     "review",
     "codex"
@@ -29,8 +28,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness Engineering",
-    "shortDescription": "Route and run the compound-engineering lifecycle",
-    "longDescription": "A Codex plugin package that bundles compound-engineering lifecycle skills for stage routing, implementation execution, and readiness reviews. This plugin covers CE workflow orchestration, not @brainwav/coding-harness setup or CI scaffold management.",
+    "shortDescription": "Route and run the Harness Engineering lifecycle",
+    "longDescription": "A Codex plugin package that bundles Harness Engineering lifecycle skills for stage routing, implementation execution, refinement loops, and readiness reviews. This plugin covers HE workflow orchestration, not @brainwav/coding-harness setup or CI scaffold management.",
     "developerName": "Jamie Craik",
     "category": "Coding",
     "capabilities": [
@@ -42,7 +41,7 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use he-router to choose one CE stage and the next command."
+      "Use he-router to choose one HE stage and next command."
     ],
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",

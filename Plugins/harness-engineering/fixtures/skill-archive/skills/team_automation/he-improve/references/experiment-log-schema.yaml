@@ -1,0 +1,62 @@
+# Experiment log schema for he-improve.
+
+structure:
+  spec:
+    type: string
+    required: true
+  run_id:
+    type: string
+    required: true
+  started_at:
+    type: string
+    required: true
+  baseline:
+    type: object
+    required: true
+  experiments:
+    type: array
+    required: true
+  best:
+    type: object
+    required: true
+  hypothesis_backlog:
+    type: array
+    required: false
+
+experiment_entry:
+  required_children:
+    iteration:
+      type: integer
+    batch:
+      type: integer
+    hypothesis:
+      type: string
+    category:
+      type: string
+    outcome:
+      type: enum
+      values:
+        - measured
+        - kept
+        - reverted
+        - degenerate
+        - error
+        - timeout
+        - deferred_needs_approval
+        - runner_up_kept
+        - runner_up_reverted
+  optional_children:
+    gates:
+      type: object
+    diagnostics:
+      type: object
+    judge:
+      type: object
+    primary_delta:
+      type: string
+    learnings:
+      type: string
+    commit:
+      type: string
+    error_message:
+      type: string

@@ -1,6 +1,0 @@
-interface:
-  display_name: Reproduce Bug
-  short_description: Reproduce or investigate a bug from a Linear issue or GitHub
-    issue, preserving tracker context, symptoms, and repro s...
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

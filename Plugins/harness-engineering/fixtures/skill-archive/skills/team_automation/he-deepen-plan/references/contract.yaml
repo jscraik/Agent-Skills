@@ -1,7 +1,7 @@
 schema_version: 1
 
 purpose: >
-  Run the plan-deepening stage of the compound-engineering workflow so the user gets
+  Run the plan-deepening stage of the harness-engineering workflow so the user gets
   a stronger, execution-ready plan with better rationale, sequencing, verification,
   and risk treatment before implementation begins.
 
@@ -19,6 +19,7 @@ inputs:
 outputs:
   - a deepening-mode decision such as targeted-confidence or max-coverage
   - a research execution mode decision such as direct or artifact-backed
+  - a subagent route decision: automatic delegation when mapped roles exist, otherwise inline/manual fallback
   - a strengthened plan written in place or as a -deepened variant
   - a short enhancement summary plus explicit next-step guidance
 
@@ -31,5 +32,6 @@ non_goals:
 risks:
   - plan inflation without real confidence gain; mitigate with section scoring and targeted rewrites
   - context bloat from broad fan-out; mitigate with targeted-confidence default and artifact-backed mode only when justified
+  - missing reviewer roles at runtime; mitigate with manifest checks and codex-agent-creator fallback routing
   - contradiction with source artifacts; mitigate with origin-artifact rereads and explicit preservation checks
   - stale or generic research; mitigate with repo-grounded evidence first and dated primary-source citations for external claims

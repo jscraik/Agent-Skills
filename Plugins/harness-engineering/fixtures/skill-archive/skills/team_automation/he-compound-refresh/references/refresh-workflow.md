@@ -93,7 +93,7 @@ If there are no candidate docs at all, report:
 
 ```text
 No candidate docs found in docs/solutions/.
-Run `ce:compound` after solving problems to start building your knowledge base.
+Run `he-compound` after solving problems to start building your knowledge base.
 ```
 
 Regardless of run mode, keep report sections explicit:
@@ -457,7 +457,7 @@ Always print the full markdown report.
 Summary header:
 
 ```text
-Compound Refresh Summary
+Harness Engineering Compound Refresh Summary
 ========================
 Scanned: N artifacts (N learnings, M patterns)
 

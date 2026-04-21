@@ -1,5 +1,5 @@
 interface:
-  display_name: "CE Ideate"
+  display_name: "Harness Engineering Ideate"
   short_description: "Generate, challenge, and rank grounded project-improvement ideas before he-brainstorm."
   icon_small: "../assets/icon-small.png"
   icon_large: "../assets/icon-large.png"

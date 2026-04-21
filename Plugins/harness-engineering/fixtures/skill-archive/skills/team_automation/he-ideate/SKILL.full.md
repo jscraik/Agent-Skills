@@ -1,11 +1,11 @@
 ---
 name: he-ideate
-description: Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants CE-stage idea generation before brainstorming in depth, not a general product brainstorm.
+description: Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants the Harness Engineering ideation stage before brainstorming in depth, not a general product brainstorm.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Ideate
+# Harness Engineering Ideate
 
 **Note: The current year is 2026.** Use this when dating ideation documents and checking recent ideation artifacts.
 
@@ -52,14 +52,14 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 5. **Use agent diversity to improve the candidate pool** - Parallel sub-agents are a support mechanism for richer idea generation and critique, not the core workflow itself.
 6. **Preserve the artifact early** - Write the ideation document before presenting results so work survives interruptions.
 7. **Route action into brainstorming** - Ideation identifies promising directions; `he-brainstorm` defines the selected one precisely enough for planning.
-Read when: you need April 2026 standards rationale, ideation philosophy, or output variation guidance -> `Infrastructure/references/style-and-operating-guidance.md`.
+Read when: you need April 2026 standards rationale, ideation philosophy, or output variation guidance -> `references/style-and-operating-guidance.md`.
 
 ## Working agreement
-- Treat `he-ideate` as the compound-engineering stage that decides which ideas are worth exploring next, not as generic brainstorming, planning, or implementation.
+- Treat `he-ideate` as the Harness Engineering ideation stage that decides which ideas are worth exploring next, not as generic brainstorming, planning, or implementation.
 - Ground ideation in the actual repo first. Do not generate detached product advice that ignores the current codebase, docs, or issue signals.
 - Preserve the core mechanism: generate many ideas first, critique the full combined list second, explain only the survivors in detail.
 - Use subagents to widen idea diversity and critique quality only when the user has explicitly asked for delegation; otherwise widen the pool and critique inline without delegating.
-- Keep the stage boundary explicit: `he-ideate` ranks candidate directions, `he-brainstorm` defines one chosen direction, and later CE stages turn that direction into specs and plans.
+- Keep the stage boundary explicit: `he-ideate` ranks candidate directions, `he-brainstorm` defines one chosen direction, and later Harness Engineering stages turn that direction into specs and plans.
 - Stay repo-first by default. Use repo context, `docs/solutions/`, and issue-tracker evidence when relevant. Do not add external market or web research unless the user explicitly asks for it.
 - Be candid. Do not keep weak ideas out of politeness, novelty bias, or a desire to pad the shortlist.
 
@@ -67,7 +67,7 @@ Read when: you need April 2026 standards rationale, ideation philosophy, or outp
 Use this skill when the user wants grounded improvement ideas generated, filtered, and ranked before committing to one direction.
 
 Primary triggers:
-- "use `ce:ideate` on this repo"
+- "use `he-ideate` on this repo"
 - "what should I improve?"
 - "give me ideas for this project"
 - "surprise me with improvements"
@@ -153,7 +153,7 @@ Infer:
 - volume override
 - issue-tracker intent
 
-Use the exact issue-intent and resume rules in `Infrastructure/references/ideation-workflow.md`.
+Use the exact issue-intent and resume rules in `references/ideation-workflow.md`.
 
 ### Phase 1: Codebase scan
 Gather a short grounding summary before ideating:
@@ -161,7 +161,7 @@ Gather a short grounding summary before ideating:
 - learnings search
 - optional issue intelligence when the request is really about issue themes or bug patterns
 
-Keep issue intelligence distinct from code-observed context. Use the bounded repo and issue scan rules in `Infrastructure/references/ideation-workflow.md`.
+Keep issue intelligence distinct from code-observed context. Use the bounded repo and issue scan rules in `references/ideation-workflow.md`.
 
 ### Phase 2: Divergent ideation
 Generate the full candidate pool before critique.
@@ -175,16 +175,16 @@ If the user has explicitly asked for delegation and wider parallel ideation woul
 
 If delegation was not explicitly requested, the tool is unavailable, or subagents are unnecessary, generate the full candidate pool inline before critique.
 
-Use the frame-selection, merge, dedupe, and cross-cutting synthesis rules in `Infrastructure/references/ideation-workflow.md`.
+Use the frame-selection, merge, dedupe, and cross-cutting synthesis rules in `references/ideation-workflow.md`.
 
 ### Phases 3-6: Filter, present, preserve, hand off
-After Phase 2 merge and synthesis are complete, load `Infrastructure/references/post-ideation-workflow.md` and run:
+After Phase 2 merge and synthesis are complete, load `references/post-ideation-workflow.md` and run:
 - adversarial filtering
 - review checkpoint formatting
 - artifact write and resume semantics
 - refine or handoff routing
 
-Do not load `Infrastructure/references/post-ideation-workflow.md` before Phase 2 candidate generation completes.
+Do not load `references/post-ideation-workflow.md` before Phase 2 candidate generation completes.
 Do not skip from ideation directly to planning or implementation.
 
 ## Focus modes
@@ -197,6 +197,8 @@ Do not skip from ideation directly to planning or implementation.
 - Use the platform's blocking question tool (`AskUserQuestion`, `request_user_input`, or `ask_user`) and ask one question at a time.
 - Keep the initial codebase scan shallow; do not do deep implementation analysis before ideating.
 - Use `repo-research-analyst` and `learnings-researcher` for bounded grounding only when delegation was explicitly requested; otherwise perform the equivalent grounding inline.
+- For HE subagent policy and conditional-role mapping, follow `../../../references/subagent-routing.md`.
+- If required roles are missing from `~/.codex/agents/manifest.json`, continue inline and advise role creation/install via `[[codex-agent-creator]]` with explicit role names from the stage map.
 - If an issue-intelligence helper exists, use it for issue-theme clustering. Otherwise, do a bounded direct issue-theme pass with available repo and issue tools, and clearly note the fallback.
 - When ideation subagents are explicitly requested, run them in the foreground because their outputs are needed before the next phase.
 - Give ideation subagents starting biases, not hard fences. Cross-cutting ideas are allowed.
@@ -230,27 +232,27 @@ Do not skip from ideation directly to planning or implementation.
 
 ## Examples
 User says:
-- "Use `ce:ideate` and tell me what this repo should improve next."
+- "Use `he-ideate` and tell me what this repo should improve next."
 - "Give me the top 3 improvements for the auth subsystem before we brainstorm one."
 - "Surprise me with grounded improvements for this project."
-- "What would you change in `Plugins/compound-engineering/skills/`?"
+- "What would you change in `Plugins/harness-engineering/skills/`?"
 - "Look at the open issues and tell me which product directions are actually worth exploring."
 - "Resume the ideation doc we started last week and raise the bar on the survivors."
 
 ## References
-- Contract: `Infrastructure/references/contract.yaml`
-- Evals: `Infrastructure/references/evals.yaml`
-- Prompt parity map: `Infrastructure/references/source-parity.md`
-- Phase 0-2 ideation workflow: `Infrastructure/references/ideation-workflow.md`
-- Phase 3-6 post-ideation workflow: `Infrastructure/references/post-ideation-workflow.md`
-- Standards and operating guidance: `Infrastructure/references/style-and-operating-guidance.md`
+- Contract: `references/contract.yaml`
+- Evals: `references/evals.yaml`
+- Prompt parity map: `references/source-parity.md`
+- Phase 0-2 ideation workflow: `references/ideation-workflow.md`
+- Phase 3-6 post-ideation workflow: `references/post-ideation-workflow.md`
+- Standards and operating guidance: `references/style-and-operating-guidance.md`
 
 ## See Also
 
 | Skill | When to use together |
 |---|---|
 | [[he-brainstorm]] | Take one selected survivor from ranked ideation into clarified problem framing and approach shaping |
-| [[he-compound]] | Route broader CE lifecycle work or preserve learning after implementation rather than before exploration |
+| [[he-compound]] | Route broader Harness Engineering lifecycle work or preserve learning after implementation rather than before exploration |
 | [[he-plan]] | Use only after a brainstormed direction has been selected and specified enough to plan |
 
 **Topic map:** [[product-ops]]
@@ -259,7 +261,7 @@ User says:
 <!-- decision-feedback-protocol:v2 -->
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture `decision`, `outcome`, and `confidence`.
-- Persist feedback with `python3 Skills/skill-builder/Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`
+- Persist feedback with `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`
 <!-- /decision-feedback-protocol -->
 
 ## Gotchas

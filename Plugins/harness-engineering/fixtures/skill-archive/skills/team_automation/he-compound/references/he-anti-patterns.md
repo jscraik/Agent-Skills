@@ -1,10 +1,10 @@
-# CE Compound Anti-patterns
+# Harness Engineering Compound Anti-patterns
 
 Read when: you need the full anti-pattern catalog with corrective actions.
 
 | Anti-pattern | Why it harms workflow quality | Corrective action |
 |---|---|---|
-| Treating `he-compound` as a substitute for all CE stages | Blurs boundaries and weakens stage-specific quality gates | Route to the correct downstream CE stage once mode is selected |
+| Treating `he-compound` as a substitute for all Harness Engineering stages | Blurs boundaries and weakens stage-specific quality gates | Route to the correct downstream Harness Engineering stage once mode is selected |
 | Skipping upstream artifact validation | Carries hidden defects into later stages | Resume from the earliest incomplete or untrusted stage |
 | Capturing unverified fixes as durable learnings | Pollutes the knowledge base with unstable guidance | Require solved and verified evidence before learning capture |
 | Broadening `he-compound-refresh` without evidence | Creates maintenance churn and weak signal-to-noise | Recommend narrow, evidence-backed refresh scope only |

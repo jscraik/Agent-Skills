@@ -14,7 +14,7 @@ Use `he-compound` as the orchestration layer for:
 6. `he-deepen-plan`
 7. `he-technical-review` against the plan
 8. `he-work`
-9. `he-review`
+9. `he-code-review`
 10. `he-compound` learning capture
 
 This is the durable stage sequence to preserve from `workflow-compound.md`.
@@ -25,7 +25,7 @@ This is the durable stage sequence to preserve from `workflow-compound.md`.
 
 Use when:
 - the request starts from a feature idea, problem statement, or rough delivery ask
-- no trustworthy downstream CE artifact exists yet
+- no trustworthy downstream Harness Engineering artifact exists yet
 
 Behavior:
 - initialize a stage ledger
@@ -35,7 +35,7 @@ Behavior:
 ### Resume from stage
 
 Use when:
-- CE artifacts already exist
+- Harness Engineering artifacts already exist
 - the user wants the next correct stage instead of a fresh full run
 
 Behavior:

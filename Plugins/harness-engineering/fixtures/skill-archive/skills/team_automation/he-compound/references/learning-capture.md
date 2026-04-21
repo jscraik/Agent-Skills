@@ -19,10 +19,11 @@ Default behavior.
 Proceed directly in full mode unless the user explicitly asks for `compact-safe`.
 
 Critical rule:
-- Only one file gets written: the final documentation artifact.
+- Only one `docs/solutions` artifact gets written: the final documentation artifact.
 - Phase 1 helpers return text data to the orchestrator.
 - Helpers must not write drafts, temp markdowns, or intermediate solution files.
 - Only the orchestrator writes `docs/solutions/[category]/[filename].md`.
+- Any optional instruction-doc update (`AGENTS.md`/`CLAUDE.md`) requires explicit user consent and is maintenance, not a second solution artifact.
 
 ### Compact-safe mode
 
@@ -158,10 +159,10 @@ Scope rules:
 - compact-safe sessions -> do not broaden into a large refresh sweep
 
 Example arguments:
-- `/ce:compound-refresh plugin-versioning-requirements`
-- `/ce:compound-refresh payments`
-- `/ce:compound-refresh performance-issues`
-- `/ce:compound-refresh critical-patterns`
+- `/he-compound-refresh plugin-versioning-requirements`
+- `/he-compound-refresh payments`
+- `/he-compound-refresh performance-issues`
+- `/he-compound-refresh critical-patterns`
 
 ### Phase 2.75: Discoverability check (instruction docs)
 
@@ -233,21 +234,21 @@ That variant adds:
 - an explicit post-capture decision menu after documentation lands
 
 Preserved references:
-- `Infrastructure/references/upstream-compound-docs-guide.md`
-- `Infrastructure/references/compound-docs-yaml-schema.md`
-- `Infrastructure/references/compound-docs-resolution-template.md`
-- `Infrastructure/references/compound-docs-critical-pattern-template.md`
+- `upstream-compound-docs-guide.md`
+- `compound-docs-yaml-schema.md`
+- `compound-docs-resolution-template.md`
+- `compound-docs-critical-pattern-template.md`
 
 Rules:
 - preserve the local `he-compound` one-file-write contract
 - treat the upstream schema and templates as richer guidance, not disposable background
 - if the target repo does not use schema-driven `docs/solutions/`, fall back to the canonical local categories and shape
 
-## Project Brain Integration (Dual Write)
+## Project Brain Integration (Optional Follow-Up Only)
 
-When the target repo has a `.harness/` directory, use dual-write to both `docs/solutions/` and Project Brain:
+When the target repo has a `.harness/` directory, keep `he-compound` on the one-artifact contract (`docs/solutions/...` only). If Project Brain sync is needed, run it as a separate user-approved follow-up workflow after `he-compound` finishes.
 
-### Phase: Dual Write (after creating docs/solutions/ doc)
+### Phase: Optional Follow-Up (outside `he-compound`)
 
 1. **Map to domain**: Determine `.harness/knowledge/{domain}/` from problem category
    - build-errors → build
@@ -258,7 +259,7 @@ When the target repo has a `.harness/` directory, use dual-write to both `docs/s
    - database-issues → data
    - etc.
 
-2. **Write to knowledge**: Append to `.harness/knowledge/{domain}/knowledge.md`:
+2. **Write to knowledge (follow-up workflow only)**: Append to `.harness/knowledge/{domain}/knowledge.md` only when the user explicitly requests Project Brain sync:
 
    ```yaml
    ---
@@ -284,6 +285,11 @@ When the target repo has a `.harness/` directory, use dual-write to both `docs/s
 
 3. **Sync to Local Memory MCP**:
 
+   Redaction gate before sync:
+   - remove or redact credentials, tokens, secrets, personal data, and internal-only URLs
+   - reduce payload to sanitized problem and solution summaries
+   - if uncertain, replace sensitive fragments with `[REDACTED]`
+
    ```text
    observe(
      content="{problem summary} → {solution summary}",
@@ -306,7 +312,8 @@ When the target repo has a `.harness/` directory, use dual-write to both `docs/s
 ### Promotion Path
 
 ```text
-First capture     → docs/solutions/ + .harness/knowledge/{domain}/knowledge.md
+First capture     → docs/solutions/ (inside he-compound)
+Optional follow-up→ .harness/knowledge/{domain}/knowledge.md (outside he-compound)
                   → observe(tags=["type:knowledge", ...])
                   
 Second occurrence → Update existing knowledge.md, increment frequency counter
@@ -317,7 +324,7 @@ Third occurrence  → Promote to rules.md
 ```
 
 ### Anti-patterns to Avoid
-- Writing only to docs/solutions/ when .harness/ exists
+- Writing to `.harness/knowledge` inside `he-compound` without explicit user-approved follow-up
 - Creating duplicate entries in knowledge.md without checking
 - Forgetting to sync to Local Memory MCP
 - Promoting to rules without 3+ confirmations
@@ -351,9 +358,9 @@ Summarize:
 - the created or updated solution artifact path
 - the likely future module or problem space this learning helps
 
-## Auto-invoke cues
+## Manual routing cues
 
-Direct entry into learning-capture mode is justified when the user says things like:
+Use these as operator routing cues when selecting learning-capture mode:
 - "that worked"
 - "it's fixed"
 - "working now"
@@ -361,6 +368,9 @@ Direct entry into learning-capture mode is justified when the user says things l
 
 Manual override:
 - use `he-compound [context]` to capture the learning immediately without waiting for an explicit auto-detect-style cue
+
+Runtime note:
+- implicit invocation is disabled on this archived package surface (`allow_implicit_invocation: false`)
 
 ---
 

@@ -10,8 +10,8 @@
 This package is aligned against the upstream donor skill at:
 
 - repository: `EveryInc/compound-engineering-plugin`
-- commit: `4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa`
-- path: `Plugins/compound-engineering/skills/he-compound-refresh/SKILL.md`
+- commit: `e1524287f73ea1ec9598aa63c05a31745ff503c7`
+- path: `plugins/compound-engineering/skills/ce-compound-refresh/SKILL.md`
 
 The local package still applies Codex/OpenAI progressive-disclosure packaging on top of that donor.
 
@@ -59,7 +59,7 @@ The local package still applies Codex/OpenAI progressive-disclosure packaging on
 - branch-aware commit follow-up after refresh actions
 
 ## Intentional modernizations
-- April 12, 2026 parity refresh imported two deterministic behaviors from upstream while preserving local archive semantics:
+- April 20, 2026 parity refresh imported the current upstream guidance while preserving local archive semantics:
   - report contract now explicitly requires `Applied` and `Recommended` sections,
   - `_archived/` detection is now surfaced as a reportable legacy-cleanup signal.
 - kept the skill tightly scoped to stale-doc maintenance rather than letting it drift into generic code review or generic doc editing

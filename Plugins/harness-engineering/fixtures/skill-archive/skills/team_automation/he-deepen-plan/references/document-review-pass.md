@@ -2,7 +2,7 @@
 
 Read when: an existing implementation plan mostly needs refinement before execution rather than deeper sequencing or risk expansion.
 
-Imported from the upstream `document-review` skill in `EveryInc/compound-engineering-plugin` commit `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`, adapted for `he-deepen-plan`.
+Imported from the upstream `ce-doc-review` skill in `EveryInc/compound-engineering-plugin` commit `d8436b9a3c5b5370e51ec168a251ccb45f0d826e`, adapted for `he-deepen-plan`.
 
 ## Purpose
 
@@ -12,6 +12,13 @@ Use this pass when the plan already exists and the main question is:
 - is it clear enough?
 - is it specific enough for execution?
 - is it carrying unnecessary ambiguity or bulk?
+
+## Interaction and mode cues (from `ce-doc-review`)
+
+- Use the platform's blocking question tool for user decisions (`request_user_input` in Codex).
+- Fall back to numbered options only when the question tool is unavailable or fails to load.
+- Support `mode:headless` for automated review flows: apply minor safe fixes, return non-trivial findings as structured text, and skip interactive prompts.
+- In headless mode, require an explicit document path before running.
 
 ## Review flow
 

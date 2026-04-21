@@ -109,7 +109,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-work"
       - type: regex
-        value: "(?i)(he-review mode:autofix|Tier 2|inline self-review|plan:)"
+        value: "(?i)(he-code-review mode:autofix|Tier 2|inline self-review|plan:)"
 
   - id: ui-missing-design-direction
     name: ui missing design direction

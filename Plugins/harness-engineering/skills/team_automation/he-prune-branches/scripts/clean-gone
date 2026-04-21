@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+archive_script="$script_dir/../../../../fixtures/skill-archive/skills/team_automation/he-prune-branches/scripts/clean-gone"
+
+if [[ ! -x "$archive_script" ]]; then
+  echo "Missing archived helper: $archive_script" >&2
+  exit 1
+fi
+
+exec "$archive_script" "$@"

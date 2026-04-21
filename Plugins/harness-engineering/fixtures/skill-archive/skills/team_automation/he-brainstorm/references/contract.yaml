@@ -1,14 +1,14 @@
 schema_version: 1
 
 purpose: >
-  Run the brainstorm stage of the compound-engineering workflow so the user clarifies
+  Run the brainstorm stage of the Harness Engineering workflow so the user clarifies
   what to build, compares a few viable directions, captures a right-sized requirements
   document when needed, and decides whether the next step should be spec, planning,
   or lightweight direct work.
 
 triggers:
   - the user wants to brainstorm a feature, improvement, or product direction before planning
-  - the user wants the compound-engineering brainstorm stage explicitly
+  - the user wants the Harness Engineering brainstorm stage explicitly
   - the user needs help deciding whether a spec is required
   - the user wants a durable brainstorm or requirements artifact written to docs/brainstorms
   - the request is vague or ambitious enough that scope, behavior, or success criteria still need to be shaped

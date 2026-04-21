@@ -1,0 +1,32 @@
+schema_version: "1.1"
+purpose: >
+  Define the routing contract for plugin-router so broad plugin requests are
+  classified into the correct plugin-factory lane with explicit handoff data.
+triggers:
+  - user asks generally for plugin help without naming creator, builder, or installer lane
+  - user asks for mixed plugin work (for example create then install)
+  - user asks to troubleshoot plugin work but failure stage is not clearly identified
+inputs:
+  - primary intent (create|harden|convert|install|troubleshoot)
+  - target path or source URL when available
+  - constraints (trust boundary, policy requirements, deadline)
+  - expected output state
+outputs:
+  - routing handoff object with selected lane, next skill, and rationale
+  - explicit required inputs list (present and missing)
+  - blocker classification when routing cannot proceed safely
+non_goals:
+  - running lane-specific builder, creator, or installer scripts
+  - performing destructive repository operations during routing
+  - bypassing validation gates for downstream lane skills
+risks:
+  - intent misclassification; mitigated by one clarify-once question for high-risk ambiguity
+  - hidden blockers; mitigated by explicit blocked_by output
+  - lane overreach; mitigated by strict next_skill allow-list
+rollback_procedure: >
+  If routing selects the wrong lane, stop execution, emit a corrected handoff object,
+  and restart from routing with clarified intent. Do not continue downstream execution
+  using stale routing decisions.
+observability: >
+  Monitor routing quality by tracking re-route frequency, blocked_by reason categories,
+  and downstream validation failures caused by missing required_inputs.

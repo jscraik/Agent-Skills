@@ -1,11 +1,11 @@
 ---
 name: he-brainstorm
-description: Run the compound-engineering brainstorm stage to clarify WHAT to build, compare viable directions, and capture a right-sized requirements document before spec, planning, or lightweight direct work. Use when the user wants CE-stage exploration, is unsure about scope or direction, or needs help deciding whether a spec is required.
+description: Clarify requirements and compare approaches before writing a right-sized requirements document and choosing the next Harness Engineering stage. Use when the user wants a brainstorm, needs help deciding what to build, or has a vague feature request whose scope and direction are still unclear.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Brainstorm
+# HE Brainstorm
 
 **Note: The current year is 2026.** Use this when dating requirements documents and checking recent artifacts.
 
@@ -34,7 +34,7 @@ This workflow produces a requirements document that clarifies WHAT to build and 
 - [Gotchas](#gotchas)
 
 ## Working agreement
-- Treat this as the compound-engineering brainstorm stage, not a generic ideation free-for-all or the broader non-CE `brainstorming` lane.
+- Treat this as the Harness Engineering brainstorm stage, not a generic ideation free-for-all or the broader non-stage-specific `brainstorming` lane.
 - Clarify WHAT and WHY before moving into HOW.
 - Prefer the smallest decision that reduces ambiguity enough to choose the next workflow stage safely.
 - Right-size the ceremony to the scope: lightweight work may only need brief alignment, while standard or deep work usually needs a durable requirements document.
@@ -42,7 +42,7 @@ This workflow produces a requirements document that clarifies WHAT to build and 
 - Stop when the requirements artifact is strong enough that the next stage does not need to invent behavior.
 
 ## When to use
-Use this skill when the user wants to explore a feature, improvement, or problem before spec or planning and needs a structured compound-engineering brainstorm artifact.
+Use this skill when the user wants to explore a feature, improvement, or problem before spec or planning and needs a structured Harness Engineering brainstorm artifact.
 
 Primary triggers:
 - "brainstorm this feature"
@@ -58,7 +58,7 @@ Non-triggers:
 - requirements are already explicit enough for planning
 - the user wants direct implementation now
 - the request is for detailed sequencing, file edits, or test plans
-- the task is better handled by the broader `brainstorming` skill without compound-engineering handoff needs
+- the task is better handled by the broader `brainstorming` skill without Harness Engineering stage handoff needs
 
 ## Required inputs
 - a feature idea, problem, or improvement to explore
@@ -143,8 +143,8 @@ If the user references an existing brainstorm topic or document, or there is an 
 #### 0.1b Classify Task Domain
 Before Phase 0.2, classify the request:
 - Treat this as a software workflow only when the user is asking to build, modify, debug, deploy, or architect software; topical mentions of software alone are not enough.
-- **Software**: asks to build/modify/debug/deploy/architect software, including concrete code/repository/API/database change requests. Continue this CE workflow.
-- **Non-software brainstorming**: does not ask for software changes and the user wants to explore/decide in another domain (even if technical terms are mentioned as context). Route to `brainstorming` and stop this CE workflow.
+- **Software**: asks to build/modify/debug/deploy/architect software, including concrete code/repository/API/database change requests. Continue this HE workflow.
+- **Non-software brainstorming**: does not ask for software changes and the user wants to explore/decide in another domain (even if technical terms are mentioned as context). Route to `brainstorming` and stop this HE workflow.
 - **Neither**: quick factual question, direct task, or error triage that does not need brainstorming. Respond directly and skip brainstorm phases.
 
 If domain is ambiguous, ask one targeted question before proceeding.
@@ -187,6 +187,8 @@ If nothing obvious appears after a short scan, say so and continue. Two rules go
 1. **Verify before claiming** — When the brainstorm touches checkable infrastructure (database tables, routes, config files, dependencies, model definitions), read the relevant source files to confirm what actually exists. Any claim that something is absent must be verified against the codebase first; if not verified, label it as an unverified assumption.
 
 2. **Defer design decisions to planning** — Implementation details like schemas, migration strategies, endpoint structure, or deployment topology belong in planning, not here — unless the brainstorm is itself about a technical or architectural decision.
+
+**Slack context** — never auto-dispatch. If Slack tools are available and the user explicitly asks for organizational context, gather it alongside Phase 1.1 work and fold the findings into constraints and context awareness. If Slack tools are available but the user did not ask, mention that Slack context can be included on request. If the user asks and Slack tools are unavailable, say so directly and continue without blocking the brainstorm.
 
 #### 1.2 Product Pressure Test
 Before generating approaches, challenge the request to catch misframing using the scope-matched prompts in `Infrastructure/references/brainstorm-workflow-details.md`.
@@ -298,7 +300,7 @@ Use the closeout templates in `Infrastructure/references/brainstorm-workflow-det
 ## Examples
 - User says: "We have three dashboard personalization ideas; run `he-brainstorm` and recommend one direction with clear requirements before we plan."
 - User says: "Compare first-run onboarding options for our repo setup flow and decide whether this should go to `he-spec` or directly to `he-plan`."
-- User asks: "Resume `docs/brainstorms/2026-04-02-agent-feedback-loop-requirements.md`, resolve remaining blockers, then tell me the next CE stage."
+- User asks: "Resume `docs/brainstorms/2026-04-02-agent-feedback-loop-requirements.md`, resolve remaining blockers, then tell me the next HE stage."
 
 ## References
 - Contract: `Infrastructure/references/contract.yaml`
@@ -318,7 +320,7 @@ Use the closeout templates in `Infrastructure/references/brainstorm-workflow-det
 |---|---|
 | [[he-spec]] | Hand off medium or high-risk brainstorm outputs into a durable spec |
 | [[he-plan]] | Hand off low-risk, well-resolved brainstorm outputs into implementation planning |
-| [[brainstorming]] | Use when the user needs a broader, non-compound brainstorming workflow |
+| [[brainstorming]] | Use when the user needs a broader, non-stage-specific brainstorming workflow |
 
 **Topic map:** [[product-ops]]
 

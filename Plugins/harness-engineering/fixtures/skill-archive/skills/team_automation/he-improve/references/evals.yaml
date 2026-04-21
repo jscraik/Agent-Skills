@@ -1,0 +1,105 @@
+schema_version: "2.0"
+
+skill_name: "he-improve"
+
+cases:
+  - id: explicit-optimize-stage
+    name: explicit optimize stage request
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $he-improve to tune clustering quality with repeatable measurement and keep only improvements."
+    acceptance:
+      - type: regex
+        value: "(?i)(he-improve)"
+      - type: regex
+        value: "(?i)(baseline|experiment-log|measur|gate|hypothes)"
+
+  - id: hard-metric-optimization
+    name: hard metric optimization request
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Optimize build latency and memory use. We can run the same benchmark command each time."
+    acceptance:
+      - type: regex
+        value: "(?i)(he-improve)"
+      - type: regex
+        value: "(?i)(hard|build|latency|baseline|delta)"
+
+  - id: judge-metric-optimization
+    name: judge mode optimization request
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Tune search relevance where numeric metrics alone can be gamed. Use semantic judging."
+    acceptance:
+      - type: regex
+        value: "(?i)(he-improve)"
+      - type: regex
+        value: "(?i)(judge|rubric|sample|degenerate gate)"
+
+  - id: missing-measurement-input
+    name: missing measurement command
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-improve to optimize this, but I did not include any evaluation command."
+    acceptance:
+      - type: regex
+        value: "(?i)(What measurement command should I run\\?)"
+
+  - id: stop-no-metrics
+    name: no measurable target
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Optimize this with no metric, no rubric, and no way to judge whether it improved."
+    acceptance:
+      - type: regex
+        value: "(?i)(cannot|blocked|measurable|metric|judge)"
+
+  - id: implementation-not-optimization
+    name: direct implementation request
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Implement this approved plan now and ship it."
+    acceptance:
+      - type: not_regex
+        value: "(?i)(he-improve)"
+      - type: regex
+        value: "(?i)(he-work|he-tdd)"
+
+  - id: manifest-unavailable-fallback
+    name: manifest unavailable fallback guidance
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-improve, but ~/.codex/agents/manifest.json is unavailable during this run."
+    acceptance:
+      - type: regex
+        value: "(?i)(manifest|unavailable|fallback|manual)"
+
+  - id: missing-role-fallback
+    name: missing mapped role fallback guidance
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-improve; required mapped roles are missing from the manifest."
+    acceptance:
+      - type: regex
+        value: "(?i)(missing roles|manual|codex-agent-creator)"
+
+metadata:
+  last_updated: "2026-04-20"
+  author: "Codex"
+  review_status: "draft"

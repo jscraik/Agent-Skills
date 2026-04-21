@@ -1,0 +1,47 @@
+name: improve-search-relevance
+description: Improve semantic search quality with judge-scored evaluation
+
+metric:
+  primary:
+    type: judge
+    name: mean_score
+    direction: maximize
+  degenerate_gates:
+    - name: result_count
+      check: ">= 5"
+    - name: empty_query_failures
+      check: "== 0"
+  judge:
+    rubric: |
+      Rate each result set from 1-5 for relevance and ordering quality.
+      Return JSON with fields: item_id, score, ambiguous.
+    scoring:
+      primary: mean_score
+    sample_size: 10
+    batch_size: 5
+    sample_seed: 42
+    minimum_improvement: 0.2
+    max_total_cost_usd: 5
+
+measurement:
+  command: "python eval_search.py"
+  timeout_seconds: 300
+  working_directory: "tools/eval"
+
+scope:
+  mutable:
+    - "src/search/"
+    - "config/search.yaml"
+  immutable:
+    - "tools/eval/eval_search.py"
+    - "tests/fixtures/"
+
+execution:
+  mode: serial
+  backend: worktree
+  max_concurrent: 1
+
+stopping:
+  max_iterations: 4
+  max_hours: 1
+  plateau_iterations: 3

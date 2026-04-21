@@ -1,4 +1,4 @@
-# CE Work Execution Modes
+# Harness Engineering Work Execution Modes
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -11,7 +11,7 @@
 ## Purpose
 This note captures how `he-work` chooses an execution lane and task strategy without bloating the main skill body.
 
-For deterministic specialist/delegate role selection, use `Infrastructure/references/sub-agent-map.md`.
+For deterministic specialist/delegate role selection, use `./sub-agent-map.md`.
 
 ## Primary lanes
 - `plan-led`

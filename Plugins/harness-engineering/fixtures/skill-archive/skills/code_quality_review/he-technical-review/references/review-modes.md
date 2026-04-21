@@ -1,4 +1,4 @@
-# CE Technical Review Modes
+# Harness Engineering Technical Review Modes
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -16,19 +16,19 @@ This note preserves the original technical-review prompt mechanics while keeping
 
 Canonical scaffold files for this skill:
 - `finding.md.tmpl`
-- rendered baseline: `Infrastructure/references/finding-template.md`
+- rendered baseline: `references/finding-template.md`
 
 Render / refresh:
 
 ```bash
-python3 Plugins/harness-engineering/skills/code_quality_review/he-technical-review/Infrastructure/scripts/render_finding_template.py
-python3 Plugins/harness-engineering/skills/code_quality_review/he-technical-review/Infrastructure/scripts/check_finding_template_drift.py --update
+python3 Plugins/harness-engineering/fixtures/skill-archive/skills/code_quality_review/he-technical-review/scripts/render_finding_template.py
+python3 Plugins/harness-engineering/fixtures/skill-archive/skills/code_quality_review/he-technical-review/scripts/check_finding_template_drift.py --update
 ```
 
 Verify no drift:
 
 ```bash
-python3 Plugins/harness-engineering/skills/code_quality_review/he-technical-review/Infrastructure/scripts/check_finding_template_drift.py
+python3 Plugins/harness-engineering/fixtures/skill-archive/skills/code_quality_review/he-technical-review/scripts/check_finding_template_drift.py
 ```
 
 ## External evidence rule

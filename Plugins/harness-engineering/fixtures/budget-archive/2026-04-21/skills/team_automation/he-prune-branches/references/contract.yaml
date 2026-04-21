@@ -1,0 +1,43 @@
+schema_version: 1
+
+purpose: >
+  Run the Harness Engineering stale-branch cleanup stage by discovering local
+  branches whose upstream refs are gone, requesting explicit confirmation, and
+  applying worktree-safe deletion sequencing.
+
+inputs:
+  - repository path and git context
+  - yes/no confirmation for deleting discovered branches
+  - permission to remove associated worktrees before branch deletion
+
+outputs:
+  - schema_version: 1
+  - repo_path
+  - discovery_status
+  - candidate_branches
+  - confirmation
+  - cleanup_results
+  - summary
+
+triggers:
+  - user asks to prune stale local branches
+  - user asks to delete local branches removed from remote
+  - user asks for branch hygiene cleanup before further work
+
+non_goals:
+  - feature implementation
+  - multi-repo governance policy writing
+  - destructive cleanup without explicit confirmation
+
+risks:
+  - accidental branch deletion; mitigate with explicit whole-set confirmation
+  - orphaned worktree paths; mitigate with worktree-first cleanup ordering
+  - partial cleanup ambiguity; mitigate with per-branch outcome reporting
+
+observability: >
+  Track stage selection accuracy, fallback frequency when mapped roles are
+  unavailable, and validation pass/fail outcomes for each run.
+
+rollback_procedure: >
+  Restore the previous contract/evals/task-profile files from git, then rerun
+  strict skill audit and plugin-builder validation before re-promoting.

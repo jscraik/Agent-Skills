@@ -1,4 +1,4 @@
-# CE Deepen Spec Rewrite Rules
+# Harness Engineering Deepen Spec Rewrite Rules
 
 Read when: you are rewriting selected sections, adding the Enhancement Summary, or running final checks before writing the deepened spec.
 

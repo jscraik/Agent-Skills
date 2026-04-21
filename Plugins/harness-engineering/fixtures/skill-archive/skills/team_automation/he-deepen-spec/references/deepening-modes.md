@@ -1,4 +1,4 @@
-# CE Deepen Spec Modes
+# Harness Engineering Deepen Spec Modes
 
 Read when: you need to choose between targeted-confidence and max-coverage, decide whether artifact-backed execution is warranted, or score which spec sections deserve intervention.
 
@@ -132,12 +132,16 @@ Use only when:
 - the topic is high risk and bulky research output is likely
 
 Scratch path:
-- `.context/compound-engineering/he-deepen-spec/<run-id-or-spec-stem>/`
+- `.context/harness-engineering/he-deepen-spec/<run-id-or-spec-stem>/`
 
 Artifact rules:
 - one compact artifact per section or reviewer cluster
 - findings only, no implementation code, no command recipes
 - clean up unless the user asked to inspect them
+
+Role availability guardrail:
+- before delegation, keep only roles present in `~/.codex/agents/manifest.json`
+- if required roles are missing, continue inline/manual and route role creation to `[[codex-agent-creator]]`
 
 ## Legacy coverage preservation
 The original `deepen-spec` prompt was intentionally direct and broad:

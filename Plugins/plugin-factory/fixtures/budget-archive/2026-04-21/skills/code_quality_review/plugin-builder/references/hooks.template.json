@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "handlers": [
+          {
+            "type": "command",
+            "command": "./Infrastructure/scripts/hooks/session_start_check.sh",
+            "timeout": 30000,
+            "statusMessage": "Validating session startup contract"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "handlers": [
+          {
+            "type": "command",
+            "command": "./Infrastructure/scripts/hooks/stop_guard.sh",
+            "timeout": 15000,
+            "statusMessage": "Evaluating stop hook guardrails"
+          }
+        ]
+      }
+    ]
+  }
+}

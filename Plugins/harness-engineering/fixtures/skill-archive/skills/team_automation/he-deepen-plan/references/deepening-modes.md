@@ -1,4 +1,4 @@
-# CE Deepen Plan Modes
+# Harness Engineering Deepen Plan Modes
 
 Read when: you need to choose between targeted-confidence and max-coverage, decide whether artifact-backed execution is warranted, or score which plan sections deserve intervention.
 
@@ -125,12 +125,16 @@ Use only when:
 - the topic is high risk and bulky research output is likely
 
 Scratch path:
-- `.context/compound-engineering/he-deepen-plan/<run-id-or-plan-stem>/`
+- `.context/harness-engineering/he-deepen-plan/<run-id-or-plan-stem>/`
 
 Artifact rules:
 - one compact artifact per section or reviewer cluster
 - findings only, no implementation code, no command recipes
 - clean up unless the user asked to inspect them
+
+Role availability guardrail:
+- before delegation, keep only roles present in `~/.codex/agents/manifest.json`
+- if required roles are missing, continue inline/manual and route role creation to `[[codex-agent-creator]]`
 
 ## Legacy coverage preservation
 The original `deepen-plan` prompt was intentionally broad:

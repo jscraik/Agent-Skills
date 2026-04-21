@@ -71,7 +71,7 @@ ignore = ["E501"]
 | Skill | When to use |
 |---|---|
 | [[yaml]] | Schema-aware config review for YAML-based tooling configs |
-| [[systematic-debugging]] | Triage config parsing failures with evidence-first diagnosis |
+| [[he-fix-bugs]] | Triage config parsing failures with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
 

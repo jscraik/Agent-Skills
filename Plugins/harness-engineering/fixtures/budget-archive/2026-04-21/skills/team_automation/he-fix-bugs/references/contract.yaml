@@ -1,0 +1,41 @@
+schema_version: 1
+
+purpose: >
+  Run the canonical Harness Engineering bug-fixing workflow with reproducible intake,
+  evidence-first root-cause analysis, and optional minimal remediation.
+
+triggers:
+  - user asks to debug or fix a bug
+  - user shares stack trace, failing test, regression symptoms, or issue tracker reference
+  - prior fix attempts failed and a structured investigation is required
+
+inputs:
+  - issue source and reference (`linear`, `github`, or `manual-context`)
+  - observable symptoms and expected behavior
+  - environment clues and reproduction constraints
+  - execution permission (`diagnosis-only` vs `diagnose-and-fix`)
+
+outputs:
+  - reproduction status (`confirmed`, `not_reproduced`, `partial`, or `blocked`)
+  - root-cause chain with evidence references
+  - fix plan and test recommendations
+  - implementation summary when fix execution is requested
+  - structured summary including `schema_version: 1` on request
+
+non_goals:
+  - greenfield implementation work outside bug scope
+  - speculative fixes without diagnosis evidence
+  - automatic tracker mutations without explicit approval
+
+risks:
+  - symptom-fix bias; mitigate with causal-chain gate and prediction checks for uncertain links
+  - unreliable reproduction; mitigate with iterative instrumentation and environment notes
+  - scope drift into redesign; mitigate with explicit route to `he-brainstorm` when needed
+
+observability: >
+  Track stage selection accuracy, fallback frequency when mapped roles are
+  unavailable, and validation pass/fail outcomes for each run.
+
+rollback_procedure: >
+  Restore the previous contract/evals/task-profile files from git, then rerun
+  strict skill audit and plugin-builder validation before re-promoting.

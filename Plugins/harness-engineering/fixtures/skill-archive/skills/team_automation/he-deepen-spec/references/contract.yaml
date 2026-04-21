@@ -1,7 +1,7 @@
 schema_version: 1
 
 purpose: >
-  Run the spec-deepening stage of the compound-engineering workflow so the user gets
+  Run the spec-deepening stage of the harness-engineering workflow so the user gets
   a stronger, planning-ready system spec or UI spec with better boundary clarity,
   lifecycle detail, failure handling, observability, and validation before `he-plan`.
 
@@ -19,6 +19,7 @@ inputs:
 outputs:
   - a deepening-mode decision such as targeted-confidence or max-coverage
   - a research execution mode decision such as direct or artifact-backed
+  - a subagent route decision: automatic delegation when mapped roles exist, otherwise inline/manual fallback
   - a strengthened spec written in place or as a -deepened variant
   - a short enhancement summary, preserved or extended SA/VAC IDs, and explicit next-step guidance
 
@@ -31,5 +32,6 @@ non_goals:
 risks:
   - spec inflation without real planning-readiness gain; mitigate with weak-section scoring and targeted rewrites
   - context bloat from broad fan-out; mitigate with targeted-confidence default and artifact-backed mode only when justified
+  - missing reviewer roles at runtime; mitigate with manifest checks and codex-agent-creator fallback routing
   - contradiction with linked artifacts; mitigate with origin or parent rereads and explicit preservation checks
   - unstable acceptance IDs; mitigate with preserve-and-append rules for SA and VAC matrices

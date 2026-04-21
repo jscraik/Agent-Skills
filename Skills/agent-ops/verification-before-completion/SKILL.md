@@ -115,7 +115,7 @@ Required gates:
 
 | Skill | When to use together |
 |---|---|
-| [[systematic-debugging]] | Run first to find root cause; use this skill to prove the fix worked |
+| [[he-fix-bugs]] | Run first to find root cause; use this skill to prove the fix worked |
 | [[test-driven-development]] | Write failing tests before fixing; this skill verifies they now pass |
 | [[gh-workflow]] | Gate PR merges: verification must pass before PR language is used |
 | [[evals-router]] | Verify LLM eval pipelines pass before claiming eval work is complete |
