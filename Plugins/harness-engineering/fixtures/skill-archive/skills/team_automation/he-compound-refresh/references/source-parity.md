@@ -7,18 +7,17 @@
 - [Known constraints](#known-constraints)
 
 ## Source input
-This package is aligned against the upstream donor skill at:
+This package is aligned against the current local Harness Engineering refresh workflow:
 
-- repository: `EveryInc/compound-engineering-plugin`
-- commit: `e1524287f73ea1ec9598aa63c05a31745ff503c7`
-- path: `plugins/compound-engineering/skills/ce-compound-refresh/SKILL.md`
+- active stage: `Plugins/harness-engineering/skills/team_automation/he-compound-refresh/`
+- workflow reference: `Infrastructure/references/refresh-workflow.md`
 
-The local package still applies Codex/OpenAI progressive-disclosure packaging on top of that donor.
+The package preserves the local progressive-disclosure entrypoint plus the deeper archived workflow references.
 
 ## Preserved behaviors
 - `interactive` versus `mode:autonomous` execution
 - argument stripping for `mode:autonomous`
-- compatibility handling for the upstream `mode:autofix` token
+- compatibility handling for the `mode:autofix` alias
 - autonomous rules:
   - no user questions
   - process all matched docs

@@ -63,7 +63,7 @@ class TestAskSkillsRoute(unittest.TestCase):
             )
         ]
 
-        with patch("ask.commands.skills.discover_skill_entries", return_value=entries):
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
             with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub(ranked, [])):
                 with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
                     result = route_skills(REPO_ROOT, "review this change", top_k=1, considered_limit=2)
@@ -115,7 +115,7 @@ class TestAskSkillsRoute(unittest.TestCase):
                 risk_tier="low",
             ),
         ]
-        with patch("ask.commands.skills.discover_skill_entries", return_value=entries):
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
             with patch(
                 "ask.commands.skills._load_builder_module",
                 return_value=_RouterStub(ranked, ["top_candidates_close_score"]),
@@ -140,7 +140,7 @@ class TestAskSkillsRoute(unittest.TestCase):
             )
         ]
 
-        with patch("ask.commands.skills.discover_skill_entries", return_value=entries):
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
             with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub([], [])):
                 with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
                     result = route_skills(REPO_ROOT, "no match expected", top_k=1, considered_limit=5)

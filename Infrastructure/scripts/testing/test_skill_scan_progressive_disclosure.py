@@ -237,6 +237,24 @@ Keep this concise.
 
             self.assertEqual(rc, 1)
 
+    def test_iter_skill_files_skips_generated_skills_system_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            canonical_skill = root / "Skills" / "agent-ops" / "real-skill" / "SKILL.md"
+            generated_skill = root / "skills-system" / "generated-skill" / "SKILL.md"
+            canonical_skill.parent.mkdir(parents=True, exist_ok=True)
+            generated_skill.parent.mkdir(parents=True, exist_ok=True)
+            canonical_skill.write_text(_skill_with_required_headings("Real skill."), encoding="utf-8")
+            generated_skill.write_text(_skill_with_required_headings("Generated skill."), encoding="utf-8")
+
+            with (
+                mock.patch.object(self.module, "REPO_ROOT", root),
+            ):
+                discovered = [path.relative_to(root).as_posix() for path in self.module.iter_skill_files()]
+
+            self.assertNotIn("skills-system", self.module.ROOTS)
+            self.assertEqual(discovered, ["Skills/agent-ops/real-skill/SKILL.md"])
+
 
 if __name__ == "__main__":
     main()

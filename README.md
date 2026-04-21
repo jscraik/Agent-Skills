@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed repository of **120 canonical skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **131 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 
@@ -125,7 +125,7 @@ ask repo validate --ephemeral
 
 ## Skill graph (manual topic clusters, non-canonical)
 
-This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **120** skills (88 in `Skills/<topic-cluster>` + 5 in `.agents/skills/.system/` + 27 in `Plugins/`).
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **131** skills (88 in `Skills/<topic-cluster>` + 5 in `.agents/skills/.system/` + 27 in `Plugins/`).
 
 | Topic              | Skills | Examples                                           |
 | ------------------ | ------ | -------------------------------------------------- |

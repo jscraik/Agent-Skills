@@ -10,4 +10,4 @@ _archive = (
     "router_controls.py"
 )
 
-runpy.run_path(str(_archive), run_name=__name__)
+globals().update(runpy.run_path(str(_archive), run_name=__name__))

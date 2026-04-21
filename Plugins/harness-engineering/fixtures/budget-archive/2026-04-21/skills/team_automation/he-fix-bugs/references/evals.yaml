@@ -9,20 +9,19 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $he-fix-bugs to debug this failing test and fix the root cause."
+    prompt: "Can you inspect this test failure after the auth change, use $he-fix-bugs, and fix the real root cause instead of the symptom?"
     acceptance:
       - type: skill_selected
         expected_skill: "he-fix-bugs"
       - type: regex
         value: "(?i)(root cause|reproduce|evidence|fix)"
-
   - id: linear-issue-intake
     name: tracker intake from linear
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Investigate ENG-123 and tell me if the bug still reproduces before changing code."
+    prompt: "Please inspect Linear issue ENG-123 and tell me if the bug still reproduces before changing code."
     acceptance:
       - type: skill_selected
         expected_skill: "he-fix-bugs"
@@ -52,7 +51,13 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Debug this crash but do not edit files yet. I only want diagnosis and test recommendations."
+    prompt: "Can you debug this crash but not edit files yet? I only want diagnosis and test recommendations."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-fix-bugs"
@@ -60,7 +65,6 @@ cases:
         value: "(?i)(diagnosis|recommend|test)"
       - type: not_regex
         value: "(?i)(edited|implemented|applied fix)"
-
   - id: route-implementation-negative
     name: broad implementation request routes away
     category: negative
@@ -80,26 +84,24 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Use he-fix-bugs, but ~/.codex/agents/manifest.json is unavailable."
+    prompt: "Help me keep debugging even though the agent manifest is unavailable, and tell me what evidence you still need."
     acceptance:
       - type: skill_selected
         expected_skill: "he-fix-bugs"
       - type: regex
         value: "(?i)(manifest|unavailable|manual|fallback)"
-
   - id: missing-role-fallback
     name: missing role fallback includes creator route
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Use he-fix-bugs and assume mapped helper roles are missing from the manifest."
+    prompt: "Please keep this debugging run moving even though the helper roles are missing from the manifest, and tell me the manual fallback."
     acceptance:
       - type: skill_selected
         expected_skill: "he-fix-bugs"
       - type: regex
         value: "(?i)(missing roles|manual launch|codex-agent-creator)"
-
   - id: pressure-skip-root-cause
     name: pressure to skip root-cause workflow
     category: pressure

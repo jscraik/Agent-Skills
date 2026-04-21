@@ -1,6 +1,6 @@
 # HE Brainstorm Source Parity Map
 
-Read when: you need to verify that `he-brainstorm` preserves the legacy brainstorm prompt behavior while incorporating the newer upstream `compound-engineering-plugin` `ce-brainstorm` updates without losing repo-local contracts.
+Read when: you need to verify that `he-brainstorm` preserves the legacy brainstorm prompt behavior while incorporating the current Harness Engineering brainstorm updates without losing repo-local contracts.
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -10,11 +10,11 @@ Read when: you need to verify that `he-brainstorm` preserves the legacy brainsto
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the legacy brainstorm prompt plus the upstream `compound-engineering-plugin` `ce-brainstorm` skill to the local skill at `Plugins/harness-engineering/skills/team_automation/he-brainstorm/` so upstream-sync and prompt-to-skill migration remain auditable.
+This document maps the legacy brainstorm prompt plus the current Harness Engineering brainstorm workflow to the local skill at `Plugins/harness-engineering/skills/team_automation/he-brainstorm/` so prompt-to-skill migration and future refreshes remain auditable.
 
 ## Source inputs
 - legacy prompt: `configs/codex/prompts/workflow-brainstorm.md`
-- upstream donor skill (current review baseline): `https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/e1524287f73ea1ec9598aa63c05a31745ff503c7/plugins/compound-engineering/skills/ce-brainstorm/SKILL.md`
+- current brainstorm review baseline: `Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-brainstorm/SKILL.md`
 - migration target: `Plugins/harness-engineering/skills/team_automation/he-brainstorm/`
 - lightweight review doctrine adapted locally in `Infrastructure/references/document-review-pass.md`
 
@@ -43,10 +43,10 @@ This document maps the legacy brainstorm prompt plus the upstream `compound-engi
 
 
 ## Intentional modernizations
-- The April 20, 2026 source review kept the local advanced workflow structure and selectively pulled durable upstream clarifications from the pinned `ce-brainstorm` donor:
+- The April 20, 2026 source review kept the local advanced workflow structure and selectively pulled durable brainstorm clarifications into the current HE workflow:
   - explicit prohibition on absolute file paths in generated artifacts to preserve cross-machine/worktree portability,
   - clearer software-domain classification language so topical software mentions do not misroute non-software brainstorms.
-- The same refresh also pulled the donor's optional Slack-context guidance into Phase 1.1, but kept it opt-in and non-blocking so the local workflow still runs cleanly without Slack tooling.
+- The same refresh also pulled optional Slack-context guidance into Phase 1.1, but kept it opt-in and non-blocking so the local workflow still runs cleanly without Slack tooling.
 - Prompt-only control syntax such as `argument-hint` and slash-command handoffs were translated into durable skill guidance plus local `he-spec`, `he-plan`, and `he-work` handoff language.
 - The upstream `requirements doc` contract was adopted for new substantial work because local `he-plan` already prefers `docs/brainstorms/*-requirements.md` as the primary planning source.
 - Legacy `docs/brainstorms/*-brainstorm.md` artifacts remain supported for resume-in-place compatibility rather than forced renames.

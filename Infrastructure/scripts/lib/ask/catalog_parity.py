@@ -8,7 +8,7 @@ from pathlib import Path
 from statistics import median
 from typing import Any
 
-from skill_discovery import discover_skill_entries, get_policy_identity
+from skill_discovery import discover_catalog_entries, get_policy_identity
 
 
 CATALOG_PARITY_SCHEMA_VERSION = "catalog-parity.v1"
@@ -36,7 +36,7 @@ def _extract_readme_count(readme_path: Path) -> int | None:
     if not readme_path.exists():
         return None
     content = readme_path.read_text(encoding="utf-8", errors="ignore")
-    match = re.search(r"\*\*(\d+)\s+skills\*\*", content)
+    match = re.search(r"\*\*(\d+)(?:\s+canonical)?\s+skills\*\*", content)
     if not match:
         return None
     return int(match.group(1))
@@ -194,13 +194,13 @@ def compute_catalog_parity(
             - `required_surfaces`: list of surfaces that are considered required.
             - `strict_mode`: echo of the `strict` parameter.
     """
-    canonical_count = len(discover_skill_entries(source="repo"))
+    canonical_count = len(discover_catalog_entries())
     active_policy_identity = get_policy_identity()
 
     readme_count = _extract_readme_count(repo_root / "README.md")
     skill_index_count = _extract_root_skill_index_count(repo_root / "SKILL.md")
     skill_index_policy_identity = _extract_root_skill_index_policy_identity(repo_root / "SKILL.md")
-    list_count = skills_list_count if skills_list_count is not None else len(discover_skill_entries(source="repo"))
+    list_count = skills_list_count if skills_list_count is not None else len(discover_catalog_entries())
     considered_total = route_considered_total if route_considered_total is not None else canonical_count
 
     surfaces = [

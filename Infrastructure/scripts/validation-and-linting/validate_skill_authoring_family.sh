@@ -349,27 +349,18 @@ fi
 
 if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
   echo "[family-gate] running pytest unit tests..."
-  pytest_skill_gate_path=""
-  pytest_skill_gate_candidates=(
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
-    "Plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
-    "plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py"
-    "plugins/skill-factory/skills/skill-builder/scripts/test_skill_gate.py"
-  )
-  for candidate in "${pytest_skill_gate_candidates[@]}"; do
-    if [[ -f "$candidate" ]]; then
-      pytest_skill_gate_path="$candidate"
-      break
-    fi
-  done
+  skill_gate_unittest_path="$(cd "$skill_builder_scripts_dir" && pwd -P)/test_skill_gate.py"
+  if [[ ! -f "$skill_gate_unittest_path" ]]; then
+    echo "[family-gate] ERROR: missing skill-gate unit-test target"
+    exit 2
+  fi
 
-  if [[ -z "$pytest_skill_gate_path" ]]; then
-    echo "[family-gate] ERROR: missing skill-gate pytest target"
+  if ! "${python_cmd[@]}" "$skill_gate_unittest_path"; then
+    echo "[family-gate] ERROR: skill_gate unit tests failed — fix before proceeding"
     exit 2
   fi
 
   if "${pytest_cmd[@]}" \
-      "$pytest_skill_gate_path" \
       Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py \
       Infrastructure/scripts/testing/test_projection_integrity.py \
       -q --tb=short; then

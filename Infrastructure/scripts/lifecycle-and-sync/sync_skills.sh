@@ -244,6 +244,13 @@ if [ -d "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
   fi
 fi
 
+# Reassert projection-managed bridge aliases after preserving `.system` into
+# `skills-system/`. Without this, preserved runtime copies can replace the
+# canonical plugin/skill-factory aliases with real directories and leave
+# projection integrity in drift until a manual repair pass.
+python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py" sync --scope skill-factory >/dev/null
+python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py" sync --scope plugin-factory >/dev/null
+
 # Remove stale symlinks only (keep any real files that might be intentional).
 if [ -w "$skills_dir" ]; then
   find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
@@ -584,7 +591,9 @@ for skill_entry in "$skills_dir"/*; do
   mkdir -p "$target_dir"
 
   if command -v rsync >/dev/null 2>&1; then
-    rsync -a \
+    # Materialize dereferenced content so Antigravity never inherits repo-local
+    # symlink topology from .agents/skills.
+    rsync -aL \
       --delete \
       --exclude '.git' \
       --exclude 'node_modules' \
@@ -593,7 +602,7 @@ for skill_entry in "$skills_dir"/*; do
   else
     rm -rf -- "$target_dir"
     mkdir -p "$target_dir"
-    cp -R "$skill_entry"/. "$target_dir"/
+    cp -RL "$skill_entry"/. "$target_dir"/
     rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
   fi
 done
@@ -1021,7 +1030,32 @@ HEADER
   } >> "$index_file"
 }
 
-python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py" --source repo --write-index "$repo_root/SKILL.md"
+python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py" --source catalog --write-index "$repo_root/SKILL.md"
+catalog_count="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py" --source catalog --count
+)"
+python3 - "$repo_root/README.md" "$catalog_count" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+readme_path = Path(sys.argv[1])
+catalog_count = sys.argv[2]
+content = readme_path.read_text(encoding="utf-8")
+content = re.sub(
+    r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
+    f"A governed repository of **{catalog_count} skills** for AI coding agents",
+    content,
+    count=1,
+)
+content = re.sub(
+    r"currently expects \*\*\d+\*\* skills",
+    f"currently expects **{catalog_count}** skills",
+    content,
+    count=1,
+)
+readme_path.write_text(content, encoding="utf-8")
+PY
 generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
 # remove_legacy_symlink removes the symlink at the given path if it exists and echoes a confirmation.

@@ -15,7 +15,7 @@
 - [Optional runtime verification](#optional-runtime-verification)
 
 ## Purpose
-This note preserves the stronger parts of the legacy `ce:review` prompt while keeping the main skill concise and scoped.
+This note preserves the stronger parts of the legacy broad-review workflow while keeping the main skill concise and scoped.
 
 ## Argument parsing and overrides
 Parse optional modifiers before reviewer selection:

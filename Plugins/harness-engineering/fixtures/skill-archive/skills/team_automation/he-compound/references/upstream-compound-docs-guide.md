@@ -1,6 +1,6 @@
-# Upstream Compound Docs Guide
+# Structured Solution Docs Guide
 
-Imported from `EveryInc/compound-engineering-plugin` commit `0fdc25a36cabea4ce9e2ae47ff69c1a9a2de8f0b`.
+Archived reference for the structured `docs/solutions/` capture variant preserved under `he-compound`.
 
 Read when:
 - the target repository already uses YAML-frontmatter `docs/solutions/` files
@@ -126,7 +126,7 @@ After successful documentation, pause for an explicit next step:
 
 ## Integration notes
 
-This upstream package was designed as a terminal documentation-capture skill.
+This archived guide represents a terminal documentation-capture workflow.
 
 Within this repo, its strongest ideas are preserved as a learning-capture variant inside `he-compound`, rather than as a separate duplicate skill:
 - schema-driven YAML validation

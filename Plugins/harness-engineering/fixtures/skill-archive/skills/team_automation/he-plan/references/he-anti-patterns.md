@@ -1,4 +1,4 @@
-# Compound Engineering Anti-Patterns
+# Harness Engineering Anti-Patterns
 
 Anti-patterns are common solutions to common problems that aren't really solutions at all. They are worst practices that cause more issues than they solve.
 

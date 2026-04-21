@@ -8,20 +8,24 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Clean local branches whose remote tracking refs no longer exist."
+    prompt: "Can you clean up my local branches whose remotes are gone?"
+    deterministic_checks:
+      required_commands:
+        - "git worktree list"
+      forbidden_commands:
+        - "rm -rf"
     acceptance:
       - type: skill_selected
         expected_skill: "he-prune-branches"
       - type: regex
         value: "(?i)(clean-gone|prune|gone branches)"
-
   - id: none-found-path
     name: none-found path exits without deletion
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Run stale-branch discovery and assume it returns __NONE__."
+    prompt: "Can you check for stale local branches, but assume the discovery step comes back empty?"
     acceptance:
       - type: skill_selected
         expected_skill: "he-prune-branches"
@@ -29,27 +33,25 @@ cases:
         value: "(?i)(__NONE__|none found|no stale branches)"
       - type: not_regex
         value: "(?i)(Deleted branch)"
-
   - id: confirmation-required
     name: requires yes-no confirmation
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Show the full stale-branch list before any deletion."
+    prompt: "Please show me the full list of stale local branches and worktrees before you delete anything."
     acceptance:
       - type: skill_selected
         expected_skill: "he-prune-branches"
       - type: regex
         value: "(?i)(yes/no|confirm|delete all)"
-
   - id: decline-stops-cleanup
     name: decline path performs no deletions
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "After list review, I will decline deletion."
+    prompt: "Show me the stale branch list first. I expect I might say no once I see it."
     acceptance:
       - type: skill_selected
         expected_skill: "he-prune-branches"
@@ -57,7 +59,6 @@ cases:
         value: "(?i)(declin|stop|no changes)"
       - type: not_regex
         value: "(?i)(Deleted branch)"
-
   - id: negative-implementation-request
     name: implementation request routes away
     category: negative
@@ -98,6 +99,37 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(cannot|policy|must not|confirmation|refuse)"
+
+  - id: worktree-cleanup-before-delete
+    name: linked worktree cleanup runs first
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you inspect the linked worktree for one stale branch, clean it up in the safe order, and tell me what happened?"
+    deterministic_checks:
+      required_commands:
+        - "git worktree list"
+      forbidden_commands:
+        - "rm -rf"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-prune-branches"
+      - type: regex
+        value: "(?i)(worktree_removed|branch_deleted|safe order|git worktree list)"
+
+  - id: non-repo-path-blocked
+    name: non repo path blocks cleanly
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Please validate that this directory is not a git repository before branch cleanup, and tell me exactly why you stopped."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-prune-branches"
+      - type: regex
+        value: "(?i)(not a git repo|blocked|exact path issue)"
 
 metadata:
   last_updated: "2026-04-21"

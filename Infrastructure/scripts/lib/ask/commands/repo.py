@@ -1,6 +1,7 @@
 import subprocess
 import json
 import re
+import sys
 from pathlib import Path
 from typing import List
 from ask.envelope import CallResult, ErrorObject
@@ -58,10 +59,25 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
     else:
         cmd.append("--persistent")
         
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    stdout_chunks: List[str] = []
+    with subprocess.Popen(
+        cmd,
+        cwd=str(repo_root),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    ) as process:
+        assert process.stdout is not None
+        for line in process.stdout:
+            stdout_chunks.append(line)
+            # Preserve machine-readable stdout for the final envelope while still
+            # showing long-running validation progress to operators in real time.
+            print(line, end="", file=sys.stderr)
+        process.wait()
     
     # Parse output for summary
-    stdout = process.stdout
+    stdout = "".join(stdout_chunks)
     required_failures = 0
     warn_only_issues = 0
 

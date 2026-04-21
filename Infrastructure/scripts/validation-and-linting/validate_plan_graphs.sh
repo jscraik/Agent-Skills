@@ -70,9 +70,21 @@ run_plan_graph_linter() {
 }
 
 paths=(".agents/PLANS.md")
+dedupe_manifest="$(mktemp "${TMPDIR:-/tmp}/agent-skills-plan-graphs.XXXXXX")"
+cleanup() {
+  rm -f "$dedupe_manifest"
+}
+trap cleanup EXIT
+
 for plans_dir in docs/plans Docs/plans; do
   if [[ -d "$plans_dir" ]]; then
     while IFS= read -r path; do
+      rel_path="${path#"$plans_dir"/}"
+      existing_path="$(awk -F '\t' -v rel="$rel_path" '$1 == rel { print $2; exit }' "$dedupe_manifest")"
+      if [[ -n "$existing_path" ]] && cmp -s "$existing_path" "$path"; then
+        continue
+      fi
+      printf '%s\t%s\n' "$rel_path" "$path" >> "$dedupe_manifest"
       paths+=("$path")
     done < <(find "$plans_dir" -maxdepth 1 -type f -name '*.md' | sort)
   fi

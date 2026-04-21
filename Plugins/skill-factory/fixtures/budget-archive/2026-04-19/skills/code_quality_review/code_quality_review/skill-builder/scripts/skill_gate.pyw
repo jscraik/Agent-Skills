@@ -763,7 +763,7 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     unresolved_or_external: List[str] = []
     for rel in traversal_refs:
         resolved = (doc.path.parent / rel).resolve()
-        if repo_root and resolved.exists() and resolved.is_relative_to(repo_root):
+        if repo_root and resolved.is_relative_to(repo_root):
             continue
         unresolved_or_external.append(rel)
 

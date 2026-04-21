@@ -353,6 +353,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             module.should_skip_skill_path(Path(".codex/.tmp/Plugins/.agents/skills/canonical-skill/SKILL.md"))
         )
         self.assertTrue(
+            module.should_skip_skill_path(Path(".agents/skills/.system/canonical-skill/SKILL.md"))
+        )
+        self.assertTrue(
             module.should_skip_skill_path(Path(".codex/skills/.system/canonical-skill/SKILL.md"))
         )
         self.assertFalse(module.should_skip_skill_path(Path(".codex/skills/custom-skill/SKILL.md")))
@@ -504,6 +507,18 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         selection_policy = load_selection_policy_module()
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
+
+    def test_selection_policy_promotes_all_harness_engineering_public_skills_for_flat_visibility(self) -> None:
+        selection_policy = load_selection_policy_module()
+        he_skill_names = sorted(
+            path.parent.name
+            for path in (REPO_ROOT / "Plugins" / "harness-engineering" / "skills").glob("**/SKILL.md")
+            if path.parent.name.startswith("he-")
+        )
+        self.assertEqual(
+            sorted(selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
+            he_skill_names,
+        )
 
     def test_skill_discovery_visibility_respects_router_allowlist(self) -> None:
         """

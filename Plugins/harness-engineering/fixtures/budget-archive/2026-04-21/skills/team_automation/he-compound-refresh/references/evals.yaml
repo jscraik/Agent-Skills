@@ -9,39 +9,54 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Please use $he-compound-refresh on the auth learnings because the refactor likely made some docs stale."
+    prompt: "Please refresh the auth solution docs. The refactor changed enough that some of that guidance is probably stale."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-compound-refresh"
       - type: regex
         value: "(?i)(interactive|autonomous|focused|batch|docs/solutions|Keep|Update|Consolidate|Replace|Archive)"
-
   - id: autonomous-payments-refresh
     name: autonomous refresh request
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Run he:compound-refresh mode:autonomous payments and apply any safe stale-doc maintenance without asking me questions."
+    prompt: "Please refresh the payment solution docs in autonomous mode and apply any obviously safe stale-doc maintenance without waiting on me."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-compound-refresh"
       - type: regex
         value: "(?i)(autonomous|Applied|Recommended|mark.*stale|payments|Consolidate)"
-
   - id: upstream-autofix-alias
     name: upstream autofix alias
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Run he:compound-refresh mode:autofix auth and use the older upstream flag without asking me follow-up questions."
+    prompt: "Please refresh the auth learnings in mode:autofix and keep going without follow-up questions when the safe changes are obvious."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-compound-refresh"
       - type: regex
         value: "(?i)(mode:autofix|autonomous|Applied|Recommended|auth)"
-
   - id: stale-pattern-request
     name: stale pattern request
     category: happy

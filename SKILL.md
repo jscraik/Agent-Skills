@@ -5,6 +5,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
+- [Plugins — Harness Engineering — Skills](#plugins-harness-engineering-skills)
+- [Plugins — Harness Engineering — Skills — Code_Quality_Review](#plugins-harness-engineering-skills-code_quality_review)
+- [Plugins — Harness Engineering — Skills — Team_Automation](#plugins-harness-engineering-skills-team_automation)
+- [Plugins — Plugin Factory — Skills — Infrastructure_Ops](#plugins-plugin-factory-skills-infrastructure_ops)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
@@ -12,15 +16,50 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
+- [Plugins — Plugin Factory — Skills — Code_Quality_Review](#plugins-plugin-factory-skills-code_quality_review)
+- [Plugins — Plugin Factory — Skills — Team_Automation](#plugins-plugin-factory-skills-team_automation)
+- [Plugins — Skill Factory — Skills](#plugins-skill-factory-skills)
+- [Plugins — Skill Factory — Skills — Code_Quality_Review](#plugins-skill-factory-skills-code_quality_review)
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 107
-- `catalog_source`: repository skill scan
+- `total_skills`: 131
+- `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: a4d137082c750ef9
+- `policy_identity`: d8f37e43ba560c95
 
 ## Catalog
+
+## Plugins — Harness Engineering — Skills
+
+- `he-router` — Analyze Harness Engineering requests and choose one stage plus next command. Use when intent is unclear.
+
+## Plugins — Harness Engineering — Skills — Code_Quality_Review
+
+- `he-code-review` — Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with severity-ranked synthesis. Use when users need readiness synthesis rather than detailed technical-risk critique.
+- `he-reliability-review` — Review services, APIs, and multi-component systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness. Use when the work involves new services, significant service changes, multiple external dependencies, or high blast-radius failure scenarios.
+- `he-technical-review` — Review diffs, PRs, specs, plans, or review-feedback items and return severity-ranked engineering findings with exact locations. Use when technical risks or feedback correctness must be verified before implementation.
+
+## Plugins — Harness Engineering — Skills — Team_Automation
+
+- `he-brainstorm` — Define problem scope, requirements, and decision options before spec or plan stages. Use when the user has ambiguity in what to build, why it matters, or which direction to choose.
+- `he-compound` — Analyze Harness Engineering lifecycle state, plan the correct stage routing, and capture verified solved problems into durable docs/solutions knowledge. Use when the user asks to start or resume from the correct stage, or to document a verified fix as reusable team guidance.
+- `he-compound-refresh` — Use when Harness Engineering needs to review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation after refactors, migrations, or dependency upgrades.
+- `he-deepen-plan` — Deepen an existing implementation plan so sequencing, verification, and risk treatment are strong enough for execution. Use when the user wants Harness Engineering plan hardening before he-work.
+- `he-deepen-spec` — Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants Harness Engineering spec hardening or a requirements review pass before planning.
+- `he-fix-bugs` — Restore broken behavior by reproducing failures, identifying root cause, and delivering verified fixes. Use when the user needs regression debugging, incident triage, or bug repair from tracker or direct reports.
+- `he-ideate` — Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants the Harness Engineering ideation stage before brainstorming in depth, not a general product brainstorm.
+- `he-improve` — Analyze and improve an existing implementation through metric-driven, bounded iteration loops. Use when the user wants Harness Engineering optimization or tuning rather than one-shot implementation.
+- `he-plan` — Plan execution work from specs, brainstorm outputs, bugs, or feature requests into an implementation-ready sequence. Use when the user needs the Harness Engineering planning stage before execution.
+- `he-prune-branches` — Automate stale local git branch cleanup with worktree-aware deletion and explicit confirmation gates. Use this skill when the user asks to prune local branches whose remote tracking refs are gone.
+- `he-refine` — [BETA] Improve user-facing quality of an existing feature through guided refinement and validation loops. Use when behavior works but UX, accessibility, or polish quality must be raised before review.
+- `he-spec` — Own the Harness Engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the WHAT-before-planning artifact, not a broader product-planning pipeline.
+- `he-tdd` — Build behavior-safe code changes with TDD and RED/GREEN evidence. Use when he-plan or he-work requires TDD for a concrete behavior target.
+- `he-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned.
+
+## Plugins — Plugin Factory — Skills — Infrastructure_Ops
+
+- `plugin-installer` — Install validated plugins with provenance and rollback safety
 
 ## Skills — Agent Ops
 
@@ -146,7 +185,27 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `security-ownership-map` — Use this skill to analyze security ownership in a git repository by linking people, files, bus factor, and sensitive-code risk when the user explicitly wants security-focused ownership analysis from git history.
 - `security-threat-model` — Produce a repository-grounded threat model covering assets, trust boundaries, attackers, abuse paths, and mitigations. Use when the user explicitly wants AppSec threat modeling, not general architecture review.
 
+## Plugins — Plugin Factory — Skills — Code_Quality_Review
+
+- `plugin-builder` — Harden and validate Codex plugin packages with contract-grade checks before install or release. Use when the deliverable is a plugin package that needs conversion or hardening.
+
+## Plugins — Plugin Factory — Skills — Team_Automation
+
+- `plugin-router` — Route plugin requests to the right factory lane
+
+## Plugins — Skill Factory — Skills
+
+- `skill-factory-router` — Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden, install, audit, or skillify skills.
+
+## Plugins — Skill Factory — Skills — Code_Quality_Review
+
+- `skill-builder` — Analyze and harden Codex skills and plugin packages for contract quality, eval coverage, and safety compliance. Use this skill when an existing package is approaching release and needs evidence-backed validation.
+
 ## Skills System
 
 - `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
+- `plugin-creator` — Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, and baseline placeholders you can edit before publishing or testing. Use when Codex needs to create a new local plugin, add optional plugin structure, or generate or update repo-root `.agents/plugins/marketplace.json` entries for plugin ordering and availability metadata.
+- `skill-creator` — Create or update a skill
+- `skill-installer` — Install curated skills from openai/skills or other repos
+

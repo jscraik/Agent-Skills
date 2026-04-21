@@ -49,6 +49,24 @@ def get_policy_identity() -> str:
     return policy_identity()
 
 
+def _is_hidden_coderabbit_lane(source_dir: Path, name: str) -> bool:
+    """
+    Return whether a skill entry is a hidden CodeRabbit lane on the default catalog surface.
+
+    Parameters:
+        source_dir (Path): Directory that owns the skill.
+        name (str): Skill name derived from the directory.
+
+    Returns:
+        bool: `True` when the entry represents a hidden CodeRabbit lane such as
+        `code-review` or `autofix`, otherwise `False`.
+    """
+    if name not in {"code-review", "autofix"}:
+        return False
+    parts_lower = {part.lower() for part in source_dir.parts}
+    return "plugins" in parts_lower and "coderabbit" in parts_lower and "skills" in parts_lower
+
+
 def _iter_flat_skill_dirs() -> List[Path]:
     if not FLAT_SKILLS_DIR.is_dir():
         return []
@@ -234,6 +252,32 @@ def _normalize_description(text: str) -> str:
     return normalized or "Skill description pending."
 
 
+def discover_catalog_entries(*, advanced: bool = False) -> List[SkillEntry]:
+    """
+    Discover the default user-visible catalog surface used by list, route, and parity.
+
+    The catalog surface starts from auto-resolved advanced discovery so system bridge
+    skills and plugin-owned routable skills stay visible, then removes hidden lane
+    entries that are intentionally omitted from the default picker surface.
+
+    Parameters:
+        advanced (bool): When `True`, return the full advanced surface including
+        hidden lanes. When `False`, remove default-hidden lane skills.
+
+    Returns:
+        List[SkillEntry]: Sorted catalog entries for the requested surface.
+    """
+    entries = discover_skill_entries(source="auto", visibility="advanced")
+    if advanced:
+        return entries
+    return [
+        entry
+        for entry in entries
+        if entry.name not in PLUGIN_HIDDEN_LANE_SKILL_NAMES
+        and not _is_hidden_coderabbit_lane(entry.source_dir, entry.name)
+    ]
+
+
 def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
     """
     Discover skill entries from the configured skill sources.
@@ -253,10 +297,13 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
     Raises:
         ValueError: If `visibility` is not "default" or "advanced", or if `source` is not one of "auto", "flat", or "repo".
     """
-    if source not in {"auto", "flat", "repo"}:
+    if source not in {"auto", "flat", "repo", "catalog"}:
         raise ValueError(f"Unsupported source: {source}")
     if visibility not in {"default", "advanced"}:
         raise ValueError(f"Unsupported visibility mode: {visibility}")
+
+    if source == "catalog":
+        return discover_catalog_entries(advanced=visibility == "advanced")
 
     seen: set[str] = set()
     entries: List[SkillEntry] = []
@@ -353,9 +400,9 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
     
     Parameters:
         entries (List[SkillEntry]): Skill entries to include in the index.
-        source (str): Source label used in the Summary; typically "flat", "repo" or "auto".
+        source (str): Source label used in the Summary; typically "flat", "repo", "catalog", or "auto".
             These map to "`.agents/skills` flat runtime view", "repository skill scan"
-            and "auto-resolved catalog source" respectively.
+            "default user-visible catalog surface", and "auto-resolved catalog source" respectively.
         visibility (str): Visibility mode included in the Summary; expected values are
             "default" or "advanced" and influence which skills are presented elsewhere
             in the discovery process.
@@ -384,6 +431,7 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
     source_label = {
         "flat": "`.agents/skills` flat runtime view",
         "repo": "repository skill scan",
+        "catalog": "default user-visible catalog surface",
         "auto": "auto-resolved catalog source",
     }.get(source, source)
 
@@ -423,9 +471,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--write-index", type=Path, help="Write the generated root SKILL.md index")
     parser.add_argument(
         "--source",
-        choices=("auto", "flat", "repo"),
+        choices=("auto", "flat", "repo", "catalog"),
         default="auto",
-        help="Catalog source: flat runtime view, repo scan, or auto fallback (default).",
+        help="Catalog source: flat runtime view, repo scan, default catalog surface, or auto fallback (default).",
     )
     parser.add_argument(
         "--visibility",

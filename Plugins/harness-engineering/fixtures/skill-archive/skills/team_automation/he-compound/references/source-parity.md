@@ -5,12 +5,8 @@
 This package preserves and restructures the following source prompt families:
 
 1. `Infrastructure/config/codex/prompts/workflow-compound.md`
-2. legacy `ce:compound` solved-problem capture prompt
-3. upstream `compound-docs` schema-driven capture workflow
-4. upstream donor snapshot:
-   - repo: `EveryInc/compound-engineering-plugin`
-   - commit: `e1524287f73ea1ec9598aa63c05a31745ff503c7`
-   - path: `plugins/compound-engineering/skills/ce-compound/SKILL.md`
+2. legacy solved-problem capture prompt family
+3. structured schema-driven capture workflow preserved for Harness Engineering repositories that want stronger `docs/solutions/` contracts
 
 ## Preserved from `workflow-compound.md`
 
@@ -35,7 +31,7 @@ This package preserves and restructures the following source prompt families:
 - UI branching protocol for UI-impacting work
 - current stage plus next-command output contract
 
-## Preserved from the legacy `ce:compound` prompt
+## Preserved from the legacy solved-problem capture prompt family
 
 - direct solved-problem capture into `docs/solutions/`
 - default `full` mode and opt-in `compact-safe` mode
@@ -95,9 +91,9 @@ Modern improvements added without losing source strength:
 - preservation of legacy breadth as an explicit mode rather than the universal default
 - reference-first consolidation: standards/philosophy/variation and full anti-pattern catalog moved into dedicated references with explicit SKILL signposts
 
-### Upstream schema-driven capture preserved as a variant
+### Structured schema-driven capture preserved as a variant
 
-The imported `compound-docs` package contributes a stronger structured-capture variant for repos that want:
+The archived structured-capture materials contribute a stronger variant for repos that want:
 - validated YAML frontmatter
 - explicit enum-based categorization
 - reusable troubleshooting and critical-pattern templates
@@ -110,4 +106,4 @@ Rather than splitting this into a duplicate sibling skill, the package preserves
 - If the user starts from a feature idea, `he-compound` still acts as the lifecycle orchestrator.
 - If the user starts from an already fixed issue, `he-compound` still acts as the durable learning-capture stage.
 - If the user is mid-flight with existing artifacts, `he-compound` still supports resume behavior rather than restarting blindly.
-- If the same solved problem appears again, `he-compound` now preserves the upstream bias toward refreshing the existing solution doc when overlap is high.
+- If the same solved problem appears again, `he-compound` preserves the refresh-instead-of-duplicate behavior when overlap is high.

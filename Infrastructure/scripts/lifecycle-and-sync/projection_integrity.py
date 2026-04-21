@@ -438,6 +438,8 @@ def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object
     status = "synced"
     changed = False
 
+    managed_projection_alias = spec.alias_path.startswith("skills-system/")
+
     if alias_abs.exists() or alias_abs.is_symlink():
         if alias_abs.is_symlink():
             current_target = os.readlink(alias_abs)
@@ -455,14 +457,18 @@ def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object
             alias_abs.unlink()
             changed = True
         elif alias_abs.is_dir():
-            return {
-                "name": spec.name,
-                "type": "symlink",
-                "status": "error",
-                "reason": "alias_requires_manual_migration",
-                "alias": spec.alias_path,
-                "canonical": spec.canonical_path,
-            }
+            if managed_projection_alias:
+                shutil.rmtree(alias_abs)
+                changed = True
+            else:
+                return {
+                    "name": spec.name,
+                    "type": "symlink",
+                    "status": "error",
+                    "reason": "alias_requires_manual_migration",
+                    "alias": spec.alias_path,
+                    "canonical": spec.canonical_path,
+                }
         else:
             alias_abs.unlink()
             changed = True

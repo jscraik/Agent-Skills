@@ -333,6 +333,35 @@ class ProjectionIntegrityTests(unittest.TestCase):
             self.assertTrue(alias.is_dir())
             self.assertTrue((alias / "local-note.txt").exists())
 
+    def test_ensure_symlink_replaces_managed_skills_system_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            canonical = (
+                repo_root
+                / "Plugins"
+                / "skill-factory"
+                / "skills"
+                / "scaffolding_templates"
+                / "skill-creator"
+            )
+            canonical.mkdir(parents=True, exist_ok=True)
+            (canonical / "SKILL.md").write_text("# Skill Creator\n", encoding="utf-8")
+
+            alias = repo_root / "skills-system" / "skill-creator"
+            alias.mkdir(parents=True, exist_ok=True)
+            (alias / "stale.txt").write_text("stale\n", encoding="utf-8")
+
+            spec = self.mod.SymlinkProjection(
+                name="skill-factory-skill-creator-alias",
+                alias_path="skills-system/skill-creator",
+                canonical_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+                tags=("skill-factory",),
+            )
+            result = self.mod.ensure_symlink(repo_root, spec)
+            self.assertIn(result["status"], {"replaced", "synced"})
+            self.assertTrue(alias.is_symlink())
+            self.assertEqual((alias.parent / os.readlink(alias)).resolve(), canonical.resolve())
+
 
 if __name__ == "__main__":
     unittest.main()

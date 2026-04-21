@@ -29,6 +29,7 @@ SKIP_PATH_PREFIXES = {
     (".claude", "worktrees"),
     ("plugins", "cache"),
     (".agents", "plugins-runtime", "cache"),
+    (".agents", "skills", ".system"),
     (".codex", ".tmp"),
     (".codex", "skills", ".system"),
 }
