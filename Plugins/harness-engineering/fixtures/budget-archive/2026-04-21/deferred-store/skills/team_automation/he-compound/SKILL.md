@@ -72,4 +72,4 @@ Read when: detailed policy or templates are required.
 - Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
 - Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
 - If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, create or install them with [codex-agent-creator](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) before rerunning delegated coverage.
+- If required roles are missing from the manifest, create or install them with [[codex-agent-creator]] before rerunning delegated coverage.
