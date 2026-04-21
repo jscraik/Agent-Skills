@@ -2,18 +2,20 @@ schema_version: "1.0"
 skill: "rust-pro"
 type: runbook
 purpose: >
-  Define the expected execution contract for rust-pro so routing, outputs,
-  and validation behavior remain consistent and testable.
+  Provide expert Rust development guidance including idiomatic code review,
+  Cargo dependency management, lifetime/borrow-checker analysis, unsafe code
+  audits, and async runtime selection aligned with project constraints.
 triggers:
   - User requests work that matches this skill's domain and workflow.
   - The task needs this skill's specific implementation or review contract.
 inputs:
-  - clear user goal and scope
-  - relevant repository context or target files
-  - constraints, risks, and validation expectations
+  - Rust project structure (Cargo.toml, src/, target Rust edition)
+  - specific modules, functions, or dependencies requiring review/implementation
+  - performance, safety, or compatibility requirements
 outputs:
-  - concrete guidance or edits aligned to the skill scope
-  - explicit validation results and blocker evidence
+  - idiomatic Rust code with proper lifetime annotations and error handling
+  - Cargo.toml dependency recommendations with version rationale
+  - clippy/rustfmt validation results and borrow-checker blocker evidence
   - residual risks or follow-up actions when applicable
 non_goals:
   - unrelated architectural rewrites
