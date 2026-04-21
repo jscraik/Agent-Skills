@@ -47,6 +47,22 @@ EXPECTED_MARKETPLACE_SOURCE_PATHS = {
     "skill-factory": "./Plugins/skill-factory",
 }
 
+EXPECTED_PLUGIN_KEYWORDS = {
+    "plugin-factory": {
+        "plugin-factory-router",
+        "plugin-router",
+        "plugin-builder",
+        "plugin-creator",
+        "plugin-installer",
+    },
+    "skill-factory": {
+        "skill-factory-router",
+        "skill-builder",
+        "skill-creator",
+        "skill-installer",
+    },
+}
+
 
 class LocalPluginPickerSurfaceTests(unittest.TestCase):
     def test_local_marketplace_lists_only_expected_local_plugins(self) -> None:
@@ -110,6 +126,20 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 if not metadata_path.exists():
                     missing.append(str(metadata_path.relative_to(REPO_ROOT)))
             self.assertEqual([], missing, f"{plugin_name} is missing skill-level OpenAI metadata")
+
+    def test_local_plugin_manifests_describe_visible_skill_surface(self) -> None:
+        for plugin_name, expected_keywords in EXPECTED_PLUGIN_KEYWORDS.items():
+            manifest_path = REPO_ROOT / "Plugins" / plugin_name / ".codex-plugin" / "plugin.json"
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+            keywords = set(payload.get("keywords", []))
+            self.assertTrue(
+                expected_keywords.issubset(keywords),
+                f"{plugin_name} manifest keywords should include the visible skill surface",
+            )
+            self.assertFalse(
+                {"skill-refactor", "skillify"} & keywords,
+                f"{plugin_name} manifest should not advertise removed or non-visible skills",
+            )
 
 
 if __name__ == "__main__":

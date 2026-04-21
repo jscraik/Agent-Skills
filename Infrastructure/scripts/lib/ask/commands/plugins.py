@@ -1,8 +1,10 @@
 import subprocess
 import re
 import os
+import json
+import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from ask.envelope import CallResult, ErrorObject
 from ask.plugin_state import collect_plugin_state
@@ -25,6 +27,7 @@ _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
 _PLUGIN_BUILDER_SCRIPT_CANDIDATES = (
     "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
 )
+_LOCAL_PLUGIN_ROOTS = ("Plugins", "plugins", ".agents/plugins")
 
 
 def _to_absolute_path(path: Path) -> Path:
@@ -142,6 +145,163 @@ def _normalize_plugin_name(raw_name: str) -> str:
     normalized = _PLUGIN_NAME_SANITIZE_RE.sub("-", normalized).strip("-")
     normalized = re.sub(r"-{2,}", "-", normalized)
     return normalized
+
+
+def _load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]:
+    marketplace_path = repo_root / "Plugins" / "marketplace.json"
+    if not marketplace_path.is_file():
+        raise FileNotFoundError(f"Local marketplace manifest missing: {marketplace_path}")
+
+    payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
+    raw_plugins = payload.get("plugins", [])
+    if not isinstance(raw_plugins, list):
+        raise ValueError("Plugins/marketplace.json must contain a top-level 'plugins' list.")
+
+    entries: list[dict[str, Any]] = []
+    for item in raw_plugins:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        source = item.get("source", {})
+        if not isinstance(name, str) or not isinstance(source, dict):
+            continue
+        if source.get("source") != "local":
+            continue
+        path = source.get("path")
+        if not isinstance(path, str):
+            continue
+        entries.append({"name": name, "path": path})
+    return marketplace_path, entries
+
+
+def _copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for child in list(target_dir.iterdir()):
+        if child.is_symlink() or child.is_file():
+            child.unlink()
+        else:
+            shutil.rmtree(child)
+
+    for child in source_dir.iterdir():
+        destination = target_dir / child.name
+        if child.is_symlink():
+            destination.symlink_to(os.readlink(child), target_is_directory=child.is_dir())
+        elif child.is_dir():
+            shutil.copytree(child, destination, symlinks=True)
+        else:
+            shutil.copy2(child, destination)
+
+
+def _sync_one_runtime_root(
+    *,
+    runtime_root: Path,
+    repo_root: Path,
+    marketplace_path: Path,
+    marketplace_entries: list[dict[str, Any]],
+    dry_run: bool,
+) -> dict[str, Any]:
+    runtime_root.mkdir(parents=True, exist_ok=True)
+
+    planned_plugins: list[str] = []
+    copied_plugins: list[str] = []
+    removed_entries: list[str] = []
+    marketplace_target = runtime_root / "marketplace.json"
+
+    desired_names = {entry["name"] for entry in marketplace_entries}
+
+    existing_entries = [child for child in runtime_root.iterdir() if child.name not in {"marketplace.json", "cache"}]
+    for child in existing_entries:
+        if child.name not in desired_names:
+            removed_entries.append(child.name)
+            if not dry_run:
+                if child.is_symlink() or child.is_file():
+                    child.unlink()
+                else:
+                    shutil.rmtree(child)
+
+    if not dry_run:
+        shutil.copy2(marketplace_path, marketplace_target)
+
+    for entry in marketplace_entries:
+        plugin_name = entry["name"]
+        planned_plugins.append(plugin_name)
+        relative = entry["path"]
+        source_dir = repo_root / relative.removeprefix("./")
+        if not source_dir.is_dir():
+            raise FileNotFoundError(f"Local plugin source missing for '{plugin_name}': {source_dir}")
+        target_dir = runtime_root / plugin_name
+        if not dry_run:
+            _copy_directory_contents(source_dir, target_dir)
+        copied_plugins.append(plugin_name)
+
+    return {
+        "runtime_root": str(runtime_root),
+        "marketplace_target": str(marketplace_target),
+        "planned_plugins": planned_plugins,
+        "copied_plugins": copied_plugins,
+        "removed_entries": removed_entries,
+        "dry_run": dry_run,
+    }
+
+
+def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> CallResult:
+    """
+    Install repo-local plugins into Codex home/profile runtime roots as copied directories.
+
+    The repository `Plugins/` tree remains canonical. Runtime roots under
+    ~/.codex and ~/.codex-* receive copied installs plus marketplace.json so
+    the local plugin picker resolves against an installed surface rather than
+    symlinks back into the repo.
+    """
+    result = CallResult()
+    try:
+        marketplace_path, entries = _load_local_marketplace(repo_root)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        return _runtime_error_result(
+            str(exc),
+            fix_suggestion="Ensure Plugins/marketplace.json exists and contains valid local plugin entries.",
+        )
+
+    if not entries:
+        return _validation_error_result(
+            "No local plugins were found in Plugins/marketplace.json.",
+            fix_suggestion="Add local plugin entries before syncing runtime installs.",
+        )
+
+    home = Path.home()
+    profile_homes = []
+    default_home = home / ".codex"
+    if default_home.is_dir() or default_home.exists():
+        profile_homes.append(default_home)
+    profile_homes.extend(sorted(path for path in home.glob(".codex-*") if path.is_dir()))
+
+    if not profile_homes:
+        return _validation_error_result(
+            "No Codex home directories were found under the current user home.",
+            fix_suggestion="Create ~/.codex first, then rerun the sync command.",
+        )
+
+    runtime_reports: list[dict[str, Any]] = []
+    for profile_home in profile_homes:
+        for relative_root in _LOCAL_PLUGIN_ROOTS:
+            runtime_root = profile_home / relative_root
+            runtime_reports.append(
+                _sync_one_runtime_root(
+                    runtime_root=runtime_root,
+                    repo_root=repo_root,
+                    marketplace_path=marketplace_path,
+                    marketplace_entries=entries,
+                    dry_run=dry_run,
+                )
+            )
+
+    result.status = "success"
+    result.data["message"] = "Synced local plugin runtime installs."
+    result.data["profile_homes"] = [str(path) for path in profile_homes]
+    result.data["plugin_names"] = [entry["name"] for entry in entries]
+    result.data["runtime_reports"] = runtime_reports
+    result.data["dry_run"] = dry_run
+    return result
 
 
 def _extract_plugin_root_from_output(

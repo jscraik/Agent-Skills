@@ -41,6 +41,7 @@ from ask.commands.plugins import (
     install_plugin,
     harden_plugin,
     list_plugins_state,
+    sync_local_runtime_plugins,
     status_plugin_state,
     doctor_plugins_state,
     uninstall_plugin,
@@ -71,7 +72,7 @@ VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog"],
     "skills": ["list", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
-    "plugins": ["list", "status", "doctor", "init", "create", "install", "import", "harden", "uninstall"],
+    "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
@@ -94,6 +95,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "plugins": [
         "ask plugins list",
         "ask plugins status plugin-factory",
+        "ask plugins sync-local-runtime",
         "ask plugins harden Plugins/plugin-factory",
     ],
     "evals": [
@@ -748,6 +750,13 @@ def main():
     plugins_status_parser.add_argument("name", help="Plugin name")
 
     plugins_subparsers.add_parser("doctor", help="Run read-only plugin diagnostics", parents=[global_parser])
+
+    plugins_sync_runtime_parser = plugins_subparsers.add_parser(
+        "sync-local-runtime",
+        help="Install local plugins into Codex runtime homes as copied directories",
+        parents=[global_parser],
+    )
+    plugins_sync_runtime_parser.add_argument("--dry-run", action="store_true", help="Preview runtime sync without writing")
     
     plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
     _add_plugin_init_args(plugins_init_parser)
@@ -1080,6 +1089,8 @@ def main():
             result = status_plugin_state(repo_root, name=args.name)
         elif args.action == "doctor":
             result = doctor_plugins_state(repo_root)
+        elif args.action == "sync-local-runtime":
+            result = sync_local_runtime_plugins(repo_root, dry_run=args.dry_run)
         elif args.action in {"init", "create"}:
             companion = [
                 name
@@ -1133,7 +1144,7 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'plugins'",
-                fix_suggestion="Valid actions: list, status, doctor, init, create, install, import, harden"
+                fix_suggestion="Valid actions: list, status, doctor, sync-local-runtime, init, create, install, import, harden, uninstall"
             ))
 
     elif args.topic == "evals":
@@ -1510,6 +1521,18 @@ def main():
                         print("Blockers:")
                         for blocker in blockers:
                             print(f"  - {blocker}")
+                elif args.topic == "plugins" and args.action == "sync-local-runtime":
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would sync local plugins into runtime homes:")
+                    else:
+                        print(f"✅ {result.data.get('message', 'Synced local plugin runtime installs.')}")
+                    print(f"Profiles: {len(result.data.get('profile_homes', []))}")
+                    print(f"Plugins: {', '.join(result.data.get('plugin_names', []))}")
+                    for report in result.data.get("runtime_reports", []):
+                        print(f"  - {report.get('runtime_root')}")
+                        removed = report.get("removed_entries") or []
+                        if removed:
+                            print(f"    removed: {', '.join(removed)}")
                 elif args.topic == "plugins" and args.action in {"install", "import"}:
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install plugin:")
@@ -1720,7 +1743,7 @@ def main():
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")
-            elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden"):
+            elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden", "sync-local-runtime"):
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
                 # Display command_runs for harden_plugin() failures
@@ -1744,6 +1767,7 @@ def main():
                 print("   ask plugins init my-plugin --category third-party --with-marketplace")
                 print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")
                 print("   ask plugins harden Plugins/my-plugin")
+                print("   ask plugins sync-local-runtime")
             elif args.topic == "evals":
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])

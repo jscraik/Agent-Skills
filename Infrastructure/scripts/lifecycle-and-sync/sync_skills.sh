@@ -1237,7 +1237,9 @@ resolve_marketplace_source_dir() {
 
 # Keep home-level plugin source paths aligned with the canonical repo plugins.
 # Some plugin installers resolve marketplace relative paths (./Plugins/<name>)
-# sync_home_plugin_mirrors creates or updates symlinks in a home plugins directory for local plugins listed in a marketplace JSON file, skipping unsafe plugin names, leaving existing non-symlink targets untouched, and avoiding mirrors when the canonical source and target resolve to the same real path.
+# sync_home_plugin_mirrors copies local plugins from the canonical repo plugins
+# tree into a home plugins directory, pruning stale copied plugin entries while
+# preserving reserved runtime files such as marketplace.json and cache/.
 sync_home_plugin_mirrors() {
   local marketplace_file="$1"
   local canonical_plugins_dir="$2"
@@ -1288,22 +1290,8 @@ sync_home_plugin_mirrors() {
       continue
     fi
 
-    if [ -L "$target_dir" ]; then
-      if ln -sfn "$source_dir" "$target_dir"; then
-        echo "[OK] Updated home plugin symlink: $target_dir -> $source_dir"
-      else
-        echo "[WARN] Unable to update home plugin symlink $target_dir -> $source_dir"
-      fi
-    elif [ -e "$target_dir" ]; then
-      echo "[WARN] $target_dir exists as a non-symlink; leaving it untouched."
-      echo "       Move/remove it to allow canonical mirror linking."
-    else
-      if ln -s "$source_dir" "$target_dir"; then
-        echo "[OK] Created home plugin symlink: $target_dir -> $source_dir"
-      else
-        echo "[WARN] Unable to create home plugin symlink $target_dir -> $source_dir"
-      fi
-    fi
+    sync_user_skills "$source_dir" "$target_dir" 0 copy
+    echo "[OK] Installed home plugin copy: $target_dir"
   done < <(
     jq -r '
       def trim: gsub("^\\s+|\\s+$"; "");
@@ -1324,19 +1312,30 @@ sync_home_plugin_mirrors() {
     if grep -Fqx "$existing_dir" "$keep_file"; then
       continue
     fi
-    if [ ! -L "$existing_dir" ]; then
-      continue
-    fi
-    link_target="$(readlink "$existing_dir" || true)"
-    [ -n "$link_target" ] || continue
-    link_target_real="$(cd "$(dirname "$existing_dir")" 2>/dev/null && cd "$link_target" 2>/dev/null && pwd -P || true)"
-    [ -n "$link_target_real" ] || continue
-    case "$link_target_real" in
-      "$canonical_plugins_real"/*)
-        rm -f -- "$existing_dir"
-        echo "[OK] Removed stale home plugin symlink: $existing_dir"
+    case "$(basename "$existing_dir")" in
+      marketplace.json|cache)
+        continue
         ;;
     esac
+    if [ ! -e "$existing_dir" ] && [ ! -L "$existing_dir" ]; then
+      continue
+    fi
+    if [ -L "$existing_dir" ]; then
+      link_target="$(readlink "$existing_dir" || true)"
+      [ -n "$link_target" ] || continue
+      link_target_real="$(cd "$(dirname "$existing_dir")" 2>/dev/null && cd "$link_target" 2>/dev/null && pwd -P || true)"
+      [ -n "$link_target_real" ] || continue
+      case "$link_target_real" in
+        "$canonical_plugins_real"/*)
+          rm -f -- "$existing_dir"
+          echo "[OK] Removed stale home plugin entry: $existing_dir"
+          ;;
+      esac
+      continue
+    fi
+
+    rm -rf -- "$existing_dir"
+    echo "[OK] Removed stale home plugin entry: $existing_dir"
   done < <(find "$home_plugins_dir" -mindepth 1 -maxdepth 1 -print)
 }
 
@@ -1630,6 +1629,7 @@ sync_codex_profile_homes() {
       fi
       # Keep profile-local marketplace source paths resolvable at
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
+      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"
     fi

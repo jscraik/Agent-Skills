@@ -660,21 +660,25 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
+            'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"',
+            content,
+        )
+        self.assertIn(
             'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"',
             content,
         )
 
-    def test_sync_script_prunes_stale_home_plugin_symlinks(self) -> None:
+    def test_sync_script_prunes_stale_home_plugin_entries(self) -> None:
         """
         Ensure removed local-marketplace entries do not linger in profile homes.
 
         When vendored curated plugins are removed from the local marketplace,
-        stale `~/.codex/Plugins/<name>` symlinks should be removed if they
-        still point into the canonical repo plugin tree.
+        stale `~/.codex/Plugins/<name>` installs should be removed so the
+        local runtime surface matches the declared marketplace set.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('keep_file="$state_dir/home-plugins.keep"', content)
-        self.assertIn('Removed stale home plugin symlink', content)
+        self.assertIn('Removed stale home plugin entry', content)
 
     def test_sync_script_repairs_repo_backed_home_plugin_root_symlinks(self) -> None:
         """
@@ -704,6 +708,17 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"',
             content,
         )
+
+    def test_sync_script_installs_home_plugins_as_copied_directories(self) -> None:
+        """
+        Ensure local plugins install into home runtimes as copies, not symlinks.
+
+        Home runtimes should be a generated installed surface that can travel
+        across machines after sync, while the repo remains the canonical source.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('sync_user_skills "$source_dir" "$target_dir" 0 copy', content)
+        self.assertIn("Installed home plugin copy", content)
 
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
         """
