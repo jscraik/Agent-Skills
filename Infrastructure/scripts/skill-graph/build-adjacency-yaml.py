@@ -22,6 +22,7 @@ CANONICAL_PREFIXES = {
     "frontend/",
     "github/",
     "interview/",
+    "Plugins/coderabbit/skills/",
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
@@ -48,6 +49,10 @@ ALLOWED_DUPLICATE_SKILL_IDS = {
 
 SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
+LEGACY_SKILL_REF_ALIASES = {
+    # Historical skill id retained in See Also tables.
+    "codex-agent-builder": "codex-agent-creator",
+}
 
 adjacency = {}   # skill -> {related_skill: description}
 seen_skills: dict[str, pathlib.Path] = {}   # canonical skill id -> first source path
@@ -82,11 +87,11 @@ def normalize_skill_ref(target: str) -> str:
     """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
     normalized = target.strip()
     if ":" not in normalized:
-        return normalized
+        return LEGACY_SKILL_REF_ALIASES.get(normalized, normalized)
     _, suffix = normalized.split(":", 1)
     if SKILL_REF_RE.fullmatch(suffix):
-        return suffix
-    return normalized
+        normalized = suffix
+    return LEGACY_SKILL_REF_ALIASES.get(normalized, normalized)
 
 def iter_skill_md_files(root: pathlib.Path):
     # Prefer tracked files so generated/untracked projections do not pollute output.
