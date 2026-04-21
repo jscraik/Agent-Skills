@@ -1,4 +1,4 @@
-# CE Brainstorm Discovery Interview
+# HE Brainstorm Discovery Interview
 
 Read when: the brainstorm request is underspecified and you need a concise, structured interview before requirements capture.
 

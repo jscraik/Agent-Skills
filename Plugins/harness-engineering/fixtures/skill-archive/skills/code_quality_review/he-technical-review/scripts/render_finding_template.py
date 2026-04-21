@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render he-technical-review/finding.md.tmpl into Infrastructure/references/finding-template.md."""
+"""Render he-technical-review/finding.md.tmpl into references/finding-template.md."""
 
 from __future__ import annotations
 
@@ -9,7 +9,14 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
-FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
+FAMILY_SKILLS_DIR = None
+for parent in SCRIPT_DIR.parents:
+    candidate = parent / "skills" / "_template_utils.py"
+    if candidate.exists():
+        FAMILY_SKILLS_DIR = parent / "skills"
+        break
+if FAMILY_SKILLS_DIR is None:
+    raise RuntimeError(f"Unable to locate skills/_template_utils.py from {SCRIPT_DIR}")
 if str(FAMILY_SKILLS_DIR) not in sys.path:
     sys.path.insert(0, str(FAMILY_SKILLS_DIR))
 
@@ -19,7 +26,9 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
+    print_diff_lines,
     render_from_path,
+    unified_diff_lines,
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "finding.md.tmpl"
@@ -41,7 +50,11 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "WHY_IT_MATTERS_2": "Missing terminal-transition coverage leaves regression risk.",
     "RECOMMENDED_FIX_2": "Add a reconciliation test that transitions active->terminal while retry timer is queued.",
     "CONFIDENCE_2": "0.74",
+    "NO_CRITICAL_FINDINGS": "false",
+    "FEEDBACK_RESPONSE_PLAN": "push_back_with_evidence",
+    "FEEDBACK_RESPONSE_PLAN_RATIONALE": "Current implementation already satisfies compatibility constraints documented in the plan.",
     "QUESTION_1": "Assumes tracker refresh semantics remain consistent during pagination.",
+    "NEXT_ACTION": "Fix F1 first, then rerun targeted tests and re-review the updated diff.",
     "CHANGE_SUMMARY_1": "No code changed yet; this artifact captures actionable review findings.",
     "RESIDUAL_RISK_1": "Concurrent worker exits may still race if state updates happen outside orchestrator authority.",
 }

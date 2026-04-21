@@ -158,6 +158,6 @@ Use a focused GitHub remediation workflow for unresolved PR review threads. Pres
 |---|---|
 | [[gh-workflow]] | Handle a single-threaded PR lifecycle or smaller review loop without fan-out |
 | `github:github` (plugin) | Connector-first repository and PR triage before choosing remediation |
-| [[systematic-debugging]] | Diagnose a stubborn defect before continuing to resolve review feedback |
+| [[he-fix-bugs]] | Diagnose a stubborn defect before continuing to resolve review feedback |
 
 **Topic map:** [[backend-platform]]

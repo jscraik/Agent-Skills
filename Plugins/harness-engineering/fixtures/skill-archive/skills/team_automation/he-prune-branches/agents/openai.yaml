@@ -1,0 +1,11 @@
+interface:
+  display_name: "Harness Engineering Prune Branches"
+  short_description: "Prune local branches whose upstreams are gone, including associated worktree cleanup."
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

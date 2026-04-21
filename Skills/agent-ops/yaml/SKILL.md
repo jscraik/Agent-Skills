@@ -73,7 +73,7 @@ services:
 | Skill | When to use |
 |---|---|
 | [[toml]] | Schema-aware config review for TOML-based tooling configs |
-| [[systematic-debugging]] | Triage config parsing failures with evidence-first diagnosis |
+| [[he-fix-bugs]] | Triage config parsing failures with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
 

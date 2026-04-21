@@ -181,7 +181,7 @@ shellcheck -x Infrastructure/scripts/*.sh
 | Skill | When to use |
 |---|---|
 | [[codex-hooks-builder]] | Harden shell-heavy hook scripts and hook-pack scaffolds with safer defaults |
-| [[systematic-debugging]] | Triage shell failures with evidence-first diagnosis before behavioral changes |
+| [[he-fix-bugs]] | Triage shell failures with evidence-first diagnosis before behavioral changes |
 | [[verification-before-completion]] | Enforce verification routines after Bash script edits before claiming done |
 
 **Topic map:** [[agent-ops]]

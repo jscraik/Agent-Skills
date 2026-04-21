@@ -1,18 +1,19 @@
-# CE Technical Review Prompt Parity Map
+# Harness Engineering Technical Review Prompt Parity Map
 
 ## Table of Contents
 - [Purpose](#purpose)
 - [Source prompt and migration target](#source-prompt-and-migration-target)
 - [Parity mapping](#parity-mapping)
+- [Feedback-reception parity mapping](#feedback-reception-parity-mapping)
 - [Intentional modernizations](#intentional-modernizations)
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document records how `/Users/jamiecraik/dev/configs/codex/prompts/technical_review.md` was migrated into the CE skill package so the conversion stays auditable.
+This document records how `/Users/jamiecraik/dev/configs/codex/prompts/technical_review.md` was migrated into the Harness Engineering skill package so the conversion stays auditable.
 
 ## Source prompt and migration target
 - source:
-  - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/Plugins/compound-engineering/skills/he-technical-review`
+  - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/Plugins/compound-engineering/skills/he-technical-review` (historical upstream provenance URL)
   - `/Users/jamiecraik/dev/configs/codex/prompts/technical_review.md`
 - migration target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/Infrastructure/ops/he-technical-review/`
@@ -34,8 +35,18 @@ This document records how `/Users/jamiecraik/dev/configs/codex/prompts/technical
 | explicit no-critical-findings statement | `Deliverables`, `Acceptance criteria` | Preserved directly |
 | validate key steps and report smallest safe fix on failure | `Validation` | Preserved directly |
 
+## Feedback-reception parity mapping
+| Incoming guidance | Preserved in skill | Notes |
+|---|---|---|
+| verify feedback before implementation | `SKILL.full.md -> Receiving review feedback`, `references/review-feedback-reception.md` | Preserved directly |
+| ask clarification before implementing unclear items | same as above | Preserved directly |
+| avoid performative agreement language | `SKILL.full.md -> Receiving review feedback`, `SKILL.md -> Constraints` | Preserved directly |
+| evaluate external reviewer suggestions with technical skepticism | `references/review-feedback-reception.md` | Preserved directly |
+| YAGNI check for overbuilt suggestions | `references/review-feedback-reception.md` | Preserved directly |
+| push back with evidence when suggestions are wrong | `references/review-feedback-reception.md` | Preserved directly |
+
 ## Intentional modernizations
-- The stage is now packaged as a first-class CE skill instead of a standalone prompt path.
+- The stage is now packaged as a first-class Harness Engineering skill instead of a standalone prompt path.
 - Reviewer fanout is preserved, but framed as bounded and platform-gated rather than assumed to be unboundedly parallel.
 - The skill makes the distinction between `technical-review` and broad `review` explicit, matching the current router guidance.
 - `contract.yaml` and `evals.yaml` were added to improve routing reliability and quality gating.

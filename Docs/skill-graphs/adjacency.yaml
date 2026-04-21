@@ -76,8 +76,8 @@ baseline-ui:
 bash-hygiene:
   codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
     safer defaults
-  systematic-debugging: Triage shell failures with evidence-first diagnosis before
-    behavioral changes
+  he-fix-bugs: Triage shell failures with evidence-first diagnosis before behavioral
+    changes
   verification-before-completion: Enforce verification routines after Bash script
     edits before claiming done
 beautiful-mermaid:
@@ -128,7 +128,7 @@ codex-agent-creator:
     or automation first
 codex-automation-architect:
   ce-plan: Plan the automation contract before implementing
-  codex-agent-builder: Create the agent role the automation will run under
+  codex-agent-creator: Create the agent role the automation will run under
   decide-build-primitive: Confirm automation is the right primitive before building
   verification-before-completion: Validate automation output before declaring done
 codex-home-audit:
@@ -139,7 +139,7 @@ codex-home-audit:
   skill-refactor: Run a skill health scan alongside the home audit
   verification-before-completion: Verify fixes before marking the audit complete
 codex-hooks-builder:
-  codex-agent-builder: Create or update agent roles that the hooks should invoke or
+  codex-agent-creator: Create or update agent roles that the hooks should invoke or
     govern
   codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
     config
@@ -148,8 +148,8 @@ coding-harness:
   bootstrap: Clone and bootstrap a repository before coding-harness setup begins
   circleci-cli: Work on CircleCI-specific pipeline design or migration details beyond
     the harness wrapper
-  systematic-debugging: Root-cause failing harness commands or broken repo state before
-    applying fixes
+  he-fix-bugs: Root-cause failing harness commands or broken repo state before applying
+    fixes
   verification-before-completion: Add a stronger final verification pass before claiming
     a repo change is complete
 context7:
@@ -194,13 +194,13 @@ docs-expert:
   visual-explainer: Present a complex system, workflow, or docs audit as a visual
     artifact
 elixir-pro:
+  he-fix-bugs: Triage distributed process failures with evidence-first diagnosis
   rust-pro: Systems-level concurrency patterns that share OTP-style supervision thinking
-  systematic-debugging: Triage distributed process failures with evidence-first diagnosis
 evals-router:
+  he-fix-bugs: When eval pipeline bugs emerge — debug root cause before redesigning
+    the eval
   skill-refactor: Analyze session-derived skill quality signals before redesigning
     eval plans
-  systematic-debugging: When eval pipeline bugs emerge — debug root cause before redesigning
-    the eval
   test-driven-development: For the implementation layer of the review tooling or judge
     prompt validation tests
   verification-before-completion: Gate "eval is ready" claims with concrete calibration
@@ -223,8 +223,8 @@ favicon-generator:
 fix-mise:
   bootstrap: Fix mise before retrying the bootstrap
   codex-home-audit: Address mise issues found during a home directory audit
+  he-fix-bugs: Debug root cause of mis trust or shim failures
   process-watch: Watch process health while diagnosing mise shim issues
-  systematic-debugging: Debug root cause of mis trust or shim failures
   verification-before-completion: Confirm mise is healthy after the fix
 fixing-accessibility:
   baseline-ui: Validate passing accessibility alongside baseline UI checks
@@ -248,16 +248,15 @@ frontend-ui-design:
   fixing-accessibility: Apply accessibility fixes during component design
   ui-ux-creative-coding: Add motion and creative polish to designed components
 gh-workflow:
+  he-fix-bugs: When PR CI failures reveal a code-level bug that needs root-cause investigation
   release: After merging — use to cut the version tag and publish the release
   resolve-pr-parallel: Resolve many unresolved review threads when a one-thread-at-a-time
     loop is too slow
-  systematic-debugging: When PR CI failures reveal a code-level bug that needs root-cause
-    investigation
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
 go:
+  he-fix-bugs: Triage Go runtime errors with evidence-first diagnosis
   rust-pro: Systems programming with similar error-propagation and ownership concerns
-  systematic-debugging: Triage Go runtime errors with evidence-first diagnosis
 insight-report:
   codex-automation-architect: Convert recommendations into automations
   codex-home-audit: Check Codex setup health
@@ -379,13 +378,12 @@ react-ui-patterns:
   shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
   ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
 recon-workbench:
+  he-fix-bugs: Debug confirmed runtime behavior after recon narrows the target surface
   security-best-practices: Turn recon findings into concrete secure-by-default implementation
     guidance
   security-ownership-map: Connect the findings to code ownership and bus-factor risk
   security-threat-model: Map recon evidence into trust boundaries, abuse paths, and
     mitigations
-  systematic-debugging: Debug confirmed runtime behavior after recon narrows the target
-    surface
 release:
   ce-plan: Plan the release checklist before executing
   gh-workflow: Manage the PR and merge lifecycle before cutting a release
@@ -403,15 +401,10 @@ repoprompt:
   agents-md: Use Repo Prompt context packs alongside AGENTS.md
   ce-plan: Ground implementation plans with Repo Prompt context
   context7: Combine with Context7 for richer library context in prompts
-reproduce-bug:
-  gh-workflow: Follow up on GitHub issues or PR state after the bug is understood
-  systematic-debugging: Move from reproduction evidence into a deeper root-cause analysis
-  test-browser: Reproduce or verify browser-facing regressions with route-level evidence
 resolve-pr-parallel:
   gh-workflow: Handle a single-threaded PR lifecycle or smaller review loop without
     fan-out
-  systematic-debugging: Diagnose a stubborn defect before continuing to resolve review
-    feedback
+  he-fix-bugs: Diagnose a stubborn defect before continuing to resolve review feedback
 resolve-todo-parallel:
   ce-compound: Capture durable learnings that emerge from repeated todo fixes
   ce-work: Execute a single scoped implementation path instead of a todo sweep
@@ -420,7 +413,7 @@ resolve-todo-parallel:
   triage: Review pending todo findings before execution begins
 rust-pro:
   go: Systems programming with similar error-handling and concurrency patterns
-  systematic-debugging: Triage Rust ownership and borrow-checker errors with evidence-first
+  he-fix-bugs: Triage Rust ownership and borrow-checker errors with evidence-first
     diagnosis
 scaffolding-expert:
   bash-hygiene: Shell-policy and quoting/interpreter hardening
@@ -454,8 +447,8 @@ shadcn-ui:
 simplify:
   code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
     fix work
-  systematic-debugging: Use when simplify findings indicate likely regressions or
-    uncertain root cause needing evidence-first diagnosis
+  he-fix-bugs: Use when simplify findings indicate likely regressions or uncertain
+    root cause needing evidence-first diagnosis
 skill-builder:
   codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
     for skill-linked delegation flows
@@ -495,19 +488,10 @@ stitch-remotion:
   sora: Use Sora for AI-generated video alternative to Remotion
   stitch-loop: Generate the Stitch screens that feed this skill
 swift-development:
+  he-fix-bugs: Triage Swift concurrency and actor isolation issues with evidence-first
+    diagnosis
   rust-pro: Systems-level safety patterns that share Swift's value-type and concurrency
     thinking
-  systematic-debugging: Triage Swift concurrency and actor isolation issues with evidence-first
-    diagnosis
-systematic-debugging:
-  ce-plan: Re-plan the approach when repeated fixes fail and the current path is not
-    converging
-  gh-workflow: Use `ci_diagnose` mode for GitHub check failures that need lifecycle
-    context
-  test-driven-development: Capture the root cause as a failing test before or alongside
-    the fix
-  verification-before-completion: Prove the fix works before claiming the debugging
-    loop is done
 test-browser:
   agent-browser: Deterministic live-page interaction using snapshot refs
   fixing-accessibility: Pair route-level verification with accessibility checks on
@@ -518,8 +502,7 @@ test-driven-development:
   ce-plan: Write a TDD-aware plan when the feature spans multiple behavior changes
   evals-router: When the failing "test" is an LLM evaluation — route to the correct
     eval workflow
-  systematic-debugging: Run the TDD loop inside this debugging workflow for each phase-4
-    fix
+  he-fix-bugs: Run the TDD loop inside this debugging workflow for each phase-4 fix
   verification-before-completion: 'Explicit gate: verify the full test suite is green
     before claiming done'
 threejs-builder:
@@ -528,14 +511,14 @@ threejs-builder:
   ui-ux-creative-coding: Orchestrate Three.js alongside React motion for rich UI
   visual-explainer: Embed Three.js scenes in HTML explainer pages
 toml:
-  systematic-debugging: Triage config parsing failures with evidence-first diagnosis
+  he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
   yaml: Schema-aware config review for YAML-based tooling configs
 triage:
   ce-work: Execute the approved work once triage decisions are made
+  he-fix-bugs: Diagnose unclear or flaky findings before deciding whether they belong
+    in the queue
   resolve-todo-parallel: Resolve a batch of approved todo items in parallel rather
     than triaging them
-  systematic-debugging: Diagnose unclear or flaky findings before deciding whether
-    they belong in the queue
 typescript:
   biome-linting: Enforce TypeScript lint and format rules with Biome
   javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
@@ -563,8 +546,7 @@ uv-python-project-setup:
 verification-before-completion:
   evals-router: Verify LLM eval pipelines pass before claiming eval work is complete
   gh-workflow: 'Gate PR merges: verification must pass before PR language is used'
-  systematic-debugging: Run first to find root cause; use this skill to prove the
-    fix worked
+  he-fix-bugs: Run first to find root cause; use this skill to prove the fix worked
   test-driven-development: Write failing tests before fixing; this skill verifies
     they now pass
 video-transcript-downloader:
@@ -581,7 +563,7 @@ visual-explainer:
   slides: Use a presentation deck instead of a scrollable HTML explainer when the
     format fits better
 yaml:
-  systematic-debugging: Triage config parsing failures with evidence-first diagnosis
+  he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
   toml: Schema-aware config review for TOML-based tooling configs
 youtube-hooks-scripts:
   notebooklm: Use NotebookLM to generate audio overviews from scripts

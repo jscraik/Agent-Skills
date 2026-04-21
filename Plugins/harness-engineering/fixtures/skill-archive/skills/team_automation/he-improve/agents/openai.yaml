@@ -1,0 +1,11 @@
+interface:
+  display_name: "Harness Engineering Improve"
+  short_description: "Run iterative optimization loops with measurable gates, bounded experiments, and durable logging."
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

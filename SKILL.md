@@ -60,14 +60,12 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `project-brain` — Bootstrap and operate Project Brain
 - `release` — Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
 - `repoprompt` — Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
-- `reproduce-bug` — Reproduce or investigate a bug from a Linear issue or GitHub issue, preserving tracker context, symptoms, and repro steps. Use when the user wants issue-driven debugging rather than a freeform root-cause review.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
 - `resolve-todo-parallel` — WHAT: Resolve file-based `todos/` items with dependency-aware serial or bounded-parallel execution, verification, and cleanup controls. WHEN: Use when a todo-sweep is the primary task, not generic single-feature implementation.
 - `rust-pro` — Master Rust 1.75+ with modern async patterns, advanced type system features, and production-ready systems programming.
 - `scaffolding-expert` — Use when users ask how to scaffold or re-scaffold a repo: this skill chooses the right tier (`lite|growth|strict`), audits drift/conflict from file evidence, and returns minimal-change remediation aligned to the user's `~/dev` git-project style.
 - `simplify` — Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
 - `swift-development` — Swift language patterns and best practices including concurrency, performance, and modern idioms. Use for Swift language-level code review or architecture guidance.
-- `systematic-debugging` — Diagnose production bugs, regressions, or failing checks from concrete evidence before code changes. Use when the user wants a safe root-cause analysis and fix plan, not immediate speculative implementation.
 - `test-browser` — Run or plan browser-based verification for changed web surfaces using sanctioned browser automation tools. Use when a user needs deterministic QA for routes, flows, or PR scope instead of ad hoc manual browsing.
 - `test-driven-development` — Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.
 - `toml` — Write and review TOML configuration files with predictable structure, strict typing, and tool-safe edits.
@@ -152,4 +150,3 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 - `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-

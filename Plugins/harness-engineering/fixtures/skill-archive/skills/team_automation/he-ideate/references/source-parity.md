@@ -7,12 +7,12 @@
 - [Known constraints](#known-constraints)
 
 ## Source input
-This package preserves and restructures the upstream `ce:ideate` skill while retaining local governance hardening.
+This package incorporates and restructures upstream `ce:ideate` behavior while retaining local governance hardening.
 
 Pinned donor snapshot:
 - repo: `EveryInc/compound-engineering-plugin`
-- commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
-- path: `Plugins/compound-engineering/skills/he-ideate/SKILL.md`
+- commit: `e1524287f73ea1ec9598aa63c05a31745ff503c7`
+- path: `plugins/compound-engineering/skills/ce-ideate/SKILL.md`
 
 ## Preserved behaviors
 - `ce:ideate` explicitly precedes `ce:brainstorm`
@@ -40,7 +40,8 @@ Pinned donor snapshot:
 - handoff remains `he-brainstorm` (not direct planning/implementation)
 
 ## Intentional modernizations
-- aligned donor parity to `0ae91dcc...`, including deferred-load behavior where post-merge workflow details live in a dedicated reference (`post-ideation-workflow.md`) loaded only after Phase 2 completes
+- refreshed donor parity inputs to `e1524287...` while preserving local Harness Engineering stage boundaries and naming
+- retained deferred-load behavior where post-merge workflow details live in a dedicated reference (`post-ideation-workflow.md`) loaded only after Phase 2 completes
 - kept `SKILL.md` route-critical and moved richer standards/philosophy/variation guidance into `Infrastructure/references/style-and-operating-guidance.md`
 - split workflow references into:
   - `ideation-workflow.md` for interaction + Phases 0-2

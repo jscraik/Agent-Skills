@@ -45,3 +45,8 @@ For explicit exhaustive mode, optionally add:
 2. targeted reviewer lanes by weak section
 3. optional research lanes
 4. max-coverage extension lanes (only when explicitly selected)
+
+## Role availability fallback
+- Check role availability from `~/.codex/agents/manifest.json` before delegation.
+- If auto-spawn is unavailable, keep execution inline and list recommended manual roles explicitly.
+- If required roles are missing, route role creation or installation to `[[codex-agent-creator]]`.

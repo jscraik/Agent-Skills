@@ -1,11 +1,11 @@
 ---
 name: he-deepen-plan
-description: Deepen an existing implementation plan so sequencing, verification, and risk treatment are strong enough for execution. Use when the user wants CE-stage plan hardening before he-work.
+description: Deepen an existing implementation plan so sequencing, verification, and risk treatment are strong enough for execution. Use when the user wants Harness Engineering plan hardening before he-work.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Deepen Plan
+# Harness Engineering Deepen Plan
 
 **Note: The current year is 2026.** Use this when dating deepening artifacts and searching for recent documentation.
 
@@ -43,7 +43,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 5. **Preserve intent** - Keep original decisions unless evidence justifies change.
 
 ## Working agreement
-- Treat this as the compound-engineering deepening stage, not a planning-from-scratch or implementation lane.
+- Treat this as the Harness Engineering deepening stage, not a planning-from-scratch or implementation lane.
 - Deepening answers whether an existing plan is grounded enough to execute safely and what sections need stronger rationale, sequencing, or verification.
 - Preserve the plan's intent and structure unless evidence justifies a targeted rewrite.
 - Prefer the smallest meaningful deepening pass, usually 2-5 weak sections rather than the whole document.
@@ -225,6 +225,7 @@ When `max-coverage` is selected, also:
 - select reviewer lanes using `Infrastructure/references/sub-agent-map.md` so the split `document-review` personas map consistently to plan-deepening needs
 
 Treat all delegated subagents as internal support for the deepening stage, not separate top-level operators the user must coordinate.
+Resolve helper-role availability from `~/.codex/agents/manifest.json` before spawning subagents. If auto-spawn is unavailable, continue inline and explicitly list manual launch roles for the user. If required roles are missing, route to `[[codex-agent-creator]]` to create or install them before rerunning delegated coverage.
 
 ### Phase 4: Choose research execution mode
 Use `direct` mode by default when the selected research scope is small enough for inline synthesis.
@@ -235,7 +236,7 @@ Use `artifact-backed` mode only when:
 - the work is high-risk and bulky source-backed analysis is likely
 
 When artifact-backed mode is warranted:
-- use a scratch directory under `.context/compound-engineering/he-deepen-plan/`
+- use a scratch directory under `.context/harness-engineering/he-deepen-plan/`
 - write one compact artifact per selected section or reviewer cluster
 - keep artifacts temporary unless the user explicitly asks to inspect them
 
@@ -346,6 +347,7 @@ IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected
 - Lightweight document-review pass: `Infrastructure/references/document-review-pass.md`
 - Rewrite rules and final checks: `Infrastructure/references/rewrite-rules.md`
 - Sub-agent routing map: `Infrastructure/references/sub-agent-map.md`
+- Role-creation fallback: `[[codex-agent-creator]]`
 ## See Also
 | Skill | When to use together |
 |---|---|

@@ -1,35 +1,31 @@
-# Technical Review Findings
+schema_version: 1
+review_mode: {{REVIEW_MODE}}
+target_artifact: {{TARGET_ARTIFACT}}
+target_ref: {{TARGET_REF}}
 
-## Target
+findings:
+  - id: {{FINDING_ID}}
+    severity: {{SEVERITY}}
+    location: {{LOCATION}}
+    why_it_matters: {{WHY_IT_MATTERS}}
+    recommended_minimal_fix: {{RECOMMENDED_FIX}}
+    confidence: {{CONFIDENCE}}
+  - id: {{FINDING_ID_2}}
+    severity: {{SEVERITY_2}}
+    location: {{LOCATION_2}}
+    why_it_matters: {{WHY_IT_MATTERS_2}}
+    recommended_minimal_fix: {{RECOMMENDED_FIX_2}}
+    confidence: {{CONFIDENCE_2}}
 
-- Artifact: {{TARGET_ARTIFACT}}
-- Scope reference: {{TARGET_REF}}
-- Review mode: {{REVIEW_MODE}}
+no_critical_findings: {{NO_CRITICAL_FINDINGS}}
+feedback_response_plan: {{FEEDBACK_RESPONSE_PLAN}}
+feedback_response_plan_rationale: {{FEEDBACK_RESPONSE_PLAN_RATIONALE}}
+open_questions:
+  - {{QUESTION_1}}
+next_action: {{NEXT_ACTION}}
 
-## Findings
-
-### {{FINDING_ID}}
-- Severity: {{SEVERITY}}
-- Location: {{LOCATION}}
-- Why it matters: {{WHY_IT_MATTERS}}
-- Recommended minimal fix: {{RECOMMENDED_FIX}}
-- Confidence: {{CONFIDENCE}}
-
-### {{FINDING_ID_2}}
-- Severity: {{SEVERITY_2}}
-- Location: {{LOCATION_2}}
-- Why it matters: {{WHY_IT_MATTERS_2}}
-- Recommended minimal fix: {{RECOMMENDED_FIX_2}}
-- Confidence: {{CONFIDENCE_2}}
-
-## Open Questions / Assumptions
-
-- {{QUESTION_1}}
-
-## Change Summary
-
-- {{CHANGE_SUMMARY_1}}
-
-## Residual Risks
-
-- {{RESIDUAL_RISK_1}}
+# Optional narrative (non-contract)
+change_summary:
+  - {{CHANGE_SUMMARY_1}}
+residual_risks:
+  - {{RESIDUAL_RISK_1}}

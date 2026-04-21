@@ -1,0 +1,78 @@
+# Optimization spec schema for he-improve.
+
+required_fields:
+  name:
+    type: string
+    pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+  description:
+    type: string
+  metric:
+    type: object
+    required_children:
+      primary:
+        type: object
+        required_children:
+          type:
+            type: enum
+            values: [hard, judge]
+          name:
+            type: string
+          direction:
+            type: enum
+            values: [maximize, minimize]
+      degenerate_gates:
+        type: array
+  measurement:
+    type: object
+    required_children:
+      command:
+        type: string
+    optional_children:
+      timeout_seconds:
+        type: integer
+        default: 600
+      working_directory:
+        type: string
+        default: "."
+  scope:
+    type: object
+    required_children:
+      mutable:
+        type: array
+      immutable:
+        type: array
+
+optional_fields:
+  execution:
+    type: object
+    optional_children:
+      mode:
+        type: enum
+        values: [parallel, serial]
+        default: serial
+      backend:
+        type: enum
+        values: [worktree, codex]
+        default: worktree
+      max_concurrent:
+        type: integer
+        default: 1
+  stopping:
+    type: object
+    optional_children:
+      max_iterations:
+        type: integer
+        default: 4
+      max_hours:
+        type: number
+        default: 1
+      plateau_iterations:
+        type: integer
+        default: 3
+
+validation_rules:
+  - "All required fields must be present."
+  - "metric.primary.type must be hard or judge."
+  - "scope.mutable and scope.immutable must not be empty."
+  - "measurement.command must be non-empty."
+  - "execution.max_concurrent must be >= 1."

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "profile_id": "Plugins-skill-factory-skills-skill-factory-router",
-  "scope_skill": "plugins/skill-factory/skills/skill-factory-router",
+  "scope_skill": "Plugins/skill-factory/skills/skill-factory-router",
   "scope_profile": "Plugins",
   "rubric_version": "2026-04-19",
   "evaluator_version": "v1",

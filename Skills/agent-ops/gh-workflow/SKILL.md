@@ -136,7 +136,7 @@ GitHub workflow work is only complete when the repository state and the GitHub s
 |---|---|
 | [[resolve-pr-parallel]] | Resolve many unresolved review threads when a one-thread-at-a-time loop is too slow |
 | [[verification-before-completion]] | Gate all merge claims with fresh `gh pr checks` and `git log` evidence |
-| [[systematic-debugging]] | When PR CI failures reveal a code-level bug that needs root-cause investigation |
+| [[he-fix-bugs]] | When PR CI failures reveal a code-level bug that needs root-cause investigation |
 | [[release]] | After merging — use to cut the version tag and publish the release |
 
 **Topic map:** [[backend-platform]]

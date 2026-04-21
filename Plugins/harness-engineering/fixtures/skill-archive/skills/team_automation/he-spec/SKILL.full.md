@@ -1,11 +1,11 @@
 ---
 name: he-spec
-description: Own the compound-engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the CE WHAT-before-planning artifact, not a broader product-planning pipeline.
+description: Own the Harness Engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the WHAT-before-planning artifact, not a broader product-planning pipeline.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Spec
+# Harness Engineering Spec
 
 **Note: The current year is 2026.** Use this when dating spec artifacts and searching for recent documentation.
 
@@ -34,7 +34,7 @@ Use the platform's blocking question tool when available (`AskUserQuestion` in C
 Ask one question at a time. Prefer concise single-select choices when natural options exist.
 
 ## Working agreement
-- Treat this as the compound-engineering specification stage, not planning or implementation; `product-spec` stays separate for broader product-planning.
+- Treat this as the Harness Engineering specification stage, not planning or implementation; `product-spec` stays separate for broader product-planning.
 - Specification answers WHAT the system owns, what behavior must hold, what can fail, and how correctness will be proved.
 - Use the most authoritative source artifact; do not invent product or UI behavior that belongs upstream.
 - Prefer the smallest spec that removes contract ambiguity; scope to one feature boundary or 2-3 tightly coupled modules unless broader is clearly needed.
@@ -46,7 +46,7 @@ Use this skill when the user wants a design and behavior contract for a feature,
 
 Primary triggers:
 - "turn this brainstorm into a spec"
-- "write the compound-engineering spec stage"
+- "write the Harness Engineering spec stage"
 - "create an implementation-grade specification"
 - "revise this existing spec"
 - "write a UI spec for this feature"

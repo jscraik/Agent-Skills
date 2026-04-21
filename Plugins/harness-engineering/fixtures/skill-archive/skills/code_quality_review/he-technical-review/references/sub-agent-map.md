@@ -43,6 +43,7 @@ Add by risk signal:
 - `architecture-strategist`: multi-module design and boundary changes
 - `maintainability-reviewer`: elevated complexity/coupling risk
 - `julik-frontend-races-reviewer`: async UI race/timing and DOM lifecycle hazards
+- `adversarial-reviewer`: challenge externally supplied review suggestions when local evidence looks contradictory
 
 ## Document-review specialists
 For specs/plans, add:

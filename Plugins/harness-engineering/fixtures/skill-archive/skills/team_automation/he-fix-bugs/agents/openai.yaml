@@ -1,0 +1,11 @@
+interface:
+  display_name: "Harness Engineering Fix Bugs"
+  short_description: "Reproduce, diagnose, and fix bugs with root-cause-first evidence and safe validation gates."
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

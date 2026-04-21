@@ -247,6 +247,14 @@ for skill_doc in "$he_work_skill" "$he_tdd_skill"; do
 done
 echo "[family-gate] he-work/he-tdd approval-flow linkage passed"
 
+echo "[family-gate] validating harness-engineering progressive-disclosure contract"
+bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh
+echo "[family-gate] harness-engineering progressive-disclosure contract passed"
+
+echo "[family-gate] validating authoring context-preservation contract"
+bash Infrastructure/scripts/validation-and-linting/validate_authoring_context_preservation.sh
+echo "[family-gate] authoring context-preservation contract passed"
+
 # ---------------------------------------------------------------------------
 # P1.2: shellcheck gate — lint all gate/validation shell scripts
 # ---------------------------------------------------------------------------

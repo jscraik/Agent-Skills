@@ -70,7 +70,7 @@ func ParsePort(value string) (int, error) {
 | Skill | When to use |
 |---|---|
 | [[rust-pro]] | Systems programming with similar error-propagation and ownership concerns |
-| [[systematic-debugging]] | Triage Go runtime errors with evidence-first diagnosis |
+| [[he-fix-bugs]] | Triage Go runtime errors with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
 

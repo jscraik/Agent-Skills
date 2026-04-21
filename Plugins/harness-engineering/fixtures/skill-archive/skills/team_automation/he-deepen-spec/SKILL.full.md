@@ -1,11 +1,11 @@
 ---
 name: he-deepen-spec
-description: Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants CE-stage spec hardening or a requirements review pass before planning.
+description: Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants Harness Engineering spec hardening or a requirements review pass before planning.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Deepen Spec
+# Harness Engineering Deepen Spec
 
 **Note: The current year is 2026.** Use this when dating deepening artifacts and searching for recent documentation.
 
@@ -46,7 +46,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 6. **Preserve intent and IDs** - Keep original decisions and stable acceptance identifiers unless evidence justifies change.
 
 ## Working agreement
-- Treat this as the compound-engineering spec-deepening stage, not spec creation, planning, or implementation.
+- Treat this as the Harness Engineering spec-deepening stage, not spec creation, planning, or implementation.
 - Deepening answers whether an existing contract is strong enough for planning and what sections need tighter boundaries, state, safety, failure, observability, or validation detail.
 - Preserve the spec's intent and stable acceptance identifiers unless evidence justifies a targeted change.
 - Prefer the smallest meaningful deepening pass, usually 2-5 weak sections rather than whole-document churn.
@@ -211,6 +211,7 @@ If the user has explicitly asked for delegation, run these bounded internal suba
 - `learnings-researcher("Find prior learnings relevant to: <spec topic> — check .harness/memory/LEARNINGS.md first when it exists, then instructions/Learnings.md for compatibility, then scan only directly relevant docs/solutions entries. Return only directly relevant findings, <=200 words total.")`
 
 If delegation was not explicitly requested, the tool is unavailable, or subagents are unnecessary, perform the equivalent grounding serially in the main thread.
+Resolve helper-role availability from `~/.codex/agents/manifest.json` before spawning subagents. If auto-spawn is unavailable, continue inline and explicitly list manual launch roles for the user. If required roles are missing, route to `[[codex-agent-creator]]` to create or install them before rerunning delegated coverage.
 
 Add conditional external research only when the section gaps justify it:
 - `best-practices-researcher("<section or spec topic> — max 5 external sources, <=300 word summary, cite URLs and dates")`
@@ -233,7 +234,7 @@ Use `artifact-backed` mode only when:
 - the work is high-risk and bulky source-backed analysis is likely
 
 When artifact-backed mode is warranted:
-- use a scratch directory under `.context/compound-engineering/he-deepen-spec/`
+- use a scratch directory under `.context/harness-engineering/he-deepen-spec/`
 - write one compact artifact per selected section or reviewer cluster
 - keep artifacts temporary unless the user explicitly asks to inspect them
 
@@ -332,6 +333,7 @@ Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to 
 
 ## References
 - `Infrastructure/references/deepening-modes.md`, `Infrastructure/references/document-review-pass.md`, `Infrastructure/references/rewrite-rules.md`, `Infrastructure/references/sub-agent-map.md`, `Infrastructure/references/contract.yaml`, `Infrastructure/references/evals.yaml`, `Infrastructure/references/source-parity.md`
+- `[[codex-agent-creator]]` when required reviewer roles are missing from `~/.codex/agents/manifest.json`
 
 ## Gotchas
 - Read the full spec before deciding what is weak; local thinness may be intentional because another section already carries the contract.
@@ -343,8 +345,8 @@ Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to 
 
 | Skill | When to use |
 |---|---|
-| [[he-spec]] | Draft or tighten the base compound-engineering spec before a deepening pass |
+| [[he-spec]] | Draft or tighten the base Harness Engineering spec before a deepening pass |
 | [[he-deepen-plan]] | Strengthen the implementation plan after the spec contract is solid |
-| [[product-spec]] | Use the broader planning-spec pipeline instead of the narrower CE contract path |
+| [[product-spec]] | Use the broader planning-spec pipeline instead of the narrower Harness Engineering contract path |
 
 **Topic map:** [[agent-ops]]

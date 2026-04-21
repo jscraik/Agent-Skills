@@ -11,7 +11,7 @@ metadata:
   metadata_source: frontmatter
 ---
 
-# CE TDD
+# Harness Engineering TDD
 
 **Note: The current year is 2026.** Use this when dating execution artifacts and searching for recent documentation.
 
@@ -299,8 +299,8 @@ IMPORTANT: Outputs should vary based on the behavior under test, the risk level,
 |---|---|
 | [[he-work]] | he-tdd is the test-first execution posture inside he-work |
 | [[he-plan]] | he-plan specifies TDD posture via `Execution note: test-first` |
-| [[test-driven-development]] | Standalone TDD discipline for non-CE contexts |
-| [[systematic-debugging]] | Run the TDD loop inside debugging workflow for each fix |
+| [[test-driven-development]] | Standalone TDD discipline for non-Harness-Engineering contexts |
+| [[he-fix-bugs]] | Run the TDD loop inside debugging workflow for each fix |
 | [[verification-before-completion]] | Verify the full test suite is green before claiming done |
 
 **Topic map:** [[agent-ops]]

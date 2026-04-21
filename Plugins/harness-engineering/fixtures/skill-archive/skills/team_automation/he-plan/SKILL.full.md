@@ -1,17 +1,19 @@
 ---
 name: he-plan
-description: Own the compound-engineering planning stage by turning a spec, brainstorm, bug report, or feature description into an execution-ready implementation plan. Use when the user wants either the CE planning stage or canonical generic multi-step implementation planning.
+description: Own the Harness Engineering planning stage by turning a spec, brainstorm, bug report, or feature description into an execution-ready implementation plan. Use when the user wants either the HE planning stage or canonical generic multi-step implementation planning.
 metadata:
   skill-type: team_automation
 ---
 
-# CE Plan
+# Harness Engineering Plan
 
 **Note: The current year is 2026.** Use this when dating plans and searching for recent documentation.
 
 `he-brainstorm` defines **WHAT** to build. `he-plan` defines **HOW** to build it. `he-work` executes.
 
 This workflow produces a durable implementation plan. It does **not** implement code, run tests, or learn from execution-time results.
+
+When directly invoked, always stay in planning mode. If the input is unclear, ask focused clarifying questions or run lightweight planning bootstrap, but do not abandon planning.
 
 ## Table of Contents
 - [Working agreement](#working-agreement)
@@ -37,7 +39,7 @@ This workflow produces a durable implementation plan. It does **not** implement 
 
 ## Working agreement
 - `he-brainstorm` defines WHAT, `he-plan` defines HOW, `he-work` executes.
-- Use the lightest planning mode that fits: `generic-plan` for plain sequencing, CE modes when stage artifacts matter.
+- Use the lightest planning mode that fits: `generic-plan` for plain sequencing, HE modes when stage artifacts matter.
 - Prefer the smallest plan that still protects safety, governance, and delivery confidence.
 - Keep planning portable: capture decisions, files, sequencing, risks, and verification — not shell choreography or implementation code.
 - Stop when the plan file is written, verified, and next-step options are clear.
@@ -82,7 +84,7 @@ Primary triggers:
 - "write a delivery plan for this bug fix"
 - "write a generic implementation plan"
 - "break this work into sequenced steps with checks"
-- "create the compound-engineering plan stage"
+- "create the Harness Engineering plan stage"
 - "make me a UI implementation plan"
 - "turn this brainstorm into an execution plan"
 - "sequence the work, risks, and validation"
@@ -187,6 +189,8 @@ Start inline by default.
 If the user explicitly requested delegation, run in parallel:
 - `repo-research-analyst` for patterns and conventions
 - `learnings-researcher` for prior learnings
+- For HE subagent policy and conditional-role mapping, follow `../../../references/subagent-routing.md`.
+- If required roles are missing from `~/.codex/agents/manifest.json`, continue inline and advise role creation/install via `[[codex-agent-creator]]` with explicit role names from the stage map.
 
 Focus on: existing patterns, AGENTS guidance, similar modules, UI conventions, stack context.
 Detect execution-posture signals (test-first, external-delegate) from request or research.
@@ -261,8 +265,8 @@ After writing, run exact checks and fix failures before presenting options.
 - if the repo has additional plan-graph or structural linting, run it as an extra non-blocking quality check before handoff
 
 ## Plan modes
-Use `generic-plan` for straightforward implementation sequencing when the job is to turn known requirements into an actionable plan without heavier CE-stage framing.
-Use `standard-plan` for backend, full-stack, infra, or product delivery work where one main implementation plan is enough and CE-stage traceability is useful.
+Use `generic-plan` for straightforward implementation sequencing when the job is to turn known requirements into an actionable plan without heavier HE-stage framing.
+Use `standard-plan` for backend, full-stack, infra, or product delivery work where one main implementation plan is enough and HE-stage traceability is useful.
 Use `ui-enhanced-plan` when the main plan is still the right artifact but UI work materially affects sequencing, validation, rollout, or prototype direction.
 Use `dedicated-ui-plan` when the user explicitly asks for a UI implementation plan, a UI spec is the primary source, or the main question is UI build order and validation.
 See `Infrastructure/references/ui-modes.md` for the full compatibility matrix.
@@ -272,7 +276,7 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 
 ## Handoff guidance
 - review the plan or refine it directly
-- run `he-review`, `he-technical-review`, or `he-deepen-plan` when scrutiny is needed
+- run `he-code-review`, `he-technical-review`, or `he-deepen-plan` when scrutiny is needed
 - generate a companion UI plan when UI work is in scope
 - start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
 - recommend the companion UI plan when the work is UI-heavy and not already covered by a dedicated UI artifact

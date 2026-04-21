@@ -156,6 +156,6 @@ Use a focused file-based todo triage workflow that sits between finding generati
 |---|---|
 | [[ce-work]] | Execute the approved work once triage decisions are made |
 | [[resolve-todo-parallel]] | Resolve a batch of approved todo items in parallel rather than triaging them |
-| [[systematic-debugging]] | Diagnose unclear or flaky findings before deciding whether they belong in the queue |
+| [[he-fix-bugs]] | Diagnose unclear or flaky findings before deciding whether they belong in the queue |
 
 **Topic map:** [[agent-ops]]

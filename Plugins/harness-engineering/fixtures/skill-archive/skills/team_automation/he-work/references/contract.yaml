@@ -1,13 +1,13 @@
 schema_version: 1
 
 purpose: >
-  Run the execution stage of the compound-engineering workflow so approved work
+  Run the execution stage of the Harness Engineering workflow so approved work
   lands with synchronized task state, contract-drift control, validation
   evidence, UI execution discipline, and shipping-ready handoff notes.
 
 triggers:
   - the user wants to implement an approved plan, todo file, or tightly scoped spec
-  - the user explicitly requests the ce:work stage
+  - the user explicitly requests the he-work stage
   - the user wants execution with contract traceability, testing, and rollout hygiene
   - the user wants delegate-mode implementation for scoped tasks
 
@@ -23,7 +23,7 @@ outputs:
   - implemented code plus validation evidence
   - updated contract artifacts when execution reveals drift
   - a shipping handoff package with monitoring and validation notes
-  - a review-tier decision that defaults to full he-review before handoff
+  - a review-tier decision that defaults to full he-code-review before handoff
   - UI evidence when user-visible surfaces changed
 
 non_goals:

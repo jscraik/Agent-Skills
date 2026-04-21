@@ -1,0 +1,43 @@
+schema_version: 1
+
+purpose: >
+  Run the Harness Engineering optimization stage so users can improve measurable
+  outcomes through controlled iterative experiments with explicit gates and
+  durable state.
+
+triggers:
+  - user asks to optimize or tune a measurable engineering outcome
+  - one-shot implementation choice is uncertain and experiments are justified
+  - quality requires hard metrics, LLM-judge scoring, or both
+
+inputs:
+  - optimization goal or spec path
+  - measurement command with timeout and working directory
+  - mutable and immutable scope
+  - degenerate gates and stopping limits
+
+outputs:
+  - normalized optimization spec
+  - baseline + per-experiment log entries
+  - best-result summary with delta from baseline
+  - next-step route (`continue`, `he-work`, or `stop`)
+  - subagent route decision: auto delegation when roles exist, inline/manual fallback otherwise
+
+non_goals:
+  - generic feature implementation without experimentation
+  - replacing spec/planning stages
+  - changing immutable measurement surfaces as part of experiment edits
+
+risks:
+  - optimizing a misleading proxy metric; mitigate with judge mode and degenerate gates
+  - result loss during long runs; mitigate with immediate on-disk log writes and verification
+  - uncontrolled parallel conflicts; mitigate with probe checks and bounded concurrency
+  - missing helper roles; mitigate with manifest checks and codex-agent-creator fallback
+
+observability: >
+  Track stage selection accuracy, fallback frequency when mapped roles are
+  unavailable, and validation pass/fail outcomes for each run.
+
+rollback_procedure: >
+  Restore the previous contract/evals/task-profile files from git, then rerun
+  strict skill audit and plugin-builder validation before re-promoting.

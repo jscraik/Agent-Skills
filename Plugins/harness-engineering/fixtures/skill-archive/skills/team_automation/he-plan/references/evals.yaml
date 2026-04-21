@@ -4,7 +4,7 @@ skill_name: "he-plan"
 
 cases:
   - id: explicit-plan-stage
-    name: explicit compound planning stage
+    name: explicit harness engineering planning stage
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
@@ -161,7 +161,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
-        value: "(?i)(ce:brainstorm|explicit assumptions|product blocker|do not continue planning)"
+        value: "(?i)(he-brainstorm|explicit assumptions|product blocker|do not continue planning)"
 
   - id: execution-posture-signal
     name: carry execution posture signal lightly

@@ -1,4 +1,4 @@
-# CE Plan UI Mode Matrix
+# Harness Engineering Plan UI Mode Matrix
 
 Read when: you need to choose between `standard-plan`, `ui-enhanced-plan`, and `dedicated-ui-plan`, or when preserving legacy UI-planning behavior during migration.
 

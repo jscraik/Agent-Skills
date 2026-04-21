@@ -1,0 +1,38 @@
+{
+  "title": "Improve he-improve",
+  "target": {
+    "kind": "skill",
+    "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/harness-engineering/skills/team_automation/he-improve",
+    "entryPath": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/harness-engineering/skills/team_automation/he-improve/SKILL.md",
+    "name": "he-improve",
+    "relativePath": "Plugins/harness-engineering/skills/team_automation/he-improve"
+  },
+  "summary": "Raise the evaluation from grade C (81/100) with a focus on the highest-signal structural and budget issues first.",
+  "goals": [
+    "Reduce repeated instruction text and move detail into deferred supporting files."
+  ],
+  "measurementGoals": [
+    "token-usage-observer",
+    "task-outcome-scorecard",
+    "latency-efficiency"
+  ],
+  "requiredFixes": [
+    {
+      "id": "deferred_cost_tokens-budget-high",
+      "message": "deferred_cost_tokens is excessive relative to the current Codex baseline.",
+      "remediation": [
+        "Reduce repeated instruction text and move detail into deferred supporting files."
+      ]
+    }
+  ],
+  "recommendedFixes": [
+    {
+      "id": "invoke_cost_tokens-budget-high",
+      "message": "invoke_cost_tokens is heavy relative to the current Codex baseline.",
+      "remediation": [
+        "Reduce repeated instruction text and move detail into deferred supporting files."
+      ]
+    }
+  ],
+  "suggestedPrompt": "Use the skill-creator guidance to improve he-improve. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard, latency-efficiency. Address deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline. Address invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline."
+}

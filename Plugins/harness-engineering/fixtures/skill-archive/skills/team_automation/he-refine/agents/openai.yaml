@@ -1,0 +1,11 @@
+interface:
+  display_name: "Harness Engineering Refine"
+  short_description: "[BETA] Run browser-first polish loops with deterministic dev-server startup and rapid user-driven iteration."
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

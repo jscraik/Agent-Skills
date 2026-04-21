@@ -1,4 +1,4 @@
-# CE Plan Artifact Templates
+# Harness Engineering Plan Artifact Templates
 
 Read when: you are writing or verifying the actual plan artifact selected by `he-plan`.
 
@@ -314,7 +314,7 @@ If the repo has additional plan-graph or structural linting, run it as an extra 
 ## Handoff options
 Offer the clearest next-step options that fit the mode:
 1. Open the plan in an editor for review
-2. Run `he-review`
+2. Run `he-code-review`
 3. Review and refine
 4. Proceed to `he-deepen-plan`
 5. Run `he-technical-review`

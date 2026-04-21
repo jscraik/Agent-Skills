@@ -1,13 +1,13 @@
 schema_version: 1
 
 purpose: >
-  Run the planning stage of the compound-engineering workflow so the user gets an
+  Run the planning stage of the Harness Engineering workflow so the user gets an
   execution-ready implementation plan with stable IDs, traceability, validation,
   rollout guidance, and mode-aware UI planning when relevant.
 
 triggers:
   - the user wants to turn a spec, brainstorm, bug report, or feature description into an implementation plan
-  - the user wants the compound-engineering planning stage explicitly
+  - the user wants the Harness Engineering planning stage explicitly
   - the user wants a UI implementation plan or a UI-aware delivery plan
   - the user needs sequencing, test strategy, acceptance criteria, or rollout guidance before implementation
 

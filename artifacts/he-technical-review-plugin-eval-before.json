@@ -1,0 +1,29 @@
+{
+  "title": "Improve he-technical-review",
+  "target": {
+    "kind": "skill",
+    "path": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/harness-engineering/skills/code_quality_review/he-technical-review",
+    "entryPath": "/Users/jamiecraik/.codex/worktrees/b79d/agent-skills/Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
+    "name": "he-technical-review",
+    "relativePath": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review"
+  },
+  "summary": "Raise the evaluation from grade B (86/100) with a focus on the highest-signal structural and budget issues first.",
+  "goals": [
+    "Fix or remove broken links in SKILL.md."
+  ],
+  "measurementGoals": [
+    "token-usage-observer",
+    "task-outcome-scorecard"
+  ],
+  "requiredFixes": [
+    {
+      "id": "broken-relative-links",
+      "message": "The skill contains relative links that do not resolve inside the skill directory.",
+      "remediation": [
+        "Fix or remove broken links in SKILL.md."
+      ]
+    }
+  ],
+  "recommendedFixes": [],
+  "suggestedPrompt": "Use the skill-creator guidance to improve he-technical-review. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard. Address broken-relative-links: The skill contains relative links that do not resolve inside the skill directory."
+}

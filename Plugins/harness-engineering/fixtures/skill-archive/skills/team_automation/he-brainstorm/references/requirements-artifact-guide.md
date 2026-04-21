@@ -57,8 +57,8 @@ complexity: small|medium|large
 - [Affects R2][Needs research] [Question that likely requires research during planning]
 
 ## Next Steps
-[If `Resolve Before Planning` is empty: `-> /ce:plan` or `-> /ce:spec`, depending on `spec_required`]
-[If `Resolve Before Planning` is not empty: `-> Resume /ce:brainstorm` to resolve blocking questions before planning]
+[If `Resolve Before Planning` is empty: `-> /he:plan` or `-> /he:spec`, depending on `spec_required`]
+[If `Resolve Before Planning` is not empty: `-> Resume /he:brainstorm` to resolve blocking questions before planning]
 ```
 
 ## Visual aids

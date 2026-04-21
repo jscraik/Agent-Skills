@@ -1,0 +1,11 @@
+interface:
+  display_name: "Harness Engineering Code Review"
+  short_description: "Run broad PR, branch, or workflow-artifact reviews with synthesized findings, blockers, readiness guidance, and optional mode/base/plan overrides."
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

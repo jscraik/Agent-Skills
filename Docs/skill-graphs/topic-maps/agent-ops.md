@@ -49,7 +49,7 @@ covers:
 
 ## Debugging & Verification
 
-- [[systematic-debugging]] — Root-cause-first debugging workflow for bugs, test failures, regressions, and unexpected behavior.
+- [[he-fix-bugs]] — Root-cause-first debugging workflow for bugs, test failures, regressions, and unexpected behavior.
 - [[verification-before-completion]] — Validate completion claims with fresh command evidence before marking work done.
 - [[test-driven-development]] — Red-Green-Refactor delivery for behavior changes: write tests first.
 - [[evals-router]] — Design, audit, debug, and scale LLM evaluation workflows: error analysis, judge prompts, synthetic eval data.
@@ -83,6 +83,6 @@ covers:
 ## Cross-links
 
 - Building a new skill? [[brainstorming]] → [[skill-builder]] → [[decide-build-primitive]] → [[plugin-builder]].
-- Debugging a failing automation? [[systematic-debugging]] → [[evals-router]] → [[verification-before-completion]].
+- Debugging a failing automation? [[he-fix-bugs]] → [[evals-router]] → [[verification-before-completion]].
 - Session health check? [[skill-refactor]] → [[insight-report]].
 - Topic maps: [[backend-platform]] | [[product-strategy]] | [[security-ops]]

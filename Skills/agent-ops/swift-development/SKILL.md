@@ -69,7 +69,7 @@ func parsePort(_ value: String) throws -> Int {
 | Skill | When to use |
 |---|---|
 | [[rust-pro]] | Systems-level safety patterns that share Swift's value-type and concurrency thinking |
-| [[systematic-debugging]] | Triage Swift concurrency and actor isolation issues with evidence-first diagnosis |
+| [[he-fix-bugs]] | Triage Swift concurrency and actor isolation issues with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
 

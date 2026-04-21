@@ -11,7 +11,7 @@ metadata:
   metadata_source: frontmatter
 ---
 
-# CE Reliability Review
+# Harness Engineering Reliability Review
 
 **Note: The current year is 2026.** Use this when dating review artifacts and searching for recent documentation.
 
@@ -71,7 +71,7 @@ Primary triggers:
 
 Non-triggers:
 - the user wants general code quality review; route to `he-technical-review`
-- the user wants broad readiness synthesis; route to `he-review`
+- the user wants broad readiness synthesis; route to `he-code-review`
 - the user wants implementation now; route to `he-work`
 - the user wants to plan reliability features; route to `he-plan`
 - the user wants security-specific analysis; route to `security-threat-model`
@@ -98,7 +98,7 @@ If the target is missing, ask one direct question:
   - blast radius assessment
   - recommended mitigation
   - confidence `0-1`
-- a resilience coverage assessment against the checklist in `Infrastructure/references/resilience-patterns.md`
+- a resilience coverage assessment against the checklist in `references/resilience-patterns.md`
 - SLO readiness assessment when the target is a user-facing service
 - dependency failure matrix when multiple external dependencies exist
 - explicit statement when no critical reliability findings exist:
@@ -183,10 +183,10 @@ Identify the review target and gather architectural context.
 - Map the service boundary: what does this service own, and what does it depend on?
 - Identify all integration points (databases, caches, queues, external APIs, internal services)
 - Read any linked plan/spec reliability sections as the adherence baseline
-- For multi-surface targets, select reviewer lanes from `Infrastructure/references/sub-agent-map.md` before fan-out
+- For multi-surface targets, select reviewer lanes from `references/sub-agent-map.md` before fan-out
 
 ### Phase 1: Map failure domains
-For each integration point and internal component, evaluate across the review dimensions in `Infrastructure/references/resilience-patterns.md`:
+For each integration point and internal component, evaluate across the review dimensions in `references/resilience-patterns.md`:
 
 | Domain | Key Questions |
 |--------|--------------|
@@ -281,7 +281,7 @@ Typical next steps after reliability review:
 - fix critical and important findings in `he-work`
 - add resilience requirements to the spec in `he-deepen-spec`
 - add reliability implementation units to the plan in `he-deepen-plan`
-- run a broader `he-review` when package-level readiness is needed
+- run a broader `he-code-review` when package-level readiness is needed
 - run `he-technical-review` for code quality beyond reliability
 
 When handing off, preserve the dependency failure matrix and resilience coverage gaps so the next stage can act without rediscovery.
@@ -321,17 +321,17 @@ IMPORTANT: Outputs should vary based on the architecture, dependency profile, an
 - User says: "We split into three microservices; map cascading-failure risk across the dependency chain."
 
 ## References
-- [Resilience Patterns](./Infrastructure/references/resilience-patterns.md)
-- [Contract](./Infrastructure/references/contract.yaml)
-- [Evals](./Infrastructure/references/evals.yaml)
-- [Sub-Agent Map](./Infrastructure/references/sub-agent-map.md)
+- [Resilience Patterns](./references/resilience-patterns.md)
+- [Contract](./references/contract.yaml)
+- [Evals](./references/evals.yaml)
+- [Sub-Agent Map](./references/sub-agent-map.md)
 
 ## See Also
 
 | Skill | When to use together |
 |---|---|
 | [[he-technical-review]] | Broader code quality and engineering findings beyond reliability |
-| [[he-review]] | Package-level readiness synthesis including reliability |
+| [[he-code-review]] | Package-level readiness synthesis including reliability |
 | [[he-plan]] | Plan reliability implementation units from review findings |
 | [[he-deepen-spec]] | Strengthen spec with reliability requirements from review |
 | [[security-threat-model]] | Security-specific threat modeling complement to reliability |

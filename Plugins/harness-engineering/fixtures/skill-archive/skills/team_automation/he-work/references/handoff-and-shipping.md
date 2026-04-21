@@ -1,4 +1,4 @@
-# CE Work Handoff And Shipping
+# Harness Engineering Work Handoff And Shipping
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -38,7 +38,7 @@ Every meaningful code change gets reviewed before handoff. Default to Tier 2.
 
 Tier 2: full review
 - default for almost all execution work
-- run `he-review mode:autofix` and pass `plan:` when the governing plan path is available
+- run `he-code-review mode:autofix` and pass `plan:` when the governing plan path is available
 - accept safe fixes automatically, then surface any remaining actionable work in the final handoff
 
 Tier 1: inline self-review

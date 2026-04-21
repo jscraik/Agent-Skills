@@ -71,7 +71,7 @@ end
 | Skill | When to use |
 |---|---|
 | [[rust-pro]] | Systems-level concurrency patterns that share OTP-style supervision thinking |
-| [[systematic-debugging]] | Triage distributed process failures with evidence-first diagnosis |
+| [[he-fix-bugs]] | Triage distributed process failures with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
 

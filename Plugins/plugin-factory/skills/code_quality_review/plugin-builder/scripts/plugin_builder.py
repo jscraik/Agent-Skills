@@ -1,10 +1,1 @@
-#!/usr/bin/env python3
-"""CLI wrapper for plugin_builder implementation."""
-
-from __future__ import annotations
-
-from pathlib import Path
-import runpy
-
-if __name__ == "__main__":
-    runpy.run_path(str(Path(__file__).with_suffix(".pyw")), run_name="__main__")
+../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py

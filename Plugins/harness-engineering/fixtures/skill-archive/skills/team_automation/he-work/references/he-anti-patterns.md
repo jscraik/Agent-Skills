@@ -1,4 +1,4 @@
-# CE Work Anti-Patterns
+# Harness Engineering Work Anti-Patterns
 
 ## Table of Contents
 - [Purpose](#purpose)

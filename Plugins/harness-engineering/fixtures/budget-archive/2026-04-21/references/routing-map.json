@@ -1,0 +1,598 @@
+{
+  "schema_version": 1,
+  "plugin": "harness-engineering",
+  "naming_note": "he-compound, he-compound-refresh, and he-review are Harness Engineering compatibility aliases retained for routing continuity, not compound-engineering branding.",
+  "entrypoint": "he-router",
+  "routes": [
+    {
+      "intent": "stage-routing-or-resume",
+      "match": [
+        "where do we start",
+        "resume workflow",
+        "what stage next",
+        "unknown stage"
+      ],
+      "skill": "he-compound",
+      "required_inputs": [
+        "problem or artifact path",
+        "constraints",
+        "execution preference"
+      ],
+      "output": "stage decision + exact next command"
+    },
+    {
+      "intent": "ideation-and-option-generation",
+      "match": [
+        "he-ideate",
+        "idea generation",
+        "explore options"
+      ],
+      "skill": "he-ideate",
+      "required_inputs": [
+        "problem statement",
+        "constraints",
+        "success signals"
+      ],
+      "output": "ranked implementation opportunities and recommendation"
+    },
+    {
+      "intent": "brainstorm-and-requirements-shaping",
+      "match": [
+        "he-brainstorm",
+        "shape requirements",
+        "compare directions"
+      ],
+      "skill": "he-brainstorm",
+      "required_inputs": [
+        "problem statement",
+        "constraints",
+        "success signals"
+      ],
+      "output": "requirements-oriented options with recommendation"
+    },
+    {
+      "intent": "specification",
+      "match": [
+        "write a spec",
+        "define contract",
+        "requirements artifact"
+      ],
+      "skill": "he-spec",
+      "required_inputs": [
+        "approved direction",
+        "scope boundaries",
+        "acceptance criteria"
+      ],
+      "output": "implementation-grade specification"
+    },
+    {
+      "intent": "planning",
+      "match": [
+        "he-plan",
+        "create implementation plan",
+        "execution plan",
+        "sequence the work"
+      ],
+      "skill": "he-plan",
+      "required_inputs": [
+        "governing spec or equivalent",
+        "constraints and risks",
+        "verification expectations"
+      ],
+      "output": "execution-ready plan with validation sequence"
+    },
+    {
+      "intent": "deepen-spec-artifact",
+      "match": [
+        "he-deepen-spec",
+        "harden spec",
+        "deepen specification"
+      ],
+      "skill": "he-deepen-spec",
+      "required_inputs": [
+        "existing spec path",
+        "known risk areas",
+        "acceptance and failure expectations"
+      ],
+      "output": "spec with stronger boundaries, failure handling, and validation detail"
+    },
+    {
+      "intent": "deepen-plan-artifact",
+      "match": [
+        "he-deepen-plan",
+        "harden plan",
+        "deepen implementation plan"
+      ],
+      "skill": "he-deepen-plan",
+      "required_inputs": [
+        "existing plan path",
+        "sequencing or risk concerns",
+        "verification expectations"
+      ],
+      "output": "plan with stronger sequencing, risk treatment, and validation gates"
+    },
+    {
+      "intent": "iterative-optimization",
+      "match": [
+        "he-improve",
+        "optimize",
+        "tune",
+        "parameter search",
+        "run experiments"
+      ],
+      "skill": "he-improve",
+      "required_inputs": [
+        "optimization goal or spec path",
+        "measurement command",
+        "mutable/immutable scope and gates"
+      ],
+      "output": "baseline + experiment loop + best-result recommendation"
+    },
+    {
+      "intent": "browser-first-refinement",
+      "match": [
+        "he-refine",
+        "polish",
+        "refine",
+        "start dev server",
+        "iterate in browser"
+      ],
+      "skill": "he-refine",
+      "required_inputs": [
+        "branch or PR context",
+        "dev-server startup constraints",
+        "refinement goals and stop condition"
+      ],
+      "output": "running dev server + iterative refinement loop + next-stage recommendation"
+    },
+    {
+      "intent": "execution",
+      "match": [
+        "he-work",
+        "implement",
+        "execute plan",
+        "ship this"
+      ],
+      "skill": "he-work",
+      "required_inputs": [
+        "plan/todo/spec target",
+        "repo conventions",
+        "verification gates"
+      ],
+      "output": "implemented changes + validation + handoff package"
+    },
+    {
+      "intent": "test-driven-execution",
+      "match": [
+        "he-tdd",
+        "test-first",
+        "tdd",
+        "start with failing test",
+        "red green"
+      ],
+      "skill": "he-tdd",
+      "required_inputs": [
+        "implementation scope",
+        "test harness constraints",
+        "verification gates"
+      ],
+      "output": "test-first execution slices with RED/GREEN evidence"
+    },
+    {
+      "intent": "debugging-and-bug-fixing",
+      "match": [
+        "he-fix-bugs",
+        "debug this",
+        "fix this bug",
+        "why is this failing",
+        "trace this error",
+        "reproduce this issue"
+      ],
+      "skill": "he-fix-bugs",
+      "required_inputs": [
+        "issue reference or direct symptom",
+        "expected behavior",
+        "environment/reproduction constraints"
+      ],
+      "output": "reproduction status + root-cause summary + fix recommendation or implementation evidence"
+    },
+    {
+      "intent": "branch-hygiene-cleanup",
+      "match": [
+        "he-prune-branches",
+        "clean gone branches",
+        "prune local branches",
+        "delete stale branches",
+        "clean branches removed from remote"
+      ],
+      "skill": "he-prune-branches",
+      "required_inputs": [
+        "repository path",
+        "confirmation to delete discovered branch set",
+        "permission to remove associated worktrees"
+      ],
+      "output": "gone-branch list + confirmation checkpoint + cleanup report"
+    },
+    {
+      "intent": "readiness-synthesis-review",
+      "match": [
+        "he-review",
+        "he-code-review",
+        "go/no-go",
+        "readiness review",
+        "pre-merge review"
+      ],
+      "skill": "he-code-review",
+      "required_inputs": [
+        "diff/PR target",
+        "acceptance baseline",
+        "review scope"
+      ],
+      "output": "severity-ranked readiness synthesis and routing"
+    },
+    {
+      "intent": "deep-technical-review",
+      "match": [
+        "he-technical-review",
+        "technical review",
+        "deep critique",
+        "engineering risks",
+        "validate review feedback",
+        "review comments might be wrong"
+      ],
+      "skill": "he-technical-review",
+      "required_inputs": [
+        "target diff/files or review-feedback items",
+        "spec/plan baseline when available"
+      ],
+      "output": "findings-first technical issues with locations plus feedback validation posture"
+    },
+    {
+      "intent": "reliability-review",
+      "match": [
+        "he-reliability-review",
+        "resilience review",
+        "failure modes",
+        "SLO readiness",
+        "cascading failure"
+      ],
+      "skill": "he-reliability-review",
+      "required_inputs": [
+        "service/API target",
+        "dependency context",
+        "failure impact context"
+      ],
+      "output": "reliability risks and resilience recommendations"
+    },
+    {
+      "intent": "solved-problem-capture",
+      "match": [
+        "capture learning",
+        "document solved issue",
+        "docs/solutions update"
+      ],
+      "skill": "he-compound",
+      "required_inputs": [
+        "verified fix evidence",
+        "artifact context",
+        "desired capture mode"
+      ],
+      "output": "durable solution artifact and next-stage routing"
+    },
+    {
+      "intent": "docs-solutions-maintenance",
+      "match": [
+        "refresh docs/solutions",
+        "stale solution docs",
+        "consolidate overlap"
+      ],
+      "skill": "he-compound-refresh",
+      "required_inputs": [
+        "refresh scope",
+        "mode preference",
+        "evidence source paths"
+      ],
+      "output": "refresh/consolidation report with evidence"
+    }
+  ],
+  "not_this_plugin": [
+    {
+      "intent": "coding-harness-cli-operations",
+      "examples": [
+        "harness init",
+        "harness upgrade",
+        "harness ci-migrate",
+        "harness check-environment"
+      ],
+      "route_to_skill": "coding-harness",
+      "reason": "These operations belong to @brainwav/coding-harness setup and governance, not Harness Engineering stage orchestration."
+    }
+  ],
+  "subagent_stage_map": {
+    "he-router": {
+      "policy": "manual-only",
+      "baseline_roles": [],
+      "conditional_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "trigger": "only when stage intent is ambiguous"
+    },
+    "he-compound": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "session-historian",
+        "spec-flow-analyzer"
+      ],
+      "trigger": "delegation requested or resume/recovery ambiguity"
+    },
+    "he-ideate": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "issue-intelligence-analyst"
+      ],
+      "trigger": "delegation requested or issue-theme-heavy ideation"
+    },
+    "he-brainstorm": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "best-practices-researcher"
+      ],
+      "trigger": "delegation requested or external constraints drive requirements"
+    },
+    "he-spec": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "best-practices-researcher",
+        "framework-docs-researcher"
+      ],
+      "trigger": "delegation requested or standards/framework-sensitive contract"
+    },
+    "he-deepen-spec": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher",
+        "spec-flow-analyzer"
+      ],
+      "conditional_roles": [
+        "coherence-reviewer",
+        "scope-guardian-reviewer",
+        "product-lens-reviewer",
+        "design-lens-reviewer",
+        "security-lens-reviewer",
+        "reliability-reviewer",
+        "architecture-strategist",
+        "api-contract-reviewer",
+        "data-integrity-guardian",
+        "deployment-verification-agent"
+      ],
+      "trigger": "delegation requested or deep spec weakness/risk signals present"
+    },
+    "he-plan": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "best-practices-researcher",
+        "framework-docs-researcher",
+        "spec-flow-analyzer"
+      ],
+      "trigger": "delegation requested or plan depends on external constraints"
+    },
+    "he-deepen-plan": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "feasibility-reviewer",
+        "coherence-reviewer",
+        "scope-guardian-reviewer",
+        "product-lens-reviewer",
+        "design-lens-reviewer",
+        "security-lens-reviewer",
+        "reliability-reviewer",
+        "architecture-strategist",
+        "api-contract-reviewer",
+        "data-integrity-guardian",
+        "deployment-verification-agent"
+      ],
+      "trigger": "delegation requested or deep plan weakness/risk signals present"
+    },
+    "he-improve": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "best-practices-researcher",
+        "framework-docs-researcher",
+        "worker",
+        "testing-reviewer",
+        "correctness-reviewer",
+        "performance-reviewer"
+      ],
+      "trigger": "delegation requested or experiment-loop complexity/risk signals present"
+    },
+    "he-refine": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "worker",
+        "testing-reviewer",
+        "correctness-reviewer",
+        "design-implementation-reviewer",
+        "julik-frontend-races-reviewer"
+      ],
+      "trigger": "delegation requested or browser-loop refinement risk/complexity signals present"
+    },
+    "he-work": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "worker"
+      ],
+      "conditional_roles": [
+        "correctness-reviewer",
+        "testing-reviewer",
+        "security-reviewer",
+        "performance-reviewer",
+        "data-integrity-guardian",
+        "reliability-reviewer",
+        "api-contract-reviewer",
+        "deployment-verification-agent",
+        "design-implementation-reviewer",
+        "julik-frontend-races-reviewer"
+      ],
+      "trigger": "delegation requested, external-delegate mode, or explicit risk signal"
+    },
+    "he-fix-bugs": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "worker",
+        "testing-reviewer",
+        "correctness-reviewer",
+        "reliability-reviewer",
+        "performance-reviewer",
+        "security-reviewer"
+      ],
+      "trigger": "delegation requested or bug complexity/risk signals present"
+    },
+    "he-prune-branches": {
+      "policy": "manual-only",
+      "baseline_roles": [],
+      "conditional_roles": [
+        "repo-research-analyst"
+      ],
+      "trigger": "only when repository/worktree topology is ambiguous and explicit delegation is requested"
+    },
+    "he-tdd": {
+      "policy": "always",
+      "baseline_roles": [
+        "testing-reviewer",
+        "correctness-reviewer"
+      ],
+      "conditional_roles": [
+        "security-reviewer",
+        "data-integrity-guardian",
+        "performance-reviewer",
+        "architecture-strategist",
+        "code-simplicity-reviewer"
+      ],
+      "trigger": "risk signal for behavior slice"
+    },
+    "he-code-review": {
+      "policy": "always",
+      "baseline_roles": [
+        "agent-native-reviewer",
+        "learnings-researcher",
+        "code-simplicity-reviewer"
+      ],
+      "conditional_roles": [
+        "kieran-rails-reviewer",
+        "kieran-typescript-reviewer",
+        "kieran-python-reviewer",
+        "julik-frontend-races-reviewer",
+        "design-implementation-reviewer",
+        "architecture-strategist",
+        "api-contract-reviewer",
+        "security-reviewer",
+        "performance-reviewer",
+        "data-integrity-guardian",
+        "schema-drift-detector",
+        "reliability-reviewer",
+        "deployment-verification-agent"
+      ],
+      "trigger": "language and risk signals from review target"
+    },
+    "he-technical-review": {
+      "policy": "always",
+      "baseline_roles": [
+        "correctness-reviewer",
+        "testing-reviewer",
+        "code-simplicity-reviewer"
+      ],
+      "conditional_roles": [
+        "kieran-rails-reviewer",
+        "kieran-typescript-reviewer",
+        "kieran-python-reviewer",
+        "security-reviewer",
+        "performance-reviewer",
+        "data-integrity-guardian",
+        "schema-drift-detector",
+        "reliability-reviewer",
+        "deployment-verification-agent",
+        "api-contract-reviewer",
+        "architecture-strategist",
+        "maintainability-reviewer",
+        "julik-frontend-races-reviewer",
+        "spec-flow-analyzer",
+        "feasibility-reviewer",
+        "adversarial-reviewer"
+      ],
+      "trigger": "language/risk/document signals from review target plus external-feedback dispute signals"
+    },
+    "he-reliability-review": {
+      "policy": "always",
+      "baseline_roles": [
+        "reliability-reviewer",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "api-contract-reviewer",
+        "security-reviewer",
+        "performance-reviewer",
+        "data-integrity-guardian",
+        "data-migration-expert",
+        "deployment-verification-agent",
+        "architecture-strategist",
+        "adversarial-reviewer"
+      ],
+      "trigger": "reliability risk domain signal"
+    },
+    "he-compound-refresh": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "worker"
+      ],
+      "trigger": "delegation requested for heavy artifact refresh or replacement drafting"
+    }
+  },
+  "subagent_fallback": {
+    "manifest_path": "~/.codex/agents/manifest.json",
+    "guidance": "When auto-spawn is unavailable, continue inline and advise manual launch of mapped roles from ~/.codex/agents/manifest.json.",
+    "missing_role_guidance": "When mapped roles are missing from the manifest, preserve the mapped role list, report available/missing split explicitly, and route role creation/install to [[codex-agent-creator]] before rerunning delegated coverage.",
+    "role_read_contract": "Read roles from either top-level array entries or .agents[] entries, preserve the mapped role set for the selected stage, then derive available and missing splits without silently filtering mapped roles."
+  }
+}

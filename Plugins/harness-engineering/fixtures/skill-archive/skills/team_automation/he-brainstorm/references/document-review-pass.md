@@ -4,7 +4,7 @@ Read when: a brainstorm-produced requirements document mostly needs refinement b
 
 Canonical source: `../../shared/Infrastructure/references/document-review-pass.md`
 
-Imported from the upstream `he-brainstorm` workflow in `EveryInc/compound-engineering-plugin` commit `847ce3f156a5cdf75667d9802e95d68e6b3c53a4`, adapted for local `he-brainstorm`.
+Imported from the upstream `ce-brainstorm` workflow in `EveryInc/compound-engineering-plugin` commit `e1524287f73ea1ec9598aa63c05a31745ff503c7`, adapted for local `he-brainstorm`.
 
 Brainstorm-specific notes:
 - default search location prefers `docs/brainstorms/` and `*-requirements.md`

@@ -130,7 +130,7 @@ Random changes hoping to fix without understanding root cause.
 - Copy-paste solutions from forums without understanding
 
 **Fix:**
-- Route to [[systematic-debugging]]
+- Route to [[he-fix-bugs]]
 - Form hypothesis first
 - Change one thing at a time
 - Verify understanding before fix
@@ -147,7 +147,7 @@ Same agent implements and validates without separation.
 
 **Fix:**
 - Spawn separate reviewer agents
-- Use [[he-review]] or [[he-technical-review]]
+- Use [[he-code-review]] or [[he-technical-review]]
 - Automated checks as independent oracle
 
 ---
@@ -358,7 +358,7 @@ Planning replaced with synchronous discussion.
 | Big Batch | Large PRs, conflicts | Vertical slices, daily integration |
 | Horizontal Slicing | Brittle tests, no early feedback | he-tdd vertical slices |
 | Vibe Coding | No specs, vague requests | STOP, route to he-plan |
-| Shotgun Debugging | Random changes, no hypothesis | Route to [[systematic-debugging]] for root-cause analysis |
+| Shotgun Debugging | Random changes, no hypothesis | Route to [[he-fix-bugs]] for root-cause analysis |
 | Doer as Checker | Bugs slip through | Separate review agents |
 | Style Over Substance | Nits while tests fail | Contract acceptance first |
 | Silent Drift | Code != spec | Update governing artifact |
@@ -370,6 +370,6 @@ Planning replaced with synchronous discussion.
 ## See Also
 
 - [[he-tdd]] - Correct TDD workflow
-- [[systematic-debugging]] - Proper debugging approach
+- [[he-fix-bugs]] - Proper debugging approach
 - [[he-compound]] - Knowledge capture
 - [[he-compound-refresh]] - Cleanup and refresh

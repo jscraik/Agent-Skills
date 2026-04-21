@@ -38,6 +38,7 @@ CANONICAL_PREFIXES = {
     "github/",
     "interview/",
     "personas/",
+    "Plugins/coderabbit/skills/",
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
@@ -55,20 +56,64 @@ TOPIC_MAPS = {
 
 SKILL_REF_RE = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
+LEGACY_SKILL_REF_ALIASES = {
+    # Historical skill id retained in See Also tables.
+    "codex-agent-builder": "codex-agent-creator",
+}
+ALLOWED_EXTERNAL_SKILL_REFS = {
+    # External/runtime-provided or legacy refs still allowed in See Also tables.
+    "brainstorming",
+    "ce-compound",
+    "ce-plan",
+    "ce-spec",
+    "ce-work",
+    "circleci-cli",
+    "feature-video",
+    "he-fix-bugs",
+    "process-watch",
+    "skill-refactor",
+    "skillify",
+    "sora",
+    "ui-cloner",
+    "using-git-worktrees",
+    "writing-plans",
+}
 
 
 def normalize_skill_ref(target: str) -> str:
-    """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
+    """
+    Normalize a skill reference into its canonical short form.
+    
+    Trims surrounding whitespace, uses the portion after a colon (':') when that suffix matches the SKILL_REF_RE pattern, and then applies any legacy alias remapping.
+    
+    Parameters:
+        target (str): The input skill reference, possibly namespaced and with surrounding whitespace.
+    
+    Returns:
+        str: The normalized canonical skill reference after optional namespace stripping and alias substitution.
+    """
     normalized = target.strip()
     if ":" not in normalized:
-        return normalized
+        return LEGACY_SKILL_REF_ALIASES.get(normalized, normalized)
     _, suffix = normalized.split(":", 1)
     if SKILL_REF_RE.match(suffix):
-        return suffix
-    return normalized
+        normalized = suffix
+    return LEGACY_SKILL_REF_ALIASES.get(normalized, normalized)
 
 
 def resolve_skill_id(path: pathlib.Path, content: str) -> str:
+    """
+    Resolve the canonical skill identifier for a SKILL.md file.
+    
+    If the file contains YAML frontmatter with a `name:` field whose value matches the skill-ref pattern, that value is returned (quotes around the value are stripped). If no valid `name:` is present in frontmatter, the function falls back to using the parent directory name (the second-to-last path component).
+    
+    Parameters:
+        path (pathlib.Path): Path to the SKILL.md file.
+        content (str): File content as a string.
+    
+    Returns:
+        str: The resolved skill reference (frontmatter `name` when valid, otherwise the parent directory name).
+    """
     frontmatter = FRONTMATTER_RE.match(content)
     if frontmatter:
         for raw_line in frontmatter.group(1).splitlines():
@@ -166,7 +211,10 @@ if ADJ_YAML.exists() and HAS_YAML:
             target_ref = normalize_skill_ref(target)
             if target_ref not in TOPIC_MAPS:
                 yaml_edges.add((skill_ref, target_ref))
-                if target_ref not in known_skill_refs:
+                if (
+                    target_ref not in known_skill_refs
+                    and target_ref not in ALLOWED_EXTERNAL_SKILL_REFS
+                ):
                     unknown_targets.add((skill_ref, target_ref))
 elif not HAS_YAML:
     print("WARNING: pyyaml not installed — skipping adjacency.yaml validation", file=sys.stderr)

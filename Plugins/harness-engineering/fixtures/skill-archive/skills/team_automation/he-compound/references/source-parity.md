@@ -9,12 +9,12 @@ This package preserves and restructures the following source prompt families:
 3. upstream `compound-docs` schema-driven capture workflow
 4. upstream donor snapshot:
    - repo: `EveryInc/compound-engineering-plugin`
-   - commit: `4e0ed2cc8ddadf6d5504210e1210728e6f7cc9aa`
-   - path: `Plugins/compound-engineering/skills/he-compound/SKILL.md`
+   - commit: `e1524287f73ea1ec9598aa63c05a31745ff503c7`
+   - path: `plugins/compound-engineering/skills/ce-compound/SKILL.md`
 
 ## Preserved from `workflow-compound.md`
 
-- `he-compound` remains the compound-engineering orchestration layer
+- `he-compound` remains the Harness Engineering orchestration layer
 - canonical stage sequence:
   - brainstorm
   - spec
@@ -47,7 +47,7 @@ This package preserves and restructures the following source prompt families:
   - Prevention Strategist
   - Category Classifier
 - strict one-file-write rule in full mode
-- selective `ce:compound-refresh` follow-up logic
+- selective `he-compound-refresh` follow-up logic
 - discoverability-check maintenance intent after capture
 - optional specialized reviewer pass
 - solution categories
@@ -70,7 +70,7 @@ Instead of flattening one into the other, this package keeps both as explicit `h
 
 This preserves both source prompts without making the default behavior noisy or ambiguous.
 
-### Stronger boundary with neighboring CE skills
+### Stronger boundary with neighboring Harness Engineering skills
 
 The package now explicitly defers actual stage work to:
 - `he-brainstorm`
@@ -80,7 +80,7 @@ The package now explicitly defers actual stage work to:
 - `he-plan`
 - `he-deepen-plan`
 - `he-work`
-- `he-review`
+- `he-code-review`
 
 That makes `he-compound` the workflow spine rather than a duplicate megaskill.
 
