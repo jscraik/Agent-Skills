@@ -44,7 +44,7 @@ This document maps the original planning prompt families to `he-plan` so the pro
 | archived beta prompt recent `*-requirements.md` search and source-document carry-forward | `## Workflow` -> `Phase 0`, `## Validation` | Preserved directly |
 | archived beta prompt no-doc planning bootstrap | `## Workflow` -> `Phase 0` | Preserved directly |
 | archived beta prompt blocker reclassification (product vs planning-owned) | `## Workflow` -> `Phase 0`, `## Validation` | Preserved directly |
-| archived beta prompt plan depth (`lightweight | standard | deep`) | `## Workflow` -> `Phase 0`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived beta prompt plan depth (`lightweight \| standard \| deep`) | `## Workflow` -> `Phase 0`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
 | archived beta prompt execution posture signals (`test-first`, `characterization-first`, `external-delegate`) | `## Workflow` -> `Phase 1`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
 | archived beta prompt sharper external-research decisioning based on repo maturity | `## Workflow` -> `Phase 2` | Preserved in condensed form |
 | archived planning prompt depth reclassification when research reveals external contract surfaces | `## Workflow` -> `Phase 2` | Preserved directly |

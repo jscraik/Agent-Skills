@@ -192,6 +192,43 @@ def _copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
             shutil.copy2(child, destination)
 
 
+def _materialize_first_level_skill_aliases(plugin_root: Path) -> None:
+    """
+    Replace first-level symlinked skill aliases with real directories in a runtime install.
+
+    The repo package can keep first-level aliases for maintainability, but the
+    installed runtime surface should expose concrete directories because the UI
+    enumerator may skip symlinked skill entries.
+    """
+    skills_root = plugin_root / "skills"
+    if not skills_root.is_dir():
+        return
+
+    hidden_entries = {
+        "agents",
+        "assets",
+        "examples",
+        "fixtures",
+        "infrastructure_ops",
+        "references",
+        "rules",
+        "scaffolding_templates",
+        "scripts",
+        "shared",
+        "team_automation",
+        "templates",
+        "code_quality_review",
+    }
+    for child in skills_root.iterdir():
+        if child.name.startswith("_") or child.name in hidden_entries or not child.is_symlink():
+            continue
+        resolved = child.resolve(strict=True)
+        if not resolved.is_dir():
+            continue
+        child.unlink()
+        shutil.copytree(resolved, child, symlinks=True)
+
+
 def _sync_one_runtime_root(
     *,
     runtime_root: Path,
@@ -232,6 +269,7 @@ def _sync_one_runtime_root(
         target_dir = runtime_root / plugin_name
         if not dry_run:
             _copy_directory_contents(source_dir, target_dir)
+            _materialize_first_level_skill_aliases(target_dir)
         copied_plugins.append(plugin_name)
 
     return {

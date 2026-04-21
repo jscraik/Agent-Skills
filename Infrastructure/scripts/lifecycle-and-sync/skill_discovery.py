@@ -63,8 +63,17 @@ def _is_hidden_coderabbit_lane(source_dir: Path, name: str) -> bool:
     """
     if name not in {"code-review", "autofix"}:
         return False
-    parts_lower = {part.lower() for part in source_dir.parts}
-    return "plugins" in parts_lower and "coderabbit" in parts_lower and "skills" in parts_lower
+    try:
+        rel_parts = [part.lower() for part in source_dir.relative_to(REPO_ROOT).parts]
+    except ValueError:
+        return False
+    if not rel_parts or rel_parts[0] != "plugins":
+        return False
+    try:
+        coderabbit_idx = rel_parts.index("coderabbit")
+    except ValueError:
+        return False
+    return "skills" in rel_parts[coderabbit_idx + 1 :]
 
 
 def _iter_flat_skill_dirs() -> List[Path]:
@@ -171,15 +180,24 @@ def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
     Returns:
     	True if the directory is located inside a `plugins` subtree and contains a `skills` segment before the final path part, `False` otherwise.
     """
+    def _is_plugin_owned(parts: tuple[str, ...]) -> bool:
+        if not parts or parts[0].lower() != "plugins":
+            return False
+        subtree_parts = tuple(part.lower() for part in parts[1:-1])
+        return "skills" in subtree_parts or "skills_index" in subtree_parts
+
     try:
-        rel = skill_dir.resolve().relative_to(REPO_ROOT)
+        rel = skill_dir.relative_to(REPO_ROOT)
+        if _is_plugin_owned(rel.parts):
+            return True
+    except ValueError:
+        pass
+
+    try:
+        rel_resolved = skill_dir.resolve().relative_to(REPO_ROOT)
     except ValueError:
         return False
-
-    parts = rel.parts
-    if not parts or parts[0].lower() != "plugins":
-        return False
-    return "skills" in parts[1:-1]
+    return _is_plugin_owned(rel_resolved.parts)
 
 
 def _frontmatter_block(text: str) -> List[str]:
@@ -273,8 +291,14 @@ def discover_catalog_entries(*, advanced: bool = False) -> List[SkillEntry]:
     return [
         entry
         for entry in entries
-        if entry.name not in PLUGIN_HIDDEN_LANE_SKILL_NAMES
-        and not _is_hidden_coderabbit_lane(entry.source_dir, entry.name)
+        if not (
+            _is_plugin_owned_skill_dir(entry.source_dir)
+            and entry.name in PLUGIN_HIDDEN_LANE_SKILL_NAMES
+        )
+        and not (
+            _is_plugin_owned_skill_dir(entry.source_dir)
+            and _is_hidden_coderabbit_lane(entry.source_dir, entry.name)
+        )
     ]
 
 

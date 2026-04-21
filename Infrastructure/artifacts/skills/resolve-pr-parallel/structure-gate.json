@@ -1,26 +1,14 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:09Z",
+  "generated_at": "2026-04-21T23:01:02Z",
   "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/resolve-pr-parallel/SKILL.md",
   "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/resolve-pr-parallel/SKILL.md",
   "name": "resolve-pr-parallel",
-  "decision": "fail",
-  "exit_code": 2,
-  "failed": true,
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
   "findings": [
-    {
-      "level": "FAIL",
-      "code": "SEC_ANTIPATTERNS_MISSING",
-      "message": "Missing required section: antipatterns (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_PHILOSOPHY_MISSING",
-      "message": "Missing required section: philosophy (add a ## heading).",
-      "evidence": ""
-    },
     {
       "level": "WARN",
       "code": "PI_BINARY_ATTACHMENT",

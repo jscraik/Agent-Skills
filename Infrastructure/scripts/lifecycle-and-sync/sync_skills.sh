@@ -1244,6 +1244,7 @@ sync_home_plugin_mirrors() {
   local marketplace_file="$1"
   local canonical_plugins_dir="$2"
   local home_plugins_dir="$3"
+  local repo_plugin_marker=".codex-repo-plugin-source"
   local state_dir=""
   local keep_file=""
   local plugin_name=""
@@ -1255,6 +1256,10 @@ sync_home_plugin_mirrors() {
   local link_target=""
   local link_target_real=""
   local canonical_plugins_real=""
+  local marker_file=""
+  local marker_source=""
+  local source_manifest=""
+  local existing_manifest=""
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping home plugin mirrors)."
@@ -1267,6 +1272,52 @@ sync_home_plugin_mirrors() {
   keep_file="$state_dir/home-plugins.keep"
   : > "$keep_file"
   canonical_plugins_real="$(cd "$canonical_plugins_dir" 2>/dev/null && pwd -P || true)"
+
+  is_repo_managed_home_plugin_copy() {
+    local existing_dir="$1"
+    local legacy_source_dir="$canonical_plugins_dir/$(basename "$existing_dir")"
+
+    marker_file="$existing_dir/$repo_plugin_marker"
+    if [ -f "$marker_file" ]; then
+      marker_source="$(head -n 1 "$marker_file" 2>/dev/null || true)"
+      case "$marker_source" in
+        "$canonical_plugins_real"/*)
+          return 0
+          ;;
+      esac
+    fi
+
+    source_manifest="$legacy_source_dir/.codex-plugin/plugin.json"
+    existing_manifest="$existing_dir/.codex-plugin/plugin.json"
+    if [ ! -f "$source_manifest" ] || [ ! -f "$existing_manifest" ]; then
+      return 1
+    fi
+    cmp -s -- "$source_manifest" "$existing_manifest"
+  }
+
+  materialize_runtime_plugin_skill_aliases() {
+    local plugin_dir="$1"
+    local skills_dir="$plugin_dir/skills"
+    local child=""
+    local resolved=""
+
+    [ -d "$skills_dir" ] || return 0
+
+    while IFS= read -r child; do
+      case "$(basename "$child")" in
+        _*|agents|assets|examples|fixtures|infrastructure_ops|references|rules|scripts|scaffolding_templates|shared|team_automation|templates|code_quality_review)
+          continue
+          ;;
+      esac
+      [ -L "$child" ] || continue
+      resolved="$(cd "$(dirname "$child")" 2>/dev/null && cd "$(readlink "$child")" 2>/dev/null && pwd -P || true)"
+      [ -n "$resolved" ] || continue
+      [ -d "$resolved" ] || continue
+      rm -f -- "$child"
+      cp -a "$resolved" "$child"
+      echo "[OK] Materialized runtime skill alias: $child"
+    done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -print)
+  }
 
   while IFS= read -r plugin_name; do
     [ -n "$plugin_name" ] || continue
@@ -1291,6 +1342,9 @@ sync_home_plugin_mirrors() {
     fi
 
     sync_user_skills "$source_dir" "$target_dir" 0 copy
+    materialize_runtime_plugin_skill_aliases "$target_dir"
+    marker_file="$target_dir/$repo_plugin_marker"
+    printf '%s\n' "$source_real" > "$marker_file"
     echo "[OK] Installed home plugin copy: $target_dir"
   done < <(
     jq -r '
@@ -1320,6 +1374,7 @@ sync_home_plugin_mirrors() {
     if [ ! -e "$existing_dir" ] && [ ! -L "$existing_dir" ]; then
       continue
     fi
+
     if [ -L "$existing_dir" ]; then
       link_target="$(readlink "$existing_dir" || true)"
       [ -n "$link_target" ] || continue
@@ -1334,6 +1389,9 @@ sync_home_plugin_mirrors() {
       continue
     fi
 
+    if ! is_repo_managed_home_plugin_copy "$existing_dir"; then
+      continue
+    fi
     rm -rf -- "$existing_dir"
     echo "[OK] Removed stale home plugin entry: $existing_dir"
   done < <(find "$home_plugins_dir" -mindepth 1 -maxdepth 1 -print)

@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:14Z",
-  "skill": "Skills/backend-platform/gh-workflow/SKILL.md",
-  "skill_path": "Skills/backend-platform/gh-workflow/SKILL.md",
+  "generated_at": "2026-04-21T23:00:59Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/gh-workflow/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/gh-workflow/SKILL.md",
   "name": "gh-workflow",
   "decision": "pass",
   "exit_code": 0,

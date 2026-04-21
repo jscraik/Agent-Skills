@@ -668,16 +668,24 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             content,
         )
 
-    def test_sync_script_prunes_stale_home_plugin_entries(self) -> None:
+    def test_sync_script_prunes_only_repo_managed_stale_home_plugin_entries(self) -> None:
         """
         Ensure removed local-marketplace entries do not linger in profile homes.
 
         When vendored curated plugins are removed from the local marketplace,
         stale `~/.codex/Plugins/<name>` installs should be removed so the
-        local runtime surface matches the declared marketplace set.
+        local runtime surface matches the declared marketplace set, but
+        unrelated home plugins must not be deleted as collateral damage. The
+        prune guard also needs a legacy fallback for repo-managed copies that
+        were created before the marker file existed.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('local repo_plugin_marker=".codex-repo-plugin-source"', content)
         self.assertIn('keep_file="$state_dir/home-plugins.keep"', content)
+        self.assertIn("is_repo_managed_home_plugin_copy()", content)
+        self.assertIn('legacy_source_dir="$canonical_plugins_dir/$(basename "$existing_dir")"', content)
+        self.assertIn('cmp -s -- "$source_manifest" "$existing_manifest"', content)
+        self.assertIn('if ! is_repo_managed_home_plugin_copy "$existing_dir"; then', content)
         self.assertIn('Removed stale home plugin entry', content)
 
     def test_sync_script_repairs_repo_backed_home_plugin_root_symlinks(self) -> None:
@@ -718,7 +726,22 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('sync_user_skills "$source_dir" "$target_dir" 0 copy', content)
+        self.assertIn('marker_file="$target_dir/$repo_plugin_marker"', content)
+        self.assertIn('printf \'%s\\n\' "$source_real" > "$marker_file"', content)
         self.assertIn("Installed home plugin copy", content)
+
+    def test_sync_script_materializes_visible_runtime_skill_aliases(self) -> None:
+        """
+        Ensure copied plugin runtimes expose real first-level skill directories.
+
+        The repo package can keep canonical nested layout, but runtime-visible
+        entries like he-plan or plugin-builder must not remain symlinks or the
+        UI may only surface the non-aliased router entries.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("materialize_runtime_plugin_skill_aliases()", content)
+        self.assertIn('cp -a "$resolved" "$child"', content)
+        self.assertIn('materialize_runtime_plugin_skill_aliases "$target_dir"', content)
 
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
         """

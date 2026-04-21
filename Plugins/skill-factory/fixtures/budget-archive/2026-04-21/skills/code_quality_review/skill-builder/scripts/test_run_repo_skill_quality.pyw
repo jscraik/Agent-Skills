@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[5]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
@@ -20,6 +21,20 @@ import run_repo_skill_quality
 
 
 class RunRepoSkillQualityTests(unittest.TestCase):
+    def test_find_skill_dirs_keeps_live_allowlisted_skills_after_recategory_drift(self) -> None:
+        skills = {path.relative_to(REPO_ROOT).as_posix() for path in run_repo_skill_quality.find_skill_dirs(REPO_ROOT)}
+        expected = {
+            "Skills/agent-ops/bootstrap",
+            "Skills/agent-ops/fix-mise",
+            "Skills/agent-ops/gh-workflow",
+            "Skills/agent-ops/test-driven-development",
+            "Skills/content-publishing/beautiful-mermaid",
+            "Skills/content-publishing/slides",
+            "Skills/content-publishing/visual-explainer",
+        }
+
+        self.assertTrue(expected.issubset(skills), msg=f"missing inventory skills: {sorted(expected - skills)}")
+
     def test_merge_sarif_reports_combines_runs(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)

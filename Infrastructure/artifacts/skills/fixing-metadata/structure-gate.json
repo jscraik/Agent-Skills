@@ -1,38 +1,14 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:17Z",
+  "generated_at": "2026-04-21T23:01:08Z",
   "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/fixing-metadata/SKILL.md",
   "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/frontend-ui/fixing-metadata/SKILL.md",
   "name": "fixing-metadata",
-  "decision": "fail",
-  "exit_code": 2,
-  "failed": true,
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
   "findings": [
-    {
-      "level": "FAIL",
-      "code": "SAFE_REDACTION_REQUIRED",
-      "message": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default.",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_ANTIPATTERNS_MISSING",
-      "message": "Missing required section: antipatterns (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_CONSTRAINTS_MISSING",
-      "message": "Missing required section: constraints (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_PHILOSOPHY_MISSING",
-      "message": "Missing required section: philosophy (add a ## heading).",
-      "evidence": ""
-    },
     {
       "level": "WARN",
       "code": "OUT_SCHEMA_VERSION_MISSING",

@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "skill_gate",
-          "informationUri": "https://github.com/jscraik/Agent-Skills",
+          "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
               "id": "PI_BINARY_ATTACHMENT",
@@ -199,7 +199,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/scripts/audit_codex_home.py"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -215,7 +215,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/scripts/audit_codex_home.py"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -247,7 +247,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/scripts/audit_codex_home.py"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -327,7 +327,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/scripts/audit_codex_home.py"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -343,7 +343,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/scripts/audit_codex_home.py"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -359,7 +359,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/Infrastructure/references/evals.yaml"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -375,7 +375,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/Infrastructure/references/evals.yaml"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -391,7 +391,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/Infrastructure/references/evals.yaml"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }
@@ -407,7 +407,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-home-audit/Infrastructure/references/evals.yaml"
+                  "uri": "Skills/agent-ops/codex-home-audit/SKILL.md"
                 }
               }
             }

@@ -6,26 +6,16 @@
       "tool": {
         "driver": {
           "name": "skill_gate",
-          "informationUri": "https://github.com/jscraik/Agent-Skills",
+          "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             }
           ]
@@ -33,31 +23,15 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-agent-creator/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {

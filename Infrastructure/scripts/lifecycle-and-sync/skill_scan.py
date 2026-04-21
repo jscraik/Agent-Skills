@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 # Canonical skill authoring lives in Skills/ and the plugin source trees.
 # `skills-system/` is a generated projection store for hidden/system runtime
 # skills and should not be treated as authored source by quality lints.
-ROOTS = ("Skills", "plugins/harness-engineering", "plugins/plugin-factory", "plugins/skill-factory")
+ROOTS = ("Skills", "Plugins/harness-engineering", "Plugins/plugin-factory", "Plugins/skill-factory")
 ORDERED_TYPES = (
     "library_api_reference",
     "product_verification",
@@ -40,14 +40,14 @@ HEADING_ALIASES = {
     "Gotchas": {"gotchas", "constraints", "notes"},
 }
 RELOCATION_GUARD_SKILL_FILES = {
-    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-    "plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "plugins/plugin-factory/skills_index/plugin-factory-router",
-    "plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
-    "plugins/plugin-factory/skills/code_quality_review/plugin-builder",
-    "plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
-    "plugins/plugin-factory/skills/team_automation/plugin-router",
+    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "Plugins/plugin-factory/skills_index/plugin-factory-router",
+    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
+    "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
+    "Plugins/plugin-factory/skills/team_automation/plugin-router",
 }
 CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),

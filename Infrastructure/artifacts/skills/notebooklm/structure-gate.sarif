@@ -221,6 +221,22 @@
           "ruleId": "PI_OVERRIDE",
           "level": "warning",
           "message": {
+            "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | legacy_scripts/auto_sync.py"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/product-strategy/notebooklm/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OVERRIDE",
+          "level": "warning",
+          "message": {
             "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | scripts/auto_sync.py"
           },
           "locations": [
@@ -238,6 +254,22 @@
           "level": "warning",
           "message": {
             "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/product-strategy/notebooklm/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_TOOL_CHAIN",
+          "level": "warning",
+          "message": {
+            "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | references/legacy-philosophy.md"
           },
           "locations": [
             {

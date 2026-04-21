@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "skill_gate",
-          "informationUri": "https://github.com/jscraik/Agent-Skills",
+          "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
               "id": "PI_BINARY_ATTACHMENT",
@@ -77,11 +77,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/backend-platform/gh-workflow/SKILL.md"
-                },
-                "region": {
-                  "startLine": 1,
-                  "endLine": 1
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }
@@ -97,11 +93,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/backend-platform/gh-workflow/SKILL.md"
-                },
-                "region": {
-                  "startLine": 1,
-                  "endLine": 1
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }
@@ -117,11 +109,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/backend-platform/gh-workflow/SKILL.md"
-                },
-                "region": {
-                  "startLine": 1,
-                  "endLine": 1
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }
@@ -137,11 +125,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/backend-platform/gh-workflow/SKILL.md"
-                },
-                "region": {
-                  "startLine": 1,
-                  "endLine": 1
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }
@@ -157,11 +141,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/backend-platform/gh-workflow/SKILL.md"
-                },
-                "region": {
-                  "startLine": 1,
-                  "endLine": 1
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }
@@ -177,11 +157,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/backend-platform/gh-workflow/SKILL.md"
-                },
-                "region": {
-                  "startLine": 1,
-                  "endLine": 1
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }

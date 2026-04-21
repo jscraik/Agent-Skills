@@ -1,67 +1,25 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:05Z",
-  "skill": "Skills/agent-ops/elixir-pro/SKILL.md",
-  "skill_path": "Skills/agent-ops/elixir-pro/SKILL.md",
+  "generated_at": "2026-04-21T23:00:58Z",
+  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/elixir-pro/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/elixir-pro/SKILL.md",
   "name": "elixir-pro",
-  "decision": "fail",
-  "exit_code": 2,
-  "failed": true,
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
   "findings": [
     {
-      "level": "FAIL",
-      "code": "CONTRACT_MISSING",
-      "message": "Missing Infrastructure/references/contract.yaml (required for gold).",
+      "level": "WARN",
+      "code": "OUT_SCHEMA_VERSION_MISSING",
+      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
       "evidence": ""
     },
     {
-      "level": "FAIL",
-      "code": "EVALS_MISSING",
-      "message": "Missing Infrastructure/references/evals.yaml (required for gold).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "FM_DESC_WHAT_WHEN",
-      "message": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts).",
-      "evidence": "description: Write idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Masters concurrency, fault tolerance, and distributed systems."
-    },
-    {
-      "level": "FAIL",
-      "code": "SAFE_REDACTION_REQUIRED",
-      "message": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default.",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_ANTIPATTERNS_MISSING",
-      "message": "Missing required section: antipatterns (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_CONSTRAINTS_MISSING",
-      "message": "Missing required section: constraints (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_PHILOSOPHY_MISSING",
-      "message": "Missing required section: philosophy (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_PROCEDURE_MISSING",
-      "message": "Missing required section: procedure (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_VALIDATION_MISSING",
-      "message": "Missing required section: validation (add a ## heading).",
-      "evidence": ""
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/3"
     },
     {
       "level": "WARN",

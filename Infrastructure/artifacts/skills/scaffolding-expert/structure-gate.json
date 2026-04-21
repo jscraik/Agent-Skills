@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:10Z",
+  "generated_at": "2026-04-21T23:01:02Z",
   "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/scaffolding-expert/SKILL.md",
   "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/scaffolding-expert/SKILL.md",
   "name": "scaffolding-expert",

@@ -23,6 +23,7 @@ from ask.selection_contract import (
     EligibleCandidate,
     build_decision_payload,
     build_goal_decision,
+    candidate_id,
     canonical_sort_key,
 )
 
@@ -255,6 +256,7 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
         entry
         for entry in discover_catalog_entries()
         if entry.source_dir.is_relative_to(repo_root)
+        and ".agents" not in entry.source_dir.relative_to(repo_root).parts
     ]
     catalog_count = len(entries)
     logs: list[str] = []
@@ -874,23 +876,46 @@ def route_skills(
         )
         return result
 
-    eligible_candidates: list[EligibleCandidate] = []
+    default_candidates: list[EligibleCandidate] = []
+    default_candidate_ids: set[str] = set()
     for entry in discover_catalog_entries():
         if not entry.source_dir.is_relative_to(repo_root):
             continue
         rel_path = entry.source_dir.relative_to(repo_root).as_posix()
-        eligible_candidates.append(
-            EligibleCandidate(
-                name=entry.name,
-                path=rel_path,
-                description=entry.description,
-                scope_rank=_scope_rank_for_path(rel_path),
-            )
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(rel_path),
         )
+        default_candidates.append(candidate)
+        default_candidate_ids.add(candidate_id(candidate))
 
-    ordered_candidates = sorted(eligible_candidates, key=canonical_sort_key)
+    advanced_only_candidates: list[EligibleCandidate] = []
+    for entry in discover_catalog_entries(advanced=True):
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(rel_path),
+        )
+        if candidate_id(candidate) in default_candidate_ids:
+            continue
+        advanced_only_candidates.append(candidate)
+
+    ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
     bounded_limit = max(1, int(considered_limit))
-    considered_candidates = ordered_candidates[:bounded_limit]
+    considered_candidates = ordered_default_candidates[:bounded_limit]
+    considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in considered_candidate_ids:
+            continue
+        considered_candidates.append(candidate)
+        considered_candidate_ids.add(cid)
     router_skills = [
         _RouterSkill(name=item.name, description=item.description, skill_path=item.path)
         for item in considered_candidates
@@ -911,15 +936,15 @@ def route_skills(
     catalog_parity = compute_catalog_parity(
         repo_root,
         strict=False,
-        route_considered_total=len(ordered_candidates),
+        route_considered_total=len(considered_candidates),
     )
 
     decision = build_decision_payload(
         request=query,
         policy_identity=get_policy_identity(),
-        considered_limit=bounded_limit,
+        considered_limit=len(considered_candidates),
         top_k=max(1, int(top_k)),
-        eligible_candidates=ordered_candidates,
+        eligible_candidates=considered_candidates,
         ranked_candidates=ranked_payload,
         uncertainty_reasons=list(uncertainty_reasons),
         catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
@@ -1048,7 +1073,8 @@ def _prune_first_level_symlinks(target_dir: Path, keep_names: set[str], dry_run:
     if not target_dir.exists():
         return logs
     for item in sorted(target_dir.iterdir()):
-        if not item.is_symlink() or item.name in keep_names:
+        # Preserve hidden control links (for example ".system") and managed links.
+        if not item.is_symlink() or item.name in keep_names or item.name.startswith("."):
             continue
         logs.append(f"Removed stale symlink: {item} -> {os.readlink(item)}")
         if not dry_run:
@@ -1145,15 +1171,34 @@ def _refresh_antigravity_projection(repo_root: Path, dry_run: bool = False) -> l
 
     return logs
 
+
+def _refresh_system_lane_link(
+    skills_dir: Path,
+    system_skills_dir: Path,
+    dry_run: bool = False,
+) -> list[str]:
+    """Preserve the reserved `.system` bridge when a managed system store exists."""
+    if not system_skills_dir.is_dir():
+        return []
+
+    target_link = skills_dir / ".system"
+    if target_link.exists() and not target_link.is_symlink():
+        return [f"Skipped existing non-symlink system lane: {target_link}"]
+
+    return [_create_symlink(Path("../../skills-system"), target_link, dry_run)]
+
 def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False) -> CallResult:
     result = CallResult()
     plan = {"writes": [], "deletes": [], "symlinks": []}
     logs = []
     skills_dir = repo_root / ".agents" / "skills"
+    system_skills_dir = repo_root / "skills-system"
     antigravity_skills_dir = repo_root / "skills-antigravity"
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
         keep_names = {entry.name for entry in entries if entry.source_dir.is_relative_to(repo_root)}
+        if system_skills_dir.is_dir():
+            keep_names.add(".system")
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
@@ -1166,6 +1211,10 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
             source_rel = os.path.join("../..", str(rel_to_root))
             plan["symlinks"].append({"from": str(target_link), "to": source_rel})
             logs.append(_create_symlink(Path(source_rel), target_link, dry_run))
+        system_lane_logs = _refresh_system_lane_link(skills_dir, system_skills_dir, dry_run)
+        if system_lane_logs:
+            plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
+            logs.extend(system_lane_logs)
         antigravity_logs = _refresh_antigravity_projection(repo_root, dry_run)
         plan["writes"].append(str(antigravity_skills_dir))
         logs.extend(antigravity_logs)
