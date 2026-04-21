@@ -190,6 +190,7 @@ Use this schema when structured output is requested:
 - [Task Profile](./references/task-profile.json)
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[he-work]] | Execute broader implementation once bug scope is resolved |
@@ -197,4 +198,5 @@ Use this schema when structured output is requested:
 | [[he-brainstorm]] | Redesign boundaries when root cause is architectural |
 | [[he-compound]] | Capture validated fix learnings in durable docs/solutions |
 
+**Topic map:** [[agent-ops]]
 **Topic map:** [[agent-ops]]
