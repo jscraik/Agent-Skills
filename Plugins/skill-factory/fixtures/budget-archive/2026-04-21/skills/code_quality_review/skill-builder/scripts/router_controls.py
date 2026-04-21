@@ -10,4 +10,20 @@ _archive = (
     "router_controls.py"
 )
 
-globals().update(runpy.run_path(str(_archive), run_name=__name__))
+_loaded_namespace = runpy.run_path(str(_archive), run_name="__archived_router_controls__")
+_reserved_names = {
+    "__name__",
+    "__file__",
+    "__package__",
+    "__spec__",
+    "__loader__",
+    "__cached__",
+    "__builtins__",
+    "_here",
+    "_root",
+    "_archive",
+}
+for _name, _value in _loaded_namespace.items():
+    if _name in _reserved_names or (_name.startswith("__") and _name.endswith("__")):
+        continue
+    globals()[_name] = _value
