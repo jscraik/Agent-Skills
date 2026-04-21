@@ -48,6 +48,9 @@ cd "$WORKDIR" || {
   exit 1
 }
 
+# run_with_timeout runs $COMMAND with a wall-clock timeout of $TIMEOUT seconds and propagates the command's exit status.
+# 
+# Uses an embedded Python3 helper to spawn the command in a new process session, wait up to $TIMEOUT seconds, and on timeout send SIGTERM to the command's process group then SIGKILL if it does not exit; on timeout the function exits with status 124. If the command tokenizes to an empty argv the helper exits with 2. If python3 is unavailable the function prints an error and exits with 1.
 run_with_timeout() {
   if command -v python3 >/dev/null 2>&1; then
     python3 - "$TIMEOUT" "$COMMAND" <<'PY'

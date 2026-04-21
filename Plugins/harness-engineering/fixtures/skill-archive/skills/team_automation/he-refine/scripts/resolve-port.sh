@@ -87,7 +87,7 @@ fi
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 # should_probe TYPE PROBE_NAME
-# Returns 0 (true) if the probe should run for the given --type.
+# should_probe returns success (0) when the given probe is allowed for the provided project type; empty or unrecognized types enable all probes, while `rails`, `next|nuxt|astro|remix|vite|sveltekit`, and `procfile` restrict which probe names are allowed.
 should_probe() {
   local ptype="$1"
   local probe="$2"
@@ -123,7 +123,9 @@ should_probe() {
 
 # parse_env_port FILE
 # Parses PORT=<n> from the given file. Strips surrounding quotes and inline
-# comments. Prints the port on stdout or nothing.
+# parse_env_port reads the last `PORT=` assignment from a file and echoes the parsed port value to stdout.
+# It accepts one argument: the path to an env-style file to probe.
+# Behavior: finds the last line beginning with `PORT=`, trims surrounding whitespace, removes an inline `#` comment, strips surrounding single or double quotes, trims again, and if the resulting value is non-empty echoes it; otherwise echoes nothing.
 parse_env_port() {
   local envfile="$1"
   if [ ! -f "$envfile" ]; then

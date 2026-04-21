@@ -84,7 +84,17 @@ def resolve_skill_id(path: pathlib.Path, content: str) -> str:
 
 
 def normalize_skill_ref(target: str) -> str:
-    """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
+    """
+    Normalize a skill reference into its canonical skill id.
+    
+    Strips surrounding whitespace, accepts optional namespace-qualified references (form "namespace:suffix") and uses the suffix when it matches a valid skill-id pattern; applies legacy alias remapping to produce the final canonical id.
+    
+    Parameters:
+        target (str): Skill reference, possibly namespace-qualified or a legacy identifier.
+    
+    Returns:
+        str: Canonical skill id — the normalized suffix or original token after applying legacy alias mapping.
+    """
     normalized = target.strip()
     if ":" not in normalized:
         return LEGACY_SKILL_REF_ALIASES.get(normalized, normalized)
@@ -95,6 +105,16 @@ def normalize_skill_ref(target: str) -> str:
 
 def iter_skill_md_files(root: pathlib.Path):
     # Prefer tracked files so generated/untracked projections do not pollute output.
+    """
+    Yield SKILL.md file paths under the given repository root.
+    
+    When the root is a Git repository, prefer files reported by `git ls-files` to avoid untracked or generated files; otherwise walk the filesystem (following symlinks). Directory symlinks that resolve to real directories are treated as if they contain a `SKILL.md` file. Each discovered `SKILL.md` is yielded as a pathlib.Path; when using the Git-backed discovery, each path is yielded once.
+    Parameters:
+        root (pathlib.Path): Repository root directory to search.
+    
+    Returns:
+        pathlib.Path: Yields a Path for each discovered `SKILL.md` file.
+    """
     git_cmd = ["git", "-C", str(root), "ls-files"]
     proc = subprocess.run(git_cmd, capture_output=True, text=True, check=False)
     if proc.returncode == 0:

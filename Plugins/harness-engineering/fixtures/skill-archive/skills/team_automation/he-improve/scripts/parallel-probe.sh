@@ -29,6 +29,7 @@ fi
 BLOCKERS="[]"
 SCAN_PATHS=()
 
+# add_blocker appends a blocker object (type, description, suggestion) to the global BLOCKERS JSON array, preserving the existing BLOCKERS value if the JSON update fails.
 add_blocker() {
   local type="$1"
   local desc="$2"
@@ -41,6 +42,7 @@ print(json.dumps(b))
 " 2>/dev/null || echo "$BLOCKERS")
 }
 
+# add_scan_path adds a non-empty existing candidate path to the SCAN_PATHS array.
 add_scan_path() {
   local candidate="$1"
   if [[ -n "$candidate" && -e "$candidate" ]]; then

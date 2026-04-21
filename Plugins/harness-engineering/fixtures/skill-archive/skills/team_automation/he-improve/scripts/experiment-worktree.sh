@@ -17,12 +17,14 @@ GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || {
 
 WORKTREE_DIR="$GIT_ROOT/.worktrees"
 
+# experiment_branch_name constructs the branch/worktree name used for experiments in the form optimize-exp/<spec_name>/exp-<padded_index>.
 experiment_branch_name() {
   local spec_name="${1:?Error: spec_name required}"
   local padded_index="${2:?Error: padded_index required}"
   echo "optimize-exp/${spec_name}/exp-${padded_index}"
 }
 
+# ensure_worktree_exclude ensures Git's info/exclude contains the literal ".worktrees" entry so the repository's .worktrees directory is ignored.
 ensure_worktree_exclude() {
   local exclude_file
   exclude_file=$(git rev-parse --git-path info/exclude)
@@ -32,6 +34,7 @@ ensure_worktree_exclude() {
   fi
 }
 
+# is_registered_worktree checks whether the given path is registered as a Git worktree; exits with status 0 if registered, 1 otherwise.
 is_registered_worktree() {
   local worktree_path="${1:?Error: worktree_path required}"
   git worktree list --porcelain | awk -v target="$worktree_path" '
@@ -40,6 +43,7 @@ is_registered_worktree() {
   '
 }
 
+# is_branch_checked_out checks whether the given branch is currently checked out in any Git worktree; exits 0 if it is, 1 otherwise.
 is_branch_checked_out() {
   local branch_name="${1:?Error: branch_name required}"
   local branch_ref="refs/heads/$branch_name"
@@ -49,6 +53,7 @@ is_branch_checked_out() {
   '
 }
 
+# reset_worktree_to_base resets the specified worktree to the given base branch (hard reset) and removes all untracked and ignored files; it first verifies the worktree is checked out to the expected branch and returns non-zero on mismatch.
 reset_worktree_to_base() {
   local worktree_path="${1:?Error: worktree_path required}"
   local branch_name="${2:?Error: branch_name required}"
@@ -65,6 +70,7 @@ reset_worktree_to_base() {
   git -C "$worktree_path" clean -fdx >/dev/null
 }
 
+# create_worktree creates or reuses a per-experiment git worktree and branch for a given spec/index, ensures it is reset to the specified base branch, copies repository `.env*` files (excluding `.env.example`) and any provided shared files/directories into the worktree, and echoes the created worktree path.
 create_worktree() {
   local spec_name="${1:?Error: spec_name required}"
   local exp_index="${2:?Error: exp_index required}"
@@ -132,6 +138,7 @@ create_worktree() {
   echo "$worktree_path"
 }
 
+# cleanup_worktree removes the worktree directory for the given spec/index and deletes its associated experiment branch.
 cleanup_worktree() {
   local spec_name="${1:?Error: spec_name required}"
   local exp_index="${2:?Error: exp_index required}"
@@ -153,6 +160,11 @@ cleanup_worktree() {
   git branch -D "$branch_name" 2>/dev/null || true
 }
 
+# cleanup_all removes all experiment worktrees and their associated branches for the given spec.
+# It searches WORKTREE_DIR for directories named "optimize-<spec_name>-exp-*" and for each found
+# force-removes the worktree directory, deletes the corresponding experiment branch, and then
+# runs `git worktree prune`. If WORKTREE_DIR becomes empty it attempts to remove it.
+# spec_name: spec identifier used to match worktree names (required).
 cleanup_all() {
   local spec_name="${1:?Error: spec_name required}"
   local prefix="optimize-${spec_name}-exp-"
@@ -179,6 +191,7 @@ cleanup_all() {
   fi
 }
 
+# count_worktrees counts the number of worktree directories under $WORKTREE_DIR and echoes the numeric count.
 count_worktrees() {
   local count=0
   if [[ -d "$WORKTREE_DIR" ]]; then
@@ -191,6 +204,7 @@ count_worktrees() {
   echo "$count"
 }
 
+# main dispatches CLI commands for managing experiment worktrees: create, cleanup, cleanup-all, count, and help.
 main() {
   local command="${1:-help}"
   case "$command" in

@@ -22,20 +22,20 @@ from render_review_todo_template import (
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """
-    Parse command-line arguments for the drift-checking utility.
+    Create and return the command-line argument namespace for the drift-check utility.
     
     Parameters:
-        argv (list[str] | None): Optional list of arguments to parse; if `None`, arguments are taken from the process command line.
+        argv (list[str] | None): Optional list of arguments to parse; if None, uses the process command line.
     
     Returns:
         argparse.Namespace: Parsed arguments with attributes:
-            - template (str): Path to the template file.
-            - output (str): Path to the rendered markdown file.
-            - vars_json (str | None): Path to a JSON file containing template variables.
-            - var (list[str]): Inline variable overrides as `KEY=VALUE` strings.
-            - no_defaults (bool): Whether to disable built-in default context values.
-            - update (bool): Whether to overwrite the output file with the rendered content.
-            - max_diff_lines (int): Maximum number of diff lines to print when drift is detected.
+            template (str): Path to the template file.
+            output (str): Path to the rendered markdown baseline file.
+            vars_json (str | None): Path to a JSON file supplying template variables, or None.
+            var (list[str]): Inline variable overrides as `KEY=VALUE` strings.
+            no_defaults (bool): If true, built-in default context values are not used.
+            update (bool): If true, overwrite the output baseline with the rendered content.
+            max_diff_lines (int): Maximum number of diff lines to display when drift is detected.
     """
     parser = argparse.ArgumentParser(description="Check drift for he-code-review rendered template output.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")

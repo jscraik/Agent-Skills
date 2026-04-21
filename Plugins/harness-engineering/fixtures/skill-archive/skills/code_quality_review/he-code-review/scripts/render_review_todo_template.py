@@ -82,13 +82,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         argv (list[str] | None): Optional list of arguments to parse (typically sys.argv[1:]). If None, arguments are read from the environment.
     
     Returns:
-        argparse.Namespace: Namespace with parsed options:
+        argparse.Namespace: Parsed arguments with attributes:
             - template: Path to the template file.
             - output: Path to the rendered markdown file.
             - vars_json: Optional path to a JSON file containing template variables.
             - var: List of inline KEY=VALUE overrides.
-            - no_defaults: Boolean flag to disable built-in default context.
-            - stdout: Boolean flag to print rendered output to stdout.
+            - no_defaults: True if built-in default context should be disabled.
+            - stdout: True if rendered output should be printed to stdout.
     """
     parser = argparse.ArgumentParser(description="Render he-code-review/review-todo.md.tmpl to markdown.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")

@@ -81,7 +81,17 @@ ALLOWED_EXTERNAL_SKILL_REFS = {
 
 
 def normalize_skill_ref(target: str) -> str:
-    """Normalize optional namespace-qualified refs (e.g. plugin-factory:plugin-builder)."""
+    """
+    Normalize a skill reference into its canonical short form.
+    
+    Trims surrounding whitespace, uses the portion after a colon (':') when that suffix matches the SKILL_REF_RE pattern, and then applies any legacy alias remapping.
+    
+    Parameters:
+        target (str): The input skill reference, possibly namespaced and with surrounding whitespace.
+    
+    Returns:
+        str: The normalized canonical skill reference after optional namespace stripping and alias substitution.
+    """
     normalized = target.strip()
     if ":" not in normalized:
         return LEGACY_SKILL_REF_ALIASES.get(normalized, normalized)
@@ -92,6 +102,18 @@ def normalize_skill_ref(target: str) -> str:
 
 
 def resolve_skill_id(path: pathlib.Path, content: str) -> str:
+    """
+    Resolve the canonical skill identifier for a SKILL.md file.
+    
+    If the file contains YAML frontmatter with a `name:` field whose value matches the skill-ref pattern, that value is returned (quotes around the value are stripped). If no valid `name:` is present in frontmatter, the function falls back to using the parent directory name (the second-to-last path component).
+    
+    Parameters:
+        path (pathlib.Path): Path to the SKILL.md file.
+        content (str): File content as a string.
+    
+    Returns:
+        str: The resolved skill reference (frontmatter `name` when valid, otherwise the parent directory name).
+    """
     frontmatter = FRONTMATTER_RE.match(content)
     if frontmatter:
         for raw_line in frontmatter.group(1).splitlines():
