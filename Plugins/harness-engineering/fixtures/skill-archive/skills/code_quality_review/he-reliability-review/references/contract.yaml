@@ -1,7 +1,7 @@
 schema_version: 1
 
 purpose: >
-  Run the compound-engineering reliability-review stage so services, APIs,
+  Run the Harness Engineering reliability-review stage so services, APIs,
   and multi-component systems receive severity-ranked reliability findings
   with failure mode analysis, resilience coverage assessment, dependency
   failure matrices, and SLO readiness evaluation.

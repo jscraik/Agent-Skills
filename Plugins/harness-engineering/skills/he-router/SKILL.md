@@ -30,7 +30,7 @@ Select exactly one `harness-engineering` stage and return one executable next st
 
 1. Parse stage and artifact hints from the request.
 2. Pick one stage using `../../references/routing-map.json`.
-3. Resolve mapped roles from `~/.codex/agents/manifest.json`.
+3. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
 4. Return outputs.
 5. If still ambiguous after one clarification, return blocked with missing input.
 

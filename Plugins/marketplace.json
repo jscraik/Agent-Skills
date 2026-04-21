@@ -1,273 +1,52 @@
 {
-  "interface" : {
-    "displayName" : "Local Plugins"
+  "interface": {
+    "displayName": "Local Plugins"
   },
-  "name" : "local",
-  "plugins" : [
+  "name": "local",
+  "plugins": [
     {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "build-ios-apps",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
+      "category": "Coding",
+      "name": "harness-engineering",
+      "policy": {
+        "authentication": "ON_INSTALL",
+        "installation": "AVAILABLE",
+        "products": [
           "CODEX"
         ]
       },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/build-ios-apps",
-        "source" : "local"
+      "source": {
+        "path": "./Plugins/harness-engineering",
+        "source": "local"
       }
     },
     {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "build-macos-apps",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
+      "category": "Productivity",
+      "name": "plugin-factory",
+      "policy": {
+        "authentication": "ON_INSTALL",
+        "installation": "AVAILABLE",
+        "products": [
           "CODEX"
         ]
       },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/build-macos-apps",
-        "source" : "local"
+      "source": {
+        "path": "./Plugins/plugin-factory",
+        "source": "local"
       }
     },
     {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "build-web-apps",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
+      "category": "Productivity",
+      "name": "skill-factory",
+      "policy": {
+        "authentication": "ON_INSTALL",
+        "installation": "AVAILABLE",
+        "products": [
           "CODEX"
         ]
       },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/build-web-apps",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "circleci",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/circleci",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "cloudflare",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/cloudflare",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "coderabbit",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/coderabbit",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Design",
-      "marketplace" : "openai-curated",
-      "name" : "figma",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/figma",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "github",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/github",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Coding",
-      "name" : "harness-engineering",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "path" : "./Plugins/harness-engineering",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Productivity",
-      "marketplace" : "openai-curated",
-      "name" : "linear",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/linear",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Coding",
-      "marketplace" : "openai-curated",
-      "name" : "plugin-eval",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/plugin-eval",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Productivity",
-      "name" : "plugin-factory",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "path" : "./Plugins/plugin-factory",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Productivity",
-      "marketplace" : "openai-curated",
-      "name" : "sentry",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/sentry",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Productivity",
-      "name" : "skill-factory",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "path" : "./Plugins/skill-factory",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Productivity",
-      "marketplace" : "openai-curated",
-      "name" : "slack",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-curated",
-        "path" : "./Plugins/slack",
-        "source" : "local"
-      }
-    },
-    {
-      "category" : "Productivity",
-      "marketplace" : "openai-bundled",
-      "name" : "computer-use",
-      "policy" : {
-        "authentication" : "ON_INSTALL",
-        "installation" : "AVAILABLE",
-        "products" : [
-          "CODEX"
-        ]
-      },
-      "source" : {
-        "marketplace" : "openai-bundled",
-        "path" : "./Plugins/cache/openai-bundled/computer-use/1.0.750",
-        "source" : "local"
+      "source": {
+        "path": "./Plugins/skill-factory",
+        "source": "local"
       }
     }
   ]

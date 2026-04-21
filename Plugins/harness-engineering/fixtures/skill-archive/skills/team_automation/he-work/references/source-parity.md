@@ -14,8 +14,8 @@ This document records how the prompt sources for the execution stage were migrat
 - canonical source prompt:
   - `/Users/jamiecraik/dev/configs/codex/prompts/workflow-work.md`
 - donor prompts explicitly preserved:
-  - `https://github.com/EveryInc/compound-engineering-plugin/tree/e1524287f73ea1ec9598aa63c05a31745ff503c7/plugins/compound-engineering/skills/ce-work`
-  - `https://github.com/EveryInc/compound-engineering-plugin/tree/e1524287f73ea1ec9598aa63c05a31745ff503c7/plugins/compound-engineering/skills/ce-work-beta`
+  - local migration snapshot for `ce-work` at commit `e1524287f73ea1ec9598aa63c05a31745ff503c7`
+  - local migration snapshot for `ce-work-beta` at commit `e1524287f73ea1ec9598aa63c05a31745ff503c7`
 - packaging target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/Infrastructure/ops/he-work/`
 

@@ -1,7 +1,7 @@
 schema_version: 1
 
 purpose: >
-  Run the compound-engineering test-first execution posture so behavior
+  Run the Harness Engineering test-first execution posture so behavior
   changes ship with RED→GREEN evidence, vertical tracer bullet slicing,
   and refactor-safe tests through public interfaces.
 
