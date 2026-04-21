@@ -15,6 +15,11 @@ Create, edit, recreate, and validate presentation decks with editable PowerPoint
 - Treat rendering review, overflow checks, and font verification as release gates, not optional polish.
 - Keep the workflow reproducible so another agent can regenerate the deck without hidden context.
 
+## Philosophy
+- Slides are a delivery format, not a screenshot dump. Keep the result editable, reviewable, and easy for another agent or operator to regenerate.
+- Preserve author intent before introducing stylistic improvements. Matching the requested geometry, density, and hierarchy matters more than inventing a cleaner deck.
+- Treat visual validation as evidence, not intuition. If the deck was not rendered or checked, report that gap plainly instead of implying it is done.
+
 ## When to use
 - Creating a new `.pptx` deck from scratch.
 - Updating or extending an existing presentation while preserving its theme and layout.
@@ -37,6 +42,12 @@ Create, edit, recreate, and validate presentation decks with editable PowerPoint
 - Rebuildable JavaScript source when the deck is authored or materially edited with PptxGenJS.
 - A short evidence summary covering render review, overflow checks, font drift, and blockers.
 - If requested, a structured status report with `schema_version: 1` aligned to `Infrastructure/references/contract.yaml`.
+
+## Constraints
+- Redact secrets, credentials, API keys, internal URLs, and other sensitive material from slide content, presenter notes, screenshots, and review artifacts by default unless the user explicitly requires their inclusion.
+- Do not claim font, overflow, or render validation unless the relevant tool output was actually produced in this run.
+- Do not switch authoring stacks or flatten editable content into raster images unless the request or source material requires it.
+- Preserve the requested aspect ratio, template, and brand constraints unless the user approves a change.
 
 ## Failure mode
 - If required tools are missing, report the exact dependency blocker and stop instead of improvising.
@@ -111,10 +122,10 @@ If a dependency is missing, report the exact install gap before continuing.
 - Increase review rigor for board decks, sales collateral, or screenshot-matched recreations.
 
 ## Examples
-- Build a clean 10-slide investor update deck with editable charts and speaker-safe spacing.
-- Recreate a screenshot-based keynote into a rebuildable `.pptx` and authoring `.js`.
-- Update an existing deck’s copy and charts while preserving theme and layout.
-- Diagnose which slides overflow the canvas and fix the offending elements before delivery.
+- "Build a 10-slide investor update deck as `artifacts/q2-update.pptx`, keep charts editable, and tell me which slides needed layout compromises."
+- "Take this keynote PDF and recreate it as a rebuildable `.pptx` plus the source `.js`, matching the original aspect ratio."
+- "Update `deck/customer-demo.pptx` with the new pricing slide and speaker notes, but keep the theme and spacing untouched."
+- "Run overflow checks on this deck, fix the clipped slides, and report any font substitutions you had to make."
 
 ## See Also
 

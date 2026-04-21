@@ -296,7 +296,10 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         with patch("ask.commands.skills.discover_catalog_entries", side_effect=_discover) as mocked_discover:
             with patch("ask.commands.skills._load_builder_module", return_value=router_stub):
-                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+                with patch(
+                    "ask.commands.skills.compute_catalog_parity",
+                    return_value={"drift_detected": False},
+                ) as mocked_parity:
                     result = route_skills(REPO_ROOT, "build a ChatGPT app", top_k=1, considered_limit=20)
 
         self.assertEqual(
@@ -306,6 +309,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "chatgpt-apps")
         self.assertEqual(result.data["decision"]["considered_total"], 22)
+        self.assertEqual(mocked_parity.call_args.kwargs["route_considered_total"], 20)
         self.assertIn("chatgpt-apps", router_stub.calls[0])
         self.assertIn("code-review", router_stub.calls[0])
 

@@ -12,7 +12,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parents[5]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -124,12 +124,18 @@ description: Test skill
             ]
 
             stdout = io.StringIO()
-            with patch.object(run_repo_skill_quality, "find_skill_dirs", return_value=[skill_dir]):
-                with patch.object(run_repo_skill_quality, "choose_python", return_value=sys.executable):
-                    with patch.object(run_repo_skill_quality, "run_cmd", side_effect=fake_run_cmd):
-                        with patch.object(sys, "argv", argv):
-                            with redirect_stdout(stdout):
-                                exit_code = run_repo_skill_quality.main()
+            module_globals = run_repo_skill_quality.main.__globals__
+            with patch.dict(
+                module_globals,
+                {
+                    "find_skill_dirs": lambda _root: [skill_dir],
+                    "choose_python": lambda: sys.executable,
+                    "run_cmd": fake_run_cmd,
+                },
+            ):
+                with patch.object(sys, "argv", argv):
+                    with redirect_stdout(stdout):
+                        exit_code = run_repo_skill_quality.main()
 
             payload = json.loads(stdout.getvalue())
             self.assertEqual(exit_code, 0)

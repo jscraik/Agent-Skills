@@ -561,6 +561,247 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
+              "id": "PATH_ABSOLUTE",
+              "name": "PATH_ABSOLUTE",
+              "shortDescription": {
+                "text": "Absolute paths detected; prefer repo-relative paths."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_TOOL_CHAIN",
+              "name": "PI_TOOL_CHAIN",
+              "shortDescription": {
+                "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_LEAKY",
+              "name": "RESEARCH_EVALS_LEAKY",
+              "shortDescription": {
+                "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EXAMPLES_MISSING",
+              "name": "SEC_EXAMPLES_MISSING",
+              "shortDescription": {
+                "text": "Missing recommended section: examples (add a ## heading)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PATH_ABSOLUTE",
+          "level": "warning",
+          "message": {
+            "text": "Absolute paths detected; prefer repo-relative paths."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_TOOL_CHAIN",
+          "level": "warning",
+          "message": {
+            "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_LEAKY",
+          "level": "warning",
+          "message": {
+            "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior. | leaky=2/3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=1/3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EXAMPLES_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Missing recommended section: examples (add a ## heading)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -1774,6 +2015,117 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -1819,6 +2171,169 @@
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "Skills/agent-ops/frontend-design/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "REPO_SCRIPTS_UNREFERENCED",
+              "name": "REPO_SCRIPTS_UNREFERENCED",
+              "shortDescription": {
+                "text": "Infrastructure/scripts/ exists but is not referenced in SKILL.md."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_LEAKY",
+              "name": "RESEARCH_EVALS_LEAKY",
+              "shortDescription": {
+                "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "REPO_SCRIPTS_UNREFERENCED",
+          "level": "warning",
+          "message": {
+            "text": "Infrastructure/scripts/ exists but is not referenced in SKILL.md."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_LEAKY",
+          "level": "warning",
+          "message": {
+            "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior. | leaky=12/14"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=2/14"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
                 }
               }
             }
@@ -4084,6 +4599,247 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
+              "id": "FM_DESC_WORKFLOWY",
+              "name": "FM_DESC_WORKFLOWY",
+              "shortDescription": {
+                "text": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PRESSURE_MISSING",
+              "name": "SEC_EVALS_PRESSURE_MISSING",
+              "shortDescription": {
+                "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "FM_DESC_WORKFLOWY",
+          "level": "warning",
+          "message": {
+            "text": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PRESSURE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
@@ -5412,6 +6168,273 @@
               }
             },
             {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SAFE_UNTRUSTED_TO_COMMAND",
+              "name": "SAFE_UNTRUSTED_TO_COMMAND",
+              "shortDescription": {
+                "text": "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_NEGATIVE_MISSING",
+              "name": "SEC_EVALS_NEGATIVE_MISSING",
+              "shortDescription": {
+                "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PRESSURE_MISSING",
+              "name": "SEC_EVALS_PRESSURE_MISSING",
+              "shortDescription": {
+                "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "WF_FAIL_FAST_MISSING",
+              "name": "WF_FAIL_FAST_MISSING",
+              "shortDescription": {
+                "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SAFE_UNTRUSTED_TO_COMMAND",
+          "level": "warning",
+          "message": {
+            "text": "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | scripts/render.ts"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_NEGATIVE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PRESSURE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "WF_FAIL_FAST_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
               "id": "REPO_ASSETS_UNREFERENCED",
               "name": "REPO_ASSETS_UNREFERENCED",
               "shortDescription": {
@@ -5591,6 +6614,117 @@
               }
             },
             {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/slides.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=2/8"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
               "id": "REPO_ASSETS_UNREFERENCED",
               "name": "REPO_ASSETS_UNREFERENCED",
               "shortDescription": {
@@ -5730,6 +6864,191 @@
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "Skills/content-publishing/spreadsheet/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_COMMANDS",
+              "name": "PI_COMMANDS",
+              "shortDescription": {
+                "text": "[medium] Command-like instructions detected; ensure commands are gated and safe."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_OBFUSCATION",
+              "name": "PI_OBFUSCATION",
+              "shortDescription": {
+                "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_OVERRIDE",
+              "name": "PI_OVERRIDE",
+              "shortDescription": {
+                "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_COMMANDS",
+          "level": "warning",
+          "message": {
+            "text": "[medium] Command-like instructions detected; ensure commands are gated and safe. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OBFUSCATION",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | references/css-patterns.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OBFUSCATION",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | references/libraries.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OBFUSCATION",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | references/slide-patterns.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OVERRIDE",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OVERRIDE",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | references/libraries.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
                 }
               }
             }

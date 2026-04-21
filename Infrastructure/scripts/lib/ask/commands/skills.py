@@ -936,7 +936,7 @@ def route_skills(
     catalog_parity = compute_catalog_parity(
         repo_root,
         strict=False,
-        route_considered_total=len(considered_candidates),
+        route_considered_total=len(default_candidates),
     )
 
     decision = build_decision_payload(
