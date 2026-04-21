@@ -32,7 +32,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
 - Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
 - Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If mapped roles are missing, continue inline and tell the user to provision the role with [$codex-agent-creator](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md).
+- If mapped roles are missing, continue inline and tell the user to provision the role with `[[codex-agent-creator]]`.
 - If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
 
 ## When to use
