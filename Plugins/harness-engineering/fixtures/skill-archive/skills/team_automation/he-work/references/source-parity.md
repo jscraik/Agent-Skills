@@ -51,9 +51,9 @@ This document records how the prompt sources for the execution stage were migrat
 - Donor bare-prompt execution was preserved only as a tiny, low-risk compatibility path; this repo still keeps artifact-led execution as the default.
 - Parallel execution is preserved as an execution strategy, but the skill avoids assuming that every platform or turn permits subagent spawning.
 - `contract.yaml` and `evals.yaml` were added to improve routing reliability and validation coverage.
-- non-route-critical standards and philosophy guidance were relocated to `references/style-and-operating-guidance.md` so `SKILL.md` stays execution-focused without losing context
-- deterministic execution and verification role mapping is now explicit in `references/sub-agent-map.md`
-- missing supporting references were restored for operational completeness: `references/mcp-integration.md` and `references/he-anti-patterns.md`
+- non-route-critical standards and philosophy guidance were relocated to `references/style-and-operating-guidance.md` so `SKILL.md` stays execution-focused without losing context.
+- deterministic execution and verification role mapping is now explicit in `references/sub-agent-map.md`.
+- missing supporting references were restored for operational completeness: `references/mcp-integration.md` and `references/he-anti-patterns.md`.
 
 ## No-loss checklist
 - plan, todo, and direct-spec execution paths are still present
