@@ -89,17 +89,7 @@ numstat_added_deleted() {
   printf '%s %s\n' "$added" "$deleted"
 }
 
-collect_removed_lines() {
-  local base_ref="$1"
-  local target="$2"
-  if [[ -n "$base_ref" ]]; then
-    git diff --unified=0 "$base_ref"...HEAD -- "$target"
-  fi
-  git diff --unified=0 -- "$target"
-  git diff --cached --unified=0 -- "$target"
-}
-
-collect_added_lines() {
+collect_unified_diff() {
   local base_ref="$1"
   local target="$2"
   if [[ -n "$base_ref" ]]; then
@@ -136,7 +126,7 @@ has_context_move_evidence() {
   while IFS= read -r moved_line; do
     [[ -n "$moved_line" ]] && removed_lines+=("$moved_line")
   done < <(
-    collect_removed_lines "$base_ref" "$skill_path" \
+    collect_unified_diff "$base_ref" "$skill_path" \
       | awk '
           /^--- / || /^\+\+\+ / || /^@@/ {next}
           /^-/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}
@@ -153,7 +143,7 @@ has_context_move_evidence() {
       continue
     fi
     added_blob="$(
-      collect_added_lines "$base_ref" "$target" \
+      collect_unified_diff "$base_ref" "$target" \
         | awk '
             /^--- / || /^\+\+\+ / || /^@@/ {next}
             /^\+/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}

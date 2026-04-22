@@ -92,6 +92,13 @@ def rel_skill(root: Path, skill: Path) -> str:
         return str(skill)
 
 
+def rel_path(root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except (OSError, RuntimeError, ValueError):
+        return str(path)
+
+
 def load_canonical_skill_name(skill: Path) -> str:
     skill_md = skill / "SKILL.md"
     try:
@@ -377,12 +384,12 @@ def main() -> int:
     repo_artifact_index = {
         "schema_version": "1.0",
         "generated_by": "run_repo_skill_quality.py",
-        "reports_root": str(reports_root),
-        "structure_reports": [str(p) for p in structure_reports],
-        "structure_sarif_reports": [str(p) for p in structure_sarif_reports],
-        "aggregate_sarif": str(aggregate_sarif_path) if structure_sarif_reports else None,
-        "scorecards": [str(p) for p in scorecards],
-        "eval_junit_reports": [str(p) for p in eval_junit_reports],
+        "reports_root": rel_path(root, reports_root),
+        "structure_reports": [rel_path(root, p) for p in structure_reports],
+        "structure_sarif_reports": [rel_path(root, p) for p in structure_sarif_reports],
+        "aggregate_sarif": rel_path(root, aggregate_sarif_path) if structure_sarif_reports else None,
+        "scorecards": [rel_path(root, p) for p in scorecards],
+        "eval_junit_reports": [rel_path(root, p) for p in eval_junit_reports],
         "benchmark_output_json": str(args.benchmark_output_json),
     }
     _write_json_file(repo_artifact_index_path, repo_artifact_index)

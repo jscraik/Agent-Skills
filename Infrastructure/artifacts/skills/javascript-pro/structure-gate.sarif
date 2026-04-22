@@ -29,16 +29,6 @@
               }
             },
             {
-              "id": "OUT_SCHEMA_VERSION_MISSING",
-              "name": "OUT_SCHEMA_VERSION_MISSING",
-              "shortDescription": {
-                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
-              },
-              "properties": {
-                "defaultSeverity": "warn"
-              }
-            },
-            {
               "id": "RESEARCH_EXAMPLES_SYNTHETIC",
               "name": "RESEARCH_EXAMPLES_SYNTHETIC",
               "shortDescription": {
@@ -78,22 +68,6 @@
           "level": "warning",
           "message": {
             "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
-          "level": "warning",
-          "message": {
-            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
           },
           "locations": [
             {

@@ -561,6 +561,247 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
+              "id": "PATH_ABSOLUTE",
+              "name": "PATH_ABSOLUTE",
+              "shortDescription": {
+                "text": "Absolute paths detected; prefer repo-relative paths."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_TOOL_CHAIN",
+              "name": "PI_TOOL_CHAIN",
+              "shortDescription": {
+                "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_LEAKY",
+              "name": "RESEARCH_EVALS_LEAKY",
+              "shortDescription": {
+                "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EXAMPLES_MISSING",
+              "name": "SEC_EXAMPLES_MISSING",
+              "shortDescription": {
+                "text": "Missing recommended section: examples (add a ## heading)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PATH_ABSOLUTE",
+          "level": "warning",
+          "message": {
+            "text": "Absolute paths detected; prefer repo-relative paths."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_TOOL_CHAIN",
+          "level": "warning",
+          "message": {
+            "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_LEAKY",
+          "level": "warning",
+          "message": {
+            "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior. | leaky=2/3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=1/3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EXAMPLES_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Missing recommended section: examples (add a ## heading)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/bootstrap/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -620,23 +861,13 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             }
           ]
@@ -644,31 +875,15 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/codex-agent-creator/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -1568,93 +1783,23 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
@@ -1682,15 +1827,15 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
           },
           "locations": [
             {
@@ -1703,122 +1848,10 @@
           ]
         },
         {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Write idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Masters concurrency, fault tolerance, and distributed systems."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/elixir-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -1871,46 +1904,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
@@ -1945,74 +1938,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
@@ -2086,6 +2015,117 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/fix-mise/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -2145,83 +2185,186 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
+              "id": "REPO_SCRIPTS_UNREFERENCED",
+              "name": "REPO_SCRIPTS_UNREFERENCED",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+                "text": "Infrastructure/scripts/ exists but is not referenced in SKILL.md."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
+              "id": "RESEARCH_EVALS_LEAKY",
+              "name": "RESEARCH_EVALS_LEAKY",
               "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+                "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
               "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "REPO_SCRIPTS_UNREFERENCED",
+          "level": "warning",
+          "message": {
+            "text": "Infrastructure/scripts/ exists but is not referenced in SKILL.md."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_LEAKY",
+          "level": "warning",
+          "message": {
+            "text": "Most positive eval prompts mention the skill name directly. Prefer natural user phrasing to test real routing behavior. | leaky=12/14"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=2/14"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/gh-workflow/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
@@ -2249,15 +2392,15 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
           },
           "locations": [
             {
@@ -2270,106 +2413,10 @@
           ]
         },
         {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/go/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/go/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/go/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/go/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/go/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/go/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -2799,90 +2846,20 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
                 "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -2903,143 +2880,31 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Master modern JavaScript with ES6+, async patterns, and Node.js APIs. Handles promises, event loops, and browser/Node compatibility."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
           "message": {
             "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/javascript-pro/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -3556,100 +3421,20 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_SHORT",
-              "name": "FM_DESC_SHORT",
-              "shortDescription": {
-                "text": "Description is brief (< 120); expand for better discovery."
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
               },
               "properties": {
                 "defaultSeverity": "warn"
               }
             },
             {
-              "id": "OUT_SCHEMA_VERSION_MISSING",
-              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -3670,159 +3455,31 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Bootstrap and operate Project Brain correctly using the canonical instruction and bootstrap script."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_SHORT",
-          "level": "warning",
-          "message": {
-            "text": "Description is brief (< 120); expand for better discovery."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
           "message": {
             "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/project-brain/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -4194,26 +3851,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -4248,42 +3885,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/resolve-pr-parallel/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/resolve-pr-parallel/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "PI_BINARY_ATTACHMENT",
           "level": "warning",
@@ -4357,90 +3962,20 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_SHORT",
-              "name": "FM_DESC_SHORT",
-              "shortDescription": {
-                "text": "Description is brief (< 120); expand for better discovery."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -4471,143 +4006,31 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Master Rust 1.75+ with modern async patterns, advanced type system features, and production-ready systems programming."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_SHORT",
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
           "message": {
-            "text": "Description is brief (< 120); expand for better discovery."
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/rust-pro/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -4892,93 +4315,13 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
               },
               "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
@@ -4986,6 +4329,16 @@
               "name": "PI_TOOL_CHAIN",
               "shortDescription": {
                 "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -5016,143 +4369,15 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
           "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Swift language patterns and best practices including concurrency, performance, and modern idioms. Use for Swift language-level code review or architecture guidance."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
           },
           "locations": [
             {
@@ -5169,6 +4394,22 @@
           "level": "warning",
           "message": {
             "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/swift-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -5221,50 +4462,20 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
                 "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -5295,74 +4506,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/test-browser/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/test-browser/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/test-browser/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/test-browser/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "PI_BINARY_ATTACHMENT",
           "level": "warning",
@@ -5384,6 +4531,22 @@
           "level": "warning",
           "message": {
             "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-browser/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -5436,100 +4599,261 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "FM_DESC_WORKFLOWY",
+              "name": "FM_DESC_WORKFLOWY",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
               "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
               "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
               "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
+              "id": "SEC_EVALS_PRESSURE_MISSING",
+              "name": "SEC_EVALS_PRESSURE_MISSING",
               "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
+                "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "FM_DESC_WORKFLOWY",
+          "level": "warning",
+          "message": {
+            "text": "Description looks workflow-like. Prefer outcome + trigger keywords in `description`; keep procedures in the body/references. | description: Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PRESSURE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/test-driven-development/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_SHORT",
-              "name": "FM_DESC_SHORT",
-              "shortDescription": {
-                "text": "Description is brief (< 120); expand for better discovery."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -5560,159 +4884,31 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Write and review TOML configuration files with predictable structure, strict typing, and tool-safe edits."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/toml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_SHORT",
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
           "message": {
-            "text": "Description is brief (< 120); expand for better discovery."
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/toml/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -5765,80 +4961,20 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
                 "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -5859,127 +4995,31 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/typescript/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
           "message": {
             "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/typescript/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -6015,96 +5055,6 @@
           "name": "skill_gate",
           "informationUri": "https://github.com/openai/skills",
           "rules": [
-            {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
-              "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
             {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
@@ -6146,6 +5096,16 @@
               }
             },
             {
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
+              "shortDescription": {
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
               "id": "SEC_EXAMPLES_MISSING",
               "name": "SEC_EXAMPLES_MISSING",
               "shortDescription": {
@@ -6160,154 +5120,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Python project initialization and dependency management with uv. Use when starting new CLI tools or libraries, configuring pyproject.toml, managing virtual environments, or setting up development workflows. Covers project types, dependency commands, and environment synchronization."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
@@ -6361,6 +5177,22 @@
           "level": "warning",
           "message": {
             "text": "Infrastructure/scripts/ exists but is not referenced in SKILL.md."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/uv-python-project-setup/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -6586,100 +5418,20 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "CONTRACT_MISSING",
-              "name": "CONTRACT_MISSING",
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "EVALS_MISSING",
-              "name": "EVALS_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PROCEDURE_MISSING",
-              "name": "SEC_PROCEDURE_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: procedure (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_VALIDATION_MISSING",
-              "name": "SEC_VALIDATION_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: validation (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "FM_DESC_SHORT",
-              "name": "FM_DESC_SHORT",
-              "shortDescription": {
-                "text": "Description is brief (< 120); expand for better discovery."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
                 "defaultSeverity": "warn"
@@ -6700,159 +5452,31 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
         {
-          "ruleId": "CONTRACT_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/contract.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "EVALS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing Infrastructure/references/evals.yaml (required for gold)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Write and review YAML files with safe indentation, schema-aware structure, and low-surprise serialization."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PROCEDURE_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: procedure (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_VALIDATION_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: validation (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/yaml/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FM_DESC_SHORT",
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",
           "message": {
-            "text": "Description is brief (< 120); expand for better discovery."
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/agent-ops/yaml/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=0/3"
           },
           "locations": [
             {
@@ -7544,6 +6168,273 @@
               }
             },
             {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SAFE_UNTRUSTED_TO_COMMAND",
+              "name": "SAFE_UNTRUSTED_TO_COMMAND",
+              "shortDescription": {
+                "text": "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "name": "SEC_EVALS_COMMAND_GUARD_MISSING",
+              "shortDescription": {
+                "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_NEGATIVE_MISSING",
+              "name": "SEC_EVALS_NEGATIVE_MISSING",
+              "shortDescription": {
+                "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PI_CASE_MISSING",
+              "name": "SEC_EVALS_PI_CASE_MISSING",
+              "shortDescription": {
+                "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "SEC_EVALS_PRESSURE_MISSING",
+              "name": "SEC_EVALS_PRESSURE_MISSING",
+              "shortDescription": {
+                "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "WF_FAIL_FAST_MISSING",
+              "name": "WF_FAIL_FAST_MISSING",
+              "shortDescription": {
+                "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "OUT_SCHEMA_VERSION_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SAFE_UNTRUSTED_TO_COMMAND",
+          "level": "warning",
+          "message": {
+            "text": "Untrusted input appears to flow into command execution without clear sanitization/argument-list hardening. | scripts/render.ts"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_COMMAND_GUARD_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat). | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_NEGATIVE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No negative/non-trigger security case detected in evals.yaml. Add `category: negative` or `should_trigger: false` coverage. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PI_CASE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC_EVALS_PRESSURE_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "No pressure/adversarial case detected in evals.yaml. Add at least one `category: pressure` case. | Infrastructure/references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "WF_FAIL_FAST_MISSING",
+          "level": "warning",
+          "message": {
+            "text": "Validation section should specify fail-fast behavior (stop at first failed gate)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/beautiful-mermaid/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "OUT_SCHEMA_VERSION_MISSING",
+              "name": "OUT_SCHEMA_VERSION_MISSING",
+              "shortDescription": {
+                "text": "Schema-bound outputs detected; consider including `schema_version` in the output contract."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
               "id": "REPO_ASSETS_UNREFERENCED",
               "name": "REPO_ASSETS_UNREFERENCED",
               "shortDescription": {
@@ -7713,25 +6604,116 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
             {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
+              "id": "RESEARCH_EVALS_UNREALISTIC",
+              "name": "RESEARCH_EVALS_UNREALISTIC",
               "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
+                "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances."
               },
               "properties": {
-                "defaultSeverity": "fail"
+                "defaultSeverity": "warn"
               }
             },
+            {
+              "id": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "name": "RESEARCH_EXAMPLES_SYNTHETIC",
+              "shortDescription": {
+                "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/slides.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EVALS_UNREALISTIC",
+          "level": "warning",
+          "message": {
+            "text": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances. | realistic=2/8"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RESEARCH_EXAMPLES_SYNTHETIC",
+          "level": "warning",
+          "message": {
+            "text": "Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
             {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
@@ -7787,42 +6769,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/content-publishing/spreadsheet/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/content-publishing/spreadsheet/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "PI_BINARY_ATTACHMENT",
           "level": "warning",
@@ -7914,6 +6864,191 @@
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "Skills/content-publishing/spreadsheet/SKILL.md"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "skill_gate",
+          "informationUri": "https://github.com/openai/skills",
+          "rules": [
+            {
+              "id": "PI_BINARY_ATTACHMENT",
+              "name": "PI_BINARY_ATTACHMENT",
+              "shortDescription": {
+                "text": "Binary attachment detected; manual review required (prompt scan skipped)."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_COMMANDS",
+              "name": "PI_COMMANDS",
+              "shortDescription": {
+                "text": "[medium] Command-like instructions detected; ensure commands are gated and safe."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_OBFUSCATION",
+              "name": "PI_OBFUSCATION",
+              "shortDescription": {
+                "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            },
+            {
+              "id": "PI_OVERRIDE",
+              "name": "PI_OVERRIDE",
+              "shortDescription": {
+                "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions."
+              },
+              "properties": {
+                "defaultSeverity": "warn"
+              }
+            }
+          ]
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-large.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_COMMANDS",
+          "level": "warning",
+          "message": {
+            "text": "[medium] Command-like instructions detected; ensure commands are gated and safe. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OBFUSCATION",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | references/css-patterns.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OBFUSCATION",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | references/libraries.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OBFUSCATION",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential obfuscation / hidden-instruction language detected; verify it cannot bypass safety checks. | references/slide-patterns.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OVERRIDE",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | references/evals.yaml"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_OVERRIDE",
+          "level": "warning",
+          "message": {
+            "text": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions. | references/libraries.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/content-publishing/visual-explainer/SKILL.md"
                 }
               }
             }
@@ -9201,46 +8336,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
@@ -9295,74 +8390,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",

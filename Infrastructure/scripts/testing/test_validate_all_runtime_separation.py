@@ -228,7 +228,7 @@ class FakeRepo:
         "Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py",
         "Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py",
         "Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py",
-        "Infrastructure/scripts/verify_selection_gate_severity.py",
+        "Infrastructure/scripts/validation-and-linting/verify_selection_gate_severity.py",
     )
 
     # Bash scripts called directly via `bash Infrastructure/scripts/...`

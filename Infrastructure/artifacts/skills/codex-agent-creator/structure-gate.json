@@ -1,25 +1,19 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:18:33Z",
-  "skill": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md",
-  "skill_path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md",
+  "generated_at": "2026-04-22T18:51:04Z",
+  "skill": "Skills/agent-ops/codex-agent-creator/SKILL.md",
+  "skill_path": "Skills/agent-ops/codex-agent-creator/SKILL.md",
   "name": "codex-agent-creator",
-  "decision": "fail",
-  "exit_code": 2,
-  "failed": true,
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
   "findings": [
     {
-      "level": "FAIL",
-      "code": "CONTRACT_MISSING",
-      "message": "Missing Infrastructure/references/contract.yaml (required for gold).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "EVALS_MISSING",
-      "message": "Missing Infrastructure/references/evals.yaml (required for gold).",
-      "evidence": ""
+      "level": "WARN",
+      "code": "RESEARCH_EVALS_UNREALISTIC",
+      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
+      "evidence": "realistic=0/3"
     }
   ]
 }

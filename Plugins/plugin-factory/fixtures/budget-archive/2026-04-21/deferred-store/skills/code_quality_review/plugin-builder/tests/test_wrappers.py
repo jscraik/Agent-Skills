@@ -2,20 +2,29 @@
 """Smoke checks for plugin-builder script wrappers."""
 
 from pathlib import Path
+import sys
 
+HELPERS_ROOT = Path(__file__).resolve().parents[3]
+if str(HELPERS_ROOT) not in sys.path:
+    sys.path.insert(0, str(HELPERS_ROOT))
 
-def _find_repo_root(current: Path) -> Path:
-    for parent in current.parents:
-        if (parent / "AGENTS.md").exists() and (parent / "Plugins").exists():
-            return parent
-    raise AssertionError(f"could not locate repo root from {current}")
+from tests_shared import find_repo_root
 
 
 def test_plugin_builder_wrapper_points_to_impl() -> None:
     current = Path(__file__).resolve()
-    repo_root = _find_repo_root(current)
-    script_path = current.parent.parent / "scripts" / "plugin_builder.py"
-    impl_path = repo_root / "Plugins" / "plugin-factory" / "skills" / "code_quality_review" / "plugin-builder" / "scripts" / "plugin_builder.pyw"
+    repo_root = find_repo_root(current)
+    script_path = (
+        repo_root
+        / "Plugins"
+        / "plugin-factory"
+        / "skills"
+        / "code_quality_review"
+        / "plugin-builder"
+        / "scripts"
+        / "plugin_builder.py"
+    )
+    impl_path = script_path.with_suffix(".pyw")
 
     assert script_path.exists()
     assert impl_path.exists()

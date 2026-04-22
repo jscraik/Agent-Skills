@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:18:34Z",
-  "skill": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/orchestrating-subagents/SKILL.md",
-  "skill_path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/orchestrating-subagents/SKILL.md",
+  "generated_at": "2026-04-22T18:51:05Z",
+  "skill": "Skills/agent-ops/orchestrating-subagents/SKILL.md",
+  "skill_path": "Skills/agent-ops/orchestrating-subagents/SKILL.md",
   "name": "orchestrating-subagents",
   "decision": "pass",
   "exit_code": 0,
