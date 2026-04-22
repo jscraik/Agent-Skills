@@ -1229,7 +1229,7 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
 
     if require_contract:
         if not contract_path.exists():
-            out.append(Finding(Level.FAIL, "CONTRACT_MISSING", "Missing Infrastructure/references/contract.yaml (required for gold)."))
+            out.append(Finding(Level.FAIL, "CONTRACT_MISSING", "Missing references/contract.yaml (required for gold)."))
         else:
             try:
                 contract = _read_yaml_mapping(contract_path)
@@ -1249,7 +1249,7 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
 
     if require_evals:
         if not evals_path.exists():
-            out.append(Finding(Level.FAIL, "EVALS_MISSING", "Missing Infrastructure/references/evals.yaml (required for gold)."))
+            out.append(Finding(Level.FAIL, "EVALS_MISSING", "Missing references/evals.yaml (required for gold)."))
         else:
             try:
                 obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
@@ -1403,7 +1403,12 @@ def _build_sarif_payload(doc: SkillDoc, findings: Sequence[Finding], *, failed: 
         )
     results = []
     uri = _sarif_artifact_uri(doc.path)
+    seen_results = set()
     for finding in findings:
+        result_key = (finding.code, finding.message, finding.evidence)
+        if result_key in seen_results:
+            continue
+        seen_results.add(result_key)
         level = _lvl_name(finding.level).lower()
         results.append(
             {

@@ -661,6 +661,8 @@ def main():
     
     repo_validate_parser = repo_subparsers.add_parser("validate", help="Run all repository validations", parents=[global_parser])
     repo_validate_parser.add_argument("--ephemeral", action="store_true", help="Do not mutate repo validation artifacts")
+    repo_validate_parser.add_argument("--fail-fast", action="store_true", help="Stop after the first required failure")
+    repo_validate_parser.add_argument("--changed-files", nargs="+", default=[], help="Scope validation to these changed files")
 
     repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
     repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
@@ -1017,7 +1019,12 @@ def main():
         if args.action == "status":
             result = repo_status(repo_root, verbose=args.verbose)
         elif args.action == "validate":
-            result = repo_validate(repo_root, ephemeral=args.ephemeral)
+            result = repo_validate(
+                repo_root,
+                ephemeral=args.ephemeral,
+                fail_fast=args.fail_fast,
+                changed_files=args.changed_files or [],
+            )
         elif args.action == "check-stability":
             result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
         elif args.action == "doctor-catalog":
@@ -1383,6 +1390,8 @@ def main():
                     print(f"  Synced: {result.data['skills_synced']}")
                 elif args.topic == "repo" and args.action == "validate":
                     print(f"✅ Validation passed! ({result.data['warn_only_issues']} warnings)")
+                    if result.data.get("changed_files"):
+                        print(f"   Scoped to {len(result.data['changed_files'])} changed file(s)")
                 elif args.topic == "repo" and args.action == "check-stability":
                     print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
                     if args.changed_files:

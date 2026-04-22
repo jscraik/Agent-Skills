@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-frontend-ui-visual-explainer",
-  "scope_skill": "Skills/frontend-ui/visual-explainer",
+  "profile_id": "Skills-content-publishing-visual-explainer",
+  "scope_skill": "Skills/content-publishing/visual-explainer",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

@@ -380,7 +380,7 @@ def _validate_contract(skill_rel: str, skill_dir: Path) -> List[Finding]:
     findings: List[Finding] = []
     contract_path = skill_dir / "references" / "contract.yaml"
     if not contract_path.exists():
-        findings.append(Finding("FAIL", "CONTRACT_MISSING", skill_rel, "missing Infrastructure/references/contract.yaml"))
+        findings.append(Finding("FAIL", "CONTRACT_MISSING", skill_rel, "missing references/contract.yaml"))
         return findings
 
     try:
@@ -422,7 +422,7 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
     findings: List[Finding] = []
     evals_path = skill_dir / "references" / "evals.yaml"
     if not evals_path.exists():
-        findings.append(Finding("FAIL", "EVALS_MISSING", skill_rel, "missing Infrastructure/references/evals.yaml"))
+        findings.append(Finding("FAIL", "EVALS_MISSING", skill_rel, "missing references/evals.yaml"))
         return findings
 
     try:

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:21:04Z",
+  "generated_at": "2026-04-22T18:51:08Z",
   "skill": "Skills/frontend-ui/playwright-interactive/SKILL.md",
   "skill_path": "Skills/frontend-ui/playwright-interactive/SKILL.md",
   "name": "playwright-interactive",

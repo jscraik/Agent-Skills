@@ -5,12 +5,10 @@ SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd -P -- "$SCRIPT_DIR/../../.." && pwd -P)"
 cd "$REPO_ROOT"
 
-HE_SKILL_GLOB='Plugins/harness-engineering/skills/**/SKILL.md'
 INDEX_PATH='Plugins/harness-engineering/references/deferred-context-index.md'
 INVARIANT_MARKER='Do not remove important context for budget trimming'
 LINK_MARKER='deferred-context-index.md'
 
-# resolve_base_ref resolves a git base reference for comparisons (prefers the merge-base with '@{upstream}', then tries `origin/main`, `origin/master`, `main`, `master` in order, and falls back to `HEAD^` if present) and echoes the selected ref (or an empty string) to stdout.
 resolve_base_ref() {
   local base_ref=""
   if git rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
@@ -36,7 +34,6 @@ resolve_base_ref() {
   printf '%s' "$base_ref"
 }
 
-# collect_changed_he_skills collects changed Plugins/harness-engineering/skills/**/SKILL.md paths (includes staged, unstaged, and, if `base_ref` is provided, changes between `base_ref...HEAD`) and prints unique, sorted results; returns no output if none found.
 collect_changed_he_skills() {
   local base_ref="$1"
   local -a all_changed=()
@@ -61,11 +58,10 @@ collect_changed_he_skills() {
   fi
 
   printf '%s\n' "${all_changed[@]}" \
-    | awk '/^Plugins\/harness-engineering\/skills\/.+\/SKILL\.md$/' \
+    | awk '/^Plugins\/harness-engineering\/(skills\/.+\/SKILL\.md|fixtures\/.+\/skills\/.+\/SKILL(\.full)?\.md)$/' \
     | sort -u
 }
 
-# numstat_added_deleted computes total added and deleted line counts for a target path relative to an optional base ref, aggregating counts from base_ref...HEAD, the working tree, and the index, and prints "<added> <deleted>".
 numstat_added_deleted() {
   local base_ref="$1"
   local target="$2"
@@ -93,11 +89,16 @@ numstat_added_deleted() {
   printf '%s %s\n' "$added" "$deleted"
 }
 
-# has_context_move_evidence checks whether deleted lines from a SKILL.md are matched by added lines in the deferred-context index or the skill's reference files.
-# 
-# base_ref is the git reference (merge-base or fallback) used when computing diffs. skill_path is the path to the SKILL.md being validated.
-# 
-# Exits with status 0 if any candidate reference file shows added lines relative to base_ref, 1 otherwise.
+collect_unified_diff() {
+  local base_ref="$1"
+  local target="$2"
+  if [[ -n "$base_ref" ]]; then
+    git diff --unified=0 "$base_ref"...HEAD -- "$target"
+  fi
+  git diff --unified=0 -- "$target"
+  git diff --cached --unified=0 -- "$target"
+}
+
 has_context_move_evidence() {
   local base_ref="$1"
   local skill_path="$2"
@@ -120,35 +121,49 @@ has_context_move_evidence() {
   fi
 
   local target added deleted
+  local moved_line added_blob
+  local removed_lines=()
+  while IFS= read -r moved_line; do
+    [[ -n "$moved_line" ]] && removed_lines+=("$moved_line")
+  done < <(
+    collect_unified_diff "$base_ref" "$skill_path" \
+      | awk '
+          /^--- / || /^\+\+\+ / || /^@@/ {next}
+          /^-/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}
+        ' \
+      | sort -u
+  )
+  if [[ ${#removed_lines[@]} -eq 0 ]]; then
+    return 0
+  fi
+
   for target in "${candidates[@]}"; do
     read -r added deleted < <(numstat_added_deleted "$base_ref" "$target")
-    if (( added > 0 )); then
-      return 0
+    if (( added <= 0 )); then
+      continue
     fi
-
-    # Follow symlinked reference paths and count additions on the resolved
-    # in-repo path (many HE refs are tracked under fixture paths).
-    local abs_target resolved_abs resolved_rel
-    abs_target="$REPO_ROOT/$target"
-    if [[ -e "$abs_target" ]]; then
-      resolved_abs="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$abs_target")"
-      if [[ "$resolved_abs" == "$REPO_ROOT/"* ]]; then
-        resolved_rel="${resolved_abs#$REPO_ROOT/}"
-        if [[ "$resolved_rel" != "$target" ]]; then
-          read -r added deleted < <(numstat_added_deleted "$base_ref" "$resolved_rel")
-          if (( added > 0 )); then
-            return 0
-          fi
-        fi
+    added_blob="$(
+      collect_unified_diff "$base_ref" "$target" \
+        | awk '
+            /^--- / || /^\+\+\+ / || /^@@/ {next}
+            /^\+/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}
+          '
+    )"
+    for moved_line in "${removed_lines[@]}"; do
+      if printf '%s\n' "$added_blob" | grep -Fqx -- "$moved_line"; then
+        return 0
       fi
-    fi
+    done
   done
 
   return 1
 }
 
 base_ref="$(resolve_base_ref)"
-mapfile -t changed_skills < <(collect_changed_he_skills "$base_ref")
+changed_skills=()
+while IFS= read -r skill_path; do
+  [[ -n "$skill_path" ]] && changed_skills+=("$skill_path")
+done < <(collect_changed_he_skills "$base_ref")
 
 if [[ ${#changed_skills[@]} -eq 0 ]]; then
   echo "[he-progressive] pass: no changed harness-engineering SKILL.md files detected"

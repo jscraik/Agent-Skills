@@ -21,7 +21,7 @@ import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-VALIDATE_ALL_SH = REPO_ROOT / "scripts" / "validate_all.sh"
+VALIDATE_ALL_SH = REPO_ROOT / "Infrastructure" / "scripts" / "validate_all.sh"
 
 # Slugs introduced by the new code block, in order.
 RUNTIME_SEPARATION_SLUGS = [
@@ -213,16 +213,16 @@ class FakeRepo:
 
     # Python scripts called via $python_cmd
     _PY_SCRIPTS: tuple[str, ...] = (
-        "Infrastructure/scripts/skill-graph/verify_recursive_skill_graph_artifacts.py",
-        "Infrastructure/scripts/validation-and-linting/docs_lint.py",
-        "Infrastructure/scripts/validation-and-linting/verify_verify_work_scope_flags.py",
-        "Infrastructure/scripts/validation-and-linting/verify_question_lifecycle_contract.py",
-        "Infrastructure/scripts/testing/test_skill_lifecycle_validation.py",
-        "Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py",
-        "Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py",
-        "Infrastructure/scripts/validation-and-linting/verify_selection_contract.py",
-        "Infrastructure/scripts/validation-and-linting/verify_router_schema.py",
-        "Infrastructure/scripts/validation-and-linting/verify_ask_cli_modularity.py",
+        "Infrastructure/scripts/verify_recursive_skill_graph_artifacts.py",
+        "Infrastructure/scripts/docs_lint.py",
+        "Infrastructure/scripts/verify_verify_work_scope_flags.py",
+        "Infrastructure/scripts/verify_question_lifecycle_contract.py",
+        "Infrastructure/scripts/test_skill_lifecycle_validation.py",
+        "Infrastructure/scripts/verify_skill_catalog_freshness.py",
+        "Infrastructure/scripts/gotcha_pipeline.py",
+        "Infrastructure/scripts/verify_selection_contract.py",
+        "Infrastructure/scripts/verify_router_schema.py",
+        "Infrastructure/scripts/verify_ask_cli_modularity.py",
         "Infrastructure/scripts/runtime-separation/validate_runtime_separation_manifest.py",
         "Infrastructure/scripts/runtime-separation/scan_runtime_separation_consumers.py",
         "Infrastructure/scripts/runtime-separation/verify_runtime_separation_reader_compat.py",
@@ -233,14 +233,14 @@ class FakeRepo:
 
     # Bash scripts called directly via `bash Infrastructure/scripts/...`
     _BASH_SCRIPTS: tuple[str, ...] = (
-        "Infrastructure/scripts/validation-and-linting/validate_plan_graphs.sh",
-        "Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh",
-        "Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh",
-        "Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh",
-        "Infrastructure/scripts/validation-and-linting/lint_skill_types.sh",
-        "Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh",
-        "Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh",
-        "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh",
+        "Infrastructure/scripts/validate_plan_graphs.sh",
+        "Infrastructure/scripts/check_plugin_skill_shadowing.sh",
+        "Infrastructure/scripts/validate_projection_integrity.sh",
+        "Infrastructure/scripts/check_path_ownership_boundaries.sh",
+        "Infrastructure/scripts/lint_skill_types.sh",
+        "Infrastructure/scripts/lint_openai_skill_format.sh",
+        "Infrastructure/scripts/lint_progressive_disclosure.sh",
+        "Infrastructure/scripts/validate_skill_authoring_family.sh",
         "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.sh",
         "Infrastructure/scripts/runtime-separation/verify_runtime_separation_writer_mutations.sh",
         "Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh",
@@ -281,7 +281,8 @@ class FakeRepo:
             _make_bash_stub(self.root / rel)
 
         # Copy the real validate_all.sh (read-only; we don't modify it)
-        dst = self.root / "scripts" / "validate_all.sh"
+        dst = self.root / "Infrastructure" / "scripts" / "validate_all.sh"
+        dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes(VALIDATE_ALL_SH.read_bytes())
         _make_executable(dst)
 
