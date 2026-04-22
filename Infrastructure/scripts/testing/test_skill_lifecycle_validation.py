@@ -732,11 +732,11 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         """
         Verify the sync script materializes runtime-visible plugin skill aliases as real directories.
         
-        Asserts that the sync script contains the call to `materialize_runtime_plugin_skill_aliases()`, uses a directory copy (`cp -a "$resolved" "$child"`) to materialize resolved skill directories, and invokes the materialization function on a target directory (`materialize_runtime_plugin_skill_aliases "$target_dir"`).
+        Asserts that the sync script contains the call to `materialize_runtime_plugin_skill_aliases()`, uses a dereferencing directory copy (`cp -aL "$resolved" "$child"`) to materialize resolved skill directories, and invokes the materialization function on a target directory (`materialize_runtime_plugin_skill_aliases "$target_dir"`).
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("materialize_runtime_plugin_skill_aliases()", content)
-        self.assertIn('cp -a "$resolved" "$child"', content)
+        self.assertIn('cp -aL "$resolved" "$child"', content)
         self.assertIn('materialize_runtime_plugin_skill_aliases "$target_dir"', content)
 
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
