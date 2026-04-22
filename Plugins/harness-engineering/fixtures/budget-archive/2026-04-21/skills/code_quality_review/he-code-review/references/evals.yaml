@@ -10,12 +10,17 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Use $he-code-review on PR #482 and tell me whether it is ready to merge."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(pr-branch-review|P1|merge recommendation|next action)"
-
   - id: broad-pr-readiness
     name: broad pr readiness review
     category: happy
@@ -23,12 +28,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Before we merge this branch, I want the broad review: blockers, operational concerns, and whether browser verification should happen next."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(blockers|operational|test-browser|recommendation)"
-
   - id: report-only-override
     name: report-only override
     category: edge
@@ -36,12 +46,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Review the current branch in mode:report-only against base:origin/main and tell me if anything still blocks merge."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(report-only|base:origin/main|blockers|merge)"
-
   - id: headless-plan-context
     name: headless with plan context
     category: edge
@@ -75,12 +90,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Please review Docs/plans/2026-03-23-001-feat-example-plan.md and tell me if it is ready for the next workflow stage."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(artifact-review|readiness recommendation|next stage)"
-
   - id: protected-artifacts
     name: protected artifact filtering
     category: edge

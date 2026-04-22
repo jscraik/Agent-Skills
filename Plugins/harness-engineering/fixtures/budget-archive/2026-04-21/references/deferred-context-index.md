@@ -11,6 +11,8 @@ Use this file when you need detailed stage doctrine, extended examples, legacy/a
 - Canonical subagent role policy remains in:
   - `references/routing-map.json`
   - `references/subagent-routing.md`
+- Router role-resolution policy for `he-router` requires checking `~/.codex/agents/manifest.json` and preferring `he-*` mapped roles when available in the stage map.
+- The `he-router` execution contract now treats `he-*` stage-map role entries as first priority, with manifest lookups used to resolve concrete reviewer names only after stage-map preference.
 
 ## Stage Archive Paths
 

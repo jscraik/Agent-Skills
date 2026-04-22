@@ -16,13 +16,14 @@ if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject
-from skill_discovery import discover_skill_entries, get_policy_identity
-from selection_policy import PLUGIN_HIDDEN_LANE_SKILL_NAMES, REPO_SCAN_ROOTS
+from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index
+from selection_policy import REPO_SCAN_ROOTS
 from ask.catalog_parity import compute_catalog_parity
 from ask.selection_contract import (
     EligibleCandidate,
     build_decision_payload,
     build_goal_decision,
+    candidate_id,
     canonical_sort_key,
 )
 
@@ -100,9 +101,6 @@ class _RouterSkill:
     name: str
     description: str
     skill_path: str
-
-
-CODERABBIT_HIDDEN_LANE_SKILLS = {"code-review", "autofix"}
 
 
 STARTER_ARCHETYPES = {
@@ -243,27 +241,57 @@ def _starter_entries(entries: list, archetype: str, limit: int) -> list:
     return selected
 
 
-def _is_hidden_coderabbit_lane(entry) -> bool:
+def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list[str]:
     """
-    Determine whether a discovered skill entry should be treated as a hidden CodeRabbit "lane" skill.
-    
-    Checks that the entry's name is listed in CODERABBIT_HIDDEN_LANE_SKILLS and that the entry has a Path-like
-    `source_dir` whose path components include "plugins", "coderabbit" and "skills".
-    
-    Parameters:
-        entry: An object representing a discovered skill entry; expected to expose `name` and `source_dir` attributes.
-    
-    Returns:
-        `true` if the entry matches the hidden CodeRabbit lane criteria, `false` otherwise.
-    """
-    if entry.name not in CODERABBIT_HIDDEN_LANE_SKILLS:
-        return False
-    source_dir = getattr(entry, "source_dir", None)
-    if not isinstance(source_dir, Path):
-        return False
-    parts_lower = {part.lower() for part in source_dir.parts}
-    return "plugins" in parts_lower and "coderabbit" in parts_lower and "skills" in parts_lower
+    Regenerate root catalog projections from the default catalog surface.
 
+    Parameters:
+        repo_root (Path): Repository root containing `README.md` and `SKILL.md`.
+        dry_run (bool): When `True`, do not write files and only describe planned changes.
+
+    Returns:
+        list[str]: Human-readable log lines describing projection updates.
+    """
+    entries = [
+        entry
+        for entry in discover_catalog_entries()
+        if entry.source_dir.is_relative_to(repo_root)
+        and ".agents" not in entry.source_dir.relative_to(repo_root).parts
+    ]
+    catalog_count = len(entries)
+    logs: list[str] = []
+
+    skill_index_path = repo_root / "SKILL.md"
+    rendered_index = render_index(entries, source="catalog", visibility="default") + "\n"
+    if dry_run:
+        logs.append(f"Would refresh catalog index: {skill_index_path}")
+    else:
+        skill_index_path.write_text(rendered_index, encoding="utf-8")
+        logs.append(f"Refreshed catalog index: {skill_index_path}")
+
+    readme_path = repo_root / "README.md"
+    if readme_path.exists():
+        readme_content = readme_path.read_text(encoding="utf-8")
+        updated_readme = re.sub(
+            r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
+            f"A governed repository of **{catalog_count} skills** for AI coding agents",
+            readme_content,
+            count=1,
+        )
+        updated_readme = re.sub(
+            r"currently expects \*\*\d+\*\* skills",
+            f"currently expects **{catalog_count}** skills",
+            updated_readme,
+            count=1,
+        )
+        if dry_run:
+            if updated_readme != readme_content:
+                logs.append(f"Would refresh README skill count: {readme_path}")
+        elif updated_readme != readme_content:
+            readme_path.write_text(updated_readme, encoding="utf-8")
+            logs.append(f"Refreshed README skill count: {readme_path}")
+
+    return logs
 
 def list_skills(
     repo_root: Path,
@@ -275,19 +303,19 @@ def list_skills(
     advanced: bool = False,
 ) -> CallResult:
     """
-    List skills in the repository, optionally filtering by category or returning a deterministic starter subset.
+    List discovered catalog skills within the repository, optionally filtered by category or reduced to a deterministic starter subset.
     
     Parameters:
-    	repo_root (Path): Repository root to discover skills from; entries outside this root are excluded.
-    	category (Optional[str]): Case-insensitive substring to filter skills by their category; omit to include all.
-    	starter (bool): If true, return a deterministic subset of skills ordered by `archetype` rather than the full set.
-    	archetype (str): Archetype key used to choose starter skills; unknown keys fall back to `"general"`.
+    	repo_root (Path): Repository root used to filter discovered catalog entries; entries outside this root are excluded.
+    	category (Optional[str]): Case-insensitive substring applied to each entry's category; omit to include all categories.
+    	starter (bool): When true, return a deterministic subset selected by `archetype` and limited by `limit`.
+    	archetype (str): Archetype key used to pick starter skills; unknown keys fall back to "general".
     	limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-    	advanced (bool): If false, include installed plugin skills but omit hidden lane skills from the default listing; if true, include hidden lane skills too.
+    	advanced (bool): Include advanced/hidden-lane catalog entries when true; otherwise use the default listing.
     
     Returns:
     	CallResult: Result with `status == "success"` and `data` containing:
-    		- "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, `description`
+    		- "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, and `description`
     		- "policy_identity": current policy identity string
     		- "advanced_mode": boolean reflecting the `advanced` parameter
     		- When `starter` is true, also includes:
@@ -296,21 +324,15 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
-    # Use advanced discovery here so installed plugin skills are surfaced by default.
-    # The default list remains human-friendly by filtering hidden lanes below.
-    entries = _canonical_entries(
-        repo_root,
-        source="auto",
-        visibility="advanced",
-    )
+    entries = [
+        entry
+        for entry in discover_catalog_entries(advanced=advanced)
+        if entry.source_dir.is_relative_to(repo_root)
+    ]
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
     for entry in entries:
-        if not advanced and _is_hidden_coderabbit_lane(entry):
-            continue
-        if not advanced and entry.name in PLUGIN_HIDDEN_LANE_SKILL_NAMES:
-            continue
         if category and category.lower() not in entry.category.lower():
             continue
         skills_data.append({
@@ -854,21 +876,46 @@ def route_skills(
         )
         return result
 
-    eligible_candidates: list[EligibleCandidate] = []
-    for entry in _canonical_entries(repo_root, source="auto", visibility="advanced"):
+    default_candidates: list[EligibleCandidate] = []
+    default_candidate_ids: set[str] = set()
+    for entry in discover_catalog_entries():
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
         rel_path = entry.source_dir.relative_to(repo_root).as_posix()
-        eligible_candidates.append(
-            EligibleCandidate(
-                name=entry.name,
-                path=rel_path,
-                description=entry.description,
-                scope_rank=_scope_rank_for_path(rel_path),
-            )
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(rel_path),
         )
+        default_candidates.append(candidate)
+        default_candidate_ids.add(candidate_id(candidate))
 
-    ordered_candidates = sorted(eligible_candidates, key=canonical_sort_key)
+    advanced_only_candidates: list[EligibleCandidate] = []
+    for entry in discover_catalog_entries(advanced=True):
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(rel_path),
+        )
+        if candidate_id(candidate) in default_candidate_ids:
+            continue
+        advanced_only_candidates.append(candidate)
+
+    ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
     bounded_limit = max(1, int(considered_limit))
-    considered_candidates = ordered_candidates[:bounded_limit]
+    considered_candidates = ordered_default_candidates[:bounded_limit]
+    considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in considered_candidate_ids:
+            continue
+        considered_candidates.append(candidate)
+        considered_candidate_ids.add(cid)
     router_skills = [
         _RouterSkill(name=item.name, description=item.description, skill_path=item.path)
         for item in considered_candidates
@@ -889,15 +936,15 @@ def route_skills(
     catalog_parity = compute_catalog_parity(
         repo_root,
         strict=False,
-        route_considered_total=len(ordered_candidates),
+        route_considered_total=len(default_candidates),
     )
 
     decision = build_decision_payload(
         request=query,
         policy_identity=get_policy_identity(),
-        considered_limit=bounded_limit,
+        considered_limit=len(considered_candidates),
         top_k=max(1, int(top_k)),
-        eligible_candidates=ordered_candidates,
+        eligible_candidates=considered_candidates,
         ranked_candidates=ranked_payload,
         uncertainty_reasons=list(uncertainty_reasons),
         catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
@@ -997,17 +1044,17 @@ def goal_skills(
 
 def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
     """
-    Create or update a symbolic link at `target` that points to `source`.
+    Create or update a filesystem symbolic link at `target` that points to `source`.
     
-    Ensures `target.parent` exists. If `target` already exists and is a directory (and not a symlink) it is removed; otherwise the existing file or symlink is unlinked before creating the new link. When `dry_run` is True no filesystem mutations are performed.
+    Ensures `target.parent` exists before creating the link. When `dry_run` is True no filesystem changes are made; otherwise the function will replace any existing file, symlink, or directory at `target` with a symlink pointing to `source`.
     
     Parameters:
-        source (Path): Path the new symlink should point to.
-        target (Path): Path at which to create or update the symlink.
-        dry_run (bool): If True, do not modify the filesystem; only simulate the action.
+    	source (Path): Destination path that the symlink should reference.
+    	target (Path): Filesystem path where the symlink will be created or updated.
+    	dry_run (bool): If True, do not perform filesystem mutations; only simulate the action.
     
     Returns:
-        str: Human-readable action summary, e.g. "Created symlink: <target> -> <source>" or "Updated symlink: <target> -> <source>".
+    	action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>" or "Updated symlink: <target> -> <source>".
     """
     action = "Created" if not target.exists() else "Updated"
     if not dry_run:
@@ -1020,8 +1067,46 @@ def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
         target.symlink_to(source)
     return f"{action} symlink: {target} -> {source}"
 
+def _prune_first_level_symlinks(target_dir: Path, keep_names: set[str], dry_run: bool = False) -> list[str]:
+    """
+    Remove stale first-level symlinks in target_dir while preserving regular files, directories, hidden names, and any names listed in keep_names.
+    
+    Parameters:
+        target_dir (Path): Directory whose immediate entries will be inspected.
+        keep_names (set[str]): Entry names to skip (preserve) even if they are symlinks.
+        dry_run (bool): If true, do not modify the filesystem; only report planned removals.
+    
+    Returns:
+        list[str]: Log lines describing each removed (or planned-to-remove when dry_run) symlink in the form "Removed stale symlink: <path> -> <target>".
+    """
+    logs: list[str] = []
+    if not target_dir.exists():
+        return logs
+    for item in sorted(target_dir.iterdir()):
+        # Preserve hidden control links (for example ".system") and managed links.
+        if not item.is_symlink() or item.name in keep_names or item.name.startswith("."):
+            continue
+        logs.append(f"Removed stale symlink: {item} -> {os.readlink(item)}")
+        if not dry_run:
+            item.unlink()
+    return logs
+
 def _find_symlink_entries(source: Path) -> list[Path]:
-    """Return symlink entries under source (including source itself)."""
+    """
+    Find symlinked filesystem entries at or below the given source path.
+    
+    If `source` is a symlink, returns a list containing only `source`. If `source`
+    does not exist or is not a directory, returns an empty list. Otherwise walks
+    the directory tree (without following symlinks) and returns any symlink paths
+    found. Top-level traversal skips the `.git`, `node_modules`, and `__pycache__`
+    subdirectories.
+    
+    Parameters:
+        source (Path): Directory or path to inspect for symlink entries.
+    
+    Returns:
+        list[Path]: A list of Path objects pointing to symlink entries; may be empty.
+    """
     symlinks: list[Path] = []
     if source.is_symlink():
         symlinks.append(source)
@@ -1038,7 +1123,19 @@ def _find_symlink_entries(source: Path) -> list[Path]:
     return symlinks
 
 def _sync_dir_copy(source: Path, target: Path, dry_run: bool = False) -> str:
-    """Sync directory via copy (rsync-like)."""
+    """
+    Copy-sync a directory tree into a target directory while disallowing any symlinks in the source.
+    
+    Skips top-level entries named ".git", "node_modules", and "__pycache__". If any symlink is present anywhere under the source, raises ValueError. When not a dry run, ensures the target directory exists, replaces existing directories at the destination with fresh copies, and copies files preserving file metadata.
+    
+    Parameters:
+        source (Path): Source directory to copy from. Must not contain symlinks.
+        target (Path): Destination directory to copy into; will be created if missing.
+        dry_run (bool): If True, perform no filesystem changes and only simulate the action.
+    
+    Returns:
+        str: A human-readable message describing the completed sync and the target path.
+    """
     symlink_entries = _find_symlink_entries(source)
     if symlink_entries:
         rel = symlink_entries[0]
@@ -1062,14 +1159,127 @@ def _sync_dir_copy(source: Path, target: Path, dry_run: bool = False) -> str:
                 shutil.copy2(item, dest, follow_symlinks=False)
     return f"Synced directory: {target} (copy)"
 
+
+def _refresh_antigravity_projection(repo_root: Path, dry_run: bool = False) -> list[str]:
+    """
+    Rebuilds the flat "skills-antigravity" projection from SKILL.md-containing directories under .agents/skills.
+    
+    When not in dry run mode, ensures the repo_root/skills-antigravity directory exists, copies each subdirectory of repo_root/.agents/skills that contains a SKILL.md into skills-antigravity (removing or replacing existing targets), and removes any stale entries in skills-antigravity that are no longer present in .agents/skills. Copy operations do not preserve symlinks (symlinks are not followed or reproduced).
+    
+    Parameters:
+        repo_root (Path): Repository root path containing .agents/skills and skills-antigravity.
+        dry_run (bool): If true, perform no filesystem writes and instead return planned actions as log messages.
+    
+    Returns:
+        list[str]: Ordered log messages describing actions taken or planned (e.g., refreshed entries, removed stale entries).
+    """
+    logs: list[str] = []
+    skills_dir = repo_root / ".agents" / "skills"
+    antigravity_dir = repo_root / "skills-antigravity"
+
+    keep_names: set[str] = set()
+    if not skills_dir.exists():
+        return logs
+
+    if not dry_run:
+        antigravity_dir.mkdir(parents=True, exist_ok=True)
+
+    for skill_entry in sorted(skills_dir.iterdir(), key=lambda path: path.name):
+        if not skill_entry.is_dir():
+            continue
+        if not (skill_entry / "SKILL.md").is_file():
+            continue
+
+        keep_names.add(skill_entry.name)
+        target_dir = antigravity_dir / skill_entry.name
+        if dry_run:
+            logs.append(f"Would refresh antigravity skill: {target_dir}")
+            continue
+
+        if target_dir.is_symlink() or target_dir.is_file():
+            target_dir.unlink()
+        elif target_dir.exists():
+            shutil.rmtree(target_dir)
+        shutil.copytree(skill_entry, target_dir, symlinks=False)
+        logs.append(f"Refreshed antigravity skill: {target_dir}")
+
+    if antigravity_dir.exists():
+        for existing in sorted(antigravity_dir.iterdir(), key=lambda path: path.name):
+            if existing.name in keep_names:
+                continue
+            if dry_run:
+                logs.append(f"Would remove stale antigravity entry: {existing}")
+                continue
+            if existing.is_dir() and not existing.is_symlink():
+                shutil.rmtree(existing)
+            else:
+                existing.unlink()
+            logs.append(f"Removed stale antigravity entry: {existing}")
+
+    return logs
+
+
+def _refresh_system_lane_link(
+    skills_dir: Path,
+    system_skills_dir: Path,
+    dry_run: bool = False,
+) -> list[str]:
+    """
+    Preserve or create the reserved `.system` symlink in the skills lane when a managed system store exists.
+    
+    Parameters:
+        skills_dir (Path): Path to the repository skills directory where `.system` should exist.
+        system_skills_dir (Path): Path to the managed system skills store; if not a directory, no action is taken.
+        dry_run (bool): If true, no filesystem changes are made; actions are returned as planned-log strings.
+    
+    Returns:
+        list[str]: Log lines describing the action taken (created/updated) or skipped; empty list if no managed system store is present.
+    """
+    if not system_skills_dir.is_dir():
+        return []
+
+    target_link = skills_dir / ".system"
+    if target_link.exists() and not target_link.is_symlink():
+        return [f"Skipped existing non-symlink system lane: {target_link}"]
+
+    return [_create_symlink(Path("../../skills-system"), target_link, dry_run)]
+
 def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False) -> CallResult:
+    """
+    Synchronizes derived skill views for either the repository workspace or the user environment.
+    
+    For scope="workspace" this prunes stale first-level symlinks under .agents/skills, recreates symlinks for repository-owned skills, preserves a .system bridge when present, rebuilds the skills-antigravity projection, and refreshes catalog projections (SKILL.md and README.md). For scope="user" this creates user-facing symlinks from the repo workspace and copies the antigravity projection into the user's Gemini location.
+    
+    Parameters:
+        repo_root (Path): Root path of the repository containing skills directories.
+        scope (str): Either "workspace" to sync repository-derived views or "user" to populate user-local locations.
+        dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
+    
+    Returns:
+        CallResult: Success result contains a `data` object with:
+          - plan: dict with lists for "writes", "deletes", and "symlinks" describing intended changes,
+          - logs: list of human-readable action logs,
+          - policy_identity: identity info from get_policy_identity().
+        On error, the result will have status "error" and one or more ErrorObject entries:
+          - ERR_INVALID_SCOPE when `scope` is not "workspace" or "user".
+          - ERR_DEPENDENCY when expected sources (e.g., skills-antigravity) are missing.
+          - ERR_VALIDATION when inputs contain disallowed symlinks or other validation failures (e.g., antigravity is a symlink or contains symlink entries).
+          - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
+    """
     result = CallResult()
     plan = {"writes": [], "deletes": [], "symlinks": []}
     logs = []
     skills_dir = repo_root / ".agents" / "skills"
+    system_skills_dir = repo_root / "skills-system"
     antigravity_skills_dir = repo_root / "skills-antigravity"
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
+        keep_names = {entry.name for entry in entries if entry.source_dir.is_relative_to(repo_root)}
+        if system_skills_dir.is_dir():
+            keep_names.add(".system")
+        for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
         for entry in entries:
             skill_name = entry.name
             target_link = skills_dir / skill_name
@@ -1079,6 +1289,16 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
             source_rel = os.path.join("../..", str(rel_to_root))
             plan["symlinks"].append({"from": str(target_link), "to": source_rel})
             logs.append(_create_symlink(Path(source_rel), target_link, dry_run))
+        system_lane_logs = _refresh_system_lane_link(skills_dir, system_skills_dir, dry_run)
+        if system_lane_logs:
+            plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
+            logs.extend(system_lane_logs)
+        antigravity_logs = _refresh_antigravity_projection(repo_root, dry_run)
+        plan["writes"].append(str(antigravity_skills_dir))
+        logs.extend(antigravity_logs)
+        projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
+        logs.extend(projection_logs)
     elif scope == "user":
         home = Path.home()
         # Guard: antigravity source directory must exist before any mutations
@@ -1111,7 +1331,7 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
                 fix_suggestion="Remove symlinks from skills-antigravity and rerun ask skills sync --scope user."
             ))
             return result
-        targets = [(skills_dir, repo_root / "skills"), (skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
+        targets = [(skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
         for src, dst in targets:
             plan["symlinks"].append({"from": str(dst), "to": str(src)})
             logs.append(_create_symlink(src, dst, dry_run))

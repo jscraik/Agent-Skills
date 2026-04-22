@@ -7,15 +7,10 @@
 - [Known constraints](#known-constraints)
 
 ## Source input
-This package incorporates and restructures upstream `ce:ideate` behavior while retaining local governance hardening.
-
-Pinned donor snapshot:
-- repo: `EveryInc/compound-engineering-plugin`
-- commit: `e1524287f73ea1ec9598aa63c05a31745ff503c7`
-- path: `plugins/compound-engineering/skills/ce-ideate/SKILL.md`
+This package preserves and restructures the archived ideation workflow while retaining local governance hardening.
 
 ## Preserved behaviors
-- `ce:ideate` explicitly precedes `ce:brainstorm`
+- `he-ideate` explicitly precedes `he-brainstorm`
 - stage boundary remains explicit:
   - ideate what is worth exploring
   - brainstorm what one chosen idea should mean
@@ -40,13 +35,14 @@ Pinned donor snapshot:
 - handoff remains `he-brainstorm` (not direct planning/implementation)
 
 ## Intentional modernizations
-- refreshed donor parity inputs to `e1524287...` while preserving local Harness Engineering stage boundaries and naming
+- preserved local Harness Engineering stage boundaries and naming while keeping the archived ideation workflow current
 - retained deferred-load behavior where post-merge workflow details live in a dedicated reference (`post-ideation-workflow.md`) loaded only after Phase 2 completes
 - kept `SKILL.md` route-critical and moved richer standards/philosophy/variation guidance into `Infrastructure/references/style-and-operating-guidance.md`
 - split workflow references into:
   - `ideation-workflow.md` for interaction + Phases 0-2
   - `post-ideation-workflow.md` for Phases 3-6
 - retained realistic trigger examples and strengthened deterministic wording for execution boundaries
+- aligned the active front door with explicit `fresh | resume` routing, issue-intent handling, repo-first grounding, and survivor-only handoff to `he-brainstorm`
 - preserved context depth by relocation (not deletion), consistent with progressive-disclosure governance
 
 ## Known constraints

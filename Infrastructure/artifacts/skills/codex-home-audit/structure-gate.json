@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:04Z",
-  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/codex-home-audit/SKILL.md",
-  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/codex-home-audit/SKILL.md",
+  "generated_at": "2026-04-21T23:20:52Z",
+  "skill": "Skills/agent-ops/codex-home-audit/SKILL.md",
+  "skill_path": "Skills/agent-ops/codex-home-audit/SKILL.md",
   "name": "codex-home-audit",
   "decision": "pass",
   "exit_code": 0,

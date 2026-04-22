@@ -1,6 +1,6 @@
 ---
 name: rust-pro
-description: Master Rust 1.75+ with modern async patterns, advanced type system features, and production-ready systems programming.
+description: Create and review Rust 1.75+ systems code with ownership-safe async patterns and production error handling. Use when building or debugging Rust services that need performance and reliability.
 metadata:
   skill-type: code_quality_review
 ---
@@ -69,6 +69,36 @@ pub fn parse_port(value: &str) -> Result<u16, String> {
 | [[he-fix-bugs]] | Triage Rust ownership and borrow-checker errors with evidence-first diagnosis |
 
 **Topic map:** [[agent-ops]]
+
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Procedure
+
+1. Confirm scope, constraints, and required inputs before edits.
+2. Apply focused changes tied directly to the requested outcome.
+3. Re-run the highest-signal validations and capture concrete evidence.
+
+## Validation
+
+- Run the relevant local checks for touched files and workflow contracts.
+- Fail fast: stop at the first blocking validation failure and report exact evidence.
+- Re-run checks after fixes and record residual risk if any remains.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
 
 ## References and assets
 

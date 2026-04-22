@@ -10,12 +10,17 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Please use $he-compound on this feature request and tell me the correct Harness Engineering stage to start with."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-compound"
       - type: regex
         value: "(?i)(full-lifecycle|current stage|completed stages|recommended next command)"
-
   - id: resume-existing-artifacts
     name: resume from existing artifacts
     category: happy
@@ -23,12 +28,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you look at the brainstorm doc and draft plan we already have, then resume from the earliest incomplete Harness Engineering stage?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-compound"
       - type: regex
         value: "(?i)(resume-from-stage|earliest incomplete|validated stages|artifact paths)"
-
   - id: direct-learning-capture
     name: direct solved problem capture
     category: happy

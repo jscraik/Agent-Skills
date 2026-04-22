@@ -12,7 +12,8 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).parent
+REPO_ROOT = SCRIPT_DIR.parents[5]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
@@ -20,6 +21,20 @@ import run_repo_skill_quality
 
 
 class RunRepoSkillQualityTests(unittest.TestCase):
+    def test_find_skill_dirs_keeps_live_allowlisted_skills_after_recategory_drift(self) -> None:
+        skills = {path.relative_to(REPO_ROOT).as_posix() for path in run_repo_skill_quality.find_skill_dirs(REPO_ROOT)}
+        expected = {
+            "Skills/agent-ops/bootstrap",
+            "Skills/agent-ops/fix-mise",
+            "Skills/agent-ops/gh-workflow",
+            "Skills/agent-ops/test-driven-development",
+            "Skills/content-publishing/beautiful-mermaid",
+            "Skills/content-publishing/slides",
+            "Skills/content-publishing/visual-explainer",
+        }
+
+        self.assertTrue(expected.issubset(skills), msg=f"missing inventory skills: {sorted(expected - skills)}")
+
     def test_merge_sarif_reports_combines_runs(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -109,12 +124,18 @@ description: Test skill
             ]
 
             stdout = io.StringIO()
-            with patch.object(run_repo_skill_quality, "find_skill_dirs", return_value=[skill_dir]):
-                with patch.object(run_repo_skill_quality, "choose_python", return_value=sys.executable):
-                    with patch.object(run_repo_skill_quality, "run_cmd", side_effect=fake_run_cmd):
-                        with patch.object(sys, "argv", argv):
-                            with redirect_stdout(stdout):
-                                exit_code = run_repo_skill_quality.main()
+            module_globals = run_repo_skill_quality.main.__globals__
+            with patch.dict(
+                module_globals,
+                {
+                    "find_skill_dirs": lambda _root: [skill_dir],
+                    "choose_python": lambda: sys.executable,
+                    "run_cmd": fake_run_cmd,
+                },
+            ):
+                with patch.object(sys, "argv", argv):
+                    with redirect_stdout(stdout):
+                        exit_code = run_repo_skill_quality.main()
 
             payload = json.loads(stdout.getvalue())
             self.assertEqual(exit_code, 0)

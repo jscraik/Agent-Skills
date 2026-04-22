@@ -13,7 +13,7 @@ This document records how `/Users/jamiecraik/dev/configs/codex/prompts/technical
 
 ## Source prompt and migration target
 - source:
-  - `https://github.com/EveryInc/compound-engineering-plugin/tree/0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c/Plugins/compound-engineering/skills/he-technical-review` (historical upstream provenance URL)
+  - historical upstream provenance is captured in local Harness Engineering migration notes
   - `/Users/jamiecraik/dev/configs/codex/prompts/technical_review.md`
 - migration target:
   - `/Users/jamiecraik/dev/Agent-Skills/product/Infrastructure/ops/he-technical-review/`

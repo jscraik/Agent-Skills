@@ -46,10 +46,50 @@ class SkillEntry:
 
 
 def get_policy_identity() -> str:
+    """
+    Retrieve the current selection policy identity.
+    
+    Returns:
+        The selection policy identity string.
+    """
     return policy_identity()
 
 
+def _is_hidden_coderabbit_lane(source_dir: Path, name: str) -> bool:
+    """
+    Determine whether a skill entry corresponds to a hidden CodeRabbit lane on the default catalog surface.
+    
+    Parameters:
+        source_dir (Path): Directory that owns the skill; must be under the repository root to be considered.
+        name (str): Skill name derived from the directory (e.g., "code-review" or "autofix").
+    
+    Returns:
+        bool: `True` if `name` is `"code-review"` or `"autofix"` and `source_dir` is located under a `plugins/.../coderabbit/.../skills` subtree, `False` otherwise.
+    """
+    if name not in {"code-review", "autofix"}:
+        return False
+    try:
+        rel_parts = [part.lower() for part in source_dir.relative_to(REPO_ROOT).parts]
+    except ValueError:
+        return False
+    if not rel_parts or rel_parts[0] != "plugins":
+        return False
+    try:
+        coderabbit_idx = rel_parts.index("coderabbit")
+    except ValueError:
+        return False
+    return "skills" in rel_parts[coderabbit_idx + 1 :]
+
+
 def _iter_flat_skill_dirs() -> List[Path]:
+    """
+    Discover flat skill directories under the repository's .agents/skills directory.
+    
+    Returns:
+        List[Path]: Immediate child directories of FLAT_SKILLS_DIR that contain a SKILL.md file.
+                    Entries whose names start with '.' are excluded. Returns an empty list
+                    if FLAT_SKILLS_DIR is not a directory.
+    """
     if not FLAT_SKILLS_DIR.is_dir():
         return []
 
@@ -145,26 +185,55 @@ def _iter_system_lane_skill_dirs() -> List[Path]:
 
 def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
     """
-    Determine whether the given skill directory is owned by a plugin (i.e. it resides under REPO_ROOT/Plugins/.../skills/...).
+    Check whether a skill directory resides inside a plugin-owned subtree under the repository.
+    
+    A directory is considered plugin-owned when, relative to REPO_ROOT, its first path element is "plugins" and any intermediate path segment (excluding the final path part) contains "skills" or "skills_index", case-insensitive.
     
     Parameters:
     	skill_dir (Path): Path to the skill directory to test.
     
     Returns:
-    	True if the directory is located inside a `plugins` subtree and contains a `skills` segment before the final path part, `False` otherwise.
+    	True if the directory is located inside a `plugins` subtree with a `skills` or `skills_index` segment before the final path part, False otherwise.
     """
+    def _is_plugin_owned(parts: tuple[str, ...]) -> bool:
+        """
+        Determine whether the given path parts refer to a plugin-owned subtree.
+        
+        Parameters:
+            parts (tuple[str, ...]): Path segments relative to the repository root (e.g., ("plugins", "SomePlugin", "skills", "foo")).
+        
+        Returns:
+            bool: `True` if the first segment is `"plugins"` and any intermediate segment (excluding the final segment) is `"skills"` or `"skills_index"`, `False` otherwise.
+        """
+        if not parts or parts[0].lower() != "plugins":
+            return False
+        subtree_parts = tuple(part.lower() for part in parts[1:-1])
+        return "skills" in subtree_parts or "skills_index" in subtree_parts
+
     try:
-        rel = skill_dir.resolve().relative_to(REPO_ROOT)
+        rel = skill_dir.relative_to(REPO_ROOT)
+        if _is_plugin_owned(rel.parts):
+            return True
+    except ValueError:
+        pass
+
+    try:
+        rel_resolved = skill_dir.resolve().relative_to(REPO_ROOT)
     except ValueError:
         return False
-
-    parts = rel.parts
-    if not parts or parts[0].lower() != "plugins":
-        return False
-    return "skills" in parts[1:-1]
+    return _is_plugin_owned(rel_resolved.parts)
 
 
 def _frontmatter_block(text: str) -> List[str]:
+    """
+    Extract the lines of a YAML-like frontmatter block from the start of a text.
+    
+    Parameters:
+        text (str): Full text to scan for a leading frontmatter block delimited by lines containing only `---`.
+    
+    Returns:
+        List[str]: The lines between the opening and closing `---` delimiters (without the delimiter lines and without trailing newlines), or an empty list if no valid frontmatter block is present.
+    """
     lines = text.splitlines()
     if len(lines) < 3 or lines[0].strip() != "---":
         return []
@@ -225,38 +294,77 @@ def _parse_frontmatter(skill_md: Path) -> Dict[str, str]:
 
 def _normalize_description(text: str) -> str:
     """
-    Normalises a skill description by collapsing consecutive whitespace to single spaces and trimming surrounding space; returns a fallback when empty.
+    Normalize a skill description by collapsing consecutive whitespace to single spaces and trimming surrounding space.
     
     Returns:
-        str: The cleaned description, or "Skill description pending." if the result is empty.
+        The cleaned description; "Skill description pending." if the input is empty or contains only whitespace.
     """
     normalized = re.sub(r"\s+", " ", text).strip()
     return normalized or "Skill description pending."
 
 
+def discover_catalog_entries(*, advanced: bool = False, source: str = "auto") -> List[SkillEntry]:
+    """
+    Compute the default user-visible catalog surface of skills.
+    
+    When `advanced` is False, exclude lane skills that are intentionally hidden from the default picker surface; when True, include those hidden lanes.
+    
+    Parameters:
+        advanced (bool): If True, return the full advanced surface including hidden lanes; if False, remove default-hidden lane skills.
+        source (str): Discovery source for baseline entries. `"auto"` preserves runtime-first behavior and `"repo"` forces repository-owned catalog discovery.
+    
+    Returns:
+        List[SkillEntry]: Sorted list of SkillEntry objects included in the requested catalog surface.
+    """
+    if source not in {"auto", "repo"}:
+        raise ValueError(f"Unsupported catalog source: {source}")
+    entries = discover_skill_entries(source=source, visibility="advanced")
+    if advanced:
+        return entries
+    return [
+        entry
+        for entry in entries
+        if not (
+            _is_plugin_owned_skill_dir(entry.source_dir)
+            and entry.name in PLUGIN_HIDDEN_LANE_SKILL_NAMES
+        )
+        and not (
+            _is_plugin_owned_skill_dir(entry.source_dir)
+            and _is_hidden_coderabbit_lane(entry.source_dir, entry.name)
+        )
+    ]
+
+
 def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
     """
-    Discover skill entries from the configured skill sources.
-
+    Discover skill entries from configured sources and apply visibility filtering.
+    
     Parameters:
-        source (str): Which repository surface to scan. One of:
-            - "auto": prefer flat skills if present, otherwise fall back to repository scan;
-            - "flat": scan only the flat skills directory (optionally augment with plugin lanes in advanced visibility);
-            - "repo": scan repository roots. Default "auto".
-        visibility (str): Visibility mode affecting which skills are included.
-            - "default": hide policy-marked hidden flat skills and hide certain plugin lane skills;
-            - "advanced": include plugin lane skills that are otherwise hidden. Default "default".
-
+        source (str): Which repository surface to scan. One of "auto", "flat", "repo", or "catalog".
+            - "auto": prefer flat skills if present, otherwise fall back to repository scan.
+            - "flat": scan the flat skills directory (augments with plugin lanes in advanced visibility).
+            - "repo": scan configured repository roots (includes plugins and system lane).
+            - "catalog": compute the default user-visible catalog surface (delegates to discover_catalog_entries).
+        visibility (str): Visibility mode affecting included skills. One of "default" or "advanced".
+            - "default": hide policy-marked hidden skills and certain plugin lane skills.
+            - "advanced": include plugin lane skills that are otherwise hidden.
+    
     Returns:
-        List[SkillEntry]: A list of discovered SkillEntry objects, deduplicated by name and sorted by (category, name). Each entry's category is derived from the skill path relative to the repository root and the description is chosen from frontmatter (`metadata.short-description` or `description`) then normalised.
-
+        List[SkillEntry]: Discovered, deduplicated SkillEntry objects sorted by (category, name). Each entry's
+        category is derived from the skill path relative to the repository root and the description is taken
+        from frontmatter (`metadata.short-description` or `description`) then normalized.
+    
     Raises:
-        ValueError: If `visibility` is not "default" or "advanced", or if `source` is not one of "auto", "flat", or "repo".
+        ValueError: If `source` is not one of "auto", "flat", "repo", or "catalog", or if `visibility` is not
+        "default" or "advanced".
     """
-    if source not in {"auto", "flat", "repo"}:
+    if source not in {"auto", "flat", "repo", "catalog"}:
         raise ValueError(f"Unsupported source: {source}")
     if visibility not in {"default", "advanced"}:
         raise ValueError(f"Unsupported visibility mode: {visibility}")
+
+    if source == "catalog":
+        return discover_catalog_entries(advanced=visibility == "advanced")
 
     seen: set[str] = set()
     entries: List[SkillEntry] = []
@@ -353,9 +461,9 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
     
     Parameters:
         entries (List[SkillEntry]): Skill entries to include in the index.
-        source (str): Source label used in the Summary; typically "flat", "repo" or "auto".
+        source (str): Source label used in the Summary; typically "flat", "repo", "catalog", or "auto".
             These map to "`.agents/skills` flat runtime view", "repository skill scan"
-            and "auto-resolved catalog source" respectively.
+            "default user-visible catalog surface", and "auto-resolved catalog source" respectively.
         visibility (str): Visibility mode included in the Summary; expected values are
             "default" or "advanced" and influence which skills are presented elsewhere
             in the discovery process.
@@ -384,6 +492,7 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
     source_label = {
         "flat": "`.agents/skills` flat runtime view",
         "repo": "repository skill scan",
+        "catalog": "default user-visible catalog surface",
         "auto": "auto-resolved catalog source",
     }.get(source, source)
 
@@ -413,19 +522,24 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
 
 def parse_args() -> argparse.Namespace:
     """
-    Parse command-line arguments for the skill index utility.
+    Parse CLI options for the skill index utility.
     
     Returns:
-        argparse.Namespace: Parsed CLI options with attributes `count`, `write_index`, `source`, `visibility` and `policy_identity`.
+        argparse.Namespace: Parsed options with attributes:
+            count (bool): If true, print only the surfaced skill count.
+            write_index (Path | None): Path to write the rendered SKILL.md index, or None.
+            source (str): Catalog source selection; one of "auto", "flat", "repo", or "catalog".
+            visibility (str): Visibility mode; either "default" or "advanced".
+            policy_identity (bool): If true, print the canonical selection-policy identity.
     """
     parser = argparse.ArgumentParser(description="Render and count the surfaced skill catalog")
     parser.add_argument("--count", action="store_true", help="Print the current surfaced skill count")
     parser.add_argument("--write-index", type=Path, help="Write the generated root SKILL.md index")
     parser.add_argument(
         "--source",
-        choices=("auto", "flat", "repo"),
+        choices=("auto", "flat", "repo", "catalog"),
         default="auto",
-        help="Catalog source: flat runtime view, repo scan, or auto fallback (default).",
+        help="Catalog source: flat runtime view, repo scan, default catalog surface, or auto fallback (default).",
     )
     parser.add_argument(
         "--visibility",

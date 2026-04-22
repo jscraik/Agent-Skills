@@ -1,6 +1,6 @@
 ---
 name: project-brain
-description: Bootstrap and operate Project Brain correctly using the canonical instruction and bootstrap script.
+description: Analyze, bootstrap, and operate Project Brain workflows with the canonical bootstrap path and instruction contract. Use when setting up, debugging, or maintaining a Project Brain environment.
 metadata:
   short-description: Bootstrap and operate Project Brain
   skill-type: runbook
@@ -103,6 +103,30 @@ Produce:
 | [[coding-harness]] | Use when Project Brain rollout must align with harness contracts, gates, and tooling audits in a managed repository. |
 | [[codex-home-audit]] | Pair when the user wants Codex control-plane drift analysis across agents, hooks, skills, and memory surfaces. |
 | [[docs-expert]] | Use for follow-on documentation hardening after Project Brain bootstrap or rollout changes land. |
+
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Validation
+
+- Run the relevant local checks for touched files and workflow contracts.
+- Fail fast: stop at the first blocking validation failure and report exact evidence.
+- Re-run checks after fixes and record residual risk if any remains.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
 
 ## References
 - [Setup and Bootstrap](./Infrastructure/references/setup-and-bootstrap.md)

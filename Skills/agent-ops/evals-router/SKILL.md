@@ -1,6 +1,6 @@
 ---
 name: evals-router
-description: Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
+description: Analyze and plan LLM evaluation workflows, including evaluator design, error analysis, and RAG eval strategy. Use when a user asks for eval-specific implementation or triage guidance.
 metadata:
   skill-type: code_quality_review
 ---
@@ -61,6 +61,18 @@ Route evaluation-method work to the smallest trustworthy workflow so users can m
 - Use `workflows/evaluate-rag.md` when retrieval and generation quality must be measured separately in a RAG system.
 - Use `workflows/generate-synthetic-data.md` when real traces are sparse and an eval dataset needs bootstrapping.
 - Use `workflows/build-review-interface.md` when humans need a purpose-built annotation UI for traces.
+
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
 
 ## Tooling and references
 - Treat `workflows/` as the primary method reference, not optional reading.

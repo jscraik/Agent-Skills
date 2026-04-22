@@ -1,0 +1,23 @@
+schema_version: "1.0"
+skill: "yaml"
+type: runbook
+purpose: >
+  Define the expected execution contract for yaml so routing, outputs,
+  and validation behavior remain consistent and testable.
+triggers:
+  - User requests work that matches this skill's domain and workflow.
+  - The task needs this skill's specific implementation or review contract.
+inputs:
+  - clear user goal and scope
+  - relevant repository context or target files
+  - constraints, risks, and validation expectations
+outputs:
+  - concrete guidance or edits aligned to the skill scope
+  - explicit validation results and blocker evidence
+  - residual risks or follow-up actions when applicable
+non_goals:
+  - unrelated architectural rewrites
+  - out-of-scope operations without explicit approval
+risks:
+  - missing context can lead to incorrect scope; mitigate with targeted clarification
+  - stale assumptions can cause drift; mitigate with current evidence and checks

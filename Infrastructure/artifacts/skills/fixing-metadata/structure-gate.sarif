@@ -9,46 +9,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
@@ -103,74 +63,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/fixing-metadata/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",

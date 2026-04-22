@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:04Z",
+  "generated_at": "2026-04-21T23:20:51Z",
   "skill": "Skills/agent-ops/claude-alias/SKILL.md",
   "skill_path": "Skills/agent-ops/claude-alias/SKILL.md",
   "name": "claude-alias",

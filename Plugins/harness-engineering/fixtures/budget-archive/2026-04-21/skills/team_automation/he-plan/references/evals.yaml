@@ -10,12 +10,17 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Use $he-plan to turn this approved notifications spec into an implementation plan with phases, tests, and rollout guidance."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(P0|AC1|rollout|Execution Ledger|plan mode)"
-
   - id: spec-to-main-plan
     name: spec to main implementation plan
     category: happy
@@ -23,12 +28,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you turn this approved spec into an execution-ready implementation plan before we start coding?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(implementation phases|traceability|acceptance)"
-
   - id: bugfix-plan-request
     name: bugfix plan request
     category: happy
@@ -36,12 +46,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Please plan this production bug fix from the bug report and give me the safest execution order."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(type:|fix|dependencies|validation)"
-
   - id: brainstorm-none-allows-plan
     name: brainstorm says no spec needed
     category: happy
@@ -49,12 +64,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "I have a brainstorm doc where spec_required is none. Can you write the implementation plan now?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(Docs/plans/|standard-plan|ui-enhanced-plan)"
-
   - id: brainstorm-lite-blocks-plan
     name: brainstorm says lite spec required
     category: edge
@@ -75,12 +95,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you make me a UI implementation plan from this UI spec and parent spec, including build order and accessibility validation?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(dedicated-ui-plan|docs/ui-plans/|UP0|UAC1|VAC)"
-
   - id: ui-required-parent-spec
     name: parent spec with ui required
     category: happy
@@ -88,12 +113,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "This spec has ui_required true. Please write the main delivery plan and tell me whether we also need a companion UI plan."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(ui-enhanced-plan|companion UI plan|Prototype Pack|prototype-first)"
-
   - id: legacy-ui-spec-path
     name: legacy ui spec path compatibility
     category: edge

@@ -1,8 +1,10 @@
 import subprocess
 import re
 import os
+import json
+import shutil
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from ask.envelope import CallResult, ErrorObject
 from ask.plugin_state import collect_plugin_state
@@ -25,14 +27,15 @@ _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
 _PLUGIN_BUILDER_SCRIPT_CANDIDATES = (
     "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
 )
+_LOCAL_PLUGIN_ROOTS = ("Plugins", "plugins", ".agents/plugins")
 
 
 def _to_absolute_path(path: Path) -> Path:
     """
-    Convert a path to an absolute Path, expanding '~' while preserving symlinks.
+    Return an absolute Path with '~' expanded while preserving symlinks.
     
     Returns:
-        Absolute Path with the user-home expanded; symbolic links are not resolved.
+        Path: Absolute path with the user home expanded; symbolic links are not resolved.
     """
     return Path(path.expanduser()).absolute()
 
@@ -130,18 +133,270 @@ def _resolve_script_path_or_runtime_error(
 
 def _normalize_plugin_name(raw_name: str) -> str:
     """
-    Normalise a raw plugin name to a filesystem- and URL-safe kebab-case identifier.
+    Normalize a raw plugin name into a filesystem- and URL-safe kebab-case identifier.
     
     Parameters:
-        raw_name (str): Original plugin name provided by the user.
+        raw_name (str): The original plugin name.
     
     Returns:
-        normalized_name (str): The input lowercased, with any sequence of non-alphanumeric characters replaced by a single hyphen, leading/trailing hyphens removed, and repeated hyphens collapsed into one.
+        str: The name lowercased with each sequence of non-alphanumeric characters replaced by a single hyphen, leading and trailing hyphens removed, and consecutive hyphens collapsed.
     """
     normalized = raw_name.strip().lower()
     normalized = _PLUGIN_NAME_SANITIZE_RE.sub("-", normalized).strip("-")
     normalized = re.sub(r"-{2,}", "-", normalized)
     return normalized
+
+
+def _load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]:
+    """
+    Load and filter the repository's Plugins/marketplace.json for local plugin entries.
+    
+    Reads Plugins/marketplace.json under repo_root, validates that its top-level "plugins" value is a list, and returns the manifest path plus a list of entries filtered to those whose source.type is "local" and whose name and path are strings.
+    
+    Parameters:
+        repo_root (Path): Repository root directory containing the Plugins/ directory.
+    
+    Returns:
+        tuple[Path, list[dict[str, Any]]]: A tuple where the first element is the absolute Path to Plugins/marketplace.json and the second is a list of objects each with keys "name" (str) and "path" (str) for local-source plugins.
+    
+    Raises:
+        FileNotFoundError: If Plugins/marketplace.json does not exist.
+        ValueError: If the manifest does not contain a top-level "plugins" list.
+    """
+    marketplace_path = repo_root / "Plugins" / "marketplace.json"
+    if not marketplace_path.is_file():
+        raise FileNotFoundError(f"Local marketplace manifest missing: {marketplace_path}")
+
+    payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
+    raw_plugins = payload.get("plugins", [])
+    if not isinstance(raw_plugins, list):
+        raise ValueError("Plugins/marketplace.json must contain a top-level 'plugins' list.")
+
+    entries: list[dict[str, Any]] = []
+    for item in raw_plugins:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        source = item.get("source", {})
+        if not isinstance(name, str) or not isinstance(source, dict):
+            continue
+        if source.get("source") != "local":
+            continue
+        path = source.get("path")
+        if not isinstance(path, str):
+            continue
+        entries.append({"name": name, "path": path})
+    return marketplace_path, entries
+
+
+def _copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
+    """
+    Replace the contents of target_dir with the first-level entries from source_dir.
+    
+    Ensures target_dir exists, removes any existing children in target_dir (files and symlinks are unlinked, directories are removed), then copies each immediate child of source_dir into target_dir. Symlinks are recreated pointing to the same target (preserving whether the link refers to a directory), directories are copied recursively while preserving symlinks inside them, and regular files are copied with metadata.
+    Parameters:
+        source_dir (Path): Directory whose immediate children will be copied into target_dir.
+        target_dir (Path): Destination directory whose existing contents will be replaced.
+    """
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for child in list(target_dir.iterdir()):
+        if child.is_symlink() or child.is_file():
+            child.unlink()
+        else:
+            shutil.rmtree(child)
+
+    for child in source_dir.iterdir():
+        destination = target_dir / child.name
+        if child.is_symlink():
+            destination.symlink_to(os.readlink(child), target_is_directory=child.is_dir())
+        elif child.is_dir():
+            shutil.copytree(child, destination, symlinks=True)
+        else:
+            shutil.copy2(child, destination)
+
+
+def _materialize_first_level_skill_aliases(plugin_root: Path) -> None:
+    """
+    Replace first-level symlinked directories under `plugin_root/skills` with real directory copies.
+    
+    Scans the immediate children of `plugin_root/skills` and, for each entry that is a symlink whose resolved target is a directory, removes the symlink and copies the target directory into its place (preserving symlinks inside the copied tree). Entries whose names start with `_` or are in the internal hidden set are skipped. No action is taken if `plugin_root/skills` does not exist.
+    """
+    skills_root = plugin_root / "skills"
+    if not skills_root.is_dir():
+        return
+
+    hidden_entries = {
+        "agents",
+        "assets",
+        "examples",
+        "fixtures",
+        "infrastructure_ops",
+        "references",
+        "rules",
+        "scaffolding_templates",
+        "scripts",
+        "shared",
+        "team_automation",
+        "templates",
+        "code_quality_review",
+    }
+    for child in skills_root.iterdir():
+        if child.name.startswith("_") or child.name in hidden_entries or not child.is_symlink():
+            continue
+        resolved = child.resolve(strict=True)
+        if not resolved.is_dir():
+            continue
+        child.unlink()
+        shutil.copytree(resolved, child, symlinks=True)
+
+
+def _sync_one_runtime_root(
+    *,
+    runtime_root: Path,
+    repo_root: Path,
+    marketplace_path: Path,
+    marketplace_entries: list[dict[str, Any]],
+    dry_run: bool,
+) -> dict[str, Any]:
+    """
+    Synchronizes a single runtime plugin root with the repository's local marketplace entries.
+    
+    Copies the repository-local plugins listed in `marketplace_entries` into `runtime_root`, removes top-level entries not present in the marketplace (excluding `marketplace.json` and `cache`), and writes the marketplace manifest to the runtime root. When `dry_run` is True no filesystem mutations are performed; a report of planned/copied/removed names is still returned.
+    
+    Parameters:
+        runtime_root (Path): Absolute path to the runtime profile directory to synchronize.
+        repo_root (Path): Repository root used to resolve marketplace entry paths.
+        marketplace_path (Path): Path to the source `marketplace.json` in the repository.
+        marketplace_entries (list[dict[str, Any]]): List of marketplace entries; each entry must contain `"name"` and `"path"` (repo-relative).
+        dry_run (bool): If True, perform a non-mutating dry run (no copies, removals, or manifest write).
+    
+    Returns:
+        dict[str, Any]: Report containing:
+            - "runtime_root": str path of the runtime root.
+            - "marketplace_target": str path where the manifest would be/was written.
+            - "planned_plugins": list of plugin names processed from the marketplace.
+            - "copied_plugins": list of plugin names copied (empty if dry_run).
+            - "removed_entries": list of top-level entry names removed (empty if dry_run).
+            - "dry_run": the `dry_run` input flag.
+    
+    Raises:
+        FileNotFoundError: If a marketplace entry's source directory does not exist under `repo_root`.
+    """
+    runtime_root.mkdir(parents=True, exist_ok=True)
+
+    planned_plugins: list[str] = []
+    copied_plugins: list[str] = []
+    removed_entries: list[str] = []
+    marketplace_target = runtime_root / "marketplace.json"
+
+    resolved_sources: list[tuple[str, Path]] = []
+    for entry in marketplace_entries:
+        plugin_name = entry["name"]
+        relative = entry["path"]
+        source_dir = repo_root / relative.removeprefix("./")
+        if not source_dir.is_dir():
+            raise FileNotFoundError(f"Local plugin source missing for '{plugin_name}': {source_dir}")
+        resolved_sources.append((plugin_name, source_dir))
+
+    desired_names = {entry["name"] for entry in marketplace_entries}
+
+    existing_entries = [child for child in runtime_root.iterdir() if child.name not in {"marketplace.json", "cache"}]
+    for child in existing_entries:
+        if child.name not in desired_names:
+            removed_entries.append(child.name)
+            if not dry_run:
+                if child.is_symlink() or child.is_file():
+                    child.unlink()
+                else:
+                    shutil.rmtree(child)
+
+    if not dry_run:
+        shutil.copy2(marketplace_path, marketplace_target)
+
+    for plugin_name, source_dir in resolved_sources:
+        planned_plugins.append(plugin_name)
+        target_dir = runtime_root / plugin_name
+        if not dry_run:
+            _copy_directory_contents(source_dir, target_dir)
+            _materialize_first_level_skill_aliases(target_dir)
+            copied_plugins.append(plugin_name)
+
+    return {
+        "runtime_root": str(runtime_root),
+        "marketplace_target": str(marketplace_target),
+        "planned_plugins": planned_plugins,
+        "copied_plugins": copied_plugins,
+        "removed_entries": removed_entries,
+        "dry_run": dry_run,
+    }
+
+
+def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> CallResult:
+    """
+    Syncs repository-local plugins into each Codex profile's runtime plugin roots by copying plugin directories and the repository marketplace manifest.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root containing the Plugins/ tree and Plugins/marketplace.json.
+        dry_run (bool): If True, performs a simulation without making filesystem changes.
+    
+    Returns:
+        CallResult: On success, contains status "success" and data with:
+            - message (str): Short success message.
+            - profile_homes (list[str]): Paths of Codex profile homes that were processed.
+            - plugin_names (list[str]): Names of local plugins considered for sync.
+            - runtime_reports (list[dict]): Per-runtime-root synchronization reports produced by the sync logic.
+            - dry_run (bool): Echoes the input dry_run flag.
+        On error, returns a CallResult with status "error" and an ErrorObject describing the problem (e.g., missing/invalid marketplace manifest or no Codex profile homes found).
+    """
+    result = CallResult()
+    try:
+        marketplace_path, entries = _load_local_marketplace(repo_root)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        return _runtime_error_result(
+            str(exc),
+            fix_suggestion="Ensure Plugins/marketplace.json exists and contains valid local plugin entries.",
+        )
+
+    if not entries:
+        return _validation_error_result(
+            "No local plugins were found in Plugins/marketplace.json.",
+            fix_suggestion="Add local plugin entries before syncing runtime installs.",
+        )
+
+    home = Path.home()
+    profile_homes = []
+    default_home = home / ".codex"
+    if default_home.is_dir() or default_home.exists():
+        profile_homes.append(default_home)
+    profile_homes.extend(sorted(path for path in home.glob(".codex-*") if path.is_dir()))
+
+    if not profile_homes:
+        return _validation_error_result(
+            "No Codex home directories were found under the current user home.",
+            fix_suggestion="Create ~/.codex first, then rerun the sync command.",
+        )
+
+    runtime_reports: list[dict[str, Any]] = []
+    for profile_home in profile_homes:
+        for relative_root in _LOCAL_PLUGIN_ROOTS:
+            runtime_root = profile_home / relative_root
+            runtime_reports.append(
+                _sync_one_runtime_root(
+                    runtime_root=runtime_root,
+                    repo_root=repo_root,
+                    marketplace_path=marketplace_path,
+                    marketplace_entries=entries,
+                    dry_run=dry_run,
+                )
+            )
+
+    result.status = "success"
+    result.data["message"] = "Synced local plugin runtime installs."
+    result.data["profile_homes"] = [str(path) for path in profile_homes]
+    result.data["plugin_names"] = [entry["name"] for entry in entries]
+    result.data["runtime_reports"] = runtime_reports
+    result.data["dry_run"] = dry_run
+    return result
 
 
 def _extract_plugin_root_from_output(
@@ -152,17 +407,16 @@ def _extract_plugin_root_from_output(
     fallback_parent: str = f"Plugins/{_DEFAULT_PLUGIN_CATEGORY}",
 ) -> Path:
     """
-    Determine the absolute plugin root path from a scaffold creator's stdout or fall back to a conventional plugins location.
-    
-    Scans each line of `stdout` for a scaffold summary that includes a created-path. If a created path is found, expands user home, resolves it relative to `repo_root` when necessary, and returns its absolute form. If no path is discovered in the output, returns `repo_root/<fallback_parent>/<name>` where `<name>` is the normalized `raw_name` when non-empty, otherwise the trimmed `raw_name`.
+    Derives the absolute plugin root path from scaffold creator output or computes a fallback under the repository.
     
     Parameters:
-        stdout (str): The captured stdout from the plugin creator script.
-        repo_root (Path): Repository root used to resolve relative paths.
-        raw_name (str): The original plugin name provided to the creator; used for fallback path construction.
+        stdout (str): Captured stdout from the plugin creator script; may contain a scaffold summary with the created path.
+        repo_root (Path): Repository root used to resolve relative created paths and to construct fallback locations.
+        raw_name (str): Original plugin name provided to the creator; used (after normalization) as the final path segment when falling back.
+        fallback_parent (str): Repository-relative parent under which to place the fallback plugin folder (default: "Plugins/third-party").
     
     Returns:
-        Path: Absolute path to the plugin root determined from output or the fallback location.
+        Path: Absolute path to the plugin root extracted from output, or the computed fallback path under `repo_root`.
     """
     for line in stdout.splitlines():
         match = _SCAFFOLD_SUMMARY_RE.search(line.strip())

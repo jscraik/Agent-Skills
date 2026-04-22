@@ -125,6 +125,23 @@ has_context_move_evidence() {
     if (( added > 0 )); then
       return 0
     fi
+
+    # Follow symlinked reference paths and count additions on the resolved
+    # in-repo path (many HE refs are tracked under fixture paths).
+    local abs_target resolved_abs resolved_rel
+    abs_target="$REPO_ROOT/$target"
+    if [[ -e "$abs_target" ]]; then
+      resolved_abs="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$abs_target")"
+      if [[ "$resolved_abs" == "$REPO_ROOT/"* ]]; then
+        resolved_rel="${resolved_abs#$REPO_ROOT/}"
+        if [[ "$resolved_rel" != "$target" ]]; then
+          read -r added deleted < <(numstat_added_deleted "$base_ref" "$resolved_rel")
+          if (( added > 0 )); then
+            return 0
+          fi
+        fi
+      fi
+    fi
   done
 
   return 1

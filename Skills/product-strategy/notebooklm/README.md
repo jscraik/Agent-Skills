@@ -4,7 +4,7 @@
 
 **Let [Claude Code](https://github.com/anthropics/claude-code) chat directly with NotebookLM for source-grounded answers based exclusively on your uploaded documents**
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-purple.svg)](https://www.anthropic.com/news/skills)
 [![Based on](https://img.shields.io/badge/Based%20on-NotebookLM%20MCP-green.svg)](https://github.com/PleasePrompto/notebooklm-mcp)
 [![GitHub](https://img.shields.io/github/stars/PleasePrompto/notebooklm-skill?style=social)](https://github.com/PleasePrompto/notebooklm-skill)
@@ -307,7 +307,7 @@ Note: The MCP server uses the same Patchright library but via TypeScript/npm eco
 
 ### Dependencies
 - **patchright==1.55.2**: Browser automation
-- **python-dotenv==1.0.0**: Environment configuration
+- **python-dotenv==1.2.2**: Environment configuration
 - Automatically installed in `.venv` on first use
 
 ### Data Storage

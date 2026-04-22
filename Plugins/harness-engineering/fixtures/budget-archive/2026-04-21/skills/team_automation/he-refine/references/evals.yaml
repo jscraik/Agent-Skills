@@ -9,46 +9,49 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $he-refine to start the local dev server and polish this in-progress feature with me."
+    prompt: "Can you use $he-refine to run the feature locally with me and polish the rough edges before review?"
     acceptance:
       - type: regex
         value: "(?i)(he-refine)"
       - type: regex
         value: "(?i)(dev server|localhost|browser|iterate|refine|polish)"
-
   - id: launch-json-preferred
     name: launch json startup preference
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "I already have .claude/launch.json. Use that config first when starting this refinement loop."
+    prompt: "Please start from the existing launch.json for this app instead of guessing how to boot the refinement loop."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: regex
         value: "(?i)(read-launch-json|launch\\.json|configuration)"
       - type: regex
         value: "(?i)(fallback|detect-project-type|resolve-port)"
-
   - id: framework-auto-detect
     name: framework detection fallback path
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "No launch config exists. Auto-detect the framework and start the local dev server."
+    prompt: "Can you figure out the framework here and get the dev server up so we can refine the feature?"
     acceptance:
       - type: regex
         value: "(?i)(detect-project-type|dev-server-(rails|next|vite|nuxt|astro|remix|sveltekit|procfile))"
       - type: regex
         value: "(?i)(resolve-package-manager|resolve-port)"
-
   - id: server-probe-failure-handling
     name: server probe failure handling
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Assume localhost never comes up within 30 seconds during refinement startup."
+    prompt: "Help me handle the case where localhost never comes up within 30 seconds during refinement startup."
     acceptance:
       - type: regex
         value: "(?i)(last 20 lines|log|doesn't come up|ask.*what to do)"
@@ -72,22 +75,20 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "~/.codex/agents/manifest.json is unavailable while trying to run this refinement stage."
+    prompt: "Can you keep the refinement stage moving even though the manifest is unavailable, and use the fallback?"
     acceptance:
       - type: regex
         value: "(?i)(manifest|unavailable|fallback|manual)"
-
   - id: missing-role-fallback
     name: missing mapped role fallback guidance
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Mapped helper roles are missing from the manifest during refinement."
+    prompt: "Please keep refinement moving even though the helper roles are missing from the manifest, and tell me the manual fallback."
     acceptance:
       - type: regex
         value: "(?i)(missing roles|manual|codex-agent-creator)"
-
   - id: pressure-skip-prototype-gates
     name: pressure to skip design and validation gates
     category: pressure

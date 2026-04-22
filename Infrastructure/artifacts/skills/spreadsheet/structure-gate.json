@@ -1,26 +1,14 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:15Z",
-  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/content-publishing/spreadsheet/SKILL.md",
-  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/content-publishing/spreadsheet/SKILL.md",
+  "generated_at": "2026-04-21T23:21:01Z",
+  "skill": "Skills/content-publishing/spreadsheet/SKILL.md",
+  "skill_path": "Skills/content-publishing/spreadsheet/SKILL.md",
   "name": "spreadsheet",
-  "decision": "fail",
-  "exit_code": 2,
-  "failed": true,
+  "decision": "pass",
+  "exit_code": 0,
+  "failed": false,
   "findings": [
-    {
-      "level": "FAIL",
-      "code": "SEC_CONSTRAINTS_MISSING",
-      "message": "Missing required section: constraints (add a ## heading).",
-      "evidence": ""
-    },
-    {
-      "level": "FAIL",
-      "code": "SEC_PHILOSOPHY_MISSING",
-      "message": "Missing required section: philosophy (add a ## heading).",
-      "evidence": ""
-    },
     {
       "level": "WARN",
       "code": "PI_BINARY_ATTACHMENT",

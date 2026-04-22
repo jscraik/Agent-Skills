@@ -13,6 +13,7 @@
   "keywords": [
     "plugin",
     "plugin-factory",
+    "plugin-factory-router",
     "plugin-router",
     "plugin-builder",
     "plugin-creator",
@@ -27,11 +28,11 @@
     "last_reviewed": "2026-04-08",
     "metadata_source": "plugin_manifest"
   },
-  "skills": "./skills_index/",
+  "skills": "./skills/",
   "interface": {
     "displayName": "Plugin Factory",
     "shortDescription": "Route, create, harden, and install Codex plugins",
-    "longDescription": "A Codex plugin package that bundles the plugin-authoring family: plugin-router, plugin-builder, plugin-creator, and plugin-installer.",
+    "longDescription": "A Codex plugin package that bundles the plugin-authoring family: plugin-factory-router, plugin-router, plugin-builder, plugin-creator, and plugin-installer.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [

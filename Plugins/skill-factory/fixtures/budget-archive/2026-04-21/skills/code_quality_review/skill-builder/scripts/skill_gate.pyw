@@ -763,7 +763,7 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     unresolved_or_external: List[str] = []
     for rel in traversal_refs:
         resolved = (doc.path.parent / rel).resolve()
-        if repo_root and resolved.exists() and resolved.is_relative_to(repo_root):
+        if repo_root and resolved.is_relative_to(repo_root):
             continue
         unresolved_or_external.append(rel)
 
@@ -1343,12 +1343,13 @@ def _utc_now_iso() -> str:
 
 def _build_json_payload(doc: SkillDoc, findings: Sequence[Finding], *, failed: bool) -> Dict[str, Any]:
     exit_code = 2 if failed else 0
+    skill_uri = _sarif_artifact_uri(doc.path)
     return {
         "schema_version": "1.1",
         "tool": "skill_gate",
         "generated_at": _utc_now_iso(),
-        "skill": str(doc.path),
-        "skill_path": str(doc.path),
+        "skill": skill_uri,
+        "skill_path": skill_uri,
         "name": doc.frontmatter.get("name"),
         "decision": "fail" if failed else "pass",
         "exit_code": exit_code,

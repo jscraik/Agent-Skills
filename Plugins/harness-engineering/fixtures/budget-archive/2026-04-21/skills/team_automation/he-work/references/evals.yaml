@@ -23,12 +23,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "I already have a plan in Docs/plans/2026-03-23-001-feat-example-plan.md. Please implement it and keep the markdown status aligned with what actually lands."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-work"
       - type: regex
         value: "(?i)(plan-led|phase|acceptance|drift)"
-
   - id: todo-led-execution
     name: todo-led execution
     category: edge
@@ -75,12 +80,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Please implement this migration-heavy cross-service raw spec directly. I do not want to spend time planning first."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-work"
       - type: regex
         value: "(?i)(route to he-plan|medium/high-risk|plan first|cannot safely)"
-
   - id: execution-note-posture
     name: execution note posture
     category: edge
@@ -114,12 +124,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Implement the approved plan, then run the default full review path before handoff unless this is truly just a tiny additive slice."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-work"
       - type: regex
         value: "(?i)(he-code-review mode:autofix|Tier 2|inline self-review|plan:)"
-
   - id: ui-missing-design-direction
     name: ui missing design direction
     category: edge

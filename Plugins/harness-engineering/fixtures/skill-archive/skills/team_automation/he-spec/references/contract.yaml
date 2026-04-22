@@ -1,13 +1,13 @@
 schema_version: 1
 
 purpose: >
-  Run the specification stage of the compound-engineering workflow so the user gets
+  Run the specification stage of the Harness Engineering workflow so the user gets
   an implementation-grade system spec or UI spec with explicit boundaries, stable
   acceptance IDs, validation, and handoff guidance before planning begins.
 
 triggers:
   - the user wants to turn a brainstorm, feature description, or existing spec into a specification
-  - the user wants the compound-engineering spec stage explicitly
+  - the user wants the he-spec stage explicitly
   - the user wants a dedicated UI spec or companion UI contract before planning
   - the user needs explicit behavior, lifecycle, failure, observability, or validation rules before planning
 

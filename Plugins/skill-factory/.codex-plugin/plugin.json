@@ -13,10 +13,9 @@
   "keywords": [
     "plugin",
     "skill-factory",
+    "skill-factory-router",
     "skill-creator",
     "skill-builder",
-    "skill-refactor",
-    "skillify",
     "skill-installer",
     "codex"
   ],
@@ -32,7 +31,7 @@
   "interface": {
     "displayName": "Skill Factory",
     "shortDescription": "Create and improve Codex skills",
-    "longDescription": "A Codex plugin package that bundles the skill-authoring family: skill-creator, skill-builder, skill-refactor, skillify, and skill-installer.",
+    "longDescription": "A Codex plugin package that bundles the skill-authoring family: skill-factory-router, skill-creator, skill-builder, and skill-installer.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [

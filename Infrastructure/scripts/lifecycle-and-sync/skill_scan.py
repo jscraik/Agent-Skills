@@ -10,7 +10,10 @@ from pathlib import Path
 from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-ROOTS = ("Skills", "skills-system", "plugins/harness-engineering", "plugins/plugin-factory", "plugins/skill-factory")
+# Canonical skill authoring lives in Skills/ and the plugin source trees.
+# `skills-system/` is a generated projection store for hidden/system runtime
+# skills and should not be treated as authored source by quality lints.
+ROOTS = ("Skills", "Plugins/harness-engineering", "Plugins/plugin-factory", "Plugins/skill-factory")
 ORDERED_TYPES = (
     "library_api_reference",
     "product_verification",

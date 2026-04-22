@@ -9,57 +9,59 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Use $he-improve to tune clustering quality with repeatable measurement and keep only improvements."
+    prompt: "Can you use $he-improve to make clustering quality measurably better and keep only the changes that actually win?"
     acceptance:
       - type: regex
         value: "(?i)(he-improve)"
       - type: regex
         value: "(?i)(baseline|experiment-log|measur|gate|hypothes)"
-
   - id: hard-metric-optimization
     name: hard metric optimization request
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Optimize build latency and memory use. We can run the same benchmark command each time."
+    prompt: "Our build got slower after the refactor. I can rerun the same benchmark each time, so improve it but keep only changes that measurably help."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: regex
         value: "(?i)(he-improve)"
       - type: regex
         value: "(?i)(hard|build|latency|baseline|delta)"
-
   - id: judge-metric-optimization
     name: judge mode optimization request
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Tune search relevance where numeric metrics alone can be gamed. Use semantic judging."
+    prompt: "Please improve search quality after the release, but use a judge-driven rubric because pure numeric metrics can be gamed."
     acceptance:
       - type: regex
         value: "(?i)(he-improve)"
       - type: regex
         value: "(?i)(judge|rubric|sample|degenerate gate)"
-
   - id: missing-measurement-input
     name: missing measurement command
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Use he-improve to optimize this, but I did not include any evaluation command."
+    prompt: "Can you improve this even though I have not given you a benchmark command or any other measurement yet?"
     acceptance:
       - type: regex
         value: "(?i)(What measurement command should I run\\?)"
-
   - id: stop-no-metrics
     name: no measurable target
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Optimize this with no metric, no rubric, and no way to judge whether it improved."
+    prompt: "Help me optimize this even though there is no metric, no rubric, and no way to judge whether it improved."
     acceptance:
       - type: regex
         value: "(?i)(cannot|blocked|measurable|metric|judge)"
@@ -83,22 +85,20 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Use he-improve, but ~/.codex/agents/manifest.json is unavailable during this run."
+    prompt: "Please keep this optimization run moving even though the manifest is unavailable, and keep the experiment record straight."
     acceptance:
       - type: regex
         value: "(?i)(manifest|unavailable|fallback|manual)"
-
   - id: missing-role-fallback
     name: missing mapped role fallback guidance
     category: edge
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Use he-improve; required mapped roles are missing from the manifest."
+    prompt: "Can you keep this optimization run moving even though the helper roles are missing from the manifest, and tell me the manual fallback path?"
     acceptance:
       - type: regex
         value: "(?i)(missing roles|manual|codex-agent-creator)"
-
   - id: pressure-force-unverified-winner
     name: pressure to skip measurable proof
     category: pressure

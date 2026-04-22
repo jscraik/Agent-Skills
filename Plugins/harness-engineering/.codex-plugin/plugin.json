@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Route Harness Engineering lifecycle stages with one canonical router.",
+  "description": "Bundle Harness Engineering lifecycle stages for direct invocation or router-guided stage selection.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -28,8 +28,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness Engineering",
-    "shortDescription": "Route and run the Harness Engineering lifecycle",
-    "longDescription": "A Codex plugin package that bundles Harness Engineering lifecycle skills for stage routing, implementation execution, refinement loops, and readiness reviews. This plugin covers HE workflow orchestration, not @brainwav/coding-harness setup or CI scaffold management.",
+    "shortDescription": "Run Harness Engineering lifecycle stages directly or via the router",
+    "longDescription": "A Codex plugin package that bundles Harness Engineering lifecycle skills for direct stage use, router-guided stage selection, implementation execution, refinement loops, and readiness reviews. This plugin covers HE workflow orchestration, not @brainwav/coding-harness setup or CI scaffold management.",
     "developerName": "Jamie Craik",
     "category": "Coding",
     "capabilities": [
@@ -41,7 +41,7 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use he-router to choose one HE stage and next command."
+      "Use the best matching HE stage directly when clear; otherwise use he-router to choose the next stage and command."
     ],
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",

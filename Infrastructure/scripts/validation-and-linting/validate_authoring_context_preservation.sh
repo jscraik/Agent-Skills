@@ -16,6 +16,26 @@ skills=(
 
 missing=0
 
+has_fixed_text() {
+  local needle="$1"
+  local file="$2"
+  if command -v rg >/dev/null 2>&1; then
+    rg -Fq "$needle" "$file"
+  else
+    grep -Fq "$needle" "$file"
+  fi
+}
+
+has_regex_text() {
+  local pattern="$1"
+  local file="$2"
+  if command -v rg >/dev/null 2>&1; then
+    rg -q "$pattern" "$file"
+  else
+    grep -Eq "$pattern" "$file"
+  fi
+}
+
 echo "[authoring-context] validating authoring context-preservation contract"
 for skill in "${skills[@]}"; do
   if [[ ! -f "$skill" ]]; then
@@ -24,12 +44,12 @@ for skill in "${skills[@]}"; do
     continue
   fi
 
-  if ! rg -Fq "$marker" "$skill"; then
+  if ! has_fixed_text "$marker" "$skill"; then
     echo "[authoring-context] ERROR: marker missing in $skill"
     missing=1
   fi
 
-  if ! rg -q 'references/' "$skill"; then
+  if ! has_regex_text 'references/' "$skill"; then
     echo "[authoring-context] ERROR: references signpost missing in $skill"
     missing=1
   fi

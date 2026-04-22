@@ -9,36 +9,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -73,58 +43,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "PI_BINARY_ATTACHMENT",
           "level": "warning",
@@ -135,7 +57,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
                 }
               }
             }
@@ -151,7 +73,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
                 }
               }
             }
@@ -167,7 +89,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
                 }
               }
             }
@@ -183,7 +105,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/frontend-ui/slides/SKILL.md"
+                  "uri": "Skills/content-publishing/slides/SKILL.md"
                 }
               }
             }

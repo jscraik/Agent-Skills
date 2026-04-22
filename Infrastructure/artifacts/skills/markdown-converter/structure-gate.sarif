@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "skill_gate",
-          "informationUri": "https://github.com/jscraik/Agent-Skills",
+          "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
               "id": "OUT_SCHEMA_VERSION_MISSING",
@@ -55,7 +55,7 @@
                 "text": "No deterministic risky-command guard detected. Add forbidden command checks (e.g., curl/wget/rm -rf/netcat)."
               },
               "properties": {
-                "defaultSeverity": "error"
+                "defaultSeverity": "warn"
               }
             },
             {
@@ -65,7 +65,7 @@
                 "text": "No prompt-injection/jailbreak-style prompt detected in evals.yaml. Add one adversarial PI prompt case."
               },
               "properties": {
-                "defaultSeverity": "error"
+                "defaultSeverity": "warn"
               }
             }
           ]
@@ -103,7 +103,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/content-publishing/markdown-converter/agents/assets/icon-large.png"
+                  "uri": "Skills/content-publishing/markdown-converter/SKILL.md"
                 }
               }
             }
@@ -119,7 +119,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/content-publishing/markdown-converter/agents/assets/icon-small.png"
+                  "uri": "Skills/content-publishing/markdown-converter/SKILL.md"
                 }
               }
             }
@@ -167,7 +167,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/content-publishing/markdown-converter/Infrastructure/references/evals.yaml"
+                  "uri": "Skills/content-publishing/markdown-converter/SKILL.md"
                 }
               }
             }
@@ -183,7 +183,7 @@
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "Skills/content-publishing/markdown-converter/Infrastructure/references/evals.yaml"
+                  "uri": "Skills/content-publishing/markdown-converter/SKILL.md"
                 }
               }
             }

@@ -1,25 +1,26 @@
 # Source Parity
 
-Read when: validating how `he-prune-branches` maps donor behavior while keeping Harness Engineering naming and routing conventions.
+Read when: validating that `he-prune-branches` preserves the current Harness Engineering cleanup workflow and branch-hygiene constraints.
 
-## Donor Source
-- Repository: `EveryInc/compound-engineering-plugin`
-- Commit: `9497a00d90bdedf6d1741aa4cf1287fb139ed990`
-- Path: `plugins/compound-engineering/skills/ce-clean-gone-branches`
+## Review Baseline
+- Active stage: `Plugins/harness-engineering/skills/team_automation/he-prune-branches/`
+- Canonical discovery helper: `scripts/clean-gone`
+- Routing contract: `../../../../../references/routing-map.json`
 
 ## Mapping Summary
-- Donor skill name `ce-clean-gone-branches` -> local stage name `he-prune-branches`.
-- Donor workflow preserved:
-  - discover with `scripts/clean-gone`,
-  - explicit yes/no confirmation on the full candidate set,
-  - worktree removal before branch deletion,
-  - per-branch outcome reporting.
-- Donor `scripts/clean-gone` helper preserved for deterministic gone-branch discovery.
+- `he-prune-branches` preserves the local cleanup flow:
+  - discover stale local branches with `scripts/clean-gone`,
+  - show the full candidate set before any deletion,
+  - require one explicit yes/no confirmation for the whole set,
+  - remove associated non-root worktrees before branch deletion,
+  - report branch-level outcomes and final totals.
+- The stage keeps deterministic gone-branch discovery through the local `scripts/clean-gone` helper.
 
 ## Harness Engineering Adaptations
-- Wording and lifecycle references use Harness Engineering naming consistently.
+- Lifecycle wording and routing remain aligned to Harness Engineering stages.
 - Stage-level routing and fallback are aligned to `../../../../../references/routing-map.json`.
-- Subagent fallback and missing-role guidance routes to `[[codex-agent-creator]]`.
+- Subagent fallback and missing-role guidance route to `[[codex-agent-creator]]`.
+- Validation explicitly protects the main repository worktree from accidental removal.
 
 ## Explicit Non-Goals In This Mapping
 - This stage does not replace lifecycle orchestration in `he-compound`.

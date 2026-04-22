@@ -20,6 +20,7 @@ outputs:
   - one exact next command
   - subagent policy (`always`, `conditional`, or `manual-only`)
   - mapped roles for the selected stage (baseline + conditional)
+  - stage-map role selection prefers `he-*` aliases before fallback reviewer-name resolution
   - available roles resolved from `~/.codex/agents/manifest.json` when present
   - missing mapped roles
   - fallback guidance when auto-spawn is unavailable

@@ -9,46 +9,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "FM_DESC_WHAT_WHEN",
-              "name": "FM_DESC_WHAT_WHEN",
-              "shortDescription": {
-                "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SAFE_REDACTION_REQUIRED",
-              "name": "SAFE_REDACTION_REQUIRED",
-              "shortDescription": {
-                "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_CONSTRAINTS_MISSING",
-              "name": "SEC_CONSTRAINTS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: constraints (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "OUT_SCHEMA_VERSION_MISSING",
               "name": "OUT_SCHEMA_VERSION_MISSING",
               "shortDescription": {
@@ -83,74 +43,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "FM_DESC_WHAT_WHEN",
-          "level": "error",
-          "message": {
-            "text": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts). | description: Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SAFE_REDACTION_REQUIRED",
-          "level": "error",
-          "message": {
-            "text": "Constraints/Safety MUST mention redaction of secrets/sensitive data by default."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_CONSTRAINTS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: constraints (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/evals-router/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "OUT_SCHEMA_VERSION_MISSING",
           "level": "warning",

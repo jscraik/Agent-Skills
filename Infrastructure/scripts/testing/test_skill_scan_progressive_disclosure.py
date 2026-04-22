@@ -190,9 +190,9 @@ class SkillScanProgressiveDisclosureTests(TestCase):
 
     def test_strict_mode_ignores_relocation_in_frontmatter(self) -> None:
         """
-        Verify that strict progressive-disclosure linting ignores relocation-style text in YAML frontmatter and only validates the body.
-
-        Creates a temporary plugin skill with a SKILL.md whose frontmatter contains relocation/signposting language but whose body omits relocation signposts, runs cmd_lint_progressive_disclosure("strict"), and asserts the command returns 1 because the linter should fail when relocation text appears only in frontmatter.
+        Verify strict progressive-disclosure linting ignores relocation-style text in YAML front matter and validates only the document body.
+        
+        Asserts that running cmd_lint_progressive_disclosure("strict") returns 1 when relocation or signposting language appears only in the SKILL.md YAML front matter and not in the body.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -236,6 +236,24 @@ Keep this concise.
                 rc = self.module.cmd_lint_progressive_disclosure("strict")
 
             self.assertEqual(rc, 1)
+
+    def test_iter_skill_files_skips_generated_skills_system_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            canonical_skill = root / "Skills" / "agent-ops" / "real-skill" / "SKILL.md"
+            generated_skill = root / "skills-system" / "generated-skill" / "SKILL.md"
+            canonical_skill.parent.mkdir(parents=True, exist_ok=True)
+            generated_skill.parent.mkdir(parents=True, exist_ok=True)
+            canonical_skill.write_text(_skill_with_required_headings("Real skill."), encoding="utf-8")
+            generated_skill.write_text(_skill_with_required_headings("Generated skill."), encoding="utf-8")
+
+            with (
+                mock.patch.object(self.module, "REPO_ROOT", root),
+            ):
+                discovered = [path.relative_to(root).as_posix() for path in self.module.iter_skill_files()]
+
+            self.assertNotIn("skills-system", self.module.ROOTS)
+            self.assertEqual(discovered, ["Skills/agent-ops/real-skill/SKILL.md"])
 
 
 if __name__ == "__main__":

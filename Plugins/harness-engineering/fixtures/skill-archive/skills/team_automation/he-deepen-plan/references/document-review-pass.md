@@ -2,7 +2,7 @@
 
 Read when: an existing implementation plan mostly needs refinement before execution rather than deeper sequencing or risk expansion.
 
-Imported from the upstream `ce-doc-review` skill in `EveryInc/compound-engineering-plugin` commit `d8436b9a3c5b5370e51ec168a251ccb45f0d826e`, adapted for `he-deepen-plan`.
+Imported from the upstream `ce-doc-review` skill snapshot commit `d8436b9a3c5b5370e51ec168a251ccb45f0d826e`, adapted for `he-deepen-plan` and tracked in local Harness Engineering migration notes.
 
 ## Purpose
 

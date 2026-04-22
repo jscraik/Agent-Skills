@@ -1,0 +1,25 @@
+schema_version: "1.0"
+skill: "rust-pro"
+type: runbook
+purpose: >
+  Provide expert Rust development guidance including idiomatic code review,
+  Cargo dependency management, lifetime/borrow-checker analysis, unsafe code
+  audits, and async runtime selection aligned with project constraints.
+triggers:
+  - User requests work that matches this skill's domain and workflow.
+  - The task needs this skill's specific implementation or review contract.
+inputs:
+  - Rust project structure (Cargo.toml, src/, target Rust edition)
+  - specific modules, functions, or dependencies requiring review/implementation
+  - performance, safety, or compatibility requirements
+outputs:
+  - idiomatic Rust code with proper lifetime annotations and error handling
+  - Cargo.toml dependency recommendations with version rationale
+  - clippy/rustfmt validation results and borrow-checker blocker evidence
+  - residual risks or follow-up actions when applicable
+non_goals:
+  - unrelated architectural rewrites
+  - out-of-scope operations without explicit approval
+risks:
+  - missing context can lead to incorrect scope; mitigate with targeted clarification
+  - stale assumptions can cause drift; mitigate with current evidence and checks

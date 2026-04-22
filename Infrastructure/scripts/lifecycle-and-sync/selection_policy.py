@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-18.v12"
+POLICY_VERSION = "2026-04-21.v13"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -40,10 +40,32 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skillgrade-setup",
 )
 
-# Plugin router skills promoted into default flat discovery.
-# Keep this empty by default: plugin-authorized skills should surface from
-# plugin scopes, not duplicated into the personal flat picker lane.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
+# Plugin-owned skills intentionally promoted into default flat discovery.
+# Harness Engineering is packaged as a stage bundle: its lifecycle stages are
+# meant to be directly invokable alongside the router, so the full HE public
+# surface is promoted here. Other plugins should still keep this narrow unless
+# there is a strong reason to expose public stage skills in the flat runtime
+# picker.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+    "he-code-review",
+    "he-brainstorm",
+    "he-compound",
+    "he-compound-refresh",
+    "he-deepen-plan",
+    "he-deepen-spec",
+    "he-fix-bugs",
+    "he-ideate",
+    "he-improve",
+    "he-plan",
+    "he-prune-branches",
+    "he-refine",
+    "he-reliability-review",
+    "he-router",
+    "he-spec",
+    "he-tdd",
+    "he-technical-review",
+    "he-work",
+)
 
 # Plugin lane skills hidden from default flat discovery.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()

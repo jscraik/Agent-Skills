@@ -16,7 +16,7 @@ This document maps the original plan-deepening prompts to `product/Infrastructur
 - `configs/codex/prompts/deepen-plan.md`
 - user-provided legacy `deepen-plan` prompt body with broad skill/agent discovery
 - user-provided `deepen-plan-beta` prompt body with selective, risk-weighted deepening
-- lightweight review doctrine imported from upstream `ce-doc-review` (`EveryInc/compound-engineering-plugin` commit `d8436b9a3c5b5370e51ec168a251ccb45f0d826e`: `https://github.com/EveryInc/compound-engineering-plugin/tree/d8436b9a3c5b5370e51ec168a251ccb45f0d826e/plugins/compound-engineering/skills/ce-doc-review`)
+- lightweight review doctrine imported from upstream `ce-doc-review` snapshot commit `d8436b9a3c5b5370e51ec168a251ccb45f0d826e`, now tracked in local Harness Engineering migration notes
 - migration target: `product/Infrastructure/ops/he-deepen-plan/`
 
 ## Parity mapping
@@ -48,7 +48,7 @@ This document maps the original plan-deepening prompts to `product/Infrastructur
 - The beta prompt's section scoring, selective fan-out, and artifact-backed mode were kept as the safer default because they reduce context bloat without losing the ability to run a legacy-style broad pass when explicitly requested.
 - `document-review` / workflow slash-command references were translated into workflow-stage guidance and `he-work` handoff language so the skill remains usable while prompt surfaces are being deprecated.
 - `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` were added to meet current skill quality requirements and improve routing reliability.
-- The upstream `ce-doc-review` workflow was preserved as a lightweight pre-execution refinement pass for plan docs via `Infrastructure/references/document-review-pass.md`, rather than as a duplicate sibling skill.
+- The upstream `ce-doc-review` workflow was preserved as a lightweight pre-execution refinement pass for plan docs via `Infrastructure/references/document-review-pass.md`, and is now tracked via local Harness Engineering migration notes rather than an external plugin URL.
 
 ## No-loss checklist
 - Existing plans are still the required input.

@@ -353,6 +353,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             module.should_skip_skill_path(Path(".codex/.tmp/Plugins/.agents/skills/canonical-skill/SKILL.md"))
         )
         self.assertTrue(
+            module.should_skip_skill_path(Path(".agents/skills/.system/canonical-skill/SKILL.md"))
+        )
+        self.assertTrue(
             module.should_skip_skill_path(Path(".codex/skills/.system/canonical-skill/SKILL.md"))
         )
         self.assertFalse(module.should_skip_skill_path(Path(".codex/skills/custom-skill/SKILL.md")))
@@ -505,6 +508,23 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
+    def test_selection_policy_promotes_all_harness_engineering_public_skills_for_flat_visibility(self) -> None:
+        """
+        Ensure the selection policy exposes exactly the harness-engineering public skills (directories named with the `he-` prefix) as router-visible flat skills.
+        
+        Loads the selection_policy module and asserts its `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES` matches the sorted set of skill directory names under `Plugins/harness-engineering/skills/**/SKILL.md` whose parent directory name starts with `he-`.
+        """
+        selection_policy = load_selection_policy_module()
+        he_skill_names = sorted(
+            path.parent.name
+            for path in (REPO_ROOT / "Plugins" / "harness-engineering" / "skills").glob("**/SKILL.md")
+            if path.parent.name.startswith("he-")
+        )
+        self.assertEqual(
+            sorted(selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
+            he_skill_names,
+        )
+
     def test_skill_discovery_visibility_respects_router_allowlist(self) -> None:
         """
         Verify default visibility only includes allowlisted plugin router skills.
@@ -636,18 +656,88 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
     def test_sync_script_projects_profile_plugin_source_mirrors(self) -> None:
         """
-        Ensure profile-home sync keeps marketplace source paths resolvable.
-
-        Codex profile homes (for example ~/.codex-red) receive a copied
-        marketplace.json. This test enforces that sync_skills also mirrors
-        plugin source dirs into <profile>/Plugins/<name> so marketplace
-        source.path entries like ./Plugins/<name> remain valid.
+        Verify the sync script mirrors plugin source directories into profile plugin roots so marketplace source paths remain resolvable.
+        
+        Asserts that sync_skills.sh invokes sync_home_plugin_mirrors with both the profile plugins root and individual profile plugins paths, ensuring copied marketplace.json entries like ./Plugins/<name> continue to point to valid plugin locations.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn(
+            'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"',
+            content,
+        )
         self.assertIn(
             'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"',
             content,
         )
+
+    def test_sync_script_prunes_only_repo_managed_stale_home_plugin_entries(self) -> None:
+        """
+        Ensure removed local-marketplace entries do not linger in profile homes.
+
+        When vendored curated plugins are removed from the local marketplace,
+        stale `~/.codex/Plugins/<name>` installs should be removed so the
+        local runtime surface matches the declared marketplace set, but
+        unrelated home plugins must not be deleted as collateral damage. The
+        prune guard also needs a legacy fallback for repo-managed copies that
+        were created before the marker file existed.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('local repo_plugin_marker=".codex-repo-plugin-source"', content)
+        self.assertIn('keep_file="$state_dir/home-plugins.keep"', content)
+        self.assertIn("is_repo_managed_home_plugin_copy()", content)
+        self.assertIn('legacy_source_dir="$canonical_plugins_dir/$(basename "$existing_dir")"', content)
+        self.assertIn('cmp -s -- "$source_manifest" "$existing_manifest"', content)
+        self.assertIn('if ! is_repo_managed_home_plugin_copy "$existing_dir"; then', content)
+        self.assertIn('Removed stale home plugin entry', content)
+
+    def test_sync_script_repairs_repo_backed_home_plugin_root_symlinks(self) -> None:
+        """
+        Verify the sync script replaces repo-backed home plugin-root symlinks with real directories before mirroring profile plugin roots.
+        
+        Asserts the sync script contains the repair helper invocation `ensure_real_home_plugin_root()`, a replacement log message, and specific calls for profile plugin roots and subsequent `sync_home_plugin_mirrors` invocation.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("ensure_real_home_plugin_root()", content)
+        self.assertIn("Replaced repo-backed symlinked", content)
+        self.assertIn(
+            'ensure_real_home_plugin_root "$profile_plugins" "$plugins_dir" "profile plugin root"',
+            content,
+        )
+        self.assertIn(
+            'ensure_real_home_plugin_root "$profile_plugins_root" "$plugins_dir" "profile Plugins root"',
+            content,
+        )
+        self.assertIn(
+            'ensure_real_home_plugin_root "$profile_agents_plugins" "$plugins_dir" "profile .agents plugin root"',
+            content,
+        )
+        self.assertIn(
+            'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"',
+            content,
+        )
+
+    def test_sync_script_installs_home_plugins_as_copied_directories(self) -> None:
+        """
+        Checks that the sync script installs home plugins as copied directories rather than symlinks.
+        
+        Asserts the script invokes the copy-based installer invocation, writes a marker file containing the source real path into the target, and contains the log message `Installed home plugin copy`.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('sync_user_skills "$source_dir" "$target_dir" 0 copy', content)
+        self.assertIn('marker_file="$target_dir/$repo_plugin_marker"', content)
+        self.assertIn('printf \'%s\\n\' "$source_real" > "$marker_file"', content)
+        self.assertIn("Installed home plugin copy", content)
+
+    def test_sync_script_materializes_visible_runtime_skill_aliases(self) -> None:
+        """
+        Verify the sync script materializes runtime-visible plugin skill aliases as real directories.
+        
+        Asserts that the sync script contains the call to `materialize_runtime_plugin_skill_aliases()`, uses a dereferencing directory copy (`cp -aL "$resolved" "$child"`) to materialize resolved skill directories, and invokes the materialization function on a target directory (`materialize_runtime_plugin_skill_aliases "$target_dir"`).
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("materialize_runtime_plugin_skill_aliases()", content)
+        self.assertIn('cp -aL "$resolved" "$child"', content)
+        self.assertIn('materialize_runtime_plugin_skill_aliases "$target_dir"', content)
 
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
         """

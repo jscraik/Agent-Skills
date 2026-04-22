@@ -259,6 +259,35 @@ class TestAskPluginsState(unittest.TestCase):
         names = sorted(plugin["name"] for plugin in result.data["installed_state"]["plugins"])
         self.assertEqual(names, ["example-plugin", "nested-plugin"])
 
+    def test_list_plugins_state_handles_symlinked_plugins_outside_repo(self) -> None:
+        external_root = self.temp_dir / "external-plugin-root"
+        external_manifest = external_root / ".codex-plugin" / "plugin.json"
+        external_manifest.parent.mkdir(parents=True, exist_ok=True)
+        external_manifest.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "name": "external-plugin",
+                    "version": "0.2.0",
+                    "description": "External fixture",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        linked_plugin = self.repo_root / "plugins" / "external-plugin"
+        linked_plugin.parent.mkdir(parents=True, exist_ok=True)
+        linked_plugin.symlink_to(external_root, target_is_directory=True)
+
+        result = list_plugins_state(self.repo_root)
+        self.assertEqual(result.status, "success")
+        installed = {
+            plugin["name"]: plugin for plugin in result.data["installed_state"]["plugins"]
+        }
+        self.assertIn("external-plugin", installed)
+        self.assertEqual(installed["external-plugin"]["path"], external_root.resolve().as_posix())
+
 
 if __name__ == "__main__":
     unittest.main()

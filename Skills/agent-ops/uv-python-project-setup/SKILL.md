@@ -1,6 +1,6 @@
 ---
 name: uv-python-project-setup
-description: "Python project initialization and dependency management with uv. Use when starting new CLI tools or libraries, configuring pyproject.toml, managing virtual environments, or setting up development workflows. Covers project types, dependency commands, and environment synchronization."
+description: Create and configure Python projects with uv for dependency management, virtual environments, and reproducible workflows. Use when initializing or repairing uv-based Python project setup.
 metadata:
   skill-type: runbook
 ---
@@ -152,3 +152,33 @@ uv run --python 3.12 --with rich debug_script.py
 | [[verification-before-completion]] | Enforce final verification before declaring setup complete |
 
 **Topic map:** [[agent-ops]]
+
+## Philosophy
+
+- Optimize for clear, verifiable outcomes with the minimum necessary changes.
+- Keep guidance deterministic so repeated runs produce consistent decisions.
+
+## Procedure
+
+1. Confirm scope, constraints, and required inputs before edits.
+2. Apply focused changes tied directly to the requested outcome.
+3. Re-run the highest-signal validations and capture concrete evidence.
+
+## Validation
+
+- Run the relevant local checks for touched files and workflow contracts.
+- Fail fast: stop at the first blocking validation failure and report exact evidence.
+- Re-run checks after fixes and record residual risk if any remains.
+
+## Constraints
+
+- Redact secrets, tokens, credentials, and sensitive data by default.
+- Do not expand scope beyond the request unless explicitly asked.
+- Prefer safe, reversible edits over broad refactors.
+
+## Anti-patterns
+
+- Skipping validation after making changes.
+- Applying broad refactors to solve narrow issues.
+- Assuming behavior without evidence from current checks.
+

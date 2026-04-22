@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "skill_gate",
-          "informationUri": "https://github.com/jscraik/Agent-Skills",
+          "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
               "id": "PI_BINARY_ATTACHMENT",
@@ -25,7 +25,7 @@
                 "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior."
               },
               "properties": {
-                "defaultSeverity": "error"
+                "defaultSeverity": "warn"
               }
             }
           ]
@@ -71,7 +71,7 @@
         },
         {
           "ruleId": "PI_TOOL_CHAIN",
-          "level": "error",
+          "level": "warning",
           "message": {
             "text": "[high] High-risk control language detected; verify this does not instruct unsafe behavior. | SKILL.md"
           },

@@ -10,12 +10,17 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Please use $he-ideate on this repo and show me which directions are actually worth exploring before we pick one to brainstorm."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-ideate"
       - type: regex
         value: "(?i)(docs/ideation|he-brainstorm|ranked|survivor)"
-
   - id: what-should-i-improve
     name: what should I improve
     category: happy
@@ -23,12 +28,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you look at this project and tell me what I should improve next if I want the next move to really matter?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-ideate"
       - type: regex
         value: "(?i)(grounding|repo|ranked ideas|survivors)"
-
   - id: surprise-me-with-improvements
     name: surprise me with improvements
     category: happy
@@ -36,12 +46,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Can you take a look at this codebase and surprise me with a few grounded improvements that are better than the obvious ones?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-ideate"
       - type: regex
         value: "(?i)(generate many|critique|survivor|grounded)"
-
   - id: top-three-dx-improvements
     name: top three dx improvements
     category: happy
@@ -49,12 +64,17 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "If you were trying to make this repo nicer for engineers to work in, what are the top 3 DX improvements worth exploring before we go deeper on one?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
     acceptance:
       - type: skill_selected
         expected_skill: "he-ideate"
       - type: regex
         value: "(?i)(top 3|developer experience|complexity|confidence)"
-
   - id: focused-path-ideation
     name: focused path ideation
     category: happy

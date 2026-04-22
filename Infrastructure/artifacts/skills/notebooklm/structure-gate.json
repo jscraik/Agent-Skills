@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-16T19:44:22Z",
-  "skill": "/Users/jamiecraik/dev/Agent-Skills/Skills/product-strategy/notebooklm/SKILL.md",
-  "skill_path": "/Users/jamiecraik/dev/Agent-Skills/Skills/product-strategy/notebooklm/SKILL.md",
+  "generated_at": "2026-04-21T23:21:09Z",
+  "skill": "Skills/product-strategy/notebooklm/SKILL.md",
+  "skill_path": "Skills/product-strategy/notebooklm/SKILL.md",
   "name": "notebooklm",
   "decision": "pass",
   "exit_code": 0,
@@ -43,6 +43,12 @@
       "level": "WARN",
       "code": "PI_OVERRIDE",
       "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
+      "evidence": "legacy_scripts/auto_sync.py"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_OVERRIDE",
+      "message": "[high] Potential prompt-injection override language detected; ensure this is not instructing the model to bypass system/developer instructions.",
       "evidence": "scripts/auto_sync.py"
     },
     {
@@ -50,6 +56,12 @@
       "code": "PI_TOOL_CHAIN",
       "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
       "evidence": "SKILL.md"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_TOOL_CHAIN",
+      "message": "[high] High-risk control language detected; verify this does not instruct unsafe behavior.",
+      "evidence": "references/legacy-philosophy.md"
     },
     {
       "level": "WARN",

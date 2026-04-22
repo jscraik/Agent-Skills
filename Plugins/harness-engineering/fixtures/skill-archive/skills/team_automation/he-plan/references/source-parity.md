@@ -1,6 +1,6 @@
-# CE Plan Prompt Parity Map
+# HE Plan Prompt Parity Map
 
-Read when: you need to verify that `workflow-plan.md`, `workflow-plan-ui.md`, `workflow-ui-plan.md`, and `ce:plan-beta` were merged into `he-plan` without losing behavior, or when packaging this skill into another surface.
+Read when: you need to verify that the archived planning prompt families were merged into `he-plan` without losing behavior, or when packaging this skill into another surface.
 
 ## Table of Contents
 - [Purpose](#purpose)
@@ -10,18 +10,14 @@ Read when: you need to verify that `workflow-plan.md`, `workflow-plan-ui.md`, `w
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the original planning prompts in `configs/codex/prompts/` to the skill at `product/Infrastructure/ops/he-plan/` so the prompt-to-skill migration stays auditable.
+This document maps the original planning prompt families to `he-plan` so the prompt-to-skill migration stays auditable.
 
 ## Source prompts
 - `configs/codex/prompts/workflow-plan.md`
 - `configs/codex/prompts/workflow-plan-ui.md`
 - `configs/codex/prompts/workflow-ui-plan.md`
-- `configs/codex/prompts/ce:plan-beta` (prompt body provided by user during merge/update)
-- upstream donor snapshot:
-  - repo: `EveryInc/compound-engineering-plugin`
-  - commit: `0ae91dcc298721e5b2c4ab6d1fc6f76a13b6f67c`
-  - path: `Plugins/compound-engineering/skills/he-plan/SKILL.md`
-- Migration target: `product/Infrastructure/ops/he-plan/`
+- archived beta planning prompt family (prompt body provided during merge/update)
+- migration target: `he-plan`
 
 ## Parity mapping
 | Prompt surface | Preserved in skill | Notes |
@@ -43,20 +39,20 @@ This document maps the original planning prompts in `configs/codex/prompts/` to 
 | `workflow-plan-ui` prototype-to-production mapping | `## Workflow` -> `Phase 5` | Preserved directly |
 | `workflow-ui-plan` dedicated UI artifact and `UP` / `UAC` / `VAC` rules | `## Workflow` -> `Phase 5`, `Infrastructure/references/plan-artifacts.md` | Preserved as the `dedicated-ui-plan` branch |
 | `workflow-ui-plan` prototype-first direction phase | `## Workflow` -> `Phase 5` | Preserved directly as the dedicated UI mode default |
-| `ce:plan-beta` WHAT/HOW/WORK framing | `## Working agreement` | Preserved directly |
-| `ce:plan-beta` existing-plan resume/update behavior | `## Workflow` -> `Phase 0` | Preserved directly |
-| `ce:plan-beta` recent `*-requirements.md` search and source-document carry-forward | `## Workflow` -> `Phase 0`, `## Validation` | Preserved directly |
-| `ce:plan-beta` no-doc planning bootstrap | `## Workflow` -> `Phase 0` | Preserved directly |
-| `ce:plan-beta` blocker reclassification (product vs planning-owned) | `## Workflow` -> `Phase 0`, `## Validation` | Preserved directly |
-| `ce:plan-beta` plan depth (`lightweight | standard | deep`) | `## Workflow` -> `Phase 0`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
-| `ce:plan-beta` execution posture signals (`test-first`, `characterization-first`, `external-delegate`) | `## Workflow` -> `Phase 1`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
-| `ce:plan-beta` sharper external-research decisioning based on repo maturity | `## Workflow` -> `Phase 2` | Preserved in condensed form |
-| donor `he-plan` depth reclassification when research reveals external contract surfaces | `## Workflow` -> `Phase 2` | Preserved directly |
-| `ce:plan-beta` planning-time vs implementation-time unknown separation | `## Workflow` -> `Phase 3`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
-| `ce:plan-beta` optional high-level technical design and per-unit technical design | `## Workflow` -> `Phase 4`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
-| `ce:plan-beta` richer implementation-unit contract | `## Workflow` -> `Phase 4`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
-| `ce:plan-beta` deep-plan optional extensions | `Infrastructure/references/plan-artifacts.md` | Preserved directly |
-| donor `he-plan` tracker creation and prompt-level next-step branch | `## Handoff guidance`, `Infrastructure/references/plan-artifacts.md` | Preserved as explicit post-plan handoff rather than inline mutation |
+| archived beta prompt WHAT/HOW/WORK framing | `## Working agreement` | Preserved directly |
+| archived beta prompt existing-plan resume/update behavior | `## Workflow` -> `Phase 0` | Preserved directly |
+| archived beta prompt recent `*-requirements.md` search and source-document carry-forward | `## Workflow` -> `Phase 0`, `## Validation` | Preserved directly |
+| archived beta prompt no-doc planning bootstrap | `## Workflow` -> `Phase 0` | Preserved directly |
+| archived beta prompt blocker reclassification (product vs planning-owned) | `## Workflow` -> `Phase 0`, `## Validation` | Preserved directly |
+| archived beta prompt plan depth (`lightweight \| standard \| deep`) | `## Workflow` -> `Phase 0`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived beta prompt execution posture signals (`test-first`, `characterization-first`, `external-delegate`) | `## Workflow` -> `Phase 1`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived beta prompt sharper external-research decisioning based on repo maturity | `## Workflow` -> `Phase 2` | Preserved in condensed form |
+| archived planning prompt depth reclassification when research reveals external contract surfaces | `## Workflow` -> `Phase 2` | Preserved directly |
+| archived beta prompt planning-time vs implementation-time unknown separation | `## Workflow` -> `Phase 3`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived beta prompt optional high-level technical design and per-unit technical design | `## Workflow` -> `Phase 4`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived beta prompt richer implementation-unit contract | `## Workflow` -> `Phase 4`, `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived beta prompt deep-plan optional extensions | `Infrastructure/references/plan-artifacts.md` | Preserved directly |
+| archived planning prompt tracker creation and prompt-level next-step branch | `## Handoff guidance`, `Infrastructure/references/plan-artifacts.md` | Preserved as explicit post-plan handoff rather than inline mutation |
 | old post-generation options | `## Handoff guidance` | Preserved as one merged option set |
 | validation and do-not-do boundaries | `## Validation`, `## Anti-patterns`, `## Constraints` | Preserved directly |
 
@@ -74,12 +70,13 @@ This document maps the original planning prompts in `configs/codex/prompts/` to 
 - `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` were added to meet current skill quality requirements and strengthen routing reliability.
 - Pressure and prompt-injection evals were added because the original prompts relied more on ambient scaffolding than a packaged skill can safely assume.
 - Tracker creation was modernized into an explicit tracker-workflow handoff (default `[[gh-workflow]]`) so plan generation and issue mutation stay separated while still preserving the original post-plan issue workflow intent.
-- The donor prompt's plan-deepening fast path was intentionally separated into `he-deepen-plan` in this repository so `he-plan` stays focused on initial plan creation and safe plan revision, while holistic plan-confidence passes route to the dedicated deepening stage.
-- The donor prompt's sequenced `Docs/plans/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
+- The archived plan-deepening fast path was intentionally separated into `he-deepen-plan` in this repository so `he-plan` stays focused on initial plan creation and safe plan revision, while holistic plan-confidence passes route to the dedicated deepening stage.
+- The archived sequenced `Docs/plans/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
 - The beta prompt's `-beta-plan.md` filename pattern was not adopted into stable `he-plan`; the canonical skill keeps the existing stable plan filename convention to avoid unnecessary artifact churn across the repo. This is an intentional portability decision, not a loss of planning behavior.
 - The beta prompt's inline Proof-share and tracker-mutation branches were not moved into the core planning skill. `he-plan` remains focused on producing the plan artifact, then handing off to dedicated tracker workflows such as `[[gh-workflow]]`.
 - Progressive-disclosure hardening keeps `SKILL.md` route-critical while relocating standards rationale and planning philosophy to `Infrastructure/references/style-and-operating-guidance.md` with explicit read-when signposting.
 - Repeated operational tables for testing, verification, rollout, and reliability were deduplicated from `SKILL.md`; canonical details remain in `Infrastructure/references/production-considerations.md` and `Infrastructure/references/verification-first.md` so nuance is preserved without bloating the main route map.
+- The active front door now makes direct-planning posture, `fresh | resume | deepen` routing, authoritative-source handling, lightweight planning bootstrap, and research-before-structure expectations explicit.
 
 ## No-loss checklist
 - General planning still answers HOW and not the contract-level WHAT.

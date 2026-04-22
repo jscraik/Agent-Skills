@@ -1,0 +1,3 @@
+interface:
+  display_name: "Skill Installer"
+  short_description: "Install Codex skills into the canonical git source tree from a curated list or a GitHub repo..."

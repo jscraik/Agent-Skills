@@ -9,26 +9,6 @@
           "informationUri": "https://github.com/openai/skills",
           "rules": [
             {
-              "id": "SEC_ANTIPATTERNS_MISSING",
-              "name": "SEC_ANTIPATTERNS_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: antipatterns (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
-              "id": "SEC_PHILOSOPHY_MISSING",
-              "name": "SEC_PHILOSOPHY_MISSING",
-              "shortDescription": {
-                "text": "Missing required section: philosophy (add a ## heading)."
-              },
-              "properties": {
-                "defaultSeverity": "fail"
-              }
-            },
-            {
               "id": "PI_BINARY_ATTACHMENT",
               "name": "PI_BINARY_ATTACHMENT",
               "shortDescription": {
@@ -63,42 +43,10 @@
       },
       "invocations": [
         {
-          "executionSuccessful": false
+          "executionSuccessful": true
         }
       ],
       "results": [
-        {
-          "ruleId": "SEC_ANTIPATTERNS_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: antipatterns (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/resolve-pr-parallel/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "SEC_PHILOSOPHY_MISSING",
-          "level": "error",
-          "message": {
-            "text": "Missing required section: philosophy (add a ## heading)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/agent-ops/resolve-pr-parallel/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
         {
           "ruleId": "PI_BINARY_ATTACHMENT",
           "level": "warning",

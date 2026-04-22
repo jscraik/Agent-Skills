@@ -65,7 +65,7 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             )
 
             stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
-            with patch("ask.catalog_parity.discover_skill_entries", return_value=[stub]), patch(
+            with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
                 "ask.catalog_parity.get_policy_identity",
                 return_value="0123456789abcdef",
             ):
@@ -93,7 +93,7 @@ class TestAskRepoDoctorCatalog(unittest.TestCase):
             )
             # Matching counts, but no history artifact => strict should block.
             stub = SimpleNamespace(name="demo", source_dir=repo / "utilities" / "demo")
-            with patch("ask.catalog_parity.discover_skill_entries", return_value=[stub]), patch(
+            with patch("ask.catalog_parity.discover_catalog_entries", return_value=[stub]), patch(
                 "ask.catalog_parity.get_policy_identity",
                 return_value="0123456789abcdef",
             ):
