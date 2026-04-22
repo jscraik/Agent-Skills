@@ -289,6 +289,15 @@ def _sync_one_runtime_root(
     removed_entries: list[str] = []
     marketplace_target = runtime_root / "marketplace.json"
 
+    resolved_sources: list[tuple[str, Path]] = []
+    for entry in marketplace_entries:
+        plugin_name = entry["name"]
+        relative = entry["path"]
+        source_dir = repo_root / relative.removeprefix("./")
+        if not source_dir.is_dir():
+            raise FileNotFoundError(f"Local plugin source missing for '{plugin_name}': {source_dir}")
+        resolved_sources.append((plugin_name, source_dir))
+
     desired_names = {entry["name"] for entry in marketplace_entries}
 
     existing_entries = [child for child in runtime_root.iterdir() if child.name not in {"marketplace.json", "cache"}]
@@ -304,18 +313,13 @@ def _sync_one_runtime_root(
     if not dry_run:
         shutil.copy2(marketplace_path, marketplace_target)
 
-    for entry in marketplace_entries:
-        plugin_name = entry["name"]
+    for plugin_name, source_dir in resolved_sources:
         planned_plugins.append(plugin_name)
-        relative = entry["path"]
-        source_dir = repo_root / relative.removeprefix("./")
-        if not source_dir.is_dir():
-            raise FileNotFoundError(f"Local plugin source missing for '{plugin_name}': {source_dir}")
         target_dir = runtime_root / plugin_name
         if not dry_run:
             _copy_directory_contents(source_dir, target_dir)
             _materialize_first_level_skill_aliases(target_dir)
-        copied_plugins.append(plugin_name)
+            copied_plugins.append(plugin_name)
 
     return {
         "runtime_root": str(runtime_root),

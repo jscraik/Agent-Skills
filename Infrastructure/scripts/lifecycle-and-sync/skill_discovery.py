@@ -303,7 +303,7 @@ def _normalize_description(text: str) -> str:
     return normalized or "Skill description pending."
 
 
-def discover_catalog_entries(*, advanced: bool = False) -> List[SkillEntry]:
+def discover_catalog_entries(*, advanced: bool = False, source: str = "auto") -> List[SkillEntry]:
     """
     Compute the default user-visible catalog surface of skills.
     
@@ -311,11 +311,14 @@ def discover_catalog_entries(*, advanced: bool = False) -> List[SkillEntry]:
     
     Parameters:
         advanced (bool): If True, return the full advanced surface including hidden lanes; if False, remove default-hidden lane skills.
+        source (str): Discovery source for baseline entries. `"auto"` preserves runtime-first behavior and `"repo"` forces repository-owned catalog discovery.
     
     Returns:
         List[SkillEntry]: Sorted list of SkillEntry objects included in the requested catalog surface.
     """
-    entries = discover_skill_entries(source="auto", visibility="advanced")
+    if source not in {"auto", "repo"}:
+        raise ValueError(f"Unsupported catalog source: {source}")
+    entries = discover_skill_entries(source=source, visibility="advanced")
     if advanced:
         return entries
     return [

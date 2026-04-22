@@ -191,13 +191,15 @@ def compute_catalog_parity(
             - `required_surfaces`: list of surfaces that are considered required.
             - `strict_mode`: echo of the `strict` parameter.
     """
-    canonical_count = len(discover_catalog_entries())
+    # Keep parity anchored to repository-owned discovery so local flat runtime
+    # projection drift cannot spuriously block doctor-catalog/route workflows.
+    canonical_count = len(discover_catalog_entries(source="repo"))
     active_policy_identity = get_policy_identity()
 
     readme_count = _extract_readme_count(repo_root / "README.md")
     skill_index_count = _extract_root_skill_index_count(repo_root / "SKILL.md")
     skill_index_policy_identity = _extract_root_skill_index_policy_identity(repo_root / "SKILL.md")
-    list_count = skills_list_count if skills_list_count is not None else len(discover_catalog_entries())
+    list_count = skills_list_count if skills_list_count is not None else canonical_count
     considered_total = route_considered_total if route_considered_total is not None else canonical_count
 
     surfaces = [

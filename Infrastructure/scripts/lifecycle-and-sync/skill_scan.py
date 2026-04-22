@@ -40,14 +40,14 @@ HEADING_ALIASES = {
     "Gotchas": {"gotchas", "constraints", "notes"},
 }
 RELOCATION_GUARD_SKILL_FILES = {
-    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "Plugins/plugin-factory/skills_index/plugin-factory-router",
-    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
-    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
-    "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
-    "Plugins/plugin-factory/skills/team_automation/plugin-router",
+    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/plugin-factory/skills_index/plugin-factory-router",
+    "plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+    "plugins/plugin-factory/skills/code_quality_review/plugin-builder",
+    "plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
+    "plugins/plugin-factory/skills/team_automation/plugin-router",
 }
 CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
