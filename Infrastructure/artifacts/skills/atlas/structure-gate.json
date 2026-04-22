@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:21:07Z",
-  "skill": "Skills/mobile-native/atlas/SKILL.md",
-  "skill_path": "Skills/mobile-native/atlas/SKILL.md",
+  "generated_at": "2026-04-21T23:18:37Z",
+  "skill": "/Users/jamiecraik/dev/agent-skills/Skills/mobile-native/atlas/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/Skills/mobile-native/atlas/SKILL.md",
   "name": "atlas",
   "decision": "pass",
   "exit_code": 0,
@@ -20,6 +20,12 @@
       "code": "PI_BINARY_ATTACHMENT",
       "message": "Binary attachment detected; manual review required (prompt scan skipped).",
       "evidence": "agents/assets/icon-small.png"
+    },
+    {
+      "level": "WARN",
+      "code": "PI_BINARY_ATTACHMENT",
+      "message": "Binary attachment detected; manual review required (prompt scan skipped).",
+      "evidence": "scripts/__pycache__/atlas_common.cpython-314.pyc"
     },
     {
       "level": "WARN",

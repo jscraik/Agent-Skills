@@ -1,6 +1,53 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+changed_files=()
+changed_files_mode=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --changed-files)
+      changed_files_mode=1
+      shift
+      while [[ $# -gt 0 ]]; do
+        if [[ "$1" == --* ]]; then
+          break
+        fi
+        changed_files+=("${1#./}")
+        shift
+      done
+      continue
+      ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh [--changed-files <file>...]
+
+  --changed-files
+      Optional repo-relative file list used to scope expensive unit-test selections.
+EOF
+      exit 0
+      ;;
+    *)
+      echo "[family-gate] ERROR: unknown argument: $1"
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+# changed_files_match returns success when any provided changed file matches the supplied glob.
+changed_files_match() {
+  local pattern="$1"
+  local changed_file=""
+  for changed_file in "${changed_files[@]}"; do
+    # shellcheck disable=SC2053
+    if [[ "$changed_file" == $pattern ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 # Run repo preflight before any path-sensitive operations
 preflight_mode="${SKILL_FAMILY_LOCAL_MEMORY_MODE:-optional}"
 if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" ]]; then
@@ -67,11 +114,9 @@ skill_builder_dir_candidates=(
   "plugins/skill-factory/skills/code_quality_review/skill-builder"
   "plugins/skill-factory/skills/skill-builder"
 )
-skill_builder_dir=""
 skill_builder_scripts_dir=""
 for candidate in "${skill_builder_dir_candidates[@]}"; do
   if [[ -f "${candidate}/scripts/skill_gate.py" ]]; then
-    skill_builder_dir="$candidate"
     skill_builder_scripts_dir="${candidate}/scripts"
     break
   fi
@@ -255,6 +300,25 @@ echo "[family-gate] validating authoring context-preservation contract"
 bash Infrastructure/scripts/validation-and-linting/validate_authoring_context_preservation.sh
 echo "[family-gate] authoring context-preservation contract passed"
 
+echo "[family-gate] validating he-improve example spec yaml fixtures"
+"${python_cmd[@]}" - <<'PY'
+from pathlib import Path
+import yaml
+
+paths = [
+    Path("Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
+]
+for path in paths:
+    if not path.exists():
+        continue
+    with path.open("r", encoding="utf-8") as handle:
+        yaml.safe_load(handle.read())
+print("[family-gate] he-improve example spec yaml fixtures passed")
+PY
+
 # ---------------------------------------------------------------------------
 # P1.2: shellcheck gate — lint all gate/validation shell scripts
 # ---------------------------------------------------------------------------
@@ -263,7 +327,10 @@ if command -v shellcheck >/dev/null 2>&1; then
   gate_scripts=()
   while IFS= read -r -d '' f; do
     gate_scripts+=("$f")
-  done < <(find scripts/ -maxdepth 1 -name "*.sh" -print0 2>/dev/null)
+  done < <(
+    find scripts/ -maxdepth 1 -name "*.sh" -print0 2>/dev/null
+    find Infrastructure/scripts/validation-and-linting -name "*.sh" -print0 2>/dev/null
+  )
   if [[ ${#gate_scripts[@]} -gt 0 ]]; then
     if shellcheck --severity=error "${gate_scripts[@]}"; then
       echo "[family-gate] shellcheck passed"
@@ -314,6 +381,9 @@ else
 fi
 
 echo "[family-gate] validating ${#skill_dirs[@]} skill authoring family members"
+if [[ "$changed_files_mode" -eq 1 ]]; then
+  echo "[family-gate] changed-files scope active (${#changed_files[@]} file(s))"
+fi
 if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
   if [[ "${SKILL_FAMILY_LIVE_EVALS_TRUSTED:-0}" != "1" ]]; then
     echo "[family-gate] refusing live eval mode without explicit trusted-lane acknowledgement"
@@ -347,37 +417,74 @@ elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3
   echo "[family-gate] using uv ephemeral pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
 fi
 
-if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
-  echo "[family-gate] running pytest unit tests..."
+run_skill_gate_unittest=1
+run_family_benchmark_pytest=1
+run_projection_pytest=1
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  run_skill_gate_unittest=0
+  run_family_benchmark_pytest=0
+  run_projection_pytest=0
+
+  if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
+     changed_files_match "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/*" || \
+     changed_files_match "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/*" || \
+     changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
+     changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
+     changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py" || \
+     changed_files_match "Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py"; then
+    run_skill_gate_unittest=1
+    run_family_benchmark_pytest=1
+  fi
+
+  if changed_files_match "Infrastructure/scripts/lifecycle-and-sync/*" || \
+     changed_files_match "Infrastructure/scripts/validate_projection_integrity.sh" || \
+     changed_files_match "Infrastructure/scripts/testing/test_projection_integrity.py"; then
+    run_projection_pytest=1
+  fi
+fi
+
+selected_pytest_targets=()
+if [[ "$run_family_benchmark_pytest" -eq 1 ]]; then
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py)
+fi
+if [[ "$run_projection_pytest" -eq 1 ]]; then
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_projection_integrity.py)
+fi
+
+if [[ "$run_skill_gate_unittest" -eq 1 ]]; then
+  echo "[family-gate] running skill_gate unit-test shim..."
   skill_gate_unittest_path="$(cd "$skill_builder_scripts_dir" && pwd -P)/test_skill_gate.py"
   if [[ ! -f "$skill_gate_unittest_path" ]]; then
     echo "[family-gate] ERROR: missing skill-gate unit-test target"
     exit 2
   fi
-
   if ! "${python_cmd[@]}" "$skill_gate_unittest_path"; then
     echo "[family-gate] ERROR: skill_gate unit tests failed — fix before proceeding"
     exit 2
   fi
+fi
 
-  if "${pytest_cmd[@]}" \
-      Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py \
-      Infrastructure/scripts/testing/test_projection_integrity.py \
-      -q --tb=short; then
-    echo "[family-gate] pytest passed"
+if [[ ${#selected_pytest_targets[@]} -gt 0 ]]; then
+  if [[ ${#pytest_cmd[@]} -gt 0 ]]; then
+    echo "[family-gate] running pytest unit tests (${#selected_pytest_targets[@]} target(s))..."
+    if "${pytest_cmd[@]}" "${selected_pytest_targets[@]}" -q --tb=short; then
+      echo "[family-gate] pytest passed"
+    else
+      echo "[family-gate] ERROR: pytest found test failures — fix before proceeding"
+      exit 2
+    fi
   else
-    echo "[family-gate] ERROR: pytest found test failures — fix before proceeding"
-    exit 2
+    if [[ "${SKILL_FAMILY_ALLOW_PYTEST_SKIP:-0}" == "1" ]]; then
+      echo "[family-gate] WARN: pytest not found; skipping selected pytest targets due to SKILL_FAMILY_ALLOW_PYTEST_SKIP=1"
+    else
+      echo "[family-gate] ERROR: pytest not found; selected unit tests are required for this gate"
+      echo "[family-gate] install via: uv run --python 3.12 --with pytest ... , uv pip install pytest, or brew install python"
+      echo "[family-gate] set SKILL_FAMILY_ALLOW_PYTEST_SKIP=1 only for emergency lanes with explicit approval"
+      exit 2
+    fi
   fi
 else
-  if [[ "${SKILL_FAMILY_ALLOW_PYTEST_SKIP:-0}" == "1" ]]; then
-    echo "[family-gate] WARN: pytest not found; skipping unit tests due to SKILL_FAMILY_ALLOW_PYTEST_SKIP=1"
-  else
-    echo "[family-gate] ERROR: pytest not found; unit tests are required for this gate"
-    echo "[family-gate] install via: uv run --python 3.12 --with pytest ... , uv pip install pytest, or brew install python"
-    echo "[family-gate] set SKILL_FAMILY_ALLOW_PYTEST_SKIP=1 only for emergency lanes with explicit approval"
-    exit 2
-  fi
+  echo "[family-gate] pytest scope: no matching changed paths; skipping pytest targets"
 fi
 
 # Track per-skill evidence for the release-ready index
@@ -453,15 +560,59 @@ _get_outcome() {
   fi
 }
 
-for skill_dir in "${skill_dirs[@]}"; do
-  echo
-  echo "[family-gate] === $skill_dir ==="
-
+# run_structural_skill_suite runs the structural checks for one skill without live model evals.
+run_structural_skill_suite() {
+  local skill_dir="$1"
   run_skill_builder_script quick_validate.py "$skill_dir" --mode compat
-
   assert_security_eval_contract "$skill_dir"
+  # One standard listing replaces two mode-specific list passes.
+  run_skill_builder_script run_skill_evals.py "$skill_dir" \
+    --list-cases \
+    --eval-mode standard
+  run_skill_builder_script openclaw_skill_guard.py "$skill_dir" \
+    --mode both \
+    --format text
+  run_skill_builder_script analyze_skill.py "$skill_dir" \
+    --min-pass 60 \
+    --no-emoji
+  run_skill_builder_script upgrade_skill.py "$skill_dir" \
+    --format text
+}
 
-  if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
+structural_pids=()
+structural_skills=()
+structural_logs=()
+structural_failures=0
+
+flush_oldest_structural_batch() {
+  local pid="${structural_pids[0]}"
+  local skill="${structural_skills[0]}"
+  local log_file="${structural_logs[0]}"
+
+  if wait "$pid"; then
+    cat "$log_file"
+    _set_outcome "$skill" "structural-only"
+  else
+    cat "$log_file"
+    _set_outcome "$skill" "failed"
+    structural_failures=1
+    echo "[family-gate] ERROR: structural checks failed for ${skill}"
+  fi
+
+  rm -f "$log_file"
+  structural_pids=("${structural_pids[@]:1}")
+  structural_skills=("${structural_skills[@]:1}")
+  structural_logs=("${structural_logs[@]:1}")
+}
+
+if [[ "${SKILL_FAMILY_LIVE_EVALS:-0}" == "1" ]]; then
+  for skill_dir in "${skill_dirs[@]}"; do
+    echo
+    echo "[family-gate] === $skill_dir ==="
+
+    run_skill_builder_script quick_validate.py "$skill_dir" --mode compat
+    assert_security_eval_contract "$skill_dir"
+
     skill_slug="${skill_dir//\//-}"
     skill_eval_failed=0
     if [[ "$release_ready" == "1" ]]; then
@@ -497,28 +648,53 @@ for skill_dir in "${skill_dirs[@]}"; do
       _set_outcome "$skill_dir" "failed"
       echo "[family-gate] WARN: live evals had failures for $skill_dir — recording outcome as failed"
     fi
-  else
-    run_skill_builder_script run_skill_evals.py "$skill_dir" \
-      --list-cases \
-      --eval-mode smoke
-    run_skill_builder_script run_skill_evals.py "$skill_dir" \
-      --list-cases \
-      --eval-mode release
-    _set_outcome "$skill_dir" "structural-only"
+
+    run_skill_builder_script openclaw_skill_guard.py "$skill_dir" \
+      --mode both \
+      --format text
+    run_skill_builder_script analyze_skill.py "$skill_dir" \
+      --min-pass 60 \
+      --no-emoji
+    run_skill_builder_script upgrade_skill.py "$skill_dir" \
+      --format text
+  done
+else
+  structural_batch_jobs="${SKILL_FAMILY_BATCH_JOBS:-2}"
+  if ! [[ "$structural_batch_jobs" =~ ^[0-9]+$ ]] || [[ "$structural_batch_jobs" -lt 1 ]]; then
+    structural_batch_jobs=1
   fi
+  if [[ "$structural_batch_jobs" -gt 4 ]]; then
+    structural_batch_jobs=4
+  fi
+  echo "[family-gate] structural batch size: ${structural_batch_jobs}"
 
-  run_skill_builder_script openclaw_skill_guard.py "$skill_dir" \
-    --mode both \
-    --format text
+  for skill_dir in "${skill_dirs[@]}"; do
+    echo
+    echo "[family-gate] === $skill_dir ==="
+    skill_slug="${skill_dir//\//-}"
+    skill_log="$(mktemp "${TMPDIR:-/tmp}/skill-family-${skill_slug}.XXXXXX.log")"
 
-  run_skill_builder_script analyze_skill.py "$skill_dir" \
-    --min-pass 60 \
-    --no-emoji
+    (
+      run_structural_skill_suite "$skill_dir"
+    ) >"$skill_log" 2>&1 &
 
-  run_skill_builder_script upgrade_skill.py "$skill_dir" \
-    --format text
+    structural_pids+=("$!")
+    structural_skills+=("$skill_dir")
+    structural_logs+=("$skill_log")
 
-done
+    if [[ ${#structural_pids[@]} -ge "$structural_batch_jobs" ]]; then
+      flush_oldest_structural_batch
+    fi
+  done
+
+  while [[ ${#structural_pids[@]} -gt 0 ]]; do
+    flush_oldest_structural_batch
+  done
+
+  if [[ "$structural_failures" -ne 0 ]]; then
+    exit 2
+  fi
+fi
 
 # ---------------------------------------------------------------------------
 # Write evidence index for release-ready runs

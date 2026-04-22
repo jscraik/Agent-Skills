@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:21:02Z",
-  "skill": "Skills/frontend-ui/better-icons/SKILL.md",
-  "skill_path": "Skills/frontend-ui/better-icons/SKILL.md",
+  "generated_at": "2026-04-21T23:18:36Z",
+  "skill": "/Users/jamiecraik/dev/agent-skills/Skills/frontend-ui/better-icons/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/Skills/frontend-ui/better-icons/SKILL.md",
   "name": "better-icons",
   "decision": "pass",
   "exit_code": 0,

@@ -186,6 +186,38 @@
           ]
         },
         {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/add_source.cpython-314.pyc"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/product-strategy/notebooklm/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PI_BINARY_ATTACHMENT",
+          "level": "warning",
+          "message": {
+            "text": "Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/browser_session.cpython-314.pyc"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Skills/product-strategy/notebooklm/SKILL.md"
+                }
+              }
+            }
+          ]
+        },
+        {
           "ruleId": "PI_COMMANDS",
           "level": "warning",
           "message": {

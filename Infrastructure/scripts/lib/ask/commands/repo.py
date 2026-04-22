@@ -33,15 +33,22 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     result.status = "success"
     return result
 
-def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
+def repo_validate(
+    repo_root: Path,
+    ephemeral: bool = False,
+    fail_fast: bool = False,
+    changed_files: List[str] | None = None,
+) -> CallResult:
     """
     Run the repository validation script and collect a structured result.
     
-    Executes the repository's Infrastructure/scripts/validate_all.sh with either `--ephemeral` or `--persistent`, parses the script summary from stdout, and records the raw output and summary counts in the returned result. If the script fails to emit the expected summary lines or exits with a non‑zero code, the result is marked as an error and includes an `ErrorObject` describing the validation failure.
+    Executes the repository's Infrastructure/scripts/validate_all.sh with either `--ephemeral` or `--persistent`, optional fail-fast behavior, and optional changed-file scoping. Parses the script summary from stdout and records the raw output and summary counts in the returned result. If the script fails to emit the expected summary lines or exits with a non-zero code, the result is marked as an error and includes an `ErrorObject` describing the validation failure.
     
     Parameters:
         repo_root (Path): Path to the repository root where the script will be executed.
         ephemeral (bool): When True run validation with `--ephemeral`; otherwise use `--persistent`.
+        fail_fast (bool): When True stop after the first required failure.
+        changed_files (List[str] | None): Optional repo-relative changed files to scope validations.
     
     Returns:
         CallResult: Contains `data` with keys:
@@ -58,6 +65,11 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
         cmd.append("--ephemeral")
     else:
         cmd.append("--persistent")
+    if fail_fast:
+        cmd.append("--fail-fast")
+    if changed_files:
+        cmd.append("--changed-files")
+        cmd.extend(changed_files)
         
     stdout_chunks: List[str] = []
     with subprocess.Popen(
@@ -103,6 +115,9 @@ def repo_validate(repo_root: Path, ephemeral: bool = False) -> CallResult:
     result.data["required_failures"] = required_failures
     result.data["warn_only_issues"] = warn_only_issues
     result.data["raw_output"] = stdout
+    result.data["ephemeral"] = ephemeral
+    result.data["fail_fast"] = fail_fast
+    result.data["changed_files"] = changed_files or []
     
     if process.returncode == 0:
         result.status = "success"

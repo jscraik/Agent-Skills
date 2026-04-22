@@ -1,9 +1,9 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:20:50Z",
-  "skill": "Skills/agent-ops/autoresearch/SKILL.md",
-  "skill_path": "Skills/agent-ops/autoresearch/SKILL.md",
+  "generated_at": "2026-04-21T23:18:33Z",
+  "skill": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/autoresearch/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/autoresearch/SKILL.md",
   "name": "autoresearch",
   "decision": "pass",
   "exit_code": 0,

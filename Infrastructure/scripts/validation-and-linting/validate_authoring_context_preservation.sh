@@ -38,6 +38,7 @@ has_regex_text() {
 
 echo "[authoring-context] validating authoring context-preservation contract"
 for skill in "${skills[@]}"; do
+  # Require a regular file so directory/symlink drift fails explicitly.
   if [[ ! -f "$skill" ]]; then
     echo "[authoring-context] ERROR: missing skill file: $skill"
     missing=1

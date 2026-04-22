@@ -1,25 +1,67 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-21T23:20:57Z",
-  "skill": "Skills/agent-ops/rust-pro/SKILL.md",
-  "skill_path": "Skills/agent-ops/rust-pro/SKILL.md",
+  "generated_at": "2026-04-21T23:18:34Z",
+  "skill": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/rust-pro/SKILL.md",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/rust-pro/SKILL.md",
   "name": "rust-pro",
-  "decision": "pass",
-  "exit_code": 0,
-  "failed": false,
+  "decision": "fail",
+  "exit_code": 2,
+  "failed": true,
   "findings": [
     {
-      "level": "WARN",
-      "code": "OUT_SCHEMA_VERSION_MISSING",
-      "message": "Schema-bound outputs detected; consider including `schema_version` in the output contract.",
+      "level": "FAIL",
+      "code": "CONTRACT_MISSING",
+      "message": "Missing Infrastructure/references/contract.yaml (required for gold).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "EVALS_MISSING",
+      "message": "Missing Infrastructure/references/evals.yaml (required for gold).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "FM_DESC_WHAT_WHEN",
+      "message": "Description MUST include WHAT the skill does and WHEN to use it (trigger contexts).",
+      "evidence": "description: Master Rust 1.75+ with modern async patterns, advanced type system features, and production-ready systems programming."
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_ANTIPATTERNS_MISSING",
+      "message": "Missing required section: antipatterns (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_CONSTRAINTS_MISSING",
+      "message": "Missing required section: constraints (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_PHILOSOPHY_MISSING",
+      "message": "Missing required section: philosophy (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_PROCEDURE_MISSING",
+      "message": "Missing required section: procedure (add a ## heading).",
+      "evidence": ""
+    },
+    {
+      "level": "FAIL",
+      "code": "SEC_VALIDATION_MISSING",
+      "message": "Missing required section: validation (add a ## heading).",
       "evidence": ""
     },
     {
       "level": "WARN",
-      "code": "RESEARCH_EVALS_UNREALISTIC",
-      "message": "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
-      "evidence": "realistic=0/3"
+      "code": "FM_DESC_SHORT",
+      "message": "Description is brief (< 120); expand for better discovery.",
+      "evidence": ""
     },
     {
       "level": "WARN",
