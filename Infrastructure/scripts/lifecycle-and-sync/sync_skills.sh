@@ -1152,6 +1152,7 @@ ensure_real_home_plugin_root() {
   local target_link=""
   local link_target_real=""
   local canonical_plugins_real=""
+  local backup_path=""
 
   mkdir -p "$(dirname "$target_dir")"
   canonical_plugins_real="$(cd "$canonical_plugins_dir" 2>/dev/null && pwd -P || true)"
@@ -1173,6 +1174,16 @@ ensure_real_home_plugin_root() {
         return 0
         ;;
     esac
+  fi
+
+  if [ -e "$target_dir" ] && [ ! -d "$target_dir" ]; then
+    backup_path="${target_dir}.bak.$(date +%Y%m%d%H%M%S)"
+    if mv -- "$target_dir" "$backup_path"; then
+      echo "[WARN] Moved non-directory $label path aside: $target_dir -> $backup_path"
+    else
+      echo "[WARN] Could not move non-directory $label path aside; removing: $target_dir"
+      rm -f -- "$target_dir"
+    fi
   fi
 
   if [ ! -e "$target_dir" ]; then
@@ -1317,7 +1328,7 @@ sync_home_plugin_mirrors() {
       [ -n "$resolved" ] || continue
       [ -d "$resolved" ] || continue
       rm -f -- "$child"
-      cp -a "$resolved" "$child"
+      cp -aL "$resolved" "$child"
       echo "[OK] Materialized runtime skill alias: $child"
     done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -print)
   }
