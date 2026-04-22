@@ -27,7 +27,8 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 ## Quick Start
 
 ```bash
-# One-time per shell: load repo environment and add ask to PATH
+# Bash-first setup (recommended): open bash, then load repo environment
+bash
 source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
 ask repo status          # Check repo health
@@ -47,6 +48,8 @@ All agents (Gemini, Codex, Claude) MUST use `bin/ask` for repo operations.
 | Audit skill | `ask skills audit <path> --level strict` |
 | Install skill | `ask skills install <url> --remediate` |
 | Find related | `ask graph related <skill> --depth 2` |
+
+`bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward into `Infrastructure/**`; keep them as real files/directories, not symlinks. `bin/ask` is the public wrapper and forwards to `Infrastructure/bin/ask`.
 
 ## Robot Mode
 

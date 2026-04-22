@@ -10,9 +10,9 @@ Provide authoritative, current guidance from OpenAI developer docs using the dev
 
 ## Quick start
 
-- Use `mcp__openaiDeveloperDocs__search_openai_docs` to find the most relevant doc pages.
-- Use `mcp__openaiDeveloperDocs__fetch_openai_doc` to pull exact sections and quote/paraphrase accurately.
-- Use `mcp__openaiDeveloperDocs__list_openai_docs` only when you need to browse or discover pages without a clear query.
+- Use `mcp__openai_docs__search_openai_docs` to find the most relevant doc pages.
+- Use `mcp__openai_docs__fetch_openai_doc` to pull exact sections and quote/paraphrase accurately.
+- Use `mcp__openai_docs__list_openai_docs` only when you need to browse or discover pages without a clear query.
 - Load only the relevant file from `references/` when the question is about model selection or a GPT-5.4 upgrade.
 
 ## OpenAI product snapshots
@@ -29,7 +29,7 @@ Provide authoritative, current guidance from OpenAI developer docs using the dev
 
 If MCP tools fail or no OpenAI docs resources are available:
 
-1. Run the install command yourself: `codex mcp add openaiDeveloperDocs --url https://developers.openai.com/mcp`
+1. Run the install command yourself: `codex mcp add openai-docs --url https://developers.openai.com/mcp`
 2. If it fails due to permissions/sandboxing, immediately retry the same command with escalated permissions and include a 1-sentence justification for approval. Do not ask the user to run it yet.
 3. Only if the escalated attempt fails, ask the user to run the install command.
 4. Ask the user to restart Codex.

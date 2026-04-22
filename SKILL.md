@@ -8,9 +8,12 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Plugins — Harness Engineering — Skills](#plugins-harness-engineering-skills)
 - [Plugins — Harness Engineering — Skills — Code_Quality_Review](#plugins-harness-engineering-skills-code_quality_review)
 - [Plugins — Harness Engineering — Skills — Team_Automation](#plugins-harness-engineering-skills-team_automation)
+- [Plugins — Plugin Factory — Skills — Code_Quality_Review](#plugins-plugin-factory-skills-code_quality_review)
 - [Plugins — Plugin Factory — Skills — Infrastructure_Ops](#plugins-plugin-factory-skills-infrastructure_ops)
 - [Plugins — Plugin Factory — Skills — Scaffolding_Templates](#plugins-plugin-factory-skills-scaffolding_templates)
-- [Plugins — Plugin Factory — Skills_Index](#plugins-plugin-factory-skills_index)
+- [Plugins — Plugin Factory — Skills — Team_Automation](#plugins-plugin-factory-skills-team_automation)
+- [Plugins — Skill Factory — Skills](#plugins-skill-factory-skills)
+- [Plugins — Skill Factory — Skills — Code_Quality_Review](#plugins-skill-factory-skills-code_quality_review)
 - [Plugins — Skill Factory — Skills — Infrastructure_Ops](#plugins-skill-factory-skills-infrastructure_ops)
 - [Plugins — Skill Factory — Skills — Scaffolding_Templates](#plugins-skill-factory-skills-scaffolding_templates)
 - [Skills — Agent Ops](#skills-agent-ops)
@@ -20,14 +23,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
-- [Plugins — Plugin Factory — Skills — Code_Quality_Review](#plugins-plugin-factory-skills-code_quality_review)
-- [Plugins — Plugin Factory — Skills — Team_Automation](#plugins-plugin-factory-skills-team_automation)
-- [Plugins — Skill Factory — Skills](#plugins-skill-factory-skills)
-- [Plugins — Skill Factory — Skills — Code_Quality_Review](#plugins-skill-factory-skills-code_quality_review)
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 132
+- `total_skills`: 131
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: d8f37e43ba560c95
@@ -61,6 +60,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `he-tdd` — Build behavior-safe code changes with TDD and RED/GREEN evidence. Use when he-plan or he-work requires TDD for a concrete behavior target.
 - `he-work` — Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned.
 
+## Plugins — Plugin Factory — Skills — Code_Quality_Review
+
+- `plugin-builder` — Harden and validate Codex plugin packages with contract-grade checks before install or release. Use when the deliverable is a plugin package that needs conversion or hardening.
+
 ## Plugins — Plugin Factory — Skills — Infrastructure_Ops
 
 - `plugin-installer` — Install validated plugins with provenance and rollback safety
@@ -69,9 +72,17 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `plugin-creator` — Scaffold a minimal Codex plugin package and optional marketplace entry. Use when the user needs first-pass plugin creation.
 
-## Plugins — Plugin Factory — Skills_Index
+## Plugins — Plugin Factory — Skills — Team_Automation
 
-- `plugin-factory-router` — Front-door entrypoint for plugin-factory. Use when a plugin task needs lane routing.
+- `plugin-router` — Route plugin requests to the right factory lane
+
+## Plugins — Skill Factory — Skills
+
+- `skill-factory-router` — Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden, install, audit, or skillify skills.
+
+## Plugins — Skill Factory — Skills — Code_Quality_Review
+
+- `skill-builder` — Analyze and harden Codex skills and plugin packages for contract quality, eval coverage, and safety compliance. Use this skill when an existing package is approaching release and needs evidence-backed validation.
 
 ## Plugins — Skill Factory — Skills — Infrastructure_Ops
 
@@ -100,15 +111,15 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `decide-build-primitive` — Use this skill to analyze whether a capability should become a Skill, Custom Prompt, or Agent automation when the user is packaging or automating a workflow and the right Codex primitive is not yet clear.
 - `diagram-cli` — Generate, validate, and refresh @brainwav/diagram architecture artifacts and context packs. Use when the user wants repository architecture diagrams for onboarding, PR impact, or CI drift checks, not hand-drawn product mock diagrams.
 - `docs-expert` — Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
-- `elixir-pro` — Write idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Masters concurrency, fault tolerance, and distributed systems.
-- `evals-router` — Route and guide LLM evaluation work such as evaluator design, error analysis, RAG evals, and synthetic eval data. Use when the user wants eval-specific workflow help, not product analytics or ordinary QA.
+- `elixir-pro` — Create and review idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Use when building or debugging Elixir services that need reliable concurrency and fault tolerance.
+- `evals-router` — Analyze and plan LLM evaluation workflows, including evaluator design, error analysis, and RAG eval strategy. Use when a user asks for eval-specific implementation or triage guidance.
 - `fallback-release` — Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions is stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.Infrastructure/config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
 - `frontend-design` — Analyze broad frontend design requests and route them to the correct local UI skill after classifying intent and maturity. Use when the user asks for frontend design generally and the specific design owner is not yet clear.
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
 - `go` — Best practices for working with Go codebases. Use when writing, debugging, or exploring Go code, including reading dependency sources and documentation.
 - `insight-report` — WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. WHEN: Use when the user asks for usage analytics, workflow patterns, Codex session summaries, or recommendations for improving their development workflow.
-- `javascript-pro` — Master modern JavaScript with ES6+, async patterns, and Node.js APIs. Handles promises, event loops, and browser/Node compatibility.
+- `javascript-pro` — Create and debug modern JavaScript code with ES6+, async patterns, and Node.js APIs. Use when working on runtime behavior, promises, or browser and Node compatibility.
 - `mise-tooling` — Operate mise tool-version workflows with trust-aware config loading, local/global version pinning, and deterministic runtime execution. Use when a user needs mise commands or trust/activation troubleshooting.
 - `npm-release` — Create and validate npm package release workflows using semver bumping, dist-tags, provenance publishing, and 2FA-aware safeguards. Use when users need npm publish/version guidance in CI or local release lanes.
 - `npm-workflow-discipline` — Manage deterministic npm dependency workflows and package script contracts. Use when users need lockfile discipline, npm ci-based CI installs, or consistent package.json script behavior.
@@ -121,19 +132,19 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `repoprompt` — Plan and troubleshoot Repo Prompt integration across editors, agents, MCP, and CLI workflows. Use when the user wants Repo Prompt configured, adopted, or compared inside an AI coding setup.
 - `resolve-pr-parallel` — Resolve multiple unresolved GitHub PR review threads in parallel by applying fixes, responding, and closing verified threads. Use when the user wants a broad PR-comment cleanup sweep, not readiness classification or one-off comment handling.
 - `resolve-todo-parallel` — WHAT: Resolve file-based `todos/` items with dependency-aware serial or bounded-parallel execution, verification, and cleanup controls. WHEN: Use when a todo-sweep is the primary task, not generic single-feature implementation.
-- `rust-pro` — Master Rust 1.75+ with modern async patterns, advanced type system features, and production-ready systems programming.
+- `rust-pro` — Create and review Rust 1.75+ systems code with ownership-safe async patterns and production error handling. Use when building or debugging Rust services that need performance and reliability.
 - `scaffolding-expert` — Use when users ask how to scaffold or re-scaffold a repo: this skill chooses the right tier (`lite|growth|strict`), audits drift/conflict from file evidence, and returns minimal-change remediation aligned to the user's `~/dev` git-project style.
 - `simplify` — Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
-- `swift-development` — Swift language patterns and best practices including concurrency, performance, and modern idioms. Use for Swift language-level code review or architecture guidance.
+- `swift-development` — Create and review Swift code with modern concurrency, performance tuning, and idiomatic language patterns. Use when building or debugging Swift application logic.
 - `test-browser` — Run or plan browser-based verification for changed web surfaces using sanctioned browser automation tools. Use when a user needs deterministic QA for routes, flows, or PR scope instead of ad hoc manual browsing.
 - `test-driven-development` — Create test-first Red-Green-Refactor delivery for behavior changes. Use when implementing a feature or bugfix before writing production code.
-- `toml` — Write and review TOML configuration files with predictable structure, strict typing, and tool-safe edits.
+- `toml` — Create and review TOML configuration with strict typing and predictable structure. Use when editing tool configuration files that require schema-safe TOML.
 - `triage` — Triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
 - `typescript` — Use when authoring or reviewing TypeScript code that requires strict type safety, explicit module contracts, and predictable runtime boundaries.
-- `uv-python-project-setup` — Python project initialization and dependency management with uv. Use when starting new CLI tools or libraries, configuring pyproject.toml, managing virtual environments, or setting up development workflows. Covers project types, dependency commands, and environment synchronization.
+- `uv-python-project-setup` — Create and configure Python projects with uv for dependency management, virtual environments, and reproducible workflows. Use when initializing or repairing uv-based Python project setup.
 - `vale` — Set up and verify Vale prose linting across local, pre-commit, and CI workflows. Use when users ask to install Vale, repair broken config or style sync, or enforce docs linting gates.
 - `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
-- `yaml` — Write and review YAML files with safe indentation, schema-aware structure, and low-surprise serialization.
+- `yaml` — Create and review YAML files with safe indentation, schema-aware structure, and low-surprise serialization. Use when editing YAML config or workflow files.
 
 ## Skills — Backend Platform
 
@@ -204,22 +215,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `security-best-practices` — Review code or architecture against language-specific security best practices. Use when the user explicitly wants a security best-practices review or secure-by-default guidance, not general debugging or code review.
 - `security-ownership-map` — Use this skill to analyze security ownership in a git repository by linking people, files, bus factor, and sensitive-code risk when the user explicitly wants security-focused ownership analysis from git history.
 - `security-threat-model` — Produce a repository-grounded threat model covering assets, trust boundaries, attackers, abuse paths, and mitigations. Use when the user explicitly wants AppSec threat modeling, not general architecture review.
-
-## Plugins — Plugin Factory — Skills — Code_Quality_Review
-
-- `plugin-builder` — Harden and validate Codex plugin packages with contract-grade checks before install or release. Use when the deliverable is a plugin package that needs conversion or hardening.
-
-## Plugins — Plugin Factory — Skills — Team_Automation
-
-- `plugin-router` — Route plugin requests to the right factory lane
-
-## Plugins — Skill Factory — Skills
-
-- `skill-factory-router` — Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden, install, audit, or skillify skills.
-
-## Plugins — Skill Factory — Skills — Code_Quality_Review
-
-- `skill-builder` — Analyze and harden Codex skills and plugin packages for contract quality, eval coverage, and safety compliance. Use this skill when an existing package is approaching release and needs evidence-backed validation.
 
 ## Skills System
 

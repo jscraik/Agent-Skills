@@ -8,7 +8,7 @@ interface:
 dependencies:
   tools:
     - type: "mcp"
-      value: "openaiDeveloperDocs"
+      value: "openai-docs"
       description: "OpenAI Developer Docs MCP server"
       transport: "streamable_http"
       url: "https://developers.openai.com/mcp"

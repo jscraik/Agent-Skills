@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-ASK_PATH = REPO_ROOT / "bin" / "ask"
+ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 
 
 def parse_args() -> argparse.Namespace:
@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
         "--max-lines",
         type=int,
         default=1900,
-        help="Maximum allowed line count for bin/ask.",
+        help="Maximum allowed line count for Infrastructure/bin/ask.",
     )
     return parser.parse_args()
 
@@ -116,13 +116,17 @@ def main() -> int:
     issues: list[str] = []
     if line_count > max(1, int(args.max_lines)):
         issues.append(
-            f"bin/ask exceeds max line budget ({line_count} > {args.max_lines})"
+            f"Infrastructure/bin/ask exceeds max line budget ({line_count} > {args.max_lines})"
         )
     if not _command_imports_ok(modules):
-        issues.append("bin/ask must import ask.commands.skills, ask.commands.repo, and ask.commands.plugins")
+        issues.append(
+            "Infrastructure/bin/ask must import ask.commands.skills, ask.commands.repo, and ask.commands.plugins"
+        )
     forbidden = _forbidden_imports(modules)
     if forbidden:
-        issues.append(f"bin/ask imports forbidden direct execution modules: {', '.join(forbidden)}")
+        issues.append(
+            f"Infrastructure/bin/ask imports forbidden direct execution modules: {', '.join(forbidden)}"
+        )
 
     print(f"ask_cli_modularity: lines={line_count} max={args.max_lines}")
     if issues:

@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed repository of **132 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **131 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 
@@ -12,7 +12,8 @@ A governed repository of **132 skills** for AI coding agents (Codex, Claude, Gem
 ## Quick start
 
 ```bash
-# One-time per shell: load repo environment and add ask to PATH
+# Bash-first setup (recommended): open bash, then load repo environment
+bash
 source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
 # See what's available
@@ -125,7 +126,7 @@ ask repo validate --ephemeral
 
 ## Skill graph (manual topic clusters, non-canonical)
 
-This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **132** skills (88 in `Skills/<topic-cluster>` + 5 in `.agents/skills/.system/` + 27 in `Plugins/`).
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **131** skills (103 in `Skills/**`, 26 in `Plugins/**`, and 2 in `skills-system/**`).
 
 | Topic              | Skills | Examples                                           |
 | ------------------ | ------ | -------------------------------------------------- |
@@ -141,7 +142,8 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 ```
 agent-skills/
-├── bin/ask                   # CLI entry point
+├── bin/ask                   # Stable public wrapper entry point
+├── scripts/                  # Stable wrapper entry points for canonical scripts
 ├── .agents/skills/           # Flat runtime projection (read-only)
 │
 ├── Skills/                   # All canonical skills organised by topic cluster
@@ -160,7 +162,7 @@ agent-skills/
 │   └── compound-engineering-router/
 │
 ├── Infrastructure/
-│   ├── bin/ask               # CLI entry point
+│   ├── bin/ask               # Canonical CLI implementation entrypoint (internal)
 │   ├── scripts/lib/ask/      # CLI implementation
 │   ├── GOVERNANCE/           # Runtime separation & policy
 │   └── ops/metrics/graph/    # Skill relationship data
@@ -172,6 +174,8 @@ agent-skills/
 Ownership boundaries:
 - Canonical authoring: `Skills/<topic-cluster>/**` (7 clusters: agent-ops, frontend-ui, backend-platform, product-strategy, security-ops, content-publishing, mobile-native) plus `Plugins/<plugin>/skills/**`
 - Factory mechanics: `Infrastructure/scripts/**`, validation/governance contracts
+- Root command wrappers: `bin/**` and `scripts/**` are stable wrappers that forward into `Infrastructure/**`; keep these as real files/directories (not symlinks)
+- `bin/ask` is the only public CLI entrypoint and must remain a thin forwarder to `Infrastructure/bin/ask`.
 - Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
 - Full policy: [Docs/agents/14-path-ownership-boundaries.md](Docs/agents/14-path-ownership-boundaries.md)
 
@@ -179,7 +183,7 @@ Ownership boundaries:
 
 - **[CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
 - **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
-- **[Skill Index](SKILL.md)** – All 120 canonical skills by category
+- **[Skill Index](SKILL.md)** – All 131 canonical skills by category
 - **[Implementation Review](Docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Privacy and Data Handling
@@ -189,6 +193,7 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 120 canonical total (88 Skills/ + 5 .system/ + 27 Plugins/)
+- **Skills:** 131 canonical total (103 Skills/ + 26 Plugins/ + 2 skills-system/)
+- **System skills pin:** `Infrastructure/GOVERNANCE/skills-system-upstream.lock.json` (upstream `openai/skills` `.system` ref `e940b8a86138adf03972802b990a1dfc57fcbf09`)
 - **Validation:** 28 automated checks via `ask repo validate`
 - **Compatibility:** Codex, Claude Code, Gemini/Antigravity
