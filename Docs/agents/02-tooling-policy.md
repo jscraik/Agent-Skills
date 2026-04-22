@@ -11,7 +11,7 @@
 ## Tools
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
-- Default to `zsh -lc` for shell tooling; switch to `bash` only when a script relies on bash internals.
+- Default to `bash -lc` for shell tooling in this repository. Use `zsh -lc` only when you must validate zsh-specific behavior.
 
 ## Command preflight
 - Run `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.

@@ -2,11 +2,16 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+	:
+else
+	REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"
+fi
 
 changed_only=1
 fast_mode=0
 strict_mode=0
+governance_scope="project-local"
 repo_root=""
 
 usage() {
@@ -66,6 +71,22 @@ run_optional_script() {
 	echo "[validate-codestyle] skip $script_name: package script not defined"
 }
 
+run_non_package_lane() {
+	local validate_all_mode="--ephemeral"
+	if [[ "$governance_scope" == "workspace" ]]; then
+		validate_all_mode="--persistent"
+	fi
+
+	if [[ "$fast_mode" -eq 1 ]]; then
+		echo "[validate-codestyle] skip pnpm codestyle lane: package.json not present"
+		echo "[validate-codestyle] non-package fast mode completed (scope=$governance_scope)"
+		return 0
+	fi
+
+	echo "[validate-codestyle] non-package repository detected; delegating to validate_all $validate_all_mode"
+	bash "$repo_root/Infrastructure/scripts/validate_all.sh" "$validate_all_mode"
+}
+
 while (( $# > 0 )); do
 	case "$1" in
 		--all)
@@ -87,6 +108,14 @@ while (( $# > 0 )); do
 		--repo-root)
 			repo_root="${2:-}"
 			shift 2
+			;;
+		--project-governance)
+			governance_scope="project-local"
+			shift
+			;;
+		--workspace-governance|--persistent-artifacts)
+			governance_scope="workspace"
+			shift
 			;;
 		-h|--help)
 			usage
@@ -118,8 +147,8 @@ if [[ ! -f "$repo_root/CODESTYLE.md" ]]; then
 fi
 
 if [[ ! -f "$repo_root/package.json" ]]; then
-	echo "[validate-codestyle] missing package.json; this validator expects a pnpm-managed harness repo" >&2
-	exit 1
+	run_non_package_lane
+	exit $?
 fi
 
 if [[ "$fast_mode" -eq 0 ]]; then

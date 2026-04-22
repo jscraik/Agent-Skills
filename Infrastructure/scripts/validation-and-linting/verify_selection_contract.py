@@ -15,9 +15,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 import sys
 
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-sys.path.insert(0, str(REPO_ROOT / "scripts" / "lib"))
-sys.path.insert(0, str(REPO_ROOT / "scripts" / "lifecycle-and-sync"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
 from selection_policy import policy_identity
 from ask.selection_contract import EligibleCandidate, build_decision_payload, build_goal_decision

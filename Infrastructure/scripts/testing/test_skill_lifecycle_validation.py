@@ -16,11 +16,11 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCRIPT = REPO_ROOT / "scripts" / "validation-and-linting" / "verify_skill_catalog_freshness.py"
-SHADOW_SCRIPT = REPO_ROOT / "scripts" / "validation-and-linting" / "check_plugin_skill_shadowing.sh"
-SELECTION_POLICY_SCRIPT = REPO_ROOT / "scripts" / "lifecycle-and-sync" / "selection_policy.py"
-SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "scripts" / "lifecycle-and-sync" / "skill_discovery.py"
-SYNC_SCRIPT = REPO_ROOT / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
+SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "verify_skill_catalog_freshness.py"
+SHADOW_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "check_plugin_skill_shadowing.sh"
+SELECTION_POLICY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "selection_policy.py"
+SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "skill_discovery.py"
+SYNC_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
 
 # macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
 # shell scripts in this repo. Prefer a known bash 4+ path when available.
