@@ -9,14 +9,20 @@
         "blocker_id": null,
         "command": "bin/ask plugins doctor --json",
         "drift_class": null,
-        "evidence_ref": "sha256:e00be3ce5e7f6ec12adce58c2ce19d755ca343a5d298e69dcb8be60fe9db94e7",
+        "evidence_ref": "sha256:9757bc6eea6b7a507f94182cbd1621fbd64f23857ff346c531006e10d5040e14",
         "normalized_fields": {
           "activation_plugins": [
             {
-              "cache_present": true,
-              "marketplace_source_path": "./Plugins/coderabbit",
+              "cache_present": false,
+              "marketplace_source_path": null,
+              "name": "browser-use",
+              "registered_in_marketplace": false
+            },
+            {
+              "cache_present": false,
+              "marketplace_source_path": null,
               "name": "coderabbit",
-              "registered_in_marketplace": true
+              "registered_in_marketplace": false
             },
             {
               "cache_present": true,
@@ -42,6 +48,10 @@
           "health_status": "healthy",
           "installed_plugins": [
             {
+              "name": "browser-use",
+              "path": "/Applications/Codex.app/Contents/Resources/plugins/openai-bundled/plugins/browser-use"
+            },
+            {
               "name": "coderabbit",
               "path": "plugins/coderabbit"
             },
@@ -64,17 +74,40 @@
         "subject_id": "plugins"
       },
       "plugins_status": {
+        "browser-use": {
+          "blocker_id": null,
+          "command": "bin/ask plugins status browser-use --json",
+          "drift_class": null,
+          "evidence_ref": "sha256:a07711985826df0334740d2d5d845c282863422083b5d220b88a88b3f21a77c2",
+          "normalized_fields": {
+            "activation_plugin": {
+              "cache_present": false,
+              "marketplace_source_path": null,
+              "name": "browser-use",
+              "registered_in_marketplace": false
+            },
+            "command": "plugins status browser-use --json",
+            "installed_plugin": {
+              "name": "browser-use",
+              "path": "/Applications/Codex.app/Contents/Resources/plugins/openai-bundled/plugins/browser-use"
+            },
+            "plugin_id": "browser-use",
+            "status": "success"
+          },
+          "returncode": 0,
+          "subject_id": "browser-use"
+        },
         "coderabbit": {
           "blocker_id": null,
           "command": "bin/ask plugins status coderabbit --json",
           "drift_class": null,
-          "evidence_ref": "sha256:04b22916a6d69cf41a8442437dd065978381b3b065440fe9dafb405370923076",
+          "evidence_ref": "sha256:2ee42a25556121f4ebd42822f9f7b2cadfee7e2613f3b9d70b09a18ec3f534c2",
           "normalized_fields": {
             "activation_plugin": {
-              "cache_present": true,
-              "marketplace_source_path": "./Plugins/coderabbit",
+              "cache_present": false,
+              "marketplace_source_path": null,
               "name": "coderabbit",
-              "registered_in_marketplace": true
+              "registered_in_marketplace": false
             },
             "command": "plugins status coderabbit --json",
             "installed_plugin": {
@@ -91,7 +124,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status harness-engineering --json",
           "drift_class": null,
-          "evidence_ref": "sha256:8dda689adc852b3dde8791c08f30924a28d25122fd53e0bbaf5f35b17cf0ac6e",
+          "evidence_ref": "sha256:465913a2456276e5047f07c0ec743b26942d1b871e6a85dc14ab08882d1ee177",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -114,7 +147,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status plugin-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:ac3098ba1f36e51025895df718e4d830e03c6be1f375a15f8c411f4fea30ebf2",
+          "evidence_ref": "sha256:5d2e2fd47c896b3e400ee887bcc1b7a840eae8c735342fa3f369365360a709ae",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -137,7 +170,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status skill-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:b6eac03d6a8f99a7eaa81f76a1e55ceee9170744579e0e3e36b36a91c6cb9e9a",
+          "evidence_ref": "sha256:cc28a118d5c4eac0397af6ccbffb60903c06a8cc9e150581e2d6dd9a3c26dc9d",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -158,25 +191,25 @@
         }
       },
       "repo_doctor_catalog": {
-        "blocker_id": null,
+        "blocker_id": "catalog:cc4eb19d4fe8",
         "command": "bin/ask repo doctor-catalog --strict --json",
-        "drift_class": null,
-        "evidence_ref": "sha256:6552bb4909641fd6f1377f4952311c759ca76e8db99521de0e1786e3232d3027",
+        "drift_class": "command_exit_nonzero",
+        "evidence_ref": "sha256:02f26ef7aa168bbc0e332959582d0fd3d3ed9b2dc82c2651f37f0a8f54019000",
         "normalized_fields": {
           "command": "repo doctor-catalog --strict --json",
-          "decision_status": "resolved",
-          "drift_class": null,
+          "decision_status": "blocked_catalog_parity",
+          "drift_class": "count_mismatch",
           "policy_identity": "d8f37e43ba560c95",
-          "status": "success"
+          "status": "error"
         },
-        "returncode": 0,
+        "returncode": 2,
         "subject_id": "catalog"
       },
       "repo_status": {
         "blocker_id": null,
         "command": "bin/ask repo status --json",
         "drift_class": null,
-        "evidence_ref": "sha256:c1dec8046dfea55c4982d326dddaf77fd6737b123bb84ca4597efad108ff7d0d",
+        "evidence_ref": "sha256:9fdb51c3eab0fd9a0c921500781ec044cf986eb0948bdddfc6fbabfabbe7747a",
         "normalized_fields": {
           "command": "repo status --json",
           "is_git": true,
@@ -204,37 +237,38 @@
         "blocker_id": null,
         "command": "bin/ask skills list --json",
         "drift_class": null,
-        "evidence_ref": "sha256:b123cd518e7e6b632c3f33f2820c65f0e0d13a6dc2aabce00600ca0e93d04f10",
+        "evidence_ref": "sha256:f1a8831fa1c57cd731f9c3a638cf7cc5f10253e786ee52f66bd8fcfeb69359be",
         "normalized_fields": {
           "command": "skills list --json",
           "sample_names": [
-            "he-router",
-            "he-code-review",
-            "he-reliability-review",
-            "he-technical-review",
-            "he-brainstorm",
-            "he-compound",
-            "he-compound-refresh",
-            "he-deepen-plan",
-            "he-deepen-spec",
-            "he-fix-bugs"
+            "circleci-deployment-gates",
+            "playwright",
+            "plugin-installer",
+            "plugin-creator",
+            "skill-installer",
+            "skill-creator",
+            "agent-native-audit",
+            "agents-md",
+            "alignment-checkpoint",
+            "autoresearch"
           ],
-          "skill_count": 131,
+          "skill_count": 133,
           "status": "success"
         },
         "returncode": 0,
         "subject_id": "skills"
       }
     },
-    "command_checks_digest": "26f3a3a143eda48e328c9cdb7baf8cc1db9d2c4bc33737c1f46f3195102db32b",
-    "discovery_identity": "eb09a05cf5473d43e6444e95ce9689126d30524fcd3e9605b1af4813cfca71cb",
+    "command_checks_digest": "ee8f32fe1e78c8b8ef39d6a8ce914654514e91c6b5efad7e5b275c4022391c94",
+    "discovery_identity": "9a6ba55f95024bf99bda6a7dc816bc7badb98d1bf4897cdc40dbc90045270309",
     "duplicate_shadow_drift_classes": {
       "plugins_doctor": null,
-      "repo_doctor_catalog": null
+      "repo_doctor_catalog": "command_exit_nonzero"
     },
     "plugin_activation_parity": {
       "cache_absent": false,
       "checked_plugins": [
+        "browser-use",
         "coderabbit",
         "harness-engineering",
         "plugin-factory",
@@ -242,6 +276,7 @@
       ],
       "doctor_status": "success",
       "status_blockers": {
+        "browser-use": null,
         "coderabbit": null,
         "harness-engineering": null,
         "plugin-factory": null,
@@ -251,43 +286,53 @@
     "plugin_package_root_parity": [
       {
         "asset_relpath": ".codex-plugin/plugin.json",
+        "catalog_resolution": "Infrastructure/catalog/Plugins/browser-use",
+        "consumer_id": "plugins_status.browser-use",
+        "evidence_ref": "sha256:a07711985826df0334740d2d5d845c282863422083b5d220b88a88b3f21a77c2",
+        "legacy_resolution": "./Plugins/browser-use",
+        "parity_result": "fail",
+        "plugin_id": "browser-use",
+        "selector_row_id": "browser-use:0"
+      },
+      {
+        "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/coderabbit",
         "consumer_id": "plugins_status.coderabbit",
-        "evidence_ref": "sha256:04b22916a6d69cf41a8442437dd065978381b3b065440fe9dafb405370923076",
+        "evidence_ref": "sha256:2ee42a25556121f4ebd42822f9f7b2cadfee7e2613f3b9d70b09a18ec3f534c2",
         "legacy_resolution": "./Plugins/coderabbit",
         "parity_result": "fail",
         "plugin_id": "coderabbit",
-        "selector_row_id": "coderabbit:0"
+        "selector_row_id": "coderabbit:1"
       },
       {
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/harness-engineering",
         "consumer_id": "plugins_status.harness-engineering",
-        "evidence_ref": "sha256:8dda689adc852b3dde8791c08f30924a28d25122fd53e0bbaf5f35b17cf0ac6e",
+        "evidence_ref": "sha256:465913a2456276e5047f07c0ec743b26942d1b871e6a85dc14ab08882d1ee177",
         "legacy_resolution": "./Plugins/harness-engineering",
         "parity_result": "fail",
         "plugin_id": "harness-engineering",
-        "selector_row_id": "harness-engineering:1"
+        "selector_row_id": "harness-engineering:2"
       },
       {
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/plugin-factory",
         "consumer_id": "plugins_status.plugin-factory",
-        "evidence_ref": "sha256:ac3098ba1f36e51025895df718e4d830e03c6be1f375a15f8c411f4fea30ebf2",
+        "evidence_ref": "sha256:5d2e2fd47c896b3e400ee887bcc1b7a840eae8c735342fa3f369365360a709ae",
         "legacy_resolution": "./Plugins/plugin-factory",
         "parity_result": "fail",
         "plugin_id": "plugin-factory",
-        "selector_row_id": "plugin-factory:2"
+        "selector_row_id": "plugin-factory:3"
       },
       {
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/skill-factory",
         "consumer_id": "plugins_status.skill-factory",
-        "evidence_ref": "sha256:b6eac03d6a8f99a7eaa81f76a1e55ceee9170744579e0e3e36b36a91c6cb9e9a",
+        "evidence_ref": "sha256:cc28a118d5c4eac0397af6ccbffb60903c06a8cc9e150581e2d6dd9a3c26dc9d",
         "legacy_resolution": "./Plugins/skill-factory",
         "parity_result": "fail",
         "plugin_id": "skill-factory",
-        "selector_row_id": "skill-factory:3"
+        "selector_row_id": "skill-factory:4"
       }
     ],
     "policy_identity": "d8f37e43ba560c95",
@@ -303,6 +348,7 @@
     "writer_authority_map": {
       "plugins_doctor": "plugins",
       "plugins_status": [
+        "browser-use",
         "coderabbit",
         "harness-engineering",
         "plugin-factory",
