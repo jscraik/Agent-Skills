@@ -14,13 +14,12 @@ ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 
 def parse_args() -> argparse.Namespace:
     """
-    Parse command-line arguments for the modularity verifier.
+    Create and parse command-line arguments for verifying the ask CLI modularity.
     
-    Parameters:
-        None
+    Adds a `--max-lines` option to control the maximum allowed line count for Infrastructure/bin/ask (default 1900).
     
     Returns:
-        args (argparse.Namespace): Parsed arguments with attribute `max_lines` (int) specifying the maximum allowed line count for bin/ask (default 1700).
+        argparse.Namespace: Parsed arguments with attribute `max_lines` (int) specifying the maximum allowed line count for Infrastructure/bin/ask.
     """
     parser = argparse.ArgumentParser(description="Validate ask CLI modularity constraints.")
     parser.add_argument(
@@ -92,12 +91,12 @@ def _forbidden_imports(modules: set[str]) -> list[str]:
 
 def main() -> int:
     """
-    Verify modularity constraints of the bin/ask entrypoint and report any violations.
+    Verify modularity constraints of the Infrastructure/bin/ask entrypoint and report any violations.
     
-    Checks include a configurable maximum line count, presence of required command imports, and absence of forbidden direct-execution modules. Prints a summary line and any issues; returns an exit code indicating the result.
+    Checks a configurable maximum line count, required command imports, and absence of forbidden direct-execution modules. Prints a summary line and any issues.
     
     Returns:
-        int: `0` if all checks pass, `1` if the entrypoint is missing or any check fails.
+        int: `0` if all checks pass, `1` if the entrypoint is missing, parsing fails, or any check fails.
     """
     args = parse_args()
     if not ASK_PATH.exists():

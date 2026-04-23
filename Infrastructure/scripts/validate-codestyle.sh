@@ -14,6 +14,7 @@ strict_mode=0
 governance_scope="project-local"
 repo_root=""
 
+# usage prints the help message describing command-line options and behavior for scripts/validate-codestyle.sh.
 usage() {
 	cat <<'USAGE'
 Usage: scripts/validate-codestyle.sh [options]
@@ -21,12 +22,15 @@ Usage: scripts/validate-codestyle.sh [options]
 Fail-closed codestyle validation for harness-managed repositories.
 
 Options:
-  --all              Run full test coverage in --fast mode
-  --changed-only     Prefer changed-file validation in --fast mode (default)
-  --strict           Fail when optional fast-mode fallbacks are needed
-  --fast             Run lint + docs + typecheck + tests instead of the full check bundle
-  --repo-root PATH   Run checks in a specific repository root
-  -h, --help         Show this help text
+  --all                      Run full test coverage in --fast mode
+  --changed-only             Prefer changed-file validation in --fast mode (default)
+  --strict                   Fail when optional fast-mode fallbacks are needed
+  --fast                     Run lint + docs + typecheck + tests instead of the full check bundle
+  --repo-root PATH           Run checks in a specific repository root
+  --project-governance       Use project-local governance scope (default)
+  --workspace-governance     Use workspace-level governance scope
+  --persistent-artifacts     Equivalent to --workspace-governance
+  -h, --help                 Show this help text
 USAGE
 }
 
@@ -55,6 +59,7 @@ run_required_script() {
 	run_script "$script_name"
 }
 
+# run_optional_script runs the package script named by its first argument if present in package.json; if the script is missing it exits with status 1 when strict_mode is 1, otherwise prints a skip message.
 run_optional_script() {
 	local script_name="$1"
 
@@ -71,6 +76,7 @@ run_optional_script() {
 	echo "[validate-codestyle] skip $script_name: package script not defined"
 }
 
+# run_non_package_lane delegates validation for repositories that lack package.json to Infrastructure/scripts/validate_all.sh, selecting `--ephemeral` or `--persistent` based on `governance_scope`; in `fast_mode` it prints a skip message and returns success.
 run_non_package_lane() {
 	local validate_all_mode="--ephemeral"
 	if [[ "$governance_scope" == "workspace" ]]; then
@@ -136,11 +142,6 @@ fi
 cd "$repo_root"
 echo "[validate-codestyle] repo root: $repo_root"
 
-if ! command -v pnpm >/dev/null 2>&1; then
-	echo "[validate-codestyle] missing required binary: pnpm" >&2
-	exit 1
-fi
-
 if [[ ! -f "$repo_root/CODESTYLE.md" ]]; then
 	echo "[validate-codestyle] missing CODESTYLE.md" >&2
 	exit 1
@@ -149,6 +150,11 @@ fi
 if [[ ! -f "$repo_root/package.json" ]]; then
 	run_non_package_lane
 	exit $?
+fi
+
+if ! command -v pnpm >/dev/null 2>&1; then
+	echo "[validate-codestyle] missing required binary: pnpm" >&2
+	exit 1
 fi
 
 if [[ "$fast_mode" -eq 0 ]]; then

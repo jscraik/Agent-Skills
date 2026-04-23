@@ -20,6 +20,15 @@ _TARGET_PATH = (
 
 
 def _load_target_module() -> ModuleType:
+    """
+    Load and return the target implementation module from the file at `_TARGET_PATH`.
+    
+    Returns:
+        ModuleType: The module object created from the target script.
+    
+    Raises:
+        ImportError: If a module spec or its loader cannot be created for `_TARGET_PATH`.
+    """
     spec = spec_from_file_location(
         "_verify_skills_system_upstream_lock_impl",
         _TARGET_PATH,

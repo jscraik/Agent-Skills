@@ -8,6 +8,7 @@ else
 	REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"
 fi
 
+# usage prints the help message describing usage and supported options for prepare-worktree.sh.
 usage() {
 	cat <<'USAGE'
 Usage: scripts/prepare-worktree.sh [options]

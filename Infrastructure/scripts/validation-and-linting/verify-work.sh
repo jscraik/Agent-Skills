@@ -14,6 +14,7 @@ strict_mode=0
 governance_scope="project-local"
 repo_root=""
 
+# usage prints the help message describing supported command-line options for verify-work.sh.
 usage() {
 	cat <<'USAGE'
 Usage: scripts/validation-and-linting/verify-work.sh [options]
