@@ -28,8 +28,8 @@
 ## Package command map
 - Repository root is configuration-oriented and has no package manager install step.
 - Verified npm package roots from lockfiles:
-  - `frontend/stitch-react-components/`
-  - `product/content/video-transcript-downloader/`
+  - `Skills/content-publishing/video-transcript-downloader/`
+  - `Skills/frontend-ui/ui-ux-creative-coding/`
 - Use per-package npm commands at those roots:
   - `npm --prefix <path> install`
   - `npm --prefix <path> run <script>`

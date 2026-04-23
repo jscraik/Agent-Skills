@@ -70,6 +70,6 @@ The source prompts referenced runtime-specific preview methods for later executi
 
 Preserved compatibility guidance:
 - if the execution runtime provides a dedicated browser review subagent, note that it may be used to render and compare prototype HTML
-- in Codex- or Claude-style local runtimes, note that standalone HTML prototypes should be directly openable in a browser without a build step
+- in Codex- or Codex-style local runtimes, note that standalone HTML prototypes should be directly openable in a browser without a build step
 
 Do not build or open the prototypes during the planning stage unless the user explicitly changes the task from planning to execution.

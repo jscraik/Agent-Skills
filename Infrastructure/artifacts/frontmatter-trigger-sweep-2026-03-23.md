@@ -2,7 +2,7 @@
 
 Date: 2026-03-23
 Mode: improve
-Scope: canonical skill files only; excluded generated projections under `skills-antigravity/` and plugin copies under `Plugins/`
+Scope: canonical skill files only; excluded generated projections under `skills-codex/` and plugin copies under `Plugins/`
 
 ### Goal
 

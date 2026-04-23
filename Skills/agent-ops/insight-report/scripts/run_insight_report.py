@@ -9,7 +9,7 @@ DATA SOURCE NOTES:
 - ~/.agents/otel-collector/ — Tool spans (requires CODEX_OTEL_ENABLED=1)
 
 Codex runs tools server-side for security, so detailed tool logs aren't stored 
-locally like Claude Code's ~/.claude/projects/ format. This report focuses on
+locally like Codex's ~/.codex/projects/ format. This report focuses on
 session patterns, message analysis, timing, and LLM-generated insights.
 """
 
@@ -85,7 +85,7 @@ LABEL_MAP = {
     "wrong_approach": "Wrong Approach",
     "buggy_code": "Buggy Code",
     "user_rejected_action": "User Rejected Action",
-    "claude_got_blocked": "Assistant Got Blocked",
+    "codex_got_blocked": "Assistant Got Blocked",
     "user_stopped_early": "User Stopped Early",
     "wrong_file_or_location": "Wrong File/Location",
     "excessive_changes": "Excessive Changes",
@@ -421,7 +421,7 @@ def detect_multi_clauding(sessions):
     
     all_messages.sort(key=lambda x: x['ts'])
     
-    multi_claude_pairs = set()
+    multi_codex_pairs = set()
     messages_during = set()
     
     window_start = 0
@@ -440,7 +440,7 @@ def detect_multi_clauding(sessions):
                 between = all_messages[j]
                 if between['session_id'] != msg['session_id']:
                     pair = tuple(sorted([msg['session_id'], between['session_id']]))
-                    multi_claude_pairs.add(pair)
+                    multi_codex_pairs.add(pair)
                     messages_during.add(f"{all_messages[prev_index]['ts']}:{msg['session_id']}")
                     messages_during.add(f"{between['ts']}:{between['session_id']}")
                     messages_during.add(f"{msg['ts']}:{msg['session_id']}")
@@ -449,12 +449,12 @@ def detect_multi_clauding(sessions):
         session_last_index[msg['session_id']] = i
     
     sessions_with_overlaps = set()
-    for pair in multi_claude_pairs:
+    for pair in multi_codex_pairs:
         sessions_with_overlaps.add(pair[0])
         sessions_with_overlaps.add(pair[1])
     
     return {
-        'overlap_events': len(multi_claude_pairs),
+        'overlap_events': len(multi_codex_pairs),
         'sessions_involved': len(sessions_with_overlaps),
         'user_messages_during': len(messages_during)
     }
@@ -781,7 +781,7 @@ For each recurring friction pattern in the data, create an execution block with:
 1. IMPACT - Why this matters (time lost, sessions wasted)
 2. ROOT CAUSE - What's actually happening
 3. FIX (shell command) - Exact command to run
-4. CLAUDE/CODEX COMMAND - Prompt to auto-fix
+4. CODEX/CODEX COMMAND - Prompt to auto-fix
 5. ENFORCE - Hook/rule/config to prevent recurrence
 6. VERIFY - Metric to confirm fix worked
 

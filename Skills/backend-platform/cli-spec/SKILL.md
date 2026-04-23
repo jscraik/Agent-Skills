@@ -151,7 +151,6 @@ Use these headings in order:
 | Skill | When to use together |
 |---|---|
 | [[ce-spec]] | Use when the CLI is a front for a broader system spec |
-| [[agent-native-architecture]] | Ensure the CLI fits into an autonomous workflow |
 | [[docs-expert]] | Generate user-facing docs from the technical contract |
 
 **Topic map:** [[backend-platform]]

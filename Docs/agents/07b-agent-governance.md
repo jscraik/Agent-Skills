@@ -4,7 +4,7 @@
 - [Prompting contract](#prompting-contract)
 - [Coordination constraints](#coordination-constraints)
 - [Communication checks](#communication-checks)
-- [Claude Invocation Trust Boundary](#claude-invocation-trust-boundary)
+- [Codex Invocation Trust Boundary](#codex-invocation-trust-boundary)
 - [PR approval gates](#pr-approval-gates)
 
 ## Prompting contract
@@ -20,11 +20,11 @@
 - If a user names a tool or skill, verify it exists before selecting fallback behavior.
 - Verify documented file paths exactly before commit (for example `.diagram/` path references).
 
-## Claude Invocation Trust Boundary
-- Claude GitHub Actions invocation is trust-gated to `author_association` values `OWNER`, `MEMBER`, or `COLLABORATOR`.
+## Codex Invocation Trust Boundary
+- Codex GitHub Actions invocation is trust-gated to `author_association` values `OWNER`, `MEMBER`, or `COLLABORATOR`.
 - Applicable events: `issue_comment`, `pull_request_review_comment`, `pull_request_review`, and `issues`.
 - `issues` is restricted to `opened` only; `assigned` is intentionally excluded to prevent assigner/author-association bypasses.
-- Canonical policy source: `.github/workflows/claude.yml` and [AI Review Governance](/Docs/agents/11-ai-review-governance.md).
+- Canonical policy source: `.github/workflows/codex.yml` and [AI Review Governance](/Docs/agents/11-ai-review-governance.md).
 
 ## PR approval gates
 - Treat `authoring-family-gate` as a governance approval gate for skill authoring family changes.

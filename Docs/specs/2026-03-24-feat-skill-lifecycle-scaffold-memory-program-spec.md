@@ -80,7 +80,7 @@ Owned by this spec:
 Not owned by this spec:
 - implementation order or execution milestones
 - broad repo IA or documentation redesign
-- runtime behavior changes in Codex, Claude, or Gemini
+- runtime behavior changes in Codex, Codex, or OpenAI
 - visual UX, design tokens, or interaction-state design
 - retrospective reporting surfaces such as dashboards unless a later artifact chooses them explicitly
 

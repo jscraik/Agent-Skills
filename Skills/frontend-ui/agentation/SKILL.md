@@ -84,7 +84,7 @@ metadata:
 ## See Also
 | Skill | When to use |
 |---|---|
-| [[agent-browser]] | Run deterministic browser interactions against the app once Agentation wiring is healthy |
+| [[playwright-interactive]] | Run deterministic browser interactions against the app once Agentation wiring is healthy |
 | [[playwright-interactive]] | Use a persistent Playwright session for iterative local inspection or debugging |
 | [[frontend-ui-design]] | Improve or redesign the frontend surface after the integration path is verified |
 | [[visual-explainer]] | Turn the integration state machine or failure path into a visual handoff artifact |

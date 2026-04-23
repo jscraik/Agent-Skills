@@ -16,7 +16,7 @@ inputs:
   - specific implementation question to answer from docs
   - optional version or environment constraints
   - optional Context7 CLI intent (`search|install|list|remove|info|suggest|generate|setup|login|whoami|logout`)
-  - optional install target flags (`--claude|--cursor|--universal|--antigravity|--global|--all`)
+  - optional install target flags (`--codex|--cursor|--universal|--codex|--global|--all`)
   - optional execution path preference (`cli_primary` by default)
 outputs:
   - resolved Context7 library id used for lookup

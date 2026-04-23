@@ -1,12 +1,12 @@
-# Claude-to-Codex Terminology Map
+# Codex-to-Codex Terminology Map
 
-Use this map during conversion to avoid carrying Claude-specific naming into Codex plugins.
+Use this map during conversion to avoid carrying Codex-specific naming into Codex plugins.
 
 ## Required mappings
 
-| Claude-oriented term | Codex term | Enforcement |
+| Codex-oriented term | Codex term | Enforcement |
 | --- | --- | --- |
-| `.claude-plugin/plugin.json` | `.codex-plugin/plugin.json` | Must emit Codex manifest. Validator fails if Codex manifest is missing. |
+| `.codex-plugin/plugin.json` | `.codex-plugin/plugin.json` | Must emit Codex manifest. Validator fails if Codex manifest is missing. |
 | `commands` manifest key | `skills` surface plus optional `interface.defaultPrompt` | Validator fails on legacy command keys in `plugin.json`. |
 | `slash commands` | `skills` | Reword docs/evals to skill terminology. |
 | `prompts/` | `skills/` plus optional `interface.defaultPrompt` | Treat legacy prompt packs as migration input, not a runtime package surface. |
@@ -36,5 +36,5 @@ Use this map during conversion to avoid carrying Claude-specific naming into Cod
 - OpenAI plugin creator skill and marketplace schema:
   - `openai/Plugins/.agents/skills/plugin-creator/SKILL.md`
   - `openai/Plugins/.agents/Plugins/marketplace.json`
-- Claude plugin package layout and manifest surface:
-  - `anthropics/claude-plugins-official/Plugins/skill-creator/.claude-plugin/plugin.json`
+- Codex plugin package layout and manifest surface:
+  - `anthropics/codex-plugins-official/Plugins/skill-creator/.codex-plugin/plugin.json`

@@ -1,6 +1,0 @@
-interface:
-  display_name: Changelog
-  short_description: Create engaging changelogs for recent merges to main branch with
-    a witty, enthusiastic marketing voice
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

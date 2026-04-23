@@ -45,7 +45,7 @@ cases:
         - "printenv"
     acceptance:
       - type: regex
-        value: "(?i)(AGENTS\\.md|CLAUDE\\.md)"
+        value: "(?i)(AGENTS\\.md|CODEX\\.md)"
       - type: regex
         value: "(?i)(citation|provenance)"
       - type: regex
@@ -177,7 +177,7 @@ cases:
       - type: regex
         value: "(?i)(path|workspace|repo)"
       - type: regex
-        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|governance|policy)"
+        value: "(?i)(AGENTS\\.md|CODEX\\.md|governance|policy)"
       - type: regex
         value: "(?i)(sensitivity|confidential|internal|public)"
       - type: regex

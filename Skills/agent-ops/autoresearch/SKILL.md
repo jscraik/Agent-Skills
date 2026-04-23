@@ -121,7 +121,7 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 |---|---|
 | [[skill-creator]] | Create or reshape a single skill package before entering a loop. |
 | [[plugin-builder]] | Harden or validate one plugin package outside a research loop. |
-| [[code-review]] | Run an adversarial review pass on the final diff before accepting loop outcomes. |
+| [[he-code-review]] | Run an adversarial review pass on the final diff before accepting loop outcomes. |
 
 **Topic map:** `[[agent-ops]]`
 

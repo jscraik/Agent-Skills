@@ -1,9 +1,12 @@
 # Product Specs Skills
 
-Specification-focused product skill directory.
+Specification-focused product strategy skill directory.
 
 ## Table of Contents
 - [Skills](#skills)
 
 ## Skills
-- [product-spec](/product/specs/product-spec/SKILL.md)
+- [architecture-interview](/Skills/product-strategy/architecture-interview/SKILL.md)
+- [deep-interview](/Skills/product-strategy/deep-interview/SKILL.md)
+- [interview-me](/Skills/product-strategy/interview-me/SKILL.md)
+- [chatgpt-apps](/Skills/product-strategy/chatgpt-apps/SKILL.md)

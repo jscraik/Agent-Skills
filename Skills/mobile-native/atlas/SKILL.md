@@ -88,8 +88,8 @@ metadata:
 | Skill | When to use together |
 |---|---|
 | [[openai-docs]] | Reference official ChatGPT documentation for Atlas features |
-| [[agent-browser]] | Complement Atlas AppleScript control with browser automation |
-| [[notebooklm]] | Cross-reference Atlas conversations with NotebookLM notebooks |
+| [[playwright-interactive]] | Complement Atlas AppleScript control with browser automation |
+| [[llm-wiki]] | Cross-reference Atlas conversations with a local markdown knowledge base |
 
 **Topic map:** [[mobile-native]]
 

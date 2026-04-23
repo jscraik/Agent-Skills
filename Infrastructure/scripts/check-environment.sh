@@ -73,7 +73,7 @@ fi
 # pinned runtime versions and required approval posture, not only the caller
 # shell's PATH.
 eval "$(mise activate bash)"
-export CLAUDE_APPROVAL_POSTURE="${CLAUDE_APPROVAL_POSTURE:-require}"
+export CODEX_APPROVAL_POSTURE="${CODEX_APPROVAL_POSTURE:-require}"
 
 required_mise_tools=("node" "pnpm" "python" "uv" "cargo:prek" "npm:@brainwav/diagram" "npm:@argos-ci/cli" "cosign" "cloudflared" "npm:vitest" "ruff" "npm:eslint" "npm:agent-browser" "npm:agentation" "npm:agentation-mcp" "npm:@mermaid-js/mermaid-cli" "npm:@brainwav/rsearch" "npm:@brainwav/wsearch-cli" "npm:beautiful-mermaid" "npm:markdownlint-cli2" "npm:semver" "npm:wrangler" "semgrep" "trivy" "vale")
 for tool in "${required_mise_tools[@]}"; do

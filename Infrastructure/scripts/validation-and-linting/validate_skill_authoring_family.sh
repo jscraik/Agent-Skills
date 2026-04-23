@@ -144,13 +144,6 @@ ce_shared_approval_ref="../shared/references/approval-flow.md"
 # ---------------------------------------------------------------------------
 runner_name="${SKILL_FAMILY_RUNNER:-codex}"
 runner_args=(--runner "$runner_name")
-if [[ "$runner_name" == "gemini" ]]; then
-  runner_args+=(--gemini-output-format json)
-  gemini_bin="${SKILL_FAMILY_GEMINI_BIN:-}"
-  if [[ -n "$gemini_bin" ]]; then
-    runner_args+=(--gemini-bin "$gemini_bin")
-  fi
-fi
 
 # ---------------------------------------------------------------------------
 # Release-readiness mode validation

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Autofix"
-  short_description: "Apply unresolved CodeRabbit PR review comments through an approval-aware fix loop when the..."

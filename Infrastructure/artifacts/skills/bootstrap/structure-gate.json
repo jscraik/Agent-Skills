@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-22T18:51:03Z",
+  "generated_at": "2026-04-23T12:45:09Z",
   "skill": "Skills/agent-ops/bootstrap/SKILL.md",
   "skill_path": "Skills/agent-ops/bootstrap/SKILL.md",
   "name": "bootstrap",

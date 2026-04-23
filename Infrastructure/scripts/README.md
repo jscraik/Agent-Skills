@@ -26,7 +26,7 @@ Index for repository automation, validation, and maintenance scripts.
 - `check_path_ownership_boundaries.sh`
   - Guardrails:
     - default local scope checks staged diff only;
-    - blocks direct edits to derived runtime/projection surfaces (`.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**`);
+    - blocks direct edits to derived runtime/projection surfaces (`.agents/**`, `.agents/skills/**`, `Plugins/cache/**`, `runtime/**`);
     - set `PATH_OWNERSHIP_GUARD_SCOPE=working` for full working-tree checks;
     - set `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1` only for explicit projection-refresh lanes.
 - `projection_integrity.py`

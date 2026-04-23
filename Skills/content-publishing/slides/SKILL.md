@@ -134,7 +134,7 @@ If a dependency is missing, report the exact install gap before continuing.
 | [[beautiful-mermaid]] | Embed high-quality Mermaid diagrams in slide decks |
 | [[visual-explainer]] | Use when a scrollable HTML page is better than slides |
 | [[remotion]] | Animate a slide deck as a Remotion video |
-| [[product-spec]] | Turn a product spec into a presentation deck |
+| [[he-plan]] | Turn an implementation plan into a presentation deck |
 | [[imagegen]] | Generate illustrative images for slide backgrounds |
 
 **Topic map:** [[frontend-ui]]

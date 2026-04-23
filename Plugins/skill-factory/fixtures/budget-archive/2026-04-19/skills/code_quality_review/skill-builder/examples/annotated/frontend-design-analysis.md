@@ -217,7 +217,7 @@ and cookie-cutter design that lacks context-specific character.
 - Names specific bad patterns (Inter, Roboto, purple gradients)
 - Identifies problem ("cookie-cutter design that lacks context-specific character")
 
-This is critical - tells Claude explicitly what NOT to do.
+This is critical - tells Codex explicitly what NOT to do.
 
 ---
 
@@ -251,12 +251,12 @@ vision well.
 - Provides guidance for both extremes
 - "Elegance comes from executing the vision well" (principle)
 
-This is crucial - helps Claude know when to be elaborate vs. restrained.
+This is crucial - helps Codex know when to be elaborate vs. restrained.
 
 ---
 
 ```markdown
-Remember: Claude is capable of extraordinary creative work. Don't hold back,
+Remember: Codex is capable of extraordinary creative work. Don't hold back,
 show what can truly be created when thinking outside the box and committing
 fully to a distinctive vision.
 ```
@@ -337,7 +337,7 @@ Five clear categories (Typography, Color, Motion, Spatial, Backgrounds)
 Easy to reference during execution
 
 ### 5. **Complexity Guidance**
-Tells Claude when to be elaborate (maximalist) vs. restrained (minimalist)
+Tells Codex when to be elaborate (maximalist) vs. restrained (minimalist)
 Prevents mismatch between vision and implementation
 
 ### 6. **Empowering Tone Throughout**
@@ -400,7 +400,7 @@ From studying frontend-design, we learn:
 7. **Be opinionated** - strong stances guide better than weak suggestions
 8. **Stay concise** - 43 lines of high-value content beats 200 lines of fluff
 9. **Provide concrete vocabulary** - "gradient meshes, grain overlays" not "visual effects"
-10. **End on empowerment** - leave Claude energized, not constrained
+10. **End on empowerment** - leave Codex energized, not constrained
 
 ---
 

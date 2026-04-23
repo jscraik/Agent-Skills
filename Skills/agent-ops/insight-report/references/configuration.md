@@ -20,7 +20,7 @@ Environment variables and setup options for OpenAI Codex.
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama API endpoint |
 | `OLLAMA_MODEL` | unset | Default Ollama model for local inference |
 
-**Note:** Unlike Claude Code, Codex does NOT use `CODEX_OTEL_ENABLED` or `OPENAI_TELEMETRY_ENABLED` environment variables. Telemetry is controlled via feature flags.
+**Note:** Unlike Codex, Codex does NOT use `CODEX_OTEL_ENABLED` or `OPENAI_TELEMETRY_ENABLED` environment variables. Telemetry is controlled via feature flags.
 
 ## Telemetry Setup
 
@@ -201,12 +201,12 @@ OpenAI Codex's default privacy model:
 - **Server-side**: Tool executions (not logged locally)
 - **Always local**: LLM analysis via Ollama (no data leaves your machine)
 
-## Key Differences from Claude Code
+## Key Differences from Codex
 
-| Feature | Claude Code | OpenAI Codex |
+| Feature | Codex | OpenAI Codex |
 |---------|-------------|--------------|
-| Config file | `~/.claude/settings.json` | `~/.codex/config.toml` |
-| Headless | `claude -p "prompt"` | `codex exec "prompt"` |
+| Config file | `~/.codex/settings.json` | `~/.codex/config.toml` |
+| Headless | `codex -p "prompt"` | `codex exec "prompt"` |
 | Telemetry env | `CODEX_OTEL_ENABLED=1` | Feature flag: `general_analytics` |
-| Tool logs | `~/.claude/projects/` | Server-side (not local) |
-| Hooks | `CLAUDE.md` hooks | `codex_hooks` feature flag |
+| Tool logs | `~/.codex/projects/` | Server-side (not local) |
+| Hooks | `AGENTS.md` hooks | `codex_hooks` feature flag |

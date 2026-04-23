@@ -11,7 +11,6 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 - [Quick Start](#quick-start)
 - [Unified Interface](#unified-interface-ask)
 - [Robot Mode](#robot-mode)
-- [Agent-Specific Guidance](#agent-specific-guidance)
 - [Testing](#testing)
 - [Shell Scripting](#shell-scripting)
 - [Git Workflow](#git-workflow)
@@ -38,7 +37,7 @@ ask skills audit <path>  # Audit before editing
 
 ## Unified Interface: `ask`
 
-All agents (Gemini, Codex, Claude) MUST use `bin/ask` for repo operations.
+All agents MUST use `bin/ask` for repo operations.
 
 | Task | Command |
 |------|---------|
@@ -67,13 +66,6 @@ Behavior contract:
 **Examples (needs clarification):**
 - `ask status --robot` → error explains ambiguity (`repo status` vs `plugins status`) with concrete examples.
 - `ask skills audit --robot` → error explains missing args and shows correct `skills audit` forms.
-
-## Agent-Specific Guidance
-
-| File | Purpose |
-|------|---------|
-| [CLAUDE.md](./CLAUDE.md) | Claude Code specific (AI artifacts, PR workflow) |
-| [GEMINI.md](./GEMINI.md) | Gemini/Antigravity notes |
 
 ## Testing
 
@@ -128,8 +120,6 @@ python3 -m http.server  # in relevant directory
 
 ## See Also
 
-- [CLAUDE.md](./CLAUDE.md) - Claude-specific governance
-- [GEMINI.md](./GEMINI.md) - Gemini-specific notes
 - `bin/ask --help` - Full CLI reference
 
 ---

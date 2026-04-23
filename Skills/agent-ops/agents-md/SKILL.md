@@ -70,6 +70,8 @@ Use this section as an adaptation guideline for generated AGENTS.md files, not r
 - Whether the repo has explicitly adopted the harness-memory convention and, if so, whether `.harness/memory/LEARNINGS.md` is part of the required operating surface.
 - Local Memory policy expectations and whether required-mode checks are genuinely part of the repo standard.
 - Project Brain expectations, including whether `instructions/project-brain.md` exists, whether a root-visible Project Brain section is expected, and whether a bootstrap helper such as `Infrastructure/scripts/init-project-brain.sh` is part of the documented workflow.
+- Whether `FORJAMIE.md` is still a live operator handoff file in this repo and whether AGENTS/instruction edits must update it before closeout without committing it.
+- Whether the current AGENTS surface already enforces a memory contract (`.harness/memory/LEARNINGS.md`, Project Brain `.harness/**`, and Local Memory linkage) that must be preserved during refactor.
 - Optional supplemental context files, such as `Learning.md` or `Learnings.md`, only when they exist and are intended for operators.
 
 ## Discovery interview
@@ -167,10 +169,11 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
    - guidance still up to date with current scripts, paths, and workflow entrypoints,
    - and guidance disclosed in the correct file instead of hidden in the wrong scope or duplicated across surfaces.
 5. Identify contradictions, duplicate guidance, stale guidance, and places where linked docs are being mistaken for auto-loaded instructions.
-6. Write minimal root AGENTS, reserve overrides for genuinely narrower scopes, and link deeper docs for progressive disclosure.
-7. Create or update missing required instruction files when repo evidence shows they belong in the active instruction surface.
-8. Add table of contents for generated docs.
-9. Validate links, commands, discovery behavior, instruction consistency, and coverage of the required instruction surface.
+6. Explicitly classify live memory surfaces (`.harness/memory/LEARNINGS.md`, `FORJAMIE.md`, Project Brain + Local Memory). If a surface is live by repo evidence or user request, carry it forward as enforced guidance during refactor.
+7. Write minimal root AGENTS, reserve overrides for genuinely narrower scopes, and link deeper docs for progressive disclosure.
+8. Create or update missing required instruction files when repo evidence shows they belong in the active instruction surface.
+9. Add table of contents for generated docs.
+10. Validate links, commands, discovery behavior, instruction consistency, and coverage of the required instruction surface.
 
 ## Validation
 
@@ -181,6 +184,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Confirm required-path guidance only names directories that exist or are explicit repo policy.
 - Confirm Local Memory requirements are present only when requested or verified by repo policy.
 - Confirm Project Brain guidance is present when requested or when `instructions/project-brain.md` exists in the target scope, and confirm linked paths/scripts resolve before insertion.
+- If the repo has an adopted memory surface contract, confirm final AGENTS guidance still enforces `.harness/memory/LEARNINGS.md`, live `FORJAMIE.md` handling, and Project Brain + Local Memory linkage (or documents an explicit approved replacement).
 - Confirm discovery guidance matches official behavior: `AGENTS.override.md` wins within a directory, fallback names require config, empty files are ignored, and combined project docs are capped by `project_doc_max_bytes`.
 - Confirm each required instruction file for the chosen surface is either:
   - present and current,
@@ -212,10 +216,10 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 - Include `## Troubleshooting` when package-install/auth incidents are in scope, requiring immediate `.npmrc` token configuration checks for npm 404/auth failures.
 - Keep `Required tooling` and `Required repo paths` limited to what the repo actually needs.
 - Keep architecture-diagram paths repo-specific: mention `.diagram/`, `.diagrams/`, or another diagram directory only when that exact path is documented or verified in the repo.
-- Keep `.harness/memory/LEARNINGS.md` opt-in at the repo level unless the repo has explicitly adopted the harness-memory convention.
-- Keep `Local Memory policy` opt-in unless the repo or user explicitly makes it required.
-- Keep `Project Brain` guidance opt-in unless the repo or user explicitly makes it part of the operating surface; when present, keep the root section concise and route detail to `instructions/project-brain.md`.
-- Treat `FORJAMIE.md` as legacy or supplemental unless repo evidence shows it is still a live fallback instruction file.
+- Keep `.harness/memory/LEARNINGS.md` opt-in at the repo level unless the repo has explicitly adopted the harness-memory convention; once adopted, preserve it as an enforced instruction surface during refactors.
+- Keep `Local Memory policy` opt-in unless the repo or user explicitly makes it required; once required, preserve explicit enforcement wording.
+- Keep `Project Brain` guidance opt-in unless the repo or user explicitly makes it part of the operating surface; when present, keep the root section concise, route detail to `instructions/project-brain.md`, and preserve the Project Brain + Local Memory linkage.
+- Treat `FORJAMIE.md` as legacy or supplemental unless repo evidence shows it is still a live fallback instruction file; when live, preserve update-before-closeout and do-not-commit handling.
 - Keep `Startup workflow` and `Supplemental context` concise and operator-focused.
 
 ## Anti-patterns
@@ -229,6 +233,7 @@ Use this section as an anti-pattern check when adapting or generating AGENTS.md 
 - **Never document file system paths as source of truth.** Paths change; agents read stale paths confidently. Describe capabilities and surface hints instead.
 - Do not paste the same `Repository rules` or `Local Memory policy` block into every repo without checking scripts, manifests, paths, and actual repo standards first.
 - Do not keep stale `FORJAMIE.md` references around once the file is gone or the repo has moved to `AGENTS.md`.
+- Do not silently drop an adopted LEARNINGS/FORJAMIE/Project Brain + Local Memory contract while "simplifying" AGENTS guidance.
 - Do not imply that arbitrary linked Markdown files are auto-discovered by Codex; only scoped AGENTS files and configured fallback filenames participate in instruction discovery.
 - Avoid repetitive, generic, cookie-cutter templates that ignore repo context.
 - Warn on conflicting package manager instructions and unresolved hierarchy conflicts.
@@ -269,6 +274,7 @@ Do not overload either level. The agent sees all merged AGENTS files. Keep each 
 - User says: "Check this project's AGENTS, CLAUDE, and GEMINI files and make sure the required instruction files exist, are current, and disclose the right canonical docs."
 - User says: "Use agents-md to audit our instruction surface, repair anything stale, and tell me which files are canonical versus legacy."
 - User says: "Update our AGENTS template so repo rules, stack detection, required tooling, required paths, Local Memory policy, and startup workflow are tailored per project instead of copied blindly."
+- User says: "Make AGENTS refactors keep LEARNINGS.md, FORJAMIE.md, and Project Brain + Local Memory enforced."
 
 ## Resource map
 

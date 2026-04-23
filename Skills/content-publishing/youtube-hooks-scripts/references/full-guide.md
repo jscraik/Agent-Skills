@@ -304,7 +304,7 @@ Every 2-4 minutes, include an **engagement beat**:
 
 **Example**:
 ```
-Idea: "Video about using Claude for code review"
+Idea: "Video about using Codex for code review"
 
 Tension: "Most AI code review content shows basic stuff.
 Real code review is nuanced—can AI actually help there?"

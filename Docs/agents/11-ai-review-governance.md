@@ -3,7 +3,7 @@
 ## Table of Contents
 - [Purpose](#purpose)
 - [Authoring-family review scope](#authoring-family-review-scope)
-- [Claude Invocation Policy](#claude-invocation-policy)
+- [Codex Invocation Policy](#codex-invocation-policy)
 - [Gate dependency policy](#gate-dependency-policy)
 - [Approval expectations](#approval-expectations)
 
@@ -23,16 +23,16 @@ Reviewers should expect this gate to enforce:
 - Structural smoke/release eval case coverage (or trusted-lane live eval execution when explicitly enabled).
 - In CI this gate runs with `SKILL_FAMILY_LOCAL_MEMORY_MODE=optional`, so local-memory preflight is advisory there; reviewers should still require all remaining contract/eval/security checks to pass.
 
-## Claude Invocation Policy
-Claude workflow invocation is restricted to trusted actors only:
+## Codex Invocation Policy
+Codex workflow invocation is restricted to trusted actors only:
 - Allowed `author_association` values: `OWNER`, `MEMBER`, `COLLABORATOR`.
 - Applies to these events: `issue_comment`, `pull_request_review_comment`, `pull_request_review`, and `issues`.
 - The `issues` trigger is restricted to `opened` events only, to avoid assigner/author ambiguity on `assigned`.
 
 Traceability:
-- Workflow file: `.github/workflows/claude.yml`
+- Workflow file: `.github/workflows/codex.yml`
 - Job condition fragment:
-  - Mention gate: `@claude` must be present in the relevant event body/title.
+  - Mention gate: `@codex` must be present in the relevant event body/title.
   - Trust gate: event-specific `author_association` must be in `["OWNER","MEMBER","COLLABORATOR"]`.
 
 ## Gate dependency policy

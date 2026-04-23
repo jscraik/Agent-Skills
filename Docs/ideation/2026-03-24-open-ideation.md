@@ -9,7 +9,7 @@ route: fresh
 
 ## Codebase Context
 
-This repo is the canonical source of truth for a large multi-runtime skill library spanning Codex, Claude Code, and Gemini. The top-level shape and README make it clear the core jobs are skill authoring, sync, routing, validation, and governance rather than ordinary application delivery.
+This repo is the canonical source of truth for a large multi-runtime skill library spanning Codex, Codex, and OpenAI. The top-level shape and README make it clear the core jobs are skill authoring, sync, routing, validation, and governance rather than ordinary application delivery.
 
 Observed leverage signals:
 - broad surface area across `auth/`, `backend/`, `frontend/`, `github/`, `interview/`, `product/`, `Skills/`, and `Skills/`

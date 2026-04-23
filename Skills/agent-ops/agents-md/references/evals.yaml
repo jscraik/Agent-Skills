@@ -225,7 +225,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so all three use a `## Quality Checks` section for TypeScript validation. In npm-based repos, require `npm run lint` and `npm run test` after TypeScript changes and confirm both pass before work is complete. Also require CI/CD work to end only after the final pipeline status is confirmed, and require multi-repo PR workflows to check merge conflicts up front and flag blocked PRs early."
+    prompt: "Update our shared AGENTS, CODEX, and OPENAI guidance so all three use a `## Quality Checks` section for TypeScript validation. In npm-based repos, require `npm run lint` and `npm run test` after TypeScript changes and confirm both pass before work is complete. Also require CI/CD work to end only after the final pipeline status is confirmed, and require multi-repo PR workflows to check merge conflicts up front and flag blocked PRs early."
     acceptance:
       - type: contains
         value: "Quality Checks"
@@ -234,7 +234,7 @@ cases:
       - type: contains
         value: "npm run test"
       - type: regex
-        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|GEMINI\\.md)"
+        value: "(?i)(AGENTS\\.md|CODEX\\.md|OPENAI\\.md)"
       - type: regex
         value: "(?i)(CI/CD Workflow|final pipeline status|authoritative pipeline)"
       - type: regex
@@ -246,7 +246,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Our AGENTS, CLAUDE, and GEMINI files already mention testing, CI, and PRs, but the wording is weak. Update the guidance so the existing rules are strengthened in place instead of duplicated."
+    prompt: "Our AGENTS, CODEX, and OPENAI files already mention testing, CI, and PRs, but the wording is weak. Update the guidance so the existing rules are strengthened in place instead of duplicated."
     acceptance:
       - type: regex
         value: "(?i)(strengthen|stronger|in place|instead of duplicating)"
@@ -259,10 +259,10 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Update our shared AGENTS, CLAUDE, and GEMINI guidance so Python environment defaults and preflight enforcement are auto-added when missing, while preserving each tool's file conventions."
+    prompt: "Update our shared AGENTS, CODEX, and OPENAI guidance so Python environment defaults and preflight enforcement are auto-added when missing, while preserving each tool's file conventions."
     acceptance:
       - type: regex
-        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|GEMINI\\.md)"
+        value: "(?i)(AGENTS\\.md|CODEX\\.md|OPENAI\\.md)"
       - type: contains
         value: "Python Environment and Dependency Management"
       - type: regex
@@ -278,10 +278,10 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Strengthen coding standards across AGENTS, CLAUDE, and GEMINI so quality gates are auto-added when missing and work cannot be marked complete until all repo-native checks pass."
+    prompt: "Strengthen coding standards across AGENTS, CODEX, and OPENAI so quality gates are auto-added when missing and work cannot be marked complete until all repo-native checks pass."
     acceptance:
       - type: regex
-        value: "(?i)(AGENTS\\.md|CLAUDE\\.md|GEMINI\\.md)"
+        value: "(?i)(AGENTS\\.md|CODEX\\.md|OPENAI\\.md)"
       - type: contains
         value: "Quality Checks"
       - type: regex

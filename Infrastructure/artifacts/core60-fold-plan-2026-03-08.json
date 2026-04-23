@@ -45,11 +45,11 @@
     "interview/interview-me",
     "interview/pm-interview",
     "product/docs/agents-md",
-    "product/docs/claude-md",
+    "product/docs/codex-md",
     "product/docs/context7",
     "product/docs/docs-expert",
     "product/docs/docs-md",
-    "product/docs/gemini-md",
+    "product/docs/openai-md",
     "product/docs/openai-docs",
     "product/domain/chatgpt-apps",
     "product/domain/chatgpt-apps-production-checklist",
@@ -167,15 +167,15 @@
       "why": "Pattern composition and React performance guidance are often consumed together."
     },
     {
-      "from": "product/docs/claude-md",
+      "from": "product/docs/codex-md",
       "to": "product/docs/agents-md",
-      "mode": "claude-target",
+      "mode": "codex-target",
       "why": "Both are agent-instruction doc refactors with target-specific output flavor."
     },
     {
-      "from": "product/docs/gemini-md",
+      "from": "product/docs/openai-md",
       "to": "product/docs/agents-md",
-      "mode": "gemini-target",
+      "mode": "openai-target",
       "why": "Same core operation as agents-md with different platform framing."
     },
     {

@@ -81,12 +81,12 @@ OPENAI_MARKETPLACE_RELATIVE_PATH = ".agents/Plugins/marketplace.json"
 PINNED_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 UV_INSTALL_HINT = "Install uv from https://docs.astral.sh/uv/getting-started/installation/."
 SOURCE_PROVIDER_MANIFESTS = (
-    ".claude-plugin/plugin.json",
+    ".codex-plugin/plugin.json",
     ".cursor-plugin/plugin.json",
     ".codex-plugin/plugin.json",
 )
 SOURCE_MARKETPLACE_MANIFESTS = (
-    ".claude-plugin/marketplace.json",
+    ".codex-plugin/marketplace.json",
     ".cursor-plugin/marketplace.json",
 )
 SOURCE_SURFACE_DEFAULTS = {
@@ -128,7 +128,7 @@ OPTIONAL_INTERFACE_STRING_FIELDS = [
 # It is validated separately because the contract allows either a string or an array of strings.
 OPTIONAL_INTERFACE_PATH_FIELDS = ["composerIcon", "logo"]
 
-CLAUDE_TO_CODEX_TERMINOLOGY = {
+CODEX_TO_CODEX_TERMINOLOGY = {
     "commands/": "skills/ plus optional interface.defaultPrompt",
     "prompts/": "skills/ plus optional interface.defaultPrompt",
     "slash commands": "skills/",
@@ -2087,8 +2087,8 @@ def _detect_hook_glue_signals(plugin_root: Path, resolved_paths: dict[str, list[
         content = _safe_read_text(hook_file)
         if not content:
             continue
-        if "CLAUDE_PLUGIN_ROOT" in content:
-            signals.append(f"{hook_file}:uses_CLAUDE_PLUGIN_ROOT")
+        if "CODEX_PLUGIN_ROOT" in content:
+            signals.append(f"{hook_file}:uses_CODEX_PLUGIN_ROOT")
         if "hookSpecificOutput" in content and "additional_context" in content:
             signals.append(f"{hook_file}:multiplexes_provider_payload_fields")
     return signals
@@ -2803,7 +2803,7 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
     for legacy_key in ("commands", "slashCommands", "slash_commands"):
         if legacy_key in payload:
             failures.append(
-                f"plugin.json uses Claude-oriented field '{legacy_key}'. "
+                f"plugin.json uses Codex-oriented field '{legacy_key}'. "
                 "Use plugin-owned `skills/` and optionally `interface.defaultPrompt` instead."
             )
 
@@ -3306,11 +3306,11 @@ def _run_validate(args: argparse.Namespace) -> int:
         if not required_path.exists():
             add_finding("error", f"Missing required file: {required_path}")
 
-    legacy_claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
-    if legacy_claude_manifest.exists():
+    legacy_codex_manifest = plugin_root / ".codex-plugin" / "plugin.json"
+    if legacy_codex_manifest.exists():
         add_finding(
             "error",
-            "Detected legacy Claude manifest `.claude-plugin/plugin.json`. "
+            "Detected legacy Codex manifest `.codex-plugin/plugin.json`. "
             "Converted Codex packages must use `.codex-plugin/plugin.json` as runtime manifest."
         )
 
@@ -3664,7 +3664,7 @@ def parse_args() -> argparse.Namespace:
     validate_parser.add_argument(
         "--show-terminology-map",
         action="store_true",
-        help="Print Claude->Codex terminology mapping reference.",
+        help="Print Codex->Codex terminology mapping reference.",
     )
     validate_parser.add_argument(
         "--allow-legacy-marketplace-path",
@@ -3790,8 +3790,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     if getattr(args, "show_terminology_map", False):
-        print("Terminology map (Claude -> Codex):")
-        for src, dst in CLAUDE_TO_CODEX_TERMINOLOGY.items():
+        print("Terminology map (Codex -> Codex):")
+        for src, dst in CODEX_TO_CODEX_TERMINOLOGY.items():
             print(f"  - {src} -> {dst}")
     if args.command == "scaffold":
         raise SystemExit(_run_scaffold(args))

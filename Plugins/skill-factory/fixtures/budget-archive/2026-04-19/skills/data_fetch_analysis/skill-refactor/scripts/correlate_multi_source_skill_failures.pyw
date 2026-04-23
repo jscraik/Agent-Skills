@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Correlate explicit skill/tool failure signals across Codex/Claude/Kimi sources.
+Correlate explicit skill/tool failure signals across Codex/Codex/Kimi sources.
 
 Design goals:
 - Stdlib-only
@@ -37,7 +37,7 @@ PATTERNS = {
     "tool_stdin_failed": re.compile(r"write_stdin failed:\s*stdin is closed for this session", re.I),
     "nonzero_exit": re.compile(r"Process exited with code ([1-9][0-9]*)", re.I),
     "tool_result_error": re.compile(r'"is_error"\s*:\s*true', re.I),
-    "claude_auth_failed": re.compile(r"authentication_failed|claude auth status[^\n]{0,80}loggedin\s*=\s*false", re.I),
+    "codex_auth_failed": re.compile(r"authentication_failed|codex auth status[^\n]{0,80}loggedin\s*=\s*false", re.I),
 }
 
 SKILL_FROM_PATH_RE = re.compile(r"/([a-z0-9-]+)/SKILL\.md", re.I)
@@ -248,7 +248,7 @@ def scan_source(
                             continue
                         if primary_exit == 0 and (CODE_DUMP_RE.search(text) or PATH_LINE_LISTING_RE.search(text)):
                             continue
-                    if pname == "claude_auth_failed":
+                    if pname == "codex_auth_failed":
                         if primary_exit == 0 and PATH_LINE_LISTING_RE.search(text):
                             continue
                         if "```diff" in text.lower():
@@ -346,8 +346,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--codex-history", type=Path, default=Path.home() / ".codex" / "history.jsonl")
     parser.add_argument("--otel-logs", type=Path, default=Path.home() / ".codex" / "state" / "otel-collector" / "logs.ndjson")
     parser.add_argument("--otel-traces", type=Path, default=Path.home() / ".codex" / "state" / "otel-collector" / "traces.ndjson")
-    parser.add_argument("--claude-projects", type=Path, default=Path.home() / ".claude" / "projects")
-    parser.add_argument("--claude-history", type=Path, default=Path.home() / ".claude" / "history.jsonl")
+    parser.add_argument("--codex-projects", type=Path, default=Path.home() / ".codex" / "projects")
+    parser.add_argument("--codex-history", type=Path, default=Path.home() / ".codex" / "history.jsonl")
     parser.add_argument("--kimi-sessions", type=Path, default=Path.home() / ".kimi" / "sessions")
     args = parser.parse_args(argv)
 
@@ -360,8 +360,8 @@ def main(argv: list[str]) -> int:
         ("codex_history", args.codex_history),
         ("otel_logs", args.otel_logs),
         ("otel_traces", args.otel_traces),
-        ("claude_projects", args.claude_projects),
-        ("claude_history", args.claude_history),
+        ("codex_projects", args.codex_projects),
+        ("codex_history", args.codex_history),
         ("kimi_sessions", args.kimi_sessions),
     ]
 

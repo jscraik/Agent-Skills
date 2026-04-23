@@ -18,9 +18,9 @@ personas/jenny-wen-persona
 personas/jh3yy-persona
 personas/kubadesign-persona
 personas/steipete-persona
-product/docs/claude-md
+product/docs/codex-md
 product/docs/docs-md
-product/docs/gemini-md
+product/docs/openai-md
 product/domain/chatgpt-apps-production-checklist
 product/security/security-ownership-map
 product/security/security-threat-model
@@ -37,7 +37,7 @@ product/specs/_archive/ux-spec-to-prompts
 product/strategy/asymmetric-ideation-engine
 product/strategy/brainstorming
 product/strategy/project-improvement-ideator
-skills-antigravity-test/ui-ux-creative-coding
+skills-codex-test/ui-ux-creative-coding
 Skills/codex-prompt-creator
 Skills/diagram-context-refresh
 Skills/executing-plans

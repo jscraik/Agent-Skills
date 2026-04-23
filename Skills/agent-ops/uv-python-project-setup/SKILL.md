@@ -148,7 +148,7 @@ uv run --python 3.12 --with rich debug_script.py
 
 | Skill | When to use |
 |---|---|
-| [[test-driven-development]] | Pair uv-managed environments with behavior-first testing workflows |
+| [[he-tdd]] | Pair uv-managed environments with behavior-first testing workflows |
 | [[verification-before-completion]] | Enforce final verification before declaring setup complete |
 
 **Topic map:** [[agent-ops]]
@@ -181,4 +181,3 @@ uv run --python 3.12 --with rich debug_script.py
 - Skipping validation after making changes.
 - Applying broad refactors to solve narrow issues.
 - Assuming behavior without evidence from current checks.
-

@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
-import sys
-import os
+"""Export MCP configuration from Codex TOML to JSON."""
+
 import json
-import logging
+import os
 import re
 import shlex
 import shutil
 import subprocess
+import sys
 
 try:
-    import tomllib  # stdlib (Python ≥ 3.11)
+    import tomllib  # stdlib (Python >= 3.11)
 except ModuleNotFoundError:
     try:
-        import tomli as tomllib  # type: ignore[no-redef]  # third-party backport
+        import tomli as tomllib  # type: ignore[no-redef]
     except ModuleNotFoundError:
         tomllib = None
 
-CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
-ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
+CODEX_CONFIG_PATH = "~/.codex/config.toml"
+CODEX_MCP_EXPORT_PATH = "~/.codex/mcp_config.json"
 ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 FALLBACK_PYTHONS = (
     "python3",
@@ -29,40 +30,43 @@ FALLBACK_PYTHONS = (
     "/opt/homebrew/bin/python3.11",
 )
 
+NAME_MAPPING = {"repo-prompt": "repoprompt"}
+
 
 def is_valid_env_var_name(value):
     return isinstance(value, str) and ENV_VAR_RE.fullmatch(value) is not None
 
-def load_codex_config():
-    if not os.path.exists(CODEX_CONFIG_PATH):
-        print(f"Error: Could not find {CODEX_CONFIG_PATH}")
-        sys.exit(1)
 
-    if tomllib is not None:
-        with open(CODEX_CONFIG_PATH, "rb") as f:
-            return tomllib.load(f)
-
-    fallback = _load_toml_with_newer_python(CODEX_CONFIG_PATH)
-    if fallback is not None:
-        return fallback
-
-    logging.error(
-        "Error: Could not parse TOML with Python %s. Install tomli or ensure python3.11+/python3.12 is available.",
-        sys.version.split()[0],
-    )
-    sys.exit(1)
+def _iter_fallback_pythons():
+    seen = set()
+    for candidate in FALLBACK_PYTHONS:
+        if os.path.isabs(candidate):
+            resolved = candidate if os.path.exists(candidate) else None
+        else:
+            resolved = shutil.which(candidate)
+        if not resolved or resolved in seen:
+            continue
+        try:
+            version_check = subprocess.run(
+                [resolved, "-c", "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError:
+            continue
+        if version_check.returncode == 0:
+            seen.add(resolved)
+            yield resolved
 
 
 def _load_toml_with_newer_python(path):
-    """Parse TOML via an available Python 3.11+ interpreter when possible."""
     loader = (
         "import json, sys, tomllib\n"
         "with open(sys.argv[1], 'rb') as f:\n"
         "    print(json.dumps(tomllib.load(f)))"
     )
     for candidate in _iter_fallback_pythons():
-        if candidate is None:
-            continue
         try:
             proc = subprocess.run(
                 [candidate, "-c", loader, path],
@@ -76,74 +80,26 @@ def _load_toml_with_newer_python(path):
     return None
 
 
-def _iter_fallback_pythons():
-    seen = set()
-    for candidate in FALLBACK_PYTHONS:
-        if os.path.isabs(candidate):
-            resolved = candidate if os.path.exists(candidate) else None
-        else:
-            resolved = shutil.which(candidate)
+def load_codex_config():
+    path = os.path.expanduser(CODEX_CONFIG_PATH)
+    if not os.path.exists(path):
+        print(f"Error: Could not find {path}")
+        sys.exit(1)
 
-        if not resolved or resolved in seen:
-            continue
+    if tomllib is not None:
+        with open(path, "rb") as f:
+            return tomllib.load(f)
 
-        try:
-            version_check = subprocess.run(
-                [resolved, "-c", "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)"],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-        except OSError:
-            continue
+    fallback = _load_toml_with_newer_python(path)
+    if fallback is not None:
+        return fallback
 
-        if version_check.returncode == 0:
-            seen.add(resolved)
-            yield resolved
-
-# Optional: Map Codex server names to Antigravity names (can cause collisions)
-NAME_MAPPING = {
-    "repo-prompt": "repoprompt",
-}
+    print("Error: Could not parse Codex config. Install tomli or use Python 3.11+.", file=sys.stderr)
+    sys.exit(1)
 
 
-def _detect_mapping_collisions(servers, name_mapping):
-    """Detect collisions before applying name mapping.
-
-    Raises ValueError if:
-    - Multiple original names map to the same target name
-    - A mapped name collides with an existing unmapped server name
-    """
-    collisions = []
-    remapped_targets = {}
-
-    for original_name in servers.keys():
-        target_name = name_mapping.get(original_name, original_name)
-        if target_name in remapped_targets:
-            collisions.append(
-                f"'{original_name}' and '{remapped_targets[target_name]}' both map to '{target_name}'"
-            )
-        else:
-            remapped_targets[target_name] = original_name
-
-    # Check for target names that exist as original names (would overwrite)
-    for original_name in servers.keys():
-        target_name = name_mapping.get(original_name, original_name)
-        if target_name != original_name and target_name in servers:
-            collisions.append(
-                f"'{original_name}' maps to '{target_name}' which already exists as an original server"
-            )
-
-    if collisions:
-        raise ValueError(
-            "NAME_MAPPING collisions detected:\n  - " + "\n  - ".join(collisions)
-        )
-
-
-def build_antigravity_config(codex_config):
+def build_codex_mcp_config(codex_config):
     mcp_servers = {}
-
-    # Source .env files and ensure Node/npm tool paths are available.
     wrapper = (
         "set -a; "
         "[ -f ~/.codex/.env ] && . ~/.codex/.env >/dev/null 2>&1; "
@@ -153,121 +109,67 @@ def build_antigravity_config(codex_config):
     )
 
     servers = codex_config.get("mcp_servers", {})
-
-    # Detect collisions before applying mapping
-    _detect_mapping_collisions(servers, NAME_MAPPING)
     for server_name, config in servers.items():
         if config.get("enabled") is False:
             continue
-            
-        mcp_obj = {}
-        
-        # 1. STDIO servers
+
+        mcp_name = NAME_MAPPING.get(server_name, server_name)
+
         if "command" in config:
             cmd = str(config["command"])
             args = [str(arg) for arg in config.get("args", [])]
+            mcp_servers[mcp_name] = {
+                "command": "sh",
+                "args": ["-c", f'{wrapper}; exec "$@"', "sync-mcp", cmd, *args],
+            }
+            continue
 
-            mcp_obj["command"] = "sh"
-            mcp_obj["args"] = [
-                "-c",
-                f"{wrapper}; exec \"$@\"",
-                "sync-mcp",
-                cmd,
-                *args,
-            ]
-            
-        # 2. HTTP servers (Requires mcp-remote bridge for Antigravity)
-        elif "url" in config:
+        if "url" in config:
             url = str(config["url"])
-            script_lines = [
-                wrapper,
-                f"set -- npx -y mcp-remote {shlex.quote(url)}",
-            ]
-            
-            # Auth header (bearer_token_env_var)
+            script_lines = [wrapper, f"set -- npx -y mcp-remote {shlex.quote(url)}"]
+
             if "bearer_token_env_var" in config:
                 env_var = config["bearer_token_env_var"]
                 if is_valid_env_var_name(env_var):
-                    script_lines.append(
-                        f'set -- "$@" --header "Authorization: Bearer ${{{env_var}}}"'
-                    )
-                else:
-                    logging.warning("Skipping invalid bearer_token_env_var for %s", server_name)
-                
-            # Auth header (env_http_headers)
+                    script_lines.append('set -- "$@" --header "Authorization: Bearer ${' + env_var + '}"')
+
             if "env_http_headers" in config:
                 for header_key, header_var in config["env_http_headers"].items():
                     if is_valid_env_var_name(header_var):
                         header_prefix = shlex.quote(f"{header_key}: ")
-                        script_lines.append(
-                            f'set -- "$@" --header {header_prefix}"${{{header_var}}}"'
-                        )
-                    else:
-                        logging.warning("Skipping invalid env_http_headers var for %s: %s", server_name, header_key)
-            
-            mcp_obj["command"] = "sh"
-            mcp_obj["args"] = [
-                "-c",
-                "; ".join(script_lines + ['exec "$@"']),
-            ]
-        else:
-            continue
+                        script_lines.append('set -- "$@" --header ' + header_prefix + '"${' + header_var + '}"')
 
-        # Apply NAME_MAPPING to get the target server name
-        target_name = NAME_MAPPING.get(server_name, server_name)
-
-        # Check for collision with existing entry
-        if target_name in mcp_servers:
-            logging.warning(
-                "Skipping '%s' -> '%s': target already exists (from '%s')",
-                server_name, target_name, server_name if target_name == server_name else "mapped source"
-            )
-            continue
-
-        mcp_servers[target_name] = mcp_obj
-
-    # Antigravity ships sequentially-thinking by default typically
-    if "sequential-thinking" not in mcp_servers:
-        mcp_servers["sequential-thinking"] = {
-            "command": "npx",
-            "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-        }
-        
-    # User requested agentation MCP to be globally available in Antigravity
-    if "agentation" not in mcp_servers:
-        mcp_servers["agentation"] = {
-            "command": "sh",
-            "args": ["-c", f"{wrapper}; exec npx -y agentation-mcp server"]
-        }
+            mcp_servers[mcp_name] = {
+                "command": "sh",
+                "args": ["-c", "; ".join(script_lines + ['exec "$@"'])],
+            }
 
     return {"mcpServers": mcp_servers}
 
+
 def main():
     codex_config = load_codex_config()
-    antigravity_mcp_config = build_antigravity_config(codex_config)
-    
-    os.makedirs(os.path.dirname(ANTIGRAVITY_MCP_PATH), exist_ok=True)
-    
-    # Merge carefully
+    export_mcp_config = build_codex_mcp_config(codex_config)
+
+    output_path = os.path.expanduser(CODEX_MCP_EXPORT_PATH)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
     existing_config = {}
-    if os.path.exists(ANTIGRAVITY_MCP_PATH):
+    if os.path.exists(output_path):
         try:
-            with open(ANTIGRAVITY_MCP_PATH, "r") as f:
+            with open(output_path, "r", encoding="utf-8") as f:
                 existing_config = json.load(f)
-        except (json.JSONDecodeError, OSError) as e:
-            print(
-                f"Warning: Existing MCP config at {ANTIGRAVITY_MCP_PATH} is not valid JSON; starting from a fresh config. ({e})",
-                file=sys.stderr,
-            )
+        except (json.JSONDecodeError, OSError):
             existing_config = {}
-            
-    existing_config["mcpServers"] = antigravity_mcp_config["mcpServers"]
-    
-    with open(ANTIGRAVITY_MCP_PATH, "w") as f:
+
+    existing_config["mcpServers"] = export_mcp_config["mcpServers"]
+
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(existing_config, f, indent=2)
-        
-    print(f"✅ Generated {len(antigravity_mcp_config['mcpServers'])} MCP servers in {ANTIGRAVITY_MCP_PATH}")
-    print("Restart Antigravity or type '/refresh' to pick up the changes.")
+
+    count = len(export_mcp_config["mcpServers"])
+    print(f"Synced {count} MCP servers to {output_path}")
+
 
 if __name__ == "__main__":
     main()

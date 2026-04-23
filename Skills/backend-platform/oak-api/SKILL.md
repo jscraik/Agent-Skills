@@ -117,7 +117,7 @@ Turn Oak Curriculum API content into age-appropriate learning flows, endpoint ma
 |---|---|
 | [[chatgpt-apps]] | Build a ChatGPT App that surfaces Oak curriculum content |
 | [[mcp-builder]] | Expose Oak API as MCP tools for agent workflows |
-| [[product-spec]] | Spec the learning experience before implementing |
+| [[interview-me]] | Clarify learning requirements before implementing |
 | [[fixing-accessibility]] | Ensure Oak-powered UI meets accessibility requirements |
 
 **Topic map:** [[backend-platform]]

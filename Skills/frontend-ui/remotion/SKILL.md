@@ -134,7 +134,7 @@ Use the Remotion ruleset as a focused advisor for composition design, timing, as
 | Skill | When to use together |
 |---|---|
 | [[sora]] | Compare Remotion (code-driven) with Sora (AI-driven) video |
-| [[stitch-remotion]] | Generate Remotion compositions from Stitch screen assets |
+| [[slides]] | Use slide decks as storyboards when planning Remotion compositions |
 | [[design-system]] | Keep caption, overlay, and UI-adjacent typography and token usage aligned with system governance |
 | [[imagegen]] | Generate still images to use as Remotion assets |
 | [[slides]] | Convert slide decks into Remotion video compositions |

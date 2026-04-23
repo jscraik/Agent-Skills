@@ -10,10 +10,6 @@ covers:
   - codex-tooling
   - debugging
   - task-management
-- [[skillgrade-graders]] — Author deterministic and LLM rubric graders for skillgrade evaluations.
-- [[skillgrade-setup]] — Set up and run skillgrade evaluation pipelines for Agent Skills.
-- [[skill-creator]] — Create or update skills that extend Codex capabilities with specialised workflows.
-- [[skill-installer]] — Install curated skills from openai/skills or GitHub repos into CODEX_HOME.
 ---
 
 # Agent Ops
@@ -44,14 +40,13 @@ covers:
 - [[codex-home-audit]] — Audit and improve a Codex home directory (AGENTS.md, USER_PROFILE, instructions, rules, config.toml).
 - [[skill-refactor]] — Daily skill health scan: analyze `~/.codex/sessions` and per-repo session logs for invocations and failures.
 - [[insight-report]] — Generate a high-fidelity Codex usage insights HTML report from local session data.
-- [[repoprompt]] — Plan and guide Repo Prompt integration and usage in AI coding workflows.
 - [[fix-mise]] — Diagnose and repair mise trust/runtime failures.
 
 ## Debugging & Verification
 
 - [[he-fix-bugs]] — Root-cause-first debugging workflow for bugs, test failures, regressions, and unexpected behavior.
 - [[verification-before-completion]] — Validate completion claims with fresh command evidence before marking work done.
-- [[test-driven-development]] — Red-Green-Refactor delivery for behavior changes: write tests first.
+- [[he-tdd]] — Build behavior-safe code changes with RED/GREEN evidence.
 - [[evals-router]] — Design, audit, debug, and scale LLM evaluation workflows: error analysis, judge prompts, synthetic eval data.
 - [[process-watch]] — Analyze system processes and resource usage to diagnose runaway CPU/memory/IO.
 - [[recon-workbench]] — Authorized, evidence-backed Recon Workbench (rwb) workflows on macOS/iOS, web/React, or OSS targets.
@@ -63,8 +58,8 @@ covers:
 
 ## Workflow Planning & Routing
 
-- [[ce-plan]] — Create execution-ready implementation plans with sequencing, validation, and rollout guidance.
-- [[brainstorming]] — Pre-planning exploration for ambiguous requests: clarify, compare 2-3 approaches, recommend a direction.
+- [[he-plan]] — Create execution-ready implementation plans with sequencing, validation, and rollout guidance.
+- [[he-brainstorm]] — Pre-planning exploration for ambiguous requests: clarify, compare 2-3 approaches, recommend a direction.
 - [[interview-me]] — Interactive, multiple-choice interview for requirements discovery; turns ideas into execution-ready specs.
 - [[deep-interview]] — Deep, gap-filling interview to enhance existing docs/specs or explore a topic.
 - [[architecture-interview]] — Plan and review architecture decisions via structured interview and ADR output.
@@ -74,15 +69,15 @@ covers:
 - [[docs-expert]] — Audit or rewrite repository docs (README, runbooks, community-health files) and in-code documentation.
 - [[context7]] — Extract current library documentation via Context7 for up-to-date API details and version checks.
 - [[openai-docs]] — Up-to-date official OpenAI documentation with citations via the OpenAI docs MCP.
-- [[notebooklm]] — Manage, analyze, and generate Google NotebookLM workflows for notebook/source management and audio overviews.
 - [[diagram-cli]] — Generate, validate, and refresh architecture artifacts (.mmd/.svg/.diagram manifest + context packs).
 - [[markdown-converter]] — Convert source files into Markdown outputs using the bundled converter workflow.
+- [[llm-wiki]] — Build and maintain a local markdown wiki for persistent, queryable project knowledge.
 
 ---
 
 ## Cross-links
 
-- Building a new skill? [[brainstorming]] → [[skill-builder]] → [[decide-build-primitive]] → [[plugin-builder]].
+- Building a new skill? [[he-brainstorm]] → [[skill-builder]] → [[decide-build-primitive]] → [[plugin-builder]].
 - Debugging a failing automation? [[he-fix-bugs]] → [[evals-router]] → [[verification-before-completion]].
 - Session health check? [[skill-refactor]] → [[insight-report]].
 - Topic maps: [[backend-platform]] | [[product-strategy]] | [[security-ops]]

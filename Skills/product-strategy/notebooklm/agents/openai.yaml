@@ -1,6 +1,0 @@
-interface:
-  display_name: Notebooklm
-  short_description: Analyze NotebookLM workflows for notebook management, question
-    answering, and audio or video overviews
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

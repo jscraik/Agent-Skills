@@ -36,7 +36,7 @@
 # Status — superpowers skill gap audit (2026-02-22)
 
 ## Completed
-- Audited skills under `/Users/jamiecraik/dev/Infrastructure/config/claude/Plugins/marketplaces/superpowers-dev/skills` against local `/Users/jamiecraik/dev/agent-skills` inventory.
+- Audited skills under `/Users/jamiecraik/dev/Infrastructure/config/codex/Plugins/marketplaces/superpowers-dev/skills` against local `/Users/jamiecraik/dev/agent-skills` inventory.
 - Computed direct name overlap and missing-by-name set.
 - Produced semantic mapping and rollout recommendations.
 - Wrote report: `/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/superpowers-skill-gap-audit-2026-02-22.md`.
@@ -181,7 +181,7 @@
   - Added immediate feedback loop guidance.
   - Added optional A/B compare loop based on `run_skill_evals.py --dual-run`.
   - Added concise test-strategy-by-skill-type section.
-  - Added Codex-first environment compatibility notes for Claude-only frontmatter fields.
+  - Added Codex-first environment compatibility notes for Codex-only frontmatter fields.
 - Updated script logic to improve factual consistency:
   - `Infrastructure/scripts/analyze_skill.py`: removed outdated penalty for headings (`when to use` / `inputs` / `outputs` / `failure mode`) that conflicted with current gate/template norms.
   - `Infrastructure/scripts/upgrade_skill.py`: removed corresponding outdated high-priority “prohibited heading” suggestion.

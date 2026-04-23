@@ -219,7 +219,7 @@ $ARGUMENTS
 |---|---|
 | [[interview-me]] | Use for fresh requirements discovery; use this skill for deepening existing drafts |
 | [[brainstorming]] | Use before this skill when the topic is still too vague for delta-mode enhancement |
-| [[product-spec]] | Hand the completed insights to product-spec for structured PRD/UX/arch artifacts |
+| [[he-plan]] | Hand the completed insights to planning for an execution-ready implementation sequence |
 | [[architecture-interview]] | Use when deep-interview surfaces a major architectural tradeoff requiring structured review |
 
 **Topic map:** [[product-strategy]]

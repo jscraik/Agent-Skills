@@ -1,6 +1,0 @@
-interface:
-  display_name: Test Browser
-  short_description: Run or plan browser-based verification for changed web surfaces
-    using sanctioned browser automation tools
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

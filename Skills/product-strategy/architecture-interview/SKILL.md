@@ -189,7 +189,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 
 | Skill | When to use together |
 |---|---|
-| [[product-spec]] | Produce a detailed spec after the architecture is decided |
+| [[he-plan]] | Produce an execution-ready plan after the architecture is decided |
 | [[writing-plans]] | Convert ADR output into an implementation plan |
 | [[brainstorming]] | Explore options before the architecture interview |
 | [[security-threat-model]] | Run a threat model alongside architecture decisions |

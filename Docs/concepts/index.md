@@ -35,15 +35,13 @@ triggers:
 The `/.agents/skills/` directory contains symlinks to all skills. This design:
 
 1. **Avoids duplication** — One canonical copy of each skill
-2. **Enables multi-tool support** — Codex, Claude Code, Gemini all read from the same location
+2. **Enables stable runtime loading** — Codex and repository tooling read from the same location
 3. **Simplifies updates** — Edit once, all tools see the change
 
 The sync script (`Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`) creates symlinks in:
 - `~/.agents/skills`
 - `~/.agents/agent-skills` (repo root)
 - `~/.codex/skills`
-- `~/.claude/skills`
-- `~/.gemini/antigravity/skills` (projection)
 
 ## Deprecations and Aliases
 

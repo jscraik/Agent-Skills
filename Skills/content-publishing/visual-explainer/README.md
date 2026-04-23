@@ -34,8 +34,8 @@ The skill follows the [Agent Skills specification](https://agentskills.io/specif
 # Pi
 git clone https://github.com/nicobailon/visual-explainer.git ~/.pi/agent/skills/visual-explainer
 
-# Claude Code
-git clone https://github.com/nicobailon/visual-explainer.git ~/.claude/skills/visual-explainer
+# Codex
+git clone https://github.com/nicobailon/visual-explainer.git ~/.codex/skills/visual-explainer
 
 # Other agents — point at the directory containing SKILL.md,
 # or paste its contents into your system prompt
@@ -48,7 +48,7 @@ cp ~/.pi/agent/skills/visual-explainer/prompts/*.md ~/.pi/agent/prompts/
 pi install npm:pi-prompt-template-model
 ```
 
-If you have [surf-cli](https://github.com/nicobailon/surf-cli) installed, the skill can also generate illustrations via Gemini Nano Banana Pro and embed them in pages. The agent detects surf automatically and skips image generation if it's not there.
+If you have [surf-cli](https://github.com/nicobailon/surf-cli) installed, the skill can also generate illustrations via OpenAI Nano Banana Pro and embed them in pages. The agent detects surf automatically and skips image generation if it's not there.
 
 ## Usage
 

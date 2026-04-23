@@ -4,7 +4,7 @@ Smart Open Graph image generation that studies your codebase, understands routes
 
 ## What This Skill Does
 
-When you ask Claude to "create og images" or "generate social cards", this skill:
+When you ask Codex to "create og images" or "generate social cards", this skill:
 
 1. **Analyzes your codebase** to detect framework, routes, and extract brand identity (colors, fonts, logo)
 2. **Categorizes pages** by type (landing, article, product, documentation, etc.)
@@ -93,7 +93,7 @@ Trigger this skill when:
 ```
 User: "Create OG images for my Next.js site"
 
-Claude:
+Codex:
 1. Analyzes your Next.js project structure
 2. Finds all routes in app/ or pages/ directory
 3. Extracts brand colors from tailwind.config.js

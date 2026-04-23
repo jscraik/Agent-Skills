@@ -1,6 +1,6 @@
-# Portable skills for Codex and Claude Code
+# Portable skills for Codex and Codex
 
-Use this guide when authoring a single skill that must work in both Claude Code and OpenAI Codex. Follow the strict subset rules to avoid parser mismatches and loading failures.
+Use this guide when authoring a single skill that must work in both Codex and OpenAI Codex. Follow the strict subset rules to avoid parser mismatches and loading failures.
 
 ## Portability contract (strict subset)
 
@@ -47,7 +47,7 @@ Implication: **Your trigger keywords must live in the frontmatter description**.
 - **Codex**
   - Explicit invocation: use `/skills` to browse or type `$` to mention a skill by name.
   - Implicit invocation: Codex may activate a skill when the task matches the description.
-- **Claude Code**
+- **Codex**
   - Primarily model-invoked; may ask for confirmation before loading and using the skill.
 
 Author the skill body so it works in both explicit and implicit flows:

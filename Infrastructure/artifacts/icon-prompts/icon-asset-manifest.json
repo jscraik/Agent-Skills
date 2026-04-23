@@ -822,9 +822,9 @@
       "style_profile": "ops"
     },
     {
-      "name": "claude-alias",
-      "path": "Skills/claude-alias",
-      "display_name": "Claude Alias Guard",
+      "name": "codex-alias",
+      "path": "Skills/codex-alias",
+      "display_name": "Codex Alias Guard",
       "description": "Fix and harden ck/cz/cc alias routing",
       "icon_small": "./assets/icon-small.png",
       "icon_large": "./assets/icon-large.png",
@@ -1065,7 +1065,7 @@
       "name": "using-git-worktrees",
       "path": "Skills/using-git-worktrees",
       "display_name": "Using Git Worktrees",
-      "description": "Align Codex and Claude worktree setup, sync strategy, and cleanup safety.",
+      "description": "Align Codex and Codex worktree setup, sync strategy, and cleanup safety.",
       "icon_small": "./assets/icon-small.png",
       "icon_large": "./assets/icon-large.png",
       "category": "utilities",

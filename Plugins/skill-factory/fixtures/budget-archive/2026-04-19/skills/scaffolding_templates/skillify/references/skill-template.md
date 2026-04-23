@@ -11,7 +11,7 @@ allowed-tools:
 metadata:
   skill-type: <canonical-skill-type>
   category: <1-9>
-  target_environment: <codex|claude|portable>
+  target_environment: <codex|codex|portable>
   compatibility_posture: <learn|guided|execute>
 ---
 

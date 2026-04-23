@@ -53,7 +53,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ## 2. Orphaned Standalone Scripts (Implemented but No CLI Integration)
 
 ### 2.1 `Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py`
-**Purpose:** Sync MCP (Model Context Protocol) configuration between Codex and Antigravity
+**Purpose:** Sync MCP (Model Context Protocol) configuration between Codex and Codex
 **Lines of Code:** ~150
 **Status:** Fully implemented but unreachable
 
@@ -74,7 +74,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 **Verification:**
 ```bash
 ./bin/ask mcp sync
-# Should: Sync MCP configuration between Codex and Antigravity
+# Should: Sync MCP configuration between Codex and Codex
 ```
 
 ---

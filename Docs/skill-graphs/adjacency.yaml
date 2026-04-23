@@ -12,26 +12,7 @@
   bootstrap: Provision dev environment secrets via 1Password during bootstrap
   create-auth: Inject credentials into authentication flows via 1Password
   security-best-practices: Apply secret management best practices alongside 1Password
-agent-browser:
-  agentation: Wire agent-browser actions into Agentation self-driving mode
-  atlas: Use Atlas for macOS ChatGPT app control vs agent-browser for web
-  fixing-accessibility: Probe ARIA and keyboard behaviour via browser automation
-  playwright-interactive: Use for iterative UI automation when Playwright is better
-  ui-visual-regression: Capture snapshots with agent-browser for regression checks
-agent-native-architecture:
-  agent-native-audit: Audit whether an existing repo or workflow already meets agent-native
-    operating principles
-  architecture-interview: Structure tradeoff-heavy architecture choices into an ADR-style
-    decision
-  chatgpt-apps: Apply agent-native patterns inside a ChatGPT Apps SDK product
-  mcp-builder: Build general MCP servers once the tool surface is clear
-agent-native-audit:
-  agents-md: Tighten repo instructions after finding discoverability gaps
-  codex-home-audit: Audit the Codex home surface instead of a single repo
-  gh-workflow: Land follow-up fixes through the GitHub workflow
 agentation:
-  agent-browser: Run deterministic browser interactions against the app once Agentation
-    wiring is healthy
   frontend-ui-design: Improve or redesign the frontend surface after the integration
     path is verified
   playwright-interactive: Use a persistent Playwright session for iterative local
@@ -46,21 +27,21 @@ alignment-checkpoint:
   brainstorming: Explore approaches once intent is aligned
   ce-plan: Move from approved intent to an execution-ready plan
   decide-build-primitive: Decide the right primitive after intent is confirmed
+  he-plan: Produce an execution-ready plan once ambiguity is resolved
   interview-me: Follow with structured interview to clarify requirements
-  product-spec: Produce a spec once ambiguity is resolved
 architecture-interview:
   brainstorming: Explore options before the architecture interview
   diagram-cli: Generate architecture diagrams from ADR decisions
-  product-spec: Produce a detailed spec after the architecture is decided
+  he-plan: Produce an execution-ready plan after the architecture is decided
   security-threat-model: Run a threat model alongside architecture decisions
   writing-plans: Convert ADR output into an implementation plan
 atlas:
-  agent-browser: Complement Atlas AppleScript control with browser automation
-  notebooklm: Cross-reference Atlas conversations with NotebookLM notebooks
+  llm-wiki: Cross-reference Atlas conversations with a local markdown knowledge base
   openai-docs: Reference official ChatGPT documentation for Atlas features
+  playwright-interactive: Complement Atlas AppleScript control with browser automation
 autoresearch:
-  code-review: Run an adversarial review pass on the final diff before accepting loop
-    outcomes.
+  he-code-review: Run an adversarial review pass on the final diff before accepting
+    loop outcomes.
   plugin-builder: Harden or validate one plugin package outside a research loop.
   skill-creator: Create or reshape a single skill package before entering a loop.
 backend-engineer:
@@ -103,21 +84,12 @@ bootstrap:
   fix-mise: Repair mise trust issues blocking the bootstrapped environment
   gh-workflow: Set up GitHub PR workflow after bootstrap
   verification-before-completion: Verify the bootstrap is working before continuing
-changelog:
-  every-style-editor: Polish the final changelog for a branded external audience
-  feature-video: Pair a release-note summary with a visual walkthrough artifact
-  gh-workflow: Inspect PRs, branches, and merge state before drafting the summary
-  release: Cut the release after the changelog content is ready
 chatgpt-apps:
   fixing-metadata: Ensure App pages have correct meta and CSP headers
   mcp-builder: Build the underlying MCP server the Apps SDK connects to
   oak-api: Integrate Oak curriculum content into ChatGPT App workflows
   openai-docs: Reference official Apps SDK documentation
-claude-alias:
-  bootstrap: Bootstrap a local development environment from a GitHub repository URL
-  fix-mise: Diagnose and repair mise trust/runtime issues
 cli-spec:
-  agent-native-architecture: Ensure the CLI fits into an autonomous workflow
   ce-spec: Use when the CLI is a front for a broader system spec
   docs-expert: Generate user-facing docs from the technical contract
 codex-agent-creator:
@@ -154,9 +126,9 @@ coding-harness:
     a repo change is complete
 context7:
   backend-engineer: Use Context7 to check API docs during backend work
+  docs-expert: Combine repo documentation context with Context7 library docs
   mcp-builder: Reference Context7 docs when building MCP tool schemas
   openai-docs: Use OpenAI docs MCP for OpenAI-specific library content
-  repoprompt: Combine repo context with Context7 library docs
 create-auth:
   1password: Inject auth secrets via 1Password CLI
   mcp-builder: Secure MCP server authentication using Better Auth
@@ -171,10 +143,10 @@ deep-interview:
     requiring structured review
   brainstorming: Use before this skill when the topic is still too vague for delta-mode
     enhancement
+  he-plan: Hand the completed insights to planning for an execution-ready implementation
+    sequence
   interview-me: Use for fresh requirements discovery; use this skill for deepening
     existing drafts
-  product-spec: Hand the completed insights to product-spec for structured PRD/UX/arch
-    artifacts
 design-system:
   baseline-ui: Run a UI guardrail pass after token or theme updates
   frontend-ui-design: Implement component and screen changes after design-system decisions
@@ -199,19 +171,11 @@ elixir-pro:
 evals-router:
   he-fix-bugs: When eval pipeline bugs emerge — debug root cause before redesigning
     the eval
+  he-tdd: For implementation lanes that need RED/GREEN evidence for eval tooling behavior
   skill-refactor: Analyze session-derived skill quality signals before redesigning
     eval plans
-  test-driven-development: For the implementation layer of the review tooling or judge
-    prompt validation tests
   verification-before-completion: Gate "eval is ready" claims with concrete calibration
     or human-label evidence
-every-style-editor:
-  changelog: Edit engineering summaries for a clearer external or community audience
-  docs-expert: Improve repository documentation instead of brand-editorial prose
-  youtube-hooks-scripts: Shape the longer-form video script before applying Every-style
-    edits
-  youtube-titles-thumbnails: Tighten packaging copy once the tone and messaging are
-    set
 fallback-release:
   production-deployment: Deploy fallback-built artifacts to production
   release: Primary release path when CI is healthy
@@ -249,9 +213,9 @@ frontend-ui-design:
   ui-ux-creative-coding: Add motion and creative polish to designed components
 gh-workflow:
   he-fix-bugs: When PR CI failures reveal a code-level bug that needs root-cause investigation
+  orchestrating-subagents: Coordinate bounded reviewer fan-out when one-thread-at-a-time
+    review handling is too slow
   release: After merging — use to cut the version tag and publish the release
-  resolve-pr-parallel: Resolve many unresolved review threads when a one-thread-at-a-time
-    loop is too slow
   verification-before-completion: Gate all merge claims with fresh `gh pr checks`
     and `git log` evidence
 go:
@@ -269,7 +233,7 @@ interview-me:
     questions
   deep-interview: Deepen an existing draft doc or spec rather than running a lighter
     clarifying interview
-  product-spec: Turn the clarified outcome into a fuller product-planning specification
+  he-plan: Turn the clarified outcome into an execution-ready implementation plan
 javascript-pro:
   biome-linting: Enforce JavaScript/TypeScript lint and format rules with Biome
   typescript: Typed JavaScript superset when strict contracts and module boundaries
@@ -282,7 +246,7 @@ llm-wiki:
     wiki pattern.
 markdown-converter:
   docs-expert: Polish converted docs to meet repository quality standards
-  notebooklm: Feed converted markdown to NotebookLM for analysis
+  llm-wiki: Feed converted markdown into a persistent knowledge base for analysis
   spreadsheet: Convert tabular data alongside markdown conversion
   visual-explainer: Present converted content as a visual HTML page
 mcp-builder:
@@ -294,15 +258,6 @@ mise-tooling:
   fix-mise: Deep-dive broken trust, shim, or runtime-resolution states
   npm-release: Ensure release commands execute on the intended Node toolchain
   pnpm-manager: Run workspace commands under the pinned runtime
-nano-banana-builder:
-  chatgpt-apps: Integrate Nano Banana image APIs into a ChatGPT App
-  imagegen: Use as fallback for static image generation outside Nano Banana
-  mcp-builder: Expose Nano Banana generation as MCP tools
-  sora: Follow image generation with AI video for richer content
-notebooklm:
-  insight-report: Feed session insights into NotebookLM for deeper analysis
-  markdown-converter: Convert docs to markdown before uploading to NotebookLM
-  video-transcript-downloader: Download transcripts to feed as NotebookLM sources
 npm-release:
   mise-tooling: Pin runtime/tool versions before release commands
   npm-workflow-discipline: Enforce deterministic npm install/release contracts
@@ -315,8 +270,8 @@ npm-workflow-discipline:
 oak-api:
   chatgpt-apps: Build a ChatGPT App that surfaces Oak curriculum content
   fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
+  interview-me: Clarify learning requirements before implementing
   mcp-builder: Expose Oak API as MCP tools for agent workflows
-  product-spec: Spec the learning experience before implementing
 og-image-builder:
   favicon-generator: Generate OG images and favicons as a complete brand suite
   fixing-metadata: Wire generated OG images into correct meta tags
@@ -326,12 +281,11 @@ orchestrating-subagents:
     implementation-ready
   codex-agent-creator: Create or update the agent roles that the orchestration plan
     needs
-  resolve-pr-parallel: Apply bounded parallelism to PR review resolution rather than
-    general subagent orchestration
+  gh-workflow: Apply bounded parallelism to PR review resolution within the GitHub
+    lifecycle lane
   using-git-worktrees: Split write-heavy parallel work into isolated worktrees instead
     of a shared checkout
 playwright-interactive:
-  agent-browser: Use agent-browser for simpler ref-based interactions
   agentation: Wire Playwright automation into Agentation self-driving
   fixing-accessibility: Test keyboard navigation and focus via Playwright
   ui-visual-regression: Capture Playwright screenshots for regression baselines
@@ -339,21 +293,6 @@ pnpm-manager:
   mise-tooling: Ensure runtime/tool versions are pinned before pnpm execution
   npm-release: Hand off package publish lanes after workspace validation
   npm-workflow-discipline: Keep workspace install/publish contracts deterministic
-product-design-critic:
-  brainstorming: Explore design alternatives before critical review
-  interview-me: Run a requirements interview before critiquing the surface
-  product-spec: Critique the product surface after speccing, before build
-  visual-explainer: Present critique findings as a visual explainer page
-product-spec:
-  architecture-interview: Use when `arch_spec` mode reveals open design decisions
-    needing review
-  brainstorming: Use first when idea is unclear — brainstorm resolves direction, this
-    skill writes the spec
-  ce-plan: After spec approval, use to decompose the spec into an execution plan
-  interview-me: Use for deep requirements discovery when the spec needs user-research
-    grounding
-  security-threat-model: Use on the resulting spec/API to identify and model security
-    risks early
 production-deployment:
   1password: Inject deployment secrets via 1Password CLI
   release: Orchestrate the release flow before deployment
@@ -364,17 +303,11 @@ project-brain:
     gates, and tooling audits in a managed repository.
   docs-expert: Use for follow-on documentation hardening after Project Brain bootstrap
     or rollout changes land.
-react-components:
-  baseline-ui: Validate converted components against baseline UI rules
-  design-system: Align converted components with the design-system token layer
-  react-ui-patterns: Apply React composition patterns to converted components
-  stitch-loop: Generate the Stitch screens that this skill converts
 react-ui-patterns:
   baseline-ui: Validate React component patterns against baseline rules
   design-system: Keep typography, spacing, and icon guidance aligned to canonical
     token governance
-  frontend-ui-design: Apply React patterns to components being designed
-  react-components: Use patterns when converting Stitch screens to React
+  frontend-ui-design: Use patterns when refining component structure and UI composition
   shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
   ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
 recon-workbench:
@@ -394,23 +327,8 @@ remotion:
   imagegen: Generate still images to use as Remotion assets
   slides: Convert slide decks into Remotion video compositions
   sora: Compare Remotion (code-driven) with Sora (AI-driven) video
-  stitch-remotion: Generate Remotion compositions from Stitch screen assets
   video-transcript-downloader: Download reference transcripts before scripting Remotion
     narration
-repoprompt:
-  agents-md: Use Repo Prompt context packs alongside AGENTS.md
-  ce-plan: Ground implementation plans with Repo Prompt context
-  context7: Combine with Context7 for richer library context in prompts
-resolve-pr-parallel:
-  gh-workflow: Handle a single-threaded PR lifecycle or smaller review loop without
-    fan-out
-  he-fix-bugs: Diagnose a stubborn defect before continuing to resolve review feedback
-resolve-todo-parallel:
-  ce-compound: Capture durable learnings that emerge from repeated todo fixes
-  ce-work: Execute a single scoped implementation path instead of a todo sweep
-  orchestrating-subagents: Coordinate explicit subagent fan-out when runtime and an
-    explicit user delegation request allow it
-  triage: Review pending todo findings before execution begins
 rust-pro:
   go: Systems programming with similar error-handling and concurrency patterns
   he-fix-bugs: Triage Rust ownership and borrow-checker errors with evidence-first
@@ -445,8 +363,8 @@ shadcn-ui:
   fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
   react-ui-patterns: Apply React composition patterns to shadcn/ui components
 simplify:
-  code-review: Run CodeRabbit CLI review to surface and prioritize risk findings before
-    fix work
+  he-code-review: Run a structured code-review pass to surface and prioritize risk
+    findings before fix work
   he-fix-bugs: Use when simplify findings indicate likely regressions or uncertain
     root cause needing evidence-first diagnosis
 skill-builder:
@@ -466,8 +384,8 @@ skill-installer:
   skillify: Harden source skills into canonical templates before install/distribution
 slides:
   beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
+  he-plan: Turn an implementation plan into a presentation deck
   imagegen: Generate illustrative images for slide backgrounds
-  product-spec: Turn a product spec into a presentation deck
   remotion: Animate a slide deck as a Remotion video
   visual-explainer: Use when a scrollable HTML page is better than slides
 spreadsheet:
@@ -475,41 +393,11 @@ spreadsheet:
   insight-report: Export session data to spreadsheet for analysis
   markdown-converter: Convert spreadsheet data to markdown for documentation
   visual-explainer: Present spreadsheet data as a styled HTML table
-stitch-loop:
-  frontend-ui-design: Review and polish Stitch-generated UI
-  react-components: Convert Stitch outputs to React components
-  stitch-remotion: Turn Stitch screens into narrated video walkthroughs
-  ui-cloner: Clone a UI design into Stitch for iterative generation
-stitch-remotion:
-  design-system: Keep overlay and caption styling aligned with canonical token and
-    typography governance
-  remotion: For custom Remotion compositions beyond Stitch walkthroughs
-  slides: Compare slide deck with Remotion video for the same content
-  sora: Use Sora for AI-generated video alternative to Remotion
-  stitch-loop: Generate the Stitch screens that feed this skill
 swift-development:
   he-fix-bugs: Triage Swift concurrency and actor isolation issues with evidence-first
     diagnosis
   rust-pro: Systems-level safety patterns that share Swift's value-type and concurrency
     thinking
-test-browser:
-  agent-browser: Deterministic live-page interaction using snapshot refs
-  fixing-accessibility: Pair route-level verification with accessibility checks on
-    interactive surfaces
-  playwright-interactive: Persistent local browser QA for iterative debugging
-  ui-visual-regression: Snapshot or layout diff validation
-test-driven-development:
-  ce-plan: Write a TDD-aware plan when the feature spans multiple behavior changes
-  evals-router: When the failing "test" is an LLM evaluation — route to the correct
-    eval workflow
-  he-fix-bugs: Run the TDD loop inside this debugging workflow for each phase-4 fix
-  verification-before-completion: 'Explicit gate: verify the full test suite is green
-    before claiming done'
-threejs-builder:
-  agentation: Automate Three.js scene interactions for testing
-  frontend-ui-design: Provide the design context Three.js scene should match
-  ui-ux-creative-coding: Orchestrate Three.js alongside React motion for rich UI
-  visual-explainer: Embed Three.js scenes in HTML explainer pages
 toml:
   he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
   yaml: Schema-aware config review for YAML-based tooling configs
@@ -517,8 +405,7 @@ triage:
   ce-work: Execute the approved work once triage decisions are made
   he-fix-bugs: Diagnose unclear or flaky findings before deciding whether they belong
     in the queue
-  resolve-todo-parallel: Resolve a batch of approved todo items in parallel rather
-    than triaging them
+  he-work: Execute approved todo items after triage decisions are finalized
 typescript:
   biome-linting: Enforce TypeScript lint and format rules with Biome
   javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
@@ -532,26 +419,23 @@ ui-ux-creative-coding:
     and polish
   react-ui-patterns: Ground the creative layer in maintainable React composition patterns
 ui-visual-regression:
-  agent-browser: Use agent-browser snapshots as regression inputs
   baseline-ui: Run baseline UI checks alongside visual regression
   design-system: Resolve confirmed token, typography, spacing, or icon drift at the
     system layer
-  playwright-interactive: Capture screenshots for regression via Playwright
-  react-components: Catch visual regressions after Stitch-to-React conversion
+  playwright-interactive: Capture deterministic screenshots and traces before classification
+  react-ui-patterns: Catch visual regressions after component composition changes
 uv-python-project-setup:
-  test-driven-development: Pair uv-managed environments with behavior-first testing
-    workflows
+  he-tdd: Pair uv-managed environments with behavior-first testing workflows
   verification-before-completion: Enforce final verification before declaring setup
     complete
 verification-before-completion:
   evals-router: Verify LLM eval pipelines pass before claiming eval work is complete
   gh-workflow: 'Gate PR merges: verification must pass before PR language is used'
   he-fix-bugs: Run first to find root cause; use this skill to prove the fix worked
-  test-driven-development: Write failing tests before fixing; this skill verifies
-    they now pass
+  he-tdd: Write failing tests before fixing; this skill verifies they now pass
 video-transcript-downloader:
+  llm-wiki: Feed transcripts into a persistent markdown knowledge base for summarisation
   markdown-converter: Convert transcript text to clean markdown
-  notebooklm: Feed transcripts to NotebookLM for summarisation
   youtube-hooks-scripts: Create scripts for videos whose transcripts you've studied
   youtube-titles-thumbnails: Package videos after reviewing competitor transcripts
 visual-explainer:
@@ -566,8 +450,8 @@ yaml:
   he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
   toml: Schema-aware config review for TOML-based tooling configs
 youtube-hooks-scripts:
-  notebooklm: Use NotebookLM to generate audio overviews from scripts
-  product-spec: Spec the content series before scripting individual videos
+  he-plan: Plan the content series before scripting individual videos
+  llm-wiki: Persist scripts and notes in a queryable markdown knowledge base
   video-transcript-downloader: Study competitor transcripts before writing hooks
   youtube-titles-thumbnails: Create titles and thumbnails to pair with the script
 youtube-titles-thumbnails:

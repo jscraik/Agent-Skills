@@ -66,7 +66,7 @@ If critical inputs are missing, ask one blocking clarification before modifying 
 Run branch checks first. If input references PR number or branch name, switch safely. If no input is given, stay on current branch but block if it is `main`/`master`.
 
 2. **Launch config check**
-Run `bash scripts/read-launch-json.sh` to inspect `.claude/launch.json`. If a valid config exists, use it as source of truth for command, cwd, env, and port.
+Run `bash scripts/read-launch-json.sh` to inspect `.codex/launch.json`. If a valid config exists, use it as source of truth for command, cwd, env, and port.
 
 3. **Framework fallback detection**
 When launch config is absent or invalid:

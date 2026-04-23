@@ -12,7 +12,7 @@ Standardize headless multi-runner evaluation for this skill using `run_skill_eva
 
 ## Prerequisites
 - `ck` and `cz` commands installed and logged in.
-- `gemini` CLI installed and authenticated.
+- `openai` CLI installed and authenticated.
 - Settings files available:
   - `kimi_settings.json`
   - `zai_settings.json`
@@ -22,11 +22,11 @@ Standardize headless multi-runner evaluation for this skill using `run_skill_eva
 CODEX_EVAL_TIMEOUT_SEC=600 \
 ~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py \
   Skills/codex-automation-architect \
-  --runners codex,claude-kimi,claude-zai,gemini \
-  --claude-kimi-command ck \
-  --claude-zai-command cz \
-  --claude-kimi-settings /absolute/path/kimi_settings.json \
-  --claude-zai-settings /absolute/path/zai_settings.json \
+  --runners codex,codex-kimi,codex-zai,openai \
+  --codex-kimi-command ck \
+  --codex-zai-command cz \
+  --codex-kimi-settings /absolute/path/kimi_settings.json \
+  --codex-zai-settings /absolute/path/zai_settings.json \
   --capture-jsonl \
   --tier2-mode warn \
   --sandbox read-only
@@ -34,9 +34,9 @@ CODEX_EVAL_TIMEOUT_SEC=600 \
 
 ## Lane notes
 - `codex`: primary baseline.
-- `claude-kimi`: quality/alternative reasoning pass.
-- `claude-zai`: edge-case and adversarial pass.
-- `gemini`: breadth and variance pass.
+- `codex-kimi`: quality/alternative reasoning pass.
+- `codex-zai`: edge-case and adversarial pass.
+- `openai`: breadth and variance pass.
 
 ## Failure handling
 - Continue with available lanes if one runner is unavailable.

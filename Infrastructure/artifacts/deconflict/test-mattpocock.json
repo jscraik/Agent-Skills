@@ -27,9 +27,9 @@
         "type": "candidate_skill"
       },
       {
-        "id": "skill:/private/tmp/codex/skill-install-c4ks1e9b/skills-main/git-guardrails-claude-code",
-        "name": "git-guardrails-claude-code",
-        "path": "/private/tmp/codex/skill-install-c4ks1e9b/skills-main/git-guardrails-claude-code",
+        "id": "skill:/private/tmp/codex/skill-install-c4ks1e9b/skills-main/git-guardrails-codex-code",
+        "name": "git-guardrails-codex-code",
+        "path": "/private/tmp/codex/skill-install-c4ks1e9b/skills-main/git-guardrails-codex-code",
         "type": "candidate_skill"
       },
       {
@@ -133,14 +133,14 @@
       "status": "dry-run-pass"
     },
     {
-      "candidate_source_dir": "/private/tmp/codex/skill-install-c4ks1e9b/skills-main/git-guardrails-claude-code",
+      "candidate_source_dir": "/private/tmp/codex/skill-install-c4ks1e9b/skills-main/git-guardrails-codex-code",
       "deconflict_matches": [],
       "deconflict_notes": [
         "harness: no overlap hits found; using lexical fallback weights"
       ],
-      "destination_dir": "/Users/jamiecraik/dev/agent-skills/deconflict-test/git-guardrails-claude-code",
+      "destination_dir": "/Users/jamiecraik/dev/agent-skills/deconflict-test/git-guardrails-codex-code",
       "risk_warnings": [],
-      "skill_name": "git-guardrails-claude-code",
+      "skill_name": "git-guardrails-codex-code",
       "status": "dry-run-pass"
     },
     {
@@ -292,7 +292,7 @@
     "paths": [
       "design-an-interface",
       "edit-article",
-      "git-guardrails-claude-code",
+      "git-guardrails-codex-code",
       "grill-me",
       "migrate-to-shoehorn",
       "obsidian-vault",

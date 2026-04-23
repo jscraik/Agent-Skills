@@ -101,3 +101,17 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-04-12 [Codex]:** `.system` bridge policy must stay explicit: only `skill-creator`, `skill-installer`, `plugin-creator`, and `plugin-installer` should route through `.agents/skills/.system/*`; route them after `.system` link creation to keep plugin picker visibility stable while avoiding broad hidden-lane drift.
 
 - **2026-04-17 [Codex]:** Repository script paths evolved after March/April refactors (`sync_skills.sh`, `verify-work.sh`, and `docs_lint.py` moved into scoped directories), but this file remains append-only. Preserve historical command strings as-run and append new entries for current-equivalent paths instead of rewriting older bullets in place.
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/autofix/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2819853580)
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/triage/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:249380224)
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/fallback-release/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1691652568)
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/production-deployment/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:501290506)
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && cat Infrastructure/artifacts/skills/autofix/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2646869697)
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skill-refactor/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3208018670)
+
+**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skillify/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:325006765)

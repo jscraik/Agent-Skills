@@ -135,7 +135,7 @@ automation_spec:
 validation:
   tested_runners:
     - codex
-    - claude-kimi
+    - codex-kimi
   last_validated: "2026-03-04"
   test_commands:
     - "gh pr list --state open --limit 5"

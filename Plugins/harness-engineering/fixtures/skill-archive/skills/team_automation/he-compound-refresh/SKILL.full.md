@@ -123,7 +123,7 @@ If evidence is insufficient to write a trustworthy replacement, do not invent a 
 
 ## Interaction Method
 
-Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+Use the platform's blocking question tool when available (`AskUserQuestion` in Codex, `request_user_input` in Codex, `ask_user` in OpenAI). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
 Ask one question at a time, prefer concise single-select choices when natural options exist, and do not ask the user to classify artifacts before evidence is gathered.
 

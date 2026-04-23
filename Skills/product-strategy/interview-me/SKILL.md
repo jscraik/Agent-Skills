@@ -112,6 +112,6 @@ metadata:
 | [[deep-interview]] | Deepen an existing draft doc or spec rather than running a lighter clarifying interview |
 | [[architecture-interview]] | Structure a concrete architecture choice into a decision record |
 | [[brainstorming]] | Explore multiple solution directions before narrowing into interview questions |
-| [[product-spec]] | Turn the clarified outcome into a fuller product-planning specification |
+| [[he-plan]] | Turn the clarified outcome into an execution-ready implementation plan |
 
 **Topic map:** [[product-strategy]]

@@ -805,7 +805,7 @@ candidates:
 ## AI-Era Execution Notes
 
 - Initial planning/research performed with Codex.
-- Deepened with Claude Code using 10 parallel research agents (2026-03-02).
+- Deepened with Codex using 10 parallel research agents (2026-03-02).
 - Maintain human review as required control point for all proposed edits.
 - Prioritize integration and contract tests because implementation speed is high with AI assistance.
 

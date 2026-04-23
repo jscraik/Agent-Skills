@@ -8,7 +8,7 @@ Checks:
 - YAML frontmatter exists and parses
 - Required keys: name, description
 - Single-line name/description (no block scalars)
-- Length limits by target (portable/codex/claude)
+- Length limits by target (portable/codex/codex)
 - Optional: strict mode enforces only name+description in frontmatter
 - Compat mode enforces OpenAI official frontmatter keys
 
@@ -59,8 +59,8 @@ from yaml_frontmatter import (  # noqa: E402  # type: ignore[import]
 )
 
 
-TARGET_NAME_LIMITS = {"portable": 64, "codex": 64, "claude": 64}
-TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 1024, "claude": 1024}
+TARGET_NAME_LIMITS = {"portable": 64, "codex": 64, "codex": 64}
+TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 1024, "codex": 1024}
 
 # In strict mode, default to only the required fields.
 STRICT_ALLOWED_KEYS = {"name", "description"}

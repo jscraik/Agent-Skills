@@ -1,6 +1,0 @@
-interface:
-  display_name: Stitch Loop
-  short_description: Run iterative autonomous website-building loops with Stitch using
-    a baton file and multi-pass page generation
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

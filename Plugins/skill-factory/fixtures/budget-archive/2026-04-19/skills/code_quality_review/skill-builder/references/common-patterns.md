@@ -36,7 +36,7 @@ ALWAYS use this exact template structure:
 </strict_requirements>
 
 <flexible_guidance>
-Use when Claude should adapt the format based on context:
+Use when Codex should adapt the format based on context:
 
 ```xml
 <report_structure>
@@ -114,7 +114,7 @@ Follow this style: type(scope): brief description, then detailed explanation.
 
 <consistent_terminology>
 <principle>
-Choose one term and use it throughout the skill. Inconsistent terminology confuses Claude and reduces execution quality.
+Choose one term and use it throughout the skill. Inconsistent terminology confuses Codex and reduces execution quality.
 </principle>
 
 <good_example>
@@ -151,7 +151,7 @@ Pull data from API routes using element mappings.
 </quick_start>
 ```
 
-Claude must now interpret: Are "API routes" and "URLs" the same? Are "fields", "boxes", "elements", and "controls" the same?
+Codex must now interpret: Are "API routes" and "URLs" the same? Are "fields", "boxes", "elements", and "controls" the same?
 </bad_example>
 
 <implementation>
@@ -203,7 +203,7 @@ Choose based on your needs.
 </quick_start>
 ```
 
-Claude must now research and compare all options before starting. This wastes tokens and time.
+Codex must now research and compare all options before starting. This wastes tokens and time.
 </bad_example>
 
 <implementation>
@@ -262,7 +262,7 @@ description: Helps with documents
 description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
 ```
 
-**Why it matters**: Vague descriptions prevent Claude from discovering and using the skill appropriately.
+**Why it matters**: Vague descriptions prevent Codex from discovering and using the skill appropriately.
 </pitfall>
 
 <pitfall name="inconsistent_pov">
@@ -330,7 +330,7 @@ SKILL.md → details.md
 SKILL.md → examples.md
 ```
 
-**Why it matters**: Claude may only partially read deeply nested files. Keep references one level deep from SKILL.md.
+**Why it matters**: Codex may only partially read deeply nested files. Keep references one level deep from SKILL.md.
 </pitfall>
 
 <pitfall name="windows_paths">
@@ -468,7 +468,7 @@ Use pdfplumber...
 
 <progressive_disclosure_pattern>
 <description>
-Keep SKILL.md concise by linking to detailed reference files. Claude loads reference files only when needed.
+Keep SKILL.md concise by linking to detailed reference files. Codex loads reference files only when needed.
 </description>
 
 <implementation>
@@ -493,7 +493,7 @@ See [basic-operations.md](basic-operations.md) for campaign creation and managem
 
 **Benefits**:
 - SKILL.md stays under 500 lines
-- Claude only reads relevant reference files
+- Codex only reads relevant reference files
 - Token usage scales with task complexity
 - Easier to maintain and update
 </implementation>
@@ -524,7 +524,7 @@ Only proceed when validation passes with zero errors.
 ```
 
 **Why verbose errors help**:
-- Claude can fix issues without guessing
+- Codex can fix issues without guessing
 - Specific error messages reduce iteration cycles
 - Available options shown in error messages
 </implementation>
@@ -532,7 +532,7 @@ Only proceed when validation passes with zero errors.
 
 <checklist_pattern>
 <description>
-For complex multi-step workflows, provide a checklist Claude can copy and track progress.
+For complex multi-step workflows, provide a checklist Codex can copy and track progress.
 </description>
 
 <implementation>

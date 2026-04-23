@@ -14,7 +14,7 @@ conversion_scope:
     - agents
     - full command parity
 assumptions:
-  - Upstream is Claude-oriented; this package is Codex starter guidance.
+  - Upstream is Codex-oriented; this package is Codex starter guidance.
   - Semantic search integration is optional and may be absent in target vaults.
 outputs:
   plugin_package_path: Skills/plugin-builder/fixtures/arscontexta-codex

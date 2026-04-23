@@ -14,7 +14,7 @@
   "run": {
     "run_id": "20260321-120000-000000",
     "eval_mode": "release",
-    "runner_mode": "codex,claude-kimi",
+    "runner_mode": "codex,codex-kimi",
     "tier2_mode": "warn",
     "capture_jsonl": true,
     "readiness_summary": {

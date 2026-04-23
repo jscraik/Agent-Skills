@@ -29,7 +29,7 @@ Use these pages first for:
 
 Treat these as compatibility anchors that must remain visible in the skill when the user explicitly asks for the original Agentation workflow:
 - `npx skills add benjitaylor/agentation`
-- `ln -s "$(pwd)/skills/agentation-self-driving" ~/.claude/skills/agentation-self-driving`
+- `ln -s "$(pwd)/skills/agentation-self-driving" ~/.codex/skills/agentation-self-driving`
 
 These are important because they describe the historical upstream skill-install path and self-driving compatibility surface, even if newer public docs emphasize different packaging routes.
 

@@ -18,7 +18,7 @@ SKIP_DIRS = {
     "templates",
     "references",
     "skills",
-    "skills-antigravity",
+    "skills-codex",
     "skills-system",
     ".worktrees",
 }

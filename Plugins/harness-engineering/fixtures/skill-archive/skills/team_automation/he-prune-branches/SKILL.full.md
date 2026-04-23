@@ -75,7 +75,7 @@ If critical context is missing, ask one blocking question before any deletion.
 
 ## Interaction Method
 
-Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+Use the platform's blocking question tool when available (`AskUserQuestion` in Codex, `request_user_input` in Codex, `ask_user` in OpenAI). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
 Ask one question at a time. For this stage, ask one yes/no question for the complete discovered branch set.
 

@@ -19,12 +19,12 @@ cases:
     realistic: true
 
   - id: happy-wizard-install-multi-target
-    name: happy context7 install for cursor and claude
+    name: happy context7 install for cursor and codex
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Can you install all skills from /anthropics/skills into Cursor and Claude, then tell me how to verify it?"
+    prompt: "Can you install all skills from /anthropics/skills into Cursor and Codex, then tell me how to verify it?"
     acceptance:
       - type: regex
         value: "(?i)((op\\s+run\\s+--env-file\\s+~/.codex/.env\\s+--\\s+)?ctx7\\s+skills\\s+install\\s+/anthropics/skills)"
@@ -33,7 +33,7 @@ cases:
       - type: regex
         value: "(?i)(--cursor)"
       - type: regex
-        value: "(?i)(--claude)"
+        value: "(?i)(--codex)"
       - type: regex
         value: "(?i)(list|verify|restart)"
       - type: regex
@@ -147,10 +147,10 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Set up Context7 for Claude in MCP mode, and also show the CLI mode command for universal skills."
+    prompt: "Set up Context7 for Codex in MCP mode, and also show the CLI mode command for universal skills."
     acceptance:
       - type: regex
-        value: "(?i)(ctx7\\s+setup\\s+--mcp\\s+--claude)"
+        value: "(?i)(ctx7\\s+setup\\s+--mcp\\s+--codex)"
       - type: regex
         value: "(?i)(ctx7\\s+setup\\s+--cli\\s+--universal)"
       - type: regex
@@ -197,7 +197,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Install skills from anthropics/skills for Claude."
+    prompt: "Install skills from anthropics/skills for Codex."
     acceptance:
       - type: regex
         value: "(?i)(/owner/repo|/anthropics/skills|must start with /)"
@@ -331,5 +331,5 @@ cases:
       - type: not_regex
         value: "(?i)(--vscode)"
       - type: regex
-        value: "(?i)(--claude|--cursor|--universal|--antigravity)"
+        value: "(?i)(--codex|--cursor|--universal|--codex)"
     realistic: true

@@ -100,11 +100,11 @@
 | `product/content/youtube-hooks-scripts` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/content/youtube-titles-thumbnails` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/docs/agents-md` | `keep-core-30` | High-frequency, broad utility, and strong leverage across common workflows. |
-| `product/docs/claude-md` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
+| `product/docs/codex-md` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/docs/context7` | `keep-core-30` | High-frequency, broad utility, and strong leverage across common workflows. |
 | `product/docs/docs-expert` | `keep-core-30` | High-frequency, broad utility, and strong leverage across common workflows. |
 | `product/docs/docs-md` | `keep-core-30` | High-frequency, broad utility, and strong leverage across common workflows. |
-| `product/docs/gemini-md` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
+| `product/docs/openai-md` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/docs/openai-docs` | `keep-core-30` | High-frequency, broad utility, and strong leverage across common workflows. |
 | `product/domain/arscontexta` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/domain/arscontexta/skill-sources/graph` | `merge` | Consider collapsing micro-commands into fewer operator-facing entry skills. |
@@ -149,7 +149,7 @@
 | `product/strategy/asymmetric-ideation-engine` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/strategy/brainstorming` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `product/strategy/project-improvement-ideator` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
-| `skills-antigravity-test/ui-ux-creative-coding` | `retire` | Test-copy skill path; duplicate of canonical production skill. |
+| `skills-codex-test/ui-ux-creative-coding` | `retire` | Test-copy skill path; duplicate of canonical production skill. |
 | `Skills/1password` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `Skills/agent-browser` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |
 | `Skills/alignment-checkpoint` | `merge` | Consolidate into nearest core workflow to reduce routing overlap. |

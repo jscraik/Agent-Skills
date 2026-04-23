@@ -205,7 +205,7 @@ class TestAskCLI(unittest.TestCase):
     def test_skills_install_dry_run(self):
         """CA2: Verify ask skills install --dry-run returns a plan without making changes."""
         # Using --dry-run to avoid actual network calls and mutations
-        cmd = ["python3", "Infrastructure/bin/ask", "skills", "install", "https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication", "--dry-run", "--json"]
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "install", "https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication", "--dry-run", "--json"]
         result = _run_cli(cmd)
 
         # Dry run should succeed and return installation plan

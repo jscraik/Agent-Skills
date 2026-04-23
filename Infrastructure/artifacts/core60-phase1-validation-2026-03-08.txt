@@ -165,11 +165,11 @@ WARN SEC_EVALS_PRESSURE_MISSING: No pressure/adversarial case detected in evals.
 RESULT: PASS
 skill_gate_exit=0
 
-== product/docs/claude-md ==
+== product/docs/codex-md ==
 [OK] SKILL.md frontmatter looks valid.
 quick_validate_exit=0
-Skill: claude-md
-Path:  /Users/jamiecraik/dev/agent-skills/product/docs/claude-md/SKILL.md
+Skill: codex-md
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/codex-md/SKILL.md
 
 
 RESULT: PASS
@@ -185,11 +185,11 @@ Path:  /Users/jamiecraik/dev/agent-skills/product/docs/docs-md/SKILL.md
 RESULT: PASS
 skill_gate_exit=0
 
-== product/docs/gemini-md ==
+== product/docs/openai-md ==
 [OK] SKILL.md frontmatter looks valid.
 quick_validate_exit=0
-Skill: gemini-md
-Path:  /Users/jamiecraik/dev/agent-skills/product/docs/gemini-md/SKILL.md
+Skill: openai-md
+Path:  /Users/jamiecraik/dev/agent-skills/product/docs/openai-md/SKILL.md
 
 
 RESULT: PASS

@@ -1,6 +1,0 @@
-interface:
-  display_name: Resolve Todo Parallel
-  short_description: 'WHAT: Resolve file-based `todos/` items with dependency-aware
-    serial or bounded-parallel execution, verification, and...'
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

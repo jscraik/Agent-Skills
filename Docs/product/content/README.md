@@ -1,14 +1,17 @@
 # Product Content Skills
 
-Content production skills for changelogs, scripts, and media assets.
+Content production skills for scripts, media assets, transcripts, and publishing workflows.
 
 ## Table of Contents
 - [Skills](#skills)
 
 ## Skills
-- [changelog](/product/content/changelog/SKILL.md)
-- [every-style-editor](/product/content/every-style-editor/SKILL.md)
-- [feature-video](/product/content/feature-video/SKILL.md)
-- [video-transcript-downloader](/product/content/video-transcript-downloader/SKILL.md)
-- [youtube-hooks-scripts](/product/content/youtube-hooks-Infrastructure/scripts/SKILL.md)
-- [youtube-titles-thumbnails](/product/content/youtube-titles-thumbnails/SKILL.md)
+- [beautiful-mermaid](/Skills/content-publishing/beautiful-mermaid/SKILL.md)
+- [llm-wiki](/Skills/content-publishing/llm-wiki/SKILL.md)
+- [markdown-converter](/Skills/content-publishing/markdown-converter/SKILL.md)
+- [slides](/Skills/content-publishing/slides/SKILL.md)
+- [spreadsheet](/Skills/content-publishing/spreadsheet/SKILL.md)
+- [video-transcript-downloader](/Skills/content-publishing/video-transcript-downloader/SKILL.md)
+- [visual-explainer](/Skills/content-publishing/visual-explainer/SKILL.md)
+- [youtube-hooks-scripts](/Skills/content-publishing/youtube-hooks-scripts/SKILL.md)
+- [youtube-titles-thumbnails](/Skills/content-publishing/youtube-titles-thumbnails/SKILL.md)

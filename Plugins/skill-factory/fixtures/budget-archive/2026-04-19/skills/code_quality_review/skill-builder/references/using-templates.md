@@ -1,7 +1,7 @@
 # Using Templates in Skills
 
 <purpose>
-Templates are reusable output structures that Claude copies and fills in. They ensure consistent, high-quality outputs without regenerating structure each time.
+Templates are reusable output structures that Codex copies and fills in. They ensure consistent, high-quality outputs without regenerating structure each time.
 </purpose>
 
 <when_to_use>
@@ -94,7 +94,7 @@ Workflows reference templates like this:
 </process>
 ```
 
-The workflow tells Claude WHEN to use the template. The template provides WHAT structure to produce.
+The workflow tells Codex WHEN to use the template. The template provides WHAT structure to produce.
 </workflow_integration>
 
 <best_practices>

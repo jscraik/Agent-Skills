@@ -183,7 +183,7 @@ rows:
     line_numbers:
       - 22
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py
     is_executable: true
@@ -262,7 +262,7 @@ rows:
     line_numbers:
       - 116
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
     is_executable: true
@@ -421,7 +421,7 @@ rows:
     line_numbers:
       - 33
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/lifecycle-and-sync/selection_policy.py
     is_executable: true
@@ -606,7 +606,7 @@ rows:
     line_numbers:
       - 39
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
     is_executable: true

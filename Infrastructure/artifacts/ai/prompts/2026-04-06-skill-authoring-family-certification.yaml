@@ -1,4 +1,4 @@
-tool: claude-code
+tool: codex-code
 date: 2026-04-06
 prompt: |
   Run the skill-authoring family certification pipeline:

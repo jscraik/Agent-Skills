@@ -1914,15 +1914,15 @@
       ]
     },
     {
-      "profile_path": "product/docs/claude-md/Infrastructure/references/task-profile.json",
+      "profile_path": "product/docs/codex-md/Infrastructure/references/task-profile.json",
       "status": "planned",
       "command": [
         "python3",
         "./Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py",
         "--profile-file",
-        "./product/docs/claude-md/Infrastructure/references/task-profile.json",
+        "./product/docs/codex-md/Infrastructure/references/task-profile.json",
         "--objective",
-        "Smoke validation for product/docs/claude-md",
+        "Smoke validation for product/docs/codex-md",
         "--out-root",
         "./Infrastructure/artifacts/skill-graphs/runs-smoke",
         "--run-owner",
@@ -2016,15 +2016,15 @@
       ]
     },
     {
-      "profile_path": "product/docs/gemini-md/Infrastructure/references/task-profile.json",
+      "profile_path": "product/docs/openai-md/Infrastructure/references/task-profile.json",
       "status": "planned",
       "command": [
         "python3",
         "./Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py",
         "--profile-file",
-        "./product/docs/gemini-md/Infrastructure/references/task-profile.json",
+        "./product/docs/openai-md/Infrastructure/references/task-profile.json",
         "--objective",
-        "Smoke validation for product/docs/gemini-md",
+        "Smoke validation for product/docs/openai-md",
         "--out-root",
         "./Infrastructure/artifacts/skill-graphs/runs-smoke",
         "--run-owner",

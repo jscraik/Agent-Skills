@@ -50,7 +50,7 @@ Get specific: "Python games" or "Python games with Pygame specifically"?
 
 Explain:
 ```
-Domain expertise skills go in: ~/.claude/skills/expertise/{domain-name}/
+Domain expertise skills go in: ~/.codex/skills/expertise/{domain-name}/
 
 These are comprehensive BUILD skills that:
 - Execute tasks (build, debug, optimize, ship)
@@ -59,7 +59,7 @@ These are comprehensive BUILD skills that:
 - Can be loaded by other skills for domain knowledge
 
 Name suggestion: {suggested-name}
-Location: ~/.claude/skills/expertise/{suggested-name}/
+Location: ~/.codex/skills/expertise/{suggested-name}/
 ```
 
 Confirm or adjust name.
@@ -477,21 +477,21 @@ Test both use cases:
 
 ```bash
 # Create structure
-mkdir -p ~/.claude/skills/expertise/{domain-name}
-mkdir -p ~/.claude/skills/expertise/{domain-name}/workflows
-mkdir -p ~/.claude/skills/expertise/{domain-name}/references
+mkdir -p ~/.codex/skills/expertise/{domain-name}
+mkdir -p ~/.codex/skills/expertise/{domain-name}/workflows
+mkdir -p ~/.codex/skills/expertise/{domain-name}/references
 
 # Write SKILL.md
 # Write all workflow files
 # Write all reference files
 
 # Verify structure
-ls -R ~/.claude/skills/expertise/{domain-name}
+ls -R ~/.codex/skills/expertise/{domain-name}
 ```
 
 ## Step 11: Document in create-plans
 
-Update `~/.claude/skills/create-plans/SKILL.md` to reference this new domain:
+Update `~/.codex/skills/create-plans/SKILL.md` to reference this new domain:
 
 Add to the domain inference table:
 ```markdown
@@ -551,7 +551,7 @@ Domain expertise skill is complete when:
 - [ ] Anti-patterns documented throughout
 - [ ] Full lifecycle covered (build → debug → test → optimize → ship)
 - [ ] Platform-specific considerations included
-- [ ] Located in ~/.claude/skills/expertise/{domain-name}/
+- [ ] Located in ~/.codex/skills/expertise/{domain-name}/
 - [ ] Referenced in create-plans domain inference table
 - [ ] Passes dual-purpose test: Can be invoked directly AND loaded for knowledge
 - [ ] User can build something professional from scratch through shipping

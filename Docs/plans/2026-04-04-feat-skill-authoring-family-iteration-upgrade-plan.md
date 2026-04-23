@@ -402,7 +402,7 @@ Design notes:
 **Verification:**
 - Docs lint passes after downstream wording changes.
 - Skill sync completes and public-facing catalog surfaces reflect the updated descriptions.
-- Post-sync parity is confirmed by checking regenerated root `SKILL.md`, `.agents/skills`, and `skills-antigravity` for the expected family entries with no missing or extra projected basenames.
+- Post-sync parity is confirmed by checking regenerated root `SKILL.md`, `.agents/skills`, and `skills-codex` for the expected family entries with no missing or extra projected basenames.
 
 **Exit criteria:**
 - Installer and plugin-builder surfaces consume the new evidence model consistently.

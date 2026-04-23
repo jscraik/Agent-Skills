@@ -1,6 +1,0 @@
-interface:
-  display_name: Nano Banana Builder
-  short_description: Build web applications that use Google's Nano Banana image APIs
-    for generation and iterative editing workflows
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

@@ -2,10 +2,9 @@ import os
 import shutil
 import sys
 import tempfile
-from unittest import TestCase, main
 from pathlib import Path
 from types import SimpleNamespace
-from unittest import mock
+from unittest import TestCase, main, mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -21,14 +20,12 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.repo_root = Path(self.temp_dir) / "repo"
         self.repo_root.mkdir(parents=True)
         (self.repo_root / ".agents" / "skills").mkdir(parents=True)
-        self.antigravity = self.repo_root / "skills-antigravity"
-        self.antigravity.mkdir(parents=True)
+        self.source_dir = self.repo_root / "Skills" / "agent-ops" / "safe-skill"
+        self.source_dir.mkdir(parents=True)
         self.fake_home = Path(self.temp_dir) / "home"
         self.fake_home.mkdir(parents=True)
 
-        safe_skill = self.antigravity / "safe-skill"
-        safe_skill.mkdir(parents=True)
-        (safe_skill / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
+        (self.source_dir / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
@@ -36,31 +33,21 @@ class TestAskSkillsSyncSecurity(TestCase):
     def test_sync_dir_copy_rejects_symlink_payload(self) -> None:
         secret = Path(self.temp_dir) / "secret.txt"
         secret.write_text("TOPSECRET", encoding="utf-8")
-        os.symlink(secret, self.antigravity / "safe-skill" / "leak.txt")
+        os.symlink(secret, self.source_dir / "leak.txt")
 
         with self.assertRaises(ValueError) as ctx:
-            skills_commands._sync_dir_copy(self.antigravity, self.fake_home / "dst", dry_run=False)
+            skills_commands._sync_dir_copy(self.source_dir, self.fake_home / "dst", dry_run=False)
 
         self.assertIn("symlink", str(ctx.exception).lower())
 
-    def test_sync_skills_user_scope_blocks_symlink_before_mutation(self) -> None:
-        secret = Path(self.temp_dir) / "secret.txt"
-        secret.write_text("TOPSECRET", encoding="utf-8")
-        os.symlink(secret, self.antigravity / "safe-skill" / "leak.txt")
-
+    def test_sync_skills_user_scope_writes_codex_and_agents_links(self) -> None:
         with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]):
             with mock.patch.object(Path, "home", return_value=self.fake_home):
                 result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
-        self.assertEqual(result.status, "error")
-        self.assertTrue(result.errors)
-        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-        self.assertIn("symlink", result.errors[0].message.lower())
-        self.assertFalse((self.fake_home / ".gemini" / "antigravity" / "skills").exists())
-        self.assertFalse((self.fake_home / ".claude" / "skills").exists())
-        self.assertFalse((self.fake_home / ".agents" / "skills").exists())
-        self.assertFalse((self.fake_home / ".codex" / "skills").exists())
-        self.assertFalse((self.fake_home / ".antigravity" / "skills").exists())
+        self.assertEqual(result.status, "success")
+        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
 
     def test_sync_skills_workspace_prunes_stale_symlinks_only(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
@@ -119,12 +106,10 @@ class TestAskSkillsSyncSecurity(TestCase):
                 result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
         self.assertEqual(result.status, "success")
-        self.assertFalse((self.repo_root / "skills").exists())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
 
     def test_sync_skills_workspace_refreshes_catalog_projections(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
-        antigravity_dir = self.repo_root / "skills-antigravity"
         readme_path = self.repo_root / "README.md"
         skill_index_path = self.repo_root / "SKILL.md"
         readme_path.write_text(
@@ -148,9 +133,6 @@ class TestAskSkillsSyncSecurity(TestCase):
             category="Skills/agent-ops",
             description="Valid skill description.",
         )
-        stale_antigravity_dir = antigravity_dir / "stale-skill"
-        stale_antigravity_dir.mkdir()
-        (stale_antigravity_dir / "SKILL.md").write_text("# Stale Skill\n", encoding="utf-8")
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[fake_entry]),
             mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[fake_entry]),
@@ -159,10 +141,6 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertTrue((skills_dir / "valid-skill").is_symlink())
-        antigravity_skill = antigravity_dir / "valid-skill"
-        self.assertTrue(antigravity_skill.is_dir())
-        self.assertFalse((antigravity_skill / "SKILL.md").is_symlink())
-        self.assertFalse(stale_antigravity_dir.exists())
         self.assertIn("**1 skills**", readme_path.read_text(encoding="utf-8"))
         self.assertIn("`total_skills`: 1", skill_index_path.read_text(encoding="utf-8"))
 

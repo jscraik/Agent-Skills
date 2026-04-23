@@ -6,7 +6,5 @@ Domain-specific product implementation skills and platform workflows.
 - [Skills](#skills)
 
 ## Skills
-- [agent-native-architecture](/product/domain/agent-native-architecture/SKILL.md)
-- [arscontexta](/product/domain/arscontexta/SKILL.md)
 - [chatgpt-apps](/product/domain/chatgpt-apps/SKILL.md)
 - [oak-api](/product/domain/oak-api/SKILL.md)

@@ -5,11 +5,10 @@ metadata:
   skill-type: code_quality_review
   version: 0.1.0
   triggers:
-    - coderabbit.?simplify
-    - simplify.?coderabbit
     - simplify.?code
     - simplify.?changes
-    - cr.?simplify
+    - simplify.?pass
+    - simplify.?refactor
 ---
 
 # Simplify
@@ -235,7 +234,7 @@ Run after fixes:
 
 | Skill | When to use |
 |---|---|
-| [[code-review]] | Run CodeRabbit CLI review to surface and prioritize risk findings before fix work |
+| [[he-code-review]] | Run a structured code-review pass to surface and prioritize risk findings before fix work |
 | [[he-fix-bugs]] | Use when simplify findings indicate likely regressions or uncertain root cause needing evidence-first diagnosis |
 
 **Topic map:** [[code-quality]]

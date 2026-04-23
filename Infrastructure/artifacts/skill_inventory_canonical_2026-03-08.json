@@ -480,12 +480,12 @@
     "description": "'Refactor or create AGENTS.md using progressive disclosure: keep root"
   },
   {
-    "name": "claude-md",
-    "scope_skill": "product/docs/claude-md",
-    "path": "product/docs/claude-md/SKILL.md",
+    "name": "codex-md",
+    "scope_skill": "product/docs/codex-md",
+    "path": "product/docs/codex-md/SKILL.md",
     "top": "product",
     "family": "product/docs",
-    "description": "Refactor or create CLAUDE.md using progressive disclosure: keep always-on guidance concise, include only non-obvious commands/style/workflow rules, use @imports for deeper docs, and flag contradictions/bloat. Use when the user asks to create, update, or audit CLAUDE.md files."
+    "description": "Refactor or create AGENTS.md using progressive disclosure: keep always-on guidance concise, include only non-obvious commands/style/workflow rules, use @imports for deeper docs, and flag contradictions/bloat. Use when the user asks to create, update, or audit AGENTS.md files."
   },
   {
     "name": "context7",
@@ -509,15 +509,15 @@
     "path": "product/docs/docs-md/SKILL.md",
     "top": "product",
     "family": "product/docs",
-    "description": "Review and refactor overloaded Markdown docs into progressive-disclosure docs when the user asks for structural cleanup or document-splitting of README, runbooks, specs, or internal docs: keep the landing doc short, split deep or volatile sections into linked companion docs, add a table of contents, and flag contradictions/bloat. Do not use for AGENTS/CLAUDE/GEMINI refactors, proofreading, translation, tone polish, API-reference writing, or generic docs QA."
+    "description": "Review and refactor overloaded Markdown docs into progressive-disclosure docs when the user asks for structural cleanup or document-splitting of README, runbooks, specs, or internal docs: keep the landing doc short, split deep or volatile sections into linked companion docs, add a table of contents, and flag contradictions/bloat. Do not use for AGENTS/CODEX/OPENAI refactors, proofreading, translation, tone polish, API-reference writing, or generic docs QA."
   },
   {
-    "name": "gemini-md",
-    "scope_skill": "product/docs/gemini-md",
-    "path": "product/docs/gemini-md/SKILL.md",
+    "name": "openai-md",
+    "scope_skill": "product/docs/openai-md",
+    "path": "product/docs/openai-md/SKILL.md",
     "top": "product",
     "family": "product/docs",
-    "description": "Use when a user asks to create, update, or review Gemini CLI context (`GEMINI.md`) and memory workflows; emit merge-safe edits that preserve existing guidance while adding what is missing for in-scope tasks."
+    "description": "Use when a user asks to create, update, or review OpenAI CLI context (`AGENTS.md`) and memory workflows; emit merge-safe edits that preserve existing guidance while adding what is missing for in-scope tasks."
   },
   {
     "name": "openai-docs",
@@ -533,7 +533,7 @@
     "path": "product/domain/arscontexta/SKILL.md",
     "top": "product",
     "family": "product/domain",
-    "description": "Use when you need to install, validate, or maintain Ars Contexta parity in Codex; mirrors skills/prompts/agents/automations and returns a parity report with any Codex-vs-Claude deltas."
+    "description": "Use when you need to install, validate, or maintain Ars Contexta parity in Codex; mirrors skills/prompts/agents/automations and returns a parity report with any Codex-vs-Codex deltas."
   },
   {
     "name": "graph",
@@ -873,10 +873,10 @@
   },
   {
     "name": "ui-ux-creative-coding",
-    "scope_skill": "skills-antigravity-test/ui-ux-creative-coding",
-    "path": "skills-antigravity-test/ui-ux-creative-coding/SKILL.md",
-    "top": "skills-antigravity-test",
-    "family": "skills-antigravity-test/ui-ux-creative-coding",
+    "scope_skill": "skills-codex-test/ui-ux-creative-coding",
+    "path": "skills-codex-test/ui-ux-creative-coding/SKILL.md",
+    "top": "skills-codex-test",
+    "family": "skills-codex-test/ui-ux-creative-coding",
     "description": "Use when UI work needs polished motion + implementation artifacts in React/Tauri (Tailwind v4, Radix, optional Three.js); deliver brief, component/motion plans, and validation notes; do not use for brand-only identity or full 3D/game builds."
   },
   {
@@ -989,7 +989,7 @@
     "path": "Skills/diagram-context-refresh/SKILL.md",
     "top": "utilities",
     "family": "Skills/diagram-context-refresh",
-    "description": "Refresh Mermaid diagram context packs for Codex and Claude using diagram-cli. Use when the user asks to keep architecture context current, automate diagram refresh, or prepare AI-ready repo context from code."
+    "description": "Refresh Mermaid diagram context packs for Codex and Codex using diagram-cli. Use when the user asks to keep architecture context current, automate diagram refresh, or prepare AI-ready repo context from code."
   },
   {
     "name": "executing-plans",
@@ -1117,7 +1117,7 @@
     "path": "Skills/using-git-worktrees/SKILL.md",
     "top": "utilities",
     "family": "Skills/using-git-worktrees",
-    "description": "Create and validate Codex app and Claude CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits."
+    "description": "Create and validate Codex app and Codex CLI git worktree workflows with safe branch/sync strategy and cleanup guidance. Use when users request isolated checkouts; do not use for explicit in-place same-branch edits."
   },
   {
     "name": "verification-before-completion",

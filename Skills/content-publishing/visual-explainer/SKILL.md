@@ -116,11 +116,11 @@ Vary the choice each time. If the last diagram was dark and technical, make the 
 
 **Mermaid zoom controls:** Always add zoom controls (+/−/reset buttons) to every `.mermaid-wrap` container. Complex diagrams render at small sizes and need zoom to be readable. Include Ctrl/Cmd+scroll zoom on the container. See the zoom controls pattern in `./Infrastructure/references/css-patterns.md` and the reference template at `./Infrastructure/templates/mermaid-flowchart.html`.
 
-**AI-generated illustrations (optional).** If [surf-cli](https://github.com/nicobailon/surf-cli) is available, you can generate images via Gemini and embed them in the page for creative, illustrative, explanatory, educational, or decorative purposes. Check availability with `which surf`. If available:
+**AI-generated illustrations (optional).** If [surf-cli](https://github.com/nicobailon/surf-cli) is available, you can generate images via OpenAI and embed them in the page for creative, illustrative, explanatory, educational, or decorative purposes. Check availability with `which surf`. If available:
 
 ```bash
 # Generate to a temp file (use --aspect-ratio for control)
-surf gemini "descriptive prompt" --generate-image /tmp/ve-img.png --aspect-ratio 16:9
+surf openai "descriptive prompt" --generate-image /tmp/ve-img.png --aspect-ratio 16:9
 
 # Convert the image into a self-contained data URI before embedding.
 # The exact command depends on the tooling available on the machine.

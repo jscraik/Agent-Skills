@@ -6,7 +6,7 @@
 
 ## Decision rights
 - Repository-wide instruction: follow `AGENTS.md` first.
-- Skill/assistant-specific instructions go in `CLAUDE.md`.
+- Skill/assistant-specific instructions go in `AGENTS.md`.
 - Agent-specific run instructions go in the active skill prompt/`SKILL.md` when present.
 
 ## Escalation rule

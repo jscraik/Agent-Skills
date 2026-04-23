@@ -30,7 +30,7 @@ fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root"
-index_file="$repo_root/docs/skills-by-type.md"
+index_file="$repo_root/Docs/skills-by-type.md"
 python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_scan.py" write-skill-type-index --output "$index_file"
 bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
 echo "[sandbox-safe-sync] Wrote $index_file"

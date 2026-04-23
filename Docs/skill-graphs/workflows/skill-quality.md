@@ -122,7 +122,7 @@ python Skills/skill-builder/Infrastructure/scripts/build_skill_eval_dashboard.py
 
 | INPUT | TYPE | DEFAULT | DESCRIPTION |
 |-------|------|---------|-------------|
-| `run_evals` | bool | `false` | Run LLM evals (requires codex/claude CLIs + auth) |
+| `run_evals` | bool | `false` | Run LLM evals (requires codex/codex CLIs + auth) |
 | `tier2_mode` | string | `warn` | Tier-2 handling: `warn` \| `strict` \| `skip` |
 
 ---
@@ -158,7 +158,7 @@ python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
   --benchmark-mode warn \
   --format text
 
-# Run full evals (requires codex/claude auth)
+# Run full evals (requires codex/codex auth)
 python Skills/skill-builder/Infrastructure/scripts/run_repo_skill_quality.py \
   --root . \
   --run-evals \

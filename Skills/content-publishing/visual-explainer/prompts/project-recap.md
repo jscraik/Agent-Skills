@@ -30,7 +30,7 @@ Follow the visual-explainer skill workflow. Read the reference template, CSS pat
 - For each, cite the source: the git command output that produced it, or the file:line where you read it
 Verify each claim against the code. If something cannot be verified, mark it as uncertain rather than stating it as fact. This fact sheet is your source of truth during HTML generation — do not deviate from it.
 
-**Optional hero image** — if `surf` CLI is available (`which surf`), generate a hero banner via `surf gemini --generate-image --aspect-ratio 16:9` that visually captures the project's identity or domain. Match the style to the page's palette. Embed as base64 data URI using the `.hero-img-wrap` pattern from css-patterns.md. Place above or just below the title. Skip if surf isn't available — the page should stand on its own.
+**Optional hero image** — if `surf` CLI is available (`which surf`), generate a hero banner via `surf openai --generate-image --aspect-ratio 16:9` that visually captures the project's identity or domain. Match the style to the page's palette. Embed as base64 data URI using the `.hero-img-wrap` pattern from css-patterns.md. Place above or just below the title. Skip if surf isn't available — the page should stand on its own.
 
 **Diagram structure** — the page should include:
 1. **Project identity** — not the README blurb. A *current-state* summary: what this project does, who uses it, what stage it's at (early dev, stable, actively shipping features). Include version, key dependencies, and the one-sentence "elevator pitch" for someone who forgot what they were building.

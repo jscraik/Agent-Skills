@@ -69,10 +69,10 @@
 | 54 | `product/content/youtube-hooks-Infrastructure/scripts/SKILL.md` | `product/content/youtube-hooks-Infrastructure/scripts/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 55 | `product/content/youtube-titles-thumbnails/SKILL.md` | `product/content/youtube-titles-thumbnails/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 56 | `product/docs/agents-md/SKILL.md` | `product/docs/agents-md/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
-| 57 | `product/docs/claude-md/SKILL.md` | `product/docs/claude-md/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
+| 57 | `product/docs/codex-md/SKILL.md` | `product/docs/codex-md/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 58 | `product/docs/context7/SKILL.md` | `product/docs/context7/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 59 | `product/docs/docs-expert/SKILL.md` | `product/docs/docs-expert/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
-| 60 | `product/docs/gemini-md/SKILL.md` | `product/docs/gemini-md/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
+| 60 | `product/docs/openai-md/SKILL.md` | `product/docs/openai-md/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 61 | `product/docs/openai-docs/SKILL.md` | `product/docs/openai-docs/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 62 | `product/domain/chatgpt-apps-production-checklist/SKILL.md` | `product/domain/chatgpt-apps-production-checklist/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |
 | 63 | `product/domain/cloudflare-deploy/SKILL.md` | `product/domain/cloudflare-deploy/Infrastructure/references/task-profile.json` | `co-pilot` | `wave-2-co-pilot` | `pending` | `unassigned` | `tbd` |

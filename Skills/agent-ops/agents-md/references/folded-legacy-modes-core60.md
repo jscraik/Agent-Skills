@@ -4,9 +4,9 @@ Destination skill: `product/docs/agents-md`
 
 This file captures legacy capabilities migrated from retired skills.
 
-## `claude-target`
-- Source skill: `product/docs/claude-md`
-- Legacy description: Refactor or create CLAUDE.md using progressive disclosure: keep always-on guidance concise, include only non-obvious commands/style/workflow rules, use @imports for deeper docs, and flag contradictions/bloat. Use when the user asks to create, update, or audit CLAUDE.md files.
+## `codex-target`
+- Source skill: `product/docs/codex-md`
+- Legacy description: Refactor or create AGENTS.md using progressive disclosure: keep always-on guidance concise, include only non-obvious commands/style/workflow rules, use @imports for deeper docs, and flag contradictions/bloat. Use when the user asks to create, update, or audit AGENTS.md files.
 - Fold rationale: Both are agent-instruction doc refactors with target-specific output flavor.
 - Legacy section map:
   - Remember
@@ -16,9 +16,9 @@ This file captures legacy capabilities migrated from retired skills.
   - Response format (required)
   - Cognitive Support / Plain-Language
 
-## `gemini-target`
-- Source skill: `product/docs/gemini-md`
-- Legacy description: Use when a user asks to create, update, or review Gemini CLI context (`GEMINI.md`) and memory workflows; emit merge-safe edits that preserve existing guidance while adding what is missing for in-scope tasks.
+## `openai-target`
+- Source skill: `product/docs/openai-md`
+- Legacy description: Use when a user asks to create, update, or review OpenAI CLI context (`AGENTS.md`) and memory workflows; emit merge-safe edits that preserve existing guidance while adding what is missing for in-scope tasks.
 - Fold rationale: Same core operation as agents-md with different platform framing.
 - Legacy section map:
   - Table of Contents

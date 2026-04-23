@@ -20,7 +20,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     eval_modes: [smoke, release]
-    prompt: "I pasted an old orchestrating-swarms prompt from Claude. Please translate it to Codex subagents but keep the same orchestration intent."
+    prompt: "I pasted an old orchestrating-swarms prompt from Codex. Please translate it to Codex subagents but keep the same orchestration intent."
     acceptance:
       - type: regex
         value: "(?i)(translate|legacy|swarm|Codex)"

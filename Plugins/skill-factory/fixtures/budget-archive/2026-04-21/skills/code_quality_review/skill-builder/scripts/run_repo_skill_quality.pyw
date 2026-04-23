@@ -26,19 +26,19 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--run-evals", action="store_true", help="Run run_skill_evals.py for each skill")
     p.add_argument("--runner", default="codex", help="Single-run eval runner.")
     p.add_argument("--runners", action="append", default=[], help="Explicit eval runner list (repeatable or comma-separated).")
-    p.add_argument("--dual-run", action="store_true", help="When running evals, execute Codex+Claude-Kimi dual-run")
+    p.add_argument("--dual-run", action="store_true", help="When running evals, execute Codex+Codex-Kimi dual-run")
     p.add_argument("--codex-fallback-profile", default="d", help="Pass through to run_skill_evals.py codex fallback profile.")
     p.add_argument("--capture-jsonl", action="store_true", help="When running evals, capture Codex JSONL")
     p.add_argument("--sandbox", default="read-only", choices=["read-only", "workspace-write", "danger-full-access"])
     p.add_argument(
-        "--claude-settings",
+        "--codex-settings",
         default=None,
-        help="DEPRECATED: plain `claude` runner was removed. Use --claude-kimi-settings / --claude-zai-settings.",
+        help="DEPRECATED: plain `codex` runner was removed. Use --codex-kimi-settings / --codex-zai-settings.",
     )
-    p.add_argument("--claude-kimi-settings", default=None, help="Path to pass through as --claude-kimi-settings.")
-    p.add_argument("--claude-zai-settings", default=None, help="Path to pass through as --claude-zai-settings.")
-    p.add_argument("--claude-kimi-command", default=None, help="Path/name to pass through as --claude-kimi-command.")
-    p.add_argument("--claude-zai-command", default=None, help="Path/name to pass through as --claude-zai-command.")
+    p.add_argument("--codex-kimi-settings", default=None, help="Path to pass through as --codex-kimi-settings.")
+    p.add_argument("--codex-zai-settings", default=None, help="Path to pass through as --codex-zai-settings.")
+    p.add_argument("--codex-kimi-command", default=None, help="Path/name to pass through as --codex-kimi-command.")
+    p.add_argument("--codex-zai-command", default=None, help="Path/name to pass through as --codex-zai-command.")
     p.add_argument("--baseline-file", default=None, help="Optional baseline JSON of known structure failures.")
     p.add_argument("--write-baseline", action="store_true", help="Write/update baseline JSON from current structure failures.")
     p.add_argument(
@@ -214,10 +214,10 @@ def merge_sarif_reports(paths: List[Path], destination: Path) -> Dict[str, Any]:
 
 def main() -> int:
     args = parse_args()
-    if args.claude_settings:
+    if args.codex_settings:
         print(
-            "ERROR: --claude-settings is deprecated because plain `claude` runner was removed. "
-            "Use --claude-kimi-settings or --claude-zai-settings.",
+            "ERROR: --codex-settings is deprecated because plain `codex` runner was removed. "
+            "Use --codex-kimi-settings or --codex-zai-settings.",
             file=sys.stderr,
         )
         return 1
@@ -303,14 +303,14 @@ def main() -> int:
                 cmd.append("--dual-run")
             if args.capture_jsonl:
                 cmd.append("--capture-jsonl")
-            if args.claude_kimi_settings:
-                cmd.extend(["--claude-kimi-settings", args.claude_kimi_settings])
-            if args.claude_zai_settings:
-                cmd.extend(["--claude-zai-settings", args.claude_zai_settings])
-            if args.claude_kimi_command:
-                cmd.extend(["--claude-kimi-command", args.claude_kimi_command])
-            if args.claude_zai_command:
-                cmd.extend(["--claude-zai-command", args.claude_zai_command])
+            if args.codex_kimi_settings:
+                cmd.extend(["--codex-kimi-settings", args.codex_kimi_settings])
+            if args.codex_zai_settings:
+                cmd.extend(["--codex-zai-settings", args.codex_zai_settings])
+            if args.codex_kimi_command:
+                cmd.extend(["--codex-kimi-command", args.codex_kimi_command])
+            if args.codex_zai_command:
+                cmd.extend(["--codex-zai-command", args.codex_zai_command])
 
             proc = run_cmd(cmd, root)
             if scorecard_path.exists():

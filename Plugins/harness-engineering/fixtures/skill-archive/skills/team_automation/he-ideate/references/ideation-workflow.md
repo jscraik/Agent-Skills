@@ -100,7 +100,7 @@ Use a bounded subagent or equivalent direct workflow to gather:
 
 Keep this scan shallow. Prefer:
 - `AGENTS.md` first
-- `CLAUDE.md` only as a compatibility fallback
+- `AGENTS.md` only as a compatibility fallback
 - `README.md` when neither instruction file exists
 
 Read top-level documentation and directory structure only. Do not do deep code search, issue analysis, or contribution-process review in this pass.

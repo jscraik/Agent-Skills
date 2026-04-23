@@ -14,7 +14,7 @@ Provenance for the upstream source used in this conversion:
 - [Sections intentionally not ported verbatim](#sections-intentionally-not-ported-verbatim)
 
 ## Why this is a migration, not a direct copy
-The upstream skill is excellent operational doctrine, but it is tightly coupled to Claude Code primitives that do not exist in Codex:
+The upstream skill is excellent operational doctrine, but it is tightly coupled to Codex primitives that do not exist in Codex:
 - `Teammate`
 - `Task`
 - `TaskCreate`
@@ -36,7 +36,7 @@ Copying those mechanics directly into Codex would create a misleading skill. The
 
 ## Concept mapping
 
-| Upstream Claude concept | Codex-native translation |
+| Upstream Codex concept | Codex-native translation |
 |---|---|
 | Team lead | Parent Codex thread |
 | Teammate | Spawned subagent |
@@ -78,10 +78,10 @@ Translate to Codex:
 - if the runtime exposes batch fan-out helpers, treat them as optional extensions rather than the baseline pattern
 
 ## Sections intentionally not ported verbatim
-- File layouts under `~/.claude/teams/` and `~/.claude/tasks/`
+- File layouts under `~/.codex/teams/` and `~/.codex/tasks/`
 - JSON message formats for inbox communication
 - Backend detection and troubleshooting for `tmux` or `iterm2`
-- Claude-specific `subagent_type` naming and `run_in_background` examples
-- Claude plugin role prefixes such as `compound-engineering:review:*`
+- Codex-specific `subagent_type` naming and `run_in_background` examples
+- Codex plugin role prefixes such as `compound-engineering:review:*`
 
 Those sections were dropped as mechanics, not as doctrine. Their useful operational lessons were preserved in the Codex-native skill and in the local overlap and docs references.

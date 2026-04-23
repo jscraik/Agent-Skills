@@ -207,7 +207,7 @@
       }
     },
     {
-      "skill": "gemini-imagegen",
+      "skill": "openai-imagegen",
       "upgrade": {
         "high": 0,
         "medium": 0,

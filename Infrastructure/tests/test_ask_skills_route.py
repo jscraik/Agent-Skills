@@ -209,7 +209,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         """
         Verifies that advanced-only (hidden-lane) skills are added to the total considered set while the router still receives the original default window of skills.
         
-        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `chatgpt-apps`, `considered_total` reflects inclusion of advanced-only entries (22), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
+        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `chatgpt-apps`, `considered_total` reflects inclusion of one advanced-only entry (21), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
         """
         default_entries = [
             SimpleNamespace(
@@ -228,12 +228,6 @@ class TestAskSkillsRoute(unittest.TestCase):
         )
         default_entries.append(chatgpt_apps)
         advanced_entries = list(default_entries) + [
-            SimpleNamespace(
-                name="autofix",
-                source_dir=REPO_ROOT / "Plugins" / "coderabbit" / "skills" / "autofix",
-                category="Plugins/coderabbit/skills",
-                description="Hidden autofix lane.",
-            ),
             SimpleNamespace(
                 name="code-review",
                 source_dir=REPO_ROOT / "Plugins" / "coderabbit" / "skills" / "code-review",
@@ -308,7 +302,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         )
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "chatgpt-apps")
-        self.assertEqual(result.data["decision"]["considered_total"], 22)
+        self.assertEqual(result.data["decision"]["considered_total"], 21)
         self.assertEqual(mocked_parity.call_args.kwargs["route_considered_total"], 20)
         self.assertIn("chatgpt-apps", router_stub.calls[0])
         self.assertIn("code-review", router_stub.calls[0])

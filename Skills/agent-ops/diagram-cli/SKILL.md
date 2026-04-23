@@ -199,7 +199,7 @@ Minimum checks:
 <!-- core60-folded-modes:v1:start -->
 This skill owns legacy capability from retired skills. Use these modes when requests match prior behavior.
 
-- `context-refresh` from `Skills/diagram-context-refresh`: Refresh Mermaid diagram context packs for Codex and Claude using diagram-cli. Use when the user asks to keep architecture context current...
+- `context-refresh` from `Skills/diagram-context-refresh`: Refresh Mermaid diagram context packs for Codex and Codex using diagram-cli. Use when the user asks to keep architecture context current...
 
 Deep legacy details: `Infrastructure/references/folded-legacy-modes-core60.md`.
 <!-- core60-folded-modes:v1:end -->
