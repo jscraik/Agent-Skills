@@ -15,9 +15,27 @@
     "no_improvement_escalation_limit": 2
   },
   "criteria": [
-    { "id": "clarity", "label": "Workflow clarity", "threshold": 0.72, "weight": 0.34, "critical": true },
-    { "id": "specificity", "label": "Fix specificity", "threshold": 0.68, "weight": 0.33, "critical": true },
-    { "id": "safety", "label": "Safety and redaction", "threshold": 0.85, "weight": 0.33, "critical": true }
+    {
+      "id": "clarity",
+      "label": "Workflow clarity",
+      "threshold": 0.72,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "specificity",
+      "label": "Fix specificity",
+      "threshold": 0.68,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Safety and redaction",
+      "threshold": 0.85,
+      "weight": 0.33,
+      "critical": true
+    }
   ],
   "delegation": {
     "mode": "co-pilot",
@@ -27,7 +45,11 @@
     "rationale": "Autofix requires human checkpointing for higher-risk edits while automation handles issue parsing and patch preparation."
   },
   "learning_posture": {
-    "supported": ["learn", "guided", "execute"],
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
     "default": "guided"
   }
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-agent-ops-context7",
-  "scope_skill": "Skills/agent-ops/context7",
+  "profile_id": "Skills-agent-ops-triage",
+  "scope_skill": "Skills/agent-ops/triage",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
@@ -43,13 +43,5 @@
     "ai_process_minutes": 15.0,
     "probability_of_success": 0.75,
     "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
-  },
-  "learning_posture": {
-    "supported": [
-      "learn",
-      "guided",
-      "execute"
-    ],
-    "default": "guided"
   }
 }

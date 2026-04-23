@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[3]
 COCKPIT_MODES = {"autopilot", "co-pilot", "manual"}
 DEFAULT_PROFILE_REL_PATH = "Infrastructure/references/task-profile.json"
 MANUAL_SKILL_PATHS = {
+    "Skills/agent-ops/release",
     "github/gh-workflow",
     "github/local-action-verification",
     "product/Infrastructure/ops/release",

@@ -1625,7 +1625,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Set CODEX_HOME. This replaces the full Codex home; live Codex runs need authenticated state in the selected home.",
     )
     p.add_argument("--codex-bin", default=None, help="Override codex CLI path.")
-    p.add_argument("--codex-bin", default=None, help="Override codex CLI path.")
     p.add_argument("--openai-bin", default=None, help="Override openai CLI path.")
     p.add_argument(
         "--codex-output-format",
@@ -1690,16 +1689,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
         choices=["warn", "fail", "off"],
         default="warn",
         help="How to treat tier-2 findings (rubric/efficiency budgets).",
-    )
-    p.add_argument(
-        "--codex-arg",
-        action="append",
-        default=[],
-        help=(
-            "Extra flag to pass to codex exec (repeatable). "
-            "For dash-prefixed values, either use `--codex-arg=--flag` "
-            "or `--codex-arg --flag`."
-        ),
     )
     return p
 
