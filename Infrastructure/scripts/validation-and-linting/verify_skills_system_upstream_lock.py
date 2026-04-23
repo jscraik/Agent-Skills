@@ -132,22 +132,122 @@ def emit_current(repo_root: Path, lock_payload: dict[str, Any]) -> int:
     }
     for item in managed:
         if not isinstance(item, dict):
+            print(f"Warning: skipping malformed managed entry (not a dict): {item!r} (repo_root={repo_root})", file=sys.stderr)
             continue
         name = str(item.get("name", "")).strip()
         rel = str(item.get("path", "")).strip()
         if not name or not rel:
+            print(f"Warning: skipping managed entry with missing name or path: {item!r} (repo_root={repo_root})", file=sys.stderr)
             continue
         target = (repo_root / rel).resolve()
+        try:
+            digest = tree_digest(target)
+        except FileNotFoundError:
+            print(f"Error: managed directory not found: {target} (from path={rel!r}, repo_root={repo_root})", file=sys.stderr)
+            raise
         snapshot["managed_dirs"].append(
             {
                 "name": name,
                 "path": rel,
-                "tree_sha256": tree_digest(target),
+                "tree_sha256": digest,
             }
         )
 
     print(json.dumps(snapshot, indent=2, sort_keys=True))
     return 0
+
+
+def _validate_upstream(payload: dict[str, Any], repo_root: Path, issues: list[str]) -> None:
+    """
+    Validate upstream section and schema_version in lock payload.
+
+    Parameters:
+        payload (dict[str, Any]): Parsed lock file content.
+        repo_root (Path): Repository root directory.
+        issues (list[str]): Mutable list of issue messages that will be mutated in-place.
+    """
+    _expect(
+        payload.get("schema_version") == LOCK_SCHEMA_VERSION,
+        f"schema_version must be {LOCK_SCHEMA_VERSION}",
+        issues,
+    )
+
+    upstream = payload.get("upstream")
+    _expect(isinstance(upstream, dict), "upstream must be an object", issues)
+    if isinstance(upstream, dict):
+        ref = str(upstream.get("ref", "")).strip()
+        _expect(bool(SHA40_RE.match(ref)), "upstream.ref must be a 40-char lowercase sha", issues)
+        _expect(
+            str(upstream.get("repo", "")).strip() == "openai/skills",
+            "upstream.repo must be openai/skills",
+            issues,
+        )
+        _expect(
+            str(upstream.get("path", "")).strip() == "skills/.system",
+            "upstream.path must be skills/.system",
+            issues,
+        )
+
+    marker = repo_root / "skills-system/.codex-system-skills.marker"
+    _expect(marker.is_file(), "skills-system marker missing: skills-system/.codex-system-skills.marker", issues)
+
+
+def _validate_bridge_entries(payload: dict[str, Any], repo_root: Path, issues: list[str]) -> None:
+    """
+    Validate bridge_entries section in lock payload.
+
+    Parameters:
+        payload (dict[str, Any]): Parsed lock file content.
+        repo_root (Path): Repository root directory.
+        issues (list[str]): Mutable list of issue messages that will be mutated in-place.
+    """
+    bridge_entries = payload.get("bridge_entries")
+    _expect(isinstance(bridge_entries, list), "bridge_entries must be a list", issues)
+    if isinstance(bridge_entries, list):
+        for entry in bridge_entries:
+            rel = str(entry).strip()
+            if not rel:
+                issues.append("bridge_entries contains an empty value")
+                continue
+            target = repo_root / rel
+            if not target.exists() and not target.is_symlink():
+                issues.append(f"missing bridge entry: {rel}")
+
+
+def _validate_managed_dirs(payload: dict[str, Any], repo_root: Path, issues: list[str]) -> None:
+    """
+    Validate managed_dirs section in lock payload.
+
+    Parameters:
+        payload (dict[str, Any]): Parsed lock file content.
+        repo_root (Path): Repository root directory.
+        issues (list[str]): Mutable list of issue messages that will be mutated in-place.
+    """
+    managed = payload.get("managed_dirs")
+    _expect(isinstance(managed, list), "managed_dirs must be a list", issues)
+    if isinstance(managed, list):
+        for item in managed:
+            if not isinstance(item, dict):
+                issues.append("managed_dirs items must be objects")
+                continue
+            name = str(item.get("name", "")).strip() or "<unnamed>"
+            rel = str(item.get("path", "")).strip()
+            expected = str(item.get("tree_sha256", "")).strip()
+            if not rel:
+                issues.append(f"{name}: path is required")
+                continue
+            if not re.match(r"^[0-9a-f]{64}$", expected):
+                issues.append(f"{name}: tree_sha256 must be a 64-char lowercase sha256")
+                continue
+            target = repo_root / rel
+            if not target.is_dir():
+                issues.append(f"{name}: missing managed directory: {rel}")
+                continue
+            actual = tree_digest(target)
+            if actual != expected:
+                issues.append(
+                    f"{name}: digest mismatch for {rel} (expected {expected}, got {actual})"
+                )
 
 
 def main() -> int:
@@ -181,68 +281,9 @@ def main() -> int:
         return emit_current(repo_root, payload)
 
     issues: list[str] = []
-    _expect(
-        payload.get("schema_version") == LOCK_SCHEMA_VERSION,
-        f"schema_version must be {LOCK_SCHEMA_VERSION}",
-        issues,
-    )
-
-    upstream = payload.get("upstream")
-    _expect(isinstance(upstream, dict), "upstream must be an object", issues)
-    if isinstance(upstream, dict):
-        ref = str(upstream.get("ref", "")).strip()
-        _expect(bool(SHA40_RE.match(ref)), "upstream.ref must be a 40-char lowercase sha", issues)
-        _expect(
-            str(upstream.get("repo", "")).strip() == "openai/skills",
-            "upstream.repo must be openai/skills",
-            issues,
-        )
-        _expect(
-            str(upstream.get("path", "")).strip() == "skills/.system",
-            "upstream.path must be skills/.system",
-            issues,
-        )
-
-    marker = repo_root / "skills-system/.codex-system-skills.marker"
-    _expect(marker.is_file(), "skills-system marker missing: skills-system/.codex-system-skills.marker", issues)
-
-    bridge_entries = payload.get("bridge_entries")
-    _expect(isinstance(bridge_entries, list), "bridge_entries must be a list", issues)
-    if isinstance(bridge_entries, list):
-        for entry in bridge_entries:
-            rel = str(entry).strip()
-            if not rel:
-                issues.append("bridge_entries contains an empty value")
-                continue
-            target = repo_root / rel
-            if not target.exists() and not target.is_symlink():
-                issues.append(f"missing bridge entry: {rel}")
-
-    managed = payload.get("managed_dirs")
-    _expect(isinstance(managed, list), "managed_dirs must be a list", issues)
-    if isinstance(managed, list):
-        for item in managed:
-            if not isinstance(item, dict):
-                issues.append("managed_dirs items must be objects")
-                continue
-            name = str(item.get("name", "")).strip() or "<unnamed>"
-            rel = str(item.get("path", "")).strip()
-            expected = str(item.get("tree_sha256", "")).strip()
-            if not rel:
-                issues.append(f"{name}: path is required")
-                continue
-            if not re.match(r"^[0-9a-f]{64}$", expected):
-                issues.append(f"{name}: tree_sha256 must be a 64-char lowercase sha256")
-                continue
-            target = repo_root / rel
-            if not target.is_dir():
-                issues.append(f"{name}: missing managed directory: {rel}")
-                continue
-            actual = tree_digest(target)
-            if actual != expected:
-                issues.append(
-                    f"{name}: digest mismatch for {rel} (expected {expected}, got {actual})"
-                )
+    _validate_upstream(payload, repo_root, issues)
+    _validate_bridge_entries(payload, repo_root, issues)
+    _validate_managed_dirs(payload, repo_root, issues)
 
     if issues:
         print("skills-system upstream lock validation failed:", file=sys.stderr)
