@@ -79,8 +79,8 @@ npm profile enable-2fa auth-and-writes
 ## Workflow
 
 1. Confirm target version strategy and release channel.
-2. Confirm lockfile/install discipline at the target package root (`npm --prefix <package-path> ci`, lockfile in sync, required release script contract present).
-3. Run version bump command and verify tag/commit policy (`git-tag-version`).
+2. Confirm lockfile/install discipline at the target package root (`npm --prefix <package-path> ci`, lockfile in sync, required release script contract present). Validate that `package.json` scripts include release-critical hooks used by the workflow, such as `prepare`, `prepublishOnly` (or `prepublish`), and a release entrypoint like `release` or `publish`, and that they align with `references/contract.yaml`.
+3. Run version bump command and verify tag/commit policy (confirm `git-tag-version` npm config is set correctly before `npm version`).
 4. Dry-run package contents when needed (`npm pack --dry-run`).
 5. Publish with explicit flags for access, provenance, and channel.
 6. Apply/update dist-tags for rollout channels.

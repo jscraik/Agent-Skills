@@ -1265,9 +1265,10 @@ sync_home_plugin_mirrors() {
     done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -print)
   }
 
-  # normalize_runtime_plugin_copy materializes symlinked SKILL.md files inside
+  # normalize_runtime_plugin_copy materializes symlinked skill files inside
   # copied plugin skills/ trees, then removes fixtures/ from runtime copies so
-  # archive assets do not inflate active skill discovery surfaces.
+  # archive assets do not inflate active skill discovery surfaces while helper
+  # modules stay reachable after pruning fixtures.
   normalize_runtime_plugin_copy() {
     local plugin_dir="$1"
     local skills_dir="$plugin_dir/skills"
@@ -1279,6 +1280,7 @@ sync_home_plugin_mirrors() {
       while IFS= read -r skill_link; do
         [ -n "$skill_link" ] || continue
         [ -L "$skill_link" ] || continue
+        [ -f "$skill_link" ] || continue
         if ! [ -r "$skill_link" ]; then
           echo "[WARN] Could not read runtime skill symlink target: $skill_link"
           continue
@@ -1292,7 +1294,7 @@ sync_home_plugin_mirrors() {
           rm -f -- "$tmp_file"
           echo "[WARN] Failed to materialize runtime skill file: $skill_link"
         fi
-      done < <(find "$skills_dir" -type l -name 'SKILL.md' -print)
+      done < <(find "$skills_dir" -type l -print)
     fi
 
     if [ -d "$plugin_dir/fixtures" ]; then
@@ -1412,9 +1414,10 @@ sync_local_marketplace_cache() {
   local child_dir=""
   local tracked_marketplace_dir=""
 
-  # normalize_cached_plugin_runtime_copy materializes symlinked SKILL.md files
-  # and removes fixtures from runtime cache plugin copies so archived skill
-  # fixtures do not inflate active runtime skill counts.
+  # normalize_cached_plugin_runtime_copy materializes symlinked skill files and
+  # removes fixtures from runtime cache plugin copies so archived skill fixtures
+  # do not inflate active runtime skill counts while helper modules remain
+  # importable.
   normalize_cached_plugin_runtime_copy() {
     local plugin_dir="$1"
     local skills_dir="$plugin_dir/skills"
@@ -1426,6 +1429,7 @@ sync_local_marketplace_cache() {
       while IFS= read -r skill_link; do
         [ -n "$skill_link" ] || continue
         [ -L "$skill_link" ] || continue
+        [ -f "$skill_link" ] || continue
         if ! [ -r "$skill_link" ]; then
           echo "[WARN] Could not read cached skill symlink target: $skill_link"
           continue
@@ -1439,7 +1443,7 @@ sync_local_marketplace_cache() {
           rm -f -- "$tmp_file"
           echo "[WARN] Failed to materialize cached skill file: $skill_link"
         fi
-      done < <(find "$skills_dir" -type l -name 'SKILL.md' -print)
+      done < <(find "$skills_dir" -type l -print)
     fi
 
     if [ -d "$plugin_dir/fixtures" ]; then

@@ -39,7 +39,8 @@ jobs:
           if [ -f base/Infrastructure/ops/metrics/graph/skill-edges.json ]; then
             cp base/Infrastructure/ops/metrics/graph/skill-edges.json /tmp/base-edges.json
           else
-            printf '{"schema_version":2,"nodes":[],"edges":[]}\n' > /tmp/base-edges.json
+            echo "::error::Missing base/Infrastructure/ops/metrics/graph/skill-edges.json. Base branch artifact is required for graph diff."
+            exit 1
           fi
 
       - name: Load edges (head)

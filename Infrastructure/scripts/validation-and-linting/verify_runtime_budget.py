@@ -88,7 +88,7 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
         if plugin_owned and name in DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES:
             continue
         try:
-            source_dir.relative_to(REPO_ROOT)
+            skill_dir.relative_to(REPO_ROOT)
         except ValueError:
             continue
         candidates.append((name, source_dir))
@@ -109,9 +109,9 @@ def _first_level_skill_names() -> list[str]:
 
 
 def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
-    default_entries = [entry for entry in discover_skill_entries(visibility="default") if entry.source_dir.is_relative_to(REPO_ROOT)]
-    advanced_entries = [entry for entry in discover_skill_entries(visibility="advanced") if entry.source_dir.is_relative_to(REPO_ROOT)]
-    catalog_entries = [entry for entry in discover_catalog_entries(advanced=False) if entry.source_dir.is_relative_to(REPO_ROOT)]
+    default_entries = list(discover_skill_entries(visibility="default"))
+    advanced_entries = list(discover_skill_entries(visibility="advanced"))
+    catalog_entries = list(discover_catalog_entries(advanced=False))
 
     by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
     for name, source_dir in _iter_default_visibility_candidates():
@@ -131,8 +131,11 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     # `.system` lane and are validated separately via BRIDGE_SKILLS_EXPOSED_FIRST_LEVEL.
     expected_default = policy_default - BRIDGE_SKILLS
     default_names = {entry.name for entry in default_entries}
+    catalog_names = {entry.name for entry in catalog_entries}
     extra_default = sorted(default_names - expected_default)
     missing_default = sorted(expected_default - default_names)
+    catalog_only_default_names = sorted(catalog_names - default_names)
+    discovery_only_default_names = sorted(default_names - catalog_names)
 
     violations: list[dict[str, Any]] = []
     if len(default_entries) > default_max:
@@ -159,10 +162,12 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             "extra": extra_default,
             "missing": missing_default,
         })
-    if sorted(entry.name for entry in catalog_entries) != sorted(entry.name for entry in default_entries):
+    if catalog_only_default_names or discovery_only_default_names:
         violations.append({
             "code": "CATALOG_DEFAULT_DRIFT",
             "message": "catalog default surface differs from discovery default surface",
+            "catalog_only_default_names": catalog_only_default_names,
+            "discovery_only_default_names": discovery_only_default_names,
         })
 
     return {
@@ -173,6 +178,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "advanced_visible_count": len(advanced_entries),
         "advanced_visible_warn": ADVANCED_WARN_VISIBLE,
         "catalog_default_count": len(catalog_entries),
+        "catalog_default_skill_names": sorted(catalog_names),
         "system_bridge_skills": sorted(BRIDGE_SKILLS),
         "first_level_bridge_skills": bridge_exposed,
         "policy_default_skill_names": sorted(policy_default),

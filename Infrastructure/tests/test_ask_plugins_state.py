@@ -143,6 +143,27 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(activation_plugin["marketplace_name"], "local")
         self.assertTrue(activation_plugin["cache_present"])
 
+    def test_doctor_treats_missing_cache_as_warning(self) -> None:
+        cache_root = self.repo_root / ".agents" / "plugins-runtime" / "cache"
+        shutil.rmtree(cache_root, ignore_errors=True)
+
+        with patch(
+            "ask.plugin_state.subprocess.run",
+            return_value=subprocess.CompletedProcess(
+                args=[],
+                returncode=0,
+                stdout="Plugin-shadowing check passed",
+                stderr="",
+            ),
+        ):
+            result = doctor_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "healthy")
+        activation = result.data["health_state"]["checks"]["activation"]
+        self.assertTrue(activation["missing_cache_plugins"])
+        self.assertTrue(activation["warnings"])
+
     def test_status_plugin_state_errors_when_missing(self) -> None:
         result = status_plugin_state(self.repo_root, "missing-plugin")
         self.assertEqual(result.status, "error")

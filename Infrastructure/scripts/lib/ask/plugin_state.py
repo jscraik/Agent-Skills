@@ -449,15 +449,18 @@ def collect_plugin_state(
             "PLUGIN_MARKETPLACE_DRIFT: plugins missing from marketplace: "
             + ", ".join(sorted(unregistered_plugins))
         )
-    if missing_cache_plugins:
-        blockers.append(
-            "PLUGIN_CACHE_MISSING: runtime cache missing for plugins: "
-            + ", ".join(sorted(missing_cache_plugins))
-        )
     checks["activation"] = {
-        "ok": not unregistered_plugins and not missing_cache_plugins,
+        "ok": not unregistered_plugins,
         "unregistered_plugins": sorted(unregistered_plugins),
         "missing_cache_plugins": sorted(missing_cache_plugins),
+        "warnings": (
+            [
+                "Runtime cache is missing for one or more repo-managed plugins. "
+                "Run ask skills sync to mirror local plugin sources into cache."
+            ]
+            if missing_cache_plugins
+            else []
+        ),
     }
 
     if run_doctor:
