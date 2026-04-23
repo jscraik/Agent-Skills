@@ -508,21 +508,44 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
-    def test_selection_policy_promotes_all_harness_engineering_public_skills_for_flat_visibility(self) -> None:
+    def test_selection_policy_plugin_router_skills_exist_in_plugin_sources(self) -> None:
         """
-        Ensure the selection policy exposes exactly the harness-engineering public skills (directories named with the `he-` prefix) as router-visible flat skills.
-        
-        Loads the selection_policy module and asserts its `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES` matches the sorted set of skill directory names under `Plugins/harness-engineering/skills/**/SKILL.md` whose parent directory name starts with `he-`.
+        Ensure each policy-declared plugin router skill resolves to a real plugin SKILL.md directory.
+
+        This guards policy drift where a skill name remains in selection policy lists
+        after the corresponding plugin skill folder has been moved or removed.
         """
         selection_policy = load_selection_policy_module()
-        he_skill_names = sorted(
+        discovered_plugin_skill_names = {
             path.parent.name
-            for path in (REPO_ROOT / "Plugins" / "harness-engineering" / "skills").glob("**/SKILL.md")
-            if path.parent.name.startswith("he-")
+            for path in (REPO_ROOT / "Plugins").glob("*/skills/**/SKILL.md")
+        }
+        missing = sorted(
+            name
+            for name in selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
+            if name not in discovered_plugin_skill_names
+        )
+        self.assertEqual(missing, [])
+
+    def test_catalog_default_surface_matches_default_discovery_surface(self) -> None:
+        """
+        Ensure catalog/default and discovery/default surfaces stay identical.
+
+        This catches contract drift where `ask skills list` (catalog view) and
+        `skill_discovery.py --visibility default` disagree on visible skill names.
+        """
+        skill_discovery = load_skill_discovery_module()
+        default_entries = skill_discovery.discover_skill_entries(
+            source="auto",
+            visibility="default",
+        )
+        catalog_entries = skill_discovery.discover_catalog_entries(
+            source="auto",
+            advanced=False,
         )
         self.assertEqual(
-            sorted(selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
-            he_skill_names,
+            sorted(entry.name for entry in catalog_entries),
+            sorted(entry.name for entry in default_entries),
         )
 
     def test_skill_discovery_visibility_respects_router_allowlist(self) -> None:
@@ -633,7 +656,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         default_names = sorted(entry.name for entry in default_entries)
         advanced_names = sorted(entry.name for entry in advanced_entries)
-        self.assertEqual(default_names, ["coderabbit"])
+        self.assertEqual(default_names, [])
         self.assertEqual(advanced_names, ["code-review", "coderabbit"])
 
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
@@ -650,6 +673,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
         self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
         self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
         self.assertIn("projection_integrity.py", content)

@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-23T11:58:00.052495+00:00",
+  "generated_at": "2026-04-23T18:51:54.506698+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -42,24 +42,48 @@
       "type": "mirror",
       "source": "Plugins/harness-engineering",
       "projection": ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
-      "status": "pass",
-      "reason": "projection_missing_optional"
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 385,
+      "source_manifest_sha256": "54efa7150af0a6b7d92e9a70a747bb8ca152064ec7c52ba9055d891aeb063314",
+      "projection_manifest_sha256": "54efa7150af0a6b7d92e9a70a747bb8ca152064ec7c52ba9055d891aeb063314",
+      "manifest_mismatch": false,
+      "status": "pass"
     },
     {
       "name": "cache-plugin-factory",
       "type": "mirror",
       "source": "Plugins/plugin-factory",
       "projection": ".agents/plugins-runtime/cache/agent-skills-local/plugin-factory",
-      "status": "pass",
-      "reason": "projection_missing_optional"
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 67,
+      "source_manifest_sha256": "bc360991e4c5982785d9bda3bde28ff3b84d0b706e3905afe6f32ba32ecc3675",
+      "projection_manifest_sha256": "bc360991e4c5982785d9bda3bde28ff3b84d0b706e3905afe6f32ba32ecc3675",
+      "manifest_mismatch": false,
+      "status": "pass"
     },
     {
       "name": "cache-skill-factory",
       "type": "mirror",
       "source": "Plugins/skill-factory",
       "projection": ".agents/plugins-runtime/cache/agent-skills-local/skill-factory",
-      "status": "pass",
-      "reason": "projection_missing_optional"
+      "policy": "hash-manifest-plus-path-diff",
+      "missing_in_projection": [],
+      "extra_in_projection": [],
+      "mismatched_files": [],
+      "unstamped_files": [],
+      "checked_files": 207,
+      "source_manifest_sha256": "027f395ee3e493b215884d1af41e1fa6ba1df24bdf8ca804432eb819c07e9e8e",
+      "projection_manifest_sha256": "027f395ee3e493b215884d1af41e1fa6ba1df24bdf8ca804432eb819c07e9e8e",
+      "manifest_mismatch": false,
+      "status": "pass"
     }
   ]
 }

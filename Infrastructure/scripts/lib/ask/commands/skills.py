@@ -1,4 +1,5 @@
 import os
+import json
 import shlex
 import shutil
 import subprocess
@@ -349,6 +350,38 @@ def list_skills(
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
         result.data["starter_limit"] = max(1, int(limit))
     result.status = "success"
+    return result
+
+
+def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
+    """Run the default skill runtime-budget audit and return its JSON report."""
+    result = CallResult()
+    cmd = _get_python_command() + [
+        "Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py",
+        "--default-max",
+        str(default_max),
+        "--json",
+    ]
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    try:
+        report = json.loads(process.stdout)
+    except json.JSONDecodeError:
+        report = {
+            "status": "fail",
+            "raw_stdout": process.stdout,
+            "raw_stderr": process.stderr,
+        }
+
+    result.data["runtime_budget"] = report
+    result.status = "success" if process.returncode == 0 and report.get("status") == "pass" else "error"
+    if result.status == "error":
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skill runtime budget failed.",
+                fix_suggestion="Reduce default-visible skills, hide bridge aliases under .system, or update the explicit budget with evidence.",
+            )
+        )
     return result
 
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:

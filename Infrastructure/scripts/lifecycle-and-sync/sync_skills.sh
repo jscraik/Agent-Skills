@@ -174,33 +174,11 @@ skills_dir="$repo_root/.agents/skills"
 plugins_dir="$repo_root/plugins"
 runtime_cache_root="$repo_root/.agents/plugins-runtime/cache"
 system_skills_dir="$repo_root/skills-system"
-antigravity_skills_dir="$repo_root/skills-antigravity"
-antigravity_skills_txt="$HOME/.gemini/antigravity/skills.txt"
 
 mkdir -p "$skills_dir"
 mkdir -p "$plugins_dir"
 
-# Security guard: never operate on a symlinked antigravity catalog path.
-if [ -L "$antigravity_skills_dir" ]; then
-  echo "Refusing to use symlinked path: $antigravity_skills_dir" >&2
-  exit 1
-fi
-if [ -e "$antigravity_skills_dir" ] && [ ! -d "$antigravity_skills_dir" ]; then
-  echo "Refusing to use non-directory path: $antigravity_skills_dir" >&2
-  exit 1
-fi
-mkdir -p "$antigravity_skills_dir"
-if [ -L "$antigravity_skills_dir" ]; then
-  echo "Refusing to use symlinked path: $antigravity_skills_dir" >&2
-  exit 1
-fi
-
 repo_root_real="$(cd "$repo_root" && pwd -P)"
-antigravity_skills_dir_real="$(cd "$antigravity_skills_dir" && pwd -P)"
-if [ "$antigravity_skills_dir_real" != "$repo_root_real/skills-antigravity" ]; then
-  echo "Refusing to use unexpected antigravity path: $antigravity_skills_dir_real" >&2
-  exit 1
-fi
 
 # Remove legacy aggregation directories that could cause duplicate skills in IDE panels.
 # sync-symlink/ was created by an older version of this script under a different name.
@@ -258,10 +236,11 @@ else
   echo "[WARN] $skills_dir is not writable; skipping stale symlink cleanup."
 fi
 
-# Remove meta/internal skills from the flat runtime surface so they do not
-# appear as user-selectable skills in Codex. Lifecycle family skills such as
-# `skill-creator` and `skill-installer` are intentionally visible again.
+# Remove hidden/internal skills and skills outside the default policy from the
+# flat runtime surface so they do not appear as user-selectable skills in Codex.
+# Lifecycle bridge skills stay available through the hidden `.system` lane.
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
+default_visible_flat_skills=("${SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS[@]}")
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
 if declare -p SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS >/dev/null 2>&1; then
@@ -276,6 +255,15 @@ router_collision_count=0
 is_hidden_flat_skill_name() {
   local skill_name="$1"
   case " ${hidden_flat_skills[*]} " in
+    *" $skill_name "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+# is_default_visible_flat_skill_name returns success (exit code 0) when the
+# supplied skill name belongs to the default flat-runtime surface.
+is_default_visible_flat_skill_name() {
+  local skill_name="$1"
+  case " ${default_visible_flat_skills[*]} " in
     *" $skill_name "*) return 0 ;;
     *) return 1 ;;
   esac
@@ -479,6 +467,10 @@ while IFS= read -r skill_path; do
     echo "Skipping hidden flat skill: $skill_name"
     continue
   fi
+  if ! is_default_visible_flat_skill_name "$skill_name"; then
+    echo "Skipping non-default flat skill: $skill_name"
+    continue
+  fi
   skill_dir_abs="$repo_root/$skill_dir"
   discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
   if is_plugin_owned_skill_path "$skill_path"; then
@@ -541,9 +533,9 @@ elif [ ! -e "$skills_dir/.system" ]; then
   ln -s "../../skills-system" "$skills_dir/.system"
 fi
 
-# Keep only the approved bridge skills routed through the hidden `.system`
-# lane so these four remain available while avoiding direct top-level plugin
-# path coupling in profile homes.
+# Keep approved bridge skills available only through the hidden `.system`
+# lane. First-level aliases make lifecycle helper skills appear as duplicate
+# user-facing skills in Codex, so remove stale aliases instead of creating them.
 for bridge_skill in "${system_bridge_skills[@]}"; do
   bridge_source=".system/$bridge_skill"
   if [ ! -e "$skills_dir/$bridge_source" ]; then
@@ -551,72 +543,13 @@ for bridge_skill in "${system_bridge_skills[@]}"; do
     continue
   fi
 
-  if [ -L "$skills_dir/$bridge_skill" ]; then
-    rm -f "$skills_dir/$bridge_skill"
-  elif [ -e "$skills_dir/$bridge_skill" ]; then
+  if [ -e "$skills_dir/$bridge_skill" ] || [ -L "$skills_dir/$bridge_skill" ]; then
     rm -rf -- "${skills_dir:?}/${bridge_skill:?}"
+    echo "Removed first-level bridge skill alias: $bridge_skill"
   fi
 
-  ln -s "$bridge_source" "$skills_dir/$bridge_skill"
-  echo "Routed bridge skill through .system: $bridge_skill -> $bridge_source"
+  echo "Bridge skill kept under .system: $bridge_skill -> $bridge_source"
 done
-
-# Build a strict Antigravity-compatible projection:
-# - flat first-level skill folders only
-# - each folder must contain SKILL.md
-# - each entry must be a first-level directory with SKILL.md (symlink or real dir)
-# This avoids loader confusion from metadata folders like .system/ or helper repos.
-#
-# Keep the projection incremental instead of deleting everything first:
-# unchanged skills stay in place, changed skills are refreshed, and stale skills
-# are pruned at the end. This preserves output behavior while reducing I/O.
-antigravity_state_dir="$(mktemp -d)"
-cleanup_paths+=("$antigravity_state_dir")
-antigravity_keep_file="$antigravity_state_dir/skills.keep"
-: > "$antigravity_keep_file"
-
-for skill_entry in "$skills_dir"/*; do
-  # Keep hidden entries excluded (glob does not match dotfiles like .system),
-  # but allow both symlinked and real first-level directories with SKILL.md.
-  if [ ! -d "$skill_entry" ]; then
-    continue
-  fi
-  if [ ! -f "$skill_entry/SKILL.md" ]; then
-    continue
-  fi
-
-  skill_name="$(basename "$skill_entry")"
-  target_dir="$antigravity_skills_dir/$skill_name"
-  printf '%s\n' "$skill_name" >> "$antigravity_keep_file"
-  mkdir -p "$target_dir"
-
-  if command -v rsync >/dev/null 2>&1; then
-    # Materialize dereferenced content so Antigravity never inherits repo-local
-    # symlink topology from .agents/skills.
-    rsync -aL \
-      --delete \
-      --exclude '.git' \
-      --exclude 'node_modules' \
-      --exclude '__pycache__' \
-      "$skill_entry/" "$target_dir/"
-  else
-    rm -rf -- "$target_dir"
-    mkdir -p "$target_dir"
-    cp -RL "$skill_entry"/. "$target_dir"/
-    rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
-  fi
-done
-
-# Remove non-directory entries that could confuse flat directory loaders.
-find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 ! -type d -exec rm -rf -- {} +
-
-# Prune stale directories that were not refreshed in this run.
-while IFS= read -r existing_dir; do
-  existing_name="$(basename "$existing_dir")"
-  if ! grep -Fqx "$existing_name" "$antigravity_keep_file"; then
-    rm -rf -- "$existing_dir"
-  fi
-done < <(find "$antigravity_skills_dir" -mindepth 1 -maxdepth 1 -type d -print)
 
 # generate_skill_index regenerates the repository root SKILL.md index from skills' YAML frontmatter, grouping skills by category and extracting short descriptions where available.
 generate_skill_index() {
@@ -1074,7 +1007,6 @@ remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.copilot/skills"
   remove_legacy_symlink "$HOME/.Infrastructure/config/agents/skills"
   remove_legacy_symlink "$HOME/.cursor/skills"
-  remove_legacy_symlink "$HOME/.gemini/skills"
 }
 
 # sync_user_skills synchronises a source skills directory into a user's target directory by creating or updating a symlink (default) or by copying contents, with optional force replacement of existing non-symlink targets.
@@ -1333,6 +1265,54 @@ sync_home_plugin_mirrors() {
     done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -print)
   }
 
+  # normalize_runtime_plugin_copy materializes symlinked SKILL.md files inside
+  # copied plugin skills/ trees, then removes fixtures/ from runtime copies so
+  # archive assets do not inflate active skill discovery surfaces.
+  normalize_runtime_plugin_copy() {
+    local plugin_dir="$1"
+    local skills_dir="$plugin_dir/skills"
+    local skill_link=""
+    local tmp_file=""
+    local duplicate_category=""
+
+    if [ -d "$skills_dir" ]; then
+      while IFS= read -r skill_link; do
+        [ -n "$skill_link" ] || continue
+        [ -L "$skill_link" ] || continue
+        if ! [ -r "$skill_link" ]; then
+          echo "[WARN] Could not read runtime skill symlink target: $skill_link"
+          continue
+        fi
+        tmp_file="$(mktemp)"
+        if cat "$skill_link" > "$tmp_file"; then
+          rm -f -- "$skill_link"
+          mv "$tmp_file" "$skill_link"
+          echo "[OK] Materialized runtime skill file: $skill_link"
+        else
+          rm -f -- "$tmp_file"
+          echo "[WARN] Failed to materialize runtime skill file: $skill_link"
+        fi
+      done < <(find "$skills_dir" -type l -name 'SKILL.md' -print)
+    fi
+
+    if [ -d "$plugin_dir/fixtures" ]; then
+      rm -rf -- "$plugin_dir/fixtures"
+      echo "[OK] Removed runtime plugin fixtures: $plugin_dir/fixtures"
+    fi
+
+    for duplicate_category in \
+      team_automation \
+      code_quality_review \
+      scaffolding_templates \
+      infrastructure_ops \
+      data_fetch_analysis; do
+      if [ -d "$skills_dir/$duplicate_category" ]; then
+        rm -rf -- "$skills_dir/$duplicate_category"
+        echo "[OK] Removed runtime duplicate category lane: $skills_dir/$duplicate_category"
+      fi
+    done
+  }
+
   while IFS= read -r plugin_name; do
     [ -n "$plugin_name" ] || continue
     if ! is_safe_path_component "$plugin_name"; then
@@ -1357,6 +1337,7 @@ sync_home_plugin_mirrors() {
 
     sync_user_skills "$source_dir" "$target_dir" 0 copy
     materialize_runtime_plugin_skill_aliases "$target_dir"
+    normalize_runtime_plugin_copy "$target_dir"
     marker_file="$target_dir/$repo_plugin_marker"
     printf '%s\n' "$source_real" > "$marker_file"
     echo "[OK] Installed home plugin copy: $target_dir"
@@ -1430,6 +1411,54 @@ sync_local_marketplace_cache() {
   local target_plugin_dir=""
   local child_dir=""
   local tracked_marketplace_dir=""
+
+  # normalize_cached_plugin_runtime_copy materializes symlinked SKILL.md files
+  # and removes fixtures from runtime cache plugin copies so archived skill
+  # fixtures do not inflate active runtime skill counts.
+  normalize_cached_plugin_runtime_copy() {
+    local plugin_dir="$1"
+    local skills_dir="$plugin_dir/skills"
+    local skill_link=""
+    local tmp_file=""
+    local duplicate_category=""
+
+    if [ -d "$skills_dir" ]; then
+      while IFS= read -r skill_link; do
+        [ -n "$skill_link" ] || continue
+        [ -L "$skill_link" ] || continue
+        if ! [ -r "$skill_link" ]; then
+          echo "[WARN] Could not read cached skill symlink target: $skill_link"
+          continue
+        fi
+        tmp_file="$(mktemp)"
+        if cat "$skill_link" > "$tmp_file"; then
+          rm -f -- "$skill_link"
+          mv "$tmp_file" "$skill_link"
+          echo "[OK] Materialized cached skill file: $skill_link"
+        else
+          rm -f -- "$tmp_file"
+          echo "[WARN] Failed to materialize cached skill file: $skill_link"
+        fi
+      done < <(find "$skills_dir" -type l -name 'SKILL.md' -print)
+    fi
+
+    if [ -d "$plugin_dir/fixtures" ]; then
+      rm -rf -- "$plugin_dir/fixtures"
+      echo "[OK] Removed cached plugin fixtures: $plugin_dir/fixtures"
+    fi
+
+    for duplicate_category in \
+      team_automation \
+      code_quality_review \
+      scaffolding_templates \
+      infrastructure_ops \
+      data_fetch_analysis; do
+      if [ -d "$skills_dir/$duplicate_category" ]; then
+        rm -rf -- "$skills_dir/$duplicate_category"
+        echo "[OK] Removed cached duplicate category lane: $skills_dir/$duplicate_category"
+      fi
+    done
+  }
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping local marketplace cache sync)."
@@ -1525,6 +1554,8 @@ sync_local_marketplace_cache() {
       rm -rf -- "$target_plugin_dir/.git" "$target_plugin_dir/node_modules" "$target_plugin_dir/__pycache__"
       find "$target_plugin_dir" -name '.DS_Store' -type f -delete
     fi
+
+    normalize_cached_plugin_runtime_copy "$target_plugin_dir"
 
     # Remove stale nested cache variants (for example `local` or `0.1.0`) so
     # plugin roots resolve directly at <cache>/<marketplace>/<plugin>.
@@ -1753,16 +1784,11 @@ fi
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 if [[ "$sync_scope" == "workspace" ]]; then
   remove_legacy_home_skill_symlinks
-  sync_user_skills "$skills_dir" "$HOME/.claude/skills"
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
   ensure_real_home_plugin_root "$HOME/plugins" "$plugins_dir" "home plugin root"
   sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
-  # Antigravity app requires a flat copy (no symlinks) in its own config dir
-  sync_user_skills "$antigravity_skills_dir" "$HOME/.gemini/antigravity/skills" 1 copy
-  sync_user_skills "$antigravity_skills_dir" "$HOME/.antigravity/skills"
-  sync_skill_path_file "$antigravity_skills_dir" "$antigravity_skills_txt"
   sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
 else
   echo "Project-local scope: skipped home runtime projections."

@@ -1,0 +1,22 @@
+{
+  "default_provider": "openai",
+  "allowed_runtime_providers": ["openai"],
+  "blocked_active_path_terms": [
+    "antigravity",
+    "anti-gravity",
+    "gemini",
+    "claude"
+  ],
+  "allowed_path_prefixes": [
+    ".git/",
+    "Infrastructure/config/provider-policy.json",
+    "Infrastructure/artifacts/",
+    "artifacts/",
+    "plugins/*/fixtures/",
+    "Plugins/*/fixtures/",
+    "plugins/cache/",
+    ".agents/plugins-runtime/cache/",
+    ".venv/"
+  ],
+  "notes": "OpenAI Codex is the only active runtime provider. Legacy provider terms may exist only in historical artifacts, cache mirrors, or explicit fixtures."
+}

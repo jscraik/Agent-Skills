@@ -9,17 +9,17 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ## Summary
 
-- `library_api_reference`: 4
+- `library_api_reference`: 3
 - `product_verification`: 4
 - `data_fetch_analysis`: 4
-- `team_automation`: 35
-- `scaffolding_templates`: 20
-- `code_quality_review`: 25
-- `ci_cd_deployment`: 3
-- `runbook`: 14
+- `team_automation`: 32
+- `scaffolding_templates`: 19
+- `code_quality_review`: 24
+- `ci_cd_deployment`: 1
+- `runbook`: 11
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 113
+- `total_tagged`: 102
 
 ## Semantic Types
 
@@ -28,7 +28,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `context7` — `Skills/agent-ops`
 - `oak-api` — `Skills/backend-platform`
 - `react-ui-patterns` — `Skills/frontend-ui`
-- `remotion` — `Skills/frontend-ui`
 
 ### Product Verification
 
@@ -70,8 +69,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `he-tdd` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
-- `markdown-converter` — `Skills/content-publishing`
-- `orchestrating-subagents` — `Skills/agent-ops`
 - `plugin-router` — `Plugins/plugin-factory/skills`
 - `production-deployment` — `Skills/agent-ops`
 - `skill-factory-router` — `Plugins/skill-factory/skills`
@@ -80,7 +77,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `video-transcript-downloader` — `Skills/content-publishing`
 - `visual-explainer` — `Skills/content-publishing`
 - `youtube-hooks-scripts` — `Skills/content-publishing`
-- `youtube-titles-thumbnails` — `Skills/content-publishing`
 
 ### Scaffolding Templates
 
@@ -93,7 +89,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `codex-agent-creator` — `Skills/agent-ops`
 - `codex-hooks-builder` — `Skills/agent-ops`
 - `create-auth` — `Skills/security-ops`
-- `favicon-generator` — `Skills/frontend-ui`
 - `frontend-design` — `Skills/agent-ops`
 - `frontend-ui-design` — `Skills/frontend-ui`
 - `llm-wiki` — `Skills/content-publishing`
@@ -111,7 +106,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `autofix` — `Skills/agent-ops`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
-- `codex-home-audit` — `Skills/agent-ops`
 - `docs-expert` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`
@@ -135,23 +129,18 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 
 ### Ci Cd Deployment
 
-- `fallback-release` — `Skills/agent-ops`
 - `gh-workflow` — `Skills/agent-ops`
-- `release` — `Skills/agent-ops`
 
 ### Runbook
 
 - `bash-hygiene` — `Skills/agent-ops`
 - `biome-linting` — `Skills/agent-ops`
 - `diagram-cli` — `Skills/agent-ops`
-- `mise-tooling` — `Skills/agent-ops`
 - `npm-release` — `Skills/agent-ops`
-- `npm-workflow-discipline` — `Skills/agent-ops`
 - `pnpm-manager` — `Skills/agent-ops`
 - `prek-pro` — `Skills/agent-ops`
 - `project-brain` — `Skills/agent-ops`
 - `recon-workbench` — `Skills/security-ops`
-- `scaffolding-expert` — `Skills/agent-ops`
 - `security-threat-model` — `Skills/security-ops`
 - `uv-python-project-setup` — `Skills/agent-ops`
 - `vale` — `Skills/agent-ops`

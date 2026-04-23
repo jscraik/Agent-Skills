@@ -1,3 +1,0 @@
-interface:
-  display_name: "Mise Tooling"
-  short_description: "Mise version pinning, trust prompts, and runtime execution"

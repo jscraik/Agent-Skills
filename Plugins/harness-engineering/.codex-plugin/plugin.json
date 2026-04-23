@@ -25,7 +25,7 @@
     "last_reviewed": "2026-04-09",
     "metadata_source": "plugin_manifest"
   },
-  "skills": "./skills/",
+  "skills": "./skills_index/",
   "interface": {
     "displayName": "Harness Engineering",
     "shortDescription": "Run Harness Engineering lifecycle stages directly or via the router",

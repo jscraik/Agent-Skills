@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-21.v13"
+POLICY_VERSION = "2026-04-23.v14"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -41,31 +41,56 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skillgrade-setup",
 )
 
-# Plugin-owned skills intentionally promoted into default flat discovery.
-# Harness Engineering is packaged as a stage bundle: its lifecycle stages are
-# meant to be directly invokable alongside the router, so the full HE public
-# surface is promoted here. Other plugins should still keep this narrow unless
-# there is a strong reason to expose public stage skills in the flat runtime
-# picker.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+# Default flat-runtime surface to keep skill-context pressure bounded.
+# Skills outside this list remain available in repository scan modes but are
+# excluded from the default always-loaded flat skill view.
+DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
+    "agents-md",
+    "autofix",
+    "autoresearch",
+    "bootstrap",
+    "codex-agent-creator",
+    "codex-automation-architect",
+    "codex-hooks-builder",
+    "coding-harness",
+    "context7",
+    "docs-expert",
+    "fix-mise",
+    "gh-workflow",
+    "npm-release",
+    "pnpm-manager",
+    "project-brain",
+    "simplify",
+    "triage",
+    "verification-before-completion",
     "he-code-review",
-    "he-brainstorm",
-    "he-compound",
-    "he-compound-refresh",
-    "he-deepen-plan",
-    "he-deepen-spec",
-    "he-fix-bugs",
-    "he-ideate",
-    "he-improve",
-    "he-plan",
     "he-prune-branches",
-    "he-refine",
-    "he-reliability-review",
     "he-router",
-    "he-spec",
-    "he-tdd",
     "he-technical-review",
     "he-work",
+    "plugin-router",
+    "skill-builder",
+    "skill-factory-router",
+    "skill-refactor",
+    "skillify",
+    "imagegen",
+    "openai-docs",
+)
+
+# Plugin-owned skills intentionally promoted into default flat discovery.
+# Plugin exposure stays router-first with a narrow public lane set.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
+    "he-code-review",
+    "he-prune-branches",
+    "he-reliability-review",
+    "he-router",
+    "he-technical-review",
+    "he-work",
+    "plugin-router",
+    "skill-builder",
+    "skill-factory-router",
+    "skill-refactor",
+    "skillify",
 )
 
 # Plugin lane skills hidden from default flat discovery.
@@ -109,6 +134,7 @@ def payload() -> dict[str, Any]:
             - "plugin_skill_root_glob": str
             - "excluded_scan_segments": list[str]
             - "hidden_flat_skill_names": list[str]
+            - "default_visible_flat_skill_names": list[str]
             - "plugin_visible_router_skill_names": list[str]
             - "plugin_hidden_lane_skill_names": list[str]
             - "system_bridge_skill_names": list[str]
@@ -119,6 +145,7 @@ def payload() -> dict[str, Any]:
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,
         "excluded_scan_segments": list(EXCLUDED_SCAN_SEGMENTS),
         "hidden_flat_skill_names": list(HIDDEN_FLAT_SKILL_NAMES),
+        "default_visible_flat_skill_names": list(DEFAULT_VISIBLE_FLAT_SKILL_NAMES),
         "plugin_visible_router_skill_names": list(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
         "plugin_hidden_lane_skill_names": list(PLUGIN_HIDDEN_LANE_SKILL_NAMES),
         "system_bridge_skill_names": list(SYSTEM_BRIDGE_SKILL_NAMES),
@@ -149,6 +176,7 @@ def render_shell() -> str:
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),
         _shell_array("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", HIDDEN_FLAT_SKILL_NAMES),
+        _shell_array("SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS", DEFAULT_VISIBLE_FLAT_SKILL_NAMES),
         _shell_array(
             "SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS",
             PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
