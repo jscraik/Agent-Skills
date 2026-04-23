@@ -318,6 +318,8 @@ Recommended update spec:
 - Do not narrate routine tool calls.
 - Keep the user-facing status short; keep the work exhaustive.
 </user_updates_spec>
+
+Use `<working_updates_spec>` below only while actively implementing or exploring.
 ```
 
 For coding agents, see the Prompting patterns for coding tasks section below for more specific guidance.
@@ -341,7 +343,7 @@ Unless the user explicitly asks for a plan, asks a question about the code, is b
 Keep updates sparse and high-signal. In coding tasks, prefer updates at key points.
 
 ```xml
-<user_updates_spec>
+<working_updates_spec>
 - Intermediary updates go to the `commentary` channel.
 - User updates are short updates while you are working. They are not final answers.
 - Use 1-2 sentence updates to communicate progress and new information while you work.
@@ -354,7 +356,7 @@ Keep updates sparse and high-signal. In coding tasks, prefer updates at key poin
 - Before file edits, explain what you are about to change.
 - While thinking, keep the user informed of progress without narrating every tool call. Even if you are not taking actions, send frequent progress updates rather than going silent, especially if you are thinking for more than a short stretch.
 - Keep the tone of progress updates consistent with the assistant's overall personality.
-</user_updates_spec>
+</working_updates_spec>
 ```
 
 **Formatting**
@@ -401,17 +403,8 @@ Exception: If working within an existing website or design system, preserve the 
 
 ### Document localization and OCR boxes
 
-For bbox tasks, be explicit about coordinate conventions and add drift tests.
-
-```xml
-<bbox_extraction_spec>
-- Use the specified coordinate format exactly (for example [x1,y1,x2,y2] normalized 0..1).
-- For each bbox, include: page, label, text snippet, confidence.
-- Add a vertical-drift sanity check:
-  - ensure bboxes align with the line of text (not shifted up or down).
-- If dense layout, process page by page and do a second pass for missed items.
-</bbox_extraction_spec>
-```
+For bbox tasks, use the canonical `<bbox_extraction_spec>` defined above in
+"Clamp strict output formats."
 
 ### Use runtime and API integration notes
 

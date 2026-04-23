@@ -75,6 +75,14 @@ class TestAskPluginsState(unittest.TestCase):
             + "\n",
             encoding="utf-8",
         )
+        (
+            self.repo_root
+            / ".agents"
+            / "plugins-runtime"
+            / "cache"
+            / "agent-skills-local"
+            / "example-plugin"
+        ).mkdir(parents=True, exist_ok=True)
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
@@ -111,6 +119,29 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(len(activation_plugins), 1)
         self.assertEqual(activation_plugins[0]["name"], "example-plugin")
         self.assertTrue(activation_plugins[0]["cache_present"])
+
+    def test_list_plugins_state_accepts_legacy_local_cache_family(self) -> None:
+        marketplace = self.repo_root / ".agents" / "plugins" / "marketplace.json"
+        payload = json.loads(marketplace.read_text(encoding="utf-8"))
+        payload["name"] = "local"
+        marketplace.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+        legacy_cache_dir = (
+            self.repo_root
+            / ".agents"
+            / "plugins-runtime"
+            / "cache"
+            / "agent-skills-local"
+            / "example-plugin"
+        )
+        legacy_cache_dir.mkdir(parents=True, exist_ok=True)
+
+        result = list_plugins_state(self.repo_root)
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "healthy")
+        activation_plugin = result.data["activation_state"]["plugins"][0]
+        self.assertEqual(activation_plugin["marketplace_name"], "local")
+        self.assertTrue(activation_plugin["cache_present"])
 
     def test_status_plugin_state_errors_when_missing(self) -> None:
         result = status_plugin_state(self.repo_root, "missing-plugin")
@@ -287,6 +318,11 @@ class TestAskPluginsState(unittest.TestCase):
         }
         self.assertIn("external-plugin", installed)
         self.assertEqual(installed["external-plugin"]["path"], external_root.resolve().as_posix())
+        activation = {
+            plugin["name"]: plugin for plugin in result.data["activation_state"]["plugins"]
+        }
+        self.assertFalse(activation["external-plugin"]["repo_managed"])
+        self.assertEqual(result.data["health_state"]["status"], "healthy")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 ---
 name: fix-mise
-description: Use this skill to operate and repair mise workflows, including trust/runtime failures, activation drift, and local/global version pinning, when commands fail or toolchain behavior is non-deterministic.
+description: Diagnose and repair mise trust, runtime, activation, and version-drift failures. Use when commands fail from mise config, missing runtimes, stale pins, or shell activation drift.
 metadata:
   skill-type: infrastructure_ops
 ---

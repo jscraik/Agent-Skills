@@ -15,6 +15,7 @@
     "plugins/*/fixtures/",
     "Plugins/*/fixtures/",
     "plugins/cache/",
+    "Plugins/cache/",
     ".agents/plugins-runtime/cache/",
     ".venv/"
   ],

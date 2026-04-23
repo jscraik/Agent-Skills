@@ -5,6 +5,7 @@
 - Status default: `assigned`
 - Owner default: `agent-skills-team`
 - Due date default: `2026-04-15`
+- Due date note: historical snapshot baseline; overdue status is expected.
 
 ## Wave summary
 

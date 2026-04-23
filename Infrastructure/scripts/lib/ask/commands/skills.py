@@ -362,15 +362,43 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
         str(default_max),
         "--json",
     ]
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
     try:
-        report = json.loads(process.stdout)
+        process = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message=f"Failed to execute runtime budget verifier: {exc}",
+                fix_suggestion="Ensure Python is available and rerun `ask skills budget`.",
+            )
+        )
+        return result
+
+    try:
+        parsed_report = json.loads(process.stdout)
     except json.JSONDecodeError:
-        report = {
+        parsed_report = {
             "status": "fail",
             "raw_stdout": process.stdout,
             "raw_stderr": process.stderr,
         }
+    report = (
+        parsed_report
+        if isinstance(parsed_report, dict)
+        else {
+            "status": "fail",
+            "raw_stdout": process.stdout,
+            "raw_stderr": process.stderr,
+            "parse_error": "verify_runtime_budget.py did not return a JSON object",
+        }
+    )
 
     result.data["runtime_budget"] = report
     result.status = "success" if process.returncode == 0 and report.get("status") == "pass" else "error"

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# clean-gone: list local branches whose remote tracking branch is gone.
+# clean-gone: list local branches (excluding the currently checked-out branch)
+# whose remote tracking branch is gone.
 # Outputs one branch name per line, or __NONE__ if no stale branches are found.
 
 set -euo pipefail
@@ -7,20 +8,20 @@ set -euo pipefail
 git fetch --prune 2>/dev/null
 
 gone_branches=()
+current_branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
 
-while IFS= read -r line; do
-  if [[ "$line" =~ ^\* ]]; then
+while IFS=$'\t' read -r branch_name upstream_track; do
+  [[ "$upstream_track" == "[gone]" ]] || continue
+  if [[ -n "$current_branch" ]] && [[ "$branch_name" == "$current_branch" ]]; then
     continue
   fi
 
-  branch_name=$(echo "$line" | sed 's/^[+* ]*//' | awk '{print $1}')
-
-  if [[ -z "$branch_name" ]] || [[ "$branch_name" =~ ^[0-9a-f]{7,}$ ]] || [[ "$branch_name" == "HEAD" ]]; then
+  if [[ -z "$branch_name" ]] || [[ "$branch_name" == "HEAD" ]]; then
     continue
   fi
 
   gone_branches+=("$branch_name")
-done < <(git branch -vv 2>/dev/null | grep ': gone]')
+done < <(git for-each-ref --format='%(refname:short)%09%(upstream:track)' refs/heads 2>/dev/null)
 
 if [[ ${#gone_branches[@]} -eq 0 ]]; then
   echo "__NONE__"

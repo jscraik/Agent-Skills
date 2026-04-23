@@ -1,6 +1,6 @@
 ---
 name: npm-release
-description: "Create and validate npm release workflows end to end, including deterministic dependency/install discipline, semver bumping, dist-tags, provenance publishing, and 2FA-aware safeguards."
+description: "Create and validate npm package release workflows with deterministic installs, semver, dist-tags, provenance, and 2FA safeguards. Use when preparing or publishing npm releases."
 metadata:
   skill-type: runbook
 ---

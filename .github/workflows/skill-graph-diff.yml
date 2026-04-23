@@ -34,17 +34,21 @@ jobs:
       - name: Install dependencies
         run: pip install pyyaml
 
-      - name: Extract edges (base)
+      - name: Load edges (base)
         run: |
-          python3 head/Docs/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
-            base \
-            /tmp/base-edges.json
+          if [ -f base/Infrastructure/ops/metrics/graph/skill-edges.json ]; then
+            cp base/Infrastructure/ops/metrics/graph/skill-edges.json /tmp/base-edges.json
+          else
+            printf '{"schema_version":2,"nodes":[],"edges":[]}\n' > /tmp/base-edges.json
+          fi
 
-      - name: Extract edges (head)
+      - name: Load edges (head)
         run: |
-          python3 head/Docs/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
-            head \
-            /tmp/head-edges.json
+          if [ -f head/Infrastructure/ops/metrics/graph/skill-edges.json ]; then
+            cp head/Infrastructure/ops/metrics/graph/skill-edges.json /tmp/head-edges.json
+          else
+            printf '{"schema_version":2,"nodes":[],"edges":[]}\n' > /tmp/head-edges.json
+          fi
 
       - name: Check hub stability
         run: |

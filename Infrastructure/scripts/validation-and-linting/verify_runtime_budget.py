@@ -20,7 +20,18 @@ from selection_policy import (  # type: ignore  # noqa: E402
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
-from skill_discovery import discover_catalog_entries, discover_skill_entries  # type: ignore  # noqa: E402
+from skill_discovery import (  # type: ignore  # noqa: E402
+    HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
+    PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
+    PLUGIN_VISIBLE_ROUTER_SKILL_NAMES as DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
+    _is_plugin_owned_skill_dir,
+    _iter_flat_skill_dirs,
+    _iter_plugin_skill_dirs,
+    _iter_repo_skill_dirs,
+    _iter_system_lane_skill_dirs,
+    discover_catalog_entries,
+    discover_skill_entries,
+)
 
 DEFAULT_MAX_VISIBLE = 30
 ADVANCED_WARN_VISIBLE = 60
@@ -34,12 +45,54 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
-def _entry_payload(entry: Any) -> dict[str, str]:
+def _candidate_payload(*, name: str, source_dir: Path) -> dict[str, str]:
+    rel_path = _rel(source_dir)
+    category = Path(rel_path).parent.as_posix() or "uncategorized"
     return {
-        "name": entry.name,
-        "path": _rel(entry.source_dir),
-        "category": entry.category,
+        "name": name,
+        "path": rel_path,
+        "category": category,
     }
+
+
+def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
+    """
+    Return default-surface candidates before name deduplication.
+
+    `discover_skill_entries` intentionally keeps only the first seen skill name.
+    This helper preserves every candidate that survives default visibility
+    filters so duplicate-name drift can be detected reliably.
+    """
+    skill_dirs = list(_iter_flat_skill_dirs())
+    if not skill_dirs:
+        skill_dirs = list(_iter_repo_skill_dirs())
+        skill_dirs.extend(_iter_plugin_skill_dirs())
+        skill_dirs.extend(_iter_system_lane_skill_dirs())
+
+    candidates: list[tuple[str, Path]] = []
+    for skill_dir in skill_dirs:
+        source_dir = skill_dir.resolve()
+        skill_md = source_dir / "SKILL.md"
+        if not skill_md.exists():
+            continue
+        name = skill_dir.name.strip() or source_dir.name
+        if not name:
+            continue
+        if name in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES:
+            continue
+        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES:
+            continue
+        plugin_owned = _is_plugin_owned_skill_dir(source_dir)
+        if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
+            continue
+        if plugin_owned and name in DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES:
+            continue
+        try:
+            source_dir.relative_to(REPO_ROOT)
+        except ValueError:
+            continue
+        candidates.append((name, source_dir))
+    return candidates
 
 
 def _first_level_skill_names() -> list[str]:
@@ -60,12 +113,12 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     advanced_entries = [entry for entry in discover_skill_entries(visibility="advanced") if entry.source_dir.is_relative_to(REPO_ROOT)]
     catalog_entries = [entry for entry in discover_catalog_entries(advanced=False) if entry.source_dir.is_relative_to(REPO_ROOT)]
 
-    by_name: dict[str, list[Any]] = defaultdict(list)
-    for entry in default_entries:
-        by_name[entry.name].append(entry)
+    by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for name, source_dir in _iter_default_visibility_candidates():
+        by_name[name].append(_candidate_payload(name=name, source_dir=source_dir))
 
     duplicate_default_names = {
-        name: [_entry_payload(entry) for entry in entries]
+        name: entries
         for name, entries in sorted(by_name.items())
         if len(entries) > 1
     }

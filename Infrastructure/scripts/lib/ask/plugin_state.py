@@ -168,7 +168,7 @@ def _activation_state(
         if marketplace_name:
             candidates.append(marketplace_name)
 
-        # Backward-compat fallback used by existing local plugin cache projections.
+        # Backward compatibility for legacy local plugin cache families.
         candidates.append("agent-skills-local")
 
         deduped_candidates = tuple(dict.fromkeys(candidates))
@@ -197,6 +197,13 @@ def _activation_state(
     plugin_rows = []
     for item in installed:
         name = item.get("name")
+        workspace_plugin_path = item.get("path")
+        plugin_path = Path(str(workspace_plugin_path or ""))
+        if not plugin_path.is_absolute():
+            plugin_path = repo_root / plugin_path
+        is_repo_managed = not _is_external_cached_plugin(repo_root, plugin_path) and not _is_external_plugin_path(
+            repo_root, plugin_path
+        )
         entry = by_name.get(name)
         cache_present = (
             _cache_present(
@@ -215,7 +222,8 @@ def _activation_state(
                 "marketplace_source_path": (
                     ((entry.get("source") or {}).get("path")) if isinstance(entry, dict) else None
                 ),
-                "workspace_plugin_path": item.get("path"),
+                "workspace_plugin_path": workspace_plugin_path,
+                "repo_managed": is_repo_managed,
                 "cache_present": cache_present,
             }
         )
@@ -424,6 +432,33 @@ def collect_plugin_state(
         }
     else:
         checks["manifests"] = {"ok": True}
+
+    activation_rows = activation.get("plugins", [])
+    unregistered_plugins = [
+        str(item.get("name"))
+        for item in activation_rows
+        if item.get("name") and item.get("repo_managed") and not item.get("registered_in_marketplace")
+    ]
+    missing_cache_plugins = [
+        str(item.get("name"))
+        for item in activation_rows
+        if item.get("name") and item.get("repo_managed") and not item.get("cache_present")
+    ]
+    if unregistered_plugins:
+        blockers.append(
+            "PLUGIN_MARKETPLACE_DRIFT: plugins missing from marketplace: "
+            + ", ".join(sorted(unregistered_plugins))
+        )
+    if missing_cache_plugins:
+        blockers.append(
+            "PLUGIN_CACHE_MISSING: runtime cache missing for plugins: "
+            + ", ".join(sorted(missing_cache_plugins))
+        )
+    checks["activation"] = {
+        "ok": not unregistered_plugins and not missing_cache_plugins,
+        "unregistered_plugins": sorted(unregistered_plugins),
+        "missing_cache_plugins": sorted(missing_cache_plugins),
+    }
 
     if run_doctor:
         shadow_check = _run_shadowing_check(repo_root)

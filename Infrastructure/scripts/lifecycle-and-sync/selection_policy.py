@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-23.v14"
+POLICY_VERSION = "2026-04-23.v17"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -65,6 +65,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "verification-before-completion",
     "he-code-review",
     "he-prune-branches",
+    "he-reliability-review",
     "he-router",
     "he-technical-review",
     "he-work",
@@ -77,8 +78,9 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "openai-docs",
 )
 
-# Plugin-owned skills intentionally promoted into default flat discovery.
-# Plugin exposure stays router-first with a narrow public lane set.
+# Plugin-owned skills intentionally promoted into default discovery for the
+# first-level picker surface. Keep this aligned with
+# DEFAULT_VISIBLE_FLAT_SKILL_NAMES to avoid visibility drift.
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
     "he-code-review",
     "he-prune-branches",
