@@ -47,7 +47,8 @@ jobs:
           if [ -f head/Infrastructure/ops/metrics/graph/skill-edges.json ]; then
             cp head/Infrastructure/ops/metrics/graph/skill-edges.json /tmp/head-edges.json
           else
-            printf '{"schema_version":2,"nodes":[],"edges":[]}\n' > /tmp/head-edges.json
+            echo "::error::Missing head/Infrastructure/ops/metrics/graph/skill-edges.json. Run projection/sync before merging."
+            exit 1
           fi
 
       - name: Check hub stability

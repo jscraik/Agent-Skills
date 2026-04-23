@@ -126,6 +126,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     first_level = set(_first_level_skill_names())
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+    # Bridge skills are intentionally not expected in default first-level discovery.
+    # They can exist in policy metadata while remaining routed through the hidden
+    # `.system` lane and are validated separately via BRIDGE_SKILLS_EXPOSED_FIRST_LEVEL.
     expected_default = policy_default - BRIDGE_SKILLS
     default_names = {entry.name for entry in default_entries}
     extra_default = sorted(default_names - expected_default)

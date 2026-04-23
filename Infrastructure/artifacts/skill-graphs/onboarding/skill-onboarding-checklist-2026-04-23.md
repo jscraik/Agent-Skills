@@ -1,3 +1,4 @@
+<!-- vale off -- reason: generated onboarding artifact table with machine-formatted paths and dates; ticket: PR-134; expires: 2026-05-31 -->
 # Skill-by-Skill Onboarding Checklist (All-Skills Graph Migration)
 
 - Generated at: `2026-04-23T14:08:04Z`
@@ -105,3 +106,4 @@
 
 - Rows using explicit per-skill assignment: `0`
 - Rows using fallback defaults: `85`
+<!-- vale on -->
