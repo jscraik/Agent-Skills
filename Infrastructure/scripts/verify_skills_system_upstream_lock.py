@@ -40,4 +40,5 @@ for _name in dir(_TARGET_MODULE):
     globals()[_name] = getattr(_TARGET_MODULE, _name)
 
 if __name__ == "__main__":
+    # Target script raises SystemExit with return code; let it propagate
     runpy.run_path(str(_TARGET_PATH), run_name="__main__")
