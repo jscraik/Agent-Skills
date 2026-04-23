@@ -14,6 +14,7 @@ strict_mode=0
 governance_scope="project-local"
 repo_root=""
 
+# usage prints the help and usage text for validate-codestyle.sh, describing supported command-line options and their effects.
 usage() {
 	cat <<'USAGE'
 Usage: scripts/validation-and-linting/validate-codestyle.sh [options]
@@ -55,6 +56,7 @@ run_required_script() {
 	run_script "$script_name"
 }
 
+# run_optional_script runs the named script from package.json if present; if the script is missing and `strict_mode` is `1` it prints an error to stderr and exits with status 1, otherwise it prints a skip message and returns success.
 run_optional_script() {
 	local script_name="$1"
 
@@ -71,6 +73,7 @@ run_optional_script() {
 	echo "[validate-codestyle] skip $script_name: package script not defined"
 }
 
+# run_non_package_lane delegates validation for repositories without package.json to Infrastructure/scripts/validate_all.sh using `--persistent` when `governance_scope` is "workspace" or `--ephemeral` otherwise; in fast mode it prints a skip message and returns success.
 run_non_package_lane() {
 	local validate_all_mode="--ephemeral"
 	if [[ "$governance_scope" == "workspace" ]]; then

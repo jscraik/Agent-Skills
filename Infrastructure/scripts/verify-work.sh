@@ -14,6 +14,7 @@ strict_mode=0
 governance_scope="project-local"
 repo_root=""
 
+# usage prints the usage help text describing accepted CLI options.
 usage() {
 	cat <<'USAGE'
 Usage: scripts/verify-work.sh [options]

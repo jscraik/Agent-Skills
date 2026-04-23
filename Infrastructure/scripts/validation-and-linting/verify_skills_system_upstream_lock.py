@@ -17,6 +17,15 @@ SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Build and parse command-line arguments for the skills-system validation CLI.
+    
+    Returns:
+        namespace (argparse.Namespace): Parsed arguments with attributes:
+            - repo_root (str): Repository root path.
+            - lock (str): Path to the upstream lock JSON relative to repo root.
+            - emit_current (bool): If true, emit current managed-directory digests as JSON and exit.
+    """
     parser = argparse.ArgumentParser(
         description="Verify skills-system pin and managed directory digests."
     )
@@ -39,10 +48,32 @@ def parse_args() -> argparse.Namespace:
 
 
 def sha256_bytes(data: bytes) -> str:
+    """
+    Compute the SHA-256 hexadecimal digest of the given bytes.
+    
+    Parameters:
+        data (bytes): Input bytes to hash.
+    
+    Returns:
+        str: Lowercase hexadecimal SHA-256 digest of `data`.
+    """
     return hashlib.sha256(data).hexdigest()
 
 
 def tree_digest(path: Path) -> str:
+    """
+    Compute a deterministic SHA-256 digest that represents the contents and structure of the directory tree rooted at `path`.
+    
+    Parameters:
+        path (Path): Root directory to snapshot; must exist and be a directory.
+    
+    Returns:
+        str: Lowercase hexadecimal SHA-256 digest (64 characters) of the directory tree.
+    
+    Raises:
+        FileNotFoundError: If `path` does not exist.
+        NotADirectoryError: If `path` exists but is not a directory.
+    """
     if not path.exists():
         raise FileNotFoundError(path)
     if not path.is_dir():
@@ -65,11 +96,31 @@ def tree_digest(path: Path) -> str:
 
 
 def _expect(condition: bool, message: str, issues: list[str]) -> None:
+    """
+    Append `message` to `issues` when `condition` is false.
+    
+    Parameters:
+        condition (bool): Predicate to evaluate.
+        message (str): Issue message to append if the predicate is false.
+        issues (list[str]): Mutable list of issue messages that will be mutated in-place.
+    """
     if not condition:
         issues.append(message)
 
 
 def emit_current(repo_root: Path, lock_payload: dict[str, Any]) -> int:
+    """
+    Generate a snapshot of current tree digests for managed directories in the provided lock payload.
+    
+    Reads `managed_dirs` from `lock_payload`, computes a SHA-256 tree digest for each entry that is an object with non-empty `name` and `path`, and prints a JSON snapshot containing `schema_version` and `managed_dirs` entries of the form `{"name", "path", "tree_sha256"}`.
+    
+    Parameters:
+        repo_root (Path): Base directory used to resolve each managed directory's relative `path`.
+        lock_payload (dict[str, Any]): Parsed lock file content; expected to contain a `managed_dirs` list of objects with `name` and `path`.
+    
+    Returns:
+        int: `0` on success; `1` if `managed_dirs` is missing or not a list.
+    """
     managed = lock_payload.get("managed_dirs")
     if not isinstance(managed, list):
         print("lock file missing managed_dirs list", file=sys.stderr)
@@ -100,6 +151,14 @@ def emit_current(repo_root: Path, lock_payload: dict[str, Any]) -> int:
 
 
 def main() -> int:
+    """
+    Validate a skills-system upstream lock file according to the tool's schema and exit with a status code.
+    
+    Performs these high-level actions: parses CLI arguments, loads and JSON-decodes the specified lock file, validates required top-level fields (including schema_version and upstream metadata), checks presence of the repository marker file, verifies bridge_entries refer to existing paths or symlinks, and validates each managed_dirs entry by confirming the path exists and its computed tree SHA-256 matches the declared `tree_sha256`. When invoked with `--emit-current` the function emits a JSON snapshot of current managed directory digests instead of performing validation. Validation failures and structural/JSON errors are printed to stderr.
+    
+    Returns:
+        int: `0` on successful validation or successful `--emit-current`; `1` on missing lock file, invalid JSON, structural/schema/validation failures, or other validation errors.
+    """
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
     lock_path = (repo_root / args.lock).resolve()
