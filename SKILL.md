@@ -27,10 +27,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 114
+- `total_skills`: 115
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: d8f37e43ba560c95
+- `policy_identity`: 25e6a07d9c0a8b21
 
 ## Catalog
 
@@ -102,6 +102,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 
 - `agents-md` — Create or refactor AGENTS.md and linked instruction docs using progressive disclosure. Use when the user wants repo-specific agent guidance organized, deduplicated, or routed cleanly, not ordinary product documentation edits.
 - `alignment-checkpoint` — Intent-alignment gate for ambiguous/high-stakes requests. Use this when you want to extract goal/assumptions/criteria and require an explicit /proceed approval gate before any tool use.
+- `autofix` — Review and apply CodeRabbit PR review-thread feedback from GitHub with per-change approval. Use this skill when a branch PR has unresolved CodeRabbit issues that need safe, human-approved fixes.
 - `autoresearch` — Analyze and improve this repo's skills and plugin packages through bounded experiment loops. Use this skill when users request autonomous research passes with hypothesis-validation-keep/discard decisions.
 - `bash-hygiene` — Write and review Bash scripts with safe structure and portability guardrails. Use when shell work needs strict mode defaults, robust quoting, and interpreter-compatible behavior.
 - `biome-linting` — Guide Biome linting and formatting workflows with safe-fix strategy and CI-ready rule triage. Use when a user needs Biome command, diagnostics, or remediation guidance in JavaScript/TypeScript projects.
@@ -117,7 +118,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `docs-expert` — Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
 - `elixir-pro` — Create and review idiomatic Elixir code with OTP patterns, supervision trees, and Phoenix LiveView. Use when building or debugging Elixir services that need reliable concurrency and fault tolerance.
 - `evals-router` — Analyze and plan LLM evaluation workflows, including evaluator design, error analysis, and RAG eval strategy. Use when a user asks for eval-specific implementation or triage guidance.
-- `fallback-release` — Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions is stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
+- `fallback-release` — Deploy deterministic fallback releases when primary CI is unavailable. Use this skill when GitHub Actions is stalled due to queue congestion, rate limits, or incidents and a critical release cannot wait.
 - `fix-mise` — Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.Infrastructure/config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
 - `frontend-design` — Analyze broad frontend design requests and route them to the correct local UI skill after classifying intent and maturity. Use when the user asks for frontend design generally and the specific design owner is not yet clear.
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
@@ -130,7 +131,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `orchestrating-subagents` — Plan and run Codex subagent workflows using installed roles and Codex-native delegation tools. Use when the user explicitly wants subagents, parallel delegation, or swarm-style orchestration, not ordinary single-agent work or role creation.
 - `pnpm-manager` — Run pnpm workspace operations with recursive and filter selectors for scoped install, test, build, and publish flows. Use when a user needs pnpm monorepo command routing.
 - `prek-pro` — Provide docs-backed guidance for configuring and troubleshooting `prek` hooks when users need to edit `prek.toml`, install shims, validate hook behavior, or migrate from pre-commit.
-- `production-deployment` — Deploy and manage production services across various platforms with automated verification and rollback safety.
+- `production-deployment` — Deploy and manage production services across various platforms with automated verification and rollback safety. Use this skill when a rollout to production or production-parity targets needs execution-grade safety checks.
 - `project-brain` — Bootstrap and operate Project Brain
 - `release` — Cut a clean semver release from the main branch using the repo's release flow. Use when the user wants a tagged Cargo release, not generic deployment or changelog drafting.
 - `rust-pro` — Create and review Rust 1.75+ systems code with ownership-safe async patterns and production error handling. Use when building or debugging Rust services that need performance and reliability.
@@ -138,7 +139,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `simplify` — Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
 - `swift-development` — Create and review Swift code with modern concurrency, performance tuning, and idiomatic language patterns. Use when building or debugging Swift application logic.
 - `toml` — Create and review TOML configuration with strict typing and predictable structure. Use when editing tool configuration files that require schema-safe TOML.
-- `triage` — Triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
+- `triage` — Review and triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use this skill when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
 - `typescript` — Use when authoring or reviewing TypeScript code that requires strict type safety, explicit module contracts, and predictable runtime boundaries.
 - `uv-python-project-setup` — Create and configure Python projects with uv for dependency management, virtual environments, and reproducible workflows. Use when initializing or repairing uv-based Python project setup.
 - `vale` — Set up and verify Vale prose linting across local, pre-commit, and CI workflows. Use when users ask to install Vale, repair broken config or style sync, or enforce docs linting gates.
@@ -206,5 +207,5 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 ## Skills System
 
 - `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or explicit GPT-5.4 upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
 

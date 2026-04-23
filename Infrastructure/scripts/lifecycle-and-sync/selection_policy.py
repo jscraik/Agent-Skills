@@ -34,6 +34,7 @@ EXCLUDED_SCAN_SEGMENTS: tuple[str, ...] = (
 
 # Internal skills intentionally hidden from flat runtime discovery.
 HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
+    "browser",
     "circleci",
     "linear",
     "skillgrade-graders",

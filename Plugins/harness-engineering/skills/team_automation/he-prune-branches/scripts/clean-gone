@@ -1,12 +1,32 @@
 #!/usr/bin/env bash
+# clean-gone: list local branches whose remote tracking branch is gone.
+# Outputs one branch name per line, or __NONE__ if no stale branches are found.
+
 set -euo pipefail
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-archive_script="$script_dir/../../../../fixtures/skill-archive/skills/team_automation/he-prune-branches/scripts/clean-gone"
+git fetch --prune 2>/dev/null
 
-if [[ ! -x "$archive_script" ]]; then
-  echo "Missing archived helper: $archive_script" >&2
-  exit 1
+gone_branches=()
+
+while IFS= read -r line; do
+  if [[ "$line" =~ ^\* ]]; then
+    continue
+  fi
+
+  branch_name=$(echo "$line" | sed 's/^[+* ]*//' | awk '{print $1}')
+
+  if [[ -z "$branch_name" ]] || [[ "$branch_name" =~ ^[0-9a-f]{7,}$ ]] || [[ "$branch_name" == "HEAD" ]]; then
+    continue
+  fi
+
+  gone_branches+=("$branch_name")
+done < <(git branch -vv 2>/dev/null | grep ': gone]')
+
+if [[ ${#gone_branches[@]} -eq 0 ]]; then
+  echo "__NONE__"
+  exit 0
 fi
 
-exec "$archive_script" "$@"
+for branch in "${gone_branches[@]}"; do
+  echo "$branch"
+done
