@@ -9,7 +9,6 @@ Usage:
 Sandbox-safe companion sync for this environment.
 This script intentionally avoids mutating protected runtime paths such as:
   - .agents/skills
-  - ~/.claude/skills
   - ~/.codex/skills
 It regenerates semantic-skill governance artifacts only.
 USAGE
@@ -29,7 +28,7 @@ if [[ $# -gt 0 ]]; then
   esac
 fi
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root"
 index_file="$repo_root/docs/skills-by-type.md"
 python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_scan.py" write-skill-type-index --output "$index_file"
