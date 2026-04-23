@@ -22,12 +22,15 @@ Usage: scripts/validation-and-linting/validate-codestyle.sh [options]
 Fail-closed codestyle validation for harness-managed repositories.
 
 Options:
-  --all              Run full test coverage in --fast mode
-  --changed-only     Prefer changed-file validation in --fast mode (default)
-  --strict           Fail when optional fast-mode fallbacks are needed
-  --fast             Run lint + docs + typecheck + tests instead of the full check bundle
-  --repo-root PATH   Run checks in a specific repository root
-  -h, --help         Show this help text
+  --all                      Run full test coverage in --fast mode
+  --changed-only             Prefer changed-file validation in --fast mode (default)
+  --strict                   Fail when optional fast-mode fallbacks are needed
+  --fast                     Run lint + docs + typecheck + tests instead of the full check bundle
+  --repo-root PATH           Run checks in a specific repository root
+  --project-governance       Use project-local governance scope (default)
+  --workspace-governance     Use workspace-level governance scope
+  --persistent-artifacts     Equivalent to --workspace-governance
+  -h, --help                 Show this help text
 USAGE
 }
 
@@ -139,11 +142,6 @@ fi
 cd "$repo_root"
 echo "[validate-codestyle] repo root: $repo_root"
 
-if ! command -v pnpm >/dev/null 2>&1; then
-	echo "[validate-codestyle] missing required binary: pnpm" >&2
-	exit 1
-fi
-
 if [[ ! -f "$repo_root/CODESTYLE.md" ]]; then
 	echo "[validate-codestyle] missing CODESTYLE.md" >&2
 	exit 1
@@ -152,6 +150,11 @@ fi
 if [[ ! -f "$repo_root/package.json" ]]; then
 	run_non_package_lane
 	exit $?
+fi
+
+if ! command -v pnpm >/dev/null 2>&1; then
+	echo "[validate-codestyle] missing required binary: pnpm" >&2
+	exit 1
 fi
 
 if [[ "$fast_mode" -eq 0 ]]; then
