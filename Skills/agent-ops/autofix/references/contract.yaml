@@ -1,0 +1,30 @@
+schema_version: "1.1"
+purpose: >
+  Resolve unresolved CodeRabbit review threads on an active pull request through
+  an approval-aware manual or batch autofix workflow.
+triggers:
+  - user asks to autofix unresolved CodeRabbit review comments
+  - user asks to resolve CodeRabbit review threads in manual or auto mode
+  - user requests one consolidated remediation pass for CodeRabbit findings
+inputs:
+  - repository branch and working-tree state for the active checkout
+  - target pull request context including owner repo and PR number
+  - unresolved CodeRabbit-authored review thread payloads
+  - requested application mode manual or auto
+outputs:
+  - ordered unresolved-thread issue list and pre-apply fix preview
+  - applied change summary tied to CodeRabbit thread context
+  - validation outcomes captured as pass fail or blocked
+non_goals:
+  - broad cleanup refactors unrelated to unresolved CodeRabbit findings
+  - bypassing user approval for risky or behavior-changing edits
+  - live SaaS administration operations
+risks:
+  - stale unresolved-thread state if branch commits are not pushed before fetch
+  - over-application of low-priority findings without explicit approval gates
+rollback_procedure: >
+  If autofix changes are incorrect, reset to the previous commit state, re-fetch
+  unresolved threads, and rerun manual mode with explicit per-issue approvals.
+observability: >
+  Monitor lane health with unresolved-thread fetch success rate, strict skill-audit
+  status, and post-fix validation pass rates.

@@ -1,6 +1,6 @@
 ---
 name: production-deployment
-description: Deploy and manage production services across various platforms with automated verification and rollback safety.
+description: Deploy and manage production services across various platforms with automated verification and rollback safety. Use this skill when a rollout to production or production-parity targets needs execution-grade safety checks.
 metadata:
   skill-type: team_automation
 ---
