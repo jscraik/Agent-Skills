@@ -9,7 +9,7 @@
 - None.
 
 ## Resolved contradictions
-- Root `AGENTS.md` and `CLAUDE.md` previously told agents to source `Infrastructure/scripts/codex-preflight/codex-preflight.sh` and call `preflight_repo`.
+- Root `AGENTS.md` and `AGENTS.md` previously told agents to source `Infrastructure/scripts/codex-preflight/codex-preflight.sh` and call `preflight_repo`.
   - Verified repo behavior is the CLI form: `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
   - Supported overrides were confirmed from the script help and live execution: `--repo-fragment`, `--bins`, `--paths`
   - See [Tooling Policy](/Docs/agents/02-tooling-policy.md) for current preflight command reference.
@@ -19,8 +19,8 @@
   - `frontend/react-components/`
   - `Skills/video-transcript-downloader/`
 - Canonical paths were verified from lockfiles and documented as:
-  - `frontend/stitch-react-components/`
-  - `product/content/video-transcript-downloader/`
+  - `Skills/content-publishing/video-transcript-downloader/`
+  - `Skills/frontend-ui/ui-ux-creative-coding/`
 
 ## Flag for deletion
 - Remove stale references to `frontend/react-components/` and `Skills/video-transcript-downloader/` if they appear in downstream docs.

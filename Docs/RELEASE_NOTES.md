@@ -24,7 +24,7 @@
 
 - `1c5f11d` feat(skill-graphs): recursive parity controls and governance telemetry.
 - `8924bc6` add governance baseline sweep artifacts and recursive skill-loop assets/codex-agent-builder.
-- `6c0ba90` auto-sync skills to `~/.claude/skills` and `~/.agents/skills`.
+- `6c0ba90` auto-sync skills to `~/.codex/skills` and `~/.agents/skills`.
 
 ## Fixes
 

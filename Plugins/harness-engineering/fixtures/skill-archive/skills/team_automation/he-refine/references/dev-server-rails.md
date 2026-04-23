@@ -1,6 +1,6 @@
 # Rails dev-server recipe (auto-detect fallback)
 
-Loaded when `detect-project-type.sh` returns `rails` and there is no `.claude/launch.json` to consult.
+Loaded when `detect-project-type.sh` returns `rails` and there is no `.codex/launch.json` to consult.
 
 ## Signature
 
@@ -21,11 +21,11 @@ Default: `3000`. Overrides follow the cascade in `references/dev-server-detectio
 1. `Procfile.dev` `web:` line may contain `-p <n>`
 2. `config/puma.rb` may bind to a non-default port
 3. `.env` / `.env.development` `PORT=<n>`
-4. `AGENTS.md` / `CLAUDE.md` project instructions
+4. `AGENTS.md` / `AGENTS.md` project instructions
 
-## Stub generation for `.claude/launch.json`
+## Stub generation for `.codex/launch.json`
 
-When the user accepts "Save this as `.claude/launch.json`?", emit the Rails stub from `launch-json-schema.md`:
+When the user accepts "Save this as `.codex/launch.json`?", emit the Rails stub from `launch-json-schema.md`:
 
 ```json
 {
@@ -47,4 +47,4 @@ If the cascade resolved a non-3000 port, substitute it in the stub's `port` fiel
 
 - **Bundler path:** some machines require `bundle exec bin/dev`. If `bin/dev` fails with a load-path error, fall back to `bundle exec bin/dev`.
 - **Foreman vs overmind:** `Procfile` vs `Procfile.dev` often both exist. Rails' `bin/dev` resolves to `Procfile.dev`; if the project uses `overmind` explicitly, prefer `overmind start -f Procfile.dev` (see `dev-server-procfile.md`).
-- **SSL dev server:** `rails s` with `--ssl` changes the URL scheme. Polish's reachability probe uses `http://`; users with SSL dev servers should set `port` explicitly in `.claude/launch.json` and note the scheme in the checklist.
+- **SSL dev server:** `rails s` with `--ssl` changes the URL scheme. Polish's reachability probe uses `http://`; users with SSL dev servers should set `port` explicitly in `.codex/launch.json` and note the scheme in the checklist.

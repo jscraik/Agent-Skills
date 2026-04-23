@@ -5,7 +5,7 @@
 - [Session hygiene](#session-hygiene)
 
 ## Artifact rules
-- Keep PR AI disclosures in `CLAUDE.md` as required.
+- Keep PR AI disclosures in `AGENTS.md` as required.
 - Use commit messages that describe purpose, not generic text.
 
 ## Session hygiene

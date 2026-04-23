@@ -164,7 +164,7 @@ python3 Skills/insight-report/Infrastructure/scripts/run_insight_report.py [opti
 Top Tools Used: Not available — Codex runs tools server-side
 ```
 OpenAI Codex runs tools server-side for security. Tool execution data is not stored 
-locally (unlike Claude Code's ~/.claude/projects/ format).
+locally (unlike Codex's ~/.codex/projects/ format).
 
 **To enable general analytics:**
 ```bash

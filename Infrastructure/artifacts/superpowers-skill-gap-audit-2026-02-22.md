@@ -10,7 +10,7 @@
 
 ## Scope
 Compared:
-- `/Users/jamiecraik/dev/Infrastructure/config/claude/Plugins/marketplaces/superpowers-dev/skills`
+- `/Users/jamiecraik/dev/Infrastructure/config/codex/Plugins/marketplaces/superpowers-dev/skills`
 - `/Users/jamiecraik/dev/agent-skills`
 
 Method:
@@ -31,7 +31,7 @@ Method:
 | Superpowers skill | Local equivalent today | Recommendation |
 |---|---|---|
 | `writing-skills` | `skill-builder` | **Do not import directly**. Keep `skill-builder` as canonical for Codex; optionally backport selected TDD-for-skills examples. |
-| `using-superpowers` | AGENTS + system behavior | **Do not import**. It is Claude-specific and conflicts with current Codex skill-invocation model. |
+| `using-superpowers` | AGENTS + system behavior | **Do not import**. It is Codex-specific and conflicts with current Codex skill-invocation model. |
 | `writing-plans` | `product-spec`, `tech-spec`, `backend-engineer` | Add lightweight generic `writing-plans` skill or expand `product-spec` with an execution-handoff mode. |
 | `executing-plans` | partial via existing planning skills | Add dedicated execution-mode skill for plan runbooks with checkpoints and blocker handling. |
 | `test-driven-development` | none (explicit) | Add a first-class TDD skill (high value). |

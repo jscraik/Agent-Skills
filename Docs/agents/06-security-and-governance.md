@@ -12,7 +12,7 @@
 
 ## Repository practice
 - Repository-wide security and workflow rules in `AGENTS.md` take precedence.
-- Use repository-specific AI handling from `CLAUDE.md`.
+- Use repository-specific AI handling from `AGENTS.md`.
 
 ## External integration preflight
 - Run `codex mcp list` before MCP-dependent work.
@@ -24,6 +24,6 @@
 - If auth fails, debug auth first before retrying commands.
 
 ## AI disclosure artifacts
-- CLAUDE governance applies to PRs:
+- CODEX governance applies to PRs:
   - `Infrastructure/artifacts/ai/prompts/YYYY-MM-DD-<slug>.yaml`
   - `Infrastructure/artifacts/ai/sessions/YYYY-MM-DD-<slug>.json`

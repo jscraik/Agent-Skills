@@ -922,7 +922,7 @@ diff -q /tmp/graph.json /tmp/graph2.json
 ## Sources & References
 ### Internal references
 - `${CONFIG_DIR}/codex/prompts/graph.md:2-3,7,10,26`
-- `${CONFIG_DIR}/claude/Plugins/marketplaces/agenticnotetaking/skill-sources/graph/SKILL.md:10,55,141,507,550`
+- `${CONFIG_DIR}/codex/Plugins/marketplaces/agenticnotetaking/skill-sources/graph/SKILL.md:10,55,141,507,550`
 - `${CONFIG_DIR}/codex/Infrastructure/scripts/arscontexta-lib.sh:4-5,32-40,49-75`
 - `${CONFIG_DIR}/codex/Infrastructure/scripts/arscontexta-write-validate.sh:80-87`
 - `${CONFIG_DIR}/codex/automations/arscontexta-session-orient/automation.toml`
@@ -945,9 +945,9 @@ diff -q /tmp/graph.json /tmp/graph2.json
 
 ### Research notes consulted
 - No actionable learning files were found in docs/solutions paths during this run.
-- `${CONFIG_DIR}/claude/Plugins/marketplaces/agenticnotetaking/methodology/dual-coding with visual elements could enhance agent traversal.md`
-- `${CONFIG_DIR}/claude/Plugins/marketplaces/agenticnotetaking/methodology/community detection algorithms can inform when MOCs should split or merge.md`
-- `${CONFIG_DIR}/claude/Plugins/marketplaces/agenticnotetaking/methodology/evolution observations provide actionable signals for system adaptation.md`
+- `${CONFIG_DIR}/codex/Plugins/marketplaces/agenticnotetaking/methodology/dual-coding with visual elements could enhance agent traversal.md`
+- `${CONFIG_DIR}/codex/Plugins/marketplaces/agenticnotetaking/methodology/community detection algorithms can inform when MOCs should split or merge.md`
+- `${CONFIG_DIR}/codex/Plugins/marketplaces/agenticnotetaking/methodology/evolution observations provide actionable signals for system adaptation.md`
 
 
 

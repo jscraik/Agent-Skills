@@ -401,9 +401,9 @@
       "wave": "wave-2-co-pilot"
     },
     {
-      "skill_md": "product/docs/claude-md/SKILL.md",
-      "skill_dir": "product/docs/claude-md",
-      "profile_file": "product/docs/claude-md/Infrastructure/references/task-profile.json",
+      "skill_md": "product/docs/codex-md/SKILL.md",
+      "skill_dir": "product/docs/codex-md",
+      "profile_file": "product/docs/codex-md/Infrastructure/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "wave": "wave-2-co-pilot"
     },
@@ -422,9 +422,9 @@
       "wave": "wave-2-co-pilot"
     },
     {
-      "skill_md": "product/docs/gemini-md/SKILL.md",
-      "skill_dir": "product/docs/gemini-md",
-      "profile_file": "product/docs/gemini-md/Infrastructure/references/task-profile.json",
+      "skill_md": "product/docs/openai-md/SKILL.md",
+      "skill_dir": "product/docs/openai-md",
+      "profile_file": "product/docs/openai-md/Infrastructure/references/task-profile.json",
       "delegation_mode": "co-pilot",
       "wave": "wave-2-co-pilot"
     },

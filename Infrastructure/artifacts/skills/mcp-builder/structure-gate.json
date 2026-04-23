@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-22T18:51:06Z",
+  "generated_at": "2026-04-23T12:45:12Z",
   "skill": "Skills/backend-platform/mcp-builder/SKILL.md",
   "skill_path": "Skills/backend-platform/mcp-builder/SKILL.md",
   "name": "mcp-builder",

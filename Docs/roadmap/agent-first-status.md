@@ -4,7 +4,7 @@ Last reviewed: 2026-04-16
 
 ## Summary
 
-Agent-Skills is a governed repository of canonical skills for AI coding agents (Codex, Claude Code, Gemini). The project is in active maintenance with a topic-cluster skill layout and automated quality gates.
+Agent-Skills is a governed repository of canonical skills for AI coding agents (Codex, Codex, OpenAI). The project is in active maintenance with a topic-cluster skill layout and automated quality gates.
 
 ## Current State
 

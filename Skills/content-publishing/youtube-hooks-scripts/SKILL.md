@@ -23,7 +23,7 @@ Deliver high-retention technical YouTube hooks, outlines, and scripts. The deepe
 ## When to use
 - Use when asked for technical YouTube hooks, outlines, or long-form scripts.
 - Use it for packaging the story and teaching arc of a video, not for broader product planning.
-- Route broader product or PRD work to `product-spec`.
+- Route broader product planning work to `he-plan`.
 
 ## Required inputs
 - topic
@@ -115,8 +115,8 @@ If the prompt lacks the core topic, audience, or target output shape, ask for th
 |---|---|
 | [[youtube-titles-thumbnails]] | Create titles and thumbnails to pair with the script |
 | [[video-transcript-downloader]] | Study competitor transcripts before writing hooks |
-| [[product-spec]] | Spec the content series before scripting individual videos |
-| [[notebooklm]] | Use NotebookLM to generate audio overviews from scripts |
+| [[he-plan]] | Plan the content series before scripting individual videos |
+| [[llm-wiki]] | Persist scripts and notes in a queryable markdown knowledge base |
 
 **Topic map:** [[content-publishing]]
 

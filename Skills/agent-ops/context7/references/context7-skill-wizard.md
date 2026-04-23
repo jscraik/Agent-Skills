@@ -48,10 +48,10 @@ Supported subcommands in this lane:
 ## Install target flags
 
 Use only these target flags when relevant:
-- `--claude`
+- `--codex`
 - `--cursor`
 - `--universal`
-- `--antigravity`
+- `--codex`
 - `--global`
 - `--all` (install all, or generate for all detected IDE targets)
 
@@ -66,11 +66,11 @@ Use setup mode intentionally:
 - `--oauth` (MCP mode only)
 
 Agent targets for setup:
-- `--claude`
+- `--codex`
 - `--cursor`
 - `--opencode`
 - `--universal`
-- `--antigravity`
+- `--codex`
 
 ## Docs workflow contract
 
@@ -104,15 +104,15 @@ op run --env-file ~/.codex/.env -- ctx7 skills generate --all
 op run --env-file ~/.codex/.env -- ctx7 skills install /owner/repo --all
 
 # install for specific targets
-op run --env-file ~/.codex/.env -- ctx7 skills install /owner/repo --cursor --claude
+op run --env-file ~/.codex/.env -- ctx7 skills install /owner/repo --cursor --codex
 
 # list installed skills by target
 op run --env-file ~/.codex/.env -- ctx7 skills list --cursor
-op run --env-file ~/.codex/.env -- ctx7 skills list --claude
+op run --env-file ~/.codex/.env -- ctx7 skills list --codex
 op run --env-file ~/.codex/.env -- ctx7 skills list --universal
 
 # setup and auth
-op run --env-file ~/.codex/.env -- ctx7 setup --mcp --claude
+op run --env-file ~/.codex/.env -- ctx7 setup --mcp --codex
 op run --env-file ~/.codex/.env -- ctx7 setup --cli --universal
 op run --env-file ~/.codex/.env -- ctx7 login
 op run --env-file ~/.codex/.env -- ctx7 whoami
@@ -141,7 +141,7 @@ When users ask about "Skill Wizard" or `ctx7 skills generate`, ensure guidance c
 # verify generated/installed skills
 op run --env-file ~/.codex/.env -- ctx7 skills list
 op run --env-file ~/.codex/.env -- ctx7 skills list --cursor
-op run --env-file ~/.codex/.env -- ctx7 skills list --claude
+op run --env-file ~/.codex/.env -- ctx7 skills list --codex
 
 # verify auth state
 op run --env-file ~/.codex/.env -- ctx7 whoami

@@ -134,7 +134,7 @@ Work:
 - Store the baseline matrix alongside the pilot evidence bundle so every later rerun can be compared mechanically against the original bar.
 - For `frontend/tools/agentation`, record the upstream compatibility anchors used for future comparisons:
   - `npx skills add benjitaylor/agentation`
-  - `ln -s "$(pwd)/skills/agentation-self-driving" ~/.claude/skills/agentation-self-driving`
+  - `ln -s "$(pwd)/skills/agentation-self-driving" ~/.codex/skills/agentation-self-driving`
 - Record the current public-web evidence source for Agentation separately from repo history. If the public site is unavailable, parked, or otherwise non-authoritative, mark the web evidence as blocked instead of silently replacing it with unstated assumptions.
 
 Exit criteria:

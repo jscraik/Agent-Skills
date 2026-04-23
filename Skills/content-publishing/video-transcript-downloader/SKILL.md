@@ -166,7 +166,7 @@ ffmpeg -version | head -n 1
 
 | Skill | When to use together |
 |---|---|
-| [[notebooklm]] | Feed transcripts to NotebookLM for summarisation |
+| [[llm-wiki]] | Feed transcripts into a persistent markdown knowledge base for summarisation |
 | [[markdown-converter]] | Convert transcript text to clean markdown |
 | [[youtube-hooks-scripts]] | Create scripts for videos whose transcripts you've studied |
 | [[youtube-titles-thumbnails]] | Package videos after reviewing competitor transcripts |

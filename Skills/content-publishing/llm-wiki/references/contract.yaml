@@ -7,7 +7,7 @@ purpose: >
 triggers:
   - user asks to create a persistent LLM-maintained wiki
   - user wants ingest/query/lint workflows for long-running knowledge bases
-  - user needs schema guidance for wiki governance in AGENTS.md or CLAUDE.md
+  - user needs schema guidance for wiki governance in AGENTS.md or AGENTS.md
   - user wants index/log conventions for markdown knowledge repositories
 inputs:
   - user domain and outcome (personal research, team wiki, due diligence, etc.)
@@ -16,7 +16,7 @@ inputs:
   - mixed-media policy (text-only or text-plus-selective-image-review)
   - preferred wiki repository path and folder conventions
   - operational constraints (supervision, cadence, citation strictness)
-  - governance documents in scope (AGENTS.md, CLAUDE.md, runbooks)
+  - governance documents in scope (AGENTS.md, AGENTS.md, runbooks)
 outputs:
   - architecture recommendation for raw/wiki/schema layers
   - ingest/query/lint playbook with explicit steps

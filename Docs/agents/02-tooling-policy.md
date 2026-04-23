@@ -11,7 +11,7 @@
 ## Tools
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
-- Default to `zsh -lc` for shell tooling; switch to `bash` only when a script relies on bash internals.
+- Default to `bash -lc` for shell tooling in this repository. Use `zsh -lc` only when you must validate zsh-specific behavior.
 
 ## Command preflight
 - Run `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
@@ -28,8 +28,8 @@
 ## Package command map
 - Repository root is configuration-oriented and has no package manager install step.
 - Verified npm package roots from lockfiles:
-  - `frontend/stitch-react-components/`
-  - `product/content/video-transcript-downloader/`
+  - `Skills/content-publishing/video-transcript-downloader/`
+  - `Skills/frontend-ui/ui-ux-creative-coding/`
 - Use per-package npm commands at those roots:
   - `npm --prefix <path> install`
   - `npm --prefix <path> run <script>`

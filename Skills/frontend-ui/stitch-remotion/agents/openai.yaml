@@ -1,5 +1,0 @@
-interface:
-  display_name: Stitch Remotion
-  short_description: Generate Stitch-to-Remotion walkthrough videos from screen assets
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

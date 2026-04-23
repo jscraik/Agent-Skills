@@ -82,7 +82,7 @@ class TestAskSkillsErrors(unittest.TestCase):
             with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
                 result = install_skill(
                     repo_root=repo_root,
-                    url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
+                    url="https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
                     dest="github",
                 )
 
@@ -114,7 +114,7 @@ class TestAskSkillsErrors(unittest.TestCase):
             with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
                 result = install_skill(
                     repo_root=repo_root,
-                    url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
+                    url="https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
                     dest="github",
                 )
 
@@ -140,7 +140,7 @@ class TestAskSkillsErrors(unittest.TestCase):
             with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
                 result = install_skill(
                     repo_root=repo_root,
-                    url="https://github.com/google-gemini/gemini-cli/tree/main/.gemini/skills/review-duplication",
+                    url="https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
                     dest="github",
                     remediate=True,
                 )

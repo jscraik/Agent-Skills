@@ -60,7 +60,7 @@ covers:
 - [[gh-workflow]] — GitHub lifecycle: intake, issue fixing, PR prep, review, CI diagnosis, and server-side merge.
 - `github:github` (plugin) — Connector-first GitHub triage and PR/issue orientation.
 - [[release]] — Create and publish a new project release (semver) via `just release X.Y.Z`.
-- [[using-git-worktrees]] — Create and validate Codex/Claude CLI git worktree workflows with safe branch/sync strategies.
+- [[using-git-worktrees]] — Create and validate Codex CLI git worktree workflows with safe branch/sync strategies.
 
 ---
 

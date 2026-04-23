@@ -1,6 +1,6 @@
 # Project Review Mode (Repo Audit)
 
-Yes, this skill can run a deterministic audit if the agent has repo access (Codex CLI / Claude Code) or you provide key files/logs. Default to this mode when the user says "review", "audit", or "refactor".
+Yes, this skill can run a deterministic audit if the agent has repo access (Codex CLI / Codex) or you provide key files/logs. Default to this mode when the user says "review", "audit", or "refactor".
 
 ## 1) Snapshot
 - Capture: stack, app surfaces, routes/screens, key packages.

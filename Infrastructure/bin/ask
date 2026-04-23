@@ -828,7 +828,7 @@ def main():
     mcp_parser = subparsers.add_parser("mcp", help="MCP configuration management", parents=[global_parser])
     mcp_subparsers = mcp_parser.add_subparsers(dest="action")
 
-    mcp_sync_parser = mcp_subparsers.add_parser("sync", help="Sync MCP config from Codex to Antigravity", parents=[global_parser])
+    mcp_sync_parser = mcp_subparsers.add_parser("sync", help="Sync MCP config from Codex to Codex JSON export", parents=[global_parser])
     mcp_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing")
 
     # --- wiki ---
@@ -1579,7 +1579,7 @@ def main():
                         print(f"\n   Target: {result.data['target_path']}")
                     else:
                         print(f"✅ Synced {result.data['server_count']} MCP servers to {result.data['target_path']}")
-                        print("   Restart Antigravity or type '/refresh' to pick up changes.")
+                        print("   Re-run `codex mcp list` or restart Codex to pick up changes.")
                 elif args.topic == "wiki":
                     if args.action == "lint":
                         print(f"✅ {result.data.get('message', 'Wiki lint passed.')}")

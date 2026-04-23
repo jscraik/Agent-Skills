@@ -25,7 +25,6 @@ covers:
 
 - [[sora]] — Generate, remix, poll, list, download Sora videos via the OpenAI video API; batch generation.
 - [[remotion]] — Best-practice guidance for Remotion (React video): compositions, timing, assets, audio, captions, rendering.
-- [[stitch-remotion]] — Transform Stitch screens into narrated or demo-style Remotion videos with transitions and overlays.
 
 ## YouTube Strategy
 
@@ -42,14 +41,15 @@ covers:
 - [[video-transcript-downloader]] — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
 - [[markdown-converter]] — Convert source files into Markdown outputs using the bundled converter workflow.
 - [[spreadsheet]] — Create, edit, analyze, and format spreadsheets (.xlsx, .csv, .tsv) with formula-aware workflows.
+- [[llm-wiki]] — Build and maintain a persistent markdown wiki from source material and transcripts.
 
 ---
 
 ## Pipelines
 
 - YouTube workflow: [[youtube-hooks-scripts]] → [[youtube-titles-thumbnails]] → (record and upload).
-- Demo walkthrough: [[stitch-loop]] → [[stitch-remotion]] → upload.
-- Research-to-publish: [[video-transcript-downloader]] → [[notebooklm]] → [[markdown-converter]].
+- Demo walkthrough: [[visual-explainer]] → [[slides]] → [[remotion]] → upload.
+- Research-to-publish: [[video-transcript-downloader]] → [[llm-wiki]] → [[markdown-converter]].
 
 ## Cross-links
 

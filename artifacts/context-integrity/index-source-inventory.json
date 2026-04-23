@@ -36,8 +36,8 @@
       ]
     },
     {
-      "id": "claude",
-      "path": "CLAUDE.md",
+      "id": "codex",
+      "path": "AGENTS.md",
       "kind": "file",
       "authority": "canonical",
       "exists": true,
@@ -45,7 +45,7 @@
       "indexedDocumentCount": 1,
       "stalenessState": "unknown",
       "documentPaths": [
-        "CLAUDE.md"
+        "AGENTS.md"
       ]
     },
     {

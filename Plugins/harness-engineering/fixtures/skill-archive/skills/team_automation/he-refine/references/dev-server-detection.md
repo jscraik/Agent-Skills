@@ -2,7 +2,7 @@
 
 Port resolution runs via `scripts/resolve-port.sh`. This document explains the probe order, framework defaults, and intentional divergences from the `test-browser` skill's inline cascade.
 
-This cascade runs **only when** `.claude/launch.json` is absent or has no `port` field for the resolved configuration. When `launch.json` specifies a port, use it verbatim and skip this cascade entirely.
+This cascade runs **only when** `.codex/launch.json` is absent or has no `port` field for the resolved configuration. When `launch.json` specifies a port, use it verbatim and skip this cascade entirely.
 
 ## Priority order
 
@@ -37,4 +37,4 @@ This cascade runs **only when** `.claude/launch.json` is absent or has no `port`
 
 **(b) Comment stripping on `.env` values.** `resolve-port.sh` truncates at `#` after trimming whitespace (so `PORT=3001 # dev only` resolves to `3001`). The `test-browser` inline cascade does not strip comments. Same rationale: real `.env` files frequently contain inline comments.
 
-**(c) Removal of the `AGENTS.md`/`CLAUDE.md` grep.** `resolve-port.sh` does not scan instruction files for port references. The `test-browser` inline cascade does. Instruction files carry natural language that may mention ports in contexts unrelated to the dev server (documentation, examples, troubleshooting), producing false positives that are hard to debug. Framework config files and `.env` are more reliable sources of truth.
+**(c) Removal of the `AGENTS.md`/`AGENTS.md` grep.** `resolve-port.sh` does not scan instruction files for port references. The `test-browser` inline cascade does. Instruction files carry natural language that may mention ports in contexts unrelated to the dev server (documentation, examples, troubleshooting), producing false positives that are hard to debug. Framework config files and `.env` are more reliable sources of truth.

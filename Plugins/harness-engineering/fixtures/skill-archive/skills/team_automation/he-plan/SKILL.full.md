@@ -46,7 +46,7 @@ When directly invoked, always stay in planning mode. If the input is unclear, as
 
 ## Interaction Method
 
-Use the platform's question tool when available. When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
+Use the platform's question tool when available. When asking the user a question, prefer the platform's blocking question tool if one exists (`AskUserQuestion` in Codex, `request_user_input` in Codex, `ask_user` in OpenAI). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
 Ask one question at a time. Prefer a concise single-select choice when natural options exist.
 

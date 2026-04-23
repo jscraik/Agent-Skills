@@ -21,7 +21,7 @@ skill-name/
 ## Problems This Solves
 
 **Problem 1: Context gets skipped**
-When important principles are in a separate file, Claude may not read them.
+When important principles are in a separate file, Codex may not read them.
 **Solution:** Put essential principles directly in SKILL.md. They load automatically.
 
 **Problem 2: Wrong context loaded**

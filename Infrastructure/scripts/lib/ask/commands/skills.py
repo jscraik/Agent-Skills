@@ -115,7 +115,7 @@ STARTER_ARCHETYPES = {
         "context7",
     ),
     "delivery": ("he-plan", "he-work", "he-review", "gh-workflow", "coding-harness"),
-    "review": ("he-technical-review", "he-review", "agent-native-audit", "security-best-practices"),
+    "review": ("he-technical-review", "he-review", "security-best-practices"),
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
@@ -1160,65 +1160,6 @@ def _sync_dir_copy(source: Path, target: Path, dry_run: bool = False) -> str:
     return f"Synced directory: {target} (copy)"
 
 
-def _refresh_antigravity_projection(repo_root: Path, dry_run: bool = False) -> list[str]:
-    """
-    Rebuilds the flat "skills-antigravity" projection from SKILL.md-containing directories under .agents/skills.
-    
-    When not in dry run mode, ensures the repo_root/skills-antigravity directory exists, copies each subdirectory of repo_root/.agents/skills that contains a SKILL.md into skills-antigravity (removing or replacing existing targets), and removes any stale entries in skills-antigravity that are no longer present in .agents/skills. Copy operations do not preserve symlinks (symlinks are not followed or reproduced).
-    
-    Parameters:
-        repo_root (Path): Repository root path containing .agents/skills and skills-antigravity.
-        dry_run (bool): If true, perform no filesystem writes and instead return planned actions as log messages.
-    
-    Returns:
-        list[str]: Ordered log messages describing actions taken or planned (e.g., refreshed entries, removed stale entries).
-    """
-    logs: list[str] = []
-    skills_dir = repo_root / ".agents" / "skills"
-    antigravity_dir = repo_root / "skills-antigravity"
-
-    keep_names: set[str] = set()
-    if not skills_dir.exists():
-        return logs
-
-    if not dry_run:
-        antigravity_dir.mkdir(parents=True, exist_ok=True)
-
-    for skill_entry in sorted(skills_dir.iterdir(), key=lambda path: path.name):
-        if not skill_entry.is_dir():
-            continue
-        if not (skill_entry / "SKILL.md").is_file():
-            continue
-
-        keep_names.add(skill_entry.name)
-        target_dir = antigravity_dir / skill_entry.name
-        if dry_run:
-            logs.append(f"Would refresh antigravity skill: {target_dir}")
-            continue
-
-        if target_dir.is_symlink() or target_dir.is_file():
-            target_dir.unlink()
-        elif target_dir.exists():
-            shutil.rmtree(target_dir)
-        shutil.copytree(skill_entry, target_dir, symlinks=False)
-        logs.append(f"Refreshed antigravity skill: {target_dir}")
-
-    if antigravity_dir.exists():
-        for existing in sorted(antigravity_dir.iterdir(), key=lambda path: path.name):
-            if existing.name in keep_names:
-                continue
-            if dry_run:
-                logs.append(f"Would remove stale antigravity entry: {existing}")
-                continue
-            if existing.is_dir() and not existing.is_symlink():
-                shutil.rmtree(existing)
-            else:
-                existing.unlink()
-            logs.append(f"Removed stale antigravity entry: {existing}")
-
-    return logs
-
-
 def _refresh_system_lane_link(
     skills_dir: Path,
     system_skills_dir: Path,
@@ -1248,7 +1189,7 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
     
-    For scope="workspace" this prunes stale first-level symlinks under .agents/skills, recreates symlinks for repository-owned skills, preserves a .system bridge when present, rebuilds the skills-antigravity projection, and refreshes catalog projections (SKILL.md and README.md). For scope="user" this creates user-facing symlinks from the repo workspace and copies the antigravity projection into the user's Gemini location.
+    For scope="workspace" this prunes stale first-level symlinks under .agents/skills, recreates symlinks for repository-owned skills, preserves a .system bridge when present, and refreshes catalog projections (SKILL.md and README.md). For scope="user" this creates user-facing symlinks from the repo workspace.
     
     Parameters:
         repo_root (Path): Root path of the repository containing skills directories.
@@ -1262,8 +1203,7 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
           - policy_identity: identity info from get_policy_identity().
         On error, the result will have status "error" and one or more ErrorObject entries:
           - ERR_INVALID_SCOPE when `scope` is not "workspace" or "user".
-          - ERR_DEPENDENCY when expected sources (e.g., skills-antigravity) are missing.
-          - ERR_VALIDATION when inputs contain disallowed symlinks or other validation failures (e.g., antigravity is a symlink or contains symlink entries).
+          - ERR_VALIDATION when inputs contain disallowed symlinks or other validation failures.
           - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
     """
     result = CallResult()
@@ -1271,7 +1211,6 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
     logs = []
     skills_dir = repo_root / ".agents" / "skills"
     system_skills_dir = repo_root / "skills-system"
-    antigravity_skills_dir = repo_root / "skills-antigravity"
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
         keep_names = {entry.name for entry in entries if entry.source_dir.is_relative_to(repo_root)}
@@ -1293,60 +1232,15 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
         if system_lane_logs:
             plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
             logs.extend(system_lane_logs)
-        antigravity_logs = _refresh_antigravity_projection(repo_root, dry_run)
-        plan["writes"].append(str(antigravity_skills_dir))
-        logs.extend(antigravity_logs)
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
     elif scope == "user":
         home = Path.home()
-        # Guard: antigravity source directory must exist before any mutations
-        if not antigravity_skills_dir.exists():
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_DEPENDENCY",
-                message=f"Antigravity skills directory not found: {antigravity_skills_dir}",
-                fix_suggestion="Ensure the skills-antigravity directory exists or use --scope workspace"
-            ))
-            return result
-        if antigravity_skills_dir.is_symlink():
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
-                message=f"Refusing to sync from symlinked antigravity directory: {antigravity_skills_dir}",
-                fix_suggestion="Replace skills-antigravity symlink with a real directory before running user scope sync."
-            ))
-            return result
-        symlink_entries = _find_symlink_entries(antigravity_skills_dir)
-        if symlink_entries:
-            rel = str(symlink_entries[0].relative_to(antigravity_skills_dir))
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
-                message=(
-                    f"Refusing to sync skills-antigravity with symlink entries "
-                    f"(first: {rel})."
-                ),
-                fix_suggestion="Remove symlinks from skills-antigravity and rerun ask skills sync --scope user."
-            ))
-            return result
-        targets = [(skills_dir, home / ".claude" / "skills"), (skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills"), (antigravity_skills_dir, home / ".antigravity" / "skills")]
+        targets = [(skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills")]
         for src, dst in targets:
             plan["symlinks"].append({"from": str(dst), "to": str(src)})
             logs.append(_create_symlink(src, dst, dry_run))
-        antigravity_dest = home / ".gemini" / "antigravity" / "skills"
-        plan["writes"].append(str(antigravity_dest))
-        try:
-            logs.append(_sync_dir_copy(antigravity_skills_dir, antigravity_dest, dry_run))
-        except ValueError as exc:
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
-                message=str(exc),
-                fix_suggestion="Remove symlinks from sync source and retry."
-            ))
-            return result
     else:
         result.status = "error"
         result.errors.append(ErrorObject(

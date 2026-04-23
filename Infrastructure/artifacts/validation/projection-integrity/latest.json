@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-21T20:49:26.122839+00:00",
+  "generated_at": "2026-04-23T11:58:00.052495+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -42,48 +42,24 @@
       "type": "mirror",
       "source": "Plugins/harness-engineering",
       "projection": ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
-      "policy": "hash-manifest-plus-path-diff",
-      "missing_in_projection": [],
-      "extra_in_projection": [],
-      "mismatched_files": [],
-      "unstamped_files": [],
-      "checked_files": 378,
-      "source_manifest_sha256": "5a3d599e30469d01f6f85f339e5ec83837dd6fa1d6d667ef1b8e235930efa07c",
-      "projection_manifest_sha256": "5a3d599e30469d01f6f85f339e5ec83837dd6fa1d6d667ef1b8e235930efa07c",
-      "manifest_mismatch": false,
-      "status": "pass"
+      "status": "pass",
+      "reason": "projection_missing_optional"
     },
     {
       "name": "cache-plugin-factory",
       "type": "mirror",
       "source": "Plugins/plugin-factory",
       "projection": ".agents/plugins-runtime/cache/agent-skills-local/plugin-factory",
-      "policy": "hash-manifest-plus-path-diff",
-      "missing_in_projection": [],
-      "extra_in_projection": [],
-      "mismatched_files": [],
-      "unstamped_files": [],
-      "checked_files": 108,
-      "source_manifest_sha256": "e50bb31e5ebb64cfacd4d0e1fcaf844749870764cda304a4c2cf75b0aa0d6f47",
-      "projection_manifest_sha256": "e50bb31e5ebb64cfacd4d0e1fcaf844749870764cda304a4c2cf75b0aa0d6f47",
-      "manifest_mismatch": false,
-      "status": "pass"
+      "status": "pass",
+      "reason": "projection_missing_optional"
     },
     {
       "name": "cache-skill-factory",
       "type": "mirror",
       "source": "Plugins/skill-factory",
       "projection": ".agents/plugins-runtime/cache/agent-skills-local/skill-factory",
-      "policy": "hash-manifest-plus-path-diff",
-      "missing_in_projection": [],
-      "extra_in_projection": [],
-      "mismatched_files": [],
-      "unstamped_files": [],
-      "checked_files": 509,
-      "source_manifest_sha256": "e3a1ab732297dee90e9a1d382228b17243f6750f7a2e4a2d619dfd5e0dc9726f",
-      "projection_manifest_sha256": "e3a1ab732297dee90e9a1d382228b17243f6750f7a2e4a2d619dfd5e0dc9726f",
-      "manifest_mismatch": false,
-      "status": "pass"
+      "status": "pass",
+      "reason": "projection_missing_optional"
     }
   ]
 }

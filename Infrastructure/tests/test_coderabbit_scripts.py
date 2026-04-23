@@ -44,6 +44,7 @@ parse_plain_review = load_module(
 fetch_unresolved_threads = load_module(
     "fetch_unresolved_threads",
     [
+        "Skills/agent-ops/autofix/scripts/fetch_unresolved_threads.py",
         "Plugins/coderabbit/skills/code_quality_review/autofix/scripts/fetch_unresolved_threads.py",
         "plugins/coderabbit/skills/code_quality_review/autofix/scripts/fetch_unresolved_threads.py",
     ],

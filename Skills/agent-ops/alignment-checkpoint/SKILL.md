@@ -176,7 +176,7 @@ Assistant: STASIS_RECORD → JSON → options → gate (no tools).
 | [[interview-me]] | Follow with structured interview to clarify requirements |
 | [[brainstorming]] | Explore approaches once intent is aligned |
 | [[ce-plan]] | Move from approved intent to an execution-ready plan |
-| [[product-spec]] | Produce a spec once ambiguity is resolved |
+| [[he-plan]] | Produce an execution-ready plan once ambiguity is resolved |
 | [[decide-build-primitive]] | Decide the right primitive after intent is confirmed |
 
 **Topic map:** [[agent-ops]]

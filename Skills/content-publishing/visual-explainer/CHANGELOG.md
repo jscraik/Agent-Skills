@@ -11,7 +11,7 @@ Initial release.
 - Mermaid deep theming with `theme: 'base'` + `themeVariables`, hand-drawn mode, ELK layout
 - Zoom controls (buttons, scroll-to-zoom, drag-to-pan) required on all Mermaid containers
 - Proactive table rendering — agent generates HTML instead of ASCII for complex tables
-- Optional AI-generated illustrations via surf-cli + Gemini Nano Banana Pro
+- Optional AI-generated illustrations via surf-cli + OpenAI Nano Banana Pro
 - Both light and dark themes via CSS custom properties and `prefers-color-scheme`
 - Quality checks: squint test, swap test, overflow protection, zoom controls verification
 

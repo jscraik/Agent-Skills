@@ -111,7 +111,7 @@ uvx markitdown scan.pdf -d -e "https://your-resource.cognitiveservices.azure.com
 | [[docs-expert]] | Polish converted docs to meet repository quality standards |
 | [[visual-explainer]] | Present converted content as a visual HTML page |
 | [[spreadsheet]] | Convert tabular data alongside markdown conversion |
-| [[notebooklm]] | Feed converted markdown to NotebookLM for analysis |
+| [[llm-wiki]] | Feed converted markdown into a persistent knowledge base for analysis |
 
 **Topic map:** [[content-publishing]]
 

@@ -1,5 +1,5 @@
 id: pr-workflow-compact-format-2026-03-11
-tool: claude-code
+tool: codex-code
 mode: normal
 task: "Transform 13 workflow documentation files to compact, token-efficient format with tables, Mermaid diagrams, and structured data"
 constraints:

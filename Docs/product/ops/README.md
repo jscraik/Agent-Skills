@@ -1,24 +1,24 @@
 # Product Ops Skills
 
-Compound engineering, planning, and operational execution skills.
+Compound engineering, planning, review, and operational execution skills.
 
 ## Table of Contents
 - [Skills](#skills)
 
 ## Skills
-- [ce-brainstorm](/product/Infrastructure/ops/ce-brainstorm/SKILL.md)
-- [ce-compound](/product/Infrastructure/ops/ce-compound/SKILL.md)
-- [ce-compound-refresh](/product/Infrastructure/ops/ce-compound-refresh/SKILL.md)
-- [ce-deepen-plan](/product/Infrastructure/ops/ce-deepen-plan/SKILL.md)
-- [ce-deepen-spec](/product/Infrastructure/ops/ce-deepen-spec/SKILL.md)
-- [ce-ideate](/product/Infrastructure/ops/ce-ideate/SKILL.md)
-- [ce-plan](/product/Infrastructure/ops/ce-plan/SKILL.md)
-- [ce-review](/product/Infrastructure/ops/ce-review/SKILL.md)
-- [ce-spec](/product/Infrastructure/ops/ce-spec/SKILL.md)
-- [ce-technical-review](/product/Infrastructure/ops/ce-technical-review/SKILL.md)
-- [ce-work](/product/Infrastructure/ops/ce-work/SKILL.md)
-- [decide-build-primitive](/product/Infrastructure/ops/decide-build-primitive/SKILL.md)
-- [production-deployment](/product/Infrastructure/ops/production-deployment/SKILL.md)
-- [release](/product/Infrastructure/ops/release/SKILL.md)
-- [resolve-todo-parallel](/product/Infrastructure/ops/resolve-todo-parallel/SKILL.md)
-- [triage](/product/Infrastructure/ops/triage/SKILL.md)
+- [he-brainstorm](/Plugins/harness-engineering/skills/team_automation/he-brainstorm/SKILL.md)
+- [he-compound](/Plugins/harness-engineering/skills/team_automation/he-compound/SKILL.md)
+- [he-compound-refresh](/Plugins/harness-engineering/skills/team_automation/he-compound-refresh/SKILL.md)
+- [he-deepen-plan](/Plugins/harness-engineering/skills/team_automation/he-deepen-plan/SKILL.md)
+- [he-deepen-spec](/Plugins/harness-engineering/skills/team_automation/he-deepen-spec/SKILL.md)
+- [he-fix-bugs](/Plugins/harness-engineering/skills/team_automation/he-fix-bugs/SKILL.md)
+- [he-ideate](/Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md)
+- [he-improve](/Plugins/harness-engineering/skills/team_automation/he-improve/SKILL.md)
+- [he-plan](/Plugins/harness-engineering/skills/team_automation/he-plan/SKILL.md)
+- [he-refine](/Plugins/harness-engineering/skills/team_automation/he-refine/SKILL.md)
+- [he-spec](/Plugins/harness-engineering/skills/team_automation/he-spec/SKILL.md)
+- [he-tdd](/Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md)
+- [he-work](/Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md)
+- [triage](/Skills/agent-ops/triage/SKILL.md)
+- [release](/Skills/agent-ops/release/SKILL.md)
+- [production-deployment](/Skills/agent-ops/production-deployment/SKILL.md)

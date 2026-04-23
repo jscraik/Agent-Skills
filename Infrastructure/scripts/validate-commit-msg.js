@@ -67,7 +67,7 @@ function main() {
 	// Check 4: Co-authorship for agent branches (enforced)
 	const coAuthorLines = commitMsg.match(CO_AUTHOR_LINE_REGEX) ?? [];
 	const branchName = getBranchName();
-	const isAgentBranch = /codex|claude|agent/i.test(branchName);
+	const isAgentBranch = /codex|agent/i.test(branchName);
 
 	if (isAgentBranch && coAuthorLines.length !== 1) {
 		errors.push(

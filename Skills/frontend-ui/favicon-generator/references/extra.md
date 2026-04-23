@@ -28,7 +28,7 @@
 ```
 User: "Make a favicon for my CLI tool"
 
-Claude:
+Codex:
 1. [Discovers existing icons]
    - Searches: rg "Icon|Logo" --type tsx
    - Finds: No existing brand icons, new project
@@ -62,7 +62,7 @@ Claude:
 ```
 User: "I need a fun favicon with a rocket for my startup"
 
-Claude:
+Codex:
 1. [Selects approach]
    - Content: Rocket icon (not emoji for consistency)
    - Style: "Vibrant" (pink→orange, energetic)

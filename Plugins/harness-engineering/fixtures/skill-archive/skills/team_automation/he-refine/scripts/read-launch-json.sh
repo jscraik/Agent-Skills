@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# read-launch-json.sh — read .claude/launch.json from the repo root and emit
+# read-launch-json.sh — read .codex/launch.json from the repo root and emit
 # the selected configuration as JSON on stdout, or a sentinel on failure.
 #
 # Usage:
@@ -44,7 +44,7 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-LAUNCH_PATH="$REPO_ROOT/.claude/launch.json"
+LAUNCH_PATH="$REPO_ROOT/.codex/launch.json"
 
 if [ ! -f "$LAUNCH_PATH" ]; then
   echo "__NO_LAUNCH_JSON__"

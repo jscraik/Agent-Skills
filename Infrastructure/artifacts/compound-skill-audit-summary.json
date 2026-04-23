@@ -100,7 +100,7 @@
     "upgrade_exit": 2
   },
   {
-    "skill": "gemini-imagegen",
+    "skill": "openai-imagegen",
     "analyze_score": 71,
     "analyze_max": 120,
     "analyze_exit": 0,

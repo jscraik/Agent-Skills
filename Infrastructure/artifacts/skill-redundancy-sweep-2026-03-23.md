@@ -8,7 +8,7 @@ Scope: canonical skill set only
 
 - Counted canonical skills by scanning repo `SKILL.md` files and excluding:
   - repo-root `SKILL.md`
-  - `skills-antigravity/` projection copies
+  - `skills-codex/` projection copies
   - `Plugins/` mirrored skill copies
 - Canonical skills reviewed: `118`
 - Read the highest-overlap families directly instead of trusting description similarity alone.
@@ -27,7 +27,7 @@ The main source of apparent redundancy is:
 
 Exact duplication exists only in distribution layers, not in the canonical skill graph:
 
-- `skills-antigravity/*`
+- `skills-codex/*`
 - `Plugins/*/skills/*`
 
 These should be treated as projections or packaging mirrors, not merge candidates.

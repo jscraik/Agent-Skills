@@ -2,7 +2,7 @@
 
 Date: 2026-03-23
 Scope: canonical skills only
-Excluded: generated projections under `skills-antigravity/` and plugin copies under `Plugins/`
+Excluded: generated projections under `skills-codex/` and plugin copies under `Plugins/`
 
 ## Table of Contents
 - [Purpose](#purpose)

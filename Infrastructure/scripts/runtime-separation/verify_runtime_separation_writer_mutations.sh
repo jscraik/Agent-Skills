@@ -35,7 +35,7 @@ cd "$repo_root"
 PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh
 
 if [[ "$strict" -eq 1 ]]; then
-  if git status --porcelain -- .agents .agent runtime skills-antigravity Plugins/cache 2>/dev/null | grep -qE '^(A|M|D|R|C|\?\?)'; then
+  if git status --porcelain -- .agents .agent runtime Plugins/cache 2>/dev/null | grep -qE '^(A|M|D|R|C|\?\?)'; then
     echo "runtime-separation writer-mutation strict check: detected direct changes in derived/runtime paths" >&2
     exit 1
   fi

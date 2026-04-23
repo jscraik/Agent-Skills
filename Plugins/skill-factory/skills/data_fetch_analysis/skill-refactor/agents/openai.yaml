@@ -1,0 +1,7 @@
+interface:
+  display_name: Skill Refactor
+  short_description: Daily scan for skill failures
+  icon_small: ./assets/icon-small.png
+  icon_large: ./assets/icon-large.png
+  default_prompt: Scan the last 1 day of ~/.codex/sessions for skill-related issues
+    (personal skills only) and include local OTel signals.

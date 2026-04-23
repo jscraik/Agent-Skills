@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-roots=("Skills" "skills-antigravity" "skills-system" "plugins/harness-engineering" "plugins/plugin-factory" "plugins/skill-factory")
+roots=("Skills" "skills-system" "plugins/harness-engineering" "plugins/plugin-factory" "plugins/skill-factory")
 modified=0
 checked=0
 

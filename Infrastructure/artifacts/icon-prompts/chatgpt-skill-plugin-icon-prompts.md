@@ -1594,14 +1594,14 @@ Return two coordinated variants: one optimized for tiny UI use and one with rich
 Output: square images.
 ```
 
-### Claude Alias Guard (`claude-alias`)
+### Codex Alias Guard (`codex-alias`)
 - Category: `utilities`
 - Style profile: `ops`
-- Skill path: `Skills/claude-alias`
-- Targets: `Skills/claude-alias/agents/assets/icon-small.png`, `Skills/claude-alias/agents/assets/icon-large.png`
+- Skill path: `Skills/codex-alias`
+- Targets: `Skills/codex-alias/agents/assets/icon-small.png`, `Skills/codex-alias/agents/assets/icon-large.png`
 - Prompt:
 ```text
-Create a clean app-style icon set for a developer skill named "Claude Alias Guard".
+Create a clean app-style icon set for a developer skill named "Codex Alias Guard".
 Concept: Fix and harden ck/cz/cc alias routing
 Style profile: ops
 Palette direction: Teal + green + graphite neutrals
@@ -2058,7 +2058,7 @@ Output: square images.
 - Prompt:
 ```text
 Create a clean app-style icon set for a developer skill named "Using Git Worktrees".
-Concept: Align Codex and Claude worktree setup, sync strategy, and cleanup safety.
+Concept: Align Codex and Codex worktree setup, sync strategy, and cleanup safety.
 Style profile: ops
 Palette direction: Teal + green + graphite neutrals
 Motif direction: Pipelines, nodes, automation loops, reliability checkpoints

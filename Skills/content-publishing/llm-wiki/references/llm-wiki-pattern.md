@@ -15,7 +15,7 @@ Classic RAG repeatedly retrieves and synthesizes from raw documents at query tim
    - Source summaries, entities, concepts, comparisons, synthesis pages.
    - Cross-links and updates are managed by the LLM.
 3. Schema (governance contract):
-   - `AGENTS.md` or `CLAUDE.md` rules for ingest/query/lint behavior.
+   - `AGENTS.md` or `AGENTS.md` rules for ingest/query/lint behavior.
    - Naming rules, citation requirements, update policy, and safety bounds.
 
 ## Core operations

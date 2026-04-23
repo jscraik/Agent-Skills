@@ -3,7 +3,6 @@
   "profile_id": "Skills-agent-ops-codex-agent-creator",
   "scope_skill": "Skills/agent-ops/codex-agent-creator",
   "scope_profile": "Skills",
-  "learning_posture": "manual",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -44,5 +43,6 @@
     "ai_process_minutes": 20.0,
     "probability_of_success": 0.68,
     "rationale": "Manual mode required: high-impact side effects need explicit human sign-off before applying candidate lessons."
-  }
+  },
+  "learning_posture": "manual"
 }

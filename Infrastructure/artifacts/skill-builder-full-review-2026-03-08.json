@@ -2021,7 +2021,7 @@
           "warn_count": 50,
           "fail_count": 0,
           "sample_warn": [
-            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | platforms/claude-code/hooks/write-validate.sh.template",
+            "WARN PI_BINARY_ATTACHMENT: Binary attachment detected; manual review required (prompt scan skipped). | platforms/codex-code/hooks/write-validate.sh.template",
             "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | methodology/engineering uses technical decision tracking with architectural memory.md",
             "WARN PI_COMMANDS: [medium] Command-like instructions detected; ensure commands are gated and safe. | platforms/shared/skill-blocks/reflect.md"
           ],

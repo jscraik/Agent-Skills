@@ -3,8 +3,8 @@
   "session_id": "skill-genome-loop-impl-20260302",
   "created_at": "2026-03-02T04:45:00Z",
   "completed_at": "2026-03-02T04:50:00Z",
-  "model": "claude-opus-4-6",
-  "tool": "claude-code",
+  "model": "codex-opus-4-6",
+  "tool": "codex-code",
   "work_product": {
     "type": "feature_implementation",
     "summary": "Implemented Skill Genome Loop draft PR candidate generator",

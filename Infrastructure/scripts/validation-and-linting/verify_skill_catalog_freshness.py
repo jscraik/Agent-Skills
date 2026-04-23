@@ -18,15 +18,12 @@ SKIP_DIRS = {
     "node_modules",
     "docs",
     "skills",
-    "skills-antigravity",
-    "skills-antigravity-test",
     "templates",
     "references",
     "skills-system",
     ".worktrees",
 }
 SKIP_PATH_PREFIXES = {
-    (".claude", "worktrees"),
     ("plugins", "cache"),
     (".agents", "plugins-runtime", "cache"),
     (".agents", "skills", ".system"),

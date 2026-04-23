@@ -7,7 +7,7 @@ metadata:
 
 # Orchestrating Subagents
 
-Plan, translate, and run Codex-native subagent workflows without carrying over Claude-specific swarm mechanics that do not exist in Codex.
+Plan, translate, and run Codex-native subagent workflows without carrying over Codex-specific swarm mechanics that do not exist in Codex.
 
 ## Table of Contents
 - [Usage triggers](#usage-triggers)
@@ -33,7 +33,7 @@ Plan, translate, and run Codex-native subagent workflows without carrying over C
 ## Usage triggers
 Use this skill when:
 - The user explicitly asks for subagents, delegation, parallel agent work, or a swarm-style workflow.
-- The user wants an older Claude Code team/task workflow translated into Codex-native orchestration.
+- The user wants an older Codex team/task workflow translated into Codex-native orchestration.
 - The task benefits from multiple narrow sidecar agents, such as read-only review fan-out, codebase mapping, docs verification, or long-running monitoring.
 - The user wants help choosing which installed Codex agent roles should participate in a delegated workflow.
 
@@ -64,7 +64,7 @@ Do not use this skill when:
 
 ## Workflow
 1. **Translate the runtime first**
-   - Treat the root Codex thread as the orchestrator because Codex subagents do not use Claude-style teams, inbox files, or shared task JSON queues.
+   - Treat the root Codex thread as the orchestrator because Codex subagents do not use Codex-style teams, inbox files, or shared task JSON queues.
    - Coordinate through the parent agent using `spawn_agent`, `wait_agent`, `send_input`, and `close_agent` because Codex subagents report back through the parent workflow.
    - Read `references/upstream-orchestrating-swarms.md` when translating older `Task`, `Teammate`, `team_name`, or inbox concepts into Codex-native behavior.
 
@@ -127,12 +127,12 @@ Required gates:
 - Start read-only unless the delegated work genuinely requires edits.
 - Subagents inherit the parent sandbox and approvals posture; keep least privilege unless there is a clear reason to widen it.
 - Never run same-file or same-surface write fan-out in one checkout.
-- Never assume Claude-style shared task queues, inboxes, tmux panes, or teammate messaging exist in Codex.
+- Never assume Codex-style shared task queues, inboxes, tmux panes, or teammate messaging exist in Codex.
 - Prefer installed specialist roles over generic workers when the user has already named the specialty.
 - Close completed agents so stale threads do not accumulate.
 
 ## Anti-patterns
-- Copying old Claude Code `Teammate`, `TaskCreate`, `TaskUpdate`, or inbox instructions directly into Codex.
+- Copying old Codex `Teammate`, `TaskCreate`, `TaskUpdate`, or inbox instructions directly into Codex.
 - Spawning agents for straightforward blocking work that should stay local.
 - Using `send_input` as a status ping instead of a deliberate next-phase instruction.
 - Letting multiple write-capable agents edit the same files in one checkout.
@@ -168,7 +168,7 @@ Required gates:
 - `references/codex-subagents-2026.md`
   Read when: you need current OpenAI docs, March 2026 model guidance, or the manager-versus-handoff decision.
 - `references/upstream-orchestrating-swarms.md`
-  Read when: the user provides an older Claude swarm prompt or wants to preserve upstream orchestration doctrine during migration.
+  Read when: the user provides an older Codex swarm prompt or wants to preserve upstream orchestration doctrine during migration.
 - `references/overlap-matrix.md`
   Read when: you need to decide whether this skill, `codex-agent-creator`, `using-git-worktrees`, or another workflow owner should lead.
 - `references/contract.yaml`
@@ -180,7 +180,7 @@ Required gates:
 | [[codex-agent-creator]] | Create or update the agent roles that the orchestration plan needs |
 | [[using-git-worktrees]] | Split write-heavy parallel work into isolated worktrees instead of a shared checkout |
 | [[ce-work]] | Execute a plan once the orchestration decision is made and the task is implementation-ready |
-| [[resolve-pr-parallel]] | Apply bounded parallelism to PR review resolution rather than general subagent orchestration |
+| [[gh-workflow]] | Apply bounded parallelism to PR review resolution within the GitHub lifecycle lane |
 
 ## Execution quality
 - Philosophy: keep orchestration shallow, explicit, and evidence-backed.
@@ -190,7 +190,7 @@ Required gates:
 - Guiding question: Which installed role already matches the job before I invent a new one?
 
 ## Gotchas
-- Codex subagents are parent-mediated. There is no direct equivalent of Claude inbox messaging between workers.
+- Codex subagents are parent-mediated. There is no direct equivalent of Codex inbox messaging between workers.
 - `send_input` queues follow-up work; it is not a live status channel.
 - Shared-checkout parallel writes are only safe when ownership is clearly split.
 

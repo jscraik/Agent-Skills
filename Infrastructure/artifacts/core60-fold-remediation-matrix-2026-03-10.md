@@ -131,8 +131,8 @@ Disposition summary:
 | `Skills/diagram-context-refresh` | `Skills/diagram-cli` | `context-refresh` | `likely-ok` | Destination body strongly overlaps diagram refresh workflow. |
 | `frontend/ui/interface-craft` | `frontend/ui/ui-ux-creative-coding` | `craft-profile` | `likely-ok` | Destination body reflects craft/motion/quality guidance well. |
 | `frontend/ui/react-best-practices` | `frontend/ui/react-ui-patterns` | `performance-patterns` | `broken` | Destination path missing. |
-| `product/docs/claude-md` | `product/docs/agents-md` | `claude-target` | `likely-ok` | Destination body strongly overlaps AGENTS/agent-doc authoring. |
-| `product/docs/gemini-md` | `product/docs/agents-md` | `gemini-target` | `likely-ok` | Destination body strongly overlaps agent-doc authoring. |
+| `product/docs/codex-md` | `product/docs/agents-md` | `codex-target` | `likely-ok` | Destination body strongly overlaps AGENTS/agent-doc authoring. |
+| `product/docs/openai-md` | `product/docs/agents-md` | `openai-target` | `likely-ok` | Destination body strongly overlaps agent-doc authoring. |
 | `product/domain/chatgpt-apps-production-checklist` | `product/domain/chatgpt-apps` | `production-gate` | `likely-ok` | Destination body already has strong deploy/submission/checklist overlap. |
 | `github/greptile/greploop` | `github/greptile/check-pr` | `iterative-fix-loop` | `likely-ok` | Destination body overlaps readiness/review loop work. |
 | `github/local-action-verification` | `github/gh-fix-ci` | `local-ci-repro` | `likely-ok` | Destination body overlaps CI repro and verification behavior. |
@@ -176,8 +176,8 @@ Disposition summary:
 | `Skills/diagram-context-refresh` | `Skills/diagram-cli` | `context-refresh` | `repair-in-place` | Context refresh is a valid sub-mode of diagram CLI operations. |
 | `frontend/ui/interface-craft` | `frontend/ui/ui-ux-creative-coding` | `craft-profile` | `repair-in-place` | Interface craft is a stylistic profile of creative coding work. |
 | `frontend/ui/react-best-practices` | `frontend/ui/react-ui-patterns` | `performance-patterns` | `restore-destination` | Folding React best-practice guidance into a React UI patterns skill is conceptually fine, but the destination skill must exist. |
-| `product/docs/claude-md` | `product/docs/agents-md` | `claude-target` | `repair-in-place` | Agent-flavored AGENTS authoring belongs inside `agents-md`. |
-| `product/docs/gemini-md` | `product/docs/agents-md` | `gemini-target` | `repair-in-place` | Same reasoning as `claude-md`. |
+| `product/docs/codex-md` | `product/docs/agents-md` | `codex-target` | `repair-in-place` | Agent-flavored AGENTS authoring belongs inside `agents-md`. |
+| `product/docs/openai-md` | `product/docs/agents-md` | `openai-target` | `repair-in-place` | Same reasoning as `codex-md`. |
 | `product/domain/chatgpt-apps-production-checklist` | `product/domain/chatgpt-apps` | `production-gate` | `repair-in-place` | Production-readiness is a valid phase of ChatGPT Apps work. |
 | `github/greptile/greploop` | `github/greptile/check-pr` | `iterative-fix-loop` | `repair-in-place` | Review-loop and PR readiness live in the same narrow domain. |
 | `github/local-action-verification` | `github/gh-fix-ci` | `local-ci-repro` | `repair-in-place` | Local CI repro is a valid subworkflow of GitHub CI fixing. |

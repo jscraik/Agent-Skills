@@ -12,7 +12,7 @@ Scope: skill-builder + skill-installer prompt-injection and attachment scanning
 - Added automatic read-only investigation summary for the Investigate option.
 - Added investigation triage labels and macOS `open` helper.
 - Added local allow/blocklist support (outside repo) via `~/.codex/skill-security/allow-block.json` or `CODEX_SKILL_SECURITY_CONFIG`.
-- Added Claude headless runner support to `run_skill_evals.py` (default runner); Codex optional.
+- Added Codex headless runner support to `run_skill_evals.py` (default runner); Codex optional.
 
 ## Files updated
 - `Skills/skill-builder/Infrastructure/scripts/skill_gate.py`
@@ -30,8 +30,8 @@ Scope: skill-builder + skill-installer prompt-injection and attachment scanning
 - `skill_gate.py` (warn-only findings, PASS)
 - `quick_validate.py` (PASS)
 - Interactive installer demo (A/B/C prompt)
-- Claude evals (skill-builder, timeout 180s): PASS (20260128-185229)
-- Claude evals (skill-installer, timeout 180s): PASS (20260128-193416)
+- Codex evals (skill-builder, timeout 180s): PASS (20260128-185229)
+- Codex evals (skill-installer, timeout 180s): PASS (20260128-193416)
 
 ## Notes
 - Binary attachments are flagged for manual review.

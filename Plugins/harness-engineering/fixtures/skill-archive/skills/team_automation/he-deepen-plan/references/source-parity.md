@@ -43,7 +43,7 @@ This document maps the original plan-deepening prompts to `product/Infrastructur
 - The two prompt variants were merged into one mode-aware skill:
   - `targeted-confidence` is the modern default
   - `max-coverage` preserves the legacy exhaustive fan-out path
-- Hardcoded Claude-specific cache paths and plugin-file discovery were generalized into current-platform/project/plugin-registry discovery guidance so the behavior survives prompt deprecation and works outside a single runtime layout.
+- Hardcoded Codex-specific cache paths and plugin-file discovery were generalized into current-platform/project/plugin-registry discovery guidance so the behavior survives prompt deprecation and works outside a single runtime layout.
 - Learnings lookup was modernized to check `.harness/memory/LEARNINGS.md` first when present, then `instructions/Learnings.md`, then deeper `docs/solutions/` entries.
 - The beta prompt's section scoring, selective fan-out, and artifact-backed mode were kept as the safer default because they reduce context bloat without losing the ability to run a legacy-style broad pass when explicitly requested.
 - `document-review` / workflow slash-command references were translated into workflow-stage guidance and `he-work` handoff language so the skill remains usable while prompt surfaces are being deprecated.

@@ -212,7 +212,7 @@ If a handle is stale, set only that handle back to `undefined` and rerun the nar
 
 | Skill | When to use together |
 |---|---|
-| [[agent-browser]] | Use agent-browser for simpler ref-based interactions |
+| [[ui-visual-regression]] | Use visual-regression workflows for repeatable screenshot and diff checks |
 | [[ui-visual-regression]] | Capture Playwright screenshots for regression baselines |
 | [[fixing-accessibility]] | Test keyboard navigation and focus via Playwright |
 | [[agentation]] | Wire Playwright automation into Agentation self-driving |

@@ -79,7 +79,7 @@
       "re"
     ],
     "called_scripts": [],
-    "docstring": "Diagnose why a skill isn't loading in Codex, Claude Code, or Antigravity."
+    "docstring": "Diagnose why a skill isn't loading in Codex, Codex, or Codex."
   },
   "wiki_lint.py": {
     "type": "python",

@@ -535,7 +535,7 @@ _Baseline protocol (applies to all KPIs unless noted):_
 
 ### External references
 - OpenAI evaluation best practices: https://platform.openai.com/docs/guides/evals-best-practices
-- Anthropic prompt engineering guide: https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview
+- Anthropic prompt engineering guide: https://docs.anthropic.com/en/docs/build-with-codex/prompt-engineering/overview
 - NIST AI RMF 1.0: https://doi.org/10.6028/NIST.AI.100-1
 - NIST Generative AI Profile (AI 600-1): https://doi.org/10.6028/NIST.AI.600-1
 - NIST SP 800-61r3 (incident response): https://doi.org/10.6028/NIST.SP.800-61r3

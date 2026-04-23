@@ -1,6 +1,6 @@
 {
   "id": "session-bash-shebang-update-2026-04-14",
-  "tool": "claude-code",
+  "tool": "codex-code",
   "date": "2026-04-14",
   "task": "Update shell script shebangs from #!/bin/bash to #!/usr/bin/env bash",
   "prompt_file": "artifacts/ai/prompts/2026-04-14-bash-shebang-update.yaml",

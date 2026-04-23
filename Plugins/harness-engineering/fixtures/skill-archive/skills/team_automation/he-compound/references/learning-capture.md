@@ -23,7 +23,7 @@ Critical rule:
 - Phase 1 helpers return text data to the orchestrator.
 - Helpers must not write drafts, temp markdowns, or intermediate solution files.
 - Only the orchestrator writes `docs/solutions/[category]/[filename].md`.
-- Any optional instruction-doc update (`AGENTS.md`/`CLAUDE.md`) requires explicit user consent and is maintenance, not a second solution artifact.
+- Any optional instruction-doc update (`AGENTS.md`/`AGENTS.md`) requires explicit user consent and is maintenance, not a second solution artifact.
 
 ### Compact-safe mode
 
@@ -168,7 +168,7 @@ Example arguments:
 
 After writing the final solution doc, verify whether root instruction docs make `docs/solutions/` discoverable to future agents.
 
-1. Check root instruction files (`AGENTS.md`, `CLAUDE.md`) and identify whether one is a shim include pointing to the other.
+1. Check root instruction files (`AGENTS.md`, `AGENTS.md`) and identify whether one is a shim include pointing to the other.
 2. Assess whether the substantive instruction doc clearly communicates:
    - a searchable solution knowledge store exists
    - category structure and frontmatter semantics are present
@@ -380,7 +380,7 @@ Runtime note:
 |----------|-----------|
 | Subagents write files like `context-analysis.md`, `solution-draft.md` | Subagents return text data; orchestrator writes one final file |
 | Research and assembly run in parallel | Research completes → then assembly runs |
-| Multiple files created during workflow | One solution doc written or updated: `docs/solutions/[category]/[filename].md` (plus optional small edit to AGENTS.md/CLAUDE.md for discoverability) |
+| Multiple files created during workflow | One solution doc written or updated: `docs/solutions/[category]/[filename].md` (plus optional small edit to AGENTS.md/AGENTS.md for discoverability) |
 | Creating a new doc when an existing doc covers the same problem | Check overlap assessment; update the existing doc when overlap is high |
 | Skipping to implementation without validating upstream artifacts | Resume from earliest incomplete or untrusted stage |
 | Documenting unverified or still-changing fixes | Wait for verified solution before learning capture |

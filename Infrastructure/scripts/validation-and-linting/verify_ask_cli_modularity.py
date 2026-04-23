@@ -9,25 +9,24 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-ASK_PATH = REPO_ROOT / "bin" / "ask"
+ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 
 
 def parse_args() -> argparse.Namespace:
     """
-    Parse command-line arguments for the modularity verifier.
+    Create and parse command-line arguments for verifying the ask CLI modularity.
     
-    Parameters:
-        None
+    Adds a `--max-lines` option to control the maximum allowed line count for Infrastructure/bin/ask (default 1900).
     
     Returns:
-        args (argparse.Namespace): Parsed arguments with attribute `max_lines` (int) specifying the maximum allowed line count for bin/ask (default 1700).
+        argparse.Namespace: Parsed arguments with attribute `max_lines` (int) specifying the maximum allowed line count for Infrastructure/bin/ask.
     """
     parser = argparse.ArgumentParser(description="Validate ask CLI modularity constraints.")
     parser.add_argument(
         "--max-lines",
         type=int,
         default=1900,
-        help="Maximum allowed line count for bin/ask.",
+        help="Maximum allowed line count for Infrastructure/bin/ask.",
     )
     return parser.parse_args()
 
@@ -92,12 +91,12 @@ def _forbidden_imports(modules: set[str]) -> list[str]:
 
 def main() -> int:
     """
-    Verify modularity constraints of the bin/ask entrypoint and report any violations.
+    Verify modularity constraints of the Infrastructure/bin/ask entrypoint and report any violations.
     
-    Checks include a configurable maximum line count, presence of required command imports, and absence of forbidden direct-execution modules. Prints a summary line and any issues; returns an exit code indicating the result.
+    Checks a configurable maximum line count, required command imports, and absence of forbidden direct-execution modules. Prints a summary line and any issues.
     
     Returns:
-        int: `0` if all checks pass, `1` if the entrypoint is missing or any check fails.
+        int: `0` if all checks pass, `1` if the entrypoint is missing, parsing fails, or any check fails.
     """
     args = parse_args()
     if not ASK_PATH.exists():
@@ -116,13 +115,17 @@ def main() -> int:
     issues: list[str] = []
     if line_count > max(1, int(args.max_lines)):
         issues.append(
-            f"bin/ask exceeds max line budget ({line_count} > {args.max_lines})"
+            f"Infrastructure/bin/ask exceeds max line budget ({line_count} > {args.max_lines})"
         )
     if not _command_imports_ok(modules):
-        issues.append("bin/ask must import ask.commands.skills, ask.commands.repo, and ask.commands.plugins")
+        issues.append(
+            "Infrastructure/bin/ask must import ask.commands.skills, ask.commands.repo, and ask.commands.plugins"
+        )
     forbidden = _forbidden_imports(modules)
     if forbidden:
-        issues.append(f"bin/ask imports forbidden direct execution modules: {', '.join(forbidden)}")
+        issues.append(
+            f"Infrastructure/bin/ask imports forbidden direct execution modules: {', '.join(forbidden)}"
+        )
 
     print(f"ask_cli_modularity: lines={line_count} max={args.max_lines}")
     if issues:

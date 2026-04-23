@@ -45,10 +45,10 @@ Out of scope:
 ## Current constraints
 
 These are hard constraints from the current repo state and scripts:
-- `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` rejects a symlinked `skills-antigravity` path. Any plan requiring that symlink is invalid.
+- `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` rejects a symlinked `skills-codex` path. Any plan requiring that symlink is invalid.
 - local marketplace runtime cache authoritative derived location is `.agents/plugins-runtime/cache/**`.
 - legacy visible local marketplace cache `Plugins/cache/agent-skills-local/**` must stay removed and must not be reintroduced as compatibility output.
-- runtime/projection surfaces (`.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**`) are governed by path-ownership checks and must remain derived.
+- runtime/projection surfaces (`.agents/**`, `.agents/skills/**`, `skills-codex/**`, `Plugins/cache/**`, `runtime/**`) are governed by path-ownership checks and must remain derived.
 - governance ownership docs use the existing uppercase root `GOVERNANCE/**` for control-plane policy content.
 
 ## Target layout
@@ -143,7 +143,7 @@ Rules:
 - every slice using `path_compatibility` containing `filesystem_forwarder` must declare exactly one allowed `forwarder_type`;
 - each `forwarder_type` must have explicit validator coverage in slice checks;
 - unlisted forwarder implementations are forbidden;
-- symlink-based forwarders are forbidden unless explicitly allowlisted by policy for antigravity sync-source compatibility.
+- symlink-based forwarders are forbidden unless explicitly allowlisted by policy for codex sync-source compatibility.
 
 ## Compatibility state machine
 
@@ -209,7 +209,7 @@ Package-root resolution contract:
 
 ## Derived artifact lifecycle contract
 
-Derived surfaces (`runtime/**`, `.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `.agents/plugins-runtime/cache/**`) require deterministic lifecycle handling:
+Derived surfaces (`runtime/**`, `.agents/**`, `.agents/skills/**`, `skills-codex/**`, `.agents/plugins-runtime/cache/**`) require deterministic lifecycle handling:
 - before slice activation or rollback validation, purge stale derived artifacts for affected slices;
 - regenerate projections/caches from declared canonical roots;
 - run validation only after clean reprojection; previous artifacts are not considered valid evidence;
@@ -371,7 +371,7 @@ Control-plane ownership rules:
 - Actions:
   - enforce boundaries via `Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`;
   - publish ownership and projection-read-only policy in docs under `GOVERNANCE/**` and agent docs;
-  - freeze external compatibility invariants only for `.agents/**`, `.agents/skills/**`, `runtime/**`, `skills-antigravity/**`, and plugin runtime cache surfaces (allowed writers, discovery/precedence, visibility, and negative tests).
+  - freeze external compatibility invariants only for `.agents/**`, `.agents/skills/**`, `runtime/**`, `skills-codex/**`, and plugin runtime cache surfaces (allowed writers, discovery/precedence, visibility, and negative tests).
   - defer internal projection-generation behavior freeze until Phase B wrapper/mechanics extraction evidence is green.
 - Exit criteria:
   - path-ownership gates block direct runtime/projection edits, including alias-path writes.
@@ -428,10 +428,10 @@ Control-plane ownership rules:
 5. Phase E: runtime lane consolidation
 - Actions:
   - formalize `runtime/**` as derived-only repo lane;
-  - keep `skills-antigravity` as a real directory (not symlink), per sync guard;
+  - keep `skills-codex` as a real directory (not symlink), per sync guard;
   - if compatibility is needed, implement it as `filesystem_forwarder` via wrapper/index indirection only;
-  - symlink allowances are closed by default outside antigravity sync-source lanes;
-  - any non-antigravity alias symlink must be explicitly declared in governance policy with `source`, `target`, `owner`, and `justification`;
+  - symlink allowances are closed by default outside codex sync-source lanes;
+  - any non-codex alias symlink must be explicitly declared in governance policy with `source`, `target`, `owner`, and `justification`;
   - each declared alias symlink must have ownership-guard and projection-integrity coverage before promotion.
 - Exit criteria:
   - runtime lane is read-only by policy and negative tests;
@@ -460,7 +460,7 @@ Control-plane ownership rules:
 | Mechanics commands | `Infrastructure/factory/**` internals + `Infrastructure/scripts/*` wrappers | wrapper delegation only | command-contract compatibility gates |
 | Runtime projection tree | `runtime/**`, `.agents/**`, and `.agents/skills/**` derived outputs | no direct compatibility writes | path-ownership guard blocks source edits |
 | Local marketplace cache | `.agents/plugins-runtime/cache/**` | canonical hidden cache only | block reintroduction of `Plugins/cache/agent-skills-local/**` |
-| Antigravity projection lane | `skills-antigravity/**` real directory | `filesystem_forwarder` via wrapper/index only | reject symlinked `skills-antigravity` sync-source paths |
+| Codex projection lane | `skills-codex/**` real directory | `filesystem_forwarder` via wrapper/index only | reject symlinked `skills-codex` sync-source paths |
 
 ## User-facing acceptance matrix
 
@@ -540,7 +540,7 @@ Phase A-F phase-promotion exhaustive lane:
 - targeted-slice `plugin_lifecycle_checks` selected by active phase key (`applies_to_phase` contains promoted phase key or `all`) with full tuple evaluation (`expected_exit_code` + `normalized_assertions`).
 
 Additional negative ownership checks for migration PRs:
-- direct edits to `.agents/**`, `skills-antigravity/**`, or `runtime/**` must fail `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` unless the slice is explicitly marked as projection mechanics;
+- direct edits to `.agents/**`, `skills-codex/**`, or `runtime/**` must fail `PATH_OWNERSHIP_GUARD_SCOPE=working bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` unless the slice is explicitly marked as projection mechanics;
 - direct edits to `.agents/skills/**` must fail the same ownership guard unless the slice is explicitly marked as projection mechanics;
 - cache-path edits must fail without explicit intent and may run only with `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 PATH_OWNERSHIP_GUARD_SCOPE=working`;
 - alias-path and realpath projection behavior must be verified via `bash Infrastructure/scripts/lifecycle-and-sync/validate_projection_integrity.sh`; do not infer alias safety from git diff output alone;

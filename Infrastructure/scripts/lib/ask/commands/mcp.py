@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MCP (Model Context Protocol) configuration sync commands."""
+"""MCP (Model Context Protocol) configuration export commands."""
 import os
 import json
 import re
@@ -18,7 +18,7 @@ except ModuleNotFoundError:
         tomllib = None
 
 CODEX_CONFIG_PATH = os.path.expanduser("~/.codex/config.toml")
-ANTIGRAVITY_MCP_PATH = os.path.expanduser("~/.gemini/antigravity/mcp_config.json")
+CODEX_MCP_EXPORT_PATH = os.path.expanduser("~/.codex/mcp_config.json")
 ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 FALLBACK_PYTHONS = (
     "python3",
@@ -95,7 +95,7 @@ def _iter_fallback_pythons():
             yield resolved
 
 
-def build_antigravity_config(codex_config):
+def build_codex_mcp_config(codex_config):
     mcp_servers = {}
     NAME_MAPPING = {
         "repo-prompt": "repoprompt",
@@ -132,7 +132,7 @@ def build_antigravity_config(codex_config):
                 *args,
             ]
 
-        # 2. HTTP servers (Requires mcp-remote bridge for Antigravity)
+        # 2. HTTP servers (bridged with mcp-remote)
         elif "url" in config:
             url = str(config["url"])
             script_lines = [
@@ -177,21 +177,11 @@ def build_antigravity_config(codex_config):
 
         mcp_servers[mcp_name] = mcp_obj
 
-    # User requested agentation MCP to be globally available in Antigravity
-    if "agentation" not in mcp_servers:
-        mcp_servers["agentation"] = {
-            "command": "sh",
-            "args": [
-                "-c",
-                f"{wrapper}; exec npx -y agentation-mcp server"
-            ]
-        }
-
     return {"mcpServers": mcp_servers}
 
 
 def sync_mcp(repo_root: Path, dry_run: bool = False) -> CallResult:
-    """Sync MCP configuration from Codex to Antigravity."""
+    """Export MCP configuration from Codex TOML to JSON."""
     result = CallResult()
 
     if tomllib is None and not list(_iter_fallback_pythons()):
@@ -214,13 +204,13 @@ def sync_mcp(repo_root: Path, dry_run: bool = False) -> CallResult:
         ))
         return result
 
-    antigravity_mcp_config = build_antigravity_config(codex_config)
-    server_count = len(antigravity_mcp_config["mcpServers"])
+    export_mcp_config = build_codex_mcp_config(codex_config)
+    server_count = len(export_mcp_config["mcpServers"])
 
-    result.data["servers"] = list(antigravity_mcp_config["mcpServers"].keys())
+    result.data["servers"] = list(export_mcp_config["mcpServers"].keys())
     result.data["server_count"] = server_count
     result.data["dry_run"] = dry_run
-    result.data["target_path"] = ANTIGRAVITY_MCP_PATH
+    result.data["target_path"] = CODEX_MCP_EXPORT_PATH
 
     if dry_run:
         result.status = "success"
@@ -228,24 +218,24 @@ def sync_mcp(repo_root: Path, dry_run: bool = False) -> CallResult:
         return result
 
     # Ensure directory exists
-    os.makedirs(os.path.dirname(ANTIGRAVITY_MCP_PATH), exist_ok=True)
+    os.makedirs(os.path.dirname(CODEX_MCP_EXPORT_PATH), exist_ok=True)
 
     # Merge carefully with existing config
     existing_config = {}
-    if os.path.exists(ANTIGRAVITY_MCP_PATH):
+    if os.path.exists(CODEX_MCP_EXPORT_PATH):
         try:
-            with open(ANTIGRAVITY_MCP_PATH, "r") as f:
+            with open(CODEX_MCP_EXPORT_PATH, "r") as f:
                 existing_config = json.load(f)
         except (json.JSONDecodeError, OSError):
             existing_config = {}
 
-    existing_config["mcpServers"] = antigravity_mcp_config["mcpServers"]
+    existing_config["mcpServers"] = export_mcp_config["mcpServers"]
 
     try:
-        with open(ANTIGRAVITY_MCP_PATH, "w") as f:
+        with open(CODEX_MCP_EXPORT_PATH, "w") as f:
             json.dump(existing_config, f, indent=2)
         result.status = "success"
-        result.metadata["next_steps"] = ["Restart Antigravity or type '/refresh' to pick up changes"]
+        result.metadata["next_steps"] = ["Re-run `codex mcp list` to verify exported servers."]
     except OSError as e:
         result.status = "error"
         result.errors.append(ErrorObject(

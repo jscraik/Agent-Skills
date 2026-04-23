@@ -8,7 +8,6 @@ covers:
   - user-research
   - ideation
   - project-analysis
-- [[product-design-critic]] — Critique and shape a software product surface, workflow, card, panel, or chat UX with opinionated JTBD-grounded recommendations.
 ---
 
 # Product Strategy
@@ -26,36 +25,32 @@ covers:
 
 ## Ideation & Exploration
 
-- [[brainstorming]] — Pre-planning exploration for ambiguous requests: clarify what to build, compare 2-3 approaches, recommend a direction.
+- [[he-brainstorm]] — Pre-planning exploration for ambiguous requests: clarify what to build, compare 2-3 approaches, recommend a direction.
 
 ## Specification & Planning
 
-- [[product-spec]] — Create or review implementation-ready product specifications from ideas or existing docs; modes: PRD, UX-only, API spec, arch spec, test plan.
-- [[ce-plan]] — Create execution-ready implementation plans with sequencing, validation, and rollout guidance.
+- [[he-plan]] — Create execution-ready implementation plans with sequencing, validation, and rollout guidance.
 - [[architecture-interview]] — Plan and review architecture decisions via structured interview with ADR output.
+- [[chatgpt-apps]] — Design and implement ChatGPT Apps SDK workflows (tool + UI architecture, CSP, metadata, bridge wiring).
 
 ## Research & Interviews
 
 - [[interview-me]] — Interactive, multiple-choice interview for requirements discovery; turns underspecified ideas into execution-ready specs.
 - [[deep-interview]] — Deep, gap-filling interview that enhances existing docs/specs or explores a topic; updates docs in-place with insights and an approval gate.
+- [[context7]] — Extract current library documentation via Context7 for up-to-date API details and versioning.
 
 ## Knowledge Systems
 
-- [[notebooklm]] — Manage, analyze, and generate NotebookLM workflows for notebook management and audio overview generation.
-- [[context7]] — Extract current library documentation via Context7 for up-to-date API details and versioning.
-
-## Project Improvement
-
-- [[project-improver]] — Analyze an existing project and design high-leverage improvements: stronger functionality, sharper product judgment, idea filtering, premortems.
-- [[ui-cloner]] — Build a structured UI replication plan from a target website URL, adapted to the user's brand with implementation-ready guidance.
+- [[docs-expert]] — Keep strategy docs, runbooks, and README surfaces aligned with live behavior.
+- [[llm-wiki]] — Persist strategy knowledge in a queryable markdown wiki with incremental updates.
 
 ---
 
 ## Pipelines
 
-- New feature idea → [[brainstorming]] → [[interview-me]] → [[product-spec]] → [[ce-plan]].
-- Improve existing project → [[project-improver]] → [[deep-interview]] → [[architecture-interview]] → [[ce-plan]].
-- Research and document → [[context7]] / [[notebooklm]] → [[docs-expert]].
+- New feature idea → [[he-brainstorm]] → [[interview-me]] → [[architecture-interview]] → [[he-plan]].
+- Improve existing project → [[deep-interview]] → [[architecture-interview]] → [[he-plan]].
+- Research and document → [[context7]] / [[llm-wiki]] → [[docs-expert]].
 
 ## Cross-links
 

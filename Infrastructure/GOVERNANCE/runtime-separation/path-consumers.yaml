@@ -7,7 +7,7 @@ rows:
       - 43
       - 58
     match_count: 2
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: .diagram/architecture.mmd
     is_executable: false
@@ -53,7 +53,7 @@ rows:
       - 319
       - 322
     match_count: 40
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: .diagram/class.mmd
     is_executable: false
@@ -71,7 +71,7 @@ rows:
       - 39
       - 42
     match_count: 12
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: ".github/workflows/skill-quality.yml"
     is_executable: false
@@ -135,7 +135,7 @@ rows:
     line_numbers:
       - 69
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: .harness/memory/LEARNINGS.md
     is_executable: false
@@ -169,7 +169,7 @@ rows:
       - 63
       - 73
     match_count: 5
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: AGENTS.md
     is_executable: false
@@ -197,7 +197,7 @@ rows:
     line_numbers:
       - 51
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: FORJAMIE
     is_executable: false
@@ -288,7 +288,7 @@ rows:
     line_numbers:
       - 164
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: RELEASE_NOTES.md
     is_executable: false
@@ -486,7 +486,7 @@ rows:
       - 3514
       - 3515
     match_count: 70
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: "Infrastructure/artifacts/document-review-merge-import-2026-03-23.txt"
     is_executable: false
@@ -521,7 +521,7 @@ rows:
     line_numbers:
       - 5
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: "Infrastructure/artifacts/icon-prompts/chatgpt-skill-plugin-icon-prompts.md"
     is_executable: false
@@ -676,7 +676,7 @@ rows:
     line_numbers:
       - 5
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: "Infrastructure/artifacts/skill-graphs/graph-adapter/notes/profile--agents-skills-system-skill-creator.md"
     is_executable: false
@@ -826,7 +826,7 @@ rows:
       - 11
       - 30
     match_count: 2
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: "Infrastructure/artifacts/skill-structure-gate-2026-03-08.json"
     is_executable: false
@@ -1361,7 +1361,7 @@ rows:
     line_numbers:
       - 58
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: docs/concepts/index.md
     is_executable: false
@@ -1549,7 +1549,7 @@ rows:
       - 582
       - 694
     match_count: 5
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: "docs/reference/managed-asset-lifecycle.md"
     is_executable: false
@@ -2877,7 +2877,7 @@ rows:
     line_numbers:
       - 29
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: "Infrastructure/scripts/skill-graph/build-adjacency-yaml.py"
     is_executable: true
@@ -2894,7 +2894,7 @@ rows:
     line_numbers:
       - 22
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py
     is_executable: true
@@ -2973,7 +2973,7 @@ rows:
     line_numbers:
       - 116
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh
     is_executable: true
@@ -3132,7 +3132,7 @@ rows:
     line_numbers:
       - 33
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/lifecycle-and-sync/selection_policy.py
     is_executable: true
@@ -3317,7 +3317,7 @@ rows:
     line_numbers:
       - 39
     match_count: 1
-    root: "skills-antigravity"
+    root: "skills-codex"
   -
     consumer_path: Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
     is_executable: true

@@ -186,7 +186,7 @@ Default to `create` or `improve`.
 ## Required inputs
 - skill goal and boundary;
 - 2-3 concrete use cases, plus 8-10 should-trigger and 8-10 should-not-trigger queries;
-- target environment: `codex`, `claude`, or `portable`;
+- target environment: `codex`, `codex`, or `portable`;
 - required tools, schemas, templates, and policy constraints;
 - compatibility posture (`learn`, `guided`, `execute`);
 - category confirmation (for create/improve) with rationale for any category tradeoff.

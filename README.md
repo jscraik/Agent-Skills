@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed repository of **132 skills** for AI coding agents (Codex, Claude, Gemini). Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of Codex skills for AI coding agents. Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 
@@ -12,7 +12,8 @@ A governed repository of **132 skills** for AI coding agents (Codex, Claude, Gem
 ## Quick start
 
 ```bash
-# One-time per shell: load repo environment and add ask to PATH
+# Bash-first setup (recommended): open bash, then load repo environment
+bash
 source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
 # See what's available
@@ -125,61 +126,64 @@ ask repo validate --ephemeral
 
 ## Skill graph (manual topic clusters, non-canonical)
 
-This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. Canonical catalog parity uses `discover_skill_entries()` and `catalog_parity` and currently expects **132** skills (88 in `Skills/<topic-cluster>` + 5 in `.agents/skills/.system/` + 27 in `Plugins/`).
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. For the current surfaced catalog size, run `python3 Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py --count --source catalog --visibility default`.
 
 | Topic              | Skills | Examples                                           |
 | ------------------ | ------ | -------------------------------------------------- |
-| agent-ops          | 41     | coding-harness, evals-router, orchestrating-subagents |
-| frontend-ui        | 25     | react-ui-patterns, shadcn-ui, agent-browser        |
-| backend-platform   | 8      | cli-spec, mcp-builder, backend-engineer            |
-| product-strategy   | 5      | architecture-interview, notebooklm, interview-me   |
-| security-ops       | 4      | 1password, best-practices, create-auth             |
-| content-publishing | 2      | markdown-converter, spreadsheet                    |
-| mobile-native      | 3      | atlas, process-watch, test-driven-development      |
+| agent-ops          | 44     | coding-harness, evals-router, simplify             |
+| frontend-ui        | 15     | react-ui-patterns, shadcn-ui, frontend-ui-design   |
+| backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer            |
+| product-strategy   | 4      | architecture-interview, chatgpt-apps, interview-me |
+| security-ops       | 7      | 1password, best-practices, create-auth             |
+| content-publishing | 9      | markdown-converter, spreadsheet, visual-explainer  |
+| mobile-native      | 1      | atlas                                               |
 
 ## Repository layout
 
 ```
 agent-skills/
-├── bin/ask                   # CLI entry point
+├── bin/ask                   # Stable public wrapper entry point
+├── scripts/                  # Stable wrapper entry points for canonical scripts
 ├── .agents/skills/           # Flat runtime projection (read-only)
 │
 ├── Skills/                   # All canonical skills organised by topic cluster
-│   ├── agent-ops/            # 41 skills: coding-harness, evals-router, orchestrating-subagents, …
-│   ├── frontend-ui/          # 25 skills: react-ui-patterns, shadcn-ui, slides, …
-│   ├── backend-platform/     #  8 skills: cli-spec, mcp-builder, gh-workflow, …
-│   ├── product-strategy/     #  5 skills: architecture-interview, notebooklm, …
-│   ├── security-ops/         #  4 skills: 1password, best-practices, create-auth, …
-│   ├── mobile-native/        #  3 skills: atlas, process-watch, test-driven-development
-│   └── content-publishing/   #  2 skills: markdown-converter, spreadsheet
+│   ├── agent-ops/            # 44 skills: coding-harness, evals-router, simplify, …
+│   ├── frontend-ui/          # 15 skills: react-ui-patterns, shadcn-ui, frontend-ui-design, …
+│   ├── backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, …
+│   ├── product-strategy/     #  4 skills: architecture-interview, chatgpt-apps, interview-me, …
+│   ├── security-ops/         #  7 skills: 1password, best-practices, create-auth, …
+│   ├── mobile-native/        #  1 skill: atlas
+│   └── content-publishing/   #  9 skills: markdown-converter, spreadsheet, visual-explainer
 │
-├── plugins/                  # Plugin packages (skills live inside plugins)
+├── Plugins/                  # Plugin packages (skills live inside plugins)
 │   ├── skill-factory/        #   skill-builder, skill-creator, skill-installer, …
 │   ├── plugin-factory/       #   plugin-builder, plugin-creator, plugin-installer
-│   ├── harness-engineering/  #   ce-brainstorm, ce-plan, ce-spec, …
-│   └── compound-engineering-router/
+│   ├── harness-engineering/  #   he-brainstorm, he-plan, he-spec, …
+│   ├── coderabbit/
+│   └── browser-use/
 │
 ├── Infrastructure/
-│   ├── bin/ask               # CLI entry point
+│   ├── bin/ask               # Canonical CLI implementation entrypoint (internal)
 │   ├── scripts/lib/ask/      # CLI implementation
 │   ├── GOVERNANCE/           # Runtime separation & policy
 │   └── ops/metrics/graph/    # Skill relationship data
 ├── Docs/                     # Plans, specs, guides, cli-specs
 ├── Wiki/                     # Skill Ops Wiki (notes, playbooks, learnings)
-└── skills-antigravity/       # Gemini/Antigravity runtime (gitignored)
 ```
 
 Ownership boundaries:
 - Canonical authoring: `Skills/<topic-cluster>/**` (7 clusters: agent-ops, frontend-ui, backend-platform, product-strategy, security-ops, content-publishing, mobile-native) plus `Plugins/<plugin>/skills/**`
 - Factory mechanics: `Infrastructure/scripts/**`, validation/governance contracts
-- Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `skills-antigravity/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
+- Root command wrappers: `bin/**` and `scripts/**` are stable wrappers that forward into `Infrastructure/**`; keep these as real files/directories (not symlinks)
+- `bin/ask` is the only public CLI entrypoint and must remain a thin forwarder to `Infrastructure/bin/ask`.
+- Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
 - Full policy: [Docs/agents/14-path-ownership-boundaries.md](Docs/agents/14-path-ownership-boundaries.md)
 
 ## Documentation
 
 - **[CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
 - **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
-- **[Skill Index](SKILL.md)** – All 120 canonical skills by category
+- **[Skill Index](SKILL.md)** – Current surfaced skill catalog by category
 - **[Implementation Review](Docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Privacy and Data Handling
@@ -189,6 +193,7 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills:** 120 canonical total (88 Skills/ + 5 .system/ + 27 Plugins/)
+- **Skills catalog:** `python3 Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py --count --source catalog --visibility default`
+- **System skills pin:** `Infrastructure/GOVERNANCE/skills-system-upstream.lock.json` (upstream `openai/skills` `.system` ref `e940b8a86138adf03972802b990a1dfc57fcbf09`)
 - **Validation:** 28 automated checks via `ask repo validate`
-- **Compatibility:** Codex, Claude Code, Gemini/Antigravity
+- **Compatibility:** Codex

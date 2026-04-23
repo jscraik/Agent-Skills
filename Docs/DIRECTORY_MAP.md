@@ -48,7 +48,6 @@ Common subdirectory patterns inside each skill:
 | Path                   | Purpose                                           |
 | ---------------------- | ------------------------------------------------- |
 | `/Plugins/`            | Plugin packages and plugin manifests              |
-| `/skills-antigravity/` | Antigravity projection output                     |
 | `/.agents/skills/`     | Flat runtime skill projection                     |
 | `/brand/`              | Brand assets and visual references                |
 | `/Infrastructure/references/`         | Shared contracts and cross-cutting reference docs |

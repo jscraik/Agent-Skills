@@ -27,4 +27,4 @@ Use this matrix to keep `orchestrating-subagents` focused on Codex-native delega
 ## Notes
 - `orchestrating-subagents` may co-trigger with `codex-agent-builder` when a real role gap is discovered during roster design.
 - `orchestrating-subagents` may route to `using-git-worktrees` when same-checkout parallel writes are unsafe.
-- This skill translates older Claude concepts into Codex behavior, but it should not recreate Claude teammate infrastructure in documents or prompts.
+- This skill translates older Codex concepts into Codex behavior, but it should not recreate Codex teammate infrastructure in documents or prompts.

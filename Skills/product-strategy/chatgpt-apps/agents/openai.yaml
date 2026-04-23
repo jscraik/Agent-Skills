@@ -12,7 +12,7 @@ interface:
 dependencies:
   tools:
   - type: mcp
-    value: openaiDeveloperDocs
+    value: openai-docs
     description: OpenAI developer docs MCP server for current Apps SDK guidance
     transport: streamable_http
     url: https://developers.openai.com/mcp

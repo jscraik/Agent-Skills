@@ -1,7 +1,7 @@
 # Using Scripts in Skills
 
 <purpose>
-Scripts are executable code that Claude runs as-is rather than regenerating each time. They ensure reliable, error-free execution of repeated operations.
+Scripts are executable code that Codex runs as-is rather than regenerating each time. They ensure reliable, error-free execution of repeated operations.
 </purpose>
 
 <when_to_use>
@@ -85,7 +85,7 @@ Workflows reference scripts like this:
 </process>
 ```
 
-The workflow tells Claude WHEN to run the script. The script handles HOW the operation executes.
+The workflow tells Codex WHEN to run the script. The script handles HOW the operation executes.
 </workflow_integration>
 
 <best_practices>

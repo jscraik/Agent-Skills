@@ -1,6 +1,0 @@
-interface:
-  display_name: Every Style Editor
-  short_description: Edit prose to conform to Every's editorial house style, including
-    grammar, punctuation, mechanics, and naming convent...
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

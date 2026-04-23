@@ -12,7 +12,7 @@ Current OpenAI-backed guidance for Codex-native subagent workflows.
 - [Sources](#sources)
 
 ## Why this reference exists
-The upstream `orchestrating-swarms` skill was built around Claude Code team, teammate, inbox, and task primitives. Codex in March 2026 exposes a different runtime:
+The upstream `orchestrating-swarms` skill was built around Codex team, teammate, inbox, and task primitives. Codex in March 2026 exposes a different runtime:
 - parent-mediated subagents
 - custom agent roles
 - shared sandbox inheritance

@@ -9,7 +9,7 @@
 - **Untested scripts**: scripts included but never executed to confirm behavior.
 
 - **Workflow-in-description trap**: description becomes a step-by-step recipe, so the model shortcuts and never reads the body. Keep discovery keywords in the description; keep workflows in the body/references.
-- **Absolute-path coupling**: hardcoded machine paths (`/home/...`, `~/.claude/...`) instead of portable, repo-relative paths.
+- **Absolute-path coupling**: hardcoded machine paths (`/home/...`, `~/.codex/...`) instead of portable, repo-relative paths.
 - **Over-questioning**: asking broad or excessive clarifying questions instead of proceeding with reasonable defaults + a small number of targeted questions.
 - **Unsafe automation**: scripts that assume network access, exfiltrate secrets, or run destructive commands without explicit approval.
 
@@ -28,7 +28,7 @@ If a created skill produces repeated artifacts (reports, templates, PR descripti
 
 **Expected outcome:** a `review-api-security/` skill folder with a trigger-rich description, a short core workflow in `SKILL.md`, deeper guidance in `Infrastructure/references/`, and `Infrastructure/references/evals.yaml` with pressure-test prompts.
 
-## Claude Skill Compatibility
+## Codex Skill Compatibility
 
 If targeting both systems:
 - Prefer the portable subset (see `Infrastructure/references/portable-skills.md`).

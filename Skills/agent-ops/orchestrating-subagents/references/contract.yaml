@@ -21,7 +21,7 @@ outputs:
   - structured output matching required_output fields when requested
 
 risks:
-  - Treating Codex like Claude Code teammate/inbox/task infrastructure
+  - Treating Codex like Codex teammate/inbox/task infrastructure
   - Over-delegating simple or tightly coupled work
   - Unsafe same-checkout parallel writes
   - Missing role coverage being papered over instead of escalated
@@ -73,4 +73,4 @@ non_goals:
   - Pure role creation or config authoring
   - Worktree creation itself
   - Generic single-agent implementation
-  - Emulating Claude-specific teammate backends or inbox file mechanics
+  - Emulating Codex-specific teammate backends or inbox file mechanics

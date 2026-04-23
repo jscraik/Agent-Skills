@@ -18,7 +18,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
 ## When to use
 
 - Use this skill when the user wants to set up or improve a "persistent wiki" workflow for personal research, team knowledge, course notes, due diligence, or similar long-running analysis.
-- Use this skill when the user wants schema guidance (`AGENTS.md`/`CLAUDE.md` conventions), ingest/query/lint routines, or file layout for an LLM-maintained knowledge base.
+- Use this skill when the user wants schema guidance (`AGENTS.md`/`AGENTS.md` conventions), ingest/query/lint routines, or file layout for an LLM-maintained knowledge base.
 - Use this skill when the user wants to convert a pile of documents into a curated, interlinked markdown knowledge system.
 - Do not use this skill for one-off Q&A over a small static document set; route to normal summarization/research workflows.
 - Do not use this skill when the user wants vector-database infrastructure first; route to backend/search implementation lanes.
@@ -31,7 +31,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
 - Preferred wiki workspace path and repository layout.
 - Operational preferences: supervised ingest vs batch ingest, citation style, and lint cadence.
 - Mixed-media handling preference: text-only or text plus image/attachment review.
-- Existing governance docs if present (`AGENTS.md`, `CLAUDE.md`, runbooks).
+- Existing governance docs if present (`AGENTS.md`, `AGENTS.md`, runbooks).
 - If domain, source path, or governance expectations are missing, ask direct clarifying questions before prescribing concrete file layout or command steps.
 
 ## Deliverables
@@ -107,7 +107,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
    - Create or validate `wiki/index.md` and `wiki/log.md`.
    - Keep `index.md` entries structured as link + one-line summary (optional metadata such as date or source count).
 3. Define schema rules:
-   - Capture ingest/query/lint procedures in `AGENTS.md` or `CLAUDE.md`.
+   - Capture ingest/query/lint procedures in `AGENTS.md` or `AGENTS.md`.
    - Specify citation, page naming, and cross-linking conventions.
    - If operating at scale, define lifecycle controls (confidence/supersession/retention), typed relations, and contradiction-resolution policy.
 4. Run privacy gate before ingest:

@@ -2,7 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+	:
+else
+	CANONICAL_SCRIPT_DIR="$(cd -- "$SCRIPT_DIR" && pwd -P)"
+	REPO_ROOT="$(cd -- "$CANONICAL_SCRIPT_DIR/../../.." && pwd -P)"
+fi
 
 TRACKED_ARTIFACT_PATHS=(
 	".diagram"

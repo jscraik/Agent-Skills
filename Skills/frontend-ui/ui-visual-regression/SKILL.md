@@ -144,8 +144,8 @@ Run a deterministic visual regression loop so we can separate expected UI change
 | [[playwright-interactive]] | Capture screenshots for regression via Playwright |
 | [[baseline-ui]] | Run baseline UI checks alongside visual regression |
 | [[design-system]] | Resolve confirmed token, typography, spacing, or icon drift at the system layer |
-| [[agent-browser]] | Use agent-browser snapshots as regression inputs |
-| [[react-components]] | Catch visual regressions after Stitch-to-React conversion |
+| [[playwright-interactive]] | Capture deterministic screenshots and traces before classification |
+| [[react-ui-patterns]] | Catch visual regressions after component composition changes |
 
 **Topic map:** [[frontend-ui]]
 

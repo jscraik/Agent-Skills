@@ -13,7 +13,7 @@ For large skill lists, do not force `default_mode_request_user_input` selection 
 Use a numbered list in chat and ask for number/name.
 
 ```bash
-ls ~/.claude/skills/
+ls ~/.codex/skills/
 ```
 
 Present numbered list, ask: "Which skill needs a new workflow?"
@@ -22,8 +22,8 @@ Present numbered list, ask: "Which skill needs a new workflow?"
 
 Read the skill:
 ```bash
-cat ~/.claude/skills/{skill-name}/SKILL.md
-ls ~/.claude/skills/{skill-name}/workflows/ 2>/dev/null
+cat ~/.codex/skills/{skill-name}/SKILL.md
+ls ~/.codex/skills/{skill-name}/workflows/ 2>/dev/null
 ```
 
 Determine:

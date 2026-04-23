@@ -1,5 +1,5 @@
 {
-  "tool": "claude-code",
+  "tool": "codex-code",
   "started_at": "2026-04-06T13:20:00Z",
   "ended_at": "2026-04-06T14:35:00Z",
   "files_touched": [

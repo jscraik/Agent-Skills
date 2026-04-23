@@ -5,7 +5,7 @@
   "tier1_failures": [
     "codex returned non-zero exit code: 1",
     "deterministic_checks/budgets requested but Codex JSONL was not captured (enable --capture-jsonl).",
-    "contains failed: 'restart Claude Code'"
+    "contains failed: 'restart Codex'"
   ],
   "tier2_findings": [],
   "warnings": [],

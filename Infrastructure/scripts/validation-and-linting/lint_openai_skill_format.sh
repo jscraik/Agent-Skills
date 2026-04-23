@@ -48,9 +48,8 @@ else
 fi
 
 # `skills-system/` is a generated projection store, not canonical authored
-# source. Keep this lint focused on real source roots plus the materialized
-# Antigravity projection.
-roots=(Skills skills-antigravity Plugins/harness-engineering Plugins/plugin-factory Plugins/skill-factory)
+# source. Keep this lint focused on real source roots.
+roots=(Skills Plugins/harness-engineering Plugins/plugin-factory Plugins/skill-factory)
 errors=0
 warnings=0
 checked=0

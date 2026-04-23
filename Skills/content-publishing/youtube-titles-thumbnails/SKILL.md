@@ -23,7 +23,7 @@ Deliver strong YouTube title and thumbnail-copy options with clear positioning t
 ## When to use
 - Use when asked for high-performing YouTube titles, packaging angles, or thumbnail text.
 - Use it when the user wants differentiated options they can test, not a full script.
-- Route broader product or PRD work to `product-spec`.
+- Route broader product planning work to `he-plan`.
 
 ## Required inputs
 - topic

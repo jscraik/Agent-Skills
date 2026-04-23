@@ -93,7 +93,7 @@ Workflow:
 
 
 <overview>
-Skills improve through iteration and testing. This reference covers evaluation-driven development, Claude A/B testing patterns, and XML structure validation during testing.
+Skills improve through iteration and testing. This reference covers evaluation-driven development, Codex A/B testing patterns, and XML structure validation during testing.
 </overview>
 
 <evaluation_driven_development>
@@ -103,7 +103,7 @@ Create evaluations BEFORE writing extensive documentation. This ensures your ski
 
 <workflow>
 <step_1>
-**Identify gaps**: Run Claude on representative tasks without a skill. Document specific failures or missing context.
+**Identify gaps**: Run Codex on representative tasks without a skill. Document specific failures or missing context.
 </step_1>
 
 <step_2>
@@ -111,7 +111,7 @@ Create evaluations BEFORE writing extensive documentation. This ensures your ski
 </step_2>
 
 <step_3>
-**Establish baseline**: Measure Claude's performance without the skill.
+**Establish baseline**: Measure Codex's performance without the skill.
 </step_3>
 
 <step_4>
@@ -147,19 +147,19 @@ Create evaluations BEFORE writing extensive documentation. This ensures your ski
 </why_evaluations_first>
 </evaluation_driven_development>
 
-<iterative_development_with_claude>
+<iterative_development_with_codex>
 <principle>
-The most effective skill development uses Claude itself. Work with "Claude A" (expert who helps refine) to create skills used by "Claude B" (agent executing tasks).
+The most effective skill development uses Codex itself. Work with "Codex A" (expert who helps refine) to create skills used by "Codex B" (agent executing tasks).
 </principle>
 
 <creating_skills>
 <workflow>
 <step_1>
-**Complete task without skill**: Work through problem with Claude A, noting what context you repeatedly provide.
+**Complete task without skill**: Work through problem with Codex A, noting what context you repeatedly provide.
 </step_1>
 
 <step_2>
-**Ask Claude A to create skill**: "Create a skill that captures this pattern we just used"
+**Ask Codex A to create skill**: "Create a skill that captures this pattern we just used"
 </step_2>
 
 <step_3>
@@ -171,23 +171,23 @@ The most effective skill development uses Claude itself. Work with "Claude A" (e
 </step_4>
 
 <step_5>
-**Test with Claude B**: Use fresh instance to test on real tasks.
+**Test with Codex B**: Use fresh instance to test on real tasks.
 </step_5>
 
 <step_6>
-**Iterate based on observation**: Return to Claude A with specific issues observed.
+**Iterate based on observation**: Return to Codex A with specific issues observed.
 </step_6>
 </workflow>
 
 <insight>
-Claude models understand skill format natively. Simply ask Claude to create a skill and it will generate properly structured SKILL.md content.
+Codex models understand skill format natively. Simply ask Codex to create a skill and it will generate properly structured SKILL.md content.
 </insight>
 </creating_skills>
 
 <improving_skills>
 <workflow>
 <step_1>
-**Use skill in real workflows**: Give Claude B actual tasks.
+**Use skill in real workflows**: Give Codex B actual tasks.
 </step_1>
 
 <step_2>
@@ -195,11 +195,11 @@ Claude models understand skill format natively. Simply ask Claude to create a sk
 </step_2>
 
 <step_3>
-**Return to Claude A**: Share observations and current SKILL.md.
+**Return to Codex A**: Share observations and current SKILL.md.
 </step_3>
 
 <step_4>
-**Review suggestions**: Claude A might suggest reorganization, stronger language, or workflow restructuring.
+**Review suggestions**: Codex A might suggest reorganization, stronger language, or workflow restructuring.
 </step_4>
 
 <step_5>
@@ -219,7 +219,7 @@ Claude models understand skill format natively. Simply ask Claude to create a sk
 - **Critical metadata**: The name and description in your skill's metadata are critical for discovery
 </what_to_watch_for>
 </improving_skills>
-</iterative_development_with_claude>
+</iterative_development_with_codex>
 
 <model_testing>
 <principle>
@@ -227,7 +227,7 @@ Test with all models you plan to use. Different models have different strengths 
 </principle>
 
 <haiku_testing>
-**Claude Haiku** (fast, economical)
+**Codex Haiku** (fast, economical)
 
 Questions to ask:
 - Does the skill provide enough guidance?
@@ -243,7 +243,7 @@ Haiku benefits from:
 </haiku_testing>
 
 <sonnet_testing>
-**Claude Sonnet** (balanced)
+**Codex Sonnet** (balanced)
 
 Questions to ask:
 - Is the skill clear and efficient?
@@ -259,7 +259,7 @@ Sonnet benefits from:
 </sonnet_testing>
 
 <opus_testing>
-**Claude Opus** (powerful reasoning)
+**Codex Opus** (powerful reasoning)
 
 Questions to ask:
 - Does the skill avoid over-explaining?
@@ -326,8 +326,8 @@ When iterating on a skill:
 
 1. Make changes to XML structure
 2. **Validate XML structure** (check tags, nesting, completeness)
-3. Test with Claude on representative tasks
-4. Observe if XML structure aids or hinders Claude's understanding
+3. Test with Codex on representative tasks
+4. Observe if XML structure aids or hinders Codex's understanding
 5. Iterate structure based on actual performance
 </testing_xml_during_iteration>
 </xml_structure_validation>
@@ -338,31 +338,31 @@ Iterate based on what you observe, not what you assume. Real usage reveals issue
 </principle>
 
 <observation_categories>
-<what_claude_reads>
-Which sections does Claude actually read? Which are ignored? This reveals:
+<what_codex_reads>
+Which sections does Codex actually read? Which are ignored? This reveals:
 - Relevance of content
 - Effectiveness of progressive disclosure
 - Whether section names are clear
-</what_claude_reads>
+</what_codex_reads>
 
-<where_claude_struggles>
+<where_codex_struggles>
 Which tasks cause confusion or errors? This reveals:
 - Missing context
 - Unclear instructions
 - Insufficient examples
 - Ambiguous requirements
-</where_claude_struggles>
+</where_codex_struggles>
 
-<where_claude_succeeds>
+<where_codex_succeeds>
 Which tasks go smoothly? This reveals:
 - Effective patterns
 - Good examples
 - Clear instructions
 - Appropriate detail level
-</where_claude_succeeds>
+</where_codex_succeeds>
 
 <unexpected_behaviors>
-What does Claude do that surprises you? This reveals:
+What does Codex do that surprises you? This reveals:
 - Unstated assumptions
 - Ambiguous phrasing
 - Missing constraints
@@ -371,7 +371,7 @@ What does Claude do that surprises you? This reveals:
 </observation_categories>
 
 <iteration_pattern>
-1. **Observe**: Run Claude on real tasks with current skill
+1. **Observe**: Run Codex on real tasks with current skill
 2. **Document**: Note specific issues, not general feelings
 3. **Hypothesize**: Why did this issue occur?
 4. **Fix**: Make targeted changes to address specific issues
@@ -420,14 +420,14 @@ Add through iteration:
 
 <testing_discovery>
 <principle>
-Test that Claude can discover and use your skill when appropriate.
+Test that Codex can discover and use your skill when appropriate.
 </principle>
 
 <discovery_testing>
 <test_description>
-Test if Claude loads your skill when it should:
+Test if Codex loads your skill when it should:
 
-1. Start fresh conversation (Claude B)
+1. Start fresh conversation (Codex B)
 2. Ask question that should trigger skill
 3. Check if skill was loaded
 4. Verify skill was used appropriately
@@ -440,7 +440,7 @@ If skill isn't discovered:
 - Ensure description explains when to use skill
 - Test with different phrasings of the same request
 
-The description is Claude's primary discovery mechanism.
+The description is Codex's primary discovery mechanism.
 </description_quality>
 </discovery_testing>
 </testing_discovery>
@@ -451,13 +451,13 @@ The description is Claude's primary discovery mechanism.
 
 **Fix**:
 - Remove obvious explanations
-- Assume Claude knows common concepts
+- Assume Codex knows common concepts
 - Use examples instead of lengthy descriptions
 - Move advanced content to reference files
 </pattern>
 
 <pattern name="too_minimal">
-**Observation**: Claude makes incorrect assumptions or misses steps
+**Observation**: Codex makes incorrect assumptions or misses steps
 
 **Fix**:
 - Add explicit instructions where assumptions fail
@@ -467,7 +467,7 @@ The description is Claude's primary discovery mechanism.
 </pattern>
 
 <pattern name="poor_discovery">
-**Observation**: Skill exists but Claude doesn't load it when needed
+**Observation**: Skill exists but Codex doesn't load it when needed
 
 **Fix**:
 - Improve description with specific triggers
@@ -477,7 +477,7 @@ The description is Claude's primary discovery mechanism.
 </pattern>
 
 <pattern name="unclear_structure">
-**Observation**: Claude reads wrong sections or misses relevant content
+**Observation**: Codex reads wrong sections or misses relevant content
 
 **Fix**:
 - Use clearer XML tag names
@@ -487,7 +487,7 @@ The description is Claude's primary discovery mechanism.
 </pattern>
 
 <pattern name="incomplete_examples">
-**Observation**: Claude produces outputs that don't match expected pattern
+**Observation**: Codex produces outputs that don't match expected pattern
 
 **Fix**:
 - Add more examples showing pattern
@@ -553,7 +553,7 @@ Define how you'll measure if the skill is working. Quantify success.
 <subjective_metrics>
 - **Output quality**: Does output meet requirements?
 - **Appropriate detail**: Too verbose or too minimal?
-- **Claude confidence**: Does Claude seem uncertain?
+- **Codex confidence**: Does Codex seem uncertain?
 - **User satisfaction**: Does skill solve the actual problem?
 </subjective_metrics>
 

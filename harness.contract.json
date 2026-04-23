@@ -666,12 +666,6 @@
         "required": true
       },
       {
-        "path": "CLAUDE.md",
-        "kind": "file",
-        "authority": "canonical",
-        "required": true
-      },
-      {
         "path": "CONTRIBUTING.md",
         "kind": "file",
         "authority": "canonical",

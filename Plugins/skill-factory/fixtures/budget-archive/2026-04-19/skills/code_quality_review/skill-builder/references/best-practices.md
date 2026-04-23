@@ -1,18 +1,18 @@
 # Skill Authoring Best Practices
 
-Source: [platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+Source: [platform.codex.com/docs/en/agents-and-tools/agent-skills/best-practices](https://platform.codex.com/docs/en/agents-and-tools/agent-skills/best-practices)
 
 ## Core Principles
 
 ### Concise is Key
 
-The context window is a public good. Your Skill shares the context window with everything else Claude needs to know.
+The context window is a public good. Your Skill shares the context window with everything else Codex needs to know.
 
-**Default assumption**: Claude is already very smart. Only add context Claude doesn't already have.
+**Default assumption**: Codex is already very smart. Only add context Codex doesn't already have.
 
 Challenge each piece of information:
-- "Does Claude really need this explanation?"
-- "Can I assume Claude knows this?"
+- "Does Codex really need this explanation?"
+- "Can I assume Codex knows this?"
 - "Does this paragraph justify its token cost?"
 
 **Good example (concise, ~50 tokens):**
@@ -103,7 +103,7 @@ Use **gerund form** (verb + -ing) for Skill names:
 **Avoid:**
 - Vague: `helper`, `utils`, `tools`
 - Generic: `documents`, `data`, `files`
-- Reserved: `anthropic-*`, `claude-*`
+- Reserved: `anthropic-*`, `codex-*`
 
 ## Writing Effective Descriptions
 
@@ -187,7 +187,7 @@ For simple edits, modify the XML directly.
 
 ## Keep References One Level Deep
 
-Claude may partially read files when they're referenced from other referenced files.
+Codex may partially read files when they're referenced from other referenced files.
 
 **Bad (too deep):**
 ```markdown

@@ -5,6 +5,12 @@
 # Note: sourced library — only set nounset to avoid leaking errexit/pipefail to callers.
 set -u
 
+if [ -z "${BASH_VERSION:-}" ]; then
+  echo "codex_env_common.sh must be sourced from bash, not zsh." >&2
+  echo "Run: bash -lc 'source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env'" >&2
+  return 1 2>/dev/null || exit 1
+fi
+
 _codex_script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 CODEX_REPO_ROOT="$(
   git -C "$_codex_script_dir" rev-parse --show-toplevel 2>/dev/null \

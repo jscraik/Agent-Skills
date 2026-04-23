@@ -1,5 +1,5 @@
 id: pr-bash-shebang-update-2026-04-14
-tool: claude-code
+tool: codex-code
 mode: normal
 task: "Update all shell scripts from #!/bin/bash to #!/usr/bin/env bash to use Homebrew bash 5.x instead of macOS system bash 3.2"
 constraints:

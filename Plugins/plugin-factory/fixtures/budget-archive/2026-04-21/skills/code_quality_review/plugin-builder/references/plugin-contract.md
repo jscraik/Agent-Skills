@@ -269,10 +269,10 @@ The scaffold also emits `Infrastructure/references/operational-spec.md` for loca
 The scaffold also emits `Infrastructure/references/package-guide.md` from the shared docs template set.
 When overlap review is relevant, the scaffold also emits `Infrastructure/references/deconflict-report.md`.
 
-## Claude-to-Codex conversion requirement
+## Codex-to-Codex conversion requirement
 
-When the source plugin is Claude-oriented, apply `Infrastructure/references/terminology-map.md` during conversion.
+When the source plugin is Codex-oriented, apply `Infrastructure/references/terminology-map.md` during conversion.
 
 Minimum enforced mapping:
-- `.claude-plugin/plugin.json` -> `.codex-plugin/plugin.json`
+- `.codex-plugin/plugin.json` -> `.codex-plugin/plugin.json`
 - legacy manifest command keys, `commands/`, `slash-commands/`, and `prompts/` -> `skills/` and or `interface.defaultPrompt`

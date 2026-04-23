@@ -1,4 +1,4 @@
-# Prompt Flows (Codex + Claude Code)
+# Prompt Flows (Codex + Codex)
 
 These are ready-to-run prompts. Replace bracketed parts.
 

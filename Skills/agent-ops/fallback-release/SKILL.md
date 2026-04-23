@@ -1,6 +1,6 @@
 ---
 name: fallback-release
-description: Execute deterministic fallback releases when primary CI is unavailable. Use when GitHub Actions is stalled due to queue congestion, rate limits, or incidents, and critical releases cannot wait.
+description: Deploy deterministic fallback releases when primary CI is unavailable. Use this skill when GitHub Actions is stalled due to queue congestion, rate limits, or incidents and a critical release cannot wait.
 metadata:
   skill-type: ci_cd_deployment
   tags: [fallback, ci-resilience, release, disaster-recovery]
@@ -45,6 +45,7 @@ The goal is "acceptable parity" with primary CI outputs, not perfect replication
 - **Complete provenance**: Build manifest must document why fallback was used
 - **Verification required**: Installer must work with fallback artifacts before publication
 - **Network domains**: Scripts access github.com, crates.io, S3-compatible storage (configured by env)
+- **Redaction required**: Redact secrets, credentials, token values, and signed-key material from logs, manifests, and incident summaries before sharing
 
 ## Required inputs
 

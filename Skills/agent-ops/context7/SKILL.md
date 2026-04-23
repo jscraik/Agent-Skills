@@ -105,8 +105,8 @@ Retrieve current external library documentation via Context7 so implementation g
 - "When the user asks: We just upgraded Next.js and middleware stopped matching. What is the current matcher pattern to exclude static assets and API routes?"
 - "User says: Our Supabase RLS policy works locally but fails in prod after a bump. Pull current docs and show the service-role-safe pattern."
 - "Can you help me generate a custom skill for OAuth hardening with `op run --env-file ~/.codex/.env -- ctx7 skills generate`, and explain where it installs?"
-- "Can you install every skill from `/anthropics/skills` for both Cursor and Claude, then show me how to validate the install?"
-- "Can you set up Context7 in MCP mode for Claude, and confirm auth is active?"
+- "Can you install every skill from `/anthropics/skills` for both Cursor and Codex, then show me how to validate the install?"
+- "Can you set up Context7 in MCP mode for Codex, and confirm auth is active?"
 
 ## Anti-patterns
 
@@ -121,7 +121,7 @@ Retrieve current external library documentation via Context7 so implementation g
 | Skill                | When to use together                                    |
 | -------------------- | ------------------------------------------------------- |
 | [[openai-docs]]      | Use OpenAI docs MCP for OpenAI-specific library content |
-| [[repoprompt]]       | Combine repo context with Context7 library docs         |
+| [[docs-expert]]      | Combine repo documentation context with Context7 library docs |
 | [[mcp-builder]]      | Reference Context7 docs when building MCP tool schemas  |
 | [[backend-engineer]] | Use Context7 to check API docs during backend work      |
 

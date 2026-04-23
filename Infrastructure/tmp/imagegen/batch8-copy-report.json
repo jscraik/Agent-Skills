@@ -146,20 +146,20 @@
   {
     "status": "copied",
     "kind": "skill",
-    "name": "claude-alias",
+    "name": "codex-alias",
     "variant": "small",
-    "source": "tmp/imagegen/batch8-out/skill-claude-alias-small.png",
-    "target_requested": "Skills/claude-alias/agents/assets/icon-small.png",
-    "target_written": "Skills/claude-alias/agents/assets/icon-small.png"
+    "source": "tmp/imagegen/batch8-out/skill-codex-alias-small.png",
+    "target_requested": "Skills/codex-alias/agents/assets/icon-small.png",
+    "target_written": "Skills/codex-alias/agents/assets/icon-small.png"
   },
   {
     "status": "copied",
     "kind": "skill",
-    "name": "claude-alias",
+    "name": "codex-alias",
     "variant": "large",
-    "source": "tmp/imagegen/batch8-out/skill-claude-alias-large.png",
-    "target_requested": "Skills/claude-alias/agents/assets/icon-large.png",
-    "target_written": "Skills/claude-alias/agents/assets/icon-large.png"
+    "source": "tmp/imagegen/batch8-out/skill-codex-alias-large.png",
+    "target_requested": "Skills/codex-alias/agents/assets/icon-large.png",
+    "target_written": "Skills/codex-alias/agents/assets/icon-large.png"
   },
   {
     "status": "copied",

@@ -1111,7 +1111,7 @@
       "tier": "experimental"
     },
     {
-      "id": "claude-alias",
+      "id": "codex-alias",
       "topic": "infrastructure",
       "in_degree": 0,
       "out_degree": 2,
@@ -3266,13 +3266,13 @@
       "desc": "Wire backend deployments into CircleCI workflows"
     },
     {
-      "from": "claude-alias",
+      "from": "codex-alias",
       "to": "fix-mise",
       "weight": 1.0,
       "desc": "Diagnose and repair mise trust/runtime issues"
     },
     {
-      "from": "claude-alias",
+      "from": "codex-alias",
       "to": "bootstrap",
       "weight": 1.0,
       "desc": "Bootstrap a local development environment from a GitHub repository URL"

@@ -36,7 +36,7 @@ covers:
 
 ## Pipelines
 
-- New iOS app: `Build iOS Apps` plugin workflow → [[test-driven-development]].
+- New iOS app: `Build iOS Apps` plugin workflow → [[he-tdd]] → [[verification-before-completion]].
 
 ## Cross-links
 

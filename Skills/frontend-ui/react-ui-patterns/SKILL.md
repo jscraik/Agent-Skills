@@ -257,7 +257,7 @@ Use judgment, adapt to context, and push boundaries when appropriate.
 | [[frontend-ui-design]] | Apply React patterns to components being designed |
 | [[design-system]] | Keep typography, spacing, and icon guidance aligned to canonical token governance |
 | [[shadcn-ui]] | Source Radix/shadcn primitives for React pattern implementations |
-| [[react-components]] | Use patterns when converting Stitch screens to React |
+| [[frontend-ui-design]] | Use patterns when refining component structure and UI composition |
 | [[baseline-ui]] | Validate React component patterns against baseline rules |
 | [[ui-ux-creative-coding]] | Layer motion on top of React pattern scaffolds |
 

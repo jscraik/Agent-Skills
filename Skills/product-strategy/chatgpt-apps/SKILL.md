@@ -41,8 +41,8 @@ Use `$openai-docs` first whenever building or changing a ChatGPT Apps SDK app.
 
 If `$openai-docs` is unavailable, use:
 
-- `mcp__openaiDeveloperDocs__search_openai_docs`
-- `mcp__openaiDeveloperDocs__fetch_openai_doc`
+- `mcp__openai_docs__search_openai_docs`
+- `mcp__openai_docs__fetch_openai_doc`
 
 Read `Infrastructure/references/apps-sdk-docs-workflow.md` for suggested doc queries and a compact checklist.
 Use the other `Infrastructure/references/*.md` docs as needed for archetypes, validation contract, search/fetch standard, upstream example selection, and `window.openai` mappings.

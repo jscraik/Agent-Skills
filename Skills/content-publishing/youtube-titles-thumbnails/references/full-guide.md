@@ -172,7 +172,7 @@ After gathering answers, apply them directly to title/thumbnail generation:
 
 **User provides:** "I made a video about why I switched from React to Vue after 5 years. Can you help with the title and thumbnail?"
 
-**Claude uses default_mode_request_user_input:**
+**Codex uses default_mode_request_user_input:**
 
 ```
 Questions to ask in first call:

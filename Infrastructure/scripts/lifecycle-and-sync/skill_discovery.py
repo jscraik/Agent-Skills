@@ -61,12 +61,12 @@ def _is_hidden_coderabbit_lane(source_dir: Path, name: str) -> bool:
     
     Parameters:
         source_dir (Path): Directory that owns the skill; must be under the repository root to be considered.
-        name (str): Skill name derived from the directory (e.g., "code-review" or "autofix").
+        name (str): Skill name derived from the directory (e.g., "code-review").
     
     Returns:
-        bool: `True` if `name` is `"code-review"` or `"autofix"` and `source_dir` is located under a `plugins/.../coderabbit/.../skills` subtree, `False` otherwise.
+        bool: `True` if `name` is `"code-review"` and `source_dir` is located under a `plugins/.../coderabbit/.../skills` subtree, `False` otherwise.
     """
-    if name not in {"code-review", "autofix"}:
+    if name != "code-review":
         return False
     try:
         rel_parts = [part.lower() for part in source_dir.relative_to(REPO_ROOT).parts]

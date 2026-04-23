@@ -26,7 +26,6 @@ CANONICAL_PREFIXES = {
     "Plugins/harness-engineering/skills/",
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
-    "skills-antigravity/",
     "personas/",
     "product/",
     "skills-system/",
@@ -146,6 +145,10 @@ for md in sorted(iter_skill_md_files(ROOT)):
     skill = resolve_skill_id(md, content)
     previous = seen_skills.get(skill)
     if previous and previous != md:
+        # Allow symlink aliases that resolve to the same physical SKILL.md.
+        # Example: Plugins/coderabbit/skills/code-review -> code_quality_review/code-review
+        if previous.resolve() == md.resolve():
+            continue
         if skill not in ALLOWED_DUPLICATE_SKILL_IDS:
             raise RuntimeError(
                 f"duplicate canonical skill id '{skill}': "

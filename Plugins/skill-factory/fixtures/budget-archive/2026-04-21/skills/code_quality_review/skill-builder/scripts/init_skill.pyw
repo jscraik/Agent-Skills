@@ -52,8 +52,8 @@ from canonical_skill_roots import (  # noqa: E402
     iter_declared_plugin_skill_roots,
 )
 
-TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "claude": 64}
-TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "claude": 1024}
+TARGET_NAME_LIMITS = {"portable": 64, "codex": 100, "codex": 64}
+TARGET_DESCRIPTION_LIMITS = {"portable": 1024, "codex": 500, "codex": 1024}
 DEFAULT_TARGET = "codex"
 
 CATEGORIES = {"github", "frontend", "apple", "backend", "product", "utilities"}

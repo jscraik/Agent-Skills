@@ -155,7 +155,7 @@ Local codex source verification:
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/stop.command.input.schema.json`
 
 Cross-runtime compatibility reference:
-- `https://github.com/anthropics/claude-code/blob/main/src/entrypoints/sdk/coreSchemas.ts`
+- `https://github.com/anthropics/codex-code/blob/main/src/entrypoints/sdk/coreSchemas.ts`
 
 Local operational reference used as a builder-pattern source:
 - `/Users/jamiecraik/dev/configs/codex/hooks/README.md`

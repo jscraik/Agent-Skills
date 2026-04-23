@@ -2,13 +2,19 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+	:
+else
+	REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"
+fi
 
 changed_only=1
 fast_mode=0
 strict_mode=0
+governance_scope="project-local"
 repo_root=""
 
+# usage prints the help message describing supported command-line options for verify-work.sh.
 usage() {
 	cat <<'USAGE'
 Usage: scripts/validation-and-linting/verify-work.sh [options]
@@ -93,6 +99,14 @@ while (( $# > 0 )); do
 			repo_root="${2:-}"
 			shift 2
 			;;
+		--project-governance)
+			governance_scope="project-local"
+			shift
+			;;
+		--workspace-governance|--persistent-artifacts)
+			governance_scope="workspace"
+			shift
+			;;
 		-h|--help)
 			usage
 			exit 0
@@ -127,7 +141,13 @@ bash "$repo_root/scripts/codex-preflight/codex-preflight.sh" \
 if [[ "$fast_mode" -eq 0 ]]; then
 	echo
 	echo "==> validate-codestyle"
-	bash "$repo_root/scripts/validation-and-linting/validate-codestyle.sh" --repo-root "$repo_root"
+	validate_args=(--repo-root "$repo_root")
+	if [[ "$governance_scope" == "workspace" ]]; then
+		validate_args+=(--workspace-governance)
+	else
+		validate_args+=(--project-governance)
+	fi
+	bash "$repo_root/scripts/validation-and-linting/validate-codestyle.sh" "${validate_args[@]}"
 	exit 0
 fi
 
@@ -141,6 +161,11 @@ else
 fi
 if [[ "$strict_mode" -eq 1 ]]; then
 	validate_args+=(--strict)
+fi
+if [[ "$governance_scope" == "workspace" ]]; then
+	validate_args+=(--workspace-governance)
+else
+	validate_args+=(--project-governance)
 fi
 
 bash "$repo_root/scripts/validation-and-linting/validate-codestyle.sh" "${validate_args[@]}"

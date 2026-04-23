@@ -365,7 +365,7 @@ Capture:
 
 Ask:
 - Walk me through what should happen from trigger to output.
-- For each step, does Claude/Codex do it directly or delegate to a script/tool/subagent?
+- For each step, does Codex/Codex do it directly or delegate to a script/tool/subagent?
 - Is the workflow conversational or fire-and-forget?
 
 Friendly opener:

@@ -5,7 +5,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+	:
+else
+	CANONICAL_SCRIPT_DIR="$(cd -- "$SCRIPT_DIR" && pwd -P)"
+	REPO_ROOT="$(cd -- "$CANONICAL_SCRIPT_DIR/../.." && pwd -P)"
+fi
 CONTRACT_PATH="$REPO_ROOT/harness.contract.json"
 	ATTESTATION_PATH="$REPO_ROOT/artifacts/policy/environment-attestation.json"
 	MISE_PATH="$REPO_ROOT/.mise.toml"
@@ -68,7 +73,7 @@ fi
 # pinned runtime versions and required approval posture, not only the caller
 # shell's PATH.
 eval "$(mise activate bash)"
-export CLAUDE_APPROVAL_POSTURE="${CLAUDE_APPROVAL_POSTURE:-require}"
+export CODEX_APPROVAL_POSTURE="${CODEX_APPROVAL_POSTURE:-require}"
 
 required_mise_tools=("node" "pnpm" "python" "uv" "cargo:prek" "npm:@brainwav/diagram" "npm:@argos-ci/cli" "cosign" "cloudflared" "npm:vitest" "ruff" "npm:eslint" "npm:agent-browser" "npm:agentation" "npm:agentation-mcp" "npm:@mermaid-js/mermaid-cli" "npm:@brainwav/rsearch" "npm:@brainwav/wsearch-cli" "npm:beautiful-mermaid" "npm:markdownlint-cli2" "npm:semver" "npm:wrangler" "semgrep" "trivy" "vale")
 for tool in "${required_mise_tools[@]}"; do

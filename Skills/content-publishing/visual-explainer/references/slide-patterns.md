@@ -1130,7 +1130,7 @@ Slides should reach for visuals before defaulting to text alone. If a slide coul
 which surf
 
 # Generate (one per target slide)
-surf gemini "descriptive prompt matching deck palette" --generate-image /tmp/ve-slide-title.png --aspect-ratio 16:9
+surf openai "descriptive prompt matching deck palette" --generate-image /tmp/ve-slide-title.png --aspect-ratio 16:9
 
 # Base64 encode for self-containment (macOS)
 TITLE_IMG=$(base64 -i /tmp/ve-slide-title.png)

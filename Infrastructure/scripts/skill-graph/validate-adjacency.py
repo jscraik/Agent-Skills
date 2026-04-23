@@ -43,7 +43,6 @@ CANONICAL_PREFIXES = {
     "Plugins/plugin-factory/skills/",
     "Plugins/skill-factory/skills/",
     "product/",
-    "skills-antigravity/",
     "skills-system/",
     "Skills/",
 }

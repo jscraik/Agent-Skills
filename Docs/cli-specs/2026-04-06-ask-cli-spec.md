@@ -39,7 +39,7 @@ This specification has been deepened to include:
 
 ## Strategic Alignment
 - **Problem Statement:** The `agent-skills` repository currently relies on a fragmented collection of shell scripts and Python utilities with inconsistent interfaces, making it difficult for both humans and agents to manage the skill lifecycle reliably.
-- **Audience:** Dual-mode. Optimized for human developers at a TUI and autonomous agents (Gemini, Codex, Claude) using JSON.
+- **Audience:** Dual-mode. Optimized for human developers at a TUI and autonomous agents (OpenAI, Codex, Codex) using JSON.
 - **Context Discovery:** The CLI automatically identifies its environment by searching for the nearest `.git` directory to establish the `<REPO_ROOT>`.
 
 ## Command Hierarchy
