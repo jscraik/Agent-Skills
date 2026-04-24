@@ -19,7 +19,7 @@
     {
       "name": "openai-docs",
       "path": "skills-system/openai-docs",
-      "tree_sha256": "388185341e836b8bc7103ac525f1bffa91f8a3df6cfe32d852177f3869edb205"
+      "tree_sha256": "f7b74daafbad4df996da2249e9ac6ed4b73562543a64d38865d819a6b54155e1"
     }
   ],
   "bridge_entries": [
