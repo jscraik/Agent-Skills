@@ -32,6 +32,25 @@ def _load_policy(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _require_non_empty_string(policy: dict[str, Any], key: str) -> str:
+    value = policy.get(key)
+    if not isinstance(value, str) or not value.strip():
+        raise SystemExit(f"provider policy field '{key}' must be a non-empty string")
+    return value.strip()
+
+
+def _require_string_list(policy: dict[str, Any], key: str) -> list[str]:
+    value = policy.get(key)
+    if not isinstance(value, list) or not value:
+        raise SystemExit(f"provider policy field '{key}' must be a non-empty list of strings")
+    normalized: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise SystemExit(f"provider policy field '{key}' must be a non-empty list of strings")
+        normalized.append(item.strip())
+    return normalized
+
+
 def _rel(path: Path) -> str:
     return path.relative_to(REPO_ROOT).as_posix()
 
@@ -63,8 +82,12 @@ def _iter_repo_paths() -> list[str]:
 
 def build_report(policy_path: Path = DEFAULT_POLICY) -> dict[str, Any]:
     policy = _load_policy(policy_path)
-    blocked_terms = [str(term).lower() for term in policy.get("blocked_active_path_terms", [])]
-    allowed_prefixes = [str(pattern) for pattern in policy.get("allowed_path_prefixes", [])]
+    default_provider = _require_non_empty_string(policy, "default_provider")
+    allowed_runtime_providers = _require_string_list(policy, "allowed_runtime_providers")
+    if default_provider not in allowed_runtime_providers:
+        raise SystemExit("provider policy field 'default_provider' must be present in 'allowed_runtime_providers'")
+    blocked_terms = [term.lower() for term in _require_string_list(policy, "blocked_active_path_terms")]
+    allowed_prefixes = _require_string_list(policy, "allowed_path_prefixes")
 
     violations: list[dict[str, str]] = []
     for rel_path in _iter_repo_paths():
@@ -77,8 +100,8 @@ def build_report(policy_path: Path = DEFAULT_POLICY) -> dict[str, Any]:
         violations.append({"path": rel_path, "term": matched_term})
 
     return {
-        "default_provider": policy.get("default_provider"),
-        "allowed_runtime_providers": policy.get("allowed_runtime_providers", []),
+        "default_provider": default_provider,
+        "allowed_runtime_providers": allowed_runtime_providers,
         "blocked_active_path_terms": blocked_terms,
         "allowed_path_prefixes": allowed_prefixes,
         "violation_count": len(violations),

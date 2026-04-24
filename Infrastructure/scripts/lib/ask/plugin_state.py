@@ -435,17 +435,33 @@ def collect_plugin_state(
         checks["manifests"] = {"ok": True}
 
     activation_rows = activation.get("plugins", [])
-    unregistered_plugins = [
-        str(item.get("name"))
-        for item in activation_rows
-        if item.get("name") and item.get("repo_managed") and not item.get("registered_in_marketplace")
-    ]
+    unregistered_plugins = (
+        [
+            str(item.get("name"))
+            for item in activation_rows
+            if item.get("name")
+            and item.get("repo_managed")
+            and not item.get("registered_in_marketplace")
+        ]
+        if not marketplace_error
+        else []
+    )
     missing_cache_plugins = [
         str(item.get("name"))
         for item in activation_rows
         if item.get("name") and item.get("repo_managed") and not item.get("cache_present")
     ]
-    if unregistered_plugins:
+    activation_warnings: list[str] = []
+    if marketplace_error:
+        activation_warnings.append(
+            "Marketplace metadata failed to load; skipping plugin marketplace drift detection."
+        )
+    if missing_cache_plugins:
+        activation_warnings.append(
+            "Runtime cache is missing for one or more repo-managed plugins. "
+            "Run bin/ask skills sync to mirror local plugin sources into cache."
+        )
+    if not marketplace_error and unregistered_plugins:
         blockers.append(
             "PLUGIN_MARKETPLACE_DRIFT: plugins missing from marketplace: "
             + ", ".join(sorted(unregistered_plugins))
@@ -454,14 +470,7 @@ def collect_plugin_state(
         "ok": not unregistered_plugins,
         "unregistered_plugins": sorted(unregistered_plugins),
         "missing_cache_plugins": sorted(missing_cache_plugins),
-        "warnings": (
-            [
-                "Runtime cache is missing for one or more repo-managed plugins. "
-                "Run bin/ask skills sync to mirror local plugin sources into cache."
-            ]
-            if missing_cache_plugins
-            else []
-        ),
+        "warnings": activation_warnings,
     }
 
     if run_doctor:

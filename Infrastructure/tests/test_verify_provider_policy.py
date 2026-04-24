@@ -1,4 +1,6 @@
 import importlib.util
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -40,6 +42,46 @@ class VerifyProviderPolicyTests(unittest.TestCase):
                 ["./Infrastructure/artifacts/"],
             )
         )
+
+    def test_build_report_requires_default_provider_in_allowed_runtime_providers(self) -> None:
+        module = load_verify_provider_policy_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "provider-policy.json"
+            policy_path.write_text(
+                json.dumps(
+                    {
+                        "default_provider": "openai",
+                        "allowed_runtime_providers": ["anthropic"],
+                        "blocked_active_path_terms": ["claude"],
+                        "allowed_path_prefixes": ["Infrastructure/artifacts/"],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(SystemExit) as context:
+                module.build_report(policy_path)
+            self.assertIn("must be present in 'allowed_runtime_providers'", str(context.exception))
+
+    def test_build_report_requires_non_empty_list_fields(self) -> None:
+        module = load_verify_provider_policy_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "provider-policy.json"
+            policy_path.write_text(
+                json.dumps(
+                    {
+                        "default_provider": "openai",
+                        "allowed_runtime_providers": ["openai"],
+                        "blocked_active_path_terms": [],
+                        "allowed_path_prefixes": ["Infrastructure/artifacts/"],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(SystemExit) as context:
+                module.build_report(policy_path)
+            self.assertIn("blocked_active_path_terms", str(context.exception))
 
 
 if __name__ == "__main__":

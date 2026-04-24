@@ -508,9 +508,10 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         after the corresponding plugin skill folder has been moved or removed.
         """
         selection_policy = load_selection_policy_module()
+        skill_discovery = load_skill_discovery_module()
         discovered_plugin_skill_names = {
-            path.parent.name
-            for path in (REPO_ROOT / "Plugins").glob("*/skills/**/SKILL.md")
+            path.name
+            for path in skill_discovery._iter_plugin_skill_dirs()  # pylint: disable=protected-access
         }
         missing = sorted(
             name
@@ -800,16 +801,20 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn('printf \'%s\\n\' "$source_real" > "$marker_file"', content)
         self.assertIn("Installed home plugin copy", content)
 
-    def test_sync_script_materializes_visible_runtime_skill_aliases(self) -> None:
+    def test_sync_script_materializes_visible_runtime_and_cache_skill_aliases(self) -> None:
         """
-        Verify the sync script materializes runtime-visible plugin skill aliases as real directories.
-        
-        Asserts that the sync script contains the call to `materialize_runtime_plugin_skill_aliases()`, uses a dereferencing directory copy (`cp -aL "$resolved" "$child"`) to materialize resolved skill directories, and invokes the materialization function on a target directory (`materialize_runtime_plugin_skill_aliases "$target_dir"`).
+        Verify the sync script materializes plugin skill aliases for runtime and cache copies.
+
+        Asserts that `normalize_plugin_copy()` includes top-level alias materialization
+        logic using dereferenced directory copies and that both runtime and cache flows
+        invoke normalization.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
-        self.assertIn("materialize_runtime_plugin_skill_aliases()", content)
-        self.assertIn('cp -aL "$resolved" "$child"', content)
-        self.assertIn('materialize_runtime_plugin_skill_aliases "$target_dir"', content)
+        self.assertIn("normalize_plugin_copy()", content)
+        self.assertIn('find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print', content)
+        self.assertIn('cp -aL "$resolved" "$skill_entry"', content)
+        self.assertIn('normalize_plugin_copy "$1" "runtime"', content)
+        self.assertIn('normalize_plugin_copy "$1" "cached"', content)
 
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
         """

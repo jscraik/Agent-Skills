@@ -1178,18 +1178,37 @@ resolve_marketplace_source_dir() {
   esac
 }
 
-# normalize_plugin_copy materializes symlinked skill files inside copied
-# plugin skills/ trees, then removes fixtures and duplicate category lanes.
+# normalize_plugin_copy materializes top-level skill alias symlink directories
+# and symlinked skill files inside copied plugin skills/ trees, then removes
+# fixtures and duplicate category lanes.
 # `label` is used only for log context (for example "runtime" or "cached").
 normalize_plugin_copy() {
   local plugin_dir="$1"
   local label="${2:-runtime}"
   local skills_dir="$plugin_dir/skills"
+  local skill_entry=""
+  local resolved=""
   local skill_link=""
   local tmp_file=""
   local duplicate_category=""
 
   if [ -d "$skills_dir" ]; then
+    while IFS= read -r skill_entry; do
+      [ -n "$skill_entry" ] || continue
+      case "$(basename "$skill_entry")" in
+        _*|agents|assets|examples|fixtures|infrastructure_ops|references|rules|scripts|scaffolding_templates|shared|team_automation|templates|code_quality_review|data_fetch_analysis)
+          continue
+          ;;
+      esac
+      [ -L "$skill_entry" ] || continue
+      resolved="$(cd "$(dirname "$skill_entry")" 2>/dev/null && cd "$(readlink "$skill_entry")" 2>/dev/null && pwd -P || true)"
+      [ -n "$resolved" ] || continue
+      [ -d "$resolved" ] || continue
+      rm -f -- "$skill_entry"
+      cp -aL "$resolved" "$skill_entry"
+      echo "[OK] Materialized ${label} skill alias: $skill_entry"
+    done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print)
+
     while IFS= read -r -d '' skill_link; do
       [ -n "$skill_link" ] || continue
       [ -L "$skill_link" ] || continue
@@ -1290,31 +1309,6 @@ sync_home_plugin_mirrors() {
     cmp -s -- "$source_manifest" "$existing_manifest"
   }
 
-  # materialize_runtime_plugin_skill_aliases replaces symlinked entries directly under <plugin_dir>/skills with real copied directories (preserving attributes), skipping non-symlinks and a fixed set of meta directories; prints "[OK] Materialized runtime skill alias: <path>" for each materialized alias.
-  materialize_runtime_plugin_skill_aliases() {
-    local plugin_dir="$1"
-    local skills_dir="$plugin_dir/skills"
-    local child=""
-    local resolved=""
-
-    [ -d "$skills_dir" ] || return 0
-
-    while IFS= read -r child; do
-      case "$(basename "$child")" in
-        _*|agents|assets|examples|fixtures|infrastructure_ops|references|rules|scripts|scaffolding_templates|shared|team_automation|templates|code_quality_review)
-          continue
-          ;;
-      esac
-      [ -L "$child" ] || continue
-      resolved="$(cd "$(dirname "$child")" 2>/dev/null && cd "$(readlink "$child")" 2>/dev/null && pwd -P || true)"
-      [ -n "$resolved" ] || continue
-      [ -d "$resolved" ] || continue
-      rm -f -- "$child"
-      cp -aL "$resolved" "$child"
-      echo "[OK] Materialized runtime skill alias: $child"
-    done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -print)
-  }
-
   # normalize_runtime_plugin_copy materializes symlinked skill files inside
   # copied plugin skills/ trees, then removes fixtures/ from runtime copies so
   # archive assets do not inflate active skill discovery surfaces while helper
@@ -1346,7 +1340,6 @@ sync_home_plugin_mirrors() {
     fi
 
     sync_user_skills "$source_dir" "$target_dir" 0 copy
-    materialize_runtime_plugin_skill_aliases "$target_dir"
     normalize_runtime_plugin_copy "$target_dir"
     marker_file="$target_dir/$repo_plugin_marker"
     printf '%s\n' "$source_real" > "$marker_file"
