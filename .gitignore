@@ -5,7 +5,6 @@
 
 # Local runtime/state directories
 .system/
-.claude/
 .agents/
 .cursor/
 .kiro/
@@ -66,7 +65,6 @@ Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/ar
 # Keep generated/runtime debris ignored inside tracked plugin-factory skills.
 Plugins/plugin-factory/skills/**/.DS_Store
 Plugins/plugin-factory/skills/**/__pycache__/
-skills-antigravity/
 sync-symlink/
 
 # Generated artifacts

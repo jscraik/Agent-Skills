@@ -1,6 +1,0 @@
-interface:
-  display_name: Youtube Titles Thumbnails
-  short_description: Generate SEO/CTR-oriented YouTube title options and thumbnail
-    copy variants with rationale
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png

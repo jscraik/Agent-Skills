@@ -358,6 +358,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertTrue(
             module.should_skip_skill_path(Path(".codex/skills/.system/canonical-skill/SKILL.md"))
         )
+        self.assertTrue(
+            module.should_skip_skill_path(Path("Plugins/cache/openai-curated/cloudflare/skills/cache-skill/SKILL.md"))
+        )
         self.assertFalse(module.should_skip_skill_path(Path(".codex/skills/custom-skill/SKILL.md")))
 
     def test_packaged_representation_does_not_count_as_duplicate(self) -> None:
@@ -463,13 +466,11 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("Plugin-shadowing check failed", result.stderr)
             self.assertIn("- demo-shadow", result.stderr)
 
-    def test_plugin_shadowing_check_allows_allowlisted_overlap(self) -> None:
+    def test_plugin_shadowing_check_allows_system_bridge_overlap(self) -> None:
         selection_policy = load_selection_policy_module()
-        allowlisted = tuple(
-            selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
-        ) or tuple(selection_policy.SYSTEM_BRIDGE_SKILL_NAMES)
+        allowlisted = tuple(selection_policy.SYSTEM_BRIDGE_SKILL_NAMES)
         if not allowlisted:
-            self.skipTest("No overlap allowlist configured in selection policy.")
+            self.skipTest("No system bridge overlap allowlist configured in selection policy.")
 
         router_skill = allowlisted[0]
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -478,20 +479,13 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 repo_root / "plugins" / "demo-plugin" / "skills" / router_skill / "SKILL.md",
                 "# plugin skill",
             )
-            if router_skill in selection_policy.SYSTEM_BRIDGE_SKILL_NAMES:
-                system_skill_dir = repo_root / "skills-system" / router_skill
-                write_text(system_skill_dir / "SKILL.md", "# bridge skill")
-                flat_root = repo_root / ".agents" / "skills"
-                flat_root.mkdir(parents=True, exist_ok=True)
-                (flat_root / ".system").symlink_to(
-                    "../../skills-system", target_is_directory=True
-                )
-                (flat_root / router_skill).symlink_to(f".system/{router_skill}")
-            else:
-                write_text(
-                    repo_root / ".agents" / "skills" / router_skill / "SKILL.md",
-                    "# flat skill",
-                )
+            system_skill_dir = repo_root / "skills-system" / router_skill
+            write_text(system_skill_dir / "SKILL.md", "# bridge skill")
+            flat_root = repo_root / ".agents" / "skills"
+            flat_root.mkdir(parents=True, exist_ok=True)
+            (flat_root / ".system").symlink_to(
+                "../../skills-system", target_is_directory=True
+            )
 
             result = run_shadow_check(repo_root)
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
@@ -508,21 +502,45 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         skill_discovery = load_skill_discovery_module()
         self.assertEqual(selection_policy.policy_identity(), skill_discovery.get_policy_identity())
 
-    def test_selection_policy_promotes_all_harness_engineering_public_skills_for_flat_visibility(self) -> None:
+    def test_selection_policy_plugin_router_skills_exist_in_plugin_sources(self) -> None:
         """
-        Ensure the selection policy exposes exactly the harness-engineering public skills (directories named with the `he-` prefix) as router-visible flat skills.
-        
-        Loads the selection_policy module and asserts its `PLUGIN_VISIBLE_ROUTER_SKILL_NAMES` matches the sorted set of skill directory names under `Plugins/harness-engineering/skills/**/SKILL.md` whose parent directory name starts with `he-`.
+        Ensure each policy-declared plugin router skill resolves to a real plugin SKILL.md directory.
+
+        This guards policy drift where a skill name remains in selection policy lists
+        after the corresponding plugin skill folder has been moved or removed.
         """
         selection_policy = load_selection_policy_module()
-        he_skill_names = sorted(
-            path.parent.name
-            for path in (REPO_ROOT / "Plugins" / "harness-engineering" / "skills").glob("**/SKILL.md")
-            if path.parent.name.startswith("he-")
+        skill_discovery = load_skill_discovery_module()
+        discovered_plugin_skill_names = {
+            path.name
+            for path in skill_discovery._iter_plugin_skill_dirs()  # pylint: disable=protected-access
+        }
+        missing = sorted(
+            name
+            for name in selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
+            if name not in discovered_plugin_skill_names
+        )
+        self.assertEqual(missing, [])
+
+    def test_catalog_default_surface_matches_default_discovery_surface(self) -> None:
+        """
+        Ensure catalog/default and discovery/default surfaces stay identical.
+
+        This catches contract drift where `ask skills list` (catalog view) and
+        `skill_discovery.py --visibility default` disagree on visible skill names.
+        """
+        skill_discovery = load_skill_discovery_module()
+        default_entries = skill_discovery.discover_skill_entries(
+            source="auto",
+            visibility="default",
+        )
+        catalog_entries = skill_discovery.discover_catalog_entries(
+            source="auto",
+            advanced=False,
         )
         self.assertEqual(
-            sorted(selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
-            he_skill_names,
+            sorted(entry.name for entry in catalog_entries),
+            sorted(entry.name for entry in default_entries),
         )
 
     def test_skill_discovery_visibility_respects_router_allowlist(self) -> None:
@@ -633,8 +651,64 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         default_names = sorted(entry.name for entry in default_entries)
         advanced_names = sorted(entry.name for entry in advanced_entries)
-        self.assertEqual(default_names, ["coderabbit"])
+        self.assertEqual(default_names, [])
         self.assertEqual(advanced_names, ["code-review", "coderabbit"])
+
+    def test_skill_discovery_auto_advanced_includes_repo_non_default_skills(self) -> None:
+        """
+        Ensure auto+advanced discovery keeps non-default repository skills visible.
+
+        When flat runtime projection exists, default discovery should still follow
+        flat policy, while advanced discovery must augment with canonical repo
+        roots so non-default skills do not disappear after sync.
+        """
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            system_root = flat_root / ".system"
+            repo_skill_root = repo_root / "Skills" / "engineering" / "diagram-cli"
+
+            write_text(
+                flat_root / "autofix" / "SKILL.md",
+                """
+                ---
+                name: autofix
+                description: "default surface skill"
+                ---
+                # autofix
+                """,
+            )
+            write_text(
+                repo_skill_root / "SKILL.md",
+                """
+                ---
+                name: diagram-cli
+                description: "non-default repo skill"
+                ---
+                # diagram-cli
+                """,
+            )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+                mock.patch.object(skill_discovery, "SYSTEM_LANE_DIR", system_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="advanced",
+                )
+
+        self.assertEqual(sorted(entry.name for entry in default_entries), ["autofix"])
+        self.assertEqual(
+            sorted(entry.name for entry in advanced_entries),
+            ["autofix", "diagram-cli"],
+        )
 
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         """
@@ -650,6 +724,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
         self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
         self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
         self.assertIn("projection_integrity.py", content)
@@ -728,16 +803,21 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn('printf \'%s\\n\' "$source_real" > "$marker_file"', content)
         self.assertIn("Installed home plugin copy", content)
 
-    def test_sync_script_materializes_visible_runtime_skill_aliases(self) -> None:
+    def test_sync_script_materializes_visible_runtime_and_cache_skill_aliases(self) -> None:
         """
-        Verify the sync script materializes runtime-visible plugin skill aliases as real directories.
-        
-        Asserts that the sync script contains the call to `materialize_runtime_plugin_skill_aliases()`, uses a dereferencing directory copy (`cp -aL "$resolved" "$child"`) to materialize resolved skill directories, and invokes the materialization function on a target directory (`materialize_runtime_plugin_skill_aliases "$target_dir"`).
+        Verify the sync script materializes plugin skill aliases for runtime and cache copies.
+
+        Asserts that `normalize_plugin_copy()` includes top-level alias materialization
+        logic that preserves nested symlinks during directory copies and that both
+        runtime and cache flows
+        invoke normalization.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
-        self.assertIn("materialize_runtime_plugin_skill_aliases()", content)
-        self.assertIn('cp -aL "$resolved" "$child"', content)
-        self.assertIn('materialize_runtime_plugin_skill_aliases "$target_dir"', content)
+        self.assertIn("normalize_plugin_copy()", content)
+        self.assertIn('find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print', content)
+        self.assertIn('cp -a "$resolved" "$skill_entry"', content)
+        self.assertIn('normalize_plugin_copy "$1" "runtime"', content)
+        self.assertIn('normalize_plugin_copy "$1" "cached"', content)
 
     def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
         """
@@ -761,9 +841,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             content,
         )
 
-    def test_sync_script_uses_entry_marketplace_for_local_cache_routing(self) -> None:
+    def test_sync_script_defaults_local_marketplace_to_agent_skills_identity(self) -> None:
         """
-        Ensure local-source plugins route to their declared marketplace family.
+        Ensure local-source plugins default to the canonical local marketplace identity.
 
         Curated plugins are declared with `marketplace` metadata per entry and
         must stay under that cache family rather than inheriting the manifest

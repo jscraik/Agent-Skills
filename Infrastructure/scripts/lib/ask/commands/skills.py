@@ -1,4 +1,5 @@
 import os
+import json
 import shlex
 import shutil
 import subprocess
@@ -349,6 +350,96 @@ def list_skills(
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
         result.data["starter_limit"] = max(1, int(limit))
     result.status = "success"
+    return result
+
+
+def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
+    """Run the default skill runtime-budget audit and return its JSON report."""
+    result = CallResult()
+    script_args = [
+        "Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py",
+        "--default-max",
+        str(default_max),
+        "--json",
+    ]
+    cmd = _get_python_command() + script_args
+
+    def _run_budget(command: List[str]) -> tuple[Optional[subprocess.CompletedProcess[str]], Optional[OSError]]:
+        try:
+            process = subprocess.run(
+                command,
+                cwd=str(repo_root),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return process, None
+        except OSError as exc:
+            return None, exc
+
+    process, run_error = _run_budget(cmd)
+    wrapper = Path(cmd[0]).name.lower() if cmd else ""
+    should_retry_with_sys_python = (
+        wrapper in {"uv", "mise"}
+        and (
+            run_error is not None
+            or (process is not None and process.returncode != 0)
+        )
+    )
+    if should_retry_with_sys_python:
+        fallback_cmd = [sys.executable] + script_args
+        fallback_process, fallback_error = _run_budget(fallback_cmd)
+        if fallback_process is not None:
+            process = fallback_process
+            run_error = None
+        elif process is None:
+            run_error = fallback_error
+
+    if process is None:
+        error_detail = (
+            f"Failed to execute runtime budget verifier: {run_error}"
+            if run_error is not None
+            else "Failed to execute runtime budget verifier."
+        )
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message=error_detail,
+                fix_suggestion="Ensure Python is available and rerun `ask skills budget`.",
+            )
+        )
+        return result
+
+    try:
+        parsed_report = json.loads(process.stdout)
+    except json.JSONDecodeError:
+        parsed_report = {
+            "status": "fail",
+            "raw_stdout": process.stdout,
+            "raw_stderr": process.stderr,
+        }
+    report = (
+        parsed_report
+        if isinstance(parsed_report, dict)
+        else {
+            "status": "fail",
+            "raw_stdout": process.stdout,
+            "raw_stderr": process.stderr,
+            "parse_error": "verify_runtime_budget.py did not return a JSON object",
+        }
+    )
+
+    result.data["runtime_budget"] = report
+    result.status = "success" if process.returncode == 0 and report.get("status") == "pass" else "error"
+    if result.status == "error":
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skill runtime budget failed.",
+                fix_suggestion="Reduce default-visible skills, hide bridge aliases under .system, or update the explicit budget with evidence.",
+            )
+        )
     return result
 
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:

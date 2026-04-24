@@ -28,16 +28,14 @@ EXPECTED_PLUGIN_SKILLS = {
     },
     "plugin-factory": {
         "plugin-builder",
-        "plugin-creator",
         "plugin-factory-router",
-        "plugin-installer",
         "plugin-router",
     },
     "skill-factory": {
         "skill-builder",
-        "skill-creator",
         "skill-factory-router",
-        "skill-installer",
+        "skill-refactor",
+        "skillify",
     },
 }
 
@@ -52,15 +50,22 @@ EXPECTED_PLUGIN_KEYWORDS = {
         "plugin-factory-router",
         "plugin-router",
         "plugin-builder",
-        "plugin-creator",
-        "plugin-installer",
     },
     "skill-factory": {
         "skill-factory-router",
         "skill-builder",
-        "skill-creator",
-        "skill-installer",
+        "skill-refactor",
+        "skillify",
     },
+}
+
+SYSTEM_BRIDGE_SKILL_NAMES = {
+    "imagegen",
+    "openai-docs",
+    "plugin-creator",
+    "plugin-installer",
+    "skill-creator",
+    "skill-installer",
 }
 
 
@@ -79,6 +84,14 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             if isinstance(item, dict) and isinstance(item.get("name"), str)
         }
         self.assertEqual(names, set(EXPECTED_PLUGIN_SKILLS))
+
+    def test_local_marketplace_uses_canonical_agent_skills_identity(self) -> None:
+        """
+        Verify the local marketplace identity matches the runtime cache family.
+        """
+        marketplace_path = REPO_ROOT / "Plugins" / "marketplace.json"
+        payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
+        self.assertEqual(payload.get("name"), "agent-skills-local")
 
     def test_local_plugins_use_canonical_marketplace_source_paths(self) -> None:
         """
@@ -156,7 +169,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         """
         Validate that each local plugin manifest describes its visible skill surface.
         
-        For every plugin listed in EXPECTED_PLUGIN_KEYWORDS, assert that the manifest's `keywords` include the expected visible-skill keywords and do not contain the disallowed keywords `skill-refactor` or `skillify`.
+        For every plugin listed in EXPECTED_PLUGIN_KEYWORDS, assert that the manifest's `keywords` include the expected visible-skill keywords and do not contain hidden system-bridge skills.
         """
         for plugin_name, expected_keywords in EXPECTED_PLUGIN_KEYWORDS.items():
             manifest_path = REPO_ROOT / "Plugins" / plugin_name / ".codex-plugin" / "plugin.json"
@@ -167,8 +180,43 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} manifest keywords should include the visible skill surface",
             )
             self.assertFalse(
-                {"skill-refactor", "skillify"} & keywords,
-                f"{plugin_name} manifest should not advertise removed or non-visible skills",
+                SYSTEM_BRIDGE_SKILL_NAMES & keywords,
+                f"{plugin_name} manifest should not advertise hidden system-bridge skills",
+            )
+
+    def test_runtime_cache_exposes_one_picker_identity_per_local_plugin_skill(self) -> None:
+        """
+        Verify the generated local plugin cache cannot show duplicate picker rows.
+
+        The Codex picker has historically scanned plugin cache contents more broadly than
+        the manifest-declared skills root. This guard fails when the runtime cache contains
+        duplicate skill names inside a plugin, non-visible lanes, or system bridge skills.
+        """
+        runtime_root = REPO_ROOT / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local"
+        if not runtime_root.exists():
+            self.skipTest("local plugin runtime cache has not been generated")
+
+        for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
+            plugin_root = runtime_root / plugin_name
+            discovered: dict[str, list[str]] = {}
+            for skill_md in sorted(plugin_root.rglob("SKILL.md")):
+                rel = skill_md.relative_to(plugin_root).as_posix()
+                if rel.startswith(("fixtures/", "references/")):
+                    continue
+                discovered.setdefault(skill_md.parent.name, []).append(rel)
+
+            duplicates = {
+                name: paths for name, paths in discovered.items() if len(paths) > 1
+            }
+            self.assertEqual({}, duplicates, f"{plugin_name} runtime cache exposes duplicate skill identities")
+            self.assertEqual(
+                set(discovered),
+                expected_skill_names,
+                f"{plugin_name} runtime cache picker surface drifted",
+            )
+            self.assertFalse(
+                SYSTEM_BRIDGE_SKILL_NAMES & set(discovered),
+                f"{plugin_name} runtime cache should not expose system bridge skills as personal skills",
             )
 
 

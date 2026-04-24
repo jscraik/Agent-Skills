@@ -1,6 +1,6 @@
 ---
 name: fix-mise
-description: Use this skill to diagnose and repair mise trust or runtime selection problems and reconcile `~/.Infrastructure/config/mise/config.toml` with required tool versions when commands fail because mise shims or trust state are broken.
+description: Diagnose and repair mise trust, runtime, activation, and version-drift failures. Use when commands fail from mise config, missing runtimes, stale pins, or shell activation drift.
 metadata:
   skill-type: infrastructure_ops
 ---
@@ -19,6 +19,8 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 - Commands fail because of untrusted `mise` config.
 - Required runtimes are missing or stale.
 - `~/.Infrastructure/config/mise/config.toml` or project `mise` files are out of sync with expected tool versions.
+- The user needs deterministic `mise` version management across local and CI contexts.
+- Shell activation and `mise exec` behavior is ambiguous or drifting.
 
 ## When not to use
 - The failure is unrelated to `mise`.
@@ -35,6 +37,7 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 - The exact remediation path taken or recommended.
 - Verification evidence showing whether the original command now works.
 - If global config changed, the path and backup details.
+- A stable runtime execution pattern (for example, `mise exec` vs shell activation) for repeated tasks.
 
 ## Philosophy
 - Small, proven `mise` fixes beat broad shell surgery.
@@ -58,7 +61,10 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 - Prefer:
   - `mise doctor`
   - `mise list`
+  - `mise current`
+  - `mise exec -- <command>`
   - `mise trust <path>`
+  - `mise use <tool>@<version>`
   - `mise use -g <tool>@<version>`
   - `mise install`
   - `mise outdated`
@@ -89,10 +95,9 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
 | Skill | When to use together |
 |---|---|
 | [[bootstrap]] | Fix mise before retrying the bootstrap |
-| [[codex-home-audit]] | Address mise issues found during a home directory audit |
+| [[npm-release]] | Confirm the release runtime/toolchain is pinned and trusted |
 | [[verification-before-completion]] | Confirm mise is healthy after the fix |
 | [[he-fix-bugs]] | Debug root cause of mis trust or shim failures |
-| [[process-watch]] | Watch process health while diagnosing mise shim issues |
 
 **Topic map:** [[backend-platform]]
 

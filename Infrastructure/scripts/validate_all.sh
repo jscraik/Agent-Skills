@@ -423,6 +423,8 @@ schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness 
 schedule_check required skill-catalog "🧭 Verifying skill catalog freshness..." "${python_cmd[@]}" Infrastructure/scripts/verify_skill_catalog_freshness.py --strict
 schedule_check required skills-system-upstream-lock "📌 Verifying skills-system upstream lock..." "${python_cmd[@]}" Infrastructure/scripts/verify_skills_system_upstream_lock.py
 schedule_check required plugin-shadowing "🪞 Checking plugin skill shadowing..." bash Infrastructure/scripts/check_plugin_skill_shadowing.sh
+schedule_check required provider-policy "🔒 Verifying OpenAI provider policy..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_provider_policy.py
+schedule_check required runtime-budget "📦 Verifying default skill runtime budget..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py
 schedule_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash Infrastructure/scripts/validate_projection_integrity.sh
 schedule_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." bash Infrastructure/scripts/check_path_ownership_boundaries.sh
 schedule_check required skill-types "🏷️  Linting semantic skill-type tags..." bash Infrastructure/scripts/lint_skill_types.sh

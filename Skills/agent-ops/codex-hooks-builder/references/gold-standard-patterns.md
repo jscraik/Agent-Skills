@@ -52,6 +52,12 @@ Optional, when explicitly requested:
 - Include `statusMessage` so operators can see which post-tool guardrail is running.
 - Make post hooks cheap to skip, file-target aware, and fail-open by default.
 
+6. `PermissionRequest` (approval-stage, Bash-associated today)
+- Use to make an allow/deny decision when Codex is about to surface an approval prompt.
+- Keep decisions narrow and auditable: deny only high-confidence risky requests.
+- Keep matcher explicit (`^Bash$`) and classify risk from `tool_input.command` inside the script.
+- Do not emit reserved rewrite fields (`updatedInput`, `updatedPermissions`, or `interrupt: true`) because these fail closed in current runtime.
+
 ## Project vs user scope
 Prefer project scope when:
 - validation rules differ by repo;
@@ -78,7 +84,7 @@ Do not install the same pack in both places unless you intentionally want duplic
 - good pattern: block only on obvious incompleteness with a one-shot corrective reason
 - bad pattern: block stylistic differences or subjective tone choices
 
-`PreToolUse` and `PostToolUse`
+`PreToolUse`, `PermissionRequest`, and `PostToolUse`
 - good pattern: gate or annotate a small set of risky Bash behaviors with explicit reasons
 - bad pattern: pretend Bash-only interception can enforce all command execution paths
 - bad pattern: rely on matcher to distinguish `git commit`, `git push`, or file-edit intent

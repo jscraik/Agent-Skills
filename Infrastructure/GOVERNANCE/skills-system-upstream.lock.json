@@ -6,19 +6,20 @@
     "ref": "e940b8a86138adf03972802b990a1dfc57fcbf09",
     "noted_recent_updates": [
       "2026-04-15",
-      "2026-04-18"
+      "2026-04-18",
+      "2026-04-23"
     ]
   },
   "managed_dirs": [
     {
       "name": "imagegen",
       "path": "skills-system/imagegen",
-      "tree_sha256": "44f411b0bec9323922df1b86984a1539e962a57787efcbc6e747a05893e5c5ef"
+      "tree_sha256": "0fd8bf74f228de6bd93f0b9f6cb6ac914b8c7bf304094d3567fe037785e370b2"
     },
     {
       "name": "openai-docs",
       "path": "skills-system/openai-docs",
-      "tree_sha256": "5de9564a0aea45d3370bc235498af45278505bf7175c513e836680d3bc040789"
+      "tree_sha256": "f7b74daafbad4df996da2249e9ac6ed4b73562543a64d38865d819a6b54155e1"
     }
   ],
   "bridge_entries": [
@@ -28,6 +29,10 @@
     "skills-system/skill-installer"
   ],
   "local_compatibility_overrides": [
-    "openai-docs MCP server/tool names use openai-docs and mcp__openai_docs__* for current runtime compatibility"
+    {
+      "surface": "openai-docs",
+      "mcp_server": "openaiDeveloperDocs",
+      "tool_prefix": "mcp__openaiDeveloperDocs__"
+    }
   ]
 }

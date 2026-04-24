@@ -39,6 +39,8 @@ class MirrorProjection:
     projection_path: str
     tags: tuple[str, ...]
     optional_when_missing: bool = False
+    follow_symlinks: bool = False
+    excluded_dir_names: tuple[str, ...] = ()
 
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
@@ -75,6 +77,15 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         projection_path=".agents/plugins-runtime/cache/agent-skills-local/harness-engineering",
         tags=("plugin-caches",),
         optional_when_missing=True,
+        follow_symlinks=True,
+        excluded_dir_names=(
+            "fixtures",
+            "team_automation",
+            "code_quality_review",
+            "scaffolding_templates",
+            "infrastructure_ops",
+            "data_fetch_analysis",
+        ),
     ),
     MirrorProjection(
         name="cache-plugin-factory",
@@ -82,6 +93,15 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         projection_path=".agents/plugins-runtime/cache/agent-skills-local/plugin-factory",
         tags=("plugin-caches", "plugin-factory"),
         optional_when_missing=True,
+        follow_symlinks=True,
+        excluded_dir_names=(
+            "fixtures",
+            "team_automation",
+            "code_quality_review",
+            "scaffolding_templates",
+            "infrastructure_ops",
+            "data_fetch_analysis",
+        ),
     ),
     MirrorProjection(
         name="cache-skill-factory",
@@ -89,6 +109,15 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         projection_path=".agents/plugins-runtime/cache/agent-skills-local/skill-factory",
         tags=("plugin-caches", "skill-factory"),
         optional_when_missing=True,
+        follow_symlinks=True,
+        excluded_dir_names=(
+            "fixtures",
+            "team_automation",
+            "code_quality_review",
+            "scaffolding_templates",
+            "infrastructure_ops",
+            "data_fetch_analysis",
+        ),
     ),
 )
 
@@ -147,7 +176,28 @@ def default_repo_root(script_path: Path) -> Path:
     return resolved.parents[2]
 
 
-def is_ignored(path: Path) -> bool:
+def normalize_excluded_dir_names(excluded_dir_names: Iterable[str]) -> tuple[str, ...]:
+    """
+    Return a stable, lower-cased tuple of directory names excluded from scans.
+
+    Parameters:
+        excluded_dir_names (Iterable[str]): Directory names to treat as ignored.
+
+    Returns:
+        tuple[str, ...]: Unique lowercase names in first-seen order.
+    """
+    seen: set[str] = set()
+    normalized: list[str] = []
+    for raw_name in excluded_dir_names:
+        name = str(raw_name).strip().lower()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        normalized.append(name)
+    return tuple(normalized)
+
+
+def is_ignored(path: Path, excluded_dir_names: Iterable[str] = ()) -> bool:
     """
     Decides whether a filesystem path should be skipped by the projection scanner.
     
@@ -162,10 +212,20 @@ def is_ignored(path: Path) -> bool:
         return True
     if path.suffix in IGNORED_SUFFIXES:
         return True
-    return any(part in IGNORED_DIR_NAMES for part in path.parts)
+    dynamic_excluded = set(normalize_excluded_dir_names(excluded_dir_names))
+    for part in path.parts:
+        lowered = part.lower()
+        if lowered in IGNORED_DIR_NAMES or lowered in dynamic_excluded:
+            return True
+    return False
 
 
-def iter_files(root: Path) -> Iterable[Path]:
+def iter_files(
+    root: Path,
+    excluded_dir_names: Iterable[str] = (),
+    *,
+    follow_symlinks: bool = False,
+) -> Iterable[Path]:
     """
     Iterate regular file paths under `root`, yielding their paths relative to `root` in sorted order.
     
@@ -175,13 +235,27 @@ def iter_files(root: Path) -> Iterable[Path]:
     Returns:
         Iterable[Path]: Relative paths (Path objects) for every non-directory file found beneath `root`, excluding entries matched by `is_ignored`, yielded in sorted order.
     """
-    for path in sorted(root.rglob("*")):
-        if path.is_dir():
+    excluded_dirs = normalize_excluded_dir_names(excluded_dir_names)
+    for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=follow_symlinks):
+        dirpath_obj = Path(dirpath)
+        try:
+            rel_dir = dirpath_obj.relative_to(root)
+        except ValueError:
             continue
-        rel = path.relative_to(root)
-        if is_ignored(rel):
-            continue
-        yield rel
+
+        kept_dirnames: list[str] = []
+        for dirname in sorted(dirnames):
+            rel_child = rel_dir / dirname if rel_dir != Path(".") else Path(dirname)
+            if is_ignored(rel_child, excluded_dirs):
+                continue
+            kept_dirnames.append(dirname)
+        dirnames[:] = kept_dirnames
+
+        for filename in sorted(filenames):
+            rel_file = rel_dir / filename if rel_dir != Path(".") else Path(filename)
+            if is_ignored(rel_file, excluded_dirs):
+                continue
+            yield rel_file
 
 
 def hash_bytes(content: bytes) -> str:
@@ -605,42 +679,81 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         projection_abs.unlink()
     projection_abs.mkdir(parents=True, exist_ok=True)
 
+    excluded_dirs = normalize_excluded_dir_names(spec.excluded_dir_names)
+
+    def _prune_excluded_dirs(root: Path, excluded: tuple[str, ...]) -> int:
+        """
+        Remove excluded directories from a projection tree.
+
+        Returns:
+            int: Number of pruned directories.
+        """
+        if not excluded:
+            return 0
+        excluded_set = set(excluded)
+        pruned = 0
+        for path in sorted(root.rglob("*"), reverse=True):
+            if not path.is_dir():
+                continue
+            if path.name.lower() not in excluded_set:
+                continue
+            shutil.rmtree(path, ignore_errors=True)
+            pruned += 1
+        return pruned
+
     rsync_bin = shutil.which("rsync")
     if rsync_bin:
-        before_files = {rel.as_posix() for rel in iter_files(projection_abs)}
+        before_files = {rel.as_posix() for rel in iter_files(projection_abs, excluded_dirs)}
         try:
+            rsync_args = [
+                rsync_bin,
+                "-a",
+                "--delete",
+                "--exclude",
+                "__pycache__/",
+                "--exclude",
+                "*.pyc",
+                "--exclude",
+                ".DS_Store",
+            ]
+            if spec.follow_symlinks:
+                rsync_args.append("-L")
+            for excluded in excluded_dirs:
+                rsync_args.extend(["--exclude", f"{excluded}/"])
+            rsync_args.extend([f"{source_abs}/", f"{projection_abs}/"])
             subprocess.run(  # noqa: S603
-                [
-                    rsync_bin,
-                    "-a",
-                    "--delete",
-                    "--exclude",
-                    "__pycache__/",
-                    "--exclude",
-                    "*.pyc",
-                    "--exclude",
-                    ".DS_Store",
-                    f"{source_abs}/",
-                    f"{projection_abs}/",
-                ],
+                rsync_args,
                 check=True,
                 capture_output=True,
                 text=True,
             )
+            pruned_dirs = _prune_excluded_dirs(projection_abs, excluded_dirs)
             sync_engine = "rsync"
-            after_files = {rel.as_posix() for rel in iter_files(projection_abs)}
-            deleted_files = len(before_files - after_files)
+            after_files = {rel.as_posix() for rel in iter_files(projection_abs, excluded_dirs)}
+            deleted_files = len(before_files - after_files) + pruned_dirs
             changed_files = -1
         except subprocess.CalledProcessError as error:
             if _is_rsync_permission_failure(error):
-                changed_files, deleted_files = _sync_mirror_python(source_abs, projection_abs)
+                changed_files, deleted_files = _sync_mirror_python(
+                    source_abs,
+                    projection_abs,
+                    follow_symlinks=spec.follow_symlinks,
+                    excluded_dir_names=excluded_dirs,
+                )
+                deleted_files += _prune_excluded_dirs(projection_abs, excluded_dirs)
             else:
                 raise
     else:
-        changed_files, deleted_files = _sync_mirror_python(source_abs, projection_abs)
+        changed_files, deleted_files = _sync_mirror_python(
+            source_abs,
+            projection_abs,
+            follow_symlinks=spec.follow_symlinks,
+            excluded_dir_names=excluded_dirs,
+        )
+        deleted_files += _prune_excluded_dirs(projection_abs, excluded_dirs)
 
     stamped_files = 0
-    for rel in iter_files(projection_abs):
+    for rel in iter_files(projection_abs, excluded_dirs):
         if rel.suffix not in STAMPABLE_SUFFIXES:
             continue
         projection_file = projection_abs / rel
@@ -695,7 +808,13 @@ def normalize_stamped_content(content: bytes, path: Path) -> bytes:
         return content
 
 
-def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, int]:
+def _sync_mirror_python(
+    source_abs: Path,
+    projection_abs: Path,
+    *,
+    follow_symlinks: bool = False,
+    excluded_dir_names: Iterable[str] = (),
+) -> tuple[int, int]:
     """
     Synchronise a projection directory to match a source directory using pure-Python file operations.
     
@@ -710,8 +829,17 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
     """
     changed_files = 0
     deleted_files = 0
-    source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}
-    projection_files = {rel.as_posix(): rel for rel in iter_files(projection_abs)}
+    source_files = {
+        rel.as_posix(): rel
+        for rel in iter_files(
+            source_abs,
+            excluded_dir_names,
+            follow_symlinks=follow_symlinks,
+        )
+    }
+    projection_files = {
+        rel.as_posix(): rel for rel in iter_files(projection_abs, excluded_dir_names)
+    }
 
     for rel_key in sorted(set(projection_files) - set(source_files)):
         stale = projection_abs / projection_files[rel_key]
@@ -743,7 +871,7 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
         source_file = source_abs / rel
         projection_file = projection_abs / rel
         projection_file.parent.mkdir(parents=True, exist_ok=True)
-        if source_file.is_symlink():
+        if source_file.is_symlink() and not follow_symlinks:
             source_target = os.readlink(source_file)
             if projection_file.is_symlink() and os.readlink(projection_file) == source_target:
                 continue
@@ -758,7 +886,19 @@ def _sync_mirror_python(source_abs: Path, projection_abs: Path) -> tuple[int, in
             changed_files += 1
             continue
 
-        source_bytes = source_file.read_bytes()
+        try:
+            source_bytes = source_file.read_bytes()
+        except OSError:
+            # Broken source symlink or unreadable file: do not mirror stale content.
+            if projection_file.exists() or projection_file.is_symlink():
+                if projection_file.is_symlink():
+                    projection_file.unlink()
+                elif projection_file.is_dir():
+                    shutil.rmtree(projection_file)
+                else:
+                    projection_file.unlink()
+                deleted_files += 1
+            continue
         normalized_source = _normalize_stamped_text(source_bytes, source_file)
         if projection_file.exists() and projection_file.is_file() and not projection_file.is_symlink():
             projection_bytes = projection_file.read_bytes()
@@ -869,22 +1009,39 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         result.update({"status": "drift", "reason": "projection_not_directory"})
         return result
 
-    source_files = {rel.as_posix(): rel for rel in iter_files(source_abs)}
-    projection_files = {rel.as_posix(): rel for rel in iter_files(projection_abs)}
+    excluded_dirs = normalize_excluded_dir_names(spec.excluded_dir_names)
+    source_files = {
+        rel.as_posix(): rel
+        for rel in iter_files(
+            source_abs,
+            excluded_dirs,
+            follow_symlinks=spec.follow_symlinks,
+        )
+    }
+    projection_files = {
+        rel.as_posix(): rel for rel in iter_files(projection_abs, excluded_dirs)
+    }
     source_manifest_hashes: dict[str, str] = {}
     for rel_key, rel in source_files.items():
         source_file = source_abs / rel
-        if source_file.is_symlink():
+        if source_file.is_symlink() and not spec.follow_symlinks:
             source_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(source_file)}")
         else:
-            source_manifest_hashes[rel_key] = hash_bytes(source_file.read_bytes())
+            try:
+                source_manifest_hashes[rel_key] = hash_bytes(source_file.read_bytes())
+            except OSError:
+                source_manifest_hashes[rel_key] = hash_text("unreadable_source")
     projection_manifest_hashes: dict[str, str] = {}
     for rel_key, rel in projection_files.items():
         projection_file = projection_abs / rel
-        if projection_file.is_symlink():
+        if projection_file.is_symlink() and not spec.follow_symlinks:
             projection_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(projection_file)}")
             continue
-        projection_bytes = projection_file.read_bytes()
+        try:
+            projection_bytes = projection_file.read_bytes()
+        except OSError:
+            projection_manifest_hashes[rel_key] = hash_text("unreadable_projection")
+            continue
         if rel.suffix not in STAMPABLE_SUFFIXES:
             projection_manifest_hashes[rel_key] = hash_bytes(projection_bytes)
             continue
@@ -906,7 +1063,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         source_file = source_abs / rel
         projection_file = projection_abs / rel
 
-        if source_file.is_symlink() or projection_file.is_symlink():
+        if (source_file.is_symlink() or projection_file.is_symlink()) and not spec.follow_symlinks:
             if source_file.is_symlink() and projection_file.is_symlink():
                 source_target = os.readlink(source_file)
                 projection_target = os.readlink(projection_file)

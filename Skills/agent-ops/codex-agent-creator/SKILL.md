@@ -1,6 +1,6 @@
 ---
 name: codex-agent-creator
-description: Create, install, and validate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
+description: Create, install, validate, and orchestrate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
@@ -19,10 +19,11 @@ metadata:
 - User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
 - User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
 
-## When to use
+## Scope
 - Focus on standalone custom-agent authoring, installation, and validation for Codex.
 - Default to canonical global write targets in this workspace (`~/dev/configs/codex/agents/`, `~/dev/configs/codex/config.toml`).
-- Do not use this skill for orchestrating active subagent threads or deciding whether the capability should be a skill, prompt, or automation.
+- Use this skill for bounded subagent orchestration plans when the user explicitly wants delegation or swarm execution.
+- Use [[decide-build-primitive]] when the user is deciding skill vs prompt vs automation packaging.
 
 ## Required inputs
 - Agent name and short description.
@@ -41,6 +42,7 @@ metadata:
 - Generated or updated standalone custom-agent TOML path.
 - Validation result with explicit success/failure reasons.
 - Optional summary of global runtime limits configured in `~/dev/configs/codex/config.toml` (or explicitly provided override).
+- If requested, a concrete subagent orchestration plan (lane assignment, fan-out, and completion artifacts).
 - Include `schema_version` whenever output is machine-validated.
 
 ## Procedure
@@ -69,6 +71,12 @@ metadata:
 - Treat non-canonical global paths as compatibility overrides that require explicit opt-in.
 - If the user requests runtime limits, update only `[agents]` global keys in the selected global `config.toml`.
 - Return next-step verification command and residual risk.
+
+### 4b) Orchestrate installed agents (when requested)
+- Confirm orchestration goal, parallelism limits, and artifact expectations before spawning.
+- Prefer deterministic fan-out with clear role/task boundaries and explicit completion criteria.
+- Keep swarm size bounded; default to minimal reviewers/workers required for coverage.
+- Require artifact-first completion from each subagent and synthesize only after artifacts are present.
 
 ### 5) Upstream alignment checkpoint
 - Verify current Codex guidance from OpenAI docs before recommending config keys (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`, `model_reasoning_effort`).

@@ -183,6 +183,38 @@ def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
     )
     return result
 
+
+def provider_audit(repo_root: Path) -> CallResult:
+    """Run the OpenAI provider policy audit and return its JSON report."""
+    result = CallResult()
+    cmd = [
+        sys.executable,
+        "Infrastructure/scripts/validation-and-linting/verify_provider_policy.py",
+        "--json",
+    ]
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    try:
+        report = json.loads(process.stdout)
+    except json.JSONDecodeError:
+        report = {
+            "status": "fail",
+            "raw_stdout": process.stdout,
+            "raw_stderr": process.stderr,
+        }
+
+    result.data["provider_policy"] = report
+    result.status = "success" if process.returncode == 0 and report.get("status") == "pass" else "error"
+    if result.status == "error":
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="OpenAI provider policy audit failed.",
+                fix_suggestion="Remove or archive active legacy provider paths, then rerun ask repo provider-audit.",
+            )
+        )
+    return result
+
+
 def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:
     """
     Validate stability-related changes to SKILL.md files and enforce rules for skills marked `stability: stable`.

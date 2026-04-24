@@ -14,9 +14,9 @@
     "plugin",
     "skill-factory",
     "skill-factory-router",
-    "skill-creator",
     "skill-builder",
-    "skill-installer",
+    "skill-refactor",
+    "skillify",
     "codex"
   ],
   "governance": {
@@ -31,7 +31,7 @@
   "interface": {
     "displayName": "Skill Factory",
     "shortDescription": "Create and improve Codex skills",
-    "longDescription": "A Codex plugin package that bundles the skill-authoring family: skill-factory-router, skill-creator, skill-builder, and skill-installer.",
+    "longDescription": "A Codex plugin package that exposes skill-factory-router, skill-builder, skill-refactor, and skillify in the picker. Skill creator and installer bridge skills remain available through the System surface.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [

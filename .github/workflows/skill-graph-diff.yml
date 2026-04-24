@@ -34,17 +34,23 @@ jobs:
       - name: Install dependencies
         run: pip install pyyaml
 
-      - name: Extract edges (base)
+      - name: Load edges (base)
         run: |
-          python3 head/Docs/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
-            base \
-            /tmp/base-edges.json
+          if [ -f base/Infrastructure/ops/metrics/graph/skill-edges.json ]; then
+            cp base/Infrastructure/ops/metrics/graph/skill-edges.json /tmp/base-edges.json
+          else
+            echo "::error::Missing base/Infrastructure/ops/metrics/graph/skill-edges.json. Base branch artifact is required for graph diff."
+            exit 1
+          fi
 
-      - name: Extract edges (head)
+      - name: Load edges (head)
         run: |
-          python3 head/Docs/product/domain/arscontexta/reference/scripts/graph/extract-skill-edges.py \
-            head \
-            /tmp/head-edges.json
+          if [ -f head/Infrastructure/ops/metrics/graph/skill-edges.json ]; then
+            cp head/Infrastructure/ops/metrics/graph/skill-edges.json /tmp/head-edges.json
+          else
+            echo "::error::Missing head/Infrastructure/ops/metrics/graph/skill-edges.json. Run projection/sync before merging."
+            exit 1
+          fi
 
       - name: Check hub stability
         run: |

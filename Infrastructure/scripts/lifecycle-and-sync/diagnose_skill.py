@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diagnose why a skill isn't loading in Codex, Claude Code, or Antigravity.
+"""Diagnose why a skill isn't loading in Codex.
 
 Usage:
     python3 Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py <skill-name>
@@ -9,10 +9,9 @@ Checks:
     1. SKILL.md exists and has valid YAML frontmatter
     2. Symlink exists in the expected loader directories
     3. Symlink points to correct location
-    4. Antigravity skills.txt points at the strict flat Antigravity catalog
-    5. No nested .git directory (breaks skill discovery)
-    6. Skill appears in root SKILL.md index
-    7. Task profile exists if referenced
+    4. No nested .git directory (breaks skill discovery)
+    5. Skill appears in root SKILL.md index
+    6. Task profile exists if referenced
 """
 
 from __future__ import annotations
@@ -37,13 +36,7 @@ SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 SKILL_INDEX = REPO_ROOT / "SKILL.md"
 
 CODEX_SKILLS = Path.home() / ".codex" / "skills"
-CLAUDE_SKILLS = Path.home() / ".claude" / "skills"
 AGENTS_SKILLS = Path.home() / ".agents" / "skills"
-ANTIGRAVITY_SKILLS = Path.home() / ".gemini" / "antigravity" / "skills"
-GEMINI_SKILLS = Path.home() / ".gemini" / "skills"
-LEGACY_ANTIGRAVITY_SKILLS = Path.home() / ".antigravity" / "skills"
-ANTIGRAVITY_SKILLS_TXT = Path.home() / ".gemini" / "antigravity" / "skills.txt"
-ANTIGRAVITY_EXPECTED_ROOT = REPO_ROOT / "skills-antigravity"
 
 
 @dataclass
@@ -183,39 +176,6 @@ def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir:
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
 
 
-def check_antigravity_skills_txt() -> DiagnosticResult:
-    """Check that Antigravity is pointed at the strict flat skills projection."""
-    if not ANTIGRAVITY_SKILLS_TXT.exists():
-        return DiagnosticResult(
-            "skills.txt (antigravity)",
-            "warn",
-            f"Antigravity skills path file not found: {ANTIGRAVITY_SKILLS_TXT}",
-        )
-
-    rendered = ANTIGRAVITY_SKILLS_TXT.read_text(encoding="utf-8").strip()
-    if not rendered:
-        return DiagnosticResult(
-            "skills.txt (antigravity)",
-            "warn",
-            f"Antigravity skills path file is empty: {ANTIGRAVITY_SKILLS_TXT}",
-        )
-
-    expected = str(ANTIGRAVITY_EXPECTED_ROOT) + "/"
-    if rendered != expected:
-        return DiagnosticResult(
-            "skills.txt (antigravity)",
-            "warn",
-            f"Antigravity points at {rendered}",
-            f"Expected {expected}. Run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` to repair it.",
-        )
-
-    return DiagnosticResult(
-        "skills.txt (antigravity)",
-        "pass",
-        f"Antigravity path file points at {expected}",
-    )
-
-
 def check_skill_index(skill_name: str) -> DiagnosticResult:
     """Check if skill appears in root SKILL.md index."""
     if not SKILL_INDEX.exists():
@@ -302,12 +262,7 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
     # Skill audits may be invoked with a path argument (for example, utilities/my-skill).
     # Symlink/index checks must always use the canonical skill directory name.
     results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
-    results.append(check_symlink(resolved_skill_name, CLAUDE_SKILLS, "claude"))
     results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
-    results.append(check_symlink(resolved_skill_name, ANTIGRAVITY_SKILLS, "antigravity", allow_real_dir=True))
-    results.append(check_symlink(resolved_skill_name, GEMINI_SKILLS, "gemini", allow_real_dir=True))
-    results.append(check_symlink(resolved_skill_name, LEGACY_ANTIGRAVITY_SKILLS, "legacy-antigravity", allow_real_dir=True))
-    results.append(check_antigravity_skills_txt())
     results.append(check_skill_index(resolved_skill_name))
     results.append(check_task_profile(skill_dir))
     results.append(check_lifecycle_readiness(skill_dir))

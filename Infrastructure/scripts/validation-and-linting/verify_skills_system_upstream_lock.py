@@ -14,6 +14,9 @@ from typing import Any
 
 LOCK_SCHEMA_VERSION = "skills-system-upstream-lock.v1"
 SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
+MCP_SERVER_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
+TOOL_PREFIX_RE = re.compile(r"^mcp__[A-Za-z][A-Za-z0-9_]*__$")
+SURFACE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -250,6 +253,74 @@ def _validate_managed_dirs(payload: dict[str, Any], repo_root: Path, issues: lis
                 )
 
 
+def _validate_local_compatibility_overrides(payload: dict[str, Any], issues: list[str]) -> None:
+    """
+    Validate local_compatibility_overrides section in lock payload.
+
+    Parameters:
+        payload (dict[str, Any]): Parsed lock file content.
+        issues (list[str]): Mutable list of issue messages that will be mutated in-place.
+    """
+    overrides = payload.get("local_compatibility_overrides")
+    _expect(
+        isinstance(overrides, list),
+        "local_compatibility_overrides must be a list",
+        issues,
+    )
+    if not isinstance(overrides, list):
+        return
+
+    for index, item in enumerate(overrides):
+        label = f"local_compatibility_overrides[{index}]"
+        if not isinstance(item, dict):
+            issues.append(f"{label} must be an object")
+            continue
+
+        surface_raw = item.get("surface", "")
+        mcp_server_raw = item.get("mcp_server", "")
+        tool_prefix_raw = item.get("tool_prefix", "")
+
+        surface_is_string = isinstance(surface_raw, str)
+        mcp_server_is_string = isinstance(mcp_server_raw, str)
+        tool_prefix_is_string = isinstance(tool_prefix_raw, str)
+
+        if not surface_is_string:
+            issues.append(f"{label}.surface must be a string")
+        if not mcp_server_is_string:
+            issues.append(f"{label}.mcp_server must be a string")
+        if not tool_prefix_is_string:
+            issues.append(f"{label}.tool_prefix must be a string")
+
+        surface = surface_raw.strip() if surface_is_string else ""
+        mcp_server = mcp_server_raw.strip() if mcp_server_is_string else ""
+        tool_prefix = tool_prefix_raw.strip() if tool_prefix_is_string else ""
+
+        if surface_is_string and not surface:
+            issues.append(f"{label}.surface must be a non-empty string")
+        if mcp_server_is_string and not mcp_server:
+            issues.append(f"{label}.mcp_server must be a non-empty string")
+
+        # Proceed with regex validation only when values are present
+        if surface and not SURFACE_RE.fullmatch(surface):
+            issues.append(f"{label}.surface must match {SURFACE_RE.pattern}")
+        if mcp_server and not MCP_SERVER_RE.fullmatch(mcp_server):
+            issues.append(f"{label}.mcp_server must match {MCP_SERVER_RE.pattern}")
+        if tool_prefix and not TOOL_PREFIX_RE.fullmatch(tool_prefix):
+            issues.append(f"{label}.tool_prefix must match {TOOL_PREFIX_RE.pattern}")
+        # Only run cross-check when both surface and mcp_server are present and valid
+        if (
+            mcp_server_is_string
+            and tool_prefix_is_string
+            and mcp_server
+            and tool_prefix
+            and tool_prefix != f"mcp__{mcp_server}__"
+        ):
+            issues.append(
+                f"{label}.tool_prefix must align with mcp_server "
+                f"(expected mcp__{mcp_server}__)"
+            )
+
+
 def main() -> int:
     """
     Validate a skills-system upstream lock file according to the tool's schema and exit with a status code.
@@ -284,6 +355,7 @@ def main() -> int:
     _validate_upstream(payload, repo_root, issues)
     _validate_bridge_entries(payload, repo_root, issues)
     _validate_managed_dirs(payload, repo_root, issues)
+    _validate_local_compatibility_overrides(payload, issues)
 
     if issues:
         print("skills-system upstream lock validation failed:", file=sys.stderr)

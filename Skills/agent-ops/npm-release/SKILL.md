@@ -1,6 +1,6 @@
 ---
 name: npm-release
-description: "Create and validate npm package release workflows using semver bumping, dist-tags, provenance publishing, and 2FA-aware safeguards. Use when users need npm publish/version guidance in CI or local release lanes."
+description: "Create and validate npm package release workflows with deterministic installs, semver, dist-tags, provenance, and 2FA safeguards. Use when preparing or publishing npm releases."
 metadata:
   skill-type: runbook
 ---
@@ -15,6 +15,8 @@ Use this skill for npm package release operations: version bumping, publish stra
 - Setting release channels (`latest`, `beta`, `next`, custom tags).
 - Preparing semver bumps and git-tag behavior.
 - Handling 2FA/OTP for release operations.
+- Enforcing deterministic npm install/lockfile behavior as part of release readiness.
+- Validating release scripts/contracts in `package.json` before publish.
 
 ## Non-triggers
 
@@ -37,6 +39,7 @@ Use this skill for npm package release operations: version bumping, publish stra
 ## Deliverables
 
 - Release command sequence from version bump to publish.
+- Dependency/install discipline checks required before publish.
 - Dist-tag and channel guidance.
 - 2FA/OTP handling notes.
 - Post-release validation checks.
@@ -76,11 +79,12 @@ npm profile enable-2fa auth-and-writes
 ## Workflow
 
 1. Confirm target version strategy and release channel.
-2. Run version bump command and verify tag/commit policy (`git-tag-version`).
-3. Dry-run package contents when needed (`npm pack --dry-run`).
-4. Publish with explicit flags for access, provenance, and channel.
-5. Apply/update dist-tags for rollout channels.
-6. Verify published version and tags.
+2. Confirm lockfile/install discipline at the target package root (`npm --prefix <package-path> ci`, lockfile in sync, required release script contract present). Validate that `package.json` scripts include release-critical hooks used by the workflow, such as `prepare`, `prepublishOnly` (or `prepublish`), and a release entrypoint like `release` or `publish`, and that they align with `references/contract.yaml`.
+3. Run version bump command and verify tag/commit policy (confirm `git-tag-version` npm config is set correctly before `npm version`).
+4. Dry-run package contents when needed (`npm pack --dry-run`).
+5. Publish with explicit flags for access, provenance, and channel.
+6. Apply/update dist-tags for rollout channels.
+7. Verify published version and tags.
 
 ## Constraints
 
@@ -129,6 +133,6 @@ npm profile enable-2fa auth-and-writes
 
 | Skill | When to use together |
 |---|---|
-| [[npm-workflow-discipline]] | Enforce deterministic npm install/release contracts |
 | [[pnpm-manager]] | Coordinate monorepo package prep before npm publish |
-| [[mise-tooling]] | Pin runtime/tool versions before release commands |
+| [[fix-mise]] | Pin and verify runtime/tool versions before release commands |
+| [[gh-workflow]] | Coordinate release PR/branch workflows and checks |
