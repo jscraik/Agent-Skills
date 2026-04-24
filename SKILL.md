@@ -11,7 +11,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `total_skills`: 18
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 7c39bf064c653137
+- `policy_identity`: ccc42d9df4a2db2e
 
 ## Catalog
 

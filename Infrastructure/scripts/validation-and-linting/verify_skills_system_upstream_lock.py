@@ -280,26 +280,24 @@ def _validate_local_compatibility_overrides(payload: dict[str, Any], issues: lis
         mcp_server_raw = item.get("mcp_server", "")
         tool_prefix_raw = item.get("tool_prefix", "")
 
-        # Verify types are strings before validation
-        if not isinstance(surface_raw, str):
+        surface_is_string = isinstance(surface_raw, str)
+        mcp_server_is_string = isinstance(mcp_server_raw, str)
+        tool_prefix_is_string = isinstance(tool_prefix_raw, str)
+
+        if not surface_is_string:
             issues.append(f"{label}.surface must be a string")
-            surface_raw = ""  # Prevent further validation
-        if not isinstance(mcp_server_raw, str):
+        if not mcp_server_is_string:
             issues.append(f"{label}.mcp_server must be a string")
-            mcp_server_raw = ""  # Prevent further validation
-        if not isinstance(tool_prefix_raw, str):
+        if not tool_prefix_is_string:
             issues.append(f"{label}.tool_prefix must be a string")
-            tool_prefix_raw = ""  # Prevent further validation
 
-        # Only validate strings (strip and check regex)
-        surface = surface_raw.strip() if isinstance(surface_raw, str) else ""
-        mcp_server = mcp_server_raw.strip() if isinstance(mcp_server_raw, str) else ""
-        tool_prefix = tool_prefix_raw.strip() if isinstance(tool_prefix_raw, str) else ""
+        surface = surface_raw.strip() if surface_is_string else ""
+        mcp_server = mcp_server_raw.strip() if mcp_server_is_string else ""
+        tool_prefix = tool_prefix_raw.strip() if tool_prefix_is_string else ""
 
-        # Check for non-empty surface and mcp_server
-        if isinstance(surface_raw, str) and not surface:
+        if surface_is_string and not surface:
             issues.append(f"{label}.surface must be a non-empty string")
-        if isinstance(mcp_server_raw, str) and not mcp_server:
+        if mcp_server_is_string and not mcp_server:
             issues.append(f"{label}.mcp_server must be a non-empty string")
 
         # Proceed with regex validation only when values are present
@@ -310,8 +308,13 @@ def _validate_local_compatibility_overrides(payload: dict[str, Any], issues: lis
         if tool_prefix and not TOOL_PREFIX_RE.fullmatch(tool_prefix):
             issues.append(f"{label}.tool_prefix must match {TOOL_PREFIX_RE.pattern}")
         # Only run cross-check when both surface and mcp_server are present and valid
-        if (isinstance(mcp_server_raw, str) and isinstance(tool_prefix_raw, str)
-            and mcp_server and tool_prefix and tool_prefix != f"mcp__{mcp_server}__"):
+        if (
+            mcp_server_is_string
+            and tool_prefix_is_string
+            and mcp_server
+            and tool_prefix
+            and tool_prefix != f"mcp__{mcp_server}__"
+        ):
             issues.append(
                 f"{label}.tool_prefix must align with mcp_server "
                 f"(expected mcp__{mcp_server}__)"

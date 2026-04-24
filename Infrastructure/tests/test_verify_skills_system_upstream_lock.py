@@ -67,7 +67,7 @@ class VerifySkillsSystemUpstreamLockTests(unittest.TestCase):
         issues: list[str] = []
         module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
         self.assertTrue(len(issues) > 0)
-        self.assertTrue(any("surface must be a string" in issue for issue in issues))
+        self.assertEqual(issues, ["local_compatibility_overrides[0].surface must be a string"])
 
     def test_local_compatibility_overrides_rejects_non_string_mcp_server(self) -> None:
         module = load_verify_lock_module()
@@ -83,7 +83,7 @@ class VerifySkillsSystemUpstreamLockTests(unittest.TestCase):
         issues: list[str] = []
         module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
         self.assertTrue(len(issues) > 0)
-        self.assertTrue(any("mcp_server must be a string" in issue for issue in issues))
+        self.assertEqual(issues, ["local_compatibility_overrides[0].mcp_server must be a string"])
 
     def test_local_compatibility_overrides_rejects_non_string_tool_prefix(self) -> None:
         module = load_verify_lock_module()

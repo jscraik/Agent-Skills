@@ -157,16 +157,16 @@ Codex repo schema source:
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/engine/discovery.rs`
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/engine/config.rs`
 
-Local codex source verification:
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/events/session_start.rs`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/events/permission_request.rs`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/session-start.command.input.schema.json`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/pre-tool-use.command.input.schema.json`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/permission-request.command.input.schema.json`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/permission-request.command.output.schema.json`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/post-tool-use.command.input.schema.json`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/user-prompt-submit.command.input.schema.json`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/stop.command.input.schema.json`
+Local codex source verification, relative to the checked-out Codex source root:
+- `codex-rs/hooks/src/events/session_start.rs`
+- `codex-rs/hooks/src/events/permission_request.rs`
+- `codex-rs/hooks/schema/generated/session-start.command.input.schema.json`
+- `codex-rs/hooks/schema/generated/pre-tool-use.command.input.schema.json`
+- `codex-rs/hooks/schema/generated/permission-request.command.input.schema.json`
+- `codex-rs/hooks/schema/generated/permission-request.command.output.schema.json`
+- `codex-rs/hooks/schema/generated/post-tool-use.command.input.schema.json`
+- `codex-rs/hooks/schema/generated/user-prompt-submit.command.input.schema.json`
+- `codex-rs/hooks/schema/generated/stop.command.input.schema.json`
 
 Cross-runtime compatibility reference:
 - `https://github.com/anthropics/codex-code/blob/main/src/entrypoints/sdk/coreSchemas.ts`

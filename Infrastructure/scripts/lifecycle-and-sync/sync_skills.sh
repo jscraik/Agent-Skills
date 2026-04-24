@@ -887,6 +887,7 @@ generate_skill_type_index() {
 # Skill Type Index
 
 Generated from `metadata.skill-type` tags in skill frontmatter. This index complements the directory-based catalog in `SKILL.md`.
+Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
 - [Summary](#summary)
@@ -1229,6 +1230,7 @@ normalize_plugin_copy() {
         while IFS= read -r -d '' nested_link; do
           [ -n "$nested_link" ] || continue
           [ -L "$nested_link" ] || continue
+          local nested_resolved
           nested_resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$nested_link" 2>/dev/null || true)"
           if [ -z "$nested_resolved" ]; then
             echo "[WARN] Could not resolve ${label} nested symlink: $nested_link"
@@ -1243,6 +1245,7 @@ normalize_plugin_copy() {
           esac
           if [ -d "$nested_link" ]; then
             # Directory symlink - copy recursively then remove link
+            local tmp_dir
             tmp_dir="$(mktemp -d)"
             if cp -a "$nested_link/." "$tmp_dir/"; then
               rm -f -- "$nested_link"
@@ -1255,6 +1258,7 @@ normalize_plugin_copy() {
             fi
           elif [ -f "$nested_link" ]; then
             # File symlink - copy to temp then replace
+            local tmp_file
             tmp_file="$(mktemp)"
             if cp -- "$nested_link" "$tmp_file"; then
               rm -f -- "$nested_link"

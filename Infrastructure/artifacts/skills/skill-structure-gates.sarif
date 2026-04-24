@@ -928,22 +928,6 @@
           ]
         },
         {
-          "ruleId": "PI_BINARY_ATTACHMENT",
-          "level": "warning",
-          "message": {
-            "text": "Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/create_basic_plugin.cpython-314.pyc"
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Plugins/plugin-factory/fixtures/budget-archive/2026-04-21/deferred-store/skills/scaffolding_templates/plugin-creator/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
           "ruleId": "SEC_EXAMPLES_MISSING",
           "level": "warning",
           "message": {
@@ -11468,22 +11452,6 @@
           "level": "warning",
           "message": {
             "text": "Binary attachment detected; manual review required (prompt scan skipped). | agents/assets/icon-small.png"
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "Skills/mobile-native/atlas/SKILL.md"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "PI_BINARY_ATTACHMENT",
-          "level": "warning",
-          "message": {
-            "text": "Binary attachment detected; manual review required (prompt scan skipped). | scripts/__pycache__/atlas_common.cpython-314.pyc"
           },
           "locations": [
             {

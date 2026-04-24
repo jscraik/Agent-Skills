@@ -60,6 +60,8 @@ EXPECTED_PLUGIN_KEYWORDS = {
 }
 
 SYSTEM_BRIDGE_SKILL_NAMES = {
+    "imagegen",
+    "openai-docs",
     "plugin-creator",
     "plugin-installer",
     "skill-creator",

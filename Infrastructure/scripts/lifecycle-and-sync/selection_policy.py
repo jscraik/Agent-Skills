@@ -63,8 +63,6 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "simplify",
     "triage",
     "verification-before-completion",
-    "imagegen",
-    "openai-docs",
 )
 
 # Plugin-owned skills stay on their plugin first-level picker surface. Do not

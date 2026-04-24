@@ -1,6 +1,7 @@
 # Skill Type Index
 
 Generated from `metadata.skill-type` tags in skill frontmatter. This index complements the directory-based catalog in `SKILL.md`.
+Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
 - [Summary](#summary)
