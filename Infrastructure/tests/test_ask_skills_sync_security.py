@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.append(str(REPO_ROOT / "scripts"))
 
-from ask.commands import skills as skills_commands
+from ask.commands import skills as skills_commands  # noqa: E402
 
 
 class TestAskSkillsSyncSecurity(TestCase):
@@ -48,6 +48,55 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
+        self.assertEqual(result.data["projection_mode"], "flat")
+
+    def test_sync_skills_projection_env_reaches_engine(self) -> None:
+        with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
+            result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=True)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["projection_mode"], "rooted")
+        self.assertEqual(result.data["projection"]["mode_source"], "env")
+        self.assertEqual(result.data["plan"]["validation_status"], "pass")
+        self.assertEqual(result.data["plan"]["root_skill_sets"]["root_count"], 10)
+
+    def test_sync_skills_projection_cli_wins_over_env(self) -> None:
+        with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
+            with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]):
+                result = skills_commands.sync_skills(
+                    self.repo_root,
+                    scope="workspace",
+                    dry_run=True,
+                    projection="flat",
+                )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["projection_mode"], "flat")
+        self.assertEqual(result.data["projection"]["mode_source"], "cli")
+
+    def test_sync_skills_rooted_non_dry_run_writes_generated_surface(self) -> None:
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["projection_mode"], "rooted")
+        self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
+        self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
+
+    def test_sync_skills_projection_does_not_mask_invalid_scope(self) -> None:
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="unknown",
+            dry_run=True,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_SCOPE")
 
     def test_sync_skills_workspace_prunes_stale_symlinks_only(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"

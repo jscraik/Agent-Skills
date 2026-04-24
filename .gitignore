@@ -127,6 +127,9 @@ Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl
 Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
 Infrastructure/artifacts/skill-graphs/telemetry/.genome-watermark
 
+# Skill workout runtime telemetry
+.skill-telemetry/
+
 Infrastructure/artifacts/policy/
 
 # Validation evidence policy:

@@ -1,0 +1,23 @@
+id: verification-before-completion-basic
+target_skill_set: agent-ops
+target_module: verification-before-completion
+target_source_path: Skills/agent-ops/verification-before-completion/SKILL.md
+level: atom
+projection_mode: rooted
+seed: seed.sh
+verify: verify.py
+max_attempts: 5
+max_skill_context_tokens: 1500
+goal: Verify whether a claimed implementation is complete before final response.
+constraints:
+  forbidden_shortcuts:
+    - modifying_verifier
+    - hardcoding_flag
+    - skipping_validation
+metrics:
+  - success
+  - wall_clock_seconds
+  - tool_steps
+  - retries
+  - flake_rate
+  - estimated_skill_context_tokens

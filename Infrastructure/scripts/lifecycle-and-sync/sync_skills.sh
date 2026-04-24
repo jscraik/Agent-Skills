@@ -4,6 +4,8 @@ set -euo pipefail
 timeout_seconds="${SYNC_SKILLS_TIMEOUT_SECONDS:-300}"
 lock_stale_after_seconds="${SYNC_SKILLS_LOCK_STALE_AFTER_SECONDS:-900}"
 sync_scope="${SYNC_SKILLS_SCOPE:-workspace}"
+projection_mode_cli=""
+dry_run=0
 lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
 lock_owned=0
@@ -12,7 +14,7 @@ watchdog_pid=""
 usage() {
   cat <<'USAGE'
 Usage:
-  Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh [--timeout-seconds <int>] [--project-local|--workspace]
+  Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh [--timeout-seconds <int>] [--workspace|--user|--project-local] [--projection <mode>] [--dry-run]
 
 Regenerates skill/plugin symlinks and SKILL.md index for this repository.
 USAGE
@@ -25,11 +27,23 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --project-local)
-      sync_scope="project-local"
+      sync_scope="workspace"
       shift
       ;;
     --workspace)
       sync_scope="workspace"
+      shift
+      ;;
+    --user)
+      sync_scope="user"
+      shift
+      ;;
+    --projection)
+      projection_mode_cli="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=1
       shift
       ;;
     -h|--help)
@@ -53,15 +67,17 @@ if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seco
   exit 2
 fi
 
-if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
-  echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
-  exit 2
-fi
-
-if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
-  echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
-  exit 2
-fi
+case "$sync_scope" in
+  project-local)
+    sync_scope="workspace"
+    ;;
+  workspace|user)
+    ;;
+  *)
+    echo "Invalid sync scope: $sync_scope (expected workspace or user; project-local is a legacy alias for workspace)" >&2
+    exit 2
+    ;;
+esac
 
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 if repo_root="$(git -C "$script_dir/../.." rev-parse --show-toplevel 2>/dev/null)"; then
@@ -70,6 +86,28 @@ else
   repo_root="$(cd -P "$script_dir/../.." && pwd -P)"
 fi
 cd "$repo_root"
+
+projection_args=(--format shell)
+if [ -n "$projection_mode_cli" ]; then
+  projection_args+=(--mode "$projection_mode_cli")
+fi
+if ! projection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
+)"; then
+  if [ -n "$projection_policy_shell" ]; then
+    eval "$projection_policy_shell"
+  fi
+  echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
+  exit 2
+fi
+eval "$projection_policy_shell"
+if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+  ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
+  if [[ "$dry_run" == "1" ]]; then
+    ask_sync_args+=(--dry-run)
+  fi
+  exec python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
+fi
 
 selection_policy_shell="$(
   python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/selection_policy.py" --format shell
@@ -1001,7 +1039,7 @@ remove_legacy_symlink() {
 }
 
 # Remove old/legacy symlinks from unsupported locations.
-# Keep this workspace-only so project-local sync stays side-effect free outside
+# Keep this user-only so workspace/project-local sync stays side-effect free outside.
 # remove_legacy_home_skill_symlinks removes legacy per-user skill symlinks from common home locations if they exist.
 remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.copilot/skills"
@@ -1821,7 +1859,7 @@ else
   sync_user_skills "$skills_dir" "$repo_root/skills" 1
 fi
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
-if [[ "$sync_scope" == "workspace" ]]; then
+if [[ "$sync_scope" == "user" ]]; then
   remove_legacy_home_skill_symlinks
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
@@ -1830,7 +1868,7 @@ if [[ "$sync_scope" == "workspace" ]]; then
   sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
   sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
 else
-  echo "Project-local scope: skipped home runtime projections."
+  echo "Workspace scope: skipped home runtime projections."
 fi
 
 chmod +x "$repo_root/Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"

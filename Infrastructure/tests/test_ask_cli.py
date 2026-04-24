@@ -202,6 +202,101 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("plan", output["data"])
         self.assertIn("symlinks", output["data"]["plan"])
 
+    def test_runtime_surface_json_contract(self):
+        """Verify ask runtime surface exposes the runtime report under an obvious topic."""
+        cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        report = output["data"]["runtime_surface"]
+        self.assertEqual(report["projection_mode"], "flat")
+        self.assertIn("first_level_default_entries", report)
+        self.assertIn("hidden_system_entries", report)
+        self.assertIn("estimated_description_tokens", report)
+
+    def test_runtime_budget_json_contract(self):
+        """Verify ask runtime budget remains a first-class budget gate command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "runtime", "budget", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["runtime_budget"]["status"], "pass")
+        self.assertEqual(output["data"]["runtime_surface"]["status"], "pass")
+
+    def test_skills_sync_projection_reaches_engine(self):
+        """Verify --projection is dispatched and cannot be silently ignored."""
+        for mode in ("flat", "rooted"):
+            with self.subTest(mode=mode):
+                cmd = [
+                    "python3",
+                    "Infrastructure/bin/ask",
+                    "skills",
+                    "sync",
+                    "--scope",
+                    "workspace",
+                    "--projection",
+                    mode,
+                    "--dry-run",
+                    "--json",
+                ]
+                result = _run_cli(cmd)
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = json.loads(result.stdout)
+                self.assertEqual(output["status"], "success")
+                self.assertEqual(output["data"]["projection_mode"], mode)
+                self.assertEqual(output["data"]["projection"]["engine"], "projection_engine.py")
+
+    def test_skills_sync_rooted_alias_dry_run_reports_canonical_mode(self):
+        """Rooted aliases must report the canonical projection mode in dry-run plans."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--projection",
+            "skill-tree",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["projection_mode"], "rooted")
+        self.assertEqual(output["data"]["projection"]["requested_mode"], "skill-tree")
+        self.assertEqual(output["data"]["plan"]["validation_status"], "pass")
+
+    def test_skills_sync_rejects_deferred_hybrid_projection(self):
+        """Hybrid remains out of mutating scope until a named consumer exists."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--projection",
+            "hybrid",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIsNone(output["data"]["projection_mode"])
+        self.assertEqual(output["data"]["requested_projection_mode"], "hybrid")
+        self.assertEqual(output["errors"][0]["code"], "ERR_DEFERRED_PROJECTION_MODE")
+
     def test_skills_install_dry_run(self):
         """CA2: Verify ask skills install --dry-run returns a plan without making changes."""
         # Using --dry-run to avoid actual network calls and mutations

@@ -17,6 +17,8 @@ if str(LIFECYCLE_DIR) not in sys.path:
 
 from selection_policy import (  # type: ignore  # noqa: E402
     DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
+    DEFAULT_PROJECTION_MODE,
+    ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
@@ -24,18 +26,22 @@ from skill_discovery import (  # type: ignore  # noqa: E402
     HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
     PLUGIN_VISIBLE_ROUTER_SKILL_NAMES as DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
-    _is_plugin_owned_skill_dir,
-    _iter_flat_skill_dirs,
-    _iter_plugin_skill_dirs,
-    _iter_repo_skill_dirs,
-    _iter_system_lane_skill_dirs,
+    USER_SKILL_SCOPE_PRECEDENCE,
+    classify_skill_scope,
     discover_catalog_entries,
     discover_skill_entries,
+    is_plugin_owned_skill_dir,
+    iter_flat_skill_dirs,
+    iter_plugin_skill_dirs,
+    iter_repo_skill_dirs,
+    iter_system_lane_skill_dirs,
 )
 
 DEFAULT_MAX_VISIBLE = 30
 ADVANCED_WARN_VISIBLE = 60
 BRIDGE_SKILLS = set(SYSTEM_BRIDGE_SKILL_NAMES)
+ROOT_SKILL_SETS = set(ROOT_SKILL_SET_NAMES)
+SCOPE_PRECEDENCE = USER_SKILL_SCOPE_PRECEDENCE
 
 
 def _rel(path: Path) -> str:
@@ -55,6 +61,114 @@ def _candidate_payload(*, name: str, source_dir: Path) -> dict[str, str]:
     }
 
 
+def _word_count(text: str) -> int:
+    return len([word for word in text.split() if word.strip()])
+
+
+def _estimated_tokens_from_words(words: int) -> int:
+    return (words * 4 + 2) // 3
+
+
+def _first_level_skill_entries() -> list[dict[str, str]]:
+    skills_dir = REPO_ROOT / ".agents" / "skills"
+    if not skills_dir.is_dir():
+        return []
+    entries: list[dict[str, str]] = []
+    for item in sorted(skills_dir.iterdir()):
+        if item.name.startswith("."):
+            continue
+        if item.is_dir() and (item / "SKILL.md").exists():
+            entries.append(_candidate_payload(name=item.name, source_dir=item.resolve()))
+    return entries
+
+
+def _system_lane_entries() -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    for skill_dir in iter_system_lane_skill_dirs():
+        entries.append(_candidate_payload(name=skill_dir.name, source_dir=skill_dir))
+    return sorted(entries, key=lambda entry: (entry["name"], entry["path"]))
+
+
+def _iter_known_skill_dirs() -> list[Path]:
+    seen: set[tuple[int, int] | str] = set()
+    dirs: list[Path] = []
+    for skill_dir in [
+        *iter_repo_skill_dirs(),
+        *iter_plugin_skill_dirs(),
+        *iter_system_lane_skill_dirs(),
+    ]:
+        try:
+            stat = skill_dir.stat()
+            key: tuple[int, int] | str = (stat.st_dev, stat.st_ino)
+        except OSError:
+            key = skill_dir.resolve().as_posix()
+        if key in seen or not (skill_dir / "SKILL.md").exists():
+            continue
+        seen.add(key)
+        dirs.append(skill_dir)
+    return sorted(dirs, key=lambda path: _rel(path))
+
+
+def _scope_payloads() -> tuple[dict[str, int], list[dict[str, str]], list[dict[str, Any]], list[dict[str, Any]]]:
+    by_scope: dict[str, list[dict[str, str]]] = defaultdict(list)
+    by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
+
+    for skill_dir in _iter_known_skill_dirs():
+        name = skill_dir.name
+        scope = classify_skill_scope(skill_dir)
+        payload = {
+            **_candidate_payload(name=name, source_dir=skill_dir),
+            "scope": scope,
+        }
+        by_scope[scope].append(payload)
+        if scope in SCOPE_PRECEDENCE:
+            by_name[name].append(payload)
+
+    scope_counts = {
+        scope: len(by_scope.get(scope, []))
+        for scope in ("global", "project", "local-plugin", "system", "primary-runtime", "unknown", "external")
+    }
+    entries = [
+        payload
+        for scope_entries in by_scope.values()
+        for payload in scope_entries
+    ]
+    shadowed_entries: list[dict[str, Any]] = []
+    unresolved_scope_collisions: list[dict[str, Any]] = []
+    for name, candidates in sorted(by_name.items()):
+        if len(candidates) < 2:
+            continue
+        max_rank = max(SCOPE_PRECEDENCE[candidate["scope"]] for candidate in candidates)
+        winners = [candidate for candidate in candidates if SCOPE_PRECEDENCE[candidate["scope"]] == max_rank]
+        if len(winners) != 1:
+            unresolved_scope_collisions.append({
+                "name": name,
+                "candidates": candidates,
+            })
+            continue
+        winner = winners[0]
+        shadowed_entries.append({
+            "name": name,
+            "selected": winner,
+            "suppressed": [candidate for candidate in candidates if candidate != winner],
+        })
+
+    return scope_counts, entries, shadowed_entries, unresolved_scope_collisions
+
+
+def _largest_description_payloads(entries: list[Any], *, limit: int = 10) -> list[dict[str, Any]]:
+    payloads = []
+    for entry in entries:
+        words = _word_count(entry.description)
+        payloads.append({
+            "name": entry.name,
+            "path": _rel(entry.source_dir),
+            "description_words": words,
+            "description": entry.description,
+        })
+    return sorted(payloads, key=lambda payload: (-payload["description_words"], payload["name"]))[:limit]
+
+
 def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
     """
     Return default-surface candidates before name deduplication.
@@ -63,11 +177,11 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
     This helper preserves every candidate that survives default visibility
     filters so duplicate-name drift can be detected reliably.
     """
-    skill_dirs = list(_iter_flat_skill_dirs())
+    skill_dirs = list(iter_flat_skill_dirs())
     if not skill_dirs:
-        skill_dirs = list(_iter_repo_skill_dirs())
-        skill_dirs.extend(_iter_plugin_skill_dirs())
-        skill_dirs.extend(_iter_system_lane_skill_dirs())
+        skill_dirs = list(iter_repo_skill_dirs())
+        skill_dirs.extend(iter_plugin_skill_dirs())
+        skill_dirs.extend(iter_system_lane_skill_dirs())
 
     candidates: list[tuple[str, Path]] = []
     for skill_dir in skill_dirs:
@@ -82,7 +196,7 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
             continue
         if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES:
             continue
-        plugin_owned = _is_plugin_owned_skill_dir(source_dir)
+        plugin_owned = is_plugin_owned_skill_dir(source_dir)
         if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
             continue
         if plugin_owned and name in DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES:
@@ -112,16 +226,22 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     default_entries = list(discover_skill_entries(visibility="default"))
     advanced_entries = list(discover_skill_entries(visibility="advanced"))
     catalog_entries = list(discover_catalog_entries(advanced=False))
+    first_level_entries = _first_level_skill_entries()
+    hidden_system_entries = _system_lane_entries()
+    scope_counts, scoped_entries, shadowed_entries, unresolved_scope_collisions = _scope_payloads()
 
     by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
     for name, source_dir in _iter_default_visibility_candidates():
         by_name[name].append(_candidate_payload(name=name, source_dir=source_dir))
 
-    duplicate_default_names = {
-        name: entries
+    duplicate_default_names = [
+        {
+            "name": name,
+            "entries": entries,
+        }
         for name, entries in sorted(by_name.items())
         if len(entries) > 1
-    }
+    ]
 
     first_level = set(_first_level_skill_names())
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
@@ -136,6 +256,20 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     missing_default = sorted(expected_default - default_names)
     catalog_only_default_names = sorted(catalog_names - default_names)
     discovery_only_default_names = sorted(default_names - catalog_names)
+    estimated_description_words = sum(_word_count(entry.description) for entry in default_entries)
+    unmapped_skill_names = sorted(
+        entry["name"]
+        for entry in scoped_entries
+        if entry["scope"] in {"unknown", "external"}
+    )
+    primary_runtime_entries = sorted(
+        [entry for entry in scoped_entries if entry["scope"] == "primary-runtime"],
+        key=lambda entry: (entry["name"], entry["path"]),
+    )
+    plugin_runtime_entries = sorted(
+        [entry for entry in scoped_entries if entry["scope"] == "local-plugin"],
+        key=lambda entry: (entry["name"], entry["path"]),
+    )
 
     violations: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
@@ -178,15 +312,44 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             "catalog_only_default_names": catalog_only_default_names,
             "discovery_only_default_names": discovery_only_default_names,
         })
+    if unresolved_scope_collisions:
+        violations.append({
+            "code": "UNRESOLVED_SCOPE_COLLISIONS",
+            "message": "skill sources with the same name remain tied at the same user scope precedence",
+            "collisions": unresolved_scope_collisions,
+        })
 
+    status = "pass" if not violations else "fail"
     return {
-        "status": "pass" if not violations else "fail",
+        "status": status,
+        "budget_status": status,
+        "projection_mode": DEFAULT_PROJECTION_MODE,
         "policy_identity": policy_identity(),
         "default_visible_count": len(default_entries),
         "default_visible_max": default_max,
         "advanced_visible_count": len(advanced_entries),
         "advanced_visible_warn": ADVANCED_WARN_VISIBLE,
         "catalog_default_count": len(catalog_entries),
+        "first_level_default_entries": first_level_entries,
+        "first_level_default_count": len(first_level_entries),
+        "hidden_system_entries": hidden_system_entries,
+        "hidden_system_count": len(hidden_system_entries),
+        "primary_runtime_entries": primary_runtime_entries,
+        "plugin_runtime_entries": plugin_runtime_entries,
+        "scope_counts": scope_counts,
+        "shadowed_entries": shadowed_entries,
+        "suppressed_entries": [
+            suppressed
+            for shadow in shadowed_entries
+            for suppressed in shadow["suppressed"]
+        ],
+        "unresolved_scope_collisions": unresolved_scope_collisions,
+        "duplicate_default_names": duplicate_default_names,
+        "largest_descriptions": _largest_description_payloads(advanced_entries),
+        "root_skill_set_count": len({entry["name"] for entry in first_level_entries} & ROOT_SKILL_SETS),
+        "unmapped_skill_names": unmapped_skill_names,
+        "estimated_description_words": estimated_description_words,
+        "estimated_description_tokens": _estimated_tokens_from_words(estimated_description_words),
         "catalog_default_skill_names": sorted(catalog_names),
         "system_bridge_skills": sorted(BRIDGE_SKILLS),
         "first_level_bridge_skills": bridge_exposed,

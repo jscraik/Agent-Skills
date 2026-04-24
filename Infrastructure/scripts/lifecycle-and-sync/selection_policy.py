@@ -84,6 +84,36 @@ SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
     "skill-installer",
 )
 
+# Runtime projection modes. These are intentionally outside the selection
+# policy identity: mode support is command behavior, not a change to which
+# flat skills are selected by default.
+DEFAULT_PROJECTION_MODE = "flat"
+SUPPORTED_PROJECTION_MODES: tuple[str, ...] = (
+    "flat",
+    "rooted",
+)
+PROJECTION_MODE_ALIASES: dict[str, str] = {
+    "skill-tree": "rooted",
+}
+DEFERRED_PROJECTION_MODES: tuple[str, ...] = (
+    "hybrid",
+)
+
+# Planned rooted projection set. These names are reportable before rooted
+# mutation exists so budget reports can stay stable across the migration.
+ROOT_SKILL_SET_NAMES: tuple[str, ...] = (
+    "agent-ops",
+    "frontend-ui",
+    "backend-platform",
+    "product-strategy",
+    "security-ops",
+    "content-publishing",
+    "mobile-native",
+    "skill-factory",
+    "plugin-factory",
+    "harness-engineering",
+)
+
 
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:
     """

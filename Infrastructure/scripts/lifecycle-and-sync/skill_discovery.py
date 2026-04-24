@@ -37,6 +37,11 @@ HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 DEFAULT_VISIBLE_FLAT_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
+USER_SKILL_SCOPE_PRECEDENCE = {
+    "global": 10,
+    "local-plugin": 20,
+    "project": 30,
+}
 
 
 @dataclass(frozen=True)
@@ -45,6 +50,63 @@ class SkillEntry:
     source_dir: Path
     category: str
     description: str
+
+
+def classify_skill_scope(source_dir: Path) -> str:
+    """
+    Classify a skill source directory into its ownership scope.
+
+    Project and local-plugin skills are user-authored overlays. They should be
+    visible in reports and win deterministic name collisions without mutating
+    lower-precedence global sources.
+    """
+    try:
+        rel_parts = tuple(part.lower() for part in source_dir.relative_to(REPO_ROOT).parts)
+    except ValueError:
+        try:
+            rel_parts = tuple(part.lower() for part in source_dir.resolve().relative_to(REPO_ROOT).parts)
+        except ValueError:
+            return "external"
+
+    if not rel_parts:
+        return "unknown"
+    if rel_parts[0] == "skills-system":
+        return "system"
+    if rel_parts[:3] == (".agents", "skills", ".system"):
+        return "system"
+    if rel_parts[0] == "skills":
+        if len(rel_parts) > 1 and rel_parts[1] == "project":
+            return "project"
+        return "global"
+    if rel_parts[0] in {"plugins", "plugin"}:
+        if "openai-primary-runtime" in rel_parts or "codex-primary-runtime" in rel_parts:
+            return "primary-runtime"
+        return "local-plugin"
+    if rel_parts[0] == ".agents":
+        return "primary-runtime"
+    return "unknown"
+
+
+def _skill_scope_rank(source_dir: Path) -> int:
+    return USER_SKILL_SCOPE_PRECEDENCE.get(classify_skill_scope(source_dir), 0)
+
+
+def _sort_for_user_scope_precedence(skill_dirs: Iterable[Path]) -> List[Path]:
+    """
+    Sort canonical sources so project > local-plugin > global on name collisions.
+
+    This is used only for canonical repo/plugin discovery. Flat runtime
+    discovery remains flat-first because it is reporting an already-projected
+    runtime surface.
+    """
+    return sorted(
+        skill_dirs,
+        key=lambda path: (
+            -_skill_scope_rank(path),
+            path.name,
+            path.resolve().as_posix(),
+        ),
+    )
 
 
 def get_policy_identity() -> str:
@@ -185,6 +247,26 @@ def _iter_system_lane_skill_dirs() -> List[Path]:
     return dirs
 
 
+def iter_flat_skill_dirs() -> List[Path]:
+    """Public wrapper for default flat runtime skill directory discovery."""
+    return _iter_flat_skill_dirs()
+
+
+def iter_repo_skill_dirs() -> Iterable[Path]:
+    """Public wrapper for canonical repository skill directory discovery."""
+    return _iter_repo_skill_dirs()
+
+
+def iter_plugin_skill_dirs() -> Iterable[Path]:
+    """Public wrapper for canonical plugin skill directory discovery."""
+    return _iter_plugin_skill_dirs()
+
+
+def iter_system_lane_skill_dirs() -> List[Path]:
+    """Public wrapper for hidden/system lane skill directory discovery."""
+    return _iter_system_lane_skill_dirs()
+
+
 def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
     """
     Check whether a skill directory resides inside a plugin-owned subtree under the repository.
@@ -224,6 +306,11 @@ def _is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
     except ValueError:
         return False
     return _is_plugin_owned(rel_resolved.parts)
+
+
+def is_plugin_owned_skill_dir(skill_dir: Path) -> bool:
+    """Public wrapper for plugin-owned skill classification."""
+    return _is_plugin_owned_skill_dir(skill_dir)
 
 
 def _frontmatter_block(text: str) -> List[str]:
@@ -294,6 +381,11 @@ def _parse_frontmatter(skill_md: Path) -> Dict[str, str]:
     return parsed
 
 
+def parse_skill_frontmatter(skill_md: Path) -> Dict[str, str]:
+    """Public wrapper for reading normalized SKILL.md frontmatter fields."""
+    return _parse_frontmatter(skill_md)
+
+
 def _normalize_description(text: str) -> str:
     """
     Normalize a skill description by collapsing consecutive whitespace to single spaces and trimming surrounding space.
@@ -303,6 +395,11 @@ def _normalize_description(text: str) -> str:
     """
     normalized = re.sub(r"\s+", " ", text).strip()
     return normalized or "Skill description pending."
+
+
+def normalize_skill_description(text: str) -> str:
+    """Public wrapper for normalizing a skill description string."""
+    return _normalize_description(text)
 
 
 def discover_catalog_entries(*, advanced: bool = False, source: str = "auto") -> List[SkillEntry]:
@@ -363,11 +460,13 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         if visibility == "advanced":
             # Flat runtime intentionally hides plugin lane skills; advanced mode
             # augments from plugin sources so lanes remain discoverable.
-            skill_dirs.extend(_iter_plugin_skill_dirs())
+            skill_dirs.extend(_sort_for_user_scope_precedence(_iter_plugin_skill_dirs()))
     elif source == "repo":
-        skill_dirs = list(_iter_repo_skill_dirs())
-        skill_dirs.extend(_iter_plugin_skill_dirs())
-        skill_dirs.extend(_iter_system_lane_skill_dirs())
+        skill_dirs = _sort_for_user_scope_precedence([
+            *_iter_repo_skill_dirs(),
+            *_iter_plugin_skill_dirs(),
+            *_iter_system_lane_skill_dirs(),
+        ])
     else:
         skill_dirs = list(_iter_flat_skill_dirs())
         if skill_dirs:
@@ -375,13 +474,19 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
                 # Default listing follows the flat runtime projection. Advanced
                 # mode augments with canonical repo/plugin/system entries so
                 # non-default skills remain discoverable after sync.
-                skill_dirs.extend(_iter_repo_skill_dirs())
-                skill_dirs.extend(_iter_plugin_skill_dirs())
-                skill_dirs.extend(_iter_system_lane_skill_dirs())
+                skill_dirs.extend(
+                    _sort_for_user_scope_precedence([
+                        *_iter_repo_skill_dirs(),
+                        *_iter_plugin_skill_dirs(),
+                        *_iter_system_lane_skill_dirs(),
+                    ])
+                )
         else:
-            skill_dirs = list(_iter_repo_skill_dirs())
-            skill_dirs.extend(_iter_plugin_skill_dirs())
-            skill_dirs.extend(_iter_system_lane_skill_dirs())
+            skill_dirs = _sort_for_user_scope_precedence([
+                *_iter_repo_skill_dirs(),
+                *_iter_plugin_skill_dirs(),
+                *_iter_system_lane_skill_dirs(),
+            ])
 
     for skill_dir in skill_dirs:
         source_dir = skill_dir.resolve()
@@ -474,7 +579,14 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
     lines = [
         "# Agent Skills Index",
         "",
-        "Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/.agents/skills`.",
+        "Canonical skills live in categorized folders below.",
+        "",
+        "Runtime projection is mode-dependent:",
+        "- `flat`: selected allowlisted skills are projected directly.",
+        "- `rooted`: only root skill sets are projected; latent modules route through `.skillsets/**` manifests.",
+        "- `hybrid`: deferred until a named consumer and budget gate exist.",
+        "",
+        "Do not hand-edit runtime projections.",
         "",
         "## Table of Contents",
         "- [Summary](#summary)",

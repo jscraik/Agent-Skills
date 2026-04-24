@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""Generate deterministic latent skill-set manifests for rooted routing."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
+from skillset_model import build_skill_modules, modules_by_skill_set, rel, repo_root
+
+DEFAULT_OUTPUT_DIR = repo_root() / ".skillsets"
+
+
+def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
+    modules, unmapped = build_skill_modules()
+    grouped = modules_by_skill_set(modules)
+    duplicate_ids: list[dict[str, Any]] = []
+    duplicate_source_paths: list[dict[str, Any]] = []
+    rows_by_identity: dict[tuple[str, str], list[Any]] = defaultdict(list)
+    rows_by_source: dict[str, list[Any]] = defaultdict(list)
+    for module in modules:
+        rows_by_identity[(module.skill_set, module.id)].append(module)
+        rows_by_source[module.source_path].append(module)
+    for (skill_set, module_id), rows in sorted(rows_by_identity.items()):
+        if len(rows) > 1:
+            duplicate_ids.append({
+                "skill_set": skill_set,
+                "id": module_id,
+                "source_paths": [row.source_path for row in rows],
+            })
+    for source_path, rows in sorted(rows_by_source.items()):
+        if len(rows) > 1:
+            duplicate_source_paths.append({
+                "source_path": source_path,
+                "entries": [{"skill_set": row.skill_set, "id": row.id} for row in rows],
+            })
+    missing_provenance = [
+        module.source_path
+        for module in modules
+        if not module.provenance.get("generator")
+        or not module.provenance.get("policy_identity")
+        or not module.provenance.get("source_sha256")
+    ]
+    violations: list[dict[str, Any]] = []
+    if duplicate_ids:
+        violations.append({"code": "DUPLICATE_MANIFEST_IDS", "duplicates": duplicate_ids})
+    if duplicate_source_paths:
+        violations.append({"code": "DUPLICATE_MANIFEST_SOURCE_PATHS", "duplicates": duplicate_source_paths})
+    if missing_provenance:
+        violations.append({"code": "MISSING_MANIFEST_PROVENANCE", "source_paths": missing_provenance})
+    manifests = []
+    for skill_set in ROOT_SKILL_SET_NAMES:
+        rows = grouped.get(skill_set, [])
+        manifest_path = output_dir / skill_set / "manifest.jsonl"
+        manifests.append({
+            "skill_set": skill_set,
+            "path": rel(manifest_path),
+            "count": len(rows),
+            "metadata_status_counts": _count_by(rows, "metadata_status"),
+            "rows": [row.to_manifest_row() for row in rows],
+        })
+    return {
+        "status": "pass" if not violations else "fail",
+        "projection_mode": "rooted",
+        "policy_identity": policy_identity(),
+        "manifest_count": len(manifests),
+        "module_count": len(modules),
+        "unmapped": unmapped,
+        "duplicate_ids": duplicate_ids,
+        "duplicate_source_paths": duplicate_source_paths,
+        "violations": violations,
+        "manifests": manifests,
+    }
+
+
+def _count_by(rows: list[Any], attr: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        value = str(getattr(row, attr))
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def write_manifests(report: dict[str, Any], output_dir: Path) -> list[dict[str, str]]:
+    writes: list[dict[str, str]] = []
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for manifest in report["manifests"]:
+        target = output_dir / manifest["skill_set"] / "manifest.jsonl"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        rows = sorted(manifest["rows"], key=lambda row: (row["id"], row["source_path"]))
+        content = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
+        target.write_text(content, encoding="utf-8")
+        writes.append({"path": rel(target), "action": "write", "count": str(len(rows))})
+    return writes
+
+
+def public_report(report: dict[str, Any]) -> dict[str, Any]:
+    return {
+        **report,
+        "manifests": [
+            {key: value for key, value in manifest.items() if key != "rows"}
+            for manifest in report["manifests"]
+        ],
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--write", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+
+    report = build_manifest_report(args.output_dir)
+    writes: list[dict[str, str]] = []
+    if args.write and not args.dry_run:
+        if report["status"] != "pass":
+            if args.json:
+                print(json.dumps(public_report(report), indent=2, sort_keys=True))
+            return 1
+        writes = write_manifests(report, args.output_dir)
+    payload = {**public_report(report), "writes": writes, "dry_run": bool(args.dry_run or not args.write)}
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(f"skill-set manifests: {payload['status']} ({payload['module_count']} modules)")
+        for violation in payload["violations"]:
+            print(f"- {violation['code']}")
+    return 0 if report["status"] == "pass" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

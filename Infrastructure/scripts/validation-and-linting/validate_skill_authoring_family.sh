@@ -405,6 +405,12 @@ fi
 
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${python_cmd[@]}" -m pytest)
+elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 pytest)
+  echo "[family-gate] using uv project pytest command (UV_CACHE_DIR=$uv_pytest_cache_dir)"
+elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 python -m pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 python -m pytest)
+  echo "[family-gate] using uv project pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
 elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest)
   echo "[family-gate] using uv ephemeral pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
