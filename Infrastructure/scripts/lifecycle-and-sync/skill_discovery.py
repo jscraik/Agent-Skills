@@ -372,9 +372,12 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         skill_dirs = list(_iter_flat_skill_dirs())
         if skill_dirs:
             if visibility == "advanced":
-                # Default listing follows flat runtime projection; advanced mode
-                # adds plugin lanes without changing default surface area.
+                # Default listing follows the flat runtime projection. Advanced
+                # mode augments with canonical repo/plugin/system entries so
+                # non-default skills remain discoverable after sync.
+                skill_dirs.extend(_iter_repo_skill_dirs())
                 skill_dirs.extend(_iter_plugin_skill_dirs())
+                skill_dirs.extend(_iter_system_lane_skill_dirs())
         else:
             skill_dirs = list(_iter_repo_skill_dirs())
             skill_dirs.extend(_iter_plugin_skill_dirs())

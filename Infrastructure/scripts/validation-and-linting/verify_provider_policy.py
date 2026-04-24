@@ -38,7 +38,9 @@ def _rel(path: Path) -> str:
 
 def _matches_allowed(rel_path: str, patterns: list[str]) -> bool:
     for pattern in patterns:
-        normalized = pattern.strip().lstrip("./")
+        normalized = pattern.strip()
+        if normalized.startswith("./"):
+            normalized = normalized[2:]
         if not normalized:
             continue
         if normalized.endswith("/"):

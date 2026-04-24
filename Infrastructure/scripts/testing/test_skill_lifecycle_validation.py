@@ -463,13 +463,11 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("Plugin-shadowing check failed", result.stderr)
             self.assertIn("- demo-shadow", result.stderr)
 
-    def test_plugin_shadowing_check_allows_allowlisted_overlap(self) -> None:
+    def test_plugin_shadowing_check_allows_system_bridge_overlap(self) -> None:
         selection_policy = load_selection_policy_module()
-        allowlisted = tuple(
-            selection_policy.PLUGIN_VISIBLE_ROUTER_SKILL_NAMES
-        ) or tuple(selection_policy.SYSTEM_BRIDGE_SKILL_NAMES)
+        allowlisted = tuple(selection_policy.SYSTEM_BRIDGE_SKILL_NAMES)
         if not allowlisted:
-            self.skipTest("No overlap allowlist configured in selection policy.")
+            self.skipTest("No system bridge overlap allowlist configured in selection policy.")
 
         router_skill = allowlisted[0]
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -478,20 +476,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 repo_root / "plugins" / "demo-plugin" / "skills" / router_skill / "SKILL.md",
                 "# plugin skill",
             )
-            if router_skill in selection_policy.SYSTEM_BRIDGE_SKILL_NAMES:
-                system_skill_dir = repo_root / "skills-system" / router_skill
-                write_text(system_skill_dir / "SKILL.md", "# bridge skill")
-                flat_root = repo_root / ".agents" / "skills"
-                flat_root.mkdir(parents=True, exist_ok=True)
-                (flat_root / ".system").symlink_to(
-                    "../../skills-system", target_is_directory=True
-                )
-                (flat_root / router_skill).symlink_to(f".system/{router_skill}")
-            else:
-                write_text(
-                    repo_root / ".agents" / "skills" / router_skill / "SKILL.md",
-                    "# flat skill",
-                )
+            system_skill_dir = repo_root / "skills-system" / router_skill
+            write_text(system_skill_dir / "SKILL.md", "# bridge skill")
+            flat_root = repo_root / ".agents" / "skills"
+            flat_root.mkdir(parents=True, exist_ok=True)
+            (flat_root / ".system").symlink_to(
+                "../../skills-system", target_is_directory=True
+            )
+            (flat_root / router_skill).symlink_to(f".system/{router_skill}")
 
             result = run_shadow_check(repo_root)
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
@@ -659,6 +651,62 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(default_names, [])
         self.assertEqual(advanced_names, ["code-review", "coderabbit"])
 
+    def test_skill_discovery_auto_advanced_includes_repo_non_default_skills(self) -> None:
+        """
+        Ensure auto+advanced discovery keeps non-default repository skills visible.
+
+        When flat runtime projection exists, default discovery should still follow
+        flat policy, while advanced discovery must augment with canonical repo
+        roots so non-default skills do not disappear after sync.
+        """
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            system_root = flat_root / ".system"
+            repo_skill_root = repo_root / "Skills" / "engineering" / "diagram-cli"
+
+            write_text(
+                flat_root / "autofix" / "SKILL.md",
+                """
+                ---
+                name: autofix
+                description: "default surface skill"
+                ---
+                # autofix
+                """,
+            )
+            write_text(
+                repo_skill_root / "SKILL.md",
+                """
+                ---
+                name: diagram-cli
+                description: "non-default repo skill"
+                ---
+                # diagram-cli
+                """,
+            )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+                mock.patch.object(skill_discovery, "SYSTEM_LANE_DIR", system_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="advanced",
+                )
+
+        self.assertEqual(sorted(entry.name for entry in default_entries), ["autofix"])
+        self.assertEqual(
+            sorted(entry.name for entry in advanced_entries),
+            ["autofix", "diagram-cli"],
+        )
+
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         """
         Ensure the sync script references the selection policy and its exported constants required for skill syncing.
@@ -785,9 +833,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             content,
         )
 
-    def test_sync_script_uses_entry_marketplace_for_local_cache_routing(self) -> None:
+    def test_sync_script_defaults_local_marketplace_to_agent_skills_identity(self) -> None:
         """
-        Ensure local-source plugins route to their declared marketplace family.
+        Ensure local-source plugins default to the canonical local marketplace identity.
 
         Curated plugins are declared with `marketplace` metadata per entry and
         must stay under that cache family rather than inheriting the manifest
