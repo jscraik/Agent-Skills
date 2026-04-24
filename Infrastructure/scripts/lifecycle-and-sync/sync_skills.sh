@@ -467,10 +467,6 @@ while IFS= read -r skill_path; do
     echo "Skipping hidden flat skill: $skill_name"
     continue
   fi
-  if ! is_default_visible_flat_skill_name "$skill_name"; then
-    echo "Skipping non-default flat skill: $skill_name"
-    continue
-  fi
   skill_dir_abs="$repo_root/$skill_dir"
   discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
   if is_plugin_owned_skill_path "$skill_path"; then
@@ -482,15 +478,14 @@ while IFS= read -r skill_path; do
       echo "Skipping hidden plugin lane skill: $skill_name"
       continue
     fi
-    if ! is_plugin_visible_router_skill_name "$skill_name"; then
-      echo "Skipping non-router plugin skill in flat runtime list: $skill_name"
-      continue
-    fi
     if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
       router_collision_count=$((router_collision_count + 1))
       continue
     fi
     echo "Including plugin-owned skill in flat runtime list: $skill_name"
+  elif ! is_default_visible_flat_skill_name "$skill_name"; then
+    echo "Skipping non-default flat skill: $skill_name"
+    continue
   fi
   # Relative path from $skills_dir (.agents/skills/) back to the skill source.
   # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
@@ -1186,11 +1181,18 @@ normalize_plugin_copy() {
   local plugin_dir="$1"
   local label="${2:-runtime}"
   local skills_dir="$plugin_dir/skills"
+  local plugin_dir_real=""
   local skill_entry=""
   local resolved=""
   local skill_link=""
   local tmp_file=""
   local duplicate_category=""
+
+  plugin_dir_real="$(cd "$plugin_dir" 2>/dev/null && pwd -P || true)"
+  if [ -z "$plugin_dir_real" ]; then
+    echo "[WARN] Could not resolve ${label} plugin copy root: $plugin_dir"
+    return 0
+  fi
 
   if [ -d "$skills_dir" ]; then
     while IFS= read -r skill_entry; do
@@ -1204,6 +1206,13 @@ normalize_plugin_copy() {
       resolved="$(cd "$(dirname "$skill_entry")" 2>/dev/null && cd "$(readlink "$skill_entry")" 2>/dev/null && pwd -P || true)"
       [ -n "$resolved" ] || continue
       [ -d "$resolved" ] || continue
+      case "$resolved" in
+        "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
+        *)
+          echo "[WARN] Refusing to materialize ${label} skill alias outside plugin copy: skills_dir=$skills_dir skill_entry=$skill_entry resolved=$resolved"
+          continue
+          ;;
+      esac
       rm -f -- "$skill_entry"
       cp -aL "$resolved" "$skill_entry"
       echo "[OK] Materialized ${label} skill alias: $skill_entry"
@@ -1217,6 +1226,18 @@ normalize_plugin_copy() {
         echo "[WARN] Could not read ${label} skill symlink target: $skill_link"
         continue
       fi
+      resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$skill_link" 2>/dev/null || true)"
+      if [ -z "$resolved" ]; then
+        echo "[WARN] Could not resolve ${label} skill symlink target: skills_dir=$skills_dir skill_link=$skill_link"
+        continue
+      fi
+      case "$resolved" in
+        "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
+        *)
+          echo "[WARN] Refusing to materialize ${label} skill file outside plugin copy: skills_dir=$skills_dir skill_link=$skill_link resolved=$resolved"
+          continue
+          ;;
+      esac
       tmp_file="$(mktemp)"
       if cp -- "$skill_link" "$tmp_file"; then
         rm -f -- "$skill_link"

@@ -483,7 +483,6 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             (flat_root / ".system").symlink_to(
                 "../../skills-system", target_is_directory=True
             )
-            (flat_root / router_skill).symlink_to(f".system/{router_skill}")
 
             result = run_shadow_check(repo_root)
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)

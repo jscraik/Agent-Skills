@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -72,11 +73,13 @@ def _matches_allowed(rel_path: str, patterns: list[str]) -> bool:
 
 def _iter_repo_paths() -> list[str]:
     paths: list[str] = []
-    for path in REPO_ROOT.rglob("*"):
-        parts = set(path.relative_to(REPO_ROOT).parts)
-        if parts & DEFAULT_EXCLUDED_DIRS:
-            continue
-        paths.append(_rel(path))
+    for root, dirnames, filenames in os.walk(REPO_ROOT, topdown=True):
+        dirnames[:] = [name for name in dirnames if name not in DEFAULT_EXCLUDED_DIRS]
+        root_path = Path(root)
+        for dirname in dirnames:
+            paths.append(_rel(root_path / dirname))
+        for filename in filenames:
+            paths.append(_rel(root_path / filename))
     return sorted(paths)
 
 
