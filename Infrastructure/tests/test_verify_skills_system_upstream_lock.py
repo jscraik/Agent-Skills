@@ -53,6 +53,72 @@ class VerifySkillsSystemUpstreamLockTests(unittest.TestCase):
         module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
         self.assertTrue(any("tool_prefix must align with mcp_server" in issue for issue in issues))
 
+    def test_local_compatibility_overrides_rejects_non_string_surface(self) -> None:
+        module = load_verify_lock_module()
+        payload = {
+            "local_compatibility_overrides": [
+                {
+                    "surface": 123,
+                    "mcp_server": "openaiDeveloperDocs",
+                    "tool_prefix": "mcp__openaiDeveloperDocs__",
+                }
+            ]
+        }
+        issues: list[str] = []
+        module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
+        self.assertTrue(len(issues) > 0)
+        self.assertTrue(any("surface must be a string" in issue for issue in issues))
+
+    def test_local_compatibility_overrides_rejects_non_string_mcp_server(self) -> None:
+        module = load_verify_lock_module()
+        payload = {
+            "local_compatibility_overrides": [
+                {
+                    "surface": "openai-docs",
+                    "mcp_server": None,
+                    "tool_prefix": "mcp__openaiDeveloperDocs__",
+                }
+            ]
+        }
+        issues: list[str] = []
+        module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
+        self.assertTrue(len(issues) > 0)
+        self.assertTrue(any("mcp_server must be a string" in issue for issue in issues))
+
+    def test_local_compatibility_overrides_rejects_non_string_tool_prefix(self) -> None:
+        module = load_verify_lock_module()
+        payload = {
+            "local_compatibility_overrides": [
+                {
+                    "surface": "openai-docs",
+                    "mcp_server": "openaiDeveloperDocs",
+                    "tool_prefix": {},
+                }
+            ]
+        }
+        issues: list[str] = []
+        module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
+        self.assertTrue(len(issues) > 0)
+        self.assertTrue(any("tool_prefix must be a string" in issue for issue in issues))
+
+    def test_local_compatibility_overrides_rejects_multiple_non_string_types(self) -> None:
+        module = load_verify_lock_module()
+        payload = {
+            "local_compatibility_overrides": [
+                {
+                    "surface": 1,
+                    "mcp_server": None,
+                    "tool_prefix": {},
+                }
+            ]
+        }
+        issues: list[str] = []
+        module._validate_local_compatibility_overrides(payload, issues)  # pylint: disable=protected-access
+        self.assertTrue(len(issues) >= 3)
+        self.assertTrue(any("surface must be a string" in issue for issue in issues))
+        self.assertTrue(any("mcp_server must be a string" in issue for issue in issues))
+        self.assertTrue(any("tool_prefix must be a string" in issue for issue in issues))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -276,17 +276,34 @@ def _validate_local_compatibility_overrides(payload: dict[str, Any], issues: lis
             issues.append(f"{label} must be an object")
             continue
 
-        surface = str(item.get("surface", "")).strip()
-        mcp_server = str(item.get("mcp_server", "")).strip()
-        tool_prefix = str(item.get("tool_prefix", "")).strip()
+        surface_raw = item.get("surface", "")
+        mcp_server_raw = item.get("mcp_server", "")
+        tool_prefix_raw = item.get("tool_prefix", "")
 
-        if not SURFACE_RE.fullmatch(surface):
+        # Verify types are strings before validation
+        if not isinstance(surface_raw, str):
+            issues.append(f"{label}.surface must be a string")
+            surface_raw = ""  # Prevent further validation
+        if not isinstance(mcp_server_raw, str):
+            issues.append(f"{label}.mcp_server must be a string")
+            mcp_server_raw = ""  # Prevent further validation
+        if not isinstance(tool_prefix_raw, str):
+            issues.append(f"{label}.tool_prefix must be a string")
+            tool_prefix_raw = ""  # Prevent further validation
+
+        # Only validate strings (strip and check regex)
+        surface = surface_raw.strip() if isinstance(surface_raw, str) else ""
+        mcp_server = mcp_server_raw.strip() if isinstance(mcp_server_raw, str) else ""
+        tool_prefix = tool_prefix_raw.strip() if isinstance(tool_prefix_raw, str) else ""
+
+        if surface and not SURFACE_RE.fullmatch(surface):
             issues.append(f"{label}.surface must match {SURFACE_RE.pattern}")
-        if not MCP_SERVER_RE.fullmatch(mcp_server):
+        if mcp_server and not MCP_SERVER_RE.fullmatch(mcp_server):
             issues.append(f"{label}.mcp_server must match {MCP_SERVER_RE.pattern}")
-        if not TOOL_PREFIX_RE.fullmatch(tool_prefix):
+        if tool_prefix and not TOOL_PREFIX_RE.fullmatch(tool_prefix):
             issues.append(f"{label}.tool_prefix must match {TOOL_PREFIX_RE.pattern}")
-        if mcp_server and tool_prefix and tool_prefix != f"mcp__{mcp_server}__":
+        if (isinstance(mcp_server_raw, str) and isinstance(tool_prefix_raw, str)
+            and mcp_server and tool_prefix and tool_prefix != f"mcp__{mcp_server}__"):
             issues.append(
                 f"{label}.tool_prefix must align with mcp_server "
                 f"(expected mcp__{mcp_server}__)"
