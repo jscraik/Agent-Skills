@@ -14,6 +14,9 @@ from typing import Any
 
 LOCK_SCHEMA_VERSION = "skills-system-upstream-lock.v1"
 SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
+MCP_SERVER_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
+TOOL_PREFIX_RE = re.compile(r"^mcp__[A-Za-z][A-Za-z0-9_]*__$")
+SURFACE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -250,6 +253,46 @@ def _validate_managed_dirs(payload: dict[str, Any], repo_root: Path, issues: lis
                 )
 
 
+def _validate_local_compatibility_overrides(payload: dict[str, Any], issues: list[str]) -> None:
+    """
+    Validate local_compatibility_overrides section in lock payload.
+
+    Parameters:
+        payload (dict[str, Any]): Parsed lock file content.
+        issues (list[str]): Mutable list of issue messages that will be mutated in-place.
+    """
+    overrides = payload.get("local_compatibility_overrides")
+    _expect(
+        isinstance(overrides, list),
+        "local_compatibility_overrides must be a list",
+        issues,
+    )
+    if not isinstance(overrides, list):
+        return
+
+    for index, item in enumerate(overrides):
+        label = f"local_compatibility_overrides[{index}]"
+        if not isinstance(item, dict):
+            issues.append(f"{label} must be an object")
+            continue
+
+        surface = str(item.get("surface", "")).strip()
+        mcp_server = str(item.get("mcp_server", "")).strip()
+        tool_prefix = str(item.get("tool_prefix", "")).strip()
+
+        if not SURFACE_RE.fullmatch(surface):
+            issues.append(f"{label}.surface must match {SURFACE_RE.pattern}")
+        if not MCP_SERVER_RE.fullmatch(mcp_server):
+            issues.append(f"{label}.mcp_server must match {MCP_SERVER_RE.pattern}")
+        if not TOOL_PREFIX_RE.fullmatch(tool_prefix):
+            issues.append(f"{label}.tool_prefix must match {TOOL_PREFIX_RE.pattern}")
+        if mcp_server and tool_prefix and tool_prefix != f"mcp__{mcp_server}__":
+            issues.append(
+                f"{label}.tool_prefix must align with mcp_server "
+                f"(expected mcp__{mcp_server}__)"
+            )
+
+
 def main() -> int:
     """
     Validate a skills-system upstream lock file according to the tool's schema and exit with a status code.
@@ -284,6 +327,7 @@ def main() -> int:
     _validate_upstream(payload, repo_root, issues)
     _validate_bridge_entries(payload, repo_root, issues)
     _validate_managed_dirs(payload, repo_root, issues)
+    _validate_local_compatibility_overrides(payload, issues)
 
     if issues:
         print("skills-system upstream lock validation failed:", file=sys.stderr)

@@ -64,7 +64,13 @@ def _matches_allowed(rel_path: str, patterns: list[str]) -> bool:
         if not normalized:
             continue
         if normalized.endswith("/"):
-            if rel_path.startswith(normalized) or fnmatch.fnmatch(rel_path, normalized + "*"):
+            prefix = normalized.rstrip("/")
+            if (
+                rel_path == prefix
+                or rel_path.startswith(prefix + "/")
+                or fnmatch.fnmatch(rel_path, prefix)
+                or fnmatch.fnmatch(rel_path, f"{prefix}/*")
+            ):
                 return True
         elif fnmatch.fnmatch(rel_path, normalized):
             return True

@@ -29,6 +29,10 @@
     "skills-system/skill-installer"
   ],
   "local_compatibility_overrides": [
-    "openai-docs MCP server/tool names use openaiDeveloperDocs and mcp__openaiDeveloperDocs__* for current runtime compatibility"
+    {
+      "surface": "openai-docs",
+      "mcp_server": "openaiDeveloperDocs",
+      "tool_prefix": "mcp__openaiDeveloperDocs__"
+    }
   ]
 }

@@ -805,13 +805,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         Verify the sync script materializes plugin skill aliases for runtime and cache copies.
 
         Asserts that `normalize_plugin_copy()` includes top-level alias materialization
-        logic using dereferenced directory copies and that both runtime and cache flows
+        logic that preserves nested symlinks during directory copies and that both
+        runtime and cache flows
         invoke normalization.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("normalize_plugin_copy()", content)
         self.assertIn('find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print', content)
-        self.assertIn('cp -aL "$resolved" "$skill_entry"', content)
+        self.assertIn('cp -a "$resolved" "$skill_entry"', content)
         self.assertIn('normalize_plugin_copy "$1" "runtime"', content)
         self.assertIn('normalize_plugin_copy "$1" "cached"', content)
 

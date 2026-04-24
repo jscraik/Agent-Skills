@@ -1214,7 +1214,7 @@ normalize_plugin_copy() {
           ;;
       esac
       rm -f -- "$skill_entry"
-      cp -aL "$resolved" "$skill_entry"
+      cp -a "$resolved" "$skill_entry"
       echo "[OK] Materialized ${label} skill alias: $skill_entry"
     done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print)
 

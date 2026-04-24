@@ -43,6 +43,15 @@ class VerifyProviderPolicyTests(unittest.TestCase):
             )
         )
 
+    def test_matches_allowed_trailing_slash_matches_directory_node(self) -> None:
+        module = load_verify_provider_policy_module()
+        self.assertTrue(
+            module._matches_allowed(  # pylint: disable=protected-access
+                "Infrastructure/artifacts",
+                ["Infrastructure/artifacts/"],
+            )
+        )
+
     def test_build_report_requires_default_provider_in_allowed_runtime_providers(self) -> None:
         module = load_verify_provider_policy_module()
         with tempfile.TemporaryDirectory() as tmpdir:
