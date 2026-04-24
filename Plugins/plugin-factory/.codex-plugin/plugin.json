@@ -13,10 +13,9 @@
   "keywords": [
     "plugin",
     "plugin-factory",
+    "plugin-factory-router",
     "plugin-router",
     "plugin-builder",
-    "plugin-creator",
-    "plugin-installer",
     "codex"
   ],
   "governance": {
@@ -31,7 +30,7 @@
   "interface": {
     "displayName": "Plugin Factory",
     "shortDescription": "Route, create, harden, and install Codex plugins",
-    "longDescription": "A Codex plugin package that bundles the plugin-authoring family: plugin-router, plugin-builder, plugin-creator, and plugin-installer.",
+    "longDescription": "A Codex plugin package that exposes plugin-factory-router, plugin-router, and plugin-builder in the picker. Plugin creator and installer bridge skills remain available through the System surface.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [

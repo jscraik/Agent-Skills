@@ -8,8 +8,8 @@ usage() {
 Usage: Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh [--repo-root <path>]
 
 Fails when a flat surfaced skill in .agents/skills shares a name with any
-plugin-exported skill under Plugins/*/skills/*, excluding policy-allowlisted
-plugin router skills intentionally surfaced in flat runtime.
+plugin-exported skill under Plugins/*/skills/*. Hidden `.system` bridge aliases
+are the only allowlisted overlap.
 USAGE
 }
 
@@ -63,24 +63,9 @@ fi
 eval "$selection_policy_shell"
 # Safely handle empty arrays under bash 3.x where ${arr[@]} with set -u
 # fails when the array is empty.  Re-parse the variable line from the eval output.
-_visible_line="$(printf '%s\n' "$selection_policy_shell" | grep '^SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS=')"
-_inner="${_visible_line#SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS=(}"
-_inner="${_inner%)}"
-# shellcheck disable=SC2206
-if [[ -n "$_inner" ]]; then
-  plugin_visible_router_skills=($_inner)
-else
-  plugin_visible_router_skills=()
-fi
-
 is_allowlisted_overlap_skill_name() {
   local skill_name="$1"
   local _rv_list=""
-  # plugin_visible_router_skills may be empty; build space-separated string safely.
-  _rv_list="${plugin_visible_router_skills[*]:-}"
-  if [[ -n "$_rv_list" ]] && [[ " $_rv_list " == *" $skill_name "* ]]; then
-    return 0
-  fi
   _rv_list="${system_bridge_skill_names[*]:-}"
   if [[ -n "$_rv_list" ]] && [[ " $_rv_list " == *" $skill_name "* ]]; then
     return 0

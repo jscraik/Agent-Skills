@@ -358,6 +358,9 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertTrue(
             module.should_skip_skill_path(Path(".codex/skills/.system/canonical-skill/SKILL.md"))
         )
+        self.assertTrue(
+            module.should_skip_skill_path(Path("Plugins/cache/openai-curated/cloudflare/skills/cache-skill/SKILL.md"))
+        )
         self.assertFalse(module.should_skip_skill_path(Path(".codex/skills/custom-skill/SKILL.md")))
 
     def test_packaged_representation_does_not_count_as_duplicate(self) -> None:

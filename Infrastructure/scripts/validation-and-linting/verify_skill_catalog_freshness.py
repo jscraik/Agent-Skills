@@ -219,16 +219,17 @@ def _resolves_into_plugin_tree(path: Path, repo_root: Path) -> bool:
         rel = resolved.relative_to(repo_root.resolve())
     except (FileNotFoundError, RuntimeError, ValueError):
         return False
-    return bool(rel.parts) and rel.parts[0] == "plugins"
+    return bool(rel.parts) and rel.parts[0].casefold() == "plugins"
 
 
 def should_skip_skill_path(rel: Path) -> bool:
-    if rel.parts and rel.parts[0] in SKIP_DIRS:
+    normalized_parts = tuple(part.casefold() for part in rel.parts)
+    if normalized_parts and normalized_parts[0] in SKIP_DIRS:
         return True
-    if any(part in SKIP_PATH_PARTS for part in rel.parts):
+    if any(part in SKIP_PATH_PARTS for part in normalized_parts):
         return True
     for prefix in SKIP_PATH_PREFIXES:
-        if rel.parts[: len(prefix)] == prefix:
+        if normalized_parts[: len(prefix)] == prefix:
             return True
     return False
 

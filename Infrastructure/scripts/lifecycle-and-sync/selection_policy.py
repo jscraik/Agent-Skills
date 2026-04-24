@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-23.v17"
+POLICY_VERSION = "2026-04-24.v18"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -63,37 +63,13 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "simplify",
     "triage",
     "verification-before-completion",
-    "he-code-review",
-    "he-prune-branches",
-    "he-reliability-review",
-    "he-router",
-    "he-technical-review",
-    "he-work",
-    "plugin-router",
-    "skill-builder",
-    "skill-factory-router",
-    "skill-refactor",
-    "skillify",
     "imagegen",
     "openai-docs",
 )
 
-# Plugin-owned skills intentionally promoted into default discovery for the
-# first-level picker surface. Keep this aligned with
-# DEFAULT_VISIBLE_FLAT_SKILL_NAMES to avoid visibility drift.
-PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = (
-    "he-code-review",
-    "he-prune-branches",
-    "he-reliability-review",
-    "he-router",
-    "he-technical-review",
-    "he-work",
-    "plugin-router",
-    "skill-builder",
-    "skill-factory-router",
-    "skill-refactor",
-    "skillify",
-)
+# Plugin-owned skills stay on their plugin first-level picker surface. Do not
+# promote them into flat runtime discovery, or Codex can render duplicate rows.
+PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills hidden from default flat discovery.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()

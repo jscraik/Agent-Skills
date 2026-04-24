@@ -2,7 +2,7 @@
   "interface": {
     "displayName": "Local Plugins"
   },
-  "name": "local",
+  "name": "agent-skills-local",
   "plugins": [
     {
       "category": "Coding",

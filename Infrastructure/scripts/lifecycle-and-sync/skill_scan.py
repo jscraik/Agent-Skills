@@ -43,7 +43,7 @@ RELOCATION_GUARD_SKILL_FILES = {
     "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
     "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
     "plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "plugins/plugin-factory/skills_index/plugin-factory-router",
+    "plugins/plugin-factory/skills/plugin-factory-router",
     "plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
     "plugins/plugin-factory/skills/code_quality_review/plugin-builder",
     "plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",

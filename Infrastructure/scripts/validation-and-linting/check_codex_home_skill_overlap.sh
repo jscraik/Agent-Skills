@@ -9,7 +9,7 @@ all_marketplaces=0
 remediate_cache_skills=0
 marketplaces=()
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-repo_root="$(cd "$script_dir/.." && pwd)"
+repo_root="$(cd "$script_dir/../../.." && pwd)"
 
 usage() {
   cat <<'USAGE'
@@ -18,7 +18,7 @@ Usage:
 
 Compares flat surfaced skills in <codex-home>/skills against plugin-cache
 skills in <codex-home>/<cache-rel>/<marketplace>/... and reports overlap.
-Overlaps allowlisted by selection policy are excluded from strict failures.
+Hidden `.system` bridge aliases are the only allowlisted overlap.
 
 Options:
   --codex-home <path>     Codex home to inspect (default: $CODEX_HOME or ~/.codex)
@@ -228,7 +228,7 @@ try:
 except Exception:
     raise SystemExit(0)
 
-for key in ("plugin_visible_router_skill_names", "system_bridge_skill_names"):
+for key in ("system_bridge_skill_names",):
     for name in data.get(key, []):
         if isinstance(name, str) and name.strip():
             print(name.strip())
