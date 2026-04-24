@@ -535,6 +535,10 @@ for bridge_skill in "${system_bridge_skills[@]}"; do
   bridge_source=".system/$bridge_skill"
   if [ ! -e "$skills_dir/$bridge_source" ]; then
     echo "[WARN] Missing system bridge source: $skills_dir/$bridge_source"
+    if [ -e "$skills_dir/$bridge_skill" ] || [ -L "$skills_dir/$bridge_skill" ]; then
+      rm -rf -- "${skills_dir:?}/${bridge_skill:?}"
+      echo "Removed stale first-level bridge skill alias: $bridge_skill"
+    fi
     continue
   fi
 
@@ -1218,45 +1222,51 @@ normalize_plugin_copy() {
       echo "[OK] Materialized ${label} skill alias: $skill_entry"
 
       # Recursively materialize any nested symlinks (both files and directories) within the copied tree
-      while IFS= read -r -d '' nested_link; do
-        [ -n "$nested_link" ] || continue
-        [ -L "$nested_link" ] || continue
-        nested_resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$nested_link" 2>/dev/null || true)"
-        if [ -z "$nested_resolved" ]; then
-          echo "[WARN] Could not resolve ${label} nested symlink: $nested_link"
-          continue
-        fi
-        case "$nested_resolved" in
-          "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
-          *)
-            echo "[WARN] Refusing to materialize ${label} nested symlink outside plugin copy: nested_link=$nested_link nested_resolved=$nested_resolved"
+      # Repeat until no more directory symlinks are materialized (to catch second-order directory symlinks)
+      local dir_symlinks_materialized=1
+      while [ "$dir_symlinks_materialized" -gt 0 ]; do
+        dir_symlinks_materialized=0
+        while IFS= read -r -d '' nested_link; do
+          [ -n "$nested_link" ] || continue
+          [ -L "$nested_link" ] || continue
+          nested_resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$nested_link" 2>/dev/null || true)"
+          if [ -z "$nested_resolved" ]; then
+            echo "[WARN] Could not resolve ${label} nested symlink: $nested_link"
             continue
-            ;;
-        esac
-        if [ -d "$nested_link" ]; then
-          # Directory symlink - copy recursively then remove link
-          tmp_dir="$(mktemp -d)"
-          if cp -a "$nested_link/." "$tmp_dir/"; then
-            rm -f -- "$nested_link"
-            mv "$tmp_dir" "$nested_link"
-            echo "[OK] Materialized ${label} nested directory symlink: $nested_link"
-          else
-            rm -rf -- "$tmp_dir"
-            echo "[WARN] Failed to materialize ${label} nested directory symlink: $nested_link"
           fi
-        elif [ -f "$nested_link" ]; then
-          # File symlink - copy to temp then replace
-          tmp_file="$(mktemp)"
-          if cp -- "$nested_link" "$tmp_file"; then
-            rm -f -- "$nested_link"
-            mv "$tmp_file" "$nested_link"
-            echo "[OK] Materialized ${label} nested file symlink: $nested_link"
-          else
-            rm -f -- "$tmp_file"
-            echo "[WARN] Failed to materialize ${label} nested file symlink: $nested_link"
+          case "$nested_resolved" in
+            "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
+            *)
+              echo "[WARN] Refusing to materialize ${label} nested symlink outside plugin copy: nested_link=$nested_link nested_resolved=$nested_resolved"
+              continue
+              ;;
+          esac
+          if [ -d "$nested_link" ]; then
+            # Directory symlink - copy recursively then remove link
+            tmp_dir="$(mktemp -d)"
+            if cp -a "$nested_link/." "$tmp_dir/"; then
+              rm -f -- "$nested_link"
+              mv "$tmp_dir" "$nested_link"
+              echo "[OK] Materialized ${label} nested directory symlink: $nested_link"
+              dir_symlinks_materialized=$((dir_symlinks_materialized + 1))
+            else
+              rm -rf -- "$tmp_dir"
+              echo "[WARN] Failed to materialize ${label} nested directory symlink: $nested_link"
+            fi
+          elif [ -f "$nested_link" ]; then
+            # File symlink - copy to temp then replace
+            tmp_file="$(mktemp)"
+            if cp -- "$nested_link" "$tmp_file"; then
+              rm -f -- "$nested_link"
+              mv "$tmp_file" "$nested_link"
+              echo "[OK] Materialized ${label} nested file symlink: $nested_link"
+            else
+              rm -f -- "$tmp_file"
+              echo "[WARN] Failed to materialize ${label} nested file symlink: $nested_link"
+            fi
           fi
-        fi
-      done < <(find "$skill_entry" -type l -print0)
+        done < <(find "$skill_entry" -type l -print0)
+      done
     done < <(find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print)
 
     while IFS= read -r -d '' skill_link; do
