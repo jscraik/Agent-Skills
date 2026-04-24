@@ -168,8 +168,9 @@ def _activation_state(
         if marketplace_name:
             candidates.append(marketplace_name)
 
-        # Backward compatibility for legacy local plugin cache families.
-        candidates.append("agent-skills-local")
+        # Backward compatibility for legacy local plugin cache families only.
+        if any(candidate in {"local", "agent-skills-local"} for candidate in candidates):
+            candidates.append("agent-skills-local")
 
         deduped_candidates = tuple(dict.fromkeys(candidates))
         cache_roots = (

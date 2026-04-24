@@ -75,6 +75,11 @@ class TestAskPluginsState(unittest.TestCase):
             + "\n",
             encoding="utf-8",
         )
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_list_plugins_state_returns_grouped_snapshot(self) -> None:
         (
             self.repo_root
             / ".agents"
@@ -83,11 +88,6 @@ class TestAskPluginsState(unittest.TestCase):
             / "agent-skills-local"
             / "example-plugin"
         ).mkdir(parents=True, exist_ok=True)
-
-    def tearDown(self) -> None:
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-    def test_list_plugins_state_returns_grouped_snapshot(self) -> None:
         result = list_plugins_state(self.repo_root)
         self.assertEqual(result.status, "success")
         self.assertIn("installed_state", result.data)

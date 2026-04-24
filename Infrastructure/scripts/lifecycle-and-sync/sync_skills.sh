@@ -1297,9 +1297,9 @@ sync_home_plugin_mirrors() {
       done < <(find "$skills_dir" -type l -print)
     fi
 
-    if [ -d "$plugin_dir/fixtures" ]; then
-      rm -rf -- "$plugin_dir/fixtures"
-      echo "[OK] Removed runtime plugin fixtures: $plugin_dir/fixtures"
+    if [ -d "${plugin_dir:?}/fixtures" ]; then
+      rm -rf -- "${plugin_dir:?}/fixtures"
+      echo "[OK] Removed runtime plugin fixtures: ${plugin_dir:?}/fixtures"
     fi
 
     for duplicate_category in \
@@ -1308,9 +1308,9 @@ sync_home_plugin_mirrors() {
       scaffolding_templates \
       infrastructure_ops \
       data_fetch_analysis; do
-      if [ -d "$skills_dir/$duplicate_category" ]; then
-        rm -rf -- "$skills_dir/$duplicate_category"
-        echo "[OK] Removed runtime duplicate category lane: $skills_dir/$duplicate_category"
+      if [ -d "${skills_dir:?}/${duplicate_category:?}" ]; then
+        rm -rf -- "${skills_dir:?}/${duplicate_category:?}"
+        echo "[OK] Removed runtime duplicate category lane: ${skills_dir:?}/${duplicate_category:?}"
       fi
     done
   }
@@ -1446,9 +1446,9 @@ sync_local_marketplace_cache() {
       done < <(find "$skills_dir" -type l -print)
     fi
 
-    if [ -d "$plugin_dir/fixtures" ]; then
-      rm -rf -- "$plugin_dir/fixtures"
-      echo "[OK] Removed cached plugin fixtures: $plugin_dir/fixtures"
+    if [ -d "${plugin_dir:?}/fixtures" ]; then
+      rm -rf -- "${plugin_dir:?}/fixtures"
+      echo "[OK] Removed cached plugin fixtures: ${plugin_dir:?}/fixtures"
     fi
 
     for duplicate_category in \
@@ -1457,9 +1457,9 @@ sync_local_marketplace_cache() {
       scaffolding_templates \
       infrastructure_ops \
       data_fetch_analysis; do
-      if [ -d "$skills_dir/$duplicate_category" ]; then
-        rm -rf -- "$skills_dir/$duplicate_category"
-        echo "[OK] Removed cached duplicate category lane: $skills_dir/$duplicate_category"
+      if [ -d "${skills_dir:?}/${duplicate_category:?}" ]; then
+        rm -rf -- "${skills_dir:?}/${duplicate_category:?}"
+        echo "[OK] Removed cached duplicate category lane: ${skills_dir:?}/${duplicate_category:?}"
       fi
     done
   }
