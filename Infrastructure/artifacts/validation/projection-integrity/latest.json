@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-23T18:51:54.506698+00:00",
+  "generated_at": "2026-04-24T07:55:10.678223+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -47,9 +47,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 385,
-      "source_manifest_sha256": "54efa7150af0a6b7d92e9a70a747bb8ca152064ec7c52ba9055d891aeb063314",
-      "projection_manifest_sha256": "54efa7150af0a6b7d92e9a70a747bb8ca152064ec7c52ba9055d891aeb063314",
+      "checked_files": 199,
+      "source_manifest_sha256": "4c059d8c79dfa4dd023bc10be509e6f97c0e5e5103162abf438f8c3498eaee85",
+      "projection_manifest_sha256": "4c059d8c79dfa4dd023bc10be509e6f97c0e5e5103162abf438f8c3498eaee85",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -63,9 +63,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 67,
-      "source_manifest_sha256": "bc360991e4c5982785d9bda3bde28ff3b84d0b706e3905afe6f32ba32ecc3675",
-      "projection_manifest_sha256": "bc360991e4c5982785d9bda3bde28ff3b84d0b706e3905afe6f32ba32ecc3675",
+      "checked_files": 35,
+      "source_manifest_sha256": "31dd7fb51ec65657a79c1fd7b18c97515a9682f1acb34158903045d566dbfced",
+      "projection_manifest_sha256": "31dd7fb51ec65657a79c1fd7b18c97515a9682f1acb34158903045d566dbfced",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 207,
-      "source_manifest_sha256": "027f395ee3e493b215884d1af41e1fa6ba1df24bdf8ca804432eb819c07e9e8e",
-      "projection_manifest_sha256": "027f395ee3e493b215884d1af41e1fa6ba1df24bdf8ca804432eb819c07e9e8e",
+      "checked_files": 180,
+      "source_manifest_sha256": "0431592516c6c4847eb41f40fe06b58342682e30900a293333cfd312f3d8b895",
+      "projection_manifest_sha256": "0431592516c6c4847eb41f40fe06b58342682e30900a293333cfd312f3d8b895",
       "manifest_mismatch": false,
       "status": "pass"
     }

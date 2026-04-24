@@ -16,12 +16,13 @@ Codex hooks are contract-sensitive. This skill should scaffold only what is expl
 
 ## Docs snapshot
 - Primary source checked: `https://developers.openai.com/codex/hooks`.
-- Verification date for this skill: April 12, 2026.
-- Latest stable release checked: `rust-v0.120.0` (published April 11, 2026).
-- Latest alpha release checked: `rust-v0.121.0-alpha.2` (published April 11, 2026).
+- Verification date for this skill: April 23, 2026.
+- Latest stable release checked: `rust-v0.124.0` (published April 23, 2026).
+- Latest alpha release checked: `rust-v0.124.0-alpha.3` (published April 23, 2026).
 
 ## Release and schema sweep
 Hook-related changes confirmed from current release stream and schema/source checks:
+- `PermissionRequest` is part of the current documented event surface and has generated command input/output schemas.
 - `#17073` Support clear SessionStart source:
   - current schema enum is `startup`, `resume`, `clear`.
   - scaffold matchers should include all three values.
@@ -42,6 +43,7 @@ Hook-related changes confirmed from current release stream and schema/source che
 Documented event buckets:
 - `SessionStart`
 - `PreToolUse`
+- `PermissionRequest`
 - `PostToolUse`
 - `UserPromptSubmit`
 - `Stop`
@@ -55,6 +57,7 @@ Matcher behavior:
   - latest release notes and generated schema show `startup`, `resume`, and `clear`;
   - this skill should scaffold `^(startup|resume|clear)$` and treat docs-only values as stale until docs catch up.
 - `PreToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
+- `PermissionRequest.matcher` matches `tool_name` (current generated input schema uses `tool_name` and runtime currently emits `Bash`).
 - `PostToolUse.matcher` matches `tool_name` (current generated input schema uses `const: "Bash"`).
 - `UserPromptSubmit.matcher` is currently not used.
 - `Stop.matcher` is currently not used.
@@ -88,6 +91,14 @@ Event-specific behavior:
   - JSON supports `hookSpecificOutput.permissionDecision: "deny"` and `permissionDecisionReason`.
   - legacy block shape (`decision: "block"` + `reason`) and exit code `2` are accepted.
   - `permissionDecision: "allow"`/`"ask"` and several extra fields are parsed but currently fail open.
+- `PermissionRequest`
+  - runs only when Codex is about to request approval.
+  - current schema requires `turn_id`, `tool_name`, and `tool_input` in input.
+  - matcher applies to `tool_name`; runtime currently emits `Bash`.
+  - JSON supports `hookSpecificOutput.decision.behavior` values `allow` and `deny`.
+  - deny wins if multiple hooks decide; allow proceeds only when no matching deny exists.
+  - plain text on stdout is ignored.
+  - reserved decision fields (`updatedInput`, `updatedPermissions`, and `interrupt: true`) currently fail closed.
 - `PostToolUse`
   - currently supports Bash tool results only.
   - current schema requires `turn_id` in input.
@@ -117,10 +128,10 @@ Cross-runtime forward compatibility:
 
 ## Design implications
 - Keep the default scaffold to the three-hook starter (`SessionStart`, `UserPromptSubmit`, `Stop`) because it provides strong baseline value with minimal latency.
-- Add `PreToolUse` or `PostToolUse` only when the user asks for command guardrails that justify additional turn-time cost.
+- Add `PreToolUse`, `PermissionRequest`, or `PostToolUse` only when the user asks for command and approval guardrails that justify additional turn-time cost.
 - Keep command paths absolute in generated packs to prevent cwd-dependent failures.
 - Keep guardrails narrow and auditable; document that Bash interception is helpful but not a complete enforcement boundary.
-- Keep `PreToolUse` and `PostToolUse` scripts self-guarding because current matcher scope stops at `Bash`; command intent and file relevance must be classified inside the hook.
+- Keep `PreToolUse`, `PermissionRequest`, and `PostToolUse` scripts self-guarding because current matcher scope stops at `Bash`; command intent and file relevance must be classified inside the hook.
 - Treat `PostToolUse` as advisory by default because it cannot undo completed side effects.
 - Keep `SessionStart` enrichment fail-open on optional dependency failures.
 - Use short `statusMessage` strings for hooks that can take more than a second because this improves operator observability.
@@ -132,14 +143,14 @@ Official documentation:
 
 Release notes:
 - Stable:
-  - `https://github.com/openai/codex/releases/tag/rust-v0.120.0`
+  - `https://github.com/openai/codex/releases/tag/rust-v0.124.0`
 - Alpha:
-  - `https://github.com/openai/codex/releases/tag/rust-v0.121.0-alpha.2`
+  - `https://github.com/openai/codex/releases/tag/rust-v0.124.0-alpha.3`
 
 Codex repo schema source:
 - Generated hook schemas:
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/schema/generated`
-  - includes `pre-tool-use`, `post-tool-use`, `session-start`, `user-prompt-submit`, and `stop` command input/output schemas.
+  - includes `pre-tool-use`, `permission-request`, `post-tool-use`, `session-start`, `user-prompt-submit`, and `stop` command input/output schemas.
   - `session-start.command.input.schema.json` currently lists `source` enum values `startup`, `resume`, and `clear`.
 - Runtime selection and matcher behavior:
   - `https://github.com/openai/codex/tree/main/codex-rs/hooks/src/events/common.rs`
@@ -148,8 +159,11 @@ Codex repo schema source:
 
 Local codex source verification:
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/events/session_start.rs`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/events/permission_request.rs`
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/session-start.command.input.schema.json`
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/pre-tool-use.command.input.schema.json`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/permission-request.command.input.schema.json`
+- `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/permission-request.command.output.schema.json`
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/post-tool-use.command.input.schema.json`
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/user-prompt-submit.command.input.schema.json`
 - `/Users/jamiecraik/dev/codex/codex-rs/hooks/schema/generated/stop.command.input.schema.json`

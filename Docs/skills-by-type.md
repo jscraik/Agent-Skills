@@ -12,14 +12,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `library_api_reference`: 3
 - `product_verification`: 4
 - `data_fetch_analysis`: 4
-- `team_automation`: 32
+- `team_automation`: 33
 - `scaffolding_templates`: 19
 - `code_quality_review`: 24
 - `ci_cd_deployment`: 1
 - `runbook`: 11
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 102
+- `total_tagged`: 103
 
 ## Semantic Types
 
@@ -69,6 +69,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `he-tdd` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
+- `plugin-factory-router` — `Plugins/plugin-factory/skills`
 - `plugin-router` — `Plugins/plugin-factory/skills`
 - `production-deployment` — `Skills/agent-ops`
 - `skill-factory-router` — `Plugins/skill-factory/skills`
@@ -94,7 +95,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 - `llm-wiki` — `Skills/content-publishing`
 - `mcp-builder` — `Skills/backend-platform`
 - `og-image-creator` — `Skills/frontend-ui`
-- `plugin-creator` — `Plugins/plugin-factory/skills`
+- `plugin-creator` — `Plugins/plugin-factory/skills/scaffolding_templates`
 - `shadcn-ui` — `Skills/frontend-ui`
 - `skill-creator` — `Plugins/skill-factory/skills/scaffolding_templates`
 - `skillify` — `Plugins/skill-factory/skills/scaffolding_templates`

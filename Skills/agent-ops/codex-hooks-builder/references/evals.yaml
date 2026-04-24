@@ -45,6 +45,17 @@ cases:
       - type: regex
         value: "(?i)(pretooluse|posttooluse|bash|matcher|tool_name)"
 
+  - id: permission-request-guardrail-audit
+    name: permission request guardrail audit
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you add and validate a PermissionRequest hook that denies risky Bash approval requests but leaves normal approval flow unchanged?"
+    acceptance:
+      - type: regex
+        value: "(?i)(permissionrequest|allow|deny|tool_name|normal approval flow)"
+
   - id: contextual-user-scope-pack
     name: contextual user scope pack
     category: edge
@@ -110,6 +121,6 @@ cases:
         value: "(?i)(absolute paths|nested working directories|session cwd)"
 
 metadata:
-  last_updated: "2026-04-09"
+  last_updated: "2026-04-23"
   author: "Codex"
   review_status: "draft"

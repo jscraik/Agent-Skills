@@ -9,7 +9,7 @@ triggers:
   - user asks to create or scaffold Codex hooks
   - user asks to upgrade hooks.json or hook scripts to the latest supported Codex behavior
   - user asks to audit supported hook events, fields, or blocking behavior
-  - user asks for SessionStart, UserPromptSubmit, Stop, PreToolUse, or PostToolUse hooks
+  - user asks for SessionStart, UserPromptSubmit, Stop, PreToolUse, PermissionRequest, or PostToolUse hooks
 
 inputs:
   - target_scope
@@ -39,7 +39,7 @@ non_goals:
 risks:
   - stale runtime assumptions; mitigated by verifying against released Codex docs before changing contract claims
   - broken command paths; mitigated by generating absolute paths in hooks.json and validating them
-  - overblocking; mitigated by keeping Stop and UserPromptSubmit rules narrow, explainable, and dry-run tested
+  - overblocking; mitigated by keeping Stop, UserPromptSubmit, and PermissionRequest deny policies narrow, explainable, and dry-run tested
   - duplicated hook execution; mitigated by installing into one active config layer by default and calling out double-run risk explicitly
 
 examples:

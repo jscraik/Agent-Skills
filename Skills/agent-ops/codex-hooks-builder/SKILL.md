@@ -28,7 +28,7 @@ Use this skill when the request is to:
 - scaffold a new Codex hook pack for a repo or for `~/.codex`;
 - upgrade existing hooks to the latest documented Codex hooks contract;
 - audit `hooks.json` against current supported events and fields;
-- convert ad hoc hook ideas into working `SessionStart`, `UserPromptSubmit`, `Stop`, and optional `PreToolUse` or `PostToolUse` command hooks;
+- convert ad hoc hook ideas into working `SessionStart`, `UserPromptSubmit`, `Stop`, and optional `PreToolUse`, `PermissionRequest`, or `PostToolUse` command hooks;
 - install repo-safe starter hooks that add context, block unsafe instruction-waiver attempts, or prevent incomplete final handoffs.
 
 Do not use this skill for:
@@ -59,7 +59,7 @@ These principles enable capable operators to explore creative hardening safely, 
   - user scope -> Codex home directory, usually `~/.codex`;
 - desired hook set:
   - default gold-standard starter = `SessionStart`, `UserPromptSubmit`, `Stop`;
-  - optional Bash guardrails = `PreToolUse`, `PostToolUse`;
+  - optional Bash guardrails = `PreToolUse`, `PermissionRequest`, `PostToolUse`;
 - whether this is `create`, `upgrade`, or `audit`;
 - whether existing hooks must be preserved or may be replaced.
 
@@ -88,6 +88,7 @@ For reusable scaffolding inside this repository, use:
 - "Please inspect our existing `~/.codex/hooks.json` and convert it to the latest documented command-hook contract."
 - "Help me migrate our hook commands from relative paths to absolute paths so nested launches do not break."
 - "Can you validate whether `PreToolUse` and `PostToolUse` matchers are correct for Bash and explain any pitfall?"
+- "Can you add a `PermissionRequest` hook that auto-denies risky approval requests and keeps normal approval flow when undecided?"
 
 ## Workflow
 1. Confirm the control-plane boundary.
@@ -99,22 +100,23 @@ For reusable scaffolding inside this repository, use:
 - Do verify whether the target runtime is trusted project scope or user scope because Codex only loads project config from trusted projects.
 
 3. Stay inside the current supported runtime contract.
-- Do treat `SessionStart`, `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, and `Stop` as the currently documented event surface.
+- Do treat `SessionStart`, `PreToolUse`, `PermissionRequest`, `PostToolUse`, `UserPromptSubmit`, and `Stop` as the currently documented event surface.
 - Do use `type: "command"` because command hooks are the documented and supported handler type.
 - Do apply matcher semantics by event because matching differs across events:
   - `SessionStart.matcher` matches `source`; docs currently list `startup` and `resume`, but current Codex release/schema also includes `clear`, so starter matchers should include all three;
-  - `PreToolUse.matcher` and `PostToolUse.matcher` match `tool_name`; current Codex runtime emits `Bash`, so command-class filtering belongs inside the script, not in the matcher;
+  - `PreToolUse.matcher`, `PermissionRequest.matcher`, and `PostToolUse.matcher` match `tool_name`; current Codex runtime emits `Bash`, so command-class filtering belongs inside the script, not in the matcher;
   - `UserPromptSubmit.matcher` and `Stop.matcher` are ignored by the current runtime.
 - Do run a release-and-schema hook sweep when the user asks for “latest” hook behavior because docs can lag runtime:
   - check latest stable and alpha release notes for hook-related changes;
   - cross-check generated schemas under `codex-rs/hooks/schema/generated`;
   - prefer scaffold defaults based on release+schema evidence, then document doc-lag deltas in `Infrastructure/references/runtime-contract.md`.
 - Do keep timeout behavior explicit because `timeout` defaults to `600` seconds and `timeoutSec` is an accepted alias.
-- Do prefer short starter timeouts and event-appropriate policy: narrow `PreToolUse` safety gates may block, while `PostToolUse` feedback hooks should usually warn and continue.
+- Do prefer short starter timeouts and event-appropriate policy: narrow `PreToolUse` and `PermissionRequest` safety gates may block, while `PostToolUse` feedback hooks should usually warn and continue.
 - Do include short `statusMessage` strings for hooks that can take noticeable time because this makes hook latency visible in the UI.
 - Do parse input payloads defensively because future runtimes may include extra fields (for example subagent metadata such as `agent_id` and `agent_type`).
 - Do use supported blocking semantics by event:
   - `PreToolUse`: `permissionDecision: "deny"`, legacy `decision: "block"`, or exit code `2` with `stderr`;
+  - `PermissionRequest`: return `hookSpecificOutput.decision.behavior` as `allow` or `deny`; if multiple hooks decide, `deny` wins; exit code `2` with `stderr` can deny;
   - `UserPromptSubmit`: `decision: "block"` or exit code `2` with `stderr`;
   - `Stop`: `decision: "block"` means continue with a new prompt, not reject the turn;
   - `PostToolUse`: `continue: false` is supported, but it cannot undo side effects from the command that already ran.
@@ -128,7 +130,7 @@ For reusable scaffolding inside this repository, use:
 - Do keep context injection small because `additionalContext` should be durable guidance, not a second system prompt.
 - Do prefer JSON outputs over stderr-only control paths because JSON is easier to audit and maintain.
 - Do keep timeouts explicit because long hooks create confusing session latency.
-- Do make `PreToolUse` and `PostToolUse` scripts self-guarding because matcher cannot distinguish `git commit`, `git push`, edit commands, or scaffold commands today.
+- Do make `PreToolUse`, `PermissionRequest`, and `PostToolUse` scripts self-guarding because matcher cannot distinguish `git commit`, `git push`, edit commands, or scaffold commands today.
 
 6. Validate before claiming completion.
 - Do syntax-check every generated shell script because one broken hook can silently degrade the whole pack.
@@ -204,8 +206,9 @@ bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
 - If `hooks.json` includes `type: "prompt"`, `type: "agent"`, or `"async": true`, report that current Codex runtime parses these but skips them, then keep only supported sync command hooks.
 
 ## Gotchas
-- `PreToolUse` and `PostToolUse` are currently Bash-focused guardrails, not full enforcement boundaries -> scope these hooks narrowly and document enforcement limits -> confirm with `Infrastructure/references/runtime-contract.md`.
-- `PreToolUse` and `PostToolUse` match on `Bash`, not command intent -> use script-side command classification for commit, push, edit, or scaffold policies -> keep matchers simple and explicit.
+- `PreToolUse`, `PermissionRequest`, and `PostToolUse` are currently Bash-focused guardrails, not full enforcement boundaries -> scope these hooks narrowly and document enforcement limits -> confirm with `Infrastructure/references/runtime-contract.md`.
+- `PreToolUse`, `PermissionRequest`, and `PostToolUse` match on `Bash`, not command intent -> use script-side command classification for commit, push, edit, or scaffold policies -> keep matchers simple and explicit.
+- `PermissionRequest` currently fail-closes on reserved fields (`updatedInput`, `updatedPermissions`, or `interrupt: true`) -> keep `PermissionRequest` outputs narrow (`allow`/`deny` + optional message) -> validate with schema-backed dry runs.
 - Relative hook commands fail from nested working directories -> command execution uses session cwd, not the config folder -> emit absolute script paths in `hooks.json` -> inspect the generated JSON before install.
 - `Stop` can block its own retry loop -> the same incomplete message gets re-checked -> honor `stop_hook_active` and fail open on the second pass -> dry-run the `Stop` payload twice when tuning.
 - `SessionStart` docs can lag release/schema updates -> cross-check docs, current release notes, and `codex-rs/hooks/schema/generated/session-start.command.input.schema.json` before locking matcher values -> keep starter packs current without guessing.

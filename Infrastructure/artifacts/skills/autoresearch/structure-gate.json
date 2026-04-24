@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "tool": "skill_gate",
-  "generated_at": "2026-04-23T12:45:09Z",
+  "generated_at": "2026-04-23T22:45:52Z",
   "skill": "Skills/agent-ops/autoresearch/SKILL.md",
   "skill_path": "Skills/agent-ops/autoresearch/SKILL.md",
   "name": "autoresearch",
