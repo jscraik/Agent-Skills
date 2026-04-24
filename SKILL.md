@@ -8,10 +8,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
-- `total_skills`: 18
+- `total_skills`: 19
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: ccc42d9df4a2db2e
+- `policy_identity`: 346ed21dd594983a
 
 ## Catalog
 
@@ -34,5 +34,6 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `project-brain` — Bootstrap and operate Project Brain
 - `simplify` — Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
 - `triage` — Review and triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use this skill when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
+- `ubiquitous-language` — Build or update a shared project vocabulary, DDD-style glossary, and prompt translation map from the current conversation, project docs, and relevant session evidence. Use when terminology is fuzzy, the user wants consistent naming, asks what to call something, wants agents to interpret their wording consistently, mentions glossary, domain model, DDD, ubiquitous language, naming, vocabulary, terminology, or says they do not know the technical term.
 - `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
 

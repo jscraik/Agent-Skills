@@ -62,6 +62,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "project-brain",
     "simplify",
     "triage",
+    "ubiquitous-language",
     "verification-before-completion",
 )
 

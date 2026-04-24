@@ -50,6 +50,12 @@ All agents MUST use `bin/ask` for repo operations.
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward into `Infrastructure/**`; keep them as real files/directories, not symlinks. `bin/ask` is the public wrapper and forwards to `Infrastructure/bin/ask`.
 
+## Shared Vocabulary
+
+Before changing skills, sync policy, runtime projections, or agent-facing docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md) for repo-specific terms, prompt translations, and overloaded words.
+
+Use its Prompt Translations table to interpret terse or ambiguous user phrases such as "sync my skills", "make it available", "run the skill", and "check it works".
+
 ## Robot Mode
 
 Use `--robot` (or `--agent-mode`, `-r`) for AI-agent command handling.
