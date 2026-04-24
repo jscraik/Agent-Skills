@@ -457,7 +457,7 @@ def collect_plugin_state(
         "warnings": (
             [
                 "Runtime cache is missing for one or more repo-managed plugins. "
-                "Run ask skills sync to mirror local plugin sources into cache."
+                "Run bin/ask skills sync to mirror local plugin sources into cache."
             ]
             if missing_cache_plugins
             else []

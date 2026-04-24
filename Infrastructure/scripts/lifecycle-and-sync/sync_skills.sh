@@ -1178,6 +1178,56 @@ resolve_marketplace_source_dir() {
   esac
 }
 
+# normalize_plugin_copy materializes symlinked skill files inside copied
+# plugin skills/ trees, then removes fixtures and duplicate category lanes.
+# `label` is used only for log context (for example "runtime" or "cached").
+normalize_plugin_copy() {
+  local plugin_dir="$1"
+  local label="${2:-runtime}"
+  local skills_dir="$plugin_dir/skills"
+  local skill_link=""
+  local tmp_file=""
+  local duplicate_category=""
+
+  if [ -d "$skills_dir" ]; then
+    while IFS= read -r -d '' skill_link; do
+      [ -n "$skill_link" ] || continue
+      [ -L "$skill_link" ] || continue
+      [ -f "$skill_link" ] || continue
+      if ! [ -r "$skill_link" ]; then
+        echo "[WARN] Could not read ${label} skill symlink target: $skill_link"
+        continue
+      fi
+      tmp_file="$(mktemp)"
+      if cp -- "$skill_link" "$tmp_file"; then
+        rm -f -- "$skill_link"
+        mv "$tmp_file" "$skill_link"
+        echo "[OK] Materialized ${label} skill file: $skill_link"
+      else
+        rm -f -- "$tmp_file"
+        echo "[WARN] Failed to materialize ${label} skill file: $skill_link"
+      fi
+    done < <(find "$skills_dir" -type l -print0)
+  fi
+
+  if [ -d "${plugin_dir:?}/fixtures" ]; then
+    rm -rf -- "${plugin_dir:?}/fixtures"
+    echo "[OK] Removed ${label} plugin fixtures: ${plugin_dir:?}/fixtures"
+  fi
+
+  for duplicate_category in \
+    team_automation \
+    code_quality_review \
+    scaffolding_templates \
+    infrastructure_ops \
+    data_fetch_analysis; do
+    if [ -d "${skills_dir:?}/${duplicate_category:?}" ]; then
+      rm -rf -- "${skills_dir:?}/${duplicate_category:?}"
+      echo "[OK] Removed ${label} duplicate category lane: ${skills_dir:?}/${duplicate_category:?}"
+    fi
+  done
+}
+
 # Keep home-level plugin source paths aligned with the canonical repo plugins.
 # Some plugin installers resolve marketplace relative paths (./Plugins/<name>)
 # sync_home_plugin_mirrors copies local plugins from the canonical repo plugins
@@ -1270,49 +1320,7 @@ sync_home_plugin_mirrors() {
   # archive assets do not inflate active skill discovery surfaces while helper
   # modules stay reachable after pruning fixtures.
   normalize_runtime_plugin_copy() {
-    local plugin_dir="$1"
-    local skills_dir="$plugin_dir/skills"
-    local skill_link=""
-    local tmp_file=""
-    local duplicate_category=""
-
-    if [ -d "$skills_dir" ]; then
-      while IFS= read -r skill_link; do
-        [ -n "$skill_link" ] || continue
-        [ -L "$skill_link" ] || continue
-        [ -f "$skill_link" ] || continue
-        if ! [ -r "$skill_link" ]; then
-          echo "[WARN] Could not read runtime skill symlink target: $skill_link"
-          continue
-        fi
-        tmp_file="$(mktemp)"
-        if cat "$skill_link" > "$tmp_file"; then
-          rm -f -- "$skill_link"
-          mv "$tmp_file" "$skill_link"
-          echo "[OK] Materialized runtime skill file: $skill_link"
-        else
-          rm -f -- "$tmp_file"
-          echo "[WARN] Failed to materialize runtime skill file: $skill_link"
-        fi
-      done < <(find "$skills_dir" -type l -print)
-    fi
-
-    if [ -d "${plugin_dir:?}/fixtures" ]; then
-      rm -rf -- "${plugin_dir:?}/fixtures"
-      echo "[OK] Removed runtime plugin fixtures: ${plugin_dir:?}/fixtures"
-    fi
-
-    for duplicate_category in \
-      team_automation \
-      code_quality_review \
-      scaffolding_templates \
-      infrastructure_ops \
-      data_fetch_analysis; do
-      if [ -d "${skills_dir:?}/${duplicate_category:?}" ]; then
-        rm -rf -- "${skills_dir:?}/${duplicate_category:?}"
-        echo "[OK] Removed runtime duplicate category lane: ${skills_dir:?}/${duplicate_category:?}"
-      fi
-    done
+    normalize_plugin_copy "$1" "runtime"
   }
 
   while IFS= read -r plugin_name; do
@@ -1419,49 +1427,7 @@ sync_local_marketplace_cache() {
   # do not inflate active runtime skill counts while helper modules remain
   # importable.
   normalize_cached_plugin_runtime_copy() {
-    local plugin_dir="$1"
-    local skills_dir="$plugin_dir/skills"
-    local skill_link=""
-    local tmp_file=""
-    local duplicate_category=""
-
-    if [ -d "$skills_dir" ]; then
-      while IFS= read -r skill_link; do
-        [ -n "$skill_link" ] || continue
-        [ -L "$skill_link" ] || continue
-        [ -f "$skill_link" ] || continue
-        if ! [ -r "$skill_link" ]; then
-          echo "[WARN] Could not read cached skill symlink target: $skill_link"
-          continue
-        fi
-        tmp_file="$(mktemp)"
-        if cat "$skill_link" > "$tmp_file"; then
-          rm -f -- "$skill_link"
-          mv "$tmp_file" "$skill_link"
-          echo "[OK] Materialized cached skill file: $skill_link"
-        else
-          rm -f -- "$tmp_file"
-          echo "[WARN] Failed to materialize cached skill file: $skill_link"
-        fi
-      done < <(find "$skills_dir" -type l -print)
-    fi
-
-    if [ -d "${plugin_dir:?}/fixtures" ]; then
-      rm -rf -- "${plugin_dir:?}/fixtures"
-      echo "[OK] Removed cached plugin fixtures: ${plugin_dir:?}/fixtures"
-    fi
-
-    for duplicate_category in \
-      team_automation \
-      code_quality_review \
-      scaffolding_templates \
-      infrastructure_ops \
-      data_fetch_analysis; do
-      if [ -d "${skills_dir:?}/${duplicate_category:?}" ]; then
-        rm -rf -- "${skills_dir:?}/${duplicate_category:?}"
-        echo "[OK] Removed cached duplicate category lane: ${skills_dir:?}/${duplicate_category:?}"
-      fi
-    done
+    normalize_plugin_copy "$1" "cached"
   }
 
   if [ ! -f "$marketplace_file" ]; then

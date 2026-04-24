@@ -138,10 +138,19 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     discovery_only_default_names = sorted(default_names - catalog_names)
 
     violations: list[dict[str, Any]] = []
+    advisories: list[dict[str, Any]] = []
     if len(default_entries) > default_max:
         violations.append({
             "code": "DEFAULT_SKILL_BUDGET_EXCEEDED",
             "message": f"default skill count {len(default_entries)} exceeds budget {default_max}",
+        })
+    if len(advanced_entries) > ADVANCED_WARN_VISIBLE:
+        advisories.append({
+            "code": "ADVANCED_SKILL_VISIBILITY_HIGH",
+            "message": (
+                f"advanced skill count {len(advanced_entries)} exceeds informational threshold "
+                f"{ADVANCED_WARN_VISIBLE}"
+            ),
         })
     if duplicate_default_names:
         violations.append({
@@ -184,6 +193,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "policy_default_skill_names": sorted(policy_default),
         "effective_default_policy_skill_names": sorted(expected_default),
         "default_visible_skill_names": sorted(default_names),
+        "advisories": advisories,
         "violations": violations,
     }
 
@@ -205,6 +215,8 @@ def main() -> int:
         )
         for violation in report["violations"]:
             print(f"- {violation['code']}: {violation['message']}")
+        for advisory in report["advisories"]:
+            print(f"- {advisory['code']}: {advisory['message']}")
 
     return 0 if report["status"] == "pass" else 1
 
