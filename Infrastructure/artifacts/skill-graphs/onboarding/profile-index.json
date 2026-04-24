@@ -1,1154 +1,1858 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-14T17:14:43Z",
-  "decision_date": "2026-04-14",
-  "active_skill_count": 74,
-  "expected_count": 74,
+  "generated_at": "2026-04-24T19:28:11Z",
+  "decision_date": "2026-04-24",
+  "active_skill_count": 102,
+  "expected_count": 102,
   "inventory_policy": "Docs/skill-graphs/governance/inventory-policy.json",
   "system_slice_mode": "exclude",
   "summary": {
-    "valid_count": 74,
+    "valid_count": 102,
     "invalid_count": 0,
     "missing_profile_count": 0,
     "missing_binding_count": 0,
-    "missing_legacy_binding_count": 74,
+    "missing_legacy_binding_count": 102,
     "invalid_binding_count": 0,
     "wave_counts": {
-      "wave-1-manual": 9,
-      "wave-2-co-pilot": 65
+      "wave-1-manual": 0,
+      "wave-2-co-pilot": 102
     }
   },
   "skills": [
     {
-      "skill_path": "auth/best-practices/SKILL.md",
-      "scope_skill": "auth/best-practices",
-      "selected_skill_dir": "auth/best-practices",
+      "skill_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
       "source_skill_dirs": [
-        "auth/best-practices"
+        "Plugins/harness-engineering/skills/code_quality_review/he-code-review"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "auth/best-practices/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "auth/create-auth/SKILL.md",
-      "scope_skill": "auth/create-auth",
-      "selected_skill_dir": "auth/create-auth",
+      "skill_path": "Plugins/harness-engineering/skills/code_quality_review/he-reliability-review/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/code_quality_review/he-reliability-review",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/code_quality_review/he-reliability-review",
       "source_skill_dirs": [
-        "auth/create-auth"
+        "Plugins/harness-engineering/skills/code_quality_review/he-reliability-review"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "auth/create-auth/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/code_quality_review/he-reliability-review/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "backend/backend-engineer/SKILL.md",
-      "scope_skill": "backend/backend-engineer",
-      "selected_skill_dir": "backend/backend-engineer",
+      "skill_path": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review",
       "source_skill_dirs": [
-        "backend/backend-engineer"
+        "Plugins/harness-engineering/skills/code_quality_review/he-technical-review"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "backend/backend-engineer/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "backend/cli-spec/SKILL.md",
-      "scope_skill": "backend/cli-spec",
-      "selected_skill_dir": "backend/cli-spec",
+      "skill_path": "Plugins/harness-engineering/skills/he-router/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/he-router",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/he-router",
       "source_skill_dirs": [
-        "backend/cli-spec"
+        "Plugins/harness-engineering/skills/he-router"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "backend/cli-spec/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/he-router/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "backend/mcp-builder/SKILL.md",
-      "scope_skill": "backend/mcp-builder",
-      "selected_skill_dir": "backend/mcp-builder",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-brainstorm/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-brainstorm",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-brainstorm",
       "source_skill_dirs": [
-        "backend/mcp-builder"
+        "Plugins/harness-engineering/skills/team_automation/he-brainstorm"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "backend/mcp-builder/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-brainstorm/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/better-icons/SKILL.md",
-      "scope_skill": "frontend/graphics/better-icons",
-      "selected_skill_dir": "frontend/graphics/better-icons",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-compound/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-compound",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-compound",
       "source_skill_dirs": [
-        "frontend/graphics/better-icons"
+        "Plugins/harness-engineering/skills/team_automation/he-compound"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/better-icons/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-compound/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/favicon-generator/SKILL.md",
-      "scope_skill": "frontend/graphics/favicon-generator",
-      "selected_skill_dir": "frontend/graphics/favicon-generator",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-compound-refresh/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-compound-refresh",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-compound-refresh",
       "source_skill_dirs": [
-        "frontend/graphics/favicon-generator"
+        "Plugins/harness-engineering/skills/team_automation/he-compound-refresh"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/favicon-generator/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-compound-refresh/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/nano-banana-builder/SKILL.md",
-      "scope_skill": "frontend/graphics/nano-banana-builder",
-      "selected_skill_dir": "frontend/graphics/nano-banana-builder",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-deepen-plan/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-deepen-plan",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-deepen-plan",
       "source_skill_dirs": [
-        "frontend/graphics/nano-banana-builder"
+        "Plugins/harness-engineering/skills/team_automation/he-deepen-plan"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/nano-banana-builder/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-deepen-plan/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/og-image-creator/SKILL.md",
-      "scope_skill": "frontend/graphics/og-image-creator",
-      "selected_skill_dir": "frontend/graphics/og-image-creator",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-deepen-spec/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-deepen-spec",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-deepen-spec",
       "source_skill_dirs": [
-        "frontend/graphics/og-image-creator"
+        "Plugins/harness-engineering/skills/team_automation/he-deepen-spec"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/og-image-creator/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-deepen-spec/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/sora/SKILL.md",
-      "scope_skill": "frontend/graphics/sora",
-      "selected_skill_dir": "frontend/graphics/sora",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-fix-bugs/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-fix-bugs",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-fix-bugs",
       "source_skill_dirs": [
-        "frontend/graphics/sora"
+        "Plugins/harness-engineering/skills/team_automation/he-fix-bugs"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/sora/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-fix-bugs/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/graphics/threejs-builder/SKILL.md",
-      "scope_skill": "frontend/graphics/threejs-builder",
-      "selected_skill_dir": "frontend/graphics/threejs-builder",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-ideate",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-ideate",
       "source_skill_dirs": [
-        "frontend/graphics/threejs-builder"
+        "Plugins/harness-engineering/skills/team_automation/he-ideate"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/graphics/threejs-builder/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-ideate/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/stitch-react-components/SKILL.md",
-      "scope_skill": "frontend/stitch-react-components",
-      "selected_skill_dir": "frontend/stitch-react-components",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-improve/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-improve",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-improve",
       "source_skill_dirs": [
-        "frontend/stitch-react-components"
+        "Plugins/harness-engineering/skills/team_automation/he-improve"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/stitch-react-components/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-improve/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/tools/agentation/SKILL.md",
-      "scope_skill": "frontend/tools/agentation",
-      "selected_skill_dir": "frontend/tools/agentation",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-plan/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-plan",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-plan",
       "source_skill_dirs": [
-        "frontend/tools/agentation"
+        "Plugins/harness-engineering/skills/team_automation/he-plan"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/tools/agentation/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-plan/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/tools/stitch-loop/SKILL.md",
-      "scope_skill": "frontend/tools/stitch-loop",
-      "selected_skill_dir": "frontend/tools/stitch-loop",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-prune-branches/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-prune-branches",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-prune-branches",
       "source_skill_dirs": [
-        "frontend/tools/stitch-loop"
+        "Plugins/harness-engineering/skills/team_automation/he-prune-branches"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/tools/stitch-loop/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-prune-branches/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/design-system/SKILL.md",
-      "scope_skill": "frontend/ui/design-system",
-      "selected_skill_dir": "frontend/ui/design-system",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-refine/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-refine",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-refine",
       "source_skill_dirs": [
-        "frontend/ui/design-system"
+        "Plugins/harness-engineering/skills/team_automation/he-refine"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/design-system/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-refine/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/frontend-ui-design/SKILL.md",
-      "scope_skill": "frontend/ui/frontend-ui-design",
-      "selected_skill_dir": "frontend/ui/frontend-ui-design",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-spec/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-spec",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-spec",
       "source_skill_dirs": [
-        "frontend/ui/frontend-ui-design"
+        "Plugins/harness-engineering/skills/team_automation/he-spec"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/frontend-ui-design/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-spec/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/react-ui-patterns/SKILL.md",
-      "scope_skill": "frontend/ui/react-ui-patterns",
-      "selected_skill_dir": "frontend/ui/react-ui-patterns",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-tdd",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-tdd",
       "source_skill_dirs": [
-        "frontend/ui/react-ui-patterns"
+        "Plugins/harness-engineering/skills/team_automation/he-tdd"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/react-ui-patterns/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-tdd/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/remotion/SKILL.md",
-      "scope_skill": "frontend/ui/remotion",
-      "selected_skill_dir": "frontend/ui/remotion",
+      "skill_path": "Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md",
+      "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-work",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/harness-engineering/skills/team_automation/he-work",
       "source_skill_dirs": [
-        "frontend/ui/remotion"
+        "Plugins/harness-engineering/skills/team_automation/he-work"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/remotion/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/harness-engineering/skills/team_automation/he-work/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/shadcn-ui/SKILL.md",
-      "scope_skill": "frontend/ui/shadcn-ui",
-      "selected_skill_dir": "frontend/ui/shadcn-ui",
+      "skill_path": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+      "scope_skill": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
       "source_skill_dirs": [
-        "frontend/ui/shadcn-ui"
+        "Plugins/plugin-factory/skills/code_quality_review/plugin-builder"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/shadcn-ui/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/stitch-remotion/SKILL.md",
-      "scope_skill": "frontend/ui/stitch-remotion",
-      "selected_skill_dir": "frontend/ui/stitch-remotion",
+      "skill_path": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
+      "scope_skill": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
       "source_skill_dirs": [
-        "frontend/ui/stitch-remotion"
+        "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/stitch-remotion/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/ui-ux-creative-coding/SKILL.md",
-      "scope_skill": "frontend/ui/ui-ux-creative-coding",
-      "selected_skill_dir": "frontend/ui/ui-ux-creative-coding",
+      "skill_path": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
+      "scope_skill": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
       "source_skill_dirs": [
-        "frontend/ui/ui-ux-creative-coding"
+        "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/ui-ux-creative-coding/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "frontend/ui/ui-visual-regression/SKILL.md",
-      "scope_skill": "frontend/ui/ui-visual-regression",
-      "selected_skill_dir": "frontend/ui/ui-visual-regression",
+      "skill_path": "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
+      "scope_skill": "Plugins/plugin-factory/skills/team_automation/plugin-router",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/plugin-factory/skills/team_automation/plugin-router",
       "source_skill_dirs": [
-        "frontend/ui/ui-visual-regression"
+        "Plugins/plugin-factory/skills/team_automation/plugin-router"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "frontend/ui/ui-visual-regression/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Plugins/plugin-factory/skills/team_automation/plugin-router/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "github/gh-workflow/SKILL.md",
-      "scope_skill": "github/gh-workflow",
-      "selected_skill_dir": "github/gh-workflow",
+      "skill_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+      "scope_skill": "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/skill-factory/skills/code_quality_review/skill-builder",
       "source_skill_dirs": [
-        "github/gh-workflow"
+        "Plugins/skill-factory/skills/code_quality_review/skill-builder"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "github/gh-workflow/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
+      "scope_skill": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor",
+      "source_skill_dirs": [
+        "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/SKILL.md",
+      "scope_skill": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+      "source_skill_dirs": [
+        "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+      "scope_skill": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+      "source_skill_dirs": [
+        "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
+      "scope_skill": "Plugins/skill-factory/skills/scaffolding_templates/skillify",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/skill-factory/skills/scaffolding_templates/skillify",
+      "source_skill_dirs": [
+        "Plugins/skill-factory/skills/scaffolding_templates/skillify"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Plugins/skill-factory/skills/scaffolding_templates/skillify/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
+      "scope_skill": "Plugins/skill-factory/skills/skill-factory-router",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Plugins/skill-factory/skills/skill-factory-router",
+      "source_skill_dirs": [
+        "Plugins/skill-factory/skills/skill-factory-router"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Plugins/skill-factory/skills/skill-factory-router/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/agents-md/SKILL.md",
+      "scope_skill": "Skills/agent-ops/agents-md",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/agents-md",
+      "source_skill_dirs": [
+        "Skills/agent-ops/agents-md"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/agents-md/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/alignment-checkpoint/SKILL.md",
+      "scope_skill": "Skills/agent-ops/alignment-checkpoint",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/alignment-checkpoint",
+      "source_skill_dirs": [
+        "Skills/agent-ops/alignment-checkpoint"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/alignment-checkpoint/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/autofix/SKILL.md",
+      "scope_skill": "Skills/agent-ops/autofix",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/autofix",
+      "source_skill_dirs": [
+        "Skills/agent-ops/autofix"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/autofix/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/autoresearch/SKILL.md",
+      "scope_skill": "Skills/agent-ops/autoresearch",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/autoresearch",
+      "source_skill_dirs": [
+        "Skills/agent-ops/autoresearch"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/autoresearch/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/bash-hygiene/SKILL.md",
+      "scope_skill": "Skills/agent-ops/bash-hygiene",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/bash-hygiene",
+      "source_skill_dirs": [
+        "Skills/agent-ops/bash-hygiene"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/bash-hygiene/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/biome-linting/SKILL.md",
+      "scope_skill": "Skills/agent-ops/biome-linting",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/biome-linting",
+      "source_skill_dirs": [
+        "Skills/agent-ops/biome-linting"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/biome-linting/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/bootstrap/SKILL.md",
+      "scope_skill": "Skills/agent-ops/bootstrap",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/bootstrap",
+      "source_skill_dirs": [
+        "Skills/agent-ops/bootstrap"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/bootstrap/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/codex-agent-creator/SKILL.md",
+      "scope_skill": "Skills/agent-ops/codex-agent-creator",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/codex-agent-creator",
+      "source_skill_dirs": [
+        "Skills/agent-ops/codex-agent-creator"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/codex-agent-creator/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/codex-automation-architect/SKILL.md",
+      "scope_skill": "Skills/agent-ops/codex-automation-architect",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/codex-automation-architect",
+      "source_skill_dirs": [
+        "Skills/agent-ops/codex-automation-architect"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/codex-automation-architect/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/codex-hooks-builder/SKILL.md",
+      "scope_skill": "Skills/agent-ops/codex-hooks-builder",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/codex-hooks-builder",
+      "source_skill_dirs": [
+        "Skills/agent-ops/codex-hooks-builder"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/codex-hooks-builder/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/coding-harness/SKILL.md",
+      "scope_skill": "Skills/agent-ops/coding-harness",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/coding-harness",
+      "source_skill_dirs": [
+        "Skills/agent-ops/coding-harness"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/coding-harness/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/context7/SKILL.md",
+      "scope_skill": "Skills/agent-ops/context7",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/context7",
+      "source_skill_dirs": [
+        "Skills/agent-ops/context7"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/context7/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/decide-build-primitive/SKILL.md",
+      "scope_skill": "Skills/agent-ops/decide-build-primitive",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/decide-build-primitive",
+      "source_skill_dirs": [
+        "Skills/agent-ops/decide-build-primitive"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/decide-build-primitive/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/diagram-cli/SKILL.md",
+      "scope_skill": "Skills/agent-ops/diagram-cli",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/diagram-cli",
+      "source_skill_dirs": [
+        "Skills/agent-ops/diagram-cli"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/diagram-cli/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/docs-expert/SKILL.md",
+      "scope_skill": "Skills/agent-ops/docs-expert",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/docs-expert",
+      "source_skill_dirs": [
+        "Skills/agent-ops/docs-expert"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/docs-expert/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/elixir-pro/SKILL.md",
+      "scope_skill": "Skills/agent-ops/elixir-pro",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/elixir-pro",
+      "source_skill_dirs": [
+        "Skills/agent-ops/elixir-pro"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/elixir-pro/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/evals-router/SKILL.md",
+      "scope_skill": "Skills/agent-ops/evals-router",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/evals-router",
+      "source_skill_dirs": [
+        "Skills/agent-ops/evals-router"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/evals-router/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/fix-mise/SKILL.md",
+      "scope_skill": "Skills/agent-ops/fix-mise",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/fix-mise",
+      "source_skill_dirs": [
+        "Skills/agent-ops/fix-mise"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/fix-mise/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/frontend-design/SKILL.md",
+      "scope_skill": "Skills/agent-ops/frontend-design",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/frontend-design",
+      "source_skill_dirs": [
+        "Skills/agent-ops/frontend-design"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/frontend-design/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/gh-workflow/SKILL.md",
+      "scope_skill": "Skills/agent-ops/gh-workflow",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/gh-workflow",
+      "source_skill_dirs": [
+        "Skills/agent-ops/gh-workflow"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/gh-workflow/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/go/SKILL.md",
+      "scope_skill": "Skills/agent-ops/go",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/go",
+      "source_skill_dirs": [
+        "Skills/agent-ops/go"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/go/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/insight-report/SKILL.md",
+      "scope_skill": "Skills/agent-ops/insight-report",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/insight-report",
+      "source_skill_dirs": [
+        "Skills/agent-ops/insight-report"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/insight-report/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
+      "profile_binding_mode": "implicit-default",
+      "delegation_mode": "co-pilot",
+      "task_profile_status": "valid",
+      "status": "valid",
+      "errors": []
+    },
+    {
+      "skill_path": "Skills/agent-ops/javascript-pro/SKILL.md",
+      "scope_skill": "Skills/agent-ops/javascript-pro",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/javascript-pro",
+      "source_skill_dirs": [
+        "Skills/agent-ops/javascript-pro"
+      ],
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/agent-ops/javascript-pro/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "interview/architecture-interview/SKILL.md",
-      "scope_skill": "interview/architecture-interview",
-      "selected_skill_dir": "interview/architecture-interview",
+      "skill_path": "Skills/agent-ops/npm-release/SKILL.md",
+      "scope_skill": "Skills/agent-ops/npm-release",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/npm-release",
       "source_skill_dirs": [
-        "interview/architecture-interview"
+        "Skills/agent-ops/npm-release"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "interview/architecture-interview/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/npm-release/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "interview/deep-interview/SKILL.md",
-      "scope_skill": "interview/deep-interview",
-      "selected_skill_dir": "interview/deep-interview",
+      "skill_path": "Skills/agent-ops/pnpm-manager/SKILL.md",
+      "scope_skill": "Skills/agent-ops/pnpm-manager",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/pnpm-manager",
       "source_skill_dirs": [
-        "interview/deep-interview"
+        "Skills/agent-ops/pnpm-manager"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "interview/deep-interview/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/pnpm-manager/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "interview/interview-me/SKILL.md",
-      "scope_skill": "interview/interview-me",
-      "selected_skill_dir": "interview/interview-me",
+      "skill_path": "Skills/agent-ops/prek-pro/SKILL.md",
+      "scope_skill": "Skills/agent-ops/prek-pro",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/prek-pro",
       "source_skill_dirs": [
-        "interview/interview-me"
+        "Skills/agent-ops/prek-pro"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "interview/interview-me/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/prek-pro/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/content/video-transcript-downloader/SKILL.md",
-      "scope_skill": "product/content/video-transcript-downloader",
-      "selected_skill_dir": "product/content/video-transcript-downloader",
+      "skill_path": "Skills/agent-ops/production-deployment/SKILL.md",
+      "scope_skill": "Skills/agent-ops/production-deployment",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/production-deployment",
       "source_skill_dirs": [
-        "product/content/video-transcript-downloader"
+        "Skills/agent-ops/production-deployment"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/content/video-transcript-downloader/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/production-deployment/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/content/youtube-hooks-scripts/SKILL.md",
-      "scope_skill": "product/content/youtube-hooks-scripts",
-      "selected_skill_dir": "product/content/youtube-hooks-scripts",
+      "skill_path": "Skills/agent-ops/project-brain/SKILL.md",
+      "scope_skill": "Skills/agent-ops/project-brain",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/project-brain",
       "source_skill_dirs": [
-        "product/content/youtube-hooks-scripts"
+        "Skills/agent-ops/project-brain"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/content/youtube-hooks-scripts/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/project-brain/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/content/youtube-titles-thumbnails/SKILL.md",
-      "scope_skill": "product/content/youtube-titles-thumbnails",
-      "selected_skill_dir": "product/content/youtube-titles-thumbnails",
+      "skill_path": "Skills/agent-ops/rust-pro/SKILL.md",
+      "scope_skill": "Skills/agent-ops/rust-pro",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/rust-pro",
       "source_skill_dirs": [
-        "product/content/youtube-titles-thumbnails"
+        "Skills/agent-ops/rust-pro"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/content/youtube-titles-thumbnails/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/rust-pro/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/docs/agents-md/SKILL.md",
-      "scope_skill": "product/docs/agents-md",
-      "selected_skill_dir": "product/docs/agents-md",
+      "skill_path": "Skills/agent-ops/simplify/SKILL.md",
+      "scope_skill": "Skills/agent-ops/simplify",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/simplify",
       "source_skill_dirs": [
-        "product/docs/agents-md"
+        "Skills/agent-ops/simplify"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/docs/agents-md/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/simplify/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/docs/context7/SKILL.md",
-      "scope_skill": "product/docs/context7",
-      "selected_skill_dir": "product/docs/context7",
+      "skill_path": "Skills/agent-ops/swift-development/SKILL.md",
+      "scope_skill": "Skills/agent-ops/swift-development",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/swift-development",
       "source_skill_dirs": [
-        "product/docs/context7"
+        "Skills/agent-ops/swift-development"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/docs/context7/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/swift-development/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/docs/docs-expert/SKILL.md",
-      "scope_skill": "product/docs/docs-expert",
-      "selected_skill_dir": "product/docs/docs-expert",
+      "skill_path": "Skills/agent-ops/toml/SKILL.md",
+      "scope_skill": "Skills/agent-ops/toml",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/toml",
       "source_skill_dirs": [
-        "product/docs/docs-expert"
+        "Skills/agent-ops/toml"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/docs/docs-expert/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/toml/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/domain/oak-api/SKILL.md",
-      "scope_skill": "product/domain/oak-api",
-      "selected_skill_dir": "product/domain/oak-api",
+      "skill_path": "Skills/agent-ops/triage/SKILL.md",
+      "scope_skill": "Skills/agent-ops/triage",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/triage",
       "source_skill_dirs": [
-        "product/domain/oak-api"
+        "Skills/agent-ops/triage"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/domain/oak-api/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/triage/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-brainstorm/SKILL.md",
-      "scope_skill": "product/ops/ce-brainstorm",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-brainstorm",
+      "skill_path": "Skills/agent-ops/typescript/SKILL.md",
+      "scope_skill": "Skills/agent-ops/typescript",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/typescript",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-brainstorm",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-brainstorm",
-        "Plugins/harness-engineering/skills/ce-brainstorm"
+        "Skills/agent-ops/typescript"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-brainstorm/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/typescript/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-compound/SKILL.md",
-      "scope_skill": "product/ops/ce-compound",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-compound",
+      "skill_path": "Skills/agent-ops/uv-python-project-setup/SKILL.md",
+      "scope_skill": "Skills/agent-ops/uv-python-project-setup",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/uv-python-project-setup",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-compound",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-compound",
-        "Plugins/harness-engineering/skills/ce-compound"
+        "Skills/agent-ops/uv-python-project-setup"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-compound/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/uv-python-project-setup/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-compound-refresh/SKILL.md",
-      "scope_skill": "product/ops/ce-compound-refresh",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-compound-refresh",
+      "skill_path": "Skills/agent-ops/vale/SKILL.md",
+      "scope_skill": "Skills/agent-ops/vale",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/vale",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-compound-refresh",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-compound-refresh",
-        "Plugins/harness-engineering/skills/ce-compound-refresh"
+        "Skills/agent-ops/vale"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-compound-refresh/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/vale/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-deepen-plan/SKILL.md",
-      "scope_skill": "product/ops/ce-deepen-plan",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-deepen-plan",
+      "skill_path": "Skills/agent-ops/verification-before-completion/SKILL.md",
+      "scope_skill": "Skills/agent-ops/verification-before-completion",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/verification-before-completion",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-deepen-plan",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-deepen-plan",
-        "Plugins/harness-engineering/skills/ce-deepen-plan"
+        "Skills/agent-ops/verification-before-completion"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-deepen-plan/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/verification-before-completion/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-deepen-spec/SKILL.md",
-      "scope_skill": "product/ops/ce-deepen-spec",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-deepen-spec",
+      "skill_path": "Skills/agent-ops/yaml/SKILL.md",
+      "scope_skill": "Skills/agent-ops/yaml",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/agent-ops/yaml",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-deepen-spec",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-deepen-spec",
-        "Plugins/harness-engineering/skills/ce-deepen-spec"
+        "Skills/agent-ops/yaml"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-deepen-spec/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/agent-ops/yaml/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-ideate/SKILL.md",
-      "scope_skill": "product/ops/ce-ideate",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-ideate",
+      "skill_path": "Skills/backend-platform/backend-engineer/SKILL.md",
+      "scope_skill": "Skills/backend-platform/backend-engineer",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/backend-platform/backend-engineer",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-ideate",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-ideate",
-        "Plugins/harness-engineering/skills/ce-ideate"
+        "Skills/backend-platform/backend-engineer"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-ideate/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/backend-platform/backend-engineer/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-plan/SKILL.md",
-      "scope_skill": "product/ops/ce-plan",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-plan",
+      "skill_path": "Skills/backend-platform/cli-spec/SKILL.md",
+      "scope_skill": "Skills/backend-platform/cli-spec",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/backend-platform/cli-spec",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-plan",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-plan",
-        "Plugins/harness-engineering/skills/ce-plan"
+        "Skills/backend-platform/cli-spec"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-plan/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/backend-platform/cli-spec/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-review/SKILL.md",
-      "scope_skill": "product/ops/ce-review",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-review",
+      "skill_path": "Skills/backend-platform/mcp-builder/SKILL.md",
+      "scope_skill": "Skills/backend-platform/mcp-builder",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/backend-platform/mcp-builder",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-review",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-review",
-        "Plugins/harness-engineering/skills/ce-review"
+        "Skills/backend-platform/mcp-builder"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-review/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/backend-platform/mcp-builder/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-spec/SKILL.md",
-      "scope_skill": "product/ops/ce-spec",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-spec",
+      "skill_path": "Skills/backend-platform/oak-api/SKILL.md",
+      "scope_skill": "Skills/backend-platform/oak-api",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/backend-platform/oak-api",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-spec",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-spec",
-        "Plugins/harness-engineering/skills/ce-spec"
+        "Skills/backend-platform/oak-api"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-spec/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/backend-platform/oak-api/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-technical-review/SKILL.md",
-      "scope_skill": "product/ops/ce-technical-review",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-technical-review",
+      "skill_path": "Skills/content-publishing/beautiful-mermaid/SKILL.md",
+      "scope_skill": "Skills/content-publishing/beautiful-mermaid",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/beautiful-mermaid",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-technical-review",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-technical-review",
-        "Plugins/harness-engineering/skills/ce-technical-review"
+        "Skills/content-publishing/beautiful-mermaid"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-technical-review/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/content-publishing/beautiful-mermaid/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Plugins/harness-engineering/skills/ce-work/SKILL.md",
-      "scope_skill": "product/ops/ce-work",
-      "selected_skill_dir": "Plugins/harness-engineering/skills/ce-work",
+      "skill_path": "Skills/content-publishing/llm-wiki/SKILL.md",
+      "scope_skill": "Skills/content-publishing/llm-wiki",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/llm-wiki",
       "source_skill_dirs": [
-        ".agents/plugins-runtime/cache/agent-skills-local/harness-engineering/skills/ce-work",
-        "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/skills/ce-work",
-        "Plugins/harness-engineering/skills/ce-work"
+        "Skills/content-publishing/llm-wiki"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Plugins/harness-engineering/skills/ce-work/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/content-publishing/llm-wiki/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/ops/decide-build-primitive/SKILL.md",
-      "scope_skill": "product/ops/decide-build-primitive",
-      "selected_skill_dir": "product/ops/decide-build-primitive",
+      "skill_path": "Skills/content-publishing/slides/SKILL.md",
+      "scope_skill": "Skills/content-publishing/slides",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/slides",
       "source_skill_dirs": [
-        "product/ops/decide-build-primitive"
+        "Skills/content-publishing/slides"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/ops/decide-build-primitive/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/content-publishing/slides/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/ops/release/SKILL.md",
-      "scope_skill": "product/ops/release",
-      "selected_skill_dir": "product/ops/release",
+      "skill_path": "Skills/content-publishing/spreadsheet/SKILL.md",
+      "scope_skill": "Skills/content-publishing/spreadsheet",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/spreadsheet",
       "source_skill_dirs": [
-        "product/ops/release"
+        "Skills/content-publishing/spreadsheet"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "product/ops/release/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/content-publishing/spreadsheet/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/security/security-best-practices/SKILL.md",
-      "scope_skill": "product/security/security-best-practices",
-      "selected_skill_dir": "product/security/security-best-practices",
+      "skill_path": "Skills/content-publishing/video-transcript-downloader/SKILL.md",
+      "scope_skill": "Skills/content-publishing/video-transcript-downloader",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/video-transcript-downloader",
       "source_skill_dirs": [
-        "product/security/security-best-practices"
+        "Skills/content-publishing/video-transcript-downloader"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/security/security-best-practices/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/content-publishing/video-transcript-downloader/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/security/security-ownership-map/SKILL.md",
-      "scope_skill": "product/security/security-ownership-map",
-      "selected_skill_dir": "product/security/security-ownership-map",
+      "skill_path": "Skills/content-publishing/visual-explainer/SKILL.md",
+      "scope_skill": "Skills/content-publishing/visual-explainer",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/visual-explainer",
       "source_skill_dirs": [
-        "product/security/security-ownership-map"
+        "Skills/content-publishing/visual-explainer"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/security/security-ownership-map/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/content-publishing/visual-explainer/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/security/security-threat-model/SKILL.md",
-      "scope_skill": "product/security/security-threat-model",
-      "selected_skill_dir": "product/security/security-threat-model",
+      "skill_path": "Skills/content-publishing/youtube-hooks-scripts/SKILL.md",
+      "scope_skill": "Skills/content-publishing/youtube-hooks-scripts",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/content-publishing/youtube-hooks-scripts",
       "source_skill_dirs": [
-        "product/security/security-threat-model"
+        "Skills/content-publishing/youtube-hooks-scripts"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/security/security-threat-model/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/content-publishing/youtube-hooks-scripts/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/specs/product-spec/SKILL.md",
-      "scope_skill": "product/specs/product-spec",
-      "selected_skill_dir": "product/specs/product-spec",
+      "skill_path": "Skills/frontend-ui/agentation/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/agentation",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/agentation",
       "source_skill_dirs": [
-        "product/specs/product-spec"
+        "Skills/frontend-ui/agentation"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/specs/product-spec/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/agentation/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "product/strategy/brainstorming/SKILL.md",
-      "scope_skill": "product/strategy/brainstorming",
-      "selected_skill_dir": "product/strategy/brainstorming",
+      "skill_path": "Skills/frontend-ui/baseline-ui/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/baseline-ui",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/baseline-ui",
       "source_skill_dirs": [
-        "product/strategy/brainstorming"
+        "Skills/frontend-ui/baseline-ui"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "product/strategy/brainstorming/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/baseline-ui/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "skills-system/imagegen/SKILL.md",
-      "scope_skill": "skills-system/imagegen",
-      "selected_skill_dir": "skills-system/imagegen",
+      "skill_path": "Skills/frontend-ui/better-icons/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/better-icons",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/better-icons",
       "source_skill_dirs": [
-        "skills-system/imagegen"
+        "Skills/frontend-ui/better-icons"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "skills-system/imagegen/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/better-icons/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/1password/SKILL.md",
-      "scope_skill": "Skills/1password",
-      "selected_skill_dir": "Skills/1password",
+      "skill_path": "Skills/frontend-ui/design-system/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/design-system",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/design-system",
       "source_skill_dirs": [
-        "Skills/1password"
+        "Skills/frontend-ui/design-system"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/1password/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/frontend-ui/design-system/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/agent-browser/SKILL.md",
-      "scope_skill": "Skills/agent-browser",
-      "selected_skill_dir": "Skills/agent-browser",
+      "skill_path": "Skills/frontend-ui/fixing-accessibility/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/fixing-accessibility",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/fixing-accessibility",
       "source_skill_dirs": [
-        "Skills/agent-browser"
+        "Skills/frontend-ui/fixing-accessibility"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/agent-browser/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/frontend-ui/fixing-accessibility/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/alignment-checkpoint/SKILL.md",
-      "scope_skill": "Skills/alignment-checkpoint",
-      "selected_skill_dir": "Skills/alignment-checkpoint",
+      "skill_path": "Skills/frontend-ui/fixing-metadata/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/fixing-metadata",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/fixing-metadata",
       "source_skill_dirs": [
-        "Skills/alignment-checkpoint"
+        "Skills/frontend-ui/fixing-metadata"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/alignment-checkpoint/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/fixing-metadata/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/atlas/SKILL.md",
-      "scope_skill": "Skills/atlas",
-      "selected_skill_dir": "Skills/atlas",
+      "skill_path": "Skills/frontend-ui/frontend-ui-design/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/frontend-ui-design",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/frontend-ui-design",
       "source_skill_dirs": [
-        "Skills/atlas"
+        "Skills/frontend-ui/frontend-ui-design"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/atlas/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/frontend-ui-design/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/beautiful-mermaid/SKILL.md",
-      "scope_skill": "Skills/beautiful-mermaid",
-      "selected_skill_dir": "Skills/beautiful-mermaid",
+      "skill_path": "Skills/frontend-ui/og-image-creator/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/og-image-creator",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/og-image-creator",
       "source_skill_dirs": [
-        "Skills/beautiful-mermaid"
+        "Skills/frontend-ui/og-image-creator"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/beautiful-mermaid/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/og-image-creator/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/bootstrap/SKILL.md",
-      "scope_skill": "Skills/bootstrap",
-      "selected_skill_dir": "Skills/bootstrap",
+      "skill_path": "Skills/frontend-ui/playwright-interactive/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/playwright-interactive",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/playwright-interactive",
       "source_skill_dirs": [
-        "Skills/bootstrap"
+        "Skills/frontend-ui/playwright-interactive"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/bootstrap/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/frontend-ui/playwright-interactive/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/codex-agent-creator/SKILL.md",
-      "scope_skill": "Skills/codex-agent-creator",
-      "selected_skill_dir": "Skills/codex-agent-creator",
+      "skill_path": "Skills/frontend-ui/react-ui-patterns/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/react-ui-patterns",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/react-ui-patterns",
       "source_skill_dirs": [
-        "Skills/codex-agent-creator"
+        "Skills/frontend-ui/react-ui-patterns"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/codex-agent-creator/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/frontend-ui/react-ui-patterns/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/codex-automation-architect/SKILL.md",
-      "scope_skill": "Skills/codex-automation-architect",
-      "selected_skill_dir": "Skills/codex-automation-architect",
+      "skill_path": "Skills/frontend-ui/shadcn-ui/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/shadcn-ui",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/shadcn-ui",
       "source_skill_dirs": [
-        "Skills/codex-automation-architect"
+        "Skills/frontend-ui/shadcn-ui"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/codex-automation-architect/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/shadcn-ui/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/codex-home-audit/SKILL.md",
-      "scope_skill": "Skills/codex-home-audit",
-      "selected_skill_dir": "Skills/codex-home-audit",
+      "skill_path": "Skills/frontend-ui/ui-ux-creative-coding/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/ui-ux-creative-coding",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/ui-ux-creative-coding",
       "source_skill_dirs": [
-        "Skills/codex-home-audit"
+        "Skills/frontend-ui/ui-ux-creative-coding"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/codex-home-audit/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/frontend-ui/ui-ux-creative-coding/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/fix-mise/SKILL.md",
-      "scope_skill": "Skills/fix-mise",
-      "selected_skill_dir": "Skills/fix-mise",
+      "skill_path": "Skills/frontend-ui/ui-visual-regression/SKILL.md",
+      "scope_skill": "Skills/frontend-ui/ui-visual-regression",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/frontend-ui/ui-visual-regression",
       "source_skill_dirs": [
-        "Skills/fix-mise"
+        "Skills/frontend-ui/ui-visual-regression"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/fix-mise/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/frontend-ui/ui-visual-regression/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/insight-report/SKILL.md",
-      "scope_skill": "Skills/insight-report",
-      "selected_skill_dir": "Skills/insight-report",
+      "skill_path": "Skills/mobile-native/atlas/SKILL.md",
+      "scope_skill": "Skills/mobile-native/atlas",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/mobile-native/atlas",
       "source_skill_dirs": [
-        "Skills/insight-report"
+        "Skills/mobile-native/atlas"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/insight-report/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/mobile-native/atlas/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/markdown-converter/SKILL.md",
-      "scope_skill": "Skills/markdown-converter",
-      "selected_skill_dir": "Skills/markdown-converter",
+      "skill_path": "Skills/product-strategy/architecture-interview/SKILL.md",
+      "scope_skill": "Skills/product-strategy/architecture-interview",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/product-strategy/architecture-interview",
       "source_skill_dirs": [
-        "Skills/markdown-converter"
+        "Skills/product-strategy/architecture-interview"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/markdown-converter/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/product-strategy/architecture-interview/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/notebooklm/SKILL.md",
-      "scope_skill": "Skills/notebooklm",
-      "selected_skill_dir": "Skills/notebooklm",
+      "skill_path": "Skills/product-strategy/chatgpt-apps/SKILL.md",
+      "scope_skill": "Skills/product-strategy/chatgpt-apps",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/product-strategy/chatgpt-apps",
       "source_skill_dirs": [
-        "Skills/notebooklm"
+        "Skills/product-strategy/chatgpt-apps"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/notebooklm/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/product-strategy/chatgpt-apps/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/process-watch/SKILL.md",
-      "scope_skill": "Skills/process-watch",
-      "selected_skill_dir": "Skills/process-watch",
+      "skill_path": "Skills/product-strategy/deep-interview/SKILL.md",
+      "scope_skill": "Skills/product-strategy/deep-interview",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/product-strategy/deep-interview",
       "source_skill_dirs": [
-        "Skills/process-watch"
+        "Skills/product-strategy/deep-interview"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/process-watch/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/product-strategy/deep-interview/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/recon-workbench/SKILL.md",
-      "scope_skill": "Skills/recon-workbench",
-      "selected_skill_dir": "Skills/recon-workbench",
+      "skill_path": "Skills/product-strategy/interview-me/SKILL.md",
+      "scope_skill": "Skills/product-strategy/interview-me",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/product-strategy/interview-me",
       "source_skill_dirs": [
-        "Skills/recon-workbench"
+        "Skills/product-strategy/interview-me"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/recon-workbench/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/product-strategy/interview-me/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/repoprompt/SKILL.md",
-      "scope_skill": "Skills/repoprompt",
-      "selected_skill_dir": "Skills/repoprompt",
+      "skill_path": "Skills/security-ops/1password/SKILL.md",
+      "scope_skill": "Skills/security-ops/1password",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/1password",
       "source_skill_dirs": [
-        "Skills/repoprompt"
+        "Skills/security-ops/1password"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/repoprompt/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/security-ops/1password/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/systematic-debugging/SKILL.md",
-      "scope_skill": "Skills/systematic-debugging",
-      "selected_skill_dir": "Skills/systematic-debugging",
+      "skill_path": "Skills/security-ops/best-practices/SKILL.md",
+      "scope_skill": "Skills/security-ops/best-practices",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/best-practices",
       "source_skill_dirs": [
-        "Skills/systematic-debugging"
+        "Skills/security-ops/best-practices"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/systematic-debugging/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/security-ops/best-practices/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/test-driven-development/SKILL.md",
-      "scope_skill": "Skills/test-driven-development",
-      "selected_skill_dir": "Skills/test-driven-development",
+      "skill_path": "Skills/security-ops/create-auth/SKILL.md",
+      "scope_skill": "Skills/security-ops/create-auth",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/create-auth",
       "source_skill_dirs": [
-        "Skills/test-driven-development"
+        "Skills/security-ops/create-auth"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/test-driven-development/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/security-ops/create-auth/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/using-git-worktrees/SKILL.md",
-      "scope_skill": "Skills/using-git-worktrees",
-      "selected_skill_dir": "Skills/using-git-worktrees",
+      "skill_path": "Skills/security-ops/recon-workbench/SKILL.md",
+      "scope_skill": "Skills/security-ops/recon-workbench",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/recon-workbench",
       "source_skill_dirs": [
-        "Skills/using-git-worktrees"
+        "Skills/security-ops/recon-workbench"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/using-git-worktrees/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/security-ops/recon-workbench/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/verification-before-completion/SKILL.md",
-      "scope_skill": "Skills/verification-before-completion",
-      "selected_skill_dir": "Skills/verification-before-completion",
+      "skill_path": "Skills/security-ops/security-best-practices/SKILL.md",
+      "scope_skill": "Skills/security-ops/security-best-practices",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/security-best-practices",
       "source_skill_dirs": [
-        "Skills/verification-before-completion"
+        "Skills/security-ops/security-best-practices"
       ],
-      "wave": "wave-1-manual",
-      "profile_path": "Skills/verification-before-completion/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "wave": "wave-2-co-pilot",
+      "profile_path": "Skills/security-ops/security-best-practices/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
-      "delegation_mode": "manual",
+      "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/visual-explainer/SKILL.md",
-      "scope_skill": "Skills/visual-explainer",
-      "selected_skill_dir": "Skills/visual-explainer",
+      "skill_path": "Skills/security-ops/security-ownership-map/SKILL.md",
+      "scope_skill": "Skills/security-ops/security-ownership-map",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/security-ownership-map",
       "source_skill_dirs": [
-        "Skills/visual-explainer"
+        "Skills/security-ops/security-ownership-map"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/visual-explainer/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/security-ops/security-ownership-map/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     },
     {
-      "skill_path": "Skills/writing-plans/SKILL.md",
-      "scope_skill": "Skills/writing-plans",
-      "selected_skill_dir": "Skills/writing-plans",
+      "skill_path": "Skills/security-ops/security-threat-model/SKILL.md",
+      "scope_skill": "Skills/security-ops/security-threat-model",
+      "inventory_slice": "operational",
+      "display_slice": "operational",
+      "selected_skill_dir": "Skills/security-ops/security-threat-model",
       "source_skill_dirs": [
-        "Skills/writing-plans"
+        "Skills/security-ops/security-threat-model"
       ],
       "wave": "wave-2-co-pilot",
-      "profile_path": "Skills/writing-plans/references/task-profile.json",
-      "profile_binding": "references/task-profile.json",
+      "profile_path": "Skills/security-ops/security-threat-model/references/task-profile.json",
+      "profile_binding": "Infrastructure/references/task-profile.json",
       "profile_binding_mode": "implicit-default",
       "delegation_mode": "co-pilot",
       "task_profile_status": "valid",
+      "status": "valid",
       "errors": []
     }
   ]
