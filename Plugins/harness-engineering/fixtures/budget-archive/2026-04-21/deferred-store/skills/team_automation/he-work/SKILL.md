@@ -1,6 +1,6 @@
 ---
 name: he-work
-description: "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned."
+description: Execute an approved plan, todo list, or tightly scoped spec with traceable progress and validation. Use when Harness Engineering work should be implemented.
 metadata:
   skill-type: team_automation
 ---
@@ -8,11 +8,6 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
-
-## Use
-
-- Use this skill as normal for this Harness Engineering execution stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -28,21 +23,15 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Inputs
 
-- Approved plan/spec/todo artifact and execution scope.
-- Validation requirements, constraints, and risk boundaries.
-- Optional execution posture such as `test-first`, `characterization-first`, or explicit external delegation.
-- Linked upstream artifacts that define scope, invariants, and non-goals.
-- Relevant `CONTEXT.md` when the approved artifact depends on project-specific domain terms.
+- Request, artifacts, repo context, and linked Linear issues.
 
 ## Outputs
 
-- Implemented progress summary with completed/blocked items.
-- Validation outcomes and next action.
-- Explicit execution lane: `plan-led`, `todo-led`, or `small-spec-direct`.
-- Shipping handoff summary with drift notes, remaining risks, and follow-up recommendation.
-- Include `schema_version: 1` when structured output is requested.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
 
 ## Procedure
+
+Read `../shared/references/approval-flow.md` before deciding whether to continue, ask a blocker question, or stop for approval.
 
 1. Choose the correct execution lane before coding: `plan-led`, `todo-led`, or the narrow `small-spec-direct` path.
 2. Read linked artifacts completely and restate the execution contract: active IDs, invariants, non-goals, validation gates, and explicit scope boundaries.
@@ -68,7 +57,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not let code become the only record of a changed domain decision; update the governing artifact or Linear issue first.
 - Do not treat medium- or high-risk raw specs as directly executable work without planning.
 - Do not mark checklist or phase state complete before validation evidence exists.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
@@ -76,31 +65,6 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Ignoring plan/spec drift introduced during execution.
 - Executing directly from a risky raw spec that should route to planning first.
 - Letting task tracking, artifact status, and real code state diverge during delivery.
-
 ## Examples
 
-- "Implement this approved plan and keep the markdown task state aligned with what actually lands."
-- "Work through this todo artifact in small verified slices and tell me where drift appears."
-- "This spec is tiny and low risk. If it really is safe, execute it directly and validate the result."
-
-## Full Context
-
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
-Read when: execution uncovers domain drift, `CONTEXT.md` mismatch, or Linear issue wording conflict.
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
-
-## Subagent Routing
-
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, route to [codex-agent-creator](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) and provide the exact role names to create or install.
+Read when: examples or role-routing details are needed, open the archived references for this skill.

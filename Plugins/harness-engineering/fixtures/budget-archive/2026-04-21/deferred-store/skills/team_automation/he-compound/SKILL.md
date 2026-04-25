@@ -1,6 +1,6 @@
 ---
 name: he-compound
-description: "Analyze Harness Engineering lifecycle state, plan the correct stage routing, and capture verified solved problems into durable docs/solutions knowledge. Use when the user asks to start or resume from the correct stage, or to document a verified fix as reusable team guidance."
+description: Run a bounded Harness Engineering lifecycle across multiple stages. Use when the user wants coordinated brainstorm, spec, plan, work, review, and fix flow rather than one isolated stage.
 metadata:
   skill-type: team_automation
 ---
@@ -23,18 +23,11 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 
 ## Inputs
 
-- Problem statement or lifecycle context.
-- Optional existing artifacts and solved-evidence references.
-- Optional capture preference: `full` or `compact-safe`.
-- Optional existing solution-doc path or suspected overlap target.
+- Request, artifacts, repo context, and linked Linear issues.
 
 ## Outputs
 
-- Mode decision: `full-lifecycle`, `resume-from-stage`, or `learning-capture`.
-- Explicit next stage decision with blocker/risk notes.
-- For learning capture: capture mode (`full` or `compact-safe`) and one created or updated solution doc path.
-- If a high-overlap solution already exists, explicit refresh/update recommendation instead of a duplicate-doc plan.
-- Structured output includes `schema_version: 1` when requested.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
 
 ## Procedure
 
@@ -62,7 +55,7 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 - Do not treat `he-compound` as a substitute for implementation, debugging, review, or refresh stages that still need to happen.
 - Do not let helper agents write intermediate files during learning capture.
 - Do not recommend deleting or ignoring protected process artifacts just to simplify the handoff.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
@@ -70,27 +63,6 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 - Recording unresolved incidents as solved knowledge.
 - Creating a duplicate solution doc when a high-overlap artifact should be refreshed.
 - Returning broad "use Harness Engineering" guidance without naming the exact mode and next stage.
-
 ## Examples
 
-- "When the user asks, `Inspect the artifacts we already have and resume from the earliest incomplete Harness Engineering stage.`"
-- "This bug is fixed and verified. Please capture the learning in `docs/solutions/` without creating a duplicate doc."
-- "Help me decide whether this needs stage routing or direct learning capture, then validate the right mode first."
-
-## Full Context
-
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Template/assets: [./assets/resolution-template.md](./assets/resolution-template.md), [./assets/icon-small.png](./assets/icon-small.png), [./assets/icon-large.png](./assets/icon-large.png)
-Read when: detailed policy or templates are required.
-
-## Subagent Routing
-
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, create or install them with [[codex-agent-creator]] before rerunning delegated coverage.
+Read when: examples or role-routing details are needed, open the archived references for this skill.

@@ -1,6 +1,6 @@
 ---
 name: he-brainstorm
-description: Define problem scope, requirements, and decision options before spec or plan stages. Use when the user has ambiguity in what to build, why it matters, or which direction to choose.
+description: Clarify problem scope, requirements, options, and expected behavior before spec or plan stages. Use when what to build, why it matters, or the right direction is ambiguous.
 metadata:
   skill-type: team_automation
 ---
@@ -8,14 +8,6 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps the full operational workflow in archived references. Use it to decide whether a structured Harness Engineering brainstorm is needed, run a right-sized clarification loop, and hand off with durable requirements when the idea is clear enough.
-
-## Use
-
-- Use this skill as normal for the Harness Engineering brainstorm stage.
-- Use it before `he-spec` or `he-plan` when the work is still ambiguous.
-- Use it when QA feedback reports confusing or "broken" behavior but the expected behavior is not yet clear enough for a Linear issue.
-- If the request is already concrete enough for planning or direct execution, keep the interaction brief and recommend the next stage instead of forcing a brainstorm.
-- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -32,20 +24,11 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 
 ## Inputs
 
-- User intent, constraints, and current context artifacts.
-- Relevant system boundaries, risks, and non-goals.
-- If the core idea is missing, ask one direct question and do not proceed until the user supplies a feature, problem, or improvement to explore.
+- Request, artifacts, repo context, and linked Linear issues.
 
 ## Outputs
 
-- Clarified requirements with ranked options and tradeoffs.
-- Domain-language notes when project-specific terms, aliases, relationships, or ambiguities affect the decision.
-- Expected-behavior clarification for ambiguous QA reports, with a route to `he-fix-bugs`, `he-spec`, or `he-plan`.
-- A recommendation on whether the next stage should be `he-spec`, `he-plan`, or direct execution.
-- A right-sized requirements artifact when durable decisions exist.
-- Explicit `spec_required`, `risk_level`, and `complexity` values for non-trivial work.
-- Recommended next Harness Engineering stage.
-- Include `schema_version: 1` when structured output is requested.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
 
 ## Procedure
 
@@ -57,14 +40,6 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 6. Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
 7. Capture durable requirements and `CONTEXT.md` updates only when the discussion produced decisions worth preserving.
 8. Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
-
-## Interaction Rules
-
-- Ask one focused question at a time.
-- Ask what the user is already thinking before steering the conversation.
-- Start broad, then narrow: problem, users, value, constraints, exclusions, edge cases.
-- Present options before the recommendation when alternatives are meaningful.
-- Keep outputs concise and use repo-relative paths for any generated artifact references.
 
 ## Validation
 
@@ -82,7 +57,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Do not force a brainstorm when the request is already well specified.
 - Keep implementation details such as libraries, schemas, endpoints, and file layouts out of the requirements artifact unless the brainstorm is inherently technical.
 - Use Linear issues or comments for durable decision capture; do not create ADRs.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
@@ -91,32 +66,6 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Returning unranked options without decision criteria.
 - Writing a requirements artifact that still leaves core behavior or scope boundaries undefined.
 - Treating multiple names for the same project concept as harmless instead of choosing a canonical term.
-
 ## Examples
 
-- "When the user asks for help thinking through a new approval flow before deciding whether it needs a spec."
-- "User says, `Inspect the current admin onboarding and compare a few grounded directions before we commit.`"
-- "Help me brainstorm this reporting feature and validate the best next Harness Engineering stage."
-- "Can you help clarify what this QA feedback should mean before we file Linear bugs?"
-
-## Full Context
-
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
-- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
-Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects the brainstorm.
-Read when: QA feedback is real but expected behavior is ambiguous enough that filing a bug would encode guesswork.
-
-## Subagent Routing
-
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
+Read when: examples or role-routing details are needed, open the archived references for this skill.
