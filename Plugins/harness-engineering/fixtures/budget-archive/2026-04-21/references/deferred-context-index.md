@@ -8,7 +8,8 @@ In this index, archive means preserved deferred context used by active skills, n
 
 ## Preserved Context
 
-- Full stage guides and archived references remain in `fixtures/skill-archive/**`.
+- Full stage guides and preserved references remain in `fixtures/preserved-context/**`.
+- `fixtures/skill-archive` remains a compatibility alias for older links only.
 - Canonical contract/eval/task profiles remain in each stage under `Infrastructure/references/**`.
 - Canonical subagent role policy remains in:
   - `references/routing-map.json`
@@ -80,23 +81,23 @@ The QA intake routing refresh preserved these pre-insertion procedure lines:
 - Domain-model workflow: `references/domain-model-routing.md`
 - QA intake workflow: `references/qa-intake-routing.md`
 - Deterministic stage routing: `references/deterministic-stage-routing.md`
-- `he-code-review`: `fixtures/skill-archive/skills/code_quality_review/he-code-review/`
-- `he-reliability-review`: `fixtures/skill-archive/skills/code_quality_review/he-reliability-review/`
-- `he-technical-review`: `fixtures/skill-archive/skills/code_quality_review/he-technical-review/`
-- `he-brainstorm`: `fixtures/skill-archive/skills/team_automation/he-brainstorm/`
-- `he-compound`: `fixtures/skill-archive/skills/team_automation/he-compound/`
-- `he-compound-refresh`: `fixtures/skill-archive/skills/team_automation/he-compound-refresh/`
-- `he-deepen-plan`: `fixtures/skill-archive/skills/team_automation/he-deepen-plan/`
-- `he-deepen-spec`: `fixtures/skill-archive/skills/team_automation/he-deepen-spec/`
-- `he-fix-bugs`: `fixtures/skill-archive/skills/team_automation/he-fix-bugs/`
-- `he-ideate`: `fixtures/skill-archive/skills/team_automation/he-ideate/`
-- `he-improve`: `fixtures/skill-archive/skills/team_automation/he-improve/`
-- `he-plan`: `fixtures/skill-archive/skills/team_automation/he-plan/`
-- `he-prune-branches`: `fixtures/skill-archive/skills/team_automation/he-prune-branches/`
-- `he-refine`: `fixtures/skill-archive/skills/team_automation/he-refine/`
-- `he-spec`: `fixtures/skill-archive/skills/team_automation/he-spec/`
-- `he-tdd`: `fixtures/skill-archive/skills/team_automation/he-tdd/`
-- `he-work`: `fixtures/skill-archive/skills/team_automation/he-work/`
+- `he-code-review`: `fixtures/preserved-context/skills/code_quality_review/he-code-review/`
+- `he-reliability-review`: `fixtures/preserved-context/skills/code_quality_review/he-reliability-review/`
+- `he-technical-review`: `fixtures/preserved-context/skills/code_quality_review/he-technical-review/`
+- `he-brainstorm`: `fixtures/preserved-context/skills/team_automation/he-brainstorm/`
+- `he-compound`: `fixtures/preserved-context/skills/team_automation/he-compound/`
+- `he-compound-refresh`: `fixtures/preserved-context/skills/team_automation/he-compound-refresh/`
+- `he-deepen-plan`: `fixtures/preserved-context/skills/team_automation/he-deepen-plan/`
+- `he-deepen-spec`: `fixtures/preserved-context/skills/team_automation/he-deepen-spec/`
+- `he-fix-bugs`: `fixtures/preserved-context/skills/team_automation/he-fix-bugs/`
+- `he-ideate`: `fixtures/preserved-context/skills/team_automation/he-ideate/`
+- `he-improve`: `fixtures/preserved-context/skills/team_automation/he-improve/`
+- `he-plan`: `fixtures/preserved-context/skills/team_automation/he-plan/`
+- `he-prune-branches`: `fixtures/preserved-context/skills/team_automation/he-prune-branches/`
+- `he-refine`: `fixtures/preserved-context/skills/team_automation/he-refine/`
+- `he-spec`: `fixtures/preserved-context/skills/team_automation/he-spec/`
+- `he-tdd`: `fixtures/preserved-context/skills/team_automation/he-tdd/`
+- `he-work`: `fixtures/preserved-context/skills/team_automation/he-work/`
 
 ## Preservation Contract
 

@@ -968,16 +968,16 @@ Rollback triggers:
 
 ## Risks and Controls
 
-| Risk                                                 | Impact                                                      | Control                                                                                |
-| ---------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Sync path divergence                                 | Shell and Python sync produce different surfaces            | Choose one projection engine boundary in A0; add parity tests                          |
-| Scope collision ambiguity                            | Project/local/global skills shadow silently                 | Require collision report and fail unresolved collisions                                |
-| Plugin browseability mistaken for runtime visibility | Rooted surface grows accidentally                           | Separate `LocalPluginSkillView` from runtime projection and validate first-level count |
-| Router leaks task text                               | Sensitive prompt text appears in argv/logs                  | Support stdin/file input and redacted persistence                                      |
-| Manifest overreach                                   | System/primary-runtime lanes pulled into ordinary manifests | Exclude bridge lanes and report separately                                             |
-| Default flip too early                               | Normal workflows regress                                    | Keep flat default until Phase C gates pass                                             |
-| Runtime-separation conflict                          | This plan conflicts with canonical path migration           | Treat runtime-separation plan as dependency; do not move roots in this plan            |
-| `skill-archive` naming reads as deprecated           | Agents may skip preserved full-context references           | Do not rename during C4; plan a dedicated `full-context`/`preserved-context` migration |
+| Risk                                                 | Impact                                                      | Control                                                                                 |
+| ---------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Sync path divergence                                 | Shell and Python sync produce different surfaces            | Choose one projection engine boundary in A0; add parity tests                           |
+| Scope collision ambiguity                            | Project/local/global skills shadow silently                 | Require collision report and fail unresolved collisions                                 |
+| Plugin browseability mistaken for runtime visibility | Rooted surface grows accidentally                           | Separate `LocalPluginSkillView` from runtime projection and validate first-level count  |
+| Router leaks task text                               | Sensitive prompt text appears in argv/logs                  | Support stdin/file input and redacted persistence                                       |
+| Manifest overreach                                   | System/primary-runtime lanes pulled into ordinary manifests | Exclude bridge lanes and report separately                                              |
+| Default flip too early                               | Normal workflows regress                                    | Keep flat default until Phase C gates pass                                              |
+| Runtime-separation conflict                          | This plan conflicts with canonical path migration           | Treat runtime-separation plan as dependency; do not move roots in this plan             |
+| `skill-archive` naming reads as deprecated           | Agents may skip preserved full-context references           | Post-C4 migration uses `preserved-context` as canonical path with a compatibility alias |
 
 ## Open Decisions Before Execution
 
@@ -995,14 +995,14 @@ Resolve before the relevant B3 router slice starts:
 
 - Low-confidence router threshold.
 
-Resolve after C4 in a dedicated compatibility slice:
+Resolved after C4 in a dedicated compatibility slice:
 
-- Whether to rename `skill-archive/**` paths to clearer `full-context/**` or
-  `preserved-context/**` paths. Do not casually rename during default flip work:
-  these paths are referenced by symlinks, fixtures, and validators. Treat this
-  as a post-C4 naming compatibility migration with validator updates,
-  compatibility aliases, rollback evidence, and a delayed removal plan for the
-  old path.
+- `Plugins/harness-engineering/fixtures/preserved-context/**` is the canonical
+  location for preserved full-context Harness Engineering fixture material.
+  `Plugins/harness-engineering/fixtures/skill-archive` remains as a
+  compatibility alias for older links while validators and docs move to the
+  clearer canonical path. Keep any future removal of the alias as a separate
+  delayed-removal change with explicit link and validator evidence.
 
 Recommended defaults:
 

@@ -58,7 +58,10 @@ collect_changed_he_skills() {
   fi
 
   printf '%s\n' "${all_changed[@]}" \
-    | awk '/^Plugins\/harness-engineering\/(skills\/.+\/SKILL\.md|fixtures\/.+\/skills\/.+\/SKILL(\.full)?\.md)$/' \
+    | awk '
+        /^Plugins\/harness-engineering\/fixtures\/preserved-context\// { next }
+        /^Plugins\/harness-engineering\/(skills\/.+\/SKILL\.md|fixtures\/.+\/skills\/.+\/SKILL(\.full)?\.md)$/ { print }
+      ' \
     | sort -u
 }
 

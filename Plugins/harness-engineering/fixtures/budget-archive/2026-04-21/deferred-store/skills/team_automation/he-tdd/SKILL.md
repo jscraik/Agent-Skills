@@ -27,17 +27,17 @@ This entrypoint stays concise and keeps full operational context in preserved ar
 - Subagent routing: [repo:Plugins/harness-engineering/references/subagent-routing.md](repo:Plugins/harness-engineering/references/subagent-routing.md)
 - QA intake routing: [repo:Plugins/harness-engineering/references/qa-intake-routing.md](repo:Plugins/harness-engineering/references/qa-intake-routing.md)
 Read when: a Linear QA issue or QA report supplies reproduction steps for the behavior under test.
-- Full TDD guide: [repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/SKILL.full.md](repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/SKILL.full.md)
+- Full TDD guide: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/SKILL.full.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/SKILL.full.md)
 Read when: you need the complete RED/GREEN/refactor workflow or behavior-slice doctrine.
-- Good/bad tests: [repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/tests.md](repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/tests.md)
+- Good/bad tests: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/tests.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/tests.md)
 Read when: deciding whether a test asserts behavior or implementation detail.
-- Boundary mocking: [repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/mocking.md](repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/mocking.md)
+- Boundary mocking: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/mocking.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/mocking.md)
 Read when: a test wants to mock collaborators or external systems.
-- Interface design: [repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/interface-design.md](repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/interface-design.md)
+- Interface design: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/interface-design.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/interface-design.md)
 Read when: the first RED test cannot be expressed through a public interface.
-- Deep modules: [repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/deep-modules.md](repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/deep-modules.md)
+- Deep modules: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/deep-modules.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/deep-modules.md)
 Read when: TDD pressure reveals a broad or shallow interface.
-- Refactoring: [repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/refactoring.md](repo:Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-tdd/references/refactoring.md)
+- Refactoring: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/refactoring.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/references/refactoring.md)
 Read when: cleanup is being considered after GREEN.
 - Assets: [repo:Plugins/harness-engineering/skills/team_automation/he-tdd/assets](repo:Plugins/harness-engineering/skills/team_automation/he-tdd/assets)
 - Assets directory marker: `assets/`

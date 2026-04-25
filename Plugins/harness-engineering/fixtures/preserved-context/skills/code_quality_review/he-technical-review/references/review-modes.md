@@ -21,14 +21,14 @@ Canonical scaffold files for this skill:
 Render / refresh:
 
 ```bash
-python3 Plugins/harness-engineering/fixtures/skill-archive/skills/code_quality_review/he-technical-review/scripts/render_finding_template.py
-python3 Plugins/harness-engineering/fixtures/skill-archive/skills/code_quality_review/he-technical-review/scripts/check_finding_template_drift.py --update
+python3 Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-technical-review/scripts/render_finding_template.py
+python3 Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-technical-review/scripts/check_finding_template_drift.py --update
 ```
 
 Verify no drift:
 
 ```bash
-python3 Plugins/harness-engineering/fixtures/skill-archive/skills/code_quality_review/he-technical-review/scripts/check_finding_template_drift.py
+python3 Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-technical-review/scripts/check_finding_template_drift.py
 ```
 
 ## External evidence rule
