@@ -41,9 +41,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn("symlink", str(ctx.exception).lower())
 
     def test_sync_skills_user_scope_writes_codex_and_agents_links(self) -> None:
-        with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]):
-            with mock.patch.object(Path, "home", return_value=self.fake_home):
-                result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
@@ -61,14 +63,16 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["plan"]["root_skill_sets"]["root_count"], 10)
 
     def test_sync_skills_projection_cli_wins_over_env(self) -> None:
-        with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
-            with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]):
-                result = skills_commands.sync_skills(
-                    self.repo_root,
-                    scope="workspace",
-                    dry_run=True,
-                    projection="flat",
-                )
+        with (
+            mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}),
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=True,
+                projection="flat",
+            )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["projection_mode"], "flat")
@@ -150,9 +154,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(os.readlink(system_link), "../../skills-system")
 
     def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
-        with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]):
-            with mock.patch.object(Path, "home", return_value=self.fake_home):
-                result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
 
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())

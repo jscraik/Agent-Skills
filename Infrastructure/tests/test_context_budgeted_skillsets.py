@@ -16,6 +16,12 @@ import check_context_budget  # noqa: E402
 import generate_root_skill_sets  # noqa: E402
 import generate_skillset_manifests  # noqa: E402
 import route_skillset  # noqa: E402
+from selection_policy import ROOT_SKILL_SET_NAMES  # noqa: E402
+
+
+BUDGET_CONFIG = check_context_budget.load_config()
+RUNTIME_BUDGET = BUDGET_CONFIG["runtime_projection"]
+ROUTING_BUDGET = BUDGET_CONFIG["routing"]
 
 
 class TestContextBudgetedSkillsets(unittest.TestCase):
@@ -29,17 +35,23 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
 
         self.assertEqual(report["status"], "pass")
-        self.assertEqual(report["root_count"], 10)
+        self.assertEqual(report["root_count"], len(ROOT_SKILL_SET_NAMES))
+        self.assertLessEqual(report["root_count"], RUNTIME_BUDGET["max_root_skill_sets"])
         self.assertFalse(report["violations"])
-        self.assertLessEqual(sum(root["description_words"] for root in report["roots"]), 350)
-        self.assertTrue(all(root["body_words"] <= 250 for root in report["roots"]))
+        self.assertLessEqual(
+            sum(root["description_words"] for root in report["roots"]),
+            RUNTIME_BUDGET["max_root_description_words_total"],
+        )
+        self.assertTrue(
+            all(root["body_words"] <= RUNTIME_BUDGET["max_root_body_words_each"] for root in report["roots"])
+        )
 
     def test_manifest_generation_writes_provenance_rich_rows(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         writes = generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
         self.assertEqual(report["status"], "pass")
-        self.assertEqual(len(writes), 10)
+        self.assertEqual(len(writes), len(ROOT_SKILL_SET_NAMES))
         manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
         self.assertTrue(manifest.is_file())
         first_row = json.loads(manifest.read_text(encoding="utf-8").splitlines()[0])
@@ -58,9 +70,9 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         )
 
         self.assertEqual(payload["status"], "selected")
-        self.assertEqual(payload["top_k"], 3)
+        self.assertEqual(payload["top_k"], ROUTING_BUDGET["max_candidates_returned"])
         self.assertEqual(payload["selected"]["id"], "verification-before-completion")
-        self.assertLessEqual(len(payload["candidates"]), 3)
+        self.assertLessEqual(len(payload["candidates"]), ROUTING_BUDGET["max_candidates_returned"])
         self.assertNotIn("source_path", payload["candidates"][0])
 
     def test_context_budget_validates_written_manifest_provenance(self) -> None:

@@ -16,6 +16,7 @@ def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -
         text=True,
         timeout=30,
         env=merged_env,
+        check=False,
     )
 
 
