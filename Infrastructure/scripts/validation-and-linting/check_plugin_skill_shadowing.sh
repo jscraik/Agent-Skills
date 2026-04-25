@@ -63,7 +63,7 @@ if [ -z "$selection_policy_shell" ]; then
 fi
 eval "$selection_policy_shell"
 # Safely handle empty arrays under bash 3.x where ${arr[@]} with set -u
-# fails when the array is empty.  Re-parse the variable line from the eval output.
+# is_allowlisted_overlap_skill_name checks whether SKILL_NAME appears in the space-separated system_bridge_skill_names and returns success (0) if it does, failure (1) otherwise.
 is_allowlisted_overlap_skill_name() {
   local skill_name="$1"
   local _rv_list=""
@@ -74,6 +74,7 @@ is_allowlisted_overlap_skill_name() {
   return 1
 }
 
+# is_rooted_projection_active checks whether any name listed in root_skill_names_file has a corresponding .agents/skills/<name>/SKILL.md and returns success (0) if at least one is found.
 is_rooted_projection_active() {
   [ -s "$root_skill_names_file" ] || return 1
   while IFS= read -r root_skill_name; do
@@ -85,6 +86,7 @@ is_rooted_projection_active() {
   return 1
 }
 
+# is_root_skill_set_name checks whether the provided skill name appears in the root skill names file and returns success (0) if it does.
 is_root_skill_set_name() {
   local skill_name="$1"
   [ -s "$root_skill_names_file" ] || return 1

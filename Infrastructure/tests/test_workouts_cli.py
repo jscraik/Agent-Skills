@@ -25,10 +25,20 @@ DIAGNOSTIC_WORKOUT_IDS = {
 
 class TestWorkoutsCLI(unittest.TestCase):
     def setUp(self) -> None:
+        """
+        Create a temporary directory for the test and set the telemetry directory path.
+        
+        Creates a filesystem temporary directory with prefix "workouts-cli-" and assigns its Path to self.temp_dir. Sets self.telemetry_dir to the Path of the "telemetry" subdirectory inside that temporary directory.
+        """
         self.temp_dir = Path(tempfile.mkdtemp(prefix="workouts-cli-"))
         self.telemetry_dir = self.temp_dir / "telemetry"
 
     def tearDown(self) -> None:
+        """
+        Remove the temporary test directory and its contents.
+        
+        Deletes the directory at self.temp_dir recursively; any filesystem errors during removal are ignored.
+        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_list_workouts_finds_fixture(self) -> None:
@@ -38,6 +48,17 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertTrue(DIAGNOSTIC_WORKOUT_IDS.issubset({item["id"] for item in result.data["workouts"]}))
 
     def test_run_score_and_promote_dry_run(self) -> None:
+        """
+        Verifies that running a workout, scoring it, and performing a dry-run promotion produce the expected metrics, telemetry artifacts, and promotion payload.
+        
+        Asserts that:
+        - The run completes successfully and the scorecard metrics report attempts == 2, pass_rate == 1.0, tool_steps == 4, and retries == 1.
+        - A telemetry runs file (`runs.jsonl`) is written to the telemetry directory.
+        - Scoring succeeds.
+        - Promotion (dry run) succeeds, its rollback validation status is "pass", and `promotion.dry_run` is true.
+        - The promotion payload uses schema version "skill-workout-amendment.v1" and includes `previous_hash`, `new_hash`, `score_before`, and `score_after`.
+        - No amendments directory is created for a dry-run promotion.
+        """
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
             run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=2)
             score_result = workouts.score_workout(REPO_ROOT, WORKOUT_ID)
@@ -79,6 +100,11 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(accepted_payload["state"], "accepted")
 
     def test_promote_rejects_and_records_context_budget_regression(self) -> None:
+        """
+        Verifies that promoting a workout that exceeds the skill context budget is rejected and recorded.
+        
+        Runs a workout, modifies its scorecard to simulate a context-budget regression and mark it promotion-ineligible, then attempts promotion (non-dry-run). Asserts the promotion operation errors, includes "context_budget_exceeded" in rejection reasons, sets promotion state to "rejected" with context budget status "fail", and writes exactly one rejected amendment record whose payload state is "rejected".
+        """
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
             run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
             scorecard_path = Path(run_result.data["scorecard_path"])
@@ -126,6 +152,11 @@ class TestWorkoutsCLI(unittest.TestCase):
             self.assertEqual(score_result.status, "success", workout_id)
 
     def test_run_workout_records_subprocess_timeout(self) -> None:
+        """
+        Verifies that run_workout records a subprocess timeout as a failure and surfaces the expected error and scorecard fields.
+        
+        Mocks subprocess.run to raise subprocess.TimeoutExpired and sets SKILL_TELEMETRY_DIR; asserts the returned result has status "error", the first error code is "ERR_VALIDATION", the scorecard pass_rate is 0.0, the first attempt outcome is "failure" with failure_type "timeout", and both seed and verify exit codes are 124.
+        """
         timeout = subprocess.TimeoutExpired(cmd=["bash", "seed.sh"], timeout=60, output="", stderr="")
         with (
             mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
@@ -143,6 +174,11 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(attempt["verify_exit_code"], 124)
 
     def test_ask_workouts_run_json_contract(self) -> None:
+        """
+        Verifies that running the CLI command `ask workouts run <WORKOUT_ID> --json` exits successfully and emits JSON output containing a `scorecard` entry.
+        
+        This test sets the telemetry directory environment, invokes the CLI, asserts the process exit code is 0, and asserts the captured stdout includes the string `"scorecard"`.
+        """
         env = os.environ.copy()
         env["SKILL_TELEMETRY_DIR"] = str(self.telemetry_dir)
         result = subprocess.run(

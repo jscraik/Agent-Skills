@@ -8,6 +8,16 @@ SYNC_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
 
 
 def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -> subprocess.CompletedProcess[str]:
+    """
+    Run the sync skills shell script with the given command-line arguments and optional environment overrides.
+    
+    Parameters:
+        args (list[str]): Command-line arguments to pass to the script (appended after the script path).
+        env (Optional[dict[str, str]]): Environment variables to overlay on the current process environment; provided keys override existing ones.
+    
+    Returns:
+        subprocess.CompletedProcess[str]: The completed process object containing `returncode`, `stdout`, and `stderr`.
+    """
     merged_env = os.environ.copy()
     merged_env.update(env or {})
     return subprocess.run(
@@ -28,6 +38,11 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn('"$sync_scope" == "user"', script)
 
     def test_rooted_projection_delegates_to_ask_engine_in_dry_run(self) -> None:
+        """
+        Verifies that running the sync script in workspace mode with the 'rooted' projection in dry-run mode delegates to the ask engine.
+        
+        Runs the script with ["--workspace", "--projection", "rooted", "--dry-run"] and asserts the process exits with code 0, that stdout contains "rooted", and that stdout contains the "Dry-run rooted projection" message.
+        """
         result = _run_sync_script(["--workspace", "--projection", "rooted", "--dry-run"])
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -41,6 +56,11 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("rooted", result.stdout)
 
     def test_invalid_scope_fails_before_projection_policy(self) -> None:
+        """
+        Verifies the sync script exits with an invalid-scope error and does not reach projection-policy parsing when SYNC_SKILLS_SCOPE is set to an unsupported value.
+        
+        Asserts that the script returns exit code 2, emits "Invalid sync scope: elsewhere" to stderr, and does not include "Projection mode 'rooted' is parsed" in stderr.
+        """
         result = _run_sync_script(["--projection", "rooted"], env={"SYNC_SKILLS_SCOPE": "elsewhere"})
 
         self.assertEqual(result.returncode, 2)

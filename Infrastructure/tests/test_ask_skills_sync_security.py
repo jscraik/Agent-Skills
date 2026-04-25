@@ -28,9 +28,20 @@ class TestAskSkillsSyncSecurity(TestCase):
         (self.source_dir / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
 
     def tearDown(self) -> None:
+        """
+        Remove the temporary test directory created during setUp.
+        
+        This cleans up self.temp_dir and all its contents by recursively deleting the directory tree; deletion errors are ignored.
+        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def _sync_rooted_workspace(self) -> None:
+        """
+        Perform a rooted workspace synchronization and assert it completed successfully.
+        
+        This helper calls the skills sync routine with projection set to "rooted" for the test repository
+        and asserts that the resulting status equals "success".
+        """
         result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
@@ -50,6 +61,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn("symlink", str(ctx.exception).lower())
 
     def test_sync_skills_user_scope_defaults_to_rooted_and_writes_runtime_links(self) -> None:
+        """
+        Verifies that syncing with scope='user' defaults to the 'rooted' projection and creates the expected runtime symlinks in the user's home.
+        
+        Runs a rooted workspace sync baseline, then calls sync_skills(...) with scope="user" (and no projection) while mocking discovered skills and the user's home directory. Asserts the operation succeeds, that ~/.agents/skills and ~/.codex/skills are created as symlinks under the mocked home, and that the reported projection_mode is "rooted".
+        """
         self._sync_rooted_workspace()
 
         with (
@@ -64,6 +80,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "rooted")
 
     def test_sync_skills_user_scope_rooted_rejects_invalid_workspace_runtime(self) -> None:
+        """
+        Verifies that syncing with scope="user" and projection="rooted" fails when the workspace runtime contains actual skill directories instead of expected symlinks.
+        
+        Asserts that the sync returns an error with validation code `ERR_VALIDATION`, that the error message mentions "workspace", no user runtime symlink is created under the fake home, and the plan records a violation with code `ROOTED_WORKSPACE_POLICY_NAME_DRIFT`.
+        """
         flat_skill = self.repo_root / ".agents" / "skills" / "safe-skill"
         flat_skill.mkdir()
         (flat_skill / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
@@ -106,6 +127,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "flat")
 
     def test_sync_skills_projection_env_reaches_engine(self) -> None:
+        """
+        Checks that the SYNC_SKILLS_PROJECTION_MODE environment variable is used to select the projection mode and that the chosen projection information and basic validation metrics are exposed by the sync engine.
+        
+        Asserts that the sync result indicates success, that `projection_mode` is "rooted", that `projection.mode_source` is "env", that the plan's `validation_status` is "pass", and that the reported `root_skill_sets.root_count` is greater than 0 and no more than 10.
+        """
         with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
             result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=True)
 
@@ -134,6 +160,12 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection"]["mode_source"], "cli")
 
     def test_sync_skills_rooted_non_dry_run_writes_generated_surface(self) -> None:
+        """
+        Verifies that a non-dry-run rooted workspace sync generates the expected rooted surface artifacts.
+        
+        Asserts the sync completes successfully, reports a "rooted" projection mode, and creates the repository-rooted artifacts:
+        `.agents/skills/<skill>/SKILL.md` and `.skillsets/<skill>/manifest.jsonl`.
+        """
         result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
@@ -190,6 +222,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertNotIn("imagegen", result.data["plan"]["preserved_bridge_lane_entries"])
 
     def test_sync_skills_projection_does_not_mask_invalid_scope(self) -> None:
+        """
+        Verifies that specifying an invalid scope produces a validation error even when a projection is provided.
+        
+        Asserts that the sync result has an error status and that the first error carries the code `ERR_INVALID_SCOPE`.
+        """
         result = skills_commands.sync_skills(
             self.repo_root,
             scope="unknown",
@@ -201,6 +238,14 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.errors[0].code, "ERR_INVALID_SCOPE")
 
     def test_sync_skills_workspace_prunes_stale_symlinks_only(self) -> None:
+        """
+        Verifies that workspace syncing removes only stale symlinks, preserves real directories, and creates symlinks for discovered skills.
+        
+        After running a workspace sync with a discovered valid skill, the test asserts:
+        - the stale symlink is removed (no longer exists and is not a symlink),
+        - an existing real directory under the runtime skills path is preserved,
+        - a symlink for the discovered valid skill is created under the runtime skills path.
+        """
         skills_dir = self.repo_root / ".agents" / "skills"
         valid_source = self.repo_root / "Skills" / "agent-ops" / "valid-skill"
         valid_source.mkdir(parents=True)
@@ -231,6 +276,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((skills_dir / "valid-skill").is_symlink())
 
     def test_sync_skills_workspace_preserves_reserved_system_lane_symlink(self) -> None:
+        """
+        Verify that syncing workspace skills preserves the reserved `.agents/skills/.system` symlink and its target.
+        
+        Creates a `skills-system` directory and sets `.agents/skills/.system` as a symlink to `../../skills-system`, runs `sync_skills` with `scope="workspace"`, and asserts the operation succeeds, `.agents/skills/.system` remains a symlink, and its link target is `"../../skills-system"`.
+        """
         skills_dir = self.repo_root / ".agents" / "skills"
         system_skills_dir = self.repo_root / "skills-system"
         system_skills_dir.mkdir()

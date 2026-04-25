@@ -124,6 +124,13 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
         )
 
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
+        """
+        Verify that the plugin-creator skill document references the workflow and that the workflow contains the repository-local `.pyw` script path for create_basic_plugin.
+        
+        The test reads the skill and workflow documentation files and asserts that:
+        - "references/workflow.md" appears in the skill document.
+        - The workflow document includes the repository-local path "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw".
+        """
         skill_doc = PLUGIN_CREATOR_SKILL.read_text(encoding="utf-8")
         workflow_doc = PLUGIN_CREATOR_WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("references/workflow.md", skill_doc)

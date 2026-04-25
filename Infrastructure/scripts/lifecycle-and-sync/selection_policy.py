@@ -131,12 +131,12 @@ def repo_scan_roots_with_prefix() -> tuple[str, ...]:
 
 def payload() -> dict[str, Any]:
     """
-    Produce a stable dictionary of all inputs that define the selection policy identity.
+    Produce a deterministic mapping of the inputs that define the selection policy identity.
     
-    Tuples are converted to lists to ensure deterministic JSON serialization for hashing and storage.
+    Tuples are converted to lists to ensure stable JSON serialization for hashing and storage.
     
     Returns:
-        payload (dict[str, Any]): Mapping with the following keys:
+        dict[str, Any]: Mapping with the following keys:
             - "policy_version": str
             - "projection_mode_choices": list[str]
             - "root_skill_set_names": list[str]
@@ -176,12 +176,12 @@ def _shell_array(name: str, values: Iterable[str]) -> str:
 
 def render_shell() -> str:
     """
-    Produce a newline-delimited shell fragment defining selection policy variables.
+    Render a newline-delimited shell fragment that exports selection policy variables.
     
-    The fragment contains a quoted `SELECTION_POLICY_IDENTITY`, shell-array assignments for repo scan roots, excluded segments, hidden flat skills, plugin-visible router skills and plugin-hidden lane skills, and a quoted `SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB`.
+    The fragment defines SELECTION_POLICY_IDENTITY and SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB as quoted strings, and emits array-style assignments for projection modes, root skill sets, repo scan roots, excluded scan segments, hidden and default-visible flat skills, plugin-visible router skills, plugin-hidden lane skills, and system bridge skills.
     
     Returns:
-        shell_fragment (str): Lines joined by newlines representing shell assignments.
+        shell_fragment (str): Newline-joined shell assignments representing the policy values.
     """
     lines = [
         f"SELECTION_POLICY_IDENTITY={shlex.quote(policy_identity())}",

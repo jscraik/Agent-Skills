@@ -36,6 +36,11 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
         self.assertEqual(report["budget_status"], report["status"])
 
     def test_scope_counts_include_known_scope_lanes(self) -> None:
+        """
+        Verify that the report's scope_counts contains expected scope lanes and that each lane's count is an integer.
+        
+        Asserts that the keys "global", "project", "local-plugin", "system", and "primary-runtime" exist in report["scope_counts"] and that each associated value is of type int.
+        """
         report = build_report()
 
         for scope in ("global", "project", "local-plugin", "system", "primary-runtime"):
