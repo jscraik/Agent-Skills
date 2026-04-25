@@ -35,7 +35,7 @@ Options:
   --prompt-out PATH           Codex prompt path
   --insights-out PATH         Codex-written insights JSON path
   --insights-in PATH          Existing insights JSON for --render-only
-  --no-open                   Do not call the OS browser opener
+  --no-open                   Compatibility flag; the runner never opens the OS browser
   --verbose                   Show progress details
 ```
 
@@ -66,7 +66,7 @@ REPORT_URL=file://$HOME/dev/configs/codex/usage-data/report.html
 
 When used as a skill inside Codex, open the printed `REPORT_URL=` in the Codex in-app browser after the report is complete.
 
-The Python runner may still call the OS browser unless `--no-open` is set, but the skill-level launch target is the Codex browser. When Browser tooling is not available, leave the `REPORT_URL` visible and say the in-app launch was skipped.
+The Python runner never calls the OS browser opener. When Browser tooling is not available, leave the `REPORT_URL` visible and say the in-app launch was skipped.
 
 ## Troubleshooting
 

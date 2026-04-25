@@ -93,6 +93,28 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
 
+    def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_skills_dir = self.repo_root / "skills-system"
+        bridge_skill_dir = system_skills_dir / "imagegen"
+        bridge_skill_dir.mkdir(parents=True)
+        (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        bridge_link = skills_dir / "imagegen"
+        bridge_link.symlink_to(Path(".system/imagegen"))
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=True,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(
+            any("imagegen" in delete for delete in result.data["plan"]["deletes"]),
+            "rooted projection should prune first-level system bridge aliases",
+        )
+
     def test_sync_skills_projection_does_not_mask_invalid_scope(self) -> None:
         result = skills_commands.sync_skills(
             self.repo_root,

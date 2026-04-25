@@ -25,7 +25,6 @@ import shlex
 import shutil
 import subprocess
 import sys
-import webbrowser
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -132,7 +131,7 @@ OUTCOME_ORDER = [
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate Codex insights report with Codex-authored analysis")
     parser.add_argument("--days", type=int, default=7, help="Lookback window (default: 7)")
-    parser.add_argument("--no-open", action="store_true", help="Don't open browser")
+    parser.add_argument("--no-open", action="store_true", help="Compatibility flag; the runner never opens the OS browser")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("--prepare-only", action="store_true", help="Write evidence and Codex prompt, then exit before invoking Codex")
     parser.add_argument("--render-only", action="store_true", help="Render HTML from existing evidence and insights JSON")
@@ -360,11 +359,14 @@ def parse_session_file(file_path):
                         elif payload_type == 'function_call':
                             name = payload.get('name') or 'unknown'
                             tool_calls[name] += 1
-                            arguments = payload.get('arguments') or '{}'
-                            try:
-                                tool_input = json.loads(arguments) if isinstance(arguments, str) else {}
-                            except json.JSONDecodeError:
-                                tool_input = {}
+                            arguments = payload.get('arguments') or {}
+                            if isinstance(arguments, dict):
+                                tool_input = arguments
+                            else:
+                                try:
+                                    tool_input = json.loads(arguments) if isinstance(arguments, str) else {}
+                                except json.JSONDecodeError:
+                                    tool_input = {}
 
                             if name in ('Edit', 'Write', 'apply_patch'):
                                 file_path_mod = tool_input.get('file_path') or tool_input.get('path') or ''
@@ -696,7 +698,7 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
   }},
   "project_areas": {{
     "areas": [
-      {{"name": "Area name", "session_count": 1, "description": "2-3 sentences"}}
+      {{"name": "Area name", "session_count": 1, "description": "2-3 sentences", "evidence": ["session id, metric, or transcript summary"]}}
     ]
   }},
   "interaction_style": {{
@@ -706,38 +708,38 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
   "what_works": {{
     "intro": "One sentence",
     "impressive_workflows": [
-      {{"title": "Short title", "description": "2-3 sentences"}}
+      {{"title": "Short title", "description": "2-3 sentences", "evidence": ["session id, metric, or transcript summary"]}}
     ]
   }},
   "friction_analysis": {{
     "intro": "One sentence",
     "categories": [
-      {{"category": "Concrete category", "description": "1-2 sentences", "examples": ["specific example", "specific example"]}}
+      {{"category": "Concrete category", "description": "1-2 sentences", "examples": ["specific example", "specific example"], "evidence": ["session id, metric, or transcript summary"]}}
     ]
   }},
   "prompting_help": {{
     "plain_english_patterns": [
-      {{"situation": "When to use this", "copyable_prompt": "Prompt Jamie can paste"}}
+      {{"situation": "When to use this", "copyable_prompt": "Prompt Jamie can paste", "evidence": ["session id, metric, or transcript summary"]}}
     ],
     "terms_to_learn": [
-      {{"term": "technical term", "plain_english": "plain explanation", "when_to_use": "when it helps"}}
+      {{"term": "technical term", "plain_english": "plain explanation", "when_to_use": "when it helps", "evidence": ["session id, metric, or transcript summary"]}}
     ]
   }},
   "suggestions": {{
     "agents_md_additions": [
-      {{"addition": "Instruction to add", "why": "Why it helps", "where": "Suggested location"}}
+      {{"addition": "Instruction to add", "why": "Why it helps", "where": "Suggested location", "evidence": ["session id, metric, or transcript summary"]}}
     ],
     "features_to_try": [
-      {{"feature": "Codex feature", "one_liner": "What it does", "why_for_you": "Why it helps Jamie", "example_code": "Copyable command or prompt"}}
+      {{"feature": "Codex feature", "one_liner": "What it does", "why_for_you": "Why it helps Jamie", "example_code": "Copyable command or prompt", "evidence": ["session id, metric, or transcript summary"]}}
     ],
     "usage_patterns": [
-      {{"title": "Short title", "suggestion": "1-2 sentences", "detail": "3-4 sentences", "copyable_prompt": "Prompt to try"}}
+      {{"title": "Short title", "suggestion": "1-2 sentences", "detail": "3-4 sentences", "copyable_prompt": "Prompt to try", "evidence": ["session id, metric, or transcript summary"]}}
     ]
   }},
   "on_the_horizon": {{
     "intro": "One sentence",
     "opportunities": [
-      {{"title": "Short title", "whats_possible": "2-3 sentences", "how_to_try": "1-2 sentences", "copyable_prompt": "Prompt to try"}}
+      {{"title": "Short title", "whats_possible": "2-3 sentences", "how_to_try": "1-2 sentences", "copyable_prompt": "Prompt to try", "evidence": ["session id, metric, or transcript summary"]}}
     ]
   }},
   "actionable_fixes": {{
@@ -756,7 +758,8 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
         "fix_shell": "Exact shell command if safe, or empty string",
         "codex_command": "Copyable Codex prompt or command",
         "enforce": "AGENTS.md/hook/skill/config enforcement",
-        "verify": "How Jamie knows it improved"
+        "verify": "How Jamie knows it improved",
+        "evidence": ["session id, metric, or transcript summary"]
       }}
     ],
     "stop_doing": ["Specific anti-pattern to stop"],
@@ -775,21 +778,120 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
 
 
 def validate_insights(insights):
-    """Return a list of missing top-level sections."""
-    required = [
-        "metadata",
-        "at_a_glance",
-        "project_areas",
-        "interaction_style",
-        "what_works",
-        "friction_analysis",
-        "prompting_help",
-        "suggestions",
-        "on_the_horizon",
-        "actionable_fixes",
-        "fun_ending",
-    ]
-    return [key for key in required if not isinstance(insights.get(key), dict)]
+    """Return writer-contract validation errors for generated insight JSON."""
+    errors = []
+    required_sections = {
+        "metadata": ("schema_version", "writer_provider", "generated_at", "confidence", "limitations"),
+        "at_a_glance": ("whats_working", "whats_hindering", "quick_wins", "ambitious_workflows"),
+        "project_areas": ("areas",),
+        "interaction_style": ("narrative", "key_pattern"),
+        "what_works": ("intro", "impressive_workflows"),
+        "friction_analysis": ("intro", "categories"),
+        "prompting_help": ("plain_english_patterns", "terms_to_learn"),
+        "suggestions": ("agents_md_additions", "features_to_try", "usage_patterns"),
+        "on_the_horizon": ("intro", "opportunities"),
+        "actionable_fixes": ("executive_summary", "priority_fixes", "stop_doing", "execution_order"),
+        "fun_ending": ("headline", "detail"),
+    }
+    required_list_fields = {
+        "metadata.limitations",
+        "project_areas.areas",
+        "what_works.impressive_workflows",
+        "friction_analysis.categories",
+        "prompting_help.plain_english_patterns",
+        "prompting_help.terms_to_learn",
+        "suggestions.agents_md_additions",
+        "suggestions.features_to_try",
+        "suggestions.usage_patterns",
+        "on_the_horizon.opportunities",
+        "actionable_fixes.priority_fixes",
+        "actionable_fixes.stop_doing",
+        "actionable_fixes.execution_order",
+    }
+    second_person_paths = {
+        "at_a_glance.whats_working",
+        "at_a_glance.whats_hindering",
+        "at_a_glance.quick_wins",
+        "at_a_glance.ambitious_workflows",
+        "interaction_style.narrative",
+        "interaction_style.key_pattern",
+        "suggestions.features_to_try[].why_for_you",
+    }
+    evidence_item_paths = {
+        "project_areas.areas",
+        "what_works.impressive_workflows",
+        "friction_analysis.categories",
+        "prompting_help.plain_english_patterns",
+        "prompting_help.terms_to_learn",
+        "suggestions.agents_md_additions",
+        "suggestions.features_to_try",
+        "suggestions.usage_patterns",
+        "on_the_horizon.opportunities",
+        "actionable_fixes.priority_fixes",
+    }
+
+    def has_second_person(value: str) -> bool:
+        return bool(re.search(r"\b(you|your|yours|yourself)\b", value, flags=re.IGNORECASE))
+
+    def section_payload(name: str) -> dict:
+        payload = insights.get(name)
+        return payload if isinstance(payload, dict) else {}
+
+    for section, fields in required_sections.items():
+        payload = insights.get(section)
+        if not isinstance(payload, dict):
+            errors.append(f"{section} must be an object")
+            continue
+        for field in fields:
+            path = f"{section}.{field}"
+            value = payload.get(field)
+            if path in required_list_fields:
+                if not isinstance(value, list):
+                    errors.append(f"{path} must be a list")
+                continue
+            if value in (None, "", [], {}):
+                errors.append(f"{path} is required")
+
+    for path in evidence_item_paths:
+        section, field = path.split(".", 1)
+        values = section_payload(section).get(field, [])
+        if not isinstance(values, list):
+            continue
+        for index, item in enumerate(values):
+            if not isinstance(item, dict):
+                errors.append(f"{path}[{index}] must be an object")
+                continue
+            evidence = item.get("evidence")
+            if not isinstance(evidence, list) or not any(isinstance(entry, str) and entry.strip() for entry in evidence):
+                errors.append(f"{path}[{index}].evidence must include at least one evidence entry")
+
+    features = section_payload("suggestions").get("features_to_try", [])
+    if isinstance(features, list):
+        for index, item in enumerate(features):
+            if not isinstance(item, dict):
+                errors.append(f"suggestions.features_to_try[{index}] must be an object")
+                continue
+            for field in ("feature", "one_liner", "why_for_you", "example_code"):
+                if not item.get(field):
+                    errors.append(f"suggestions.features_to_try[{index}].{field} is required")
+
+    for path in second_person_paths:
+        if "[]" in path:
+            section, rest = path.split(".", 1)
+            list_name, field = rest.split("[].")
+            values = section_payload(section).get(list_name, [])
+            if isinstance(values, list) and not any(
+                isinstance(item, dict) and isinstance(item.get(field), str) and has_second_person(item[field])
+                for item in values
+            ):
+                errors.append(f"{path} must use second-person phrasing")
+            continue
+        section, field = path.split(".", 1)
+        value = section_payload(section).get(field)
+        if isinstance(value, str) and not has_second_person(value):
+            errors.append(f"{path} must use second-person phrasing")
+
+    return errors
 
 
 def codex_command() -> list[str]:
@@ -1130,7 +1232,7 @@ def generate_html_report(data, insights):
     
     css = """
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
     .container { max-width: 800px; margin: 0 auto; }
     h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
     h2 { font-size: 20px; font-weight: 600; color: #0f172a; margin-top: 48px; margin-bottom: 16px; }
@@ -1236,7 +1338,6 @@ def generate_html_report(data, insights):
 <head>
   <meta charset="utf-8">
   <title>Codex Insights</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>{css}</style>
 </head>
 <body>
@@ -1521,9 +1622,6 @@ def main():
         print(f"  Analyzed {sessions['total']} sessions, {metrics.get('total_user_messages', 0)} messages {codex_status}")
     else:
         print("  No session data found.")
-    
-    if not args.no_open:
-        webbrowser.open(report_url)
     
     return 0
 

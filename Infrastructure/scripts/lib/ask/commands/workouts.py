@@ -125,7 +125,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
     try:
         import yaml  # type: ignore
 
-        loaded = yaml.safe_load(text) or {}
+        loaded = yaml.safe_load(text)
     except ImportError as exc:
         loaded = {}
         yaml_error = exc
@@ -133,7 +133,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
         loaded = {}
         yaml_error = exc
 
-    if "loaded" in locals() and loaded == {}:
+    if yaml_error is not None:
         loaded = {}
         current_key: Optional[str] = None
         for raw_line in text.splitlines():
@@ -152,6 +152,8 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
                 loaded[current_key].append(line[2:].strip().strip("\"'"))
         if not loaded:
             raise ValueError(f"Unable to parse {path}: {yaml_error or 'empty mapping'}") from yaml_error
+    if loaded is None:
+        loaded = {}
     if not isinstance(loaded, dict):
         raise ValueError(f"Expected mapping in {path}")
     return loaded
@@ -317,7 +319,10 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
     try:
         max_attempts = int(config.get("max_attempts", 5))
         requested_attempts = int(attempts)
+        max_skill_context_tokens = int(config.get("max_skill_context_tokens", 1500))
         if max_attempts < 1 or requested_attempts < 1:
+            raise ValueError
+        if max_skill_context_tokens < 1:
             raise ValueError
         bounded_attempts = min(requested_attempts, max_attempts)
         seed_path = _resolve_inside(directory, str(config.get("seed", "seed.sh")), label="seed")
@@ -402,7 +407,6 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         _append_jsonl(telemetry_dir / "workout-results.jsonl", attempt_payload)
 
     score = _score_attempts(attempt_results)
-    max_context_tokens = int(config.get("max_skill_context_tokens", DEFAULT_MAX_SKILL_CONTEXT_TOKENS))
     scorecard = {
         "schema_version": "skill-workout-scorecard.v1",
         "timestamp": _timestamp(),
@@ -416,9 +420,9 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             "estimated_skill_context_tokens": context_tokens,
         },
         "limits": {
-            "max_skill_context_tokens": max_context_tokens,
+            "max_skill_context_tokens": max_skill_context_tokens,
         },
-        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= max_context_tokens,
+        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= max_skill_context_tokens,
     }
     scorecard_path = telemetry_dir / "scorecards" / f"{_safe_filename(workout_id)}.json"
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)

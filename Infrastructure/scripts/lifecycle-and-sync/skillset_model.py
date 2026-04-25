@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 from collections.abc import Iterable
@@ -80,6 +81,20 @@ ROOT_SKILL_SET_METADATA: dict[str, dict[str, str]] = {
 }
 
 
+def validate_root_skill_set_coverage() -> None:
+    """Fail fast when policy skill-set names and metadata drift apart."""
+    missing = sorted(set(ROOT_SKILL_SETS) - set(ROOT_SKILL_SET_METADATA))
+    extra = sorted(set(ROOT_SKILL_SET_METADATA) - set(ROOT_SKILL_SETS))
+    if missing or extra:
+        raise RuntimeError(
+            "ROOT_SKILL_SET_METADATA keys must match ROOT_SKILL_SETS; "
+            f"missing={missing}, extra={extra}"
+        )
+
+
+validate_root_skill_set_coverage()
+
+
 @dataclass(frozen=True)
 class SkillModule:
     """Latent module metadata used by manifests and routers."""
@@ -139,8 +154,8 @@ def listish(value: str | None) -> list[str]:
     cleaned = value.replace("\n", " ").strip()
     if not cleaned:
         return []
-    if " - " in f" {cleaned} ":
-        return [part.strip(" -") for part in cleaned.split("-") if part.strip(" -")]
+    if re.search(r"(?:^|\s)-\s+", cleaned):
+        return [part.strip() for part in re.split(r"(?:^|\s)-\s+", cleaned) if part.strip()]
     if "," in cleaned:
         return [part.strip() for part in cleaned.split(",") if part.strip()]
     return [cleaned]
@@ -160,7 +175,10 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
     try:
         parts = tuple(source_dir.relative_to(REPO_ROOT).parts)
     except ValueError:
-        parts = tuple(source_dir.resolve().relative_to(REPO_ROOT).parts)
+        try:
+            parts = tuple(source_dir.resolve().relative_to(REPO_ROOT).parts)
+        except ValueError:
+            return None, "untagged"
     lowered = tuple(part.lower() for part in parts)
     if len(lowered) >= 2 and lowered[0] == "skills":
         if lowered[1] == "project":
@@ -261,7 +279,7 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
             unmapped.append({"id": source_dir.name, "source_path": rel(skill_md), "reason": skill_set_status})
             continue
         level, level_status = infer_level(source_dir.name, frontmatter, description)
-        metadata_status = "declared" if skill_set_status == "declared" and level_status == "declared" else "inferred"
+        metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
             SkillModule(
                 id=source_dir.name,
