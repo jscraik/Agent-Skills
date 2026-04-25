@@ -2,12 +2,13 @@ schema_version: 1
 
 purpose: >
   Route incoming Harness Engineering requests to the correct single next stage and return one
-  exact next command.
+  exact next skill invocation.
 
 triggers:
   - user asks for Harness Engineering help but does not specify a stage
   - stage selection is ambiguous across ideation, spec, plan, optimization, implementation, or review
   - user asks where domain-model, ubiquitous-language, `CONTEXT.md`, glossary, terminology, or domain drift work belongs
+  - user asks to run a QA session, report bugs conversationally, or turn feedback into Linear issues
   - user asks where to resume the Harness Engineering workflow
 
 inputs:
@@ -17,8 +18,10 @@ inputs:
 
 outputs:
   - one selected HE stage
+  - matched deterministic rule
+  - confidence value such as high, medium, or blocked
   - one-sentence rationale
-  - one exact next command
+  - one exact next skill invocation
   - subagent policy (`always`, `conditional`, or `manual-only`)
   - mapped roles for the selected stage (baseline + conditional)
   - stage-map role selection prefers `he-*` aliases before fallback reviewer-name resolution
@@ -36,11 +39,13 @@ risks:
   - wrong-stage routing; mitigate with explicit rule checks and one blocking clarification when needed
   - domain-model route confusion; mitigate by routing fuzzy language to `he-brainstorm`, first contract work to `he-spec`, existing spec contradictions to `he-deepen-spec`, execution drift to `he-work`, and review drift to the review stages
   - stage sprawl; mitigate by enforcing exactly one primary stage
-  - generic handoff text; mitigate by requiring one executable next command
+  - generic handoff text; mitigate by requiring one exact next skill invocation
   - optimize-vs-implement confusion; mitigate by routing measurable experiment loops to `he-improve`
   - refine-vs-implement confusion; mitigate by routing browser-first polish loops to `he-refine`
   - debug-vs-implement confusion; mitigate by routing root-cause bug loops to `he-fix-bugs`
+  - QA-intake-vs-debug confusion; mitigate by routing clear conversational bug reports to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, and multi-issue sequencing to `he-plan`
   - branch-hygiene-vs-debug confusion; mitigate by routing stale branch cleanup requests to `he-prune-branches`
+  - lifecycle step skipping; mitigate with deterministic precedence for review, diagnosis, TDD, refinement, optimization, and artifact deepening before generic implementation
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

@@ -11,8 +11,12 @@ Use this file when you need detailed stage doctrine, extended examples, legacy/a
 - Canonical subagent role policy remains in:
   - `references/routing-map.json`
   - `references/subagent-routing.md`
+- Canonical deterministic stage-routing policy remains in:
+  - `references/deterministic-stage-routing.md`
 - Canonical domain-model routing policy remains in:
   - `references/domain-model-routing.md`
+- Canonical QA intake routing policy remains in:
+  - `references/qa-intake-routing.md`
 - Router role-resolution policy for `he-router` requires checking `~/.codex/agents/manifest.json` and preferring `he-*` mapped roles when available in the stage map.
 - The `he-router` execution contract now treats `he-*` stage-map role entries as first priority, with manifest lookups used to resolve concrete reviewer names only after stage-map preference.
 
@@ -20,11 +24,31 @@ Use this file when you need detailed stage doctrine, extended examples, legacy/a
 
 The following lines were intentionally moved out of active or fixture `SKILL.md` entrypoints during context-budget hardening. They remain preserved here for auditability and historical review of the compacted flow contracts.
 
+The QA intake routing refresh preserved these pre-insertion procedure lines:
+
+- `2. Map service boundaries and dependency failure paths.`
+- `3. Produce reliability findings with concrete blast-radius and mitigation guidance.`
+- `4. Route review subagents per policy; if unavailable, continue inline and state manual role options.`
+- `2. Produce a failing test first (RED), then apply the smallest fix (GREEN).`
+- `3. Repeat in vertical slices and preserve traceability to accepted behavior targets.`
+- `4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.`
+
+2. Map service boundaries and dependency failure paths.
+3. Produce reliability findings with concrete blast-radius and mitigation guidance.
+4. Route review subagents per policy; if unavailable, continue inline and state manual role options.
+2. Produce a failing test first (RED), then apply the smallest fix (GREEN).
+3. Repeat in vertical slices and preserve traceability to accepted behavior targets.
+4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.
+
 2. Deepen interfaces, lifecycle behavior, and failure handling.
+2. Map service boundaries and dependency failure paths.
+2. Produce a failing test first (RED), then apply the smallest fix (GREEN).
 2. Reproduce and stabilize the failing behavior before proposing changes.
 3. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
 3. For incoming feedback: read, clarify unclear items, verify, then respond technically.
 3. Produce the specification artifact with concrete acceptance criteria.
+3. Produce reliability findings with concrete blast-radius and mitigation guidance.
+3. Repeat in vertical slices and preserve traceability to accepted behavior targets.
 3. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
 3. Return readiness outcome and next stage recommendation.
 3. Trace backward from the symptom to the point where valid state first became invalid.
@@ -34,6 +58,8 @@ The following lines were intentionally moved out of active or fixture `SKILL.md`
 4. Return findings-first output plus open questions and next action.
 4. Return outputs.
 4. Route research and review roles per routing policy; if unavailable, continue inline and state manual role options.
+4. Route review subagents per policy; if unavailable, continue inline and state manual role options.
+4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.
 4. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
 5. Capture durable requirements only when the discussion produced decisions worth preserving.
 5. If still ambiguous after one clarification, return blocked with missing input.
@@ -50,6 +76,8 @@ The following lines were intentionally moved out of active or fixture `SKILL.md`
 
 - `he-router`: `skills/he-router/references/*` (active canonical), plus router policy in `references/routing-map.json`.
 - Domain-model workflow: `references/domain-model-routing.md`
+- QA intake workflow: `references/qa-intake-routing.md`
+- Deterministic stage routing: `references/deterministic-stage-routing.md`
 - `he-code-review`: `fixtures/skill-archive/skills/code_quality_review/he-code-review/`
 - `he-reliability-review`: `fixtures/skill-archive/skills/code_quality_review/he-reliability-review/`
 - `he-technical-review`: `fixtures/skill-archive/skills/code_quality_review/he-technical-review/`

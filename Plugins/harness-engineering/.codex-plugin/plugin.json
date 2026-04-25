@@ -41,7 +41,7 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use the best matching HE stage directly when clear; otherwise use he-router to choose the next stage and command."
+      "Use the best matching HE stage directly when clear; otherwise use he-router to choose the next stage and exact skill invocation."
     ],
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",

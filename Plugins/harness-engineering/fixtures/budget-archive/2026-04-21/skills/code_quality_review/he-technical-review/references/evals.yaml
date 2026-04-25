@@ -72,6 +72,24 @@ cases:
       - type: regex
         value: "(?i)(domain_drift|CONTEXT\\.md|findings|behavior boundary)"
 
+  - id: linear-qa-fix-fit
+    name: proposed fix fits Linear QA report
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you validate whether this proposed fix solves the Linear QA report or just hides the symptom?"
+    deterministic_checks:
+      forbidden_commands:
+        - "rm -rf"
+        - "curl"
+        - "wget"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-technical-review"
+      - type: regex
+        value: "(?i)(Linear|reported behavior|symptom|evidence|push_back)"
+
   - id: implementation-route-away
     name: implementation request routes away
     category: negative

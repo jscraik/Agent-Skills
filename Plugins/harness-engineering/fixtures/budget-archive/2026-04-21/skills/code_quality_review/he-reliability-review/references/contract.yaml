@@ -13,9 +13,11 @@ triggers:
   - the user wants to understand cascading-failure risk
   - the user wants SLO readiness evaluated
   - he-plan routes to reliability review via production-considerations criteria
+  - QA reports intermittent, timeout, retry, dependency-driven, or high-blast-radius behavior
 
 inputs:
   - a review target such as service code, architecture doc, PR with service changes, or infrastructure config
+  - optional QA report with intermittent reproduction or external dependency clues
   - access to the relevant code, configs, or design documents
   - enough architectural context to map service boundaries and dependencies
 
@@ -24,6 +26,7 @@ outputs:
   - resilience coverage assessment against the resilience checklist
   - dependency failure matrix when multiple external dependencies exist
   - SLO readiness assessment when the target is user-facing
+  - QA reliability classification when the source is intermittent or dependency-driven
   - explicit no-critical-findings statement when appropriate
   - schema_version: 1 when the caller requests structured output
 
@@ -38,6 +41,7 @@ risks:
   - missing cascading paths; mitigate with dependency mapping before analysis
   - over-engineering recommendations; mitigate with scale-appropriate patterns
   - assuming cloud guarantees; mitigate with application-level verification
+  - treating reliability symptoms as simple bugs; mitigate with failure-mode classification before remediation guidance
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

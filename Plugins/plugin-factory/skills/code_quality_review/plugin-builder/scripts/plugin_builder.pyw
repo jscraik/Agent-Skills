@@ -3306,14 +3306,6 @@ def _run_validate(args: argparse.Namespace) -> int:
         if not required_path.exists():
             add_finding("error", f"Missing required file: {required_path}")
 
-    legacy_codex_manifest = plugin_root / ".codex-plugin" / "plugin.json"
-    if legacy_codex_manifest.exists():
-        add_finding(
-            "error",
-            "Detected legacy Codex manifest `.codex-plugin/plugin.json`. "
-            "Converted Codex packages must use `.codex-plugin/plugin.json` as runtime manifest."
-        )
-
     for deprecated_surface in ("prompts", "commands", "slash-commands"):
         deprecated_path = plugin_root / deprecated_surface
         if deprecated_path.exists():

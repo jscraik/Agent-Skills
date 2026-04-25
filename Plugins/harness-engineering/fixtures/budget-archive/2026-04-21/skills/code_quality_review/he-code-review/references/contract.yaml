@@ -10,10 +10,12 @@ triggers:
   - the user wants a package-level review rather than only a narrow technical critique
   - the user wants a spec, plan, UI artifact, or solution document reviewed for readiness
   - the user wants blockers, recommendation, and follow-up guidance synthesized across reviewer lenses
+  - merge readiness depends on proving a PR satisfies linked Linear QA issues
 
 inputs:
   - a review target such as PR, branch, current diff, latest PR, file path, spec path, plan path, or solution path
   - access to the relevant diff, files, or markdown artifact
+  - optional linked Linear QA issues, reproduction steps, and expected behavior
   - optional reviewer context from harness-engineering.local.md
   - optional review modifiers such as mode:report-only, mode:autofix, mode:headless, base:<ref>, or plan:<path>
 
@@ -24,6 +26,7 @@ outputs:
   - domain-language drift findings when changed code or artifacts introduce unresolved terms, aliases, or relationships
   - protected-artifact cleanup filtering
   - merge or readiness recommendation
+  - Linear QA closure assessment when linked issues define the acceptance target
   - suggested next action such as fix, deepen, re-review, or proceed
   - optional todo-follow-up artifacts using the file-based todos workflow when the repo uses it or the user requests it, with autofix residual work landing as ready
 
@@ -42,6 +45,7 @@ risks:
   - stale or unsupported external claims; mitigate with repo-first review and current-source checks only when needed
   - accidental artifact-cleanup findings; mitigate with explicit protected-artifact filtering
   - missing readiness context; mitigate with linked-artifact reads and agent-native/learnings coverage
+  - approving code that only appears related to a QA issue; mitigate by checking expected behavior, repro coverage, and validation evidence
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

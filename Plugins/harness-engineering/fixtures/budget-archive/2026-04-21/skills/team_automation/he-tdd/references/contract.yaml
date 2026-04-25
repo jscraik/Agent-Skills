@@ -10,9 +10,11 @@ triggers:
   - he-plan includes an execution note such as test-first
   - he-work is executing behavior changes that require strict TDD posture
   - the user asks for failing regression tests before implementation
+  - a Linear QA issue has reproduction steps that should become a RED regression test
 
 inputs:
   - a concrete behavior target (acceptance criterion, bug repro, or plan unit)
+  - optional Linear QA issue with reproduction steps and expected behavior
   - repository test command and framework
   - in-scope files or components for the slice
   - optional AC or UAC identifiers from he-plan for traceability
@@ -22,6 +24,7 @@ outputs:
   - minimal implementation changes that satisfy each slice
   - regression checks showing no behavior breakage
   - concise summary of tested behavior and verification evidence
+  - traceability from Linear QA reproduction steps to RED and GREEN evidence when provided
   - schema_version: 1 when structured status is requested
 
 non_goals:
@@ -35,6 +38,7 @@ risks:
   - brittle implementation-coupled tests; mitigate with public-interface assertions
   - unsafe retries or mock misuse; mitigate with boundary-only mocking and idempotency checks
   - unverified completion claims; mitigate with mandatory RED and GREEN evidence capture
+  - fixing around the repro without testing it; mitigate by translating Linear QA steps into the first RED test
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

@@ -80,6 +80,19 @@ cases:
       - type: regex
         value: "(?i)(CONTEXT\\.md|domain-language|canonical terms|Linear|ADR)"
 
+  - id: qa-report-missing-contract
+    name: qa report missing expected behavior contract
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you write the spec before Linear implementation work? QA found export status confusing, but expected behavior is not written anywhere."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-spec"
+      - type: regex
+        value: "(?i)(QA|expected behavior|acceptance|Linear)"
+
   - id: input-missing
     name: ask for source artifact when missing
     category: edge

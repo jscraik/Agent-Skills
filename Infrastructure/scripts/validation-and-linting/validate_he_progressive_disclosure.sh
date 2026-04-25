@@ -99,6 +99,31 @@ collect_unified_diff() {
   git diff --cached --unified=0 -- "$target"
 }
 
+append_candidate() {
+  local -n candidate_list="$1"
+  local candidate="$2"
+  candidate_list+=("$candidate")
+
+  if [[ ! -L "$candidate" ]]; then
+    return 0
+  fi
+
+  local link_target resolved resolved_dir
+  link_target="$(readlink "$candidate")" || return 0
+  if [[ "$link_target" = /* ]]; then
+    resolved="$link_target"
+  else
+    resolved="$(dirname -- "$candidate")/$link_target"
+  fi
+
+  if [[ ! -e "$resolved" ]]; then
+    return 0
+  fi
+
+  resolved_dir="$(cd -P -- "$(dirname -- "$resolved")" && pwd -P)" || return 0
+  candidate_list+=("${resolved_dir#$REPO_ROOT/}/$(basename -- "$resolved")")
+}
+
 has_context_move_evidence() {
   local base_ref="$1"
   local skill_path="$2"
@@ -106,8 +131,10 @@ has_context_move_evidence() {
   skill_dir="$(dirname "$skill_path")"
   local ref_dir="${skill_dir}/references"
   local infra_ref_dir="${skill_dir}/Infrastructure/references"
-  local candidates=("$INDEX_PATH")
+  local candidates=()
   local f
+
+  append_candidate candidates "$INDEX_PATH"
 
   if [[ -d "$ref_dir" ]]; then
     while IFS= read -r -d '' f; do

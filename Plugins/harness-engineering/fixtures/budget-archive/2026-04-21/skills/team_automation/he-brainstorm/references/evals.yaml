@@ -94,6 +94,19 @@ cases:
       - type: regex
         value: "(?i)(one direct question|one focused question|what feature)"
 
+  - id: qa-feedback-expected-behavior
+    name: qa feedback needs expected behavior clarification
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you help clarify what this QA feedback should mean before we file Linear bugs? The onboarding flow feels broken and users are confused."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-brainstorm"
+      - type: regex
+        value: "(?i)(expected behavior|Linear|he-spec|he-fix-bugs|one focused question)"
+
   - id: research-context-needed
     name: research context needed
     category: edge

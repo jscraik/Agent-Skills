@@ -25,10 +25,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Use when requirements exist and implementation sequencing must be defined.
 - Use before `he-work` when execution tasks and verification strategy are not yet explicit.
 - Use when a spec, brainstorm, bug report, or raw feature description must be turned into a durable implementation plan.
+- Use when multiple related Linear QA issues need dependency ordering, blocker handling, or parallelization decisions.
 
 ## Inputs
 
 - Source spec, brainstorm output, or defect scope.
+- Optional related Linear QA issues and their blocker relationships.
 - Constraints, dependencies, and risk/compliance requirements.
 - Optional existing plan path to update or deepen.
 - Optional requirements document or recent planning artifact that should be treated as the primary source.
@@ -36,6 +38,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 ## Outputs
 
 - Ordered implementation plan with validation intent per task.
+- Ordered Linear QA issue execution sequence, with blocker-first work and independent issues marked parallelizable.
 - Explicit blockers, assumptions, and next-stage recommendation.
 - Domain-readiness decision that confirms canonical terms are stable or routes back upstream.
 - Explicit plan route: `fresh`, `resume`, or `deepen`.
@@ -50,9 +53,10 @@ This entrypoint stays concise and keeps full operational context in archived ref
 4. Check interface readiness before task decomposition. If the work depends on a new module, API, CLI, plugin, tool, service, data-access, or shared-helper boundary, confirm the source defines the caller-facing contract.
 5. If the interface contract is missing or only implied, route back to `he-deepen-spec` instead of burying interface design inside implementation tasks.
 6. Check domain readiness: if core terms, relationships, or `CONTEXT.md` updates are missing, route back to `he-brainstorm` or `he-deepen-spec`.
-7. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
-8. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
-9. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
+7. If the source is a set of Linear QA issues, put blockers first, preserve issue links, and mark independent defects as parallel work instead of merging them into one broad task.
+8. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
+9. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
+10. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
 
 ## Validation
 
@@ -87,6 +91,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - "When the user asks, `Turn this approved spec into an execution-ready implementation plan with phases, tests, and rollout guidance.`"
 - "Please plan this production bug fix from the report and validate the safest execution order."
 - "Help me inspect the recent plan and decide whether to resume it, deepen it, or replace it."
+- "Can you sequence these related Linear QA issues so blockers are fixed first and independent defects can move in parallel?"
 
 ## Full Context
 
@@ -96,7 +101,9 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Compatibility mirror (non-canonical): [./references](./references)
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
 - Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
 Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects planning readiness.
+Read when: planning from multiple Linear QA issues, especially when blocker order or parallel fix lanes matter.
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
 

@@ -9,10 +9,12 @@ triggers:
   - the user wants a technical review of a PR, branch, diff, file set, spec, or plan
   - the user asks for engineering risks ranked by severity
   - the user wants incoming review feedback validated before implementation
+  - the user wants to verify whether a proposed fix solves a Linear QA report or just hides a symptom
 
 inputs:
   - review target and access to the relevant artifact
   - optional reviewer feedback items that require verification
+  - optional Linear QA report, reproduction steps, and expected-behavior claim
   - stack or risk context for specialist-lens selection
 
 outputs:
@@ -22,6 +24,7 @@ outputs:
   - domain_drift_findings
   - open_questions
   - next_action
+  - QA report fit assessment when the review target claims to fix a reported behavior
   - no_critical_findings
   - feedback_response_plan
 
@@ -35,6 +38,7 @@ risks:
   - missing domain-model regressions; mitigate with `CONTEXT-MAP.md` or `CONTEXT.md` checks when changed code, specs, or plans introduce project terms
   - blind implementation of incorrect reviewer feedback; mitigate with explicit verify-before-implement protocol
   - over-broad fanout; mitigate with smallest specialist set that materially improves confidence
+  - accepting symptom-hiding fixes; mitigate with reported-vs-expected behavior comparison and reproduction evidence
 
 observability: >
   Track finding counts by severity and review mode, fallback frequency when

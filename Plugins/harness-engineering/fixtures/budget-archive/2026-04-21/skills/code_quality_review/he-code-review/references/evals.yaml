@@ -127,6 +127,19 @@ cases:
       - type: regex
         value: "(?i)(domain-language drift|CONTEXT\\.md|Linear|go-with-conditions|no-go)"
 
+  - id: linear-qa-closure-readiness
+    name: linked Linear QA closure readiness
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you review this PR before merge and verify it actually closes the linked Linear QA issues?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)(Linear|expected behavior|repro|go|no-go|conditions)"
+
   - id: todo-follow-up
     name: todo follow-up lane
     category: edge

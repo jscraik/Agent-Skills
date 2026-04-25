@@ -965,15 +965,15 @@ Rollback triggers:
 
 ## Risks and Controls
 
-| Risk | Impact | Control |
-| --- | --- | --- |
-| Sync path divergence | Shell and Python sync produce different surfaces | Choose one projection engine boundary in A0; add parity tests |
-| Scope collision ambiguity | Project/local/global skills shadow silently | Require collision report and fail unresolved collisions |
-| Plugin browseability mistaken for runtime visibility | Rooted surface grows accidentally | Separate `LocalPluginSkillView` from runtime projection and validate first-level count |
-| Router leaks task text | Sensitive prompt text appears in argv/logs | Support stdin/file input and redacted persistence |
-| Manifest overreach | System/primary-runtime lanes pulled into ordinary manifests | Exclude bridge lanes and report separately |
-| Default flip too early | Normal workflows regress | Keep flat default until Phase C gates pass |
-| Runtime-separation conflict | This plan conflicts with canonical path migration | Treat runtime-separation plan as dependency; do not move roots in this plan |
+| Risk                                                 | Impact                                                      | Control                                                                                |
+| ---------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Sync path divergence                                 | Shell and Python sync produce different surfaces            | Choose one projection engine boundary in A0; add parity tests                          |
+| Scope collision ambiguity                            | Project/local/global skills shadow silently                 | Require collision report and fail unresolved collisions                                |
+| Plugin browseability mistaken for runtime visibility | Rooted surface grows accidentally                           | Separate `LocalPluginSkillView` from runtime projection and validate first-level count |
+| Router leaks task text                               | Sensitive prompt text appears in argv/logs                  | Support stdin/file input and redacted persistence                                      |
+| Manifest overreach                                   | System/primary-runtime lanes pulled into ordinary manifests | Exclude bridge lanes and report separately                                             |
+| Default flip too early                               | Normal workflows regress                                    | Keep flat default until Phase C gates pass                                             |
+| Runtime-separation conflict                          | This plan conflicts with canonical path migration           | Treat runtime-separation plan as dependency; do not move roots in this plan            |
 
 ## Open Decisions Before Execution
 
@@ -1005,9 +1005,9 @@ Phase A:
 - [ ] Runtime surface report includes lanes and scopes.
 - [ ] Projection mode parser supports `flat`, `rooted`, and `skill-tree` alias.
 - [ ] `SYNC_SKILLS_PROJECTION_MODE` is tested, and explicit `--projection`
-  overrides the environment default.
+      overrides the environment default.
 - [ ] `--projection` reaches the sync/projection engine and cannot be silently
-  ignored.
+      ignored.
 - [ ] Shell/Python sync scopes have a documented canonical mapping.
 - [ ] Legacy shell scope mapping or retirement is covered by parity tests.
 - [ ] Sync dry-run/mutation JSON contract has schema assertions.
@@ -1023,23 +1023,23 @@ Phase B:
 - [ ] Router returns at most three candidates and no full body/manifest content.
 - [ ] Router supports stdin/file task input.
 - [ ] Selected canonical `source_path` loads without latent first-level
-  projection.
+      projection.
 - [ ] Module-loading budget fixtures enforce max loaded modules and unrelated
-  skill-set bans.
+      skill-set bans.
 - [ ] Router and telemetry redaction fixtures pass.
 - [ ] Rooted dry-run passes.
 - [ ] Rooted mutation works in controlled scope.
 - [ ] Local plugin skills remain separately browsable.
 - [ ] Project-level skills can overlay global skills with explicit reporting.
 - [ ] Scope precedence is `project > local-plugin > global`, with bridge lanes
-  separate.
+      separate.
 - [ ] Context-budget validator catches seeded failures.
 
 Phase C:
 
 - [ ] Workout MVP runs.
 - [ ] `ask workouts` command surface parses and dispatches before workout MVP
-  validation depends on it.
+      validation depends on it.
 - [ ] `ask workouts` empty/missing/error paths return structured failures.
 - [ ] Scorecards include pass rate, flake rate, wall-clock, and context estimate.
 - [ ] Amendment dry-run rejects context-budget regression.
@@ -1047,7 +1047,7 @@ Phase C:
 - [ ] Soak records include required metadata fields and report hash.
 - [ ] Three diagnostic workouts pass with scorecards.
 - [ ] Five consecutive executions of the same validation command set pass on the
-  same branch.
+      same branch.
 - [ ] No P0/P1 routing regressions remain open.
 - [ ] Default flips to rooted.
 - [ ] Both-scope forward rooted and rollback flat mutation paths pass.

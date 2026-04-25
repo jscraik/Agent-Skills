@@ -57,6 +57,26 @@ cases:
         expected_skill: "he-plan"
       - type: regex
         value: "(?i)(type:|fix|dependencies|validation)"
+
+  - id: qa-issue-set-planning
+    name: related Linear QA issue planning
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you plan the safest fix order for three related Linear QA issues: export date rejection, missing toast, and wrong workspace redirect?"
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-plan"
+      - type: regex
+        value: "(?i)(Linear|dependency|Blocked by|parallel|validation)"
+
   - id: brainstorm-none-allows-plan
     name: brainstorm says no spec needed
     category: happy

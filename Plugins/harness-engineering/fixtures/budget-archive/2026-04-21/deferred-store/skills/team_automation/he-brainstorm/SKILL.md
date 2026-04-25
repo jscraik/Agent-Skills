@@ -13,6 +13,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 
 - Use this skill as normal for the Harness Engineering brainstorm stage.
 - Use it before `he-spec` or `he-plan` when the work is still ambiguous.
+- Use it when QA feedback reports confusing or "broken" behavior but the expected behavior is not yet clear enough for a Linear issue.
 - If the request is already concrete enough for planning or direct execution, keep the interaction brief and recommend the next stage instead of forcing a brainstorm.
 - For full stage policy, workflow details, and examples, load the archived full guide.
 
@@ -27,6 +28,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Use when scope is unclear, goals conflict, or candidate approaches need comparison.
 - Use before `he-spec` or `he-plan` when requirements are not yet stable.
 - Use when the user asks to brainstorm, compare directions, sharpen requirements, or decide whether the idea needs a spec.
+- Use when QA intake exposes product ambiguity that must be resolved before filing or implementing a bug.
 
 ## Inputs
 
@@ -38,6 +40,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 
 - Clarified requirements with ranked options and tradeoffs.
 - Domain-language notes when project-specific terms, aliases, relationships, or ambiguities affect the decision.
+- Expected-behavior clarification for ambiguous QA reports, with a route to `he-fix-bugs`, `he-spec`, or `he-plan`.
 - A recommendation on whether the next stage should be `he-spec`, `he-plan`, or direct execution.
 - A right-sized requirements artifact when durable decisions exist.
 - Explicit `spec_required`, `risk_level`, and `complexity` values for non-trivial work.
@@ -50,9 +53,10 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 2. Clarify objective, constraints, users, non-goals, and unknowns one question at a time.
 3. Run a light repo/context scan before making claims about existing behavior or missing capabilities.
 4. If domain language is fuzzy, read `CONTEXT-MAP.md` or `CONTEXT.md` when present, then resolve terms one focused question at a time before options harden.
-5. Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
-6. Capture durable requirements and `CONTEXT.md` updates only when the discussion produced decisions worth preserving.
-7. Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
+5. For QA ambiguity, clarify expected behavior first, then route clear defects to `he-fix-bugs` for Linear intake or route missing contracts to `he-spec`.
+6. Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
+7. Capture durable requirements and `CONTEXT.md` updates only when the discussion produced decisions worth preserving.
+8. Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
 
 ## Interaction Rules
 
@@ -93,6 +97,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - "When the user asks for help thinking through a new approval flow before deciding whether it needs a spec."
 - "User says, `Inspect the current admin onboarding and compare a few grounded directions before we commit.`"
 - "Help me brainstorm this reporting feature and validate the best next Harness Engineering stage."
+- "Can you help clarify what this QA feedback should mean before we file Linear bugs?"
 
 ## Full Context
 
@@ -104,7 +109,9 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Assets directory marker: `assets/`
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
 - Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
 Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects the brainstorm.
+Read when: QA feedback is real but expected behavior is ambiguous enough that filing a bug would encode guesswork.
 
 ## Subagent Routing
 

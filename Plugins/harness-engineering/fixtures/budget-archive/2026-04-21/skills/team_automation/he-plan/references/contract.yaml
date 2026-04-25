@@ -10,10 +10,12 @@ triggers:
   - the user wants the Harness Engineering planning stage explicitly
   - the user wants a UI implementation plan or a UI-aware delivery plan
   - the user needs sequencing, test strategy, acceptance criteria, or rollout guidance before implementation
+  - multiple related Linear QA issues need blocker ordering, dependency handling, or parallel execution lanes
 
 inputs:
   - a spec path, brainstorm path, UI spec path, or clear planning source
   - relevant constraints, success criteria, risks, and linked documents when available
+  - optional related Linear QA issues and blocker relationships
   - optional framework, design-system, rollout, and testing context
 
 outputs:
@@ -24,6 +26,7 @@ outputs:
   - exact parallel research support via `repo-research-analyst`, `learnings-researcher`, and conditional external-research roles when needed
   - explicit validation, rollout, and execution-control guidance
   - carry-forward treatment of any authoritative requirements doc or existing plan when present
+  - ordered Linear QA issue execution sequence with blockers first and independent work explicitly parallelizable
   - optional directional technical-design sketches only when they materially reduce planning ambiguity
   - a recommended next workflow stage, including a Linear handoff path when the user wants issue creation or durable decision capture
 
@@ -46,6 +49,7 @@ risks:
   - mixing planning with execution-time unknowns; mitigate with deferred-implementation notes and directional-only technical-design guidance
   - UI ambiguity causing execution churn; mitigate with explicit mode selection, prototype-planning rules, and prototype-to-production mapping
   - plan/state drift during execution; mitigate with the Execution Ledger and planning-mode handshake
+  - merging independent QA defects into one broad task; mitigate with thin issue sequencing and blocker-first planning
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

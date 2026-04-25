@@ -3,6 +3,197 @@
   "plugin": "harness-engineering",
   "naming_note": "he-compound, he-compound-refresh, and he-review are Harness Engineering compatibility aliases retained for routing continuity.",
   "entrypoint": "he-router",
+  "deterministic_decision_order": [
+    {
+      "priority": 10,
+      "rule": "direct-stage-invocation",
+      "route": "named he-* stage",
+      "unless": "the user asks whether the named stage is correct"
+    },
+    {
+      "priority": 15,
+      "rule": "stage-correctness-question",
+      "route": "he-router",
+      "signals": [
+        "right stage",
+        "correct stage",
+        "best stage",
+        "which stage",
+        "what stage",
+        "should we use"
+      ]
+    },
+    {
+      "priority": 16,
+      "rule": "named-stage-ambiguity",
+      "route": "he-router",
+      "signals": [
+        "multiple named he-* stages",
+        "he-* or he-*"
+      ]
+    },
+    {
+      "priority": 20,
+      "rule": "workflow-hygiene",
+      "route": "he-prune-branches",
+      "signals": [
+        "stale branch cleanup",
+        "gone remote branches",
+        "worktree cleanup"
+      ]
+    },
+    {
+      "priority": 30,
+      "rule": "review-before-more-work",
+      "route": "he-code-review",
+      "signals": [
+        "implemented branch",
+        "PR before merge",
+        "go/no-go",
+        "readiness",
+        "pre-merge"
+      ]
+    },
+    {
+      "priority": 35,
+      "rule": "deep-review-or-feedback-dispute",
+      "route": "he-technical-review",
+      "signals": [
+        "deep technical review",
+        "engineering risk",
+        "review feedback may be wrong",
+        "validate comments"
+      ]
+    },
+    {
+      "priority": 36,
+      "rule": "reliability-risk-review",
+      "route": "he-reliability-review",
+      "signals": [
+        "SLO",
+        "failure modes",
+        "cascading failure",
+        "timeout dependency risk",
+        "resilience"
+      ]
+    },
+    {
+      "priority": 40,
+      "rule": "test-first-work",
+      "route": "he-tdd",
+      "signals": [
+        "TDD",
+        "RED/GREEN",
+        "failing test first",
+        "regression first"
+      ]
+    },
+    {
+      "priority": 45,
+      "rule": "diagnose-before-fix",
+      "route": "he-fix-bugs",
+      "signals": [
+        "failing tests",
+        "debug",
+        "root cause",
+        "reproduce",
+        "trace error",
+        "regression"
+      ]
+    },
+    {
+      "priority": 50,
+      "rule": "browser-refinement",
+      "route": "he-refine",
+      "signals": [
+        "browser-first",
+        "polish",
+        "accessibility iteration",
+        "dev server loop",
+        "visual refinement"
+      ]
+    },
+    {
+      "priority": 55,
+      "rule": "measured-optimization",
+      "route": "he-improve",
+      "signals": [
+        "benchmark",
+        "measured experiments",
+        "parameter search",
+        "optimize",
+        "tune"
+      ]
+    },
+    {
+      "priority": 60,
+      "rule": "deepen-existing-artifact",
+      "route": "he-deepen-spec or he-deepen-plan",
+      "signals": [
+        "harden existing spec",
+        "deepen existing spec",
+        "harden existing plan",
+        "deepen existing plan"
+      ]
+    },
+    {
+      "priority": 70,
+      "rule": "forward-lifecycle",
+      "route": "he-ideate -> he-brainstorm -> he-spec -> he-plan -> he-work",
+      "signals": [
+        "fuzzy opportunity",
+        "ambiguous requirements",
+        "write spec",
+        "plan implementation",
+        "execute approved plan"
+      ]
+    },
+    {
+      "priority": 80,
+      "rule": "qa-intake-by-clarity",
+      "route": "he-brainstorm, he-spec, he-fix-bugs, or he-plan",
+      "signals": [
+        "QA",
+        "QA session",
+        "report bugs",
+        "turn feedback into Linear issues",
+        "multiple related QA issues",
+        "expected behavior unclear",
+        "unclear expected behavior",
+        "feedback unclear",
+        "confusing workflow"
+      ]
+    },
+    {
+      "priority": 90,
+      "rule": "ask-once-when-blocked",
+      "route": "he-router blocked",
+      "signals": [
+        "no artifact state",
+        "conflicting lifecycle state",
+        "missing expected behavior"
+      ]
+    }
+  ],
+  "stage_invocation_templates": {
+    "he-ideate": "$harness-engineering:he-ideate <request>",
+    "he-brainstorm": "$harness-engineering:he-brainstorm <request>",
+    "he-spec": "$harness-engineering:he-spec <request>",
+    "he-deepen-spec": "$harness-engineering:he-deepen-spec <artifact>",
+    "he-plan": "$harness-engineering:he-plan <request>",
+    "he-deepen-plan": "$harness-engineering:he-deepen-plan <artifact>",
+    "he-work": "$harness-engineering:he-work <plan-or-task>",
+    "he-tdd": "$harness-engineering:he-tdd <behavior-target>",
+    "he-fix-bugs": "$harness-engineering:he-fix-bugs <bug-or-qa-report>",
+    "he-improve": "$harness-engineering:he-improve <measurement-goal>",
+    "he-refine": "$harness-engineering:he-refine <browser-target>",
+    "he-code-review": "$harness-engineering:he-code-review <review-target>",
+    "he-technical-review": "$harness-engineering:he-technical-review <review-target>",
+    "he-reliability-review": "$harness-engineering:he-reliability-review <review-target>",
+    "he-prune-branches": "$harness-engineering:he-prune-branches <repo-path>",
+    "he-compound": "$harness-engineering:he-compound <request>",
+    "he-compound-refresh": "$harness-engineering:he-compound-refresh <evidence-path>"
+  },
   "routes": [
     {
       "intent": "stage-routing-or-resume",
@@ -18,7 +209,7 @@
         "constraints",
         "execution preference"
       ],
-      "output": "stage decision + exact next command"
+      "output": "stage decision + exact next skill invocation"
     },
     {
       "intent": "ideation-and-option-generation",
@@ -195,6 +386,24 @@
         "environment/reproduction constraints"
       ],
       "output": "reproduction status + root-cause summary + fix recommendation or implementation evidence"
+    },
+    {
+      "intent": "qa-intake-and-linear-filing",
+      "match": [
+        "qa session",
+        "do qa",
+        "report bugs",
+        "file these bugs",
+        "turn feedback into Linear issues",
+        "walk through issues"
+      ],
+      "skill": "he-fix-bugs",
+      "required_inputs": [
+        "reported behavior",
+        "expected behavior or clarification target",
+        "reproduction steps or permission to ask for them"
+      ],
+      "output": "Linear issue intake decision + single/breakdown issue payloads + next-stage route"
     },
     {
       "intent": "branch-hygiene-cleanup",

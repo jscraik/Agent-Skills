@@ -1,5 +1,8 @@
 import importlib.util
 import os
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import contextmanager
@@ -128,6 +131,48 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
             "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw",
             workflow_doc,
         )
+
+    def test_plugin_builder_accepts_required_codex_manifest_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="plugin-builder-validate-") as temp_dir:
+            plugin_root = Path(temp_dir) / "sample-plugin"
+            manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+            skills_dir = plugin_root / "skills"
+            manifest_path.parent.mkdir(parents=True)
+            (skills_dir / "sample-skill").mkdir(parents=True)
+            (skills_dir / "sample-skill" / "SKILL.md").write_text(
+                "---\nname: sample-skill\ndescription: Sample plugin skill.\n---\n\n# Sample Skill\n",
+                encoding="utf-8",
+            )
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "name": "sample-plugin",
+                        "version": "0.1.0",
+                        "description": "Sample plugin for validator coverage.",
+                        "author": {"name": "Agent Skills Team"},
+                        "skills": "./skills/",
+                        "interface": {
+                            "displayName": "Sample Plugin",
+                            "shortDescription": "Sample plugin",
+                            "longDescription": "Sample plugin for validator coverage.",
+                            "developerName": "Agent Skills Team",
+                            "category": "Coding",
+                            "capabilities": ["Read"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [sys.executable, str(PLUGIN_BUILDER_SCRIPT.with_suffix(".py")), "validate", str(plugin_root)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

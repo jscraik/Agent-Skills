@@ -59,13 +59,13 @@ When updating HE lifecycle behavior, keep packaged skills and the routing map al
 
 ## Usage
 Start with `he-router` when users do not know the exact stage:
-- It picks the primary HE stage and returns the exact next command.
+- It picks the primary HE stage and returns the exact next skill invocation.
 - It escalates to `he-compound` when lifecycle-orchestration is needed.
 - It now returns a stage-specific subagent plan derived from `references/routing-map.json`.
 
 Use `he-compound` when the user needs lifecycle orchestration:
 - It routes requests to the right HE stage using `references/routing-map.json`.
-- It outputs a stage decision, required inputs, and next command.
+- It outputs a stage decision, required inputs, and next skill invocation.
 
 Call stage skills directly when stage intent is explicit:
 - `he-router`, `he-ideate`, `he-brainstorm`, `he-spec`, `he-deepen-spec`, `he-plan`, `he-deepen-plan`, `he-improve`, `he-fix-bugs`, `he-prune-branches`, `he-refine`, `he-work`, `he-code-review`, `he-technical-review`, `he-reliability-review`, `he-tdd`, `he-compound`, `he-compound-refresh`.

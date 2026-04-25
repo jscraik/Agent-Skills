@@ -3,6 +3,7 @@
 Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ## Table of Contents
+
 - [Summary](#summary)
 - [Validation Notes](#validation-notes)
 - [Canonical Values](#canonical-values)
@@ -175,4 +176,3 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - fix-mise (Skills/agent-ops)
 - plugin-installer (Plugins/plugin-factory/skills/infrastructure_ops)
 - skill-installer (Plugins/skill-factory/skills/infrastructure_ops)
-

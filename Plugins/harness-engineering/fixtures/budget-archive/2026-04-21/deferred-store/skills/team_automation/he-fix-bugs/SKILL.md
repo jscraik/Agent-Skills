@@ -25,6 +25,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Use when regressions, runtime failures, or tracker defects require evidence-backed debugging.
 - Use when issue reproduction and verification are required before coding changes.
 - Use when prior fix attempts failed and the request needs disciplined root-cause analysis instead of more trial-and-error edits.
+- Use when the user starts a QA session or reports bugs conversationally and wants durable Linear issues.
 
 ## Inputs
 
@@ -33,10 +34,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Optional issue-tracker reference or pasted issue context.
 - Relevant `CONTEXT.md` when issue language uses project-specific terms.
 - Execution permission: `diagnosis-only` or `diagnose-and-fix`.
+- Optional QA-intake mode when reports need Linear issue filing before diagnosis.
 
 ## Outputs
 
 - Reproduction evidence, root-cause analysis, fix scope, and verification outcome.
+- Linear issue payloads or URLs for QA intake, including single/breakdown decision and blocker links.
 - Clear next action when blocked or when diagnosis is complete but remediation is not yet chosen.
 - Regression test recommendation and why existing checks missed the issue when that is knowable.
 - Include `schema_version: 1` when structured output is requested.
@@ -44,12 +47,13 @@ This entrypoint stays concise and keeps full operational context in archived ref
 ## Procedure
 
 1. Parse intake first: symptom report, tracker context, expected behavior, and any prior failed attempts.
-2. Compare issue language with `CONTEXT.md` when present so aliases or domain misunderstandings do not become false bug scope.
-3. Reproduce and stabilize the failing behavior before proposing changes.
-4. Trace backward from the symptom to the point where valid state first became invalid.
-5. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
-6. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
-7. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+2. If the request is a QA session or conversational report, run QA intake: ask at most 2-3 focused questions, lightly inspect domain language, decide single issue vs breakdown, and file or prepare Linear issue payloads before diagnosis.
+3. Compare issue language with `CONTEXT.md` when present so aliases or domain misunderstandings do not become false bug scope.
+4. Reproduce and stabilize the failing behavior before proposing changes.
+5. Trace backward from the symptom to the point where valid state first became invalid.
+6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
 ## Validation
 
@@ -57,6 +61,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Confirm the causal chain from trigger to symptom is explicit before fix work proceeds.
 - Confirm fix addresses root cause instead of symptom masking.
 - Confirm Linear issue wording, expected behavior, and domain terms agree or explicitly name the mismatch.
+- Confirm QA-created Linear issues avoid file paths and line numbers, include reproduction steps, and use behavior-focused domain language.
 - Confirm blocked or partial outcomes name the exact missing condition, evidence gap, or next safest route.
 - Fail fast: stop at first failed gate and do not proceed.
 
@@ -66,6 +71,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not mark issue fixed without successful verification evidence.
 - Do not skip straight to edits when reproduction or root-cause evidence is still missing.
 - Do not patch around a domain-model contradiction; route to `he-deepen-spec` when behavior meaning is unclear.
+- Do not create GitHub issues or ADRs for QA intake unless the user explicitly overrides the Linear-first project convention.
+- Do not over-interview during QA intake; ask only the minimum short questions needed to file a durable issue.
 - Do not use shotgun debugging or bundle unrelated changes into one bug fix.
 - Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
@@ -81,6 +88,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - "When the user asks, `Can you inspect this regression that started after the auth refactor, reproduce it, and find the root cause before you fix anything?`"
 - "Please investigate this crash, but stop at diagnosis and test recommendations because I do not want edits yet."
 - "Help me validate why the last two quick patches failed and tell me what is actually broken."
+- "Can you run a QA session and file Linear issues for each bug I report?"
 
 ## Full Context
 
@@ -92,6 +100,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Assets directory marker: `assets/`
 - Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
 Read when: issue wording may conflict with `CONTEXT.md` or use a non-canonical project term.
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
+Read when: the user reports bugs conversationally, asks for a QA session, or wants feedback turned into Linear issues.
 Read when: you need full workflow behavior, diagnosis gates, and fix sequencing.
 Read when: you need contracts, eval fixtures, anti-patterns, or tracker-intake details.
 Read when: you need icon/display metadata and invocation policy.

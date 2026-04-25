@@ -76,6 +76,121 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertLessEqual(len(payload["candidates"]), ROUTING_BUDGET["max_candidates_returned"])
         self.assertNotIn("source_path", payload["candidates"][0])
 
+    def test_router_ignores_generic_stopwords_when_scoring(self) -> None:
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(
+            "\n".join(
+                [
+                    json.dumps(
+                        {
+                            "id": "generic-stage",
+                            "description": "Use when the request says and with before",
+                            "level": "atom",
+                            "source_path": "Skills/agent-ops/generic-stage/SKILL.md",
+                            "triggers": ["and with before"],
+                        }
+                    ),
+                    json.dumps(
+                        {
+                            "id": "specific-stage",
+                            "description": "Use for branch review readiness",
+                            "level": "atom",
+                            "source_path": "Skills/agent-ops/specific-stage/SKILL.md",
+                            "triggers": ["branch review readiness"],
+                        }
+                    ),
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        payload = route_skillset.route(
+            "agent-ops",
+            "implemented branch with review before merge",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "specific-stage")
+
+    def test_harness_engineering_routes_review_state_before_work_or_tdd(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "implemented branch with green CI and linked Linear QA issues, review before more work",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-code-review")
+        self.assertIn("review-before-more-work", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_routes_regression_first_to_tdd(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "write failing regression test first for a broken harness engineering workflow",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-tdd")
+        self.assertIn("test-first-work", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_multistage_rules_route_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "QA says the workflow is confusing but expected behavior is unclear, clarify the issue",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-router")
+        self.assertIn("qa-intake-by-clarity", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_stage_correctness_questions_route_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        for task in (
+            "validate whether he-plan is the right stage",
+            "is he-plan correct for this request?",
+            "is he-plan right for this request?",
+        ):
+            with self.subTest(task=task):
+                payload = route_skillset.route(
+                    "harness-engineering",
+                    task,
+                    skillsets_dir=self.temp_dir / ".skillsets",
+                )
+
+                self.assertEqual(payload["status"], "selected")
+                self.assertEqual(payload["selected"]["id"], "he-router")
+                self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_multiple_named_stages_route_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "should we use he-work or he-code-review next?",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-router")
+        self.assertIn("named-stage-ambiguity", payload["candidates"][0]["reason"])
+
     def test_context_budget_validates_written_manifest_provenance(self) -> None:
         skillsets_dir = self.temp_dir / ".skillsets"
         report = generate_skillset_manifests.build_manifest_report(skillsets_dir)
