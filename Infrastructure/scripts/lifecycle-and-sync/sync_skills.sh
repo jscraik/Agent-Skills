@@ -176,7 +176,7 @@ else
   echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
   exit 2
 fi
-if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
   ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
   if [[ "$dry_run" == "1" ]]; then
     ask_sync_args+=(--dry-run)

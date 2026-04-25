@@ -99,6 +99,20 @@ class TestWorkoutsCLI(unittest.TestCase):
         rejected_payload = json.loads(rejected_records[0].read_text(encoding="utf-8"))
         self.assertEqual(rejected_payload["state"], "rejected")
 
+    def test_score_workout_reports_corrupted_scorecard(self) -> None:
+        with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+            scorecard_path = Path(run_result.data["scorecard_path"])
+            scorecard_path.write_text("{not json\n", encoding="utf-8")
+            score_result = workouts.score_workout(REPO_ROOT, WORKOUT_ID)
+
+        self.assertEqual(run_result.status, "success")
+        self.assertEqual(score_result.status, "error")
+        self.assertEqual(score_result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("corrupted or malformed", score_result.errors[0].message)
+        self.assertEqual(score_result.data["scorecard_path"], str(scorecard_path))
+        self.assertIn("parse_error", score_result.data)
+
     def test_all_diagnostic_workouts_run_and_score(self) -> None:
         for workout_id in sorted(DIAGNOSTIC_WORKOUT_IDS):
             telemetry_dir = self.temp_dir / workout_id.replace("/", "__")

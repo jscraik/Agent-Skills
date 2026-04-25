@@ -17,7 +17,7 @@ try:
     raw_state = state_file.read_text(encoding="utf-8")
 except (OSError, UnicodeDecodeError):
     print("verifier_state_unreadable", file=sys.stderr)
-    raise SystemExit(1)
+    raise SystemExit(1) from None
 
 state = {}
 for raw_line in raw_state.splitlines():

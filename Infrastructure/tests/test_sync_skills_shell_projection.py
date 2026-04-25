@@ -21,6 +21,12 @@ def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -
 
 
 class TestSyncSkillsShellProjection(unittest.TestCase):
+    def test_user_scope_flat_projection_delegates_to_ask_engine(self) -> None:
+        with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
+            script = script_file.read()
+
+        self.assertIn('"$sync_scope" == "user"', script)
+
     def test_rooted_projection_delegates_to_ask_engine_in_dry_run(self) -> None:
         result = _run_sync_script(["--workspace", "--projection", "rooted", "--dry-run"])
 

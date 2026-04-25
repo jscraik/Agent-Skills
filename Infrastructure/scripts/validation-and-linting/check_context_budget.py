@@ -163,7 +163,7 @@ def validate_written_manifest_provenance(
             ) or (
                 len(source_parts) >= 4
                 and ".." not in source_parts
-                and source_parts[0] == "Plugins"
+                and source_parts[0] in {"Plugins", "plugins"}
                 and source_parts[2] == "skills"
             )
             if not is_canonical_source:

@@ -88,6 +88,32 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
 
         self.assertFalse(violations)
 
+    def test_context_budget_accepts_lowercase_plugin_source_paths(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        skill_path = repo_root / "plugins" / "sample-plugin" / "skills" / "sample-skill" / "SKILL.md"
+        skill_path.parent.mkdir(parents=True)
+        skill_path.write_text("# Sample skill\n", encoding="utf-8")
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "plugins/sample-plugin/skills/sample-skill/SKILL.md",
+            "provenance": {
+                "generator": "test",
+                "projection_mode": "rooted",
+                "policy_identity": "test",
+                "source_revision": "test",
+                "source_sha256": check_context_budget.file_hash(skill_path),
+            },
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=repo_root,
+        )
+
+        self.assertFalse(violations)
+
     def test_context_budget_rejects_noncanonical_skillset_file(self) -> None:
         rogue = self.temp_dir / ".skillsets" / "agent-ops" / "notes.md"
         rogue.parent.mkdir(parents=True)

@@ -507,8 +507,24 @@ def score_workout(repo_root: Path, workout_id: str) -> CallResult:
             fix_suggestion=f"Run `bin/ask workouts run {workout_id}` first.",
         ))
         return result
+    try:
+        scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Scorecard for {workout_id} is corrupted or malformed.",
+            fix_suggestion=f"Re-run `bin/ask workouts run {workout_id}` to regenerate {scorecard_path}.",
+        ))
+        result.data["scorecard_path"] = (
+            scorecard_path.relative_to(repo_root).as_posix()
+            if scorecard_path.is_relative_to(repo_root)
+            else str(scorecard_path)
+        )
+        result.data["parse_error"] = str(exc)
+        return result
     result.status = "success"
-    result.data["scorecard"] = json.loads(scorecard_path.read_text(encoding="utf-8"))
+    result.data["scorecard"] = scorecard
     result.data["scorecard_path"] = scorecard_path.relative_to(repo_root).as_posix() if scorecard_path.is_relative_to(repo_root) else str(scorecard_path)
     return result
 
