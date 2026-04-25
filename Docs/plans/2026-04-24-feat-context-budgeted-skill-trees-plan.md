@@ -814,7 +814,9 @@ Implementation tasks:
   runtime surface artifact path, and report hash.
 - Run five consecutive executions of the same validation command set on the same
   branch after rooted mutation support.
-- Confirm no P0/P1 routing regressions remain open.
+- Confirm no P0/P1 routing regressions remain open. Evidence: PR #136 checks
+  pass, CodeRabbit review is complete, and GitHub review threads report
+  `unresolved_count: 0`.
 
 Validation:
 
@@ -997,7 +999,10 @@ Resolve after C4 in a dedicated compatibility slice:
 
 - Whether to rename `skill-archive/**` paths to clearer `full-context/**` or
   `preserved-context/**` paths. Do not casually rename during default flip work:
-  these paths are referenced by symlinks, fixtures, and validators.
+  these paths are referenced by symlinks, fixtures, and validators. Treat this
+  as a post-C4 naming compatibility migration with validator updates,
+  compatibility aliases, rollback evidence, and a delayed removal plan for the
+  old path.
 
 Recommended defaults:
 
@@ -1056,7 +1061,7 @@ Phase C:
 - [x] Three diagnostic workouts pass with scorecards.
 - [x] Five consecutive executions of the same validation command set pass on the
       same branch.
-- [ ] No P0/P1 routing regressions remain open.
+- [x] No P0/P1 routing regressions remain open.
 - [x] Default flips to rooted.
 - [x] Both-scope forward rooted and rollback flat mutation paths pass.
 - [x] Flat rollback remains documented and tested.
