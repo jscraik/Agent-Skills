@@ -362,9 +362,11 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
 
     result = CallResult()
     scorecard = score.data["scorecard"]
+    import shlex
+    
     target_source = str(scorecard.get("target_source_path") or "")
     target_path = repo_root / target_source if target_source else None
-    rollback_command = f"git checkout -- {target_source}" if target_source else ""
+    rollback_command = f"git checkout -- {shlex.quote(target_source)}" if target_source else ""
     rollback_validation = {
         "status": "pass" if target_path and target_path.is_file() and rollback_command else "fail",
         "rollback_command": rollback_command,
