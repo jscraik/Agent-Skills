@@ -1,41 +1,32 @@
 schema_version: 1
 skill: cli-spec
-type: scaffolding_templates
-purpose: >
-  To plan and draft high-performance, agent-native CLI specifications that adhere to 
-  2026 industry gold standards for both humans and autonomous agents.
+purpose: "Produce CLI implementation contracts that are deterministic, agent-friendly, testable, and safe to build from."
 triggers:
-  - user: "Help me spec out a new CLI for [context]."
-  - user: "Review this CLI command tree for agent-native compatibility."
-  - user: "Modernize this legacy CLI interface."
-  - user: "Draft a CLI flag schema for [tool]."
-inputs:
-  - context: "The target ecosystem, audience, and core functional goals."
-  - interaction_model: "Definition of human vs agent interaction tiers."
-  - security_requirements: "Constraints for secret handling and isolation."
-outputs:
-  - command_hierarchy: "Logical structure of topics and actions."
-  - flag_schema: "Type-safe parameter definitions with defaults."
-  - output_contract: "JSON schema and field masking specifications."
-  - safety_gates: "Dry-run and confirmation workflow designs."
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - "Writing the actual implementation code (logic)."
-  - "General shell script debugging unrelated to the CLI interface."
+  - "Route unrelated work away from this skill."
+inputs:
+  - "CLI goal"
+  - "target users and agents"
+  - "command tree"
+  - "state-changing operations"
+  - "output and error requirements"
+outputs:
+  - "CLI implementation contract"
+  - "JSON output schemas"
+  - "dry-run behavior"
+  - "error model"
+  - "validation plan"
 risks:
-  - "Inconsistent flag naming across subcommands."
-  - "Insufficient safety gating for destructive actions."
-  - "Token-heavy JSON outputs that bloat agent context."
-task_profile:
-  complexity: medium
-  risk_level: low
-  category: scaffolding
-  primary_tool: write_file
-  secondary_tools:
-    - read_file
-    - grep_search
-  output_format: markdown
-  approval_gate: none
-  validation:
-    - adversarial_input_check
-    - gold_standard_alignment
-    - consistent_naming_audit
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

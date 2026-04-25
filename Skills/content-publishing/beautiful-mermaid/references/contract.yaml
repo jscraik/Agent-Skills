@@ -1,35 +1,32 @@
 schema_version: 1
-name: beautiful-mermaid
-purpose: Render Mermaid diagrams to SVG and PNG assets using Beautiful Mermaid.
+skill: beautiful-mermaid
+purpose: "Turn Mermaid source into validated visual assets while preserving source, render settings, and troubleshooting evidence."
 triggers:
-  - User asks to render or convert Mermaid diagrams into images.
-  - User needs SVG/PNG outputs for docs, slides, or diagrams.
-inputs:
-  - name: mermaid_source
-    type: string
-    description: Mermaid code or a path to a .mmd file.
-  - name: output_basename
-    type: string
-    description: Output file base name (without extension).
-  - name: theme
-    type: string
-    description: "Mermaid theme name (default: default)."
-  - name: png_requested
-    type: boolean
-    description: Whether PNG capture is required.
-outputs:
-  - name: svg_path
-    type: string
-    description: Path to the rendered SVG file.
-  - name: png_path
-    type: string
-    description: Path to the PNG file (if requested).
-  - name: notes
-    type: string
-    description: Theme selection and any constraints applied.
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - Rendering non-Mermaid diagram languages.
-  - Auto-installing dependencies without approval.
+  - "Route unrelated work away from this skill."
+inputs:
+  - "Mermaid source"
+  - "desired output format"
+  - "theme or style constraints"
+  - "output path"
+  - "rendering error logs"
+outputs:
+  - "rendered asset path"
+  - "source used"
+  - "render command"
+  - "syntax fixes"
+  - "validation evidence"
 risks:
-  - Diagrams may include sensitive data if not redacted.
-  - PNG capture requires agent-browser availability.
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

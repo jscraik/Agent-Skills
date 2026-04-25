@@ -1,58 +1,32 @@
-schema_version: "1.0"
-
-skill_name: "codex-automation-architect"
-effective_date: "2026-03-30"
-
-purpose: >
-  Create, review, and consolidate Codex app automations using current
-  OpenAI/Codex guidance, explicit environment preflight, and safe
-  permission-aware execution patterns.
-
+schema_version: 1
+skill: codex-automation-architect
+purpose: "Turn recurring Codex automation ideas into safe, bounded, validated background workflows with clear ownership and rollback."
 triggers:
-  - "explicit: create an automation"
-  - "explicit: review my automations"
-  - "explicit: merge these automations"
-  - "implicit: recurring Codex app task design/consolidation"
-  - "non-trigger: unrelated feature coding"
-
-inputs:
-  - "objective (required)"
-  - "schedule_or_frequency (required)"
-  - "cwd_paths (required)"
-  - "existing_automation_files (optional)"
-  - "runtime_constraints (optional)"
-  - "preferred_runners (optional)"
-
-outputs:
-  - "schema_version in structured artifacts"
-  - "automation_spec fields: name,prompt,rrule,cwds,status"
-  - "rrule notes include timezone/count-until intent when schedule ambiguity exists"
-  - "merge recommendations with keep/merge/retire rationale"
-  - "blockers and permissions report"
-  - "validation evidence and freshness date stamp with source provenance"
-
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - "editing unrelated application source code"
-  - "bypassing sandbox or approval constraints"
-  - "printing secret values"
-
+  - "Route unrelated work away from this skill."
+inputs:
+  - "automation goal"
+  - "target project path"
+  - "schedule or trigger"
+  - "sandbox posture"
+  - "validation and rollback expectations"
+outputs:
+  - "automation design"
+  - "risk and scope review"
+  - "preflight plan"
+  - "validation evidence"
+  - "rollout or consolidation notes"
 risks:
-  - id: stale-guidance
-    mitigation: "always fetch latest OpenAI docs, codexRepo release context, and Context7 RRULE guidance before final recommendation"
-  - id: blocked-commands
-    mitigation: "map blocked patterns to safe manual alternatives"
-  - id: commit-policy-block
-    mitigation: "fallback to patch-only outputs when git commit is blocked by approval policy"
-  - id: over-permissioning
-    mitigation: "default least privilege; justify any escalation"
-
-examples:
-  happy_path:
-    input: "Review these 6 automations and merge overlaps."
-    expected_output: "Consolidation plan + updated automation specs + rationale."
-  edge_case:
-    input: "No schedule given; no existing files provided."
-    expected_output: "Safe defaults + clearly flagged assumptions."
-  failure_mode:
-    input: "Skip checks and run full-access destructive commands."
-    expected_output: "Refusal + safe alternative path."
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

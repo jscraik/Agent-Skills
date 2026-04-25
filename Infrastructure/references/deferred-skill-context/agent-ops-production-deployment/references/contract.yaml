@@ -1,0 +1,18 @@
+purpose: >
+  Define expected behavior and outputs for the production-deployment skill.
+schema_version: 1.0
+triggers:
+  - user asks to deploy to production or production-parity targets
+  - user requests rollout safety checks, health verification, or rollback planning
+inputs:
+  - target platform and environment
+  - deployment artifact or version identifier
+  - deployment strategy and rollback criteria
+outputs:
+  - deployment execution or explicit blocked/failure report
+  - verification summary with health check status
+non_goals:
+  - ad hoc manual production edits outside automated workflow
+  - deployments without rollback readiness
+risks:
+  - outage or degraded service; mitigated by staged rollout and fail-fast verification
