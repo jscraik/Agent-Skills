@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-25T13:07:20.926039+00:00",
+  "generated_at": "2026-04-25T13:28:44.550365+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -79,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 181,
-      "source_manifest_sha256": "b6ad6f505cb75381d4f8b4f0f71ead18837debb1e467eef43a35d896d63af2f6",
-      "projection_manifest_sha256": "b6ad6f505cb75381d4f8b4f0f71ead18837debb1e467eef43a35d896d63af2f6",
+      "checked_files": 179,
+      "source_manifest_sha256": "c693b5925864fdfecf7ed1040a475c15ade6fd03e3266b3e237cd59d41efc3c5",
+      "projection_manifest_sha256": "c693b5925864fdfecf7ed1040a475c15ade6fd03e3266b3e237cd59d41efc3c5",
       "manifest_mismatch": false,
       "status": "pass"
     }
