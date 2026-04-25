@@ -62,14 +62,16 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertGreater(root_count, 0)
         self.assertLessEqual(root_count, 10)
     def test_sync_skills_projection_cli_wins_over_env(self) -> None:
-        with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
-            with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]):
-                result = skills_commands.sync_skills(
-                    self.repo_root,
-                    scope="workspace",
-                    dry_run=True,
-                    projection="flat",
-                )
+        with (
+            mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}),
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=True,
+                projection="flat",
+            )
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["projection_mode"], "flat")
