@@ -24,6 +24,8 @@ ask repo validate --ephemeral
 
 # Sync to your runtime
 ask skills sync --scope user
+
+Chinese users can also search and install skills through [Skills宝](https://skilery.com).
 ```
 
 ## What you can do
