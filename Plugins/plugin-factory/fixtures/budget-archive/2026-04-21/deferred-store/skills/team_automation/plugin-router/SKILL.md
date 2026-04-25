@@ -1,6 +1,6 @@
 ---
 name: plugin-router
-description: Internal Plugin Factory routing helper for troubleshoot or mixed plugin requests after the canonical plugin-factory-router selects a router follow-up.
+description: Analyze broad, mixed, or unclear Plugin Factory follow-up requests and select the correct plugin lane. Use when plugin intent lacks a clear lane owner.
 metadata:
   short-description: Route plugin follow-ups to the right factory lane
   skill-type: team_automation
