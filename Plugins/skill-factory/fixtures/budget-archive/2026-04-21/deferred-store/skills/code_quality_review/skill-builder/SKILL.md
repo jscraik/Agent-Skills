@@ -66,7 +66,7 @@ Downstream handoff guardrail: `skill-installer` and `plugin-builder` are downstr
 ## Category confirmation
 For `create` and `improve` mode, confirm the primary category before drafting:
 
-Category set: Library & API Reference; Product Verification; Data Fetching & Analysis; Business Process & Automation; Code Scaffolding & Templates; Code Quality & Review; CI/CD & Deployment; Runbooks; Infrastructure Operations.
+Category set: Library & API Reference; Product Verification; Data Fetching & Analysis; Team Automation; Code Scaffolding & Templates; Code Quality & Review; CI/CD & Deployment; Runbooks; Infrastructure Operations.
 
 Start with:
 - “Based on what you described, this sounds like a [Category X] skill. Does that match your intent, or is it something different?”
@@ -259,7 +259,9 @@ Use the compact flow below, then follow the linked references for full detail.
 6. Iterate gate-by-gate: fix one failure, rerun, then continue.
 7. Run description optimization before handoff and deliver only when gates are clear or triaged.
 
+<!-- vale off -- reason: Technical file paths require backticks for clarity; ticket: SKILL-FACTORY-ARCHIVE-VALE; expires: 2026-10-21 -->
 Reference files: `Infrastructure/references/governance-contract.md`, `quality-tools.md`, `workflows-and-validation.md`, `iteration-and-testing.md`, and `discovery-interview.md`.
+<!-- vale on -->
 
 ## Execution guardrails
 - Cap iterative fix loops at 3 rounds per failing gate, then publish a blocker report and wait for user direction.

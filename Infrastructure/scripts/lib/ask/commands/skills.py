@@ -1375,21 +1375,6 @@ def _sync_rooted_projection(
     keep_names = {root["name"] for root in root_report.get("roots", [])}
     if system_skills_dir.is_dir():
         keep_names.add(".system")
-    try:
-        for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
-            plan["deletes"].append(log)
-            logs.append(log)
-        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
-            plan["deletes"].append(log)
-            logs.append(log)
-    except OSError as exc:
-        plan["validation_status"] = "fail"
-        plan["warnings"].append("RUNTIME_PROJECTION_MUTATION_FAILED")
-        return False, [ErrorObject(
-            code="ERR_RUNTIME",
-            message=f"Rooted projection could not update {skills_dir}: {exc}",
-            fix_suggestion="Check filesystem permissions on .agents/skills or rerun with --dry-run.",
-        )]
 
     for root in root_report.get("roots", []):
         plan["writes"].append(root["path"])
@@ -1412,6 +1397,22 @@ def _sync_rooted_projection(
             )]
         logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
+
+    try:
+        for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+    except OSError as exc:
+        plan["validation_status"] = "fail"
+        plan["warnings"].append("RUNTIME_PROJECTION_MUTATION_FAILED")
+        return False, [ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Rooted projection could not update {skills_dir}: {exc}",
+            fix_suggestion="Check filesystem permissions on .agents/skills or rerun with --dry-run.",
+        )]
 
     system_lane_logs = _refresh_system_lane_link(skills_dir, system_skills_dir, dry_run)
     if system_lane_logs:

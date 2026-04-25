@@ -284,7 +284,7 @@ def _latest_accepted_amendment(telemetry_dir: Path, workout_id: str) -> dict[str
 
 
 def _record_amendment(telemetry_dir: Path, state: str, workout_id: str, proposal: dict[str, Any]) -> Path:
-    target = telemetry_dir / "amendments" / state / f"{_safe_filename(workout_id)}-{int(time.time())}.json"
+    target = telemetry_dir / "amendments" / state / f"{_safe_filename(workout_id)}-{time.time_ns()}.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(proposal, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return target
@@ -582,6 +582,8 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
     budget_ok = context_tokens <= max_context_tokens
     improvement_ok = pass_rate_after > pass_rate_before or not if_better
     rejection_reasons: list[str] = []
+    if not score_after.get("success"):
+        rejection_reasons.append("last_run_failed")
     if if_better and not improvement_ok:
         rejection_reasons.append("pass_rate_not_improved")
     if not budget_ok:
