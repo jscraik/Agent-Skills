@@ -17,6 +17,7 @@ session patterns, message analysis, timing, and Codex-generated insights.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import difflib
 import json
 import os
@@ -580,10 +581,8 @@ def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding="utf-8")
-    try:
+    with contextlib.suppress(OSError):
         path.chmod(0o600)
-    except OSError:
-        pass
 
 
 def read_json(path):
@@ -1588,10 +1587,8 @@ def main():
         write_json(args.evidence_out, evidence)
         Path(args.prompt_out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.prompt_out).write_text(prompt, encoding="utf-8")
-        try:
+        with contextlib.suppress(OSError):
             Path(args.prompt_out).chmod(0o600)
-        except OSError:
-            pass
 
         print(f"\nCodex evidence ready: {args.evidence_out}")
         print(f"Codex prompt ready: {args.prompt_out}")

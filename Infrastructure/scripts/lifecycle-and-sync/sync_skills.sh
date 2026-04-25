@@ -23,6 +23,11 @@ USAGE
 while [[ $# -gt 0 ]]; do
   case "${1:-}" in
     --timeout-seconds)
+      if [[ -z "${2:-}" ]] || [[ "${2:-}" == --* ]]; then
+        echo "Missing value for --timeout-seconds" >&2
+        usage
+        exit 2
+      fi
       timeout_seconds="${2:-}"
       shift 2
       ;;
@@ -39,6 +44,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --projection)
+      if [[ -z "${2:-}" ]] || [[ "${2:-}" == --* ]]; then
+        echo "Missing value for --projection" >&2
+        usage
+        exit 2
+      fi
       projection_mode_cli="${2:-}"
       shift 2
       ;;
@@ -158,10 +168,12 @@ projection_args=(--format shell)
 if [ -n "$projection_mode_cli" ]; then
   projection_args+=(--mode "$projection_mode_cli")
 fi
-if projection_policy_shell="$(
-  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
-)"; then
+projection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}" 2>&1
+)" || true
+if python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}" >/dev/null 2>&1; then
   # Only eval on success; validate output is non-empty and contains safe patterns.
+  projection_policy_shell="$(python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}")"
   if [ -z "$projection_policy_shell" ]; then
     echo "Projection engine returned empty output." >&2
     exit 2
@@ -173,7 +185,13 @@ if projection_policy_shell="$(
   fi
   eval "$projection_policy_shell"
 else
-  echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
+  # Extract SYNC_SKILLS_PROJECTION_ERROR_MESSAGE from projection engine output
+  error_message="$(echo "$projection_policy_shell" | grep -E '^SYNC_SKILLS_PROJECTION_ERROR_MESSAGE=' | sed -E 's/^SYNC_SKILLS_PROJECTION_ERROR_MESSAGE=//; s/^"//; s/"$//')"
+  if [ -n "$error_message" ]; then
+    echo "$error_message" >&2
+  else
+    echo "Invalid projection mode." >&2
+  fi
   exit 2
 fi
 if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
