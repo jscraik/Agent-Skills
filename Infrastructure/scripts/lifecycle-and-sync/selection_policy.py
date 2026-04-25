@@ -11,6 +11,21 @@ from typing import Any, Iterable
 
 POLICY_VERSION = "2026-04-24.v18"
 
+PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
+
+ROOT_SKILL_SET_NAMES: tuple[str, ...] = (
+    "agent-ops",
+    "frontend-ui",
+    "backend-platform",
+    "product-strategy",
+    "security-ops",
+    "content-publishing",
+    "mobile-native",
+    "skill-factory",
+    "plugin-factory",
+    "harness-engineering",
+)
+
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
     "Skills",
@@ -136,6 +151,8 @@ def payload() -> dict[str, Any]:
     Returns:
         payload (dict[str, Any]): Mapping with the following keys:
             - "policy_version": str
+            - "projection_mode_choices": list[str]
+            - "root_skill_set_names": list[str]
             - "repo_scan_roots": list[str]
             - "plugin_skill_root_glob": str
             - "excluded_scan_segments": list[str]
@@ -147,6 +164,8 @@ def payload() -> dict[str, Any]:
     """
     return {
         "policy_version": POLICY_VERSION,
+        "projection_mode_choices": list(PROJECTION_MODE_CHOICES),
+        "root_skill_set_names": list(ROOT_SKILL_SET_NAMES),
         "repo_scan_roots": list(REPO_SCAN_ROOTS),
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,
         "excluded_scan_segments": list(EXCLUDED_SCAN_SEGMENTS),
@@ -179,6 +198,8 @@ def render_shell() -> str:
     """
     lines = [
         f"SELECTION_POLICY_IDENTITY={shlex.quote(policy_identity())}",
+        _shell_array("SELECTION_POLICY_PROJECTION_MODES", PROJECTION_MODE_CHOICES),
+        _shell_array("SELECTION_POLICY_ROOT_SKILL_SETS", ROOT_SKILL_SET_NAMES),
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),
         _shell_array("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", HIDDEN_FLAT_SKILL_NAMES),

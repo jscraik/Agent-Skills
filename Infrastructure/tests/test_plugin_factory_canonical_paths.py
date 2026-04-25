@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 from contextlib import contextmanager
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
 
@@ -15,7 +16,7 @@ PLUGIN_CREATOR_SCRIPT = (
     / "scaffolding_templates"
     / "plugin-creator"
     / "scripts"
-    / "create_basic_plugin.py"
+    / "create_basic_plugin.pyw"
 )
 PLUGIN_BUILDER_SCRIPT = (
     REPO_ROOT
@@ -25,11 +26,12 @@ PLUGIN_BUILDER_SCRIPT = (
     / "code_quality_review"
     / "plugin-builder"
     / "scripts"
-    / "plugin_builder.py"
+    / "plugin_builder.pyw"
 )
 PLUGIN_CREATOR_SKILL = (
     REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "scaffolding_templates" / "plugin-creator" / "SKILL.md"
 )
+PLUGIN_CREATOR_WORKFLOW = PLUGIN_CREATOR_SKILL.parent / "references" / "workflow.md"
 
 
 def _load_module(module_name: str, script_path: Path):
@@ -46,7 +48,8 @@ def _load_module(module_name: str, script_path: Path):
     Raises:
         RuntimeError: If an import spec or loader cannot be created for the given script_path.
     """
-    spec = importlib.util.spec_from_file_location(module_name, script_path)
+    loader = SourceFileLoader(module_name, str(script_path))
+    spec = importlib.util.spec_from_file_location(module_name, script_path, loader=loader)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Unable to load module from {script_path}")
     module = importlib.util.module_from_spec(spec)
@@ -119,9 +122,11 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
 
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
         skill_doc = PLUGIN_CREATOR_SKILL.read_text(encoding="utf-8")
+        workflow_doc = PLUGIN_CREATOR_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("references/workflow.md", skill_doc)
         self.assertIn(
             "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
-            skill_doc,
+            workflow_doc,
         )
 
 

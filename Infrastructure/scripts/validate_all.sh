@@ -431,7 +431,11 @@ schedule_check required path-ownership-boundaries "🧭 Enforcing path ownership
 schedule_check required skill-types "🏷️  Linting semantic skill-type tags..." bash Infrastructure/scripts/lint_skill_types.sh
 schedule_check required openai-format "🧩 Linting OpenAI skill format..." bash Infrastructure/scripts/lint_openai_skill_format.sh --mode strict
 schedule_check required progressive-disclosure "📐 Linting progressive disclosure quality..." bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode strict
-schedule_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." bash Infrastructure/scripts/validate_skill_authoring_family.sh "${skill_family_changed_files_args[@]}"
+skill_authoring_family_cmd=(bash Infrastructure/scripts/validate_skill_authoring_family.sh)
+if [[ ${#skill_family_changed_files_args[@]} -gt 0 ]]; then
+  skill_authoring_family_cmd+=("${skill_family_changed_files_args[@]}")
+fi
+schedule_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." "${skill_authoring_family_cmd[@]}"
 schedule_check required skill-graph-profiles "🕸️  Validating skill graph profile contracts..." "${python_cmd[@]}" Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0 --profile-index-out "$run_dir/skill-graph-profile-index.json" --wave-readiness-out "$run_dir/skill-graph-wave-readiness.json"
 schedule_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" Infrastructure/scripts/gotcha_pipeline.py validate
 selection_contract_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
