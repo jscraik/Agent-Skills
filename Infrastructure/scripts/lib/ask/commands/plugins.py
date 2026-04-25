@@ -19,7 +19,7 @@ _PLUGIN_NAME_SANITIZE_RE = re.compile(r"[^a-z0-9]+")
 _DEFAULT_PLUGIN_CATEGORY = "third-party"
 
 _PLUGIN_CREATOR_SCRIPT_CANDIDATES = (
-    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw",
 )
 _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
     "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",

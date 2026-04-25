@@ -58,7 +58,11 @@ def _canonical_repo_dest() -> str | None:
     for parent in [script_path.parent, *script_path.parents]:
         if not (parent / ".git").exists():
             continue
-        if (parent / "AGENTS.md").is_file() and (parent / "scripts" / "sync_skills.sh").is_file() and (parent / "plugins").is_dir():
+        if (
+            (parent / "AGENTS.md").is_file()
+            and (parent / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh").is_file()
+            and (parent / "plugins").is_dir()
+        ):
             return str(parent / "github")
     return None
 

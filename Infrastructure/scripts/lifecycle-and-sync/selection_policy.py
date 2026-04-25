@@ -114,22 +114,6 @@ DEFERRED_PROJECTION_MODES: tuple[str, ...] = (
     "hybrid",
 )
 
-# Planned rooted projection set. These names are reportable before rooted
-# mutation exists so budget reports can stay stable across the migration.
-ROOT_SKILL_SET_NAMES: tuple[str, ...] = (
-    "agent-ops",
-    "frontend-ui",
-    "backend-platform",
-    "product-strategy",
-    "security-ops",
-    "content-publishing",
-    "mobile-native",
-    "skill-factory",
-    "plugin-factory",
-    "harness-engineering",
-)
-
-
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:
     """
     Builds repository scan roots prefixed with "./".
@@ -216,7 +200,6 @@ def render_shell() -> str:
             "SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS",
             SYSTEM_BRIDGE_SKILL_NAMES,
         ),
-        _shell_array("SELECTION_POLICY_ROOT_SKILL_SETS", ROOT_SKILL_SET_NAMES),
         f"SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB={shlex.quote(PLUGIN_SKILL_ROOT_GLOB)}",
     ]
     return "\n".join(lines)

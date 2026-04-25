@@ -24,6 +24,7 @@ import sys
 import tempfile
 import urllib.error
 import urllib.parse
+import uuid
 import zipfile
 
 from github_utils import github_request
@@ -371,9 +372,8 @@ def _safe_extract_zip(zip_file: zipfile.ZipFile, dest_dir: str) -> None:
     dest_root = os.path.realpath(dest_dir)
     for info in zip_file.infolist():
         extracted_path = os.path.realpath(os.path.join(dest_dir, info.filename))
-        if extracted_path == dest_root or extracted_path.startswith(dest_root + os.sep):
-            continue
-        raise InstallError("Archive contains files outside the destination.")
+        if extracted_path != dest_root and not extracted_path.startswith(dest_root + os.sep):
+            raise InstallError("Archive contains files outside the destination.")
     zip_file.extractall(dest_dir)
 
 
@@ -526,7 +526,7 @@ def _is_canonical_repo_root(path: Path) -> bool:
     return (
         (path / ".git").exists()
         and (path / "AGENTS.md").is_file()
-        and (path / "scripts" / "sync_skills.sh").is_file()
+        and (path / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh").is_file()
         and ((path / "plugins").is_dir() or (path / "Plugins").is_dir())
     )
 
@@ -661,7 +661,7 @@ def _parse_args(argv: list[str]) -> Args:
 
 def main(argv: list[str]) -> int:
     args = _parse_args(argv)
-    run_id = tempfile.NamedTemporaryFile(prefix="skill-install-run-", delete=True).name.split("skill-install-run-")[-1]
+    run_id = uuid.uuid4().hex
 
     try:
         source = _resolve_source(args)
