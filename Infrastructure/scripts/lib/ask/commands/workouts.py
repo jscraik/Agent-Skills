@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -14,6 +15,7 @@ from ask.envelope import CallResult, ErrorObject
 
 WORKOUTS_DIRNAME = ".workouts"
 TELEMETRY_DIRNAME = ".skill-telemetry"
+DEFAULT_MAX_SKILL_CONTEXT_TOKENS = 1500
 
 
 def add_workouts_parser(subparsers: Any, global_parser: Any) -> None:
@@ -218,6 +220,42 @@ def _estimate_context_tokens(repo_root: Path, source_path: str) -> int:
     return (words * 4 + 2) // 3
 
 
+def _empty_score() -> dict[str, Any]:
+    return {
+        "attempts": 0,
+        "successes": 0,
+        "failures": 0,
+        "pass_rate": 0,
+        "flake_rate": 0,
+        "wall_clock_seconds": 0,
+        "tool_steps": 0,
+        "retries": 0,
+        "estimated_skill_context_tokens": 0,
+    }
+
+
+def _latest_accepted_amendment(telemetry_dir: Path, workout_id: str) -> dict[str, Any] | None:
+    accepted_dir = telemetry_dir / "amendments" / "accepted"
+    if not accepted_dir.is_dir():
+        return None
+    candidates = sorted(accepted_dir.glob(f"{_safe_filename(workout_id)}-*.json"))
+    for candidate in reversed(candidates):
+        try:
+            payload = json.loads(candidate.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            return payload
+    return None
+
+
+def _record_amendment(telemetry_dir: Path, state: str, workout_id: str, proposal: dict[str, Any]) -> Path:
+    target = telemetry_dir / "amendments" / state / f"{_safe_filename(workout_id)}-{int(time.time())}.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(proposal, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return target
+
+
 def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
     total = len(attempts)
     successes = sum(1 for attempt in attempts if attempt.get("outcome") == "success")
@@ -364,6 +402,7 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         _append_jsonl(telemetry_dir / "workout-results.jsonl", attempt_payload)
 
     score = _score_attempts(attempt_results)
+    max_context_tokens = int(config.get("max_skill_context_tokens", DEFAULT_MAX_SKILL_CONTEXT_TOKENS))
     scorecard = {
         "schema_version": "skill-workout-scorecard.v1",
         "timestamp": _timestamp(),
@@ -376,7 +415,10 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             **score,
             "estimated_skill_context_tokens": context_tokens,
         },
-        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= int(config.get("max_skill_context_tokens", 1500)),
+        "limits": {
+            "max_skill_context_tokens": max_context_tokens,
+        },
+        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= max_context_tokens,
     }
     scorecard_path = telemetry_dir / "scorecards" / f"{_safe_filename(workout_id)}.json"
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)
@@ -417,8 +459,7 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
 
     result = CallResult()
     scorecard = score.data["scorecard"]
-    import shlex
-    
+    telemetry_dir = _telemetry_dir(repo_root)
     target_source = str(scorecard.get("target_source_path") or "")
     target_path = None
     if target_source:
@@ -444,27 +485,78 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
         result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Rollback dry-run validation failed."))
         result.data["rollback_validation"] = rollback_validation
         return result
+
+    target_hash = _sha256(target_path) if target_path and target_path.is_file() else ""
+    latest_accepted = _latest_accepted_amendment(telemetry_dir, workout_id)
+    score_before = (
+        latest_accepted.get("score_after", {})
+        if latest_accepted and isinstance(latest_accepted.get("score_after"), dict)
+        else _empty_score()
+    )
+    score_after = scorecard.get("metrics", {})
+    max_context_tokens = int(
+        scorecard.get("limits", {}).get("max_skill_context_tokens", DEFAULT_MAX_SKILL_CONTEXT_TOKENS)
+        if isinstance(scorecard.get("limits"), dict)
+        else DEFAULT_MAX_SKILL_CONTEXT_TOKENS
+    )
+    context_tokens = int(score_after.get("estimated_skill_context_tokens") or 0)
+    pass_rate_before = float(score_before.get("pass_rate") or 0)
+    pass_rate_after = float(score_after.get("pass_rate") or 0)
+    budget_ok = context_tokens <= max_context_tokens
+    improvement_ok = pass_rate_after > pass_rate_before or not if_better
+    rejection_reasons: list[str] = []
+    if if_better and not improvement_ok:
+        rejection_reasons.append("pass_rate_not_improved")
+    if not budget_ok:
+        rejection_reasons.append("context_budget_exceeded")
     if if_better and not scorecard.get("promotion_eligible"):
-        result.status = "error"
-        result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Scorecard is not promotion eligible."))
-        result.data["scorecard"] = scorecard
-        result.data["rollback_validation"] = rollback_validation
-        return result
+        rejection_reasons.append("scorecard_not_promotion_eligible")
 
     promotion = {
-        "schema_version": "skill-workout-promotion.v1",
+        "schema_version": "skill-workout-amendment.v1",
         "timestamp": _timestamp(),
+        "state": "proposed" if dry_run else "accepted",
         "workout": _safe_id(workout_id),
         "scorecard_run_id": scorecard.get("run_id"),
         "target_source_path": target_source,
-        "score_after": scorecard.get("metrics", {}),
+        "previous_hash": target_hash,
+        "new_hash": target_hash,
+        "current_version": target_hash,
+        "score_before": score_before,
+        "score_after": score_after,
+        "rationale": "Workout promotion proposal generated from latest scorecard evidence.",
+        "evidence": [
+            score.data.get("scorecard_path", ""),
+            f"{TELEMETRY_DIRNAME}/workout-results.jsonl",
+        ],
         "rollback_command": rollback_command,
+        "rollback_validation": rollback_validation,
+        "context_budget": {
+            "estimated_skill_context_tokens": context_tokens,
+            "max_skill_context_tokens": max_context_tokens,
+            "status": "pass" if budget_ok else "fail",
+        },
+        "rejection_reasons": rejection_reasons,
         "dry_run": dry_run,
     }
+    if rejection_reasons:
+        promotion["state"] = "rejected"
+        if not dry_run:
+            target = _record_amendment(telemetry_dir, "rejected", workout_id, promotion)
+            promotion["promotion_path"] = target.relative_to(repo_root).as_posix() if target.is_relative_to(repo_root) else str(target)
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Workout amendment proposal rejected.",
+            fix_suggestion="Inspect promotion.rejection_reasons and rerun the workout after a smaller patch.",
+        ))
+        result.data["scorecard"] = scorecard
+        result.data["rollback_validation"] = rollback_validation
+        result.data["promotion"] = promotion
+        return result
+
     if not dry_run:
-        target = _telemetry_dir(repo_root) / "amendments" / "accepted" / f"{_safe_filename(workout_id)}-{int(time.time())}.json"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(json.dumps(promotion, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        target = _record_amendment(telemetry_dir, "accepted", workout_id, promotion)
         promotion["promotion_path"] = target.relative_to(repo_root).as_posix() if target.is_relative_to(repo_root) else str(target)
 
     result.status = "success"

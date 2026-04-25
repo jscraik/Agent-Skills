@@ -30,6 +30,27 @@ Each workout run:
 
 Promotion dry-run validates rollback before writing amendment metadata.
 
+## Amendment Records
+
+`ask workouts promote <id> --if-better --dry-run` returns an amendment proposal
+without writing runtime evidence. The proposal includes:
+
+- `previous_hash`, `new_hash`, and `current_version`;
+- `score_before` and `score_after`;
+- rationale and evidence paths;
+- rollback command and rollback validation;
+- context-budget status and rejection reasons.
+
+Non-dry-run promotion writes local runtime records under:
+
+```text
+.skill-telemetry/amendments/accepted/
+.skill-telemetry/amendments/rejected/
+```
+
+Rejected records are written when a proposal would regress the context budget,
+even if the latest workout pass rate is high.
+
 ## Diagnostic Fixtures
 
 The first diagnostic fixture set is:

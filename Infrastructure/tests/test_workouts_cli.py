@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import subprocess
 import sys
@@ -52,6 +53,51 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(promote_result.status, "success")
         self.assertEqual(promote_result.data["rollback_validation"]["status"], "pass")
         self.assertTrue(promote_result.data["promotion"]["dry_run"])
+        self.assertEqual(promote_result.data["promotion"]["schema_version"], "skill-workout-amendment.v1")
+        self.assertIn("previous_hash", promote_result.data["promotion"])
+        self.assertIn("new_hash", promote_result.data["promotion"])
+        self.assertIn("score_before", promote_result.data["promotion"])
+        self.assertIn("score_after", promote_result.data["promotion"])
+        self.assertFalse((self.telemetry_dir / "amendments").exists())
+
+    def test_promote_writes_accepted_amendment_record(self) -> None:
+        with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+            promote_result = workouts.promote_workout(REPO_ROOT, WORKOUT_ID, if_better=True, dry_run=False)
+
+        self.assertEqual(run_result.status, "success")
+        self.assertEqual(promote_result.status, "success")
+        promotion = promote_result.data["promotion"]
+        self.assertEqual(promotion["state"], "accepted")
+        self.assertEqual(promotion["previous_hash"], promotion["new_hash"])
+        self.assertTrue(promotion["rollback_command"])
+        self.assertEqual(promotion["context_budget"]["status"], "pass")
+        accepted_records = list((self.telemetry_dir / "amendments" / "accepted").glob("*.json"))
+        self.assertEqual(len(accepted_records), 1)
+        accepted_payload = json.loads(accepted_records[0].read_text(encoding="utf-8"))
+        self.assertEqual(accepted_payload["schema_version"], "skill-workout-amendment.v1")
+        self.assertEqual(accepted_payload["state"], "accepted")
+
+    def test_promote_rejects_and_records_context_budget_regression(self) -> None:
+        with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+            scorecard_path = Path(run_result.data["scorecard_path"])
+            scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
+            scorecard["metrics"]["estimated_skill_context_tokens"] = 9999
+            scorecard["limits"]["max_skill_context_tokens"] = 1
+            scorecard["promotion_eligible"] = False
+            scorecard_path.write_text(json.dumps(scorecard, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            promote_result = workouts.promote_workout(REPO_ROOT, WORKOUT_ID, if_better=True, dry_run=False)
+
+        self.assertEqual(run_result.status, "success")
+        self.assertEqual(promote_result.status, "error")
+        self.assertIn("context_budget_exceeded", promote_result.data["promotion"]["rejection_reasons"])
+        self.assertEqual(promote_result.data["promotion"]["state"], "rejected")
+        self.assertEqual(promote_result.data["promotion"]["context_budget"]["status"], "fail")
+        rejected_records = list((self.telemetry_dir / "amendments" / "rejected").glob("*.json"))
+        self.assertEqual(len(rejected_records), 1)
+        rejected_payload = json.loads(rejected_records[0].read_text(encoding="utf-8"))
+        self.assertEqual(rejected_payload["state"], "rejected")
 
     def test_all_diagnostic_workouts_run_and_score(self) -> None:
         for workout_id in sorted(DIAGNOSTIC_WORKOUT_IDS):
