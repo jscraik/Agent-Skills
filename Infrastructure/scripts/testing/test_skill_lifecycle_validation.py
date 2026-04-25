@@ -749,6 +749,126 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(default_names, [])
         self.assertEqual(advanced_names, ["code-review", "coderabbit"])
 
+    def test_skill_discovery_advanced_includes_local_plugin_cache_skills(self) -> None:
+        """Ensure operator catalogue discovery includes installed OpenAI plugin cache skills."""
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            cache_skill_root = (
+                repo_root
+                / "Plugins"
+                / "cache"
+                / "openai-curated"
+                / "build-web-apps"
+                / "version"
+                / "skills"
+            )
+            local_cache_skill_root = (
+                repo_root
+                / "Plugins"
+                / "cache"
+                / "agent-skills-local"
+                / "skill-factory"
+                / "version"
+                / "skills"
+            )
+            browser_cache_skill_root = (
+                repo_root
+                / "Plugins"
+                / "cache"
+                / "openai-bundled"
+                / "browser-use"
+                / "version"
+                / "skills"
+            )
+            browser_source_skill_root = repo_root / "Plugins" / "browser-use" / "skills"
+
+            write_text(
+                flat_root / "agent-ops" / "SKILL.md",
+                """
+                ---
+                name: agent-ops
+                description: "root router"
+                ---
+                # agent-ops
+                """,
+            )
+            write_text(
+                cache_skill_root / "frontend-app-builder" / "SKILL.md",
+                """
+                ---
+                name: frontend-app-builder
+                description: "Build frontend apps from the local plugin cache."
+                ---
+                # frontend-app-builder
+                """,
+            )
+            write_text(
+                cache_skill_root.parent / "fixtures" / "example" / "skills" / "fixture-only" / "SKILL.md",
+                """
+                ---
+                name: fixture-only
+                description: "Fixture skill should not be catalogued."
+                ---
+                # fixture-only
+                """,
+            )
+            write_text(
+                local_cache_skill_root / "skill-factory-router" / "SKILL.md",
+                """
+                ---
+                name: skill-factory-router
+                description: "Local cache mirror should not shadow canonical plugin sources."
+                ---
+                # skill-factory-router
+                """,
+            )
+            write_text(
+                browser_cache_skill_root / "browser" / "SKILL.md",
+                """
+                ---
+                name: browser
+                description: "Cache mirror should not shadow canonical plugin source."
+                ---
+                # browser
+                """,
+            )
+            write_text(
+                browser_source_skill_root / "browser" / "SKILL.md",
+                """
+                ---
+                name: browser
+                description: "Canonical browser plugin source."
+                ---
+                # browser
+                """,
+            )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="advanced",
+                )
+
+        self.assertEqual(sorted(entry.name for entry in default_entries), ["agent-ops"])
+        self.assertEqual(
+            sorted(entry.name for entry in advanced_entries),
+            ["agent-ops", "browser", "frontend-app-builder"],
+        )
+        browser_entry = next(entry for entry in advanced_entries if entry.name == "browser")
+        self.assertEqual(
+            browser_entry.source_dir.relative_to(repo_root).as_posix(),
+            "Plugins/browser-use/skills/browser",
+        )
+
     def test_skill_discovery_auto_advanced_includes_repo_non_default_skills(self) -> None:
         """
         Ensure auto+advanced discovery keeps non-default repository skills visible.

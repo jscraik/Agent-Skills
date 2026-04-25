@@ -38,6 +38,7 @@ HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 DEFAULT_VISIBLE_FLAT_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
+PLUGIN_CACHE_SKILL_ROOT_GLOB = "./Plugins/cache/openai-*/*/*/skills"
 USER_SKILL_SCOPE_PRECEDENCE = {
     "global": 10,
     "local-plugin": 20,
@@ -231,7 +232,7 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
     dirs: List[Path] = []
     seen_roots: set[str] = set()
     plugin_patterns: set[str] = set()
-    for raw_pattern in POLICY_PLUGIN_SKILL_ROOT_GLOB.split():
+    for raw_pattern in (*POLICY_PLUGIN_SKILL_ROOT_GLOB.split(), PLUGIN_CACHE_SKILL_ROOT_GLOB):
         if not raw_pattern:
             continue
         plugin_patterns.add(raw_pattern)
@@ -250,12 +251,34 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
             seen_roots.add(plugin_root_key)
             if not plugin_root.is_dir():
                 continue
+            cache_rel = _cache_plugin_source_root(plugin_root)
+            if cache_rel and (REPO_ROOT / "Plugins" / cache_rel / "skills").is_dir():
+                continue
             for skill_md in sorted(plugin_root.rglob("SKILL.md")):
                 rel_parts = skill_md.relative_to(plugin_root).parts
                 if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
                     continue
                 dirs.append(skill_md.parent)
     return dirs
+
+
+def _cache_plugin_source_root(plugin_root: Path) -> str | None:
+    """
+    Return the plugin name for cache roots shaped like Plugins/cache/<family>/<plugin>/<version>/skills.
+
+    Cache copies should not compete with canonical local plugin sources under
+    Plugins/<plugin>/skills. They are included only when no canonical source
+    exists for that plugin name.
+    """
+    try:
+        rel_parts = plugin_root.relative_to(REPO_ROOT).parts
+    except ValueError:
+        return None
+    if len(rel_parts) >= 6 and rel_parts[0] == "Plugins" and rel_parts[1] == "cache" and rel_parts[-1] == "skills":
+        return rel_parts[3]
+    if len(rel_parts) >= 6 and rel_parts[0] == "plugins" and rel_parts[1] == "cache" and rel_parts[-1] == "skills":
+        return rel_parts[3]
+    return None
 
 
 def _iter_system_lane_skill_dirs() -> List[Path]:
