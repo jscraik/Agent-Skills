@@ -1,48 +1,31 @@
-schema_version: "1.0"
-
-purpose: >
-  Define expected behavior for diagnosing and fixing mise trust/runtime setup
-  issues while preserving reproducibility and safety.
-
+schema_version: 1
+skill: fix-mise
+purpose: "Diagnose and repair mise trust, runtime, activation, and version-drift failures."
 triggers:
-  - user reports mise trust errors
-  - commands fail because mise-managed tools are unavailable
-  - user asks to repair local mise configuration
-  - user asks for global mise config upkeep (`~/.Infrastructure/config/mise/config.toml`) while resolving trust/runtime issues
-
-inputs:
-  - failing command/error output
-  - path to repo or directory with mise config
-  - global mise config path (typically `~/.Infrastructure/config/mise/config.toml`)
-  - optional expected runtime versions
-  - explicit permission/confirmation for global toolchain edits when intent is not explicit
-
-outputs:
-  - diagnosed root cause and remediation actions
-  - verification evidence from mise checks and retried command
-  - global configuration update result and backup metadata when updates are made
-  - explicit confirmation requirement and decision log when global edits are requested but ambiguous
-  - clear unresolved blocker summary when full recovery is not possible
-
+  - "Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift."
 non_goals:
-  - unrelated environment refactors outside mise scope
-  - claiming recovery without rerunning verification commands
-  - unrelated global toolchain policy changes
-
+  - "Route unrelated work away from this skill."
+inputs:
+  - "failing command"
+  - "error output"
+  - "repo path"
+  - "mise config"
+  - "expected versions"
+outputs:
+  - "root cause"
+  - "remediation"
+  - "verification evidence"
+  - "residual risk"
 risks:
-  - over-broad trust actions; mitigated by path-scoped trust steps
-  - sensitive output exposure; mitigated by redaction in logs and summaries
-
-examples:
-  happy_path:
-    input: "mise says config is untrusted in this repo"
-    expected_output: "trust updated, doctor passes, command works"
-  confirmation_path:
-    input: "make sure my global config matches"
-    expected_output: "asks for confirmation if versions or scope are ambiguous"
-  edge_case:
-    input: "multiple nested mise configs conflict"
-    expected_output: "documented scope resolution and targeted trust actions"
-  failure_mode:
-    input: "required runtime unavailable from configured backend"
-    expected_output: "fail-fast explanation with alternative remediation"
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

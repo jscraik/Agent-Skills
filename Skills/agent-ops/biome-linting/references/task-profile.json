@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-biome-linting",
   "scope_skill": "Skills/agent-ops/biome-linting",
   "scope_profile": "Skills",
-  "rubric_version": "2026-04-13",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -17,32 +17,32 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Instructional clarity",
+      "label": "Clarity",
       "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Command specificity",
-      "threshold": 0.7,
+      "label": "Specificity",
+      "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety/compliance",
-      "threshold": 0.86,
+      "label": "Safety",
+      "threshold": 0.85,
       "weight": 0.33,
       "critical": true
     }
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 35,
-    "ai_process_minutes": 12,
-    "probability_of_success": 0.8,
-    "rationale": "Biome remediation often needs operator confirmation for unsafe fixes while automation handles deterministic command routing."
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [
