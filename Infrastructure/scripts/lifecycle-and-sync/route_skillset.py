@@ -220,7 +220,7 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
                 return {
                     "row": row,
                     "confidence": 1.0,
-                    "reason": f"matched deterministic HE rule 'direct-stage-invocation'",
+                    "reason": "matched deterministic HE rule 'direct-stage-invocation'",
                 }
 
     for rule in sorted(routing_map.get("deterministic_decision_order", []), key=lambda item: item.get("priority", 999)):

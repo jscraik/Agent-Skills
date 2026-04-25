@@ -121,7 +121,7 @@ append_candidate() {
   fi
 
   resolved_dir="$(cd -P -- "$(dirname -- "$resolved")" && pwd -P)" || return 0
-  candidate_list+=("${resolved_dir#$REPO_ROOT/}/$(basename -- "$resolved")")
+  candidate_list+=("${resolved_dir#"$REPO_ROOT"/}/$(basename -- "$resolved")")
 }
 
 has_context_move_evidence() {

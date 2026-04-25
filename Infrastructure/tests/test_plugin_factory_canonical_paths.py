@@ -166,7 +166,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
             )
 
             result = subprocess.run(
-                [sys.executable, str(PLUGIN_BUILDER_SCRIPT.with_suffix(".py")), "validate", str(plugin_root)],
+                [sys.executable, str(PLUGIN_BUILDER_SCRIPT), "validate", str(plugin_root)],
                 text=True,
                 capture_output=True,
                 check=False,

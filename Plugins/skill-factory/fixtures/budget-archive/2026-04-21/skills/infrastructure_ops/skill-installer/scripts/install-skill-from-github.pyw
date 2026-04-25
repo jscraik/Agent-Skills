@@ -286,7 +286,9 @@ def _enforce_signer_allowlist(
 
     verified = bool(commit_verification.get("verified") is True)
     reason = str(commit_verification.get("reason") or "unknown").strip().lower()
-    if not verified and allow_unsigned_provenance:
+    if not verified:
+        if allow_unsigned_provenance:
+            return
         raise InstallError(
             "Signer allowlist checks require a signed/verified commit. "
             f"Observed verification reason='{reason}' for {owner}/{repo}@{resolved_commit}."
