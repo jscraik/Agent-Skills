@@ -1,41 +1,28 @@
 schema_version: 1
-name: diagram-cli
-purpose: Generate reproducible architecture artifacts and a concise interpretation brief so users can understand a codebase quickly and safely.
+skill: diagram-cli
+purpose: "Produce reproducible architecture artifacts before making architecture claims."
 triggers:
-  - User asks for architecture mapping, dependency visualization, or repository understanding.
-  - User asks to refresh Mermaid/context-pack artifacts for agents or CI.
-  - User asks to detect architecture drift or validate rule compliance.
-inputs:
-  - name: repo_path
-    type: string
-    description: Repository root to analyze (default current working directory).
-  - name: goal
-    type: string
-    description: onboarding_map | pr_impact | ci_drift_gate | context_refresh.
-  - name: output_root
-    type: string
-    description: Preferred artifact path (.diagram or Infrastructure/artifacts/diagrams).
-  - name: focus
-    type: string
-    description: Optional module/path focus for targeted runs.
-outputs:
-  - name: diagram_artifacts
-    type: array
-    description: Generated diagram files (typically .mmd and optional rendered assets).
-  - name: manifest_gate
-    type: object
-    description: Diagram completeness status including required types and placeholder flags.
-  - name: architecture_brief
-    type: object
-    description: Human-readable summary of topology, hotspots, and next steps.
-  - name: schema_version
-    type: integer
-    description: Contract version of the produced interpretation payload when machine-formatted output is requested.
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - Designing marketing/UI diagrams unrelated to code architecture.
-  - Performing full threat modeling without generated code-graph evidence.
-  - Installing or reconfiguring toolchains without explicit user approval.
+  - "Route unrelated work away from this skill."
+inputs:
+  - user_request
+  - target_context
+  - evidence
+outputs:
+  - result
+  - evidence_summary
+  - validation_status
 risks:
-  - Placeholder or partial diagrams causing incorrect conclusions.
-  - Overscanning large repos without focus/excludes causing noisy outputs.
-  - Sensitive code identifiers leaking into public artifacts if redaction is skipped.
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

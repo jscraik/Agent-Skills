@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-autofix",
   "scope_skill": "Skills/agent-ops/autofix",
   "scope_profile": "Skills",
-  "rubric_version": "2026-04-18",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -17,21 +17,21 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Workflow clarity",
+      "label": "Clarity",
       "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Fix specificity",
+      "label": "Specificity",
       "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety and redaction",
+      "label": "Safety",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -42,7 +42,7 @@
     "human_baseline_minutes": 45,
     "ai_process_minutes": 15,
     "probability_of_success": 0.75,
-    "rationale": "Autofix requires human checkpointing for higher-risk edits while automation handles issue parsing and patch preparation."
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [
