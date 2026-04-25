@@ -773,7 +773,9 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         "limits": {
             "max_skill_context_tokens": max_skill_context_tokens,
         },
-        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= max_skill_context_tokens,
+        "promotion_eligible": score["failures"] == 0
+        and score["pass_rate"] > 0
+        and context_tokens <= max_skill_context_tokens,
     }
     scorecard_path = telemetry_dir / "scorecards" / f"{_safe_filename(workout_id)}.json"
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)

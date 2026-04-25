@@ -406,7 +406,7 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
         if not skill_set:
             unmapped.append({"id": source_dir.name, "source_path": rel(skill_md), "reason": skill_set_status})
             continue
-        level, level_status = infer_level(source_dir.name, frontmatter, description)
+        level, _level_status = infer_level(source_dir.name, frontmatter, description)
         metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
             SkillModule(

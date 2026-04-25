@@ -2,7 +2,7 @@
 
 ## Preconditions
 
-- `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
+- `bin/ask skills sync --scope workspace --projection rooted --dry-run --json` passes.
 - `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json` passes.
 - At least one workout has a passing scorecard.
 - `.skillsets/**` is generated, provenance-rich, and validated.
@@ -10,7 +10,7 @@
 ## Dry Run
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection rooted --dry-run --json
+bin/ask skills sync --scope workspace --projection rooted --dry-run --json
 ```
 
 Confirm:
@@ -23,7 +23,7 @@ Confirm:
 ## Apply
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection rooted --json
+bin/ask skills sync --scope workspace --projection rooted --json
 ```
 
 Then validate rooted budget:
@@ -36,13 +36,13 @@ bash Infrastructure/scripts/validate_all.sh --ephemeral
 ## User Relink
 
 ```bash
-python3 bin/ask skills sync --scope user --projection rooted --json
+bin/ask skills sync --scope user --projection rooted --json
 ```
 
 ## Rollback
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection flat --json
+bin/ask skills sync --scope workspace --projection flat --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 

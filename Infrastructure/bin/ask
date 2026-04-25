@@ -132,6 +132,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask wiki add --interactive",
         "ask wiki query \"1password signing\"",
     ],
+    "workouts": ["ask workouts list --json", "ask workouts run harness-engineering/he-spec --attempts 3 --json"],
 }
 
 COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {

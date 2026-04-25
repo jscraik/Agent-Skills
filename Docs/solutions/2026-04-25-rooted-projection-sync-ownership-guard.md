@@ -57,7 +57,7 @@ rooted sync first.
   passed.
 - `ruff check Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/tests/test_ask_skills_sync_security.py`
   passed.
-- `/opt/homebrew/bin/pytest Infrastructure/tests/test_ask_skills_sync_security.py Infrastructure/tests/test_context_budgeted_skillsets.py -q`
+- `python3 -m pytest Infrastructure/tests/test_ask_skills_sync_security.py Infrastructure/tests/test_context_budgeted_skillsets.py -q`
   passed with `37 passed`.
 
 ## Follow-up

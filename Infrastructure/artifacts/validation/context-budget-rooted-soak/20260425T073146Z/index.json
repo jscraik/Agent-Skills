@@ -28,7 +28,7 @@
       "python3 bin/ask skills sync --scope workspace --projection rooted",
       "python3 bin/ask skills sync --scope user --projection rooted --dry-run",
       "python3 bin/ask skills sync --scope user --projection rooted",
-      "PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python bash Infrastructure/scripts/validate_all.sh --ephemeral",
+      "PYTHON_BIN=python3 bash Infrastructure/scripts/validate_all.sh --ephemeral",
       "python3 bin/ask skills sync --scope user --projection flat",
       "python3 bin/ask skills sync --scope workspace --projection flat",
       "python3 bin/ask skills sync --scope workspace --projection flat --dry-run",

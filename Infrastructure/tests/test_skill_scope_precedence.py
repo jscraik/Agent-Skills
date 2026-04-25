@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional
 from unittest import mock
 
 
@@ -49,7 +49,7 @@ class TestSkillScopePrecedence(unittest.TestCase):
         return skill_dir
 
     @contextmanager
-    def _patched_repo(self, *, default_visible: Optional[set[str]] = None):
+    def _patched_repo(self, *, default_visible: Optional[set[str]] = None) -> Iterator[None]:
         """
         Provide a context manager that temporarily patches skill discovery and runtime-budget configuration constants to point at the test repository.
         

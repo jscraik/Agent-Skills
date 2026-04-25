@@ -21,7 +21,7 @@ python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --
 Run the rooted budget gate after generating rooted manifests:
 
 ```bash
-python3 bin/ask skills sync --projection rooted --dry-run --json
+bin/ask skills sync --scope workspace --projection rooted --dry-run --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
 ```
 
@@ -49,11 +49,13 @@ If first-level latent skills are exposed in rooted mode, regenerate the rooted
 projection:
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection rooted --json
+bin/ask skills sync --scope workspace --projection rooted --json
 ```
 
 Rollback to flat mode:
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection flat --json
+bin/ask skills sync --scope workspace --projection flat --json
 ```
+
+<!-- vale on -->
