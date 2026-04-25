@@ -62,3 +62,10 @@ Ask the smallest useful question, reduce uncertainty quickly, and preserve an ex
 - Archived full context: `Infrastructure/references/deferred-skill-context/product-strategy-interview-me/`.
 - Load archived references only when the active workflow needs that exact detail.
 - Keep the active path compact; do not remove important context for budget trimming.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[verification-before-completion]] | Confirm gate outcomes and report deterministic pass/fail evidence before closeout |
+| [[project-brain]] | Capture durable repo learnings and route updates into the canonical memory surface |

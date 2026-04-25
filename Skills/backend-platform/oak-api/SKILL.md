@@ -63,3 +63,10 @@ Learner safety, age fit, and compliance come before product cleverness.
 - Archived full context: `Infrastructure/references/deferred-skill-context/backend-platform-oak-api/`.
 - Load archived references only when the active workflow needs that exact detail.
 - Keep the active path compact; do not remove important context for budget trimming.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[verification-before-completion]] | Confirm gate outcomes and report deterministic pass/fail evidence before closeout |
+| [[project-brain]] | Capture durable repo learnings and route updates into the canonical memory surface |
