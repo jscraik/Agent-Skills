@@ -138,6 +138,7 @@ he_work_skill="Plugins/harness-engineering/skills/team_automation/he-work/SKILL.
 he_tdd_skill="Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md"
 ce_shared_approval_doc="Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 ce_shared_approval_ref="../shared/references/approval-flow.md"
+ce_shared_approval_repo_ref="repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 
 # ---------------------------------------------------------------------------
 # Runner selection — override via SKILL_FAMILY_RUNNER (default: codex)
@@ -272,8 +273,8 @@ for skill_doc in "$he_work_skill" "$he_tdd_skill"; do
     exit 1
   fi
 
-  if ! grep -Fq "$ce_shared_approval_ref" "$skill_doc"; then
-    echo "[family-gate] ERROR: $skill_doc must reference $ce_shared_approval_ref"
+  if ! grep -Fq "$ce_shared_approval_ref" "$skill_doc" && ! grep -Fq "$ce_shared_approval_repo_ref" "$skill_doc"; then
+    echo "[family-gate] ERROR: $skill_doc must reference $ce_shared_approval_ref or $ce_shared_approval_repo_ref"
     exit 1
   fi
 

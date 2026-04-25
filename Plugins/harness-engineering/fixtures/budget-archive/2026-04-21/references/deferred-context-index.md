@@ -4,6 +4,8 @@ This reference preserves context moved out of active `SKILL.md` entrypoints duri
 
 Use this file when you need detailed stage doctrine, extended examples, legacy/archive context, or full stage asset/script references that are intentionally deferred from always-loaded entrypoints.
 
+In this index, archive means preserved deferred context used by active skills, not deprecated or inactive guidance.
+
 ## Preserved Context
 
 - Full stage guides and archived references remain in `fixtures/skill-archive/**`.
