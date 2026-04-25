@@ -16,9 +16,9 @@ Do not use it for: {{ exclusions }}.
 
 Process:
 1. Classify the task as atom, molecule, or compound.
-2. Run `route_skillset.py` for this skill set.
+2. From the repository root, run `python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "{{ skill_set_name }}" --task "<request>" --json`.
 3. Load only the selected canonical `source_path`.
 4. Follow that module's contract.
 5. Record a minimal run observation when telemetry is enabled.
 
-Do not load the full manifest, enumerate child skills, or load unrelated skill sets.
+If routing cannot run or returns no selected module, report the blocker instead of guessing. Do not enumerate child skills or load unrelated skill sets.

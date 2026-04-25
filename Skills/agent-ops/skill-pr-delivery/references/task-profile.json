@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-skill-pr-delivery",
   "scope_skill": "Skills/agent-ops/skill-pr-delivery",
   "scope_profile": "Skills",
-  "rubric_version": "2026-04-25",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -16,36 +16,37 @@
   },
   "criteria": [
     {
-      "id": "delivery_clarity",
-      "label": "Skill delivery workflow clarity",
-      "threshold": 0.76,
+      "id": "clarity",
+      "label": "Clarity",
+      "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
-      "id": "validation_specificity",
-      "label": "Concrete sync, audit, reviewer, and PR validation detail",
-      "threshold": 0.74,
+      "id": "specificity",
+      "label": "Specificity",
+      "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
-      "id": "source_safety",
-      "label": "Canonical source, unrelated-change, and destructive-git safety",
-      "threshold": 0.88,
+      "id": "safety",
+      "label": "Safety",
+      "threshold": 0.85,
       "weight": 0.33,
       "critical": true
     }
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 70.0,
-    "ai_process_minutes": 22.0,
-    "probability_of_success": 0.82,
-    "rationale": "Skill delivery benefits from agent-driven sync, validation, and PR evidence while preserving human control over visibility and merge decisions."
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [
+      "learn",
       "guided",
       "execute"
     ],

@@ -20,7 +20,7 @@ metadata:
 - [Anti-patterns](#anti-patterns)
 - [Decision feedback protocol](#decision-feedback-protocol)
 
-`./Infrastructure/scripts/vtd.js` can print transcripts and download video, audio, and subtitles through a consistent local wrapper.
+`node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js` can print transcripts and download video, audio, and subtitles through a consistent local wrapper.
 
 ## When to use
 - Use this skill when the user wants a transcript, subtitles, audio extraction, format inspection, or a direct media download.
@@ -56,32 +56,32 @@ If the requested source cannot be fetched or does not provide transcript or subt
 ### Setup
 
 ```bash
-cd ~/Projects/agent-Infrastructure/scripts/skills/video-transcript-downloader && npm ci
+cd Skills/content-publishing/video-transcript-downloader && npm ci
 ```
 
 ### Transcript (default: clean paragraph)
 
 ```bash
-./Infrastructure/scripts/vtd.js transcript --url 'https://…'
-./Infrastructure/scripts/vtd.js transcript --url 'https://…' --lang en
-./Infrastructure/scripts/vtd.js transcript --url 'https://…' --timestamps
-./Infrastructure/scripts/vtd.js transcript --url 'https://…' --keep-brackets
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js transcript --url 'https://...'
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js transcript --url 'https://...' --lang en
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js transcript --url 'https://...' --timestamps
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js transcript --url 'https://...' --keep-brackets
 ```
 
 ### Download video / audio / subtitles
 
 ```bash
-./Infrastructure/scripts/vtd.js download --url 'https://…' --output-dir ~/Downloads
-./Infrastructure/scripts/vtd.js audio --url 'https://…' --output-dir ~/Downloads
-./Infrastructure/scripts/vtd.js subs --url 'https://…' --output-dir ~/Downloads --lang en
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js download --url 'https://...' --output-dir ~/Downloads
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js audio --url 'https://...' --output-dir ~/Downloads
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js subs --url 'https://...' --output-dir ~/Downloads --lang en
 ```
 
 ### Formats (list + choose)
 
 ```bash
-./Infrastructure/scripts/vtd.js formats --url 'https://…'
-./Infrastructure/scripts/vtd.js download --url 'https://…' --output-dir ~/Downloads -- --format 137+140
-./Infrastructure/scripts/vtd.js download --url 'https://…' --output-dir ~/Downloads -- --remux-video mp4
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js formats --url 'https://...'
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js download --url 'https://...' --output-dir ~/Downloads -- --format 137+140
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js download --url 'https://...' --output-dir ~/Downloads -- --remux-video mp4
 ```
 
 ## Notes
@@ -90,7 +90,7 @@ cd ~/Projects/agent-Infrastructure/scripts/skills/video-transcript-downloader &&
 - Pass extra `yt-dlp` args after `--` for transcript fallback, download, audio, subtitles, or format inspection.
 
 ```bash
-./Infrastructure/scripts/vtd.js formats --url 'https://…' -- -v
+node Skills/content-publishing/video-transcript-downloader/scripts/vtd.js formats --url 'https://...' -- -v
 ```
 
 ## Troubleshooting (only when needed)

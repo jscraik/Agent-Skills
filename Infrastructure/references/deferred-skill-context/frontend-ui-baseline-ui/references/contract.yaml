@@ -1,0 +1,20 @@
+purpose: Provide baseline-ui guidance with actionable remediation.
+schema_version: 1.0
+triggers:
+- User requests baseline-ui guidance
+- User asks for an audit or fix workflow in this domain
+inputs:
+- Target files or scope
+- User constraints
+- Project stack context
+outputs:
+- Prioritized findings
+- Concrete minimal fixes
+- Validation checklist
+- Optional audit scorecard output (/20 with P0-P3 severity)
+non_goals:
+- Large unrelated refactors
+- Framework migrations without approval
+risks:
+- Over-broad changes
+- Assumption drift
