@@ -17,21 +17,21 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Instructional clarity",
+      "label": "Clarity",
       "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Concrete implementation detail",
+      "label": "Specificity",
       "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety/compliance compliance",
+      "label": "Safety",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -39,10 +39,10 @@
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 45.0,
-    "ai_process_minutes": 15.0,
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
     "probability_of_success": 0.75,
-    "rationale": "Co-pilot mode fits this skill: the agent can drive command-accurate setup and validation, while high-impact repository mutations and auth-dependent checks still require explicit human control."
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [

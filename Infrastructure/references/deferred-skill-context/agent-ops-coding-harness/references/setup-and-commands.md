@@ -62,7 +62,7 @@ mise install -g npm:@brainwav/coding-harness
 Required private package auth wiring:
 
 ```bash
-export NPM_TOKEN=<token>
+export NPM_AUTH_TOKEN_FROM_SECRET_STORE
 # CircleCI project settings -> Environment Variables:
 #   NPM_TOKEN
 ```
