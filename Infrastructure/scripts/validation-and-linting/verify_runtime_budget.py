@@ -16,15 +16,18 @@ if str(LIFECYCLE_DIR) not in sys.path:
     sys.path.insert(0, str(LIFECYCLE_DIR))
 
 from selection_policy import (  # type: ignore  # noqa: E402
-    DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
-    ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
+from runtime_surface_policy import (  # type: ignore  # noqa: E402
+    DEFAULT_VISIBLE_FLAT_SKILLS,
+    ROOT_SKILL_SETS,
+    active_projection_mode,
+    expected_first_level_runtime_names,
+    is_default_visible_skill_name,
+    rooted_runtime_name_drift,
+)
 from skill_discovery import (  # type: ignore  # noqa: E402
-    HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
-    PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
-    PLUGIN_VISIBLE_ROUTER_SKILL_NAMES as DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
     discover_catalog_entries,
@@ -39,7 +42,6 @@ from skill_discovery import (  # type: ignore  # noqa: E402
 DEFAULT_MAX_VISIBLE = 30
 ADVANCED_WARN_VISIBLE = 60
 BRIDGE_SKILLS = set(SYSTEM_BRIDGE_SKILL_NAMES)
-ROOT_SKILL_SETS = set(ROOT_SKILL_SET_NAMES)
 SCOPE_PRECEDENCE = USER_SKILL_SCOPE_PRECEDENCE
 
 
@@ -192,14 +194,8 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
         name = skill_dir.name.strip() or source_dir.name
         if not name:
             continue
-        if name in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES:
-            continue
-        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES:
-            continue
         plugin_owned = is_plugin_owned_skill_dir(source_dir)
-        if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
-            continue
-        if plugin_owned and name in DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES:
+        if not is_default_visible_skill_name(name, plugin_owned=plugin_owned):
             continue
         try:
             skill_dir.relative_to(REPO_ROOT)
@@ -220,12 +216,6 @@ def _first_level_skill_names() -> list[str]:
         if item.is_dir() and (item / "SKILL.md").exists():
             names.append(item.name)
     return names
-
-
-def _active_projection_mode(first_level_names: set[str]) -> str:
-    if first_level_names & ROOT_SKILL_SETS:
-        return "rooted"
-    return "flat"
 
 
 def _skill_file_word_count(entry: dict[str, str]) -> int:
@@ -257,11 +247,11 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     ]
 
     first_level = set(_first_level_skill_names())
-    projection_mode = _active_projection_mode(first_level)
+    projection_mode = active_projection_mode(first_level)
     rooted_mode = projection_mode == "rooted"
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
-    policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+    policy_default = set(DEFAULT_VISIBLE_FLAT_SKILLS)
     # Bridge skills are intentionally not expected in default first-level discovery.
     # They can exist in policy metadata while remaining routed through the hidden
     # `.system` lane and are validated separately via BRIDGE_SKILLS_EXPOSED_FIRST_LEVEL.
@@ -320,8 +310,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             "skills": bridge_exposed,
         })
     if rooted_mode:
-        missing_roots = sorted(ROOT_SKILL_SETS - first_level)
-        unexpected_first_level = sorted(first_level - ROOT_SKILL_SETS)
+        unexpected_first_level, missing_roots = rooted_runtime_name_drift(first_level)
         if missing_roots or unexpected_first_level:
             violations.append({
                 "code": "ROOTED_POLICY_NAME_DRIFT",
@@ -385,7 +374,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "system_bridge_skills": sorted(BRIDGE_SKILLS),
         "first_level_bridge_skills": bridge_exposed,
         "policy_default_skill_names": sorted(policy_default),
-        "effective_default_policy_skill_names": sorted(expected_default),
+        "effective_default_policy_skill_names": sorted(expected_first_level_runtime_names(projection_mode) - BRIDGE_SKILLS),
         "default_visible_skill_names": sorted(default_names),
         "advisories": advisories,
         "violations": violations,

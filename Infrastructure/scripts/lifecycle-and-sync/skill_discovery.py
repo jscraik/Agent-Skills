@@ -17,10 +17,10 @@ from selection_policy import (
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
     PLUGIN_SKILL_ROOT_GLOB as POLICY_PLUGIN_SKILL_ROOT_GLOB,
     REPO_SCAN_ROOTS as POLICY_REPO_SCAN_ROOTS,
-    ROOT_SKILL_SET_NAMES as POLICY_ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES as POLICY_SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
+from runtime_surface_policy import is_default_visible_skill_name
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 FLAT_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
@@ -36,7 +36,6 @@ EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
 # Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh hidden_flat_skills.
 HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 DEFAULT_VISIBLE_FLAT_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
-ROOT_SKILL_SET_NAMES = set(POLICY_ROOT_SKILL_SET_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
 USER_SKILL_SCOPE_PRECEDENCE = {
@@ -501,21 +500,7 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         if not name or name in seen:
             continue
         plugin_owned = _is_plugin_owned_skill_dir(source_dir)
-        if name in HIDDEN_FLAT_SKILL_NAMES:
-            continue
-        if (
-            visibility != "advanced"
-            and name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES
-            and name not in ROOT_SKILL_SET_NAMES
-        ):
-            continue
-        if visibility != "advanced" and plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
-            continue
-        if (
-            visibility != "advanced"
-            and plugin_owned
-            and name in PLUGIN_HIDDEN_LANE_SKILL_NAMES
-        ):
+        if visibility != "advanced" and not is_default_visible_skill_name(name, plugin_owned=plugin_owned):
             continue
 
         try:

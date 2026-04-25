@@ -20,6 +20,9 @@ SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "
 SHADOW_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "check_plugin_skill_shadowing.sh"
 SELECTION_POLICY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "selection_policy.py"
 SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "skill_discovery.py"
+RUNTIME_SURFACE_POLICY_SCRIPT = (
+    REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "runtime_surface_policy.py"
+)
 SYNC_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
 
 # macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
@@ -93,6 +96,19 @@ def load_skill_discovery_module():
     spec = importlib.util.spec_from_file_location("skill_discovery", SKILL_DISCOVERY_SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load skill discovery module from {SKILL_DISCOVERY_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_runtime_surface_policy_module():
+    script_dir = str(RUNTIME_SURFACE_POLICY_SCRIPT.parent)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    spec = importlib.util.spec_from_file_location("runtime_surface_policy", RUNTIME_SURFACE_POLICY_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load runtime surface policy module from {RUNTIME_SURFACE_POLICY_SCRIPT}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -633,6 +649,23 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         self.assertEqual(sorted(entry.name for entry in default_entries), sorted(root_names))
         self.assertEqual(sorted(entry.name for entry in advanced_entries), sorted([*root_names, latent_name]))
+
+    def test_runtime_surface_policy_classifies_rooted_visibility(self) -> None:
+        """Keep rooted runtime visibility in one policy module instead of discovery-only logic."""
+        runtime_policy = load_runtime_surface_policy_module()
+
+        self.assertEqual(runtime_policy.active_projection_mode(["agent-ops"]), "rooted")
+        self.assertEqual(runtime_policy.active_projection_mode(["autofix"]), "flat")
+        self.assertTrue(runtime_policy.is_default_visible_skill_name("agent-ops"))
+        self.assertTrue(runtime_policy.is_default_visible_skill_name("autofix"))
+        self.assertFalse(runtime_policy.is_default_visible_skill_name("hidden-latent-skill"))
+        self.assertEqual(
+            runtime_policy.rooted_runtime_name_drift(["agent-ops", "unexpected-skill"]),
+            (
+                ["unexpected-skill"],
+                sorted(set(runtime_policy.ROOT_SKILL_SETS) - {"agent-ops"}),
+            ),
+        )
 
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_missing_them(self) -> None:
         """
