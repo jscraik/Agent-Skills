@@ -44,7 +44,7 @@ Options:
 Default output root:
 
 ```text
-$HOME/dev/configs/codex/usage-data/
+$HOME/.codex/usage-data/
 ```
 
 Files:

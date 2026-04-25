@@ -68,9 +68,6 @@ if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seco
 fi
 
 case "$sync_scope" in
-  project-local)
-    sync_scope="workspace"
-    ;;
   workspace|user)
     ;;
   *)
@@ -170,7 +167,7 @@ if projection_policy_shell="$(
     exit 2
   fi
   # Basic validation: ensure output contains only expected variable assignments.
-  if ! echo "$projection_policy_shell" | grep -qE '^[A-Z_]+='; then
+  if ! echo "$projection_policy_shell" | grep -qE '^[A-Z_]+=' || echo "$projection_policy_shell" | grep -qEv '^[A-Z_]+='; then
     echo "Projection engine output does not match expected format." >&2
     exit 2
   fi

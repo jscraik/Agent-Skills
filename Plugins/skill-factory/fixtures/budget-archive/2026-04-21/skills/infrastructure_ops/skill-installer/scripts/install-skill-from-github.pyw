@@ -830,6 +830,7 @@ def main(argv: list[str]) -> int:
                 "signer_allowlist": {
                     "emails": sorted(allowed_signer_emails),
                     "domains": sorted(allowed_signer_domains),
+                    "logins": sorted(allowed_signer_logins),
                 },
             },
             "install": {

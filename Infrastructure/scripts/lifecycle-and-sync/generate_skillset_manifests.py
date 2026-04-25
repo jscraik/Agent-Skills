@@ -13,10 +13,34 @@ from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skillset_model import build_skill_modules, modules_by_skill_set, rel, repo_root
 
 DEFAULT_OUTPUT_DIR = repo_root() / ".skillsets"
+SCOPE_PRECEDENCE = {
+    "global": 10,
+    "local-plugin": 20,
+    "project": 30,
+}
+
+
+def _apply_scope_precedence(modules: list[Any]) -> list[Any]:
+    """
+    Keep the highest-precedence module for each rooted manifest identity.
+
+    Rooted manifests are built from all canonical scopes, but runtime selection
+    follows project > local-plugin > global. Apply that precedence before the
+    duplicate-ID gate so valid overlays do not block sync.
+    """
+    rows_by_identity: dict[tuple[str, str], list[Any]] = defaultdict(list)
+    selected: list[Any] = []
+    for module in modules:
+        rows_by_identity[(module.skill_set, module.id)].append(module)
+    for rows in rows_by_identity.values():
+        best_rank = max(SCOPE_PRECEDENCE.get(row.scope, 0) for row in rows)
+        selected.extend(row for row in rows if SCOPE_PRECEDENCE.get(row.scope, 0) == best_rank)
+    return sorted(selected, key=lambda module: (module.skill_set, module.id, module.source_path))
 
 
 def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
-    modules, unmapped = build_skill_modules()
+    discovered_modules, unmapped = build_skill_modules()
+    modules = _apply_scope_precedence(discovered_modules)
     grouped = modules_by_skill_set(modules)
     duplicate_ids: list[dict[str, Any]] = []
     duplicate_source_paths: list[dict[str, Any]] = []

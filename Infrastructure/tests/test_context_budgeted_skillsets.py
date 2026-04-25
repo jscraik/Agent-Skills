@@ -53,7 +53,9 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(len(writes), len(ROOT_SKILL_SET_NAMES))
         manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
         self.assertTrue(manifest.is_file())
-        first_row = json.loads(manifest.read_text(encoding="utf-8").splitlines()[0])
+        lines = manifest.read_text(encoding="utf-8").splitlines()
+        self.assertTrue(lines, "Expected at least one manifest row")
+        first_row = json.loads(lines[0])
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
 

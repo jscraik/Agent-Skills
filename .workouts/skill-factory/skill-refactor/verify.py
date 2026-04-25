@@ -13,8 +13,14 @@ if not state_file.is_file():
     print("verifier_state_missing", file=sys.stderr)
     raise SystemExit(1)
 
+try:
+    raw_state = state_file.read_text(encoding="utf-8")
+except (OSError, UnicodeDecodeError):
+    print("verifier_state_unreadable", file=sys.stderr)
+    raise SystemExit(1)
+
 state = {}
-for raw_line in state_file.read_text(encoding="utf-8").splitlines():
+for raw_line in raw_state.splitlines():
     if "=" not in raw_line:
         continue
     key, value = raw_line.split("=", 1)

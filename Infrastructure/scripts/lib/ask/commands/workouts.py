@@ -82,7 +82,7 @@ def _declared_metrics(config: dict[str, Any]) -> set[str]:
     constraints = config.get("constraints") or {}
     if not isinstance(constraints, dict):
         raise ValueError("Workout constraints must be a mapping")
-    declared = constraints.get("metrics") or []
+    declared = constraints.get("metrics") or config.get("metrics") or []
     if not isinstance(declared, list) or not all(isinstance(item, str) and item.strip() for item in declared):
         raise ValueError("Workout constraints.metrics must be a list of non-empty metric names")
     return {item.strip() for item in declared}
@@ -152,6 +152,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
     if yaml_error is not None:
         loaded = {}
         current_key: Optional[str] = None
+        current_nested_key: Optional[str] = None
         for raw_line in text.splitlines():
             if not raw_line.strip() or raw_line.lstrip().startswith("#"):
                 continue
@@ -160,12 +161,25 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
             if indent == 0 and ":" in line:
                 key, value = line.split(":", 1)
                 current_key = key.strip()
+                current_nested_key = None
                 value = value.strip().strip("\"'")
-                loaded[current_key] = value if value else []
+                loaded[current_key] = value if value else {}
+            elif indent == 2 and current_key and ":" in line and isinstance(loaded.get(current_key), dict):
+                key, value = line.split(":", 1)
+                current_nested_key = key.strip()
+                value = value.strip().strip("\"'")
+                loaded[current_key][current_nested_key] = value if value else []
             elif current_key and line.startswith("- "):
+                item = line[2:].strip().strip("\"'")
+                if current_nested_key and isinstance(loaded.get(current_key), dict):
+                    nested_value = loaded[current_key].setdefault(current_nested_key, [])
+                    if not isinstance(nested_value, list):
+                        loaded[current_key][current_nested_key] = []
+                    loaded[current_key][current_nested_key].append(item)
+                    continue
                 if not isinstance(loaded.get(current_key), list):
                     loaded[current_key] = []
-                loaded[current_key].append(line[2:].strip().strip("\"'"))
+                loaded[current_key].append(item)
         if not loaded:
             raise ValueError(f"Unable to parse {path}: {yaml_error or 'empty mapping'}") from yaml_error
     if loaded is None:
