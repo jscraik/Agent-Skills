@@ -151,7 +151,10 @@ def read_task(args: argparse.Namespace) -> str:
         import sys
 
         return sys.stdin.read().strip()
-    return Path(args.task_file).read_text(encoding="utf-8").strip()
+    task_path = Path(args.task_file)
+    if not task_path.is_file():
+        raise SystemExit(f"Task file not found: {args.task_file}")
+    return task_path.read_text(encoding="utf-8").strip()
 
 
 def main() -> int:

@@ -125,7 +125,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
         workflow_doc = PLUGIN_CREATOR_WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("references/workflow.md", skill_doc)
         self.assertIn(
-            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
+            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw",
             workflow_doc,
         )
 

@@ -68,9 +68,6 @@ if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seco
 fi
 
 case "$sync_scope" in
-  project-local)
-    sync_scope="workspace"
-    ;;
   workspace|user)
     ;;
   *)
@@ -86,45 +83,6 @@ else
   repo_root="$(cd -P "$script_dir/../.." && pwd -P)"
 fi
 cd "$repo_root"
-
-projection_args=(--format shell)
-if [ -n "$projection_mode_cli" ]; then
-  projection_args+=(--mode "$projection_mode_cli")
-fi
-if projection_policy_shell="$(
-  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
-)"; then
-  # Only eval on success; validate output is non-empty and contains safe patterns.
-  if [ -z "$projection_policy_shell" ]; then
-    echo "Projection engine returned empty output." >&2
-    exit 2
-  fi
-  # Basic validation: ensure output contains only expected variable assignments.
-  if ! echo "$projection_policy_shell" | grep -qE '^[A-Z_]+='; then
-    echo "Projection engine output does not match expected format." >&2
-    exit 2
-  fi
-  eval "$projection_policy_shell"
-else
-  echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
-  exit 2
-fi
-if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
-  ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
-  if [[ "$dry_run" == "1" ]]; then
-    ask_sync_args+=(--dry-run)
-  fi
-  exec python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
-fi
-
-selection_policy_shell="$(
-  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/selection_policy.py" --format shell
-)"
-if [ -z "$selection_policy_shell" ]; then
-  echo "Failed to load selection policy shell exports." >&2
-  exit 1
-fi
-eval "$selection_policy_shell"
 
 # acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to ensure only one sync run runs at a time, waits briefly for in-progress initialisation, and reclaims stale locks (with PID or based on directory mtime) before failing.
 acquire_sync_lock() {
@@ -189,6 +147,57 @@ acquire_sync_lock() {
   exit 1
 }
 
+release_sync_lock() {
+  if [[ "$lock_owned" -eq 1 ]]; then
+    rm -rf -- "$lock_dir"
+    lock_owned=0
+  fi
+}
+
+projection_args=(--format shell)
+if [ -n "$projection_mode_cli" ]; then
+  projection_args+=(--mode "$projection_mode_cli")
+fi
+if projection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
+)"; then
+  # Only eval on success; validate output is non-empty and contains safe patterns.
+  if [ -z "$projection_policy_shell" ]; then
+    echo "Projection engine returned empty output." >&2
+    exit 2
+  fi
+  # Basic validation: ensure output contains only expected variable assignments.
+  if ! echo "$projection_policy_shell" | grep -qE '^[A-Z_]+=' || echo "$projection_policy_shell" | grep -qEv '^[A-Z_]+='; then
+    echo "Projection engine output does not match expected format." >&2
+    exit 2
+  fi
+  eval "$projection_policy_shell"
+else
+  echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
+  exit 2
+fi
+if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+  ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
+  if [[ "$dry_run" == "1" ]]; then
+    ask_sync_args+=(--dry-run)
+  fi
+  if [[ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+    acquire_sync_lock
+    trap release_sync_lock EXIT
+  fi
+  python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
+  exit $?
+fi
+
+selection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/selection_policy.py" --format shell
+)"
+if [ -z "$selection_policy_shell" ]; then
+  echo "Failed to load selection policy shell exports." >&2
+  exit 1
+fi
+eval "$selection_policy_shell"
+
 start_watchdog() {
   (
     sleep "$timeout_seconds"
@@ -203,13 +212,6 @@ stop_watchdog() {
     kill "$watchdog_pid" 2>/dev/null || true
     wait "$watchdog_pid" 2>/dev/null || true
     watchdog_pid=""
-  fi
-}
-
-release_sync_lock() {
-  if [[ "$lock_owned" -eq 1 ]]; then
-    rm -rf -- "$lock_dir"
-    lock_owned=0
   fi
 }
 

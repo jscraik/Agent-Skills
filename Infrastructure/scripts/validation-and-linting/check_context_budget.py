@@ -17,6 +17,10 @@ if str(LIFECYCLE_DIR) not in sys.path:
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
+
+# codex-primary-runtime is an active runtime projection directory, not a rooted
+# policy skill set, but manifest provenance may legitimately point through it.
+ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS = set(ROOT_SKILL_SET_NAMES) | {"codex-primary-runtime"}
 from skillset_model import file_hash  # type: ignore  # noqa: E402
 
 CONFIG_PATH = REPO_ROOT / "Infrastructure" / "GOVERNANCE" / "context-budget.yaml"
@@ -246,7 +250,7 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
     if int(routing_config["max_candidates_returned"]) > 3:
         violations.append({"code": "ROUTER_CANDIDATE_BUDGET_TOO_HIGH"})
     if projection_mode == "rooted":
-        allowed = set(ROOT_SKILL_SET_NAMES) | {"codex-primary-runtime"}
+        allowed = ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS
         latent_first_level = [name for name in runtime_entries if name not in allowed]
         if latent_first_level:
             violations.append({

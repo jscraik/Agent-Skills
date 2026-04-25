@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HOME = Path.home()
-USAGE_DIR = Path(os.getenv("INSIGHT_REPORT_USAGE_DIR", HOME / "dev" / "configs" / "codex" / "usage-data")).expanduser()
+USAGE_DIR = Path(os.getenv("INSIGHT_REPORT_USAGE_DIR", HOME / ".codex" / "usage-data")).expanduser()
 REPORT_HTML = USAGE_DIR / "report.html"
 EVIDENCE_JSON = USAGE_DIR / "insight-evidence.json"
 PROMPT_MD = USAGE_DIR / "INSIGHT_PROMPT.md"

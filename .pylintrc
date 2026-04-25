@@ -7,7 +7,6 @@ persistent=no
 disable=
     broad-exception-caught,
     duplicate-code,
-    invalid-name,
     line-too-long,
     missing-class-docstring,
     missing-function-docstring,
