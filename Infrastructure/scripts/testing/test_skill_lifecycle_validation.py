@@ -403,7 +403,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_packaged_representation_uses_symlinked_canonical_skill_alias(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
-            packaged_skill = f"""
+            packaged_skill = """
                 ---
                 name: skill-builder
                 description: "Packaged skill representation mirrored from canonical source."
@@ -596,6 +596,43 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         )
         self.assertEqual(default_names, expected_default)
         self.assertEqual(advanced_names, sorted(skill_names))
+
+    def test_skill_discovery_default_visibility_includes_rooted_runtime_roots(self) -> None:
+        """Ensure rooted first-level runtime entries stay visible in the default catalog."""
+        skill_discovery = load_skill_discovery_module()
+        root_names = ("agent-ops", "harness-engineering", "skill-factory")
+        latent_name = "hidden-latent-skill"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            for name in (*root_names, latent_name):
+                write_text(
+                    flat_root / name / "SKILL.md",
+                    f"""
+                    ---
+                    name: {name}
+                    description: "{name} test skill"
+                    ---
+
+                    # {name}
+                    """,
+                )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="advanced",
+                )
+
+        self.assertEqual(sorted(entry.name for entry in default_entries), sorted(root_names))
+        self.assertEqual(sorted(entry.name for entry in advanced_entries), sorted([*root_names, latent_name]))
 
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_missing_them(self) -> None:
         """
