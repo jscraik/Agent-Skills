@@ -22,7 +22,14 @@ TOKEN_RE = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 
 
 def tokenize(text: str) -> set[str]:
-    return {token.replace("-", " ").strip() for token in TOKEN_RE.findall(text.lower()) if token.strip()}
+    tokens: set[str] = set()
+    for token in TOKEN_RE.findall(text.lower()):
+        cleaned = token.strip("-")
+        if not cleaned:
+            continue
+        tokens.add(cleaned)
+        tokens.update(part for part in cleaned.split("-") if part)
+    return tokens
 
 
 def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> tuple[list[dict[str, Any]], str | None]:
@@ -39,8 +46,9 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
             row = json.loads(line)
         except json.JSONDecodeError as exc:
             raise ValueError(f"Invalid manifest JSON at {rel(manifest_path)}:{line_no}: {exc}") from exc
-        if isinstance(row, dict):
-            rows.append(row)
+        if not isinstance(row, dict):
+            raise ValueError(f"Invalid manifest row at {rel(manifest_path)}:{line_no}: expected JSON object")
+        rows.append(row)
     return rows, None
 
 

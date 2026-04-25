@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import subprocess
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
@@ -112,9 +113,12 @@ def rel(path: Path) -> str:
 
 
 def source_revision() -> str:
+    git_bin = shutil.which("git")
+    if not git_bin:
+        return "unknown"
     try:
         return subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
+            [git_bin, "rev-parse", "--short", "HEAD"],
             cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
@@ -238,13 +242,14 @@ def iter_candidate_skill_dirs() -> list[Path]:
             continue
         seen.add(key)
         dirs.append(skill_dir)
-    return sorted(dirs, key=lambda path: rel(path))
+    return sorted(dirs, key=rel)
 
 
 def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
     modules: list[SkillModule] = []
     unmapped: list[dict[str, str]] = []
     revision = source_revision()
+    current_policy_identity = policy_identity()
     for source_dir in iter_candidate_skill_dirs():
         skill_md = source_dir / "SKILL.md"
         frontmatter = parse_skill_frontmatter(skill_md)
@@ -273,7 +278,7 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
                 provenance={
                     "generator": GENERATOR_NAME,
                     "projection_mode": "rooted",
-                    "policy_identity": policy_identity(),
+                    "policy_identity": current_policy_identity,
                     "source_revision": revision,
                     "source_sha256": file_hash(skill_md),
                 },

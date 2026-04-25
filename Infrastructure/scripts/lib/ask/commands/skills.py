@@ -1373,6 +1373,7 @@ def _sync_rooted_projection(
         )]
 
     keep_names = {root["name"] for root in root_report.get("roots", [])}
+    keep_names.update(SYSTEM_BRIDGE_SKILL_NAMES)
     if system_skills_dir.is_dir():
         keep_names.add(".system")
     try:
@@ -1417,8 +1418,6 @@ def _sync_rooted_projection(
     if system_lane_logs:
         plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
         logs.extend(system_lane_logs)
-    if scope == "user":
-        _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
     plan["validation_status"] = "pass"
     return True, []
 
@@ -1506,6 +1505,26 @@ def sync_skills(
         )
 
     if projection_decision.projection_mode == "rooted":
+        if scope == "user":
+            _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+            plan["validation_status"] = "pass"
+            plan["mutation_counts"] = {
+                "writes": len(plan["writes"]),
+                "deletes": len(plan["deletes"]),
+                "symlinks": len(plan["symlinks"]),
+            }
+            result.data["plan"] = plan
+            result.data["logs"] = logs
+            result.data["policy_identity"] = get_policy_identity()
+            result.data["projection_mode"] = projection_decision.projection_mode
+            result.data["projection"] = build_projection_plan_metadata(
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                warnings=plan["warnings"],
+            )
+            result.status = "success"
+            return result
         ok, errors = _sync_rooted_projection(
             repo_root,
             scope=scope,

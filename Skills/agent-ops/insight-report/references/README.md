@@ -9,15 +9,15 @@
 
 ## Canonical runtime script
 
-- Report generator: `/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/insight-report/scripts/run_insight_report.py`
+- Report generator: `Skills/agent-ops/insight-report/scripts/run_insight_report.py`
 
 ## Primary outputs
 
-- Output root: `/Users/jamiecraik/dev/configs/codex/usage-data`
-- Evidence bundle: `/Users/jamiecraik/dev/configs/codex/usage-data/insight-evidence.json`
-- Codex prompt: `/Users/jamiecraik/dev/configs/codex/usage-data/INSIGHT_PROMPT.md`
-- Codex-written insights: `/Users/jamiecraik/dev/configs/codex/usage-data/insights.generated.json`
-- HTML report: `/Users/jamiecraik/dev/configs/codex/usage-data/report.html`
+- Output root: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}`
+- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insight-evidence.json`
+- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/INSIGHT_PROMPT.md`
+- Codex-written insights: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insights.generated.json`
+- HTML report: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/report.html`
 
 ## Validation checklist
 

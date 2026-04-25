@@ -15,6 +15,10 @@ Codex-only configuration for `insight-report`.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `INSIGHTS_CODEX_TIMEOUT` | `900` | Timeout in seconds for Codex JSON generation |
+| `INSIGHTS_CODEX_COMMAND` | auto-detected `codex` | Codex CLI executable/command used for JSON generation |
+| `INSIGHT_REPORT_USAGE_DIR` | `$HOME/dev/configs/codex/usage-data` | Output directory for report artifacts |
+| `CODEX_SESSIONS_DIR` | `$HOME/.codex/sessions` | Session input directory |
+| `CODEX_HISTORY_FILE` | `$HOME/.codex/history.jsonl` | History input file |
 
 ## CLI Options
 
@@ -55,7 +59,7 @@ report.html
 The runner prints a stable launch line:
 
 ```text
-REPORT_URL=file:///Users/jamiecraik/dev/configs/codex/usage-data/report.html
+REPORT_URL=file://$HOME/dev/configs/codex/usage-data/report.html
 ```
 
 ## Codex Browser Launch

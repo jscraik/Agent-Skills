@@ -15,6 +15,41 @@ tasks:
 
 ## Command Evidence
 
+```bash
+./bin/ask skills budget --json
+```
+
+Key output:
+
+```json
+{
+  "status": "pass",
+  "budget_status": "pass",
+  "projection_mode": "flat",
+  "policy_identity": "ccc42d9df4a2db2e",
+  "default_visible_count": 18,
+  "advanced_visible_count": 106,
+  "first_level_default_count": 18,
+  "root_skill_set_count": 0
+}
+```
+
+```bash
+./bin/ask skills sync --scope workspace --projection flat --dry-run --json
+```
+
+Key output:
+
+```json
+{
+  "status": "success",
+  "projection_mode": "flat",
+  "validation_status": "pass",
+  "planned_writes": 2,
+  "planned_deletes": 0,
+  "planned_symlinks": 19
+}
+```
 
 ## Runtime Surface Summary
 

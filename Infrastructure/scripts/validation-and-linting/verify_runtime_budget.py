@@ -107,7 +107,7 @@ def _iter_known_skill_dirs() -> list[Path]:
             continue
         seen.add(key)
         dirs.append(skill_dir)
-    return sorted(dirs, key=lambda path: _rel(path))
+    return sorted(dirs, key=_rel)
 
 
 def _scope_payloads() -> tuple[dict[str, int], list[dict[str, str]], list[dict[str, Any]], list[dict[str, Any]]]:

@@ -51,10 +51,10 @@ Generate a local Codex usage report where **Codex is the only narrative insight 
 
 ## Deliverables
 
-- Evidence bundle: `$HOME/dev/configs/codex/usage-data/insight-evidence.json`
-- Codex prompt: `$HOME/dev/configs/codex/usage-data/INSIGHT_PROMPT.md`
-- Codex-written insight JSON: `$HOME/dev/configs/codex/usage-data/insights.generated.json`
-- HTML report: `file://$HOME/dev/configs/codex/usage-data/report.html`
+- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insight-evidence.json`
+- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/INSIGHT_PROMPT.md`
+- Codex-written insight JSON: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insights.generated.json`
+- HTML report: `file://${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/report.html`
 - Browser launch: open the final `REPORT_URL=` in the Codex in-app browser when available.
 
 The report includes:
@@ -103,7 +103,7 @@ python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-o
 After the HTML report is completed, read the runner output line:
 
 ```text
-REPORT_URL=file:///Users/jamiecraik/dev/configs/codex/usage-data/report.html
+REPORT_URL=file://$HOME/dev/configs/codex/usage-data/report.html
 ```
 
 Then use the Browser plugin's in-app browser workflow to open that URL. Prefer the Codex browser over macOS `open` when this skill is running inside Codex.
@@ -150,7 +150,7 @@ Stop at the first failed gate. Do not continue to report rendering, browser laun
 - Use repo validation before finishing changes to the skill:
 
 ```bash
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python ./bin/ask skills audit Skills/agent-ops/insight-report --level strict --json
+./bin/ask skills audit Skills/agent-ops/insight-report --level strict --json
 ```
 
 ## Failure Modes

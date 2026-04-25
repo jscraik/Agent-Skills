@@ -63,6 +63,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         root_count = result.data["plan"]["root_skill_sets"]["root_count"]
         self.assertGreater(root_count, 0)
         self.assertLessEqual(root_count, 10)
+
     def test_sync_skills_projection_cli_wins_over_env(self) -> None:
         with (
             mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}),

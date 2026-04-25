@@ -119,11 +119,19 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
         return json.loads(text)
     except json.JSONDecodeError:
         pass
+    yaml_error: BaseException | None = None
     try:
         import yaml  # type: ignore
 
         loaded = yaml.safe_load(text) or {}
-    except Exception as exc:
+    except ImportError as exc:
+        loaded = {}
+        yaml_error = exc
+    except yaml.YAMLError as exc:
+        loaded = {}
+        yaml_error = exc
+
+    if "loaded" in locals() and loaded == {}:
         loaded = {}
         current_key: Optional[str] = None
         for raw_line in text.splitlines():
@@ -141,10 +149,34 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
                     loaded[current_key] = []
                 loaded[current_key].append(line[2:].strip().strip("\"'"))
         if not loaded:
-            raise ValueError(f"Unable to parse {path}: {exc}") from exc
+            raise ValueError(f"Unable to parse {path}: {yaml_error or 'empty mapping'}") from yaml_error
     if not isinstance(loaded, dict):
         raise ValueError(f"Expected mapping in {path}")
     return loaded
+
+
+def _resolve_inside(base_dir: Path, relative_path: str, *, label: str) -> Path:
+    if not relative_path or Path(relative_path).is_absolute():
+        raise ValueError(f"Workout {label} must be a relative path")
+    base_resolved = base_dir.resolve()
+    target = (base_dir / relative_path).resolve()
+    try:
+        target.relative_to(base_resolved)
+    except ValueError as exc:
+        raise ValueError(f"Workout {label} must stay inside {base_dir}") from exc
+    return target
+
+
+def _resolve_repo_path(repo_root: Path, relative_path: str, *, label: str) -> Path:
+    if not relative_path or Path(relative_path).is_absolute():
+        raise ValueError(f"Workout {label} must be a relative repository path")
+    repo_resolved = repo_root.resolve()
+    target = (repo_root / relative_path).resolve()
+    try:
+        target.relative_to(repo_resolved)
+    except ValueError as exc:
+        raise ValueError(f"Workout {label} must stay inside {repo_root}") from exc
+    return target
 
 
 def _workout_dir(repo_root: Path, workout_id: str) -> Path:
@@ -241,9 +273,22 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         result.errors.append(ErrorObject(code="ERR_VALIDATION", message=str(exc)))
         return result
 
-    bounded_attempts = max(1, min(int(attempts), int(config.get("max_attempts", 5))))
-    seed_path = directory / str(config.get("seed", "seed.sh"))
-    verify_path = directory / str(config.get("verify", "verify.py"))
+    try:
+        max_attempts = int(config.get("max_attempts", 5))
+        requested_attempts = int(attempts)
+        if max_attempts < 1 or requested_attempts < 1:
+            raise ValueError
+        bounded_attempts = min(requested_attempts, max_attempts)
+        seed_path = _resolve_inside(directory, str(config.get("seed", "seed.sh")), label="seed")
+        verify_path = _resolve_inside(directory, str(config.get("verify", "verify.py")), label="verify")
+    except (TypeError, ValueError) as exc:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Invalid workout configuration: {exc}",
+            fix_suggestion="Use positive integer attempts/max_attempts and relative seed/verify paths inside the workout directory.",
+        ))
+        return result
     if not seed_path.is_file() or not verify_path.is_file():
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -370,7 +415,18 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
     import shlex
     
     target_source = str(scorecard.get("target_source_path") or "")
-    target_path = repo_root / target_source if target_source else None
+    target_path = None
+    if target_source:
+        try:
+            target_path = _resolve_repo_path(repo_root, target_source, label="target_source_path")
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=str(exc),
+                fix_suggestion="Use a relative target_source_path inside the repository.",
+            ))
+            return result
     rollback_command = f"git checkout -- {shlex.quote(target_source)}" if target_source else ""
     rollback_validation = {
         "status": "pass" if target_path and target_path.is_file() and rollback_command else "fail",

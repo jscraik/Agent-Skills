@@ -21,23 +21,25 @@ import difflib
 import json
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import webbrowser
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HOME = Path.home()
-USAGE_DIR = HOME / "dev" / "configs" / "codex" / "usage-data"
+USAGE_DIR = Path(os.getenv("INSIGHT_REPORT_USAGE_DIR", HOME / "dev" / "configs" / "codex" / "usage-data")).expanduser()
 REPORT_HTML = USAGE_DIR / "report.html"
 EVIDENCE_JSON = USAGE_DIR / "insight-evidence.json"
 PROMPT_MD = USAGE_DIR / "INSIGHT_PROMPT.md"
 INSIGHTS_JSON = USAGE_DIR / "insights.generated.json"
 
 # Data sources
-SESSIONS_DIR = HOME / ".codex" / "sessions"
-HISTORY_FILE = HOME / ".codex" / "history.jsonl"
+SESSIONS_DIR = Path(os.getenv("CODEX_SESSIONS_DIR", HOME / ".codex" / "sessions")).expanduser()
+HISTORY_FILE = Path(os.getenv("CODEX_HISTORY_FILE", HOME / ".codex" / "history.jsonl")).expanduser()
 OTEL_PATHS = [
     HOME / ".agents" / "otel-collector",
     HOME / ".codex" / "otel-collector",
@@ -583,7 +585,10 @@ def write_json(path, value):
 
 
 def read_json(path):
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise TypeError(f"Expected JSON object in {path}")
+    return value
 
 
 def load_cached_session_meta(session_id):
@@ -641,7 +646,7 @@ def build_evidence_bundle(data, sessions, args):
 
     return {
         "schema_version": "codex-insight-evidence.v1",
-        "generated_at": datetime.now().isoformat(),
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "writer": "codex",
         "notes": [
             "This file is evidence only; narrative insight must be written by Codex.",
@@ -772,26 +777,41 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
 def validate_insights(insights):
     """Return a list of missing top-level sections."""
     required = [
+        "metadata",
         "at_a_glance",
         "project_areas",
         "interaction_style",
         "what_works",
         "friction_analysis",
+        "prompting_help",
         "suggestions",
         "on_the_horizon",
+        "actionable_fixes",
+        "fun_ending",
     ]
     return [key for key in required if not isinstance(insights.get(key), dict)]
+
+
+def codex_command() -> list[str]:
+    configured = os.getenv("INSIGHTS_CODEX_COMMAND", "").strip()
+    if configured:
+        return shlex.split(configured)
+    codex_bin = shutil.which("codex")
+    if not codex_bin:
+        raise RuntimeError("Codex CLI unavailable; set INSIGHTS_CODEX_COMMAND or rerun with --prepare-only.")
+    return [codex_bin]
 
 
 def run_codex_writer(prompt):
     """Ask Codex CLI to write the insight JSON and return the parsed object."""
     # Safety: fixed executable and fixed arguments; session evidence is passed on stdin only.
     result = subprocess.run(
-        ["codex", "exec", "--sandbox", "read-only"],
+        [*codex_command(), "exec", "--sandbox", "read-only"],
         input=prompt,
         capture_output=True,
         text=True,
         timeout=CODEX_TIMEOUT,
+        check=False,
     )
     if result.returncode != 0:
         detail = (result.stderr or result.stdout or "").strip()

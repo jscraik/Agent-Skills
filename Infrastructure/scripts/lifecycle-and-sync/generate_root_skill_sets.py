@@ -75,29 +75,29 @@ def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
 
 def write_roots(report: dict[str, Any], output_dir: Path, *, repo_root_path: Path | None = None) -> list[dict[str, str]]:
     # Verify output_dir is inside the expected repository subtree before any mutations.
-    root_dir = repo_root_path or repo_root()
-    expected_base = root_dir / ".agents" / "skills"
+    repository_root = repo_root_path or repo_root()
+    expected_base = repository_root / ".agents" / "skills"
     resolved_output = output_dir.resolve()
     resolved_expected = expected_base.resolve()
     try:
         resolved_output.relative_to(resolved_expected)
-    except ValueError:
+    except ValueError as exc:
         raise ValueError(
             f"Output directory {output_dir} is outside the expected repository subtree {expected_base}. "
             f"Aborting write to avoid deleting arbitrary paths."
-        )
+        ) from exc
 
     output_dir.mkdir(parents=True, exist_ok=True)
     writes: list[dict[str, str]] = []
     for root in report["roots"]:
-        root_dir = output_dir / root["name"]
-        if root_dir.exists() or root_dir.is_symlink():
-            if root_dir.is_symlink() or root_dir.is_file():
-                root_dir.unlink()
-            elif root_dir.is_dir():
-                shutil.rmtree(root_dir)
-        root_dir.mkdir(parents=True, exist_ok=True)
-        target = root_dir / "SKILL.md"
+        target_dir = output_dir / root["name"]
+        if target_dir.exists() or target_dir.is_symlink():
+            if target_dir.is_symlink() or target_dir.is_file():
+                target_dir.unlink()
+            elif target_dir.is_dir():
+                shutil.rmtree(target_dir)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        target = target_dir / "SKILL.md"
         target.write_text(root["content"], encoding="utf-8")
         writes.append({"path": rel(target), "action": "write"})
     return writes
