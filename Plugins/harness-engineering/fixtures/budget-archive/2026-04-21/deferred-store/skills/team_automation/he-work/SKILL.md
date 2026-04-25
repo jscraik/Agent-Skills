@@ -32,6 +32,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Validation requirements, constraints, and risk boundaries.
 - Optional execution posture such as `test-first`, `characterization-first`, or explicit external delegation.
 - Linked upstream artifacts that define scope, invariants, and non-goals.
+- Relevant `CONTEXT.md` when the approved artifact depends on project-specific domain terms.
 
 ## Outputs
 
@@ -45,15 +46,17 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 1. Choose the correct execution lane before coding: `plan-led`, `todo-led`, or the narrow `small-spec-direct` path.
 2. Read linked artifacts completely and restate the execution contract: active IDs, invariants, non-goals, validation gates, and explicit scope boundaries.
-3. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
-4. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
-5. Stop and update the governing artifact before continuing if execution uncovers contract drift, hidden scope, or changed boundaries.
-6. Report completed work, blockers, validation evidence, and the shipping handoff package.
+3. Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
+4. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
+5. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
+6. Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
+7. Report completed work, blockers, validation evidence, and the shipping handoff package.
 
 ## Validation
 
 - Ensure each delivered increment has evidence of verification.
 - Ensure deviations from plan are explicit and justified.
+- Ensure implementation does not introduce domain-language drift from `CONTEXT.md` or the approved artifact without an explicit update.
 - Ensure the selected execution lane matches the source artifact and risk profile.
 - Ensure contract drift is reflected in the governing artifact before off-plan implementation continues.
 - Fail fast: stop at first failed gate and do not proceed.
@@ -62,6 +65,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not silently expand scope beyond approved artifacts.
+- Do not let code become the only record of a changed domain decision; update the governing artifact or Linear issue first.
 - Do not treat medium- or high-risk raw specs as directly executable work without planning.
 - Do not mark checklist or phase state complete before validation evidence exists.
 - Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
@@ -87,6 +91,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Compatibility mirror (non-canonical): [./references](./references)
 - Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: execution uncovers domain drift, `CONTEXT.md` mismatch, or Linear issue wording conflict.
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
 

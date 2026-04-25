@@ -20,6 +20,7 @@ inputs:
 
 outputs:
   - a clarified problem frame
+  - a domain-language decision when project-specific terms, aliases, relationships, or ambiguities affect the idea
   - 2-3 approaches with trade-offs and a recommendation
   - explicit `spec_required`, `risk_level`, and `complexity` values
   - exact parallel research support via `repo-research-analyst` and `learnings-researcher` when repo context matters
@@ -33,6 +34,8 @@ non_goals:
 
 risks:
   - over-questioning; mitigate with one-question-at-a-time clarification
+  - ambiguous project language; mitigate by checking `CONTEXT-MAP.md` or `CONTEXT.md`, picking canonical terms, and asking one scenario question at a time
+  - decision sprawl; mitigate by recording hard-to-reverse domain decisions in Linear issue comments instead of ADRs
   - over-design; mitigate with YAGNI and recommendation-first output
   - weak product framing; mitigate with a product pressure test before locking in options
   - weak handoff; mitigate with explicit next-stage guidance and artifact writing

@@ -12,12 +12,14 @@ triggers:
 inputs:
   - issue source and reference (`linear`, `github`, or `manual-context`)
   - observable symptoms and expected behavior
+  - relevant `CONTEXT-MAP.md` or `CONTEXT.md` when the issue uses project-specific terms
   - environment clues and reproduction constraints
   - execution permission (`diagnosis-only` vs `diagnose-and-fix`)
 
 outputs:
   - reproduction status (`confirmed`, `not_reproduced`, `partial`, or `blocked`)
   - root-cause chain with evidence references
+  - issue-language/domain-model mismatch note when the report uses ambiguous or non-canonical terms
   - fix plan and test recommendations
   - implementation summary when fix execution is requested
   - structured summary including `schema_version: 1` on request
@@ -29,6 +31,7 @@ non_goals:
 
 risks:
   - symptom-fix bias; mitigate with causal-chain gate and prediction checks for uncertain links
+  - tracker-language mismatch; mitigate by comparing Linear issue wording with `CONTEXT.md` before treating wording as bug scope
   - unreliable reproduction; mitigate with iterative instrumentation and environment notes
   - scope drift into redesign; mitigate with explicit route to `he-brainstorm` when needed
 

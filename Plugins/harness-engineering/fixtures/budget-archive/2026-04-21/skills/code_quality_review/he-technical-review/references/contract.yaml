@@ -19,6 +19,7 @@ outputs:
   - schema_version: 1
   - review_mode
   - findings
+  - domain_drift_findings
   - open_questions
   - next_action
   - no_critical_findings
@@ -31,6 +32,7 @@ non_goals:
 
 risks:
   - noisy, low-value findings; mitigate with severity ranking and exact locations
+  - missing domain-model regressions; mitigate with `CONTEXT-MAP.md` or `CONTEXT.md` checks when changed code, specs, or plans introduce project terms
   - blind implementation of incorrect reviewer feedback; mitigate with explicit verify-before-implement protocol
   - over-broad fanout; mitigate with smallest specialist set that materially improves confidence
 

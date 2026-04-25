@@ -37,6 +37,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 ## Outputs
 
 - Clarified requirements with ranked options and tradeoffs.
+- Domain-language notes when project-specific terms, aliases, relationships, or ambiguities affect the decision.
 - A recommendation on whether the next stage should be `he-spec`, `he-plan`, or direct execution.
 - A right-sized requirements artifact when durable decisions exist.
 - Explicit `spec_required`, `risk_level`, and `complexity` values for non-trivial work.
@@ -48,9 +49,10 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 1. Assess whether brainstorming is actually needed or whether the request is already clear enough for the next stage.
 2. Clarify objective, constraints, users, non-goals, and unknowns one question at a time.
 3. Run a light repo/context scan before making claims about existing behavior or missing capabilities.
-4. Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
-5. Capture durable requirements only when the discussion produced decisions worth preserving.
-6. Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
+4. If domain language is fuzzy, read `CONTEXT-MAP.md` or `CONTEXT.md` when present, then resolve terms one focused question at a time before options harden.
+5. Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
+6. Capture durable requirements and `CONTEXT.md` updates only when the discussion produced decisions worth preserving.
+7. Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
 
 ## Interaction Rules
 
@@ -66,6 +68,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Ensure recommendation has rationale tied to constraints.
 - Ensure any concrete claim about existing code, routes, tables, configs, or dependencies was verified against the repo or clearly labeled as an assumption.
 - Ensure the brainstorm output is strong enough that the next stage does not need to invent user-facing behavior.
+- Ensure canonical domain terms, avoided aliases, and unresolved ambiguities are captured or explicitly deferred before handoff.
 - Fail fast: stop at first failed gate and do not proceed.
 
 ## Constraints
@@ -74,6 +77,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Do not proceed to implementation planning when requirement ambiguity remains blocking.
 - Do not force a brainstorm when the request is already well specified.
 - Keep implementation details such as libraries, schemas, endpoints, and file layouts out of the requirements artifact unless the brainstorm is inherently technical.
+- Use Linear issues or comments for durable decision capture; do not create ADRs.
 - Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
 ## Anti-patterns
@@ -82,6 +86,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Asking a batch of unrelated questions in one turn.
 - Returning unranked options without decision criteria.
 - Writing a requirements artifact that still leaves core behavior or scope boundaries undefined.
+- Treating multiple names for the same project concept as harmless instead of choosing a canonical term.
 
 ## Examples
 
@@ -98,6 +103,8 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects the brainstorm.
 
 ## Subagent Routing
 

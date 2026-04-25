@@ -18,6 +18,7 @@ Progressive-disclosure entrypoint for findings-first technical review in Harness
 
 - Technical review of a PR, branch diff, file set, spec, or plan.
 - Validation of incoming review feedback before implementing requested changes.
+- Review of domain-language drift when code, specs, or plans introduce project terms.
 
 Route elsewhere:
 - `he-code-review` for broader readiness recommendation and stage routing.
@@ -28,6 +29,7 @@ Route elsewhere:
 
 - Review target (`PR`, `branch`, `current diff`, `file path`, `spec`, or `plan`).
 - Access to target evidence (diff/files/docs/tests).
+- Relevant `CONTEXT.md` or `CONTEXT-MAP.md` when domain language is part of the change.
 - Optional review-feedback items to validate.
 
 ## Outputs
@@ -42,12 +44,14 @@ Route elsewhere:
 
 1. Resolve mode and target; stop if unusable.
 2. Review with repo-first evidence and deduplicate findings.
-3. For incoming feedback: read, clarify unclear items, verify, then respond technically.
-4. Return findings-first output plus open questions and next action.
+3. Check domain-language drift when the change introduces terms, aliases, relationships, or behavior boundaries.
+4. For incoming feedback: read, clarify unclear items, verify, then respond technically.
+5. Return findings-first output plus open questions and next action.
 
 ## Validation
 
 - Ensure mode matches target and findings contain severity, location, impact, minimal fix, confidence.
+- Ensure domain drift findings include the code/spec location and the relevant `CONTEXT.md` mismatch or missing update.
 - Fail fast: stop at first blocking prerequisite or failed validation gate.
 
 ## Constraints
@@ -60,8 +64,15 @@ Route elsewhere:
 ## Anti-Patterns
 
 - Blindly implementing feedback without verification.
+- Treating terminology-only drift as harmless when it changes behavior or user meaning.
 - Reviewing style while missing correctness/regression risks.
 - Partial implementation when interdependent items are unclear.
+
+## Examples
+
+- "Can you review this PR diff for correctness before I implement the CodeRabbit feedback?"
+- "Please check whether the plan is technically sound before `he-work`, especially the migration and rollback steps."
+- "The branch renames `Customer` to `Account`; can you validate whether that matches `CONTEXT.md` and the linked Linear issue?"
 
 ## References
 
@@ -70,6 +81,8 @@ Route elsewhere:
 - Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
 - Compatibility mirror (non-canonical): [./references](./references)
 - Findings template and assets: [./finding.md.tmpl](./finding.md.tmpl), [./assets/icon-small.png](./assets/icon-small.png), [./assets/icon-large.png](./assets/icon-large.png)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: a technical review target changes project terminology, `CONTEXT.md`, or Linear issue meaning.
 Read when: deeper doctrine, templates, or compatibility details are needed.
 
 ## Subagent Routing

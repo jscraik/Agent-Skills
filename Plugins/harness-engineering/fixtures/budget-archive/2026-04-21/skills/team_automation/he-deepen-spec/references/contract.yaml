@@ -20,6 +20,8 @@ outputs:
   - a deepening-mode decision such as targeted-confidence or max-coverage
   - a research execution mode decision such as direct or artifact-backed
   - a subagent route decision: automatic delegation when mapped roles exist, otherwise inline/manual fallback
+  - a domain-consistency pass for project terms, aliases, relationships, code/spec contradictions, and unresolved ambiguities
+  - an interface-design pass for new or weak caller-facing boundaries, with at least two meaningfully different shapes, usage examples, hidden-complexity notes, tradeoffs, and a selected contract
   - a strengthened spec written in place or as a -deepened variant
   - a short enhancement summary, preserved or extended SA/VAC IDs, and explicit next-step guidance
 
@@ -31,6 +33,8 @@ non_goals:
 
 risks:
   - spec inflation without real planning-readiness gain; mitigate with weak-section scoring and targeted rewrites
+  - domain contradictions between code, spec, and user language; mitigate with `CONTEXT-MAP.md` or `CONTEXT.md` checks, concrete boundary scenarios, and Linear decision comments instead of ADRs
+  - shallow or accidental interfaces; mitigate with a design-it-twice pass that compares simplicity, flexibility, implementation efficiency, depth, and ease of correct use
   - context bloat from broad fan-out; mitigate with targeted-confidence default and artifact-backed mode only when justified
   - missing reviewer roles at runtime; mitigate with manifest checks and codex-agent-creator fallback routing
   - contradiction with linked artifacts; mitigate with origin or parent rereads and explicit preservation checks

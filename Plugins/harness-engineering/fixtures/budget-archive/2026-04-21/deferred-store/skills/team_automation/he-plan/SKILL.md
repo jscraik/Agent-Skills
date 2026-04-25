@@ -37,6 +37,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Ordered implementation plan with validation intent per task.
 - Explicit blockers, assumptions, and next-stage recommendation.
+- Domain-readiness decision that confirms canonical terms are stable or routes back upstream.
 - Explicit plan route: `fresh`, `resume`, or `deepen`.
 - Plan depth sized to the work: `lightweight`, `standard`, or `deep`.
 - Include `schema_version: 1` when structured output is requested.
@@ -46,15 +47,20 @@ This entrypoint stays concise and keeps full operational context in archived ref
 1. Resolve the best planning source first: existing plan, requirements doc, spec, brainstorm output, or direct request.
 2. If a matching recent plan already exists, decide whether to resume, deepen, or start a fresh plan instead of duplicating it.
 3. Treat the most authoritative source artifact as primary input and carry forward its problem frame, scope, requirements, and open questions.
-4. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
-5. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
-6. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
+4. Check interface readiness before task decomposition. If the work depends on a new module, API, CLI, plugin, tool, service, data-access, or shared-helper boundary, confirm the source defines the caller-facing contract.
+5. If the interface contract is missing or only implied, route back to `he-deepen-spec` instead of burying interface design inside implementation tasks.
+6. Check domain readiness: if core terms, relationships, or `CONTEXT.md` updates are missing, route back to `he-brainstorm` or `he-deepen-spec`.
+7. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
+8. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
+9. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
 
 ## Validation
 
 - Ensure tasks are actionable and independently verifiable.
 - Ensure dependencies, rollback, and risk controls are explicit.
 - Ensure the plan uses the most authoritative available source and does not silently drop upstream requirements.
+- Ensure any new caller-facing interface needed by the plan is already specified; otherwise stop and route to `he-deepen-spec`.
+- Ensure tasks use canonical domain terms from `CONTEXT.md` when one exists, and link Linear decision notes when durable tradeoffs shaped the plan.
 - Ensure the chosen route (`fresh`, `resume`, or `deepen`) matches the artifact state.
 - Fail fast: stop at first failed gate and do not proceed.
 
@@ -64,12 +70,15 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not produce plan steps that depend on unstated assumptions.
 - Do not turn planning into implementation, test execution, or speculative debugging.
 - Do not silently convert true product blockers into technical assumptions.
+- Do not create ADRs; use Linear issues or comments for durable decision capture.
 - Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
 ## Anti-patterns
 
 - Producing abstract plans without executable task boundaries.
 - Omitting verification intent for critical tasks.
+- Planning implementation tasks around an interface that has not been designed.
+- Decomposing tasks around ambiguous project terms that should have been resolved upstream.
 - Replanning from scratch when a relevant current plan or requirements doc should be updated in place.
 - Routing directly to execution when the request is still asking for planning.
 
@@ -86,6 +95,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
 - Compatibility mirror (non-canonical): [./references](./references)
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects planning readiness.
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
 

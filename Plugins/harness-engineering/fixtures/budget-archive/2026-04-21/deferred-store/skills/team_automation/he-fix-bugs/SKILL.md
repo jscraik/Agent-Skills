@@ -31,6 +31,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Symptom report, repro context, and affected scope.
 - Logs, traces, tests, and relevant code paths.
 - Optional issue-tracker reference or pasted issue context.
+- Relevant `CONTEXT.md` when issue language uses project-specific terms.
 - Execution permission: `diagnosis-only` or `diagnose-and-fix`.
 
 ## Outputs
@@ -43,17 +44,19 @@ This entrypoint stays concise and keeps full operational context in archived ref
 ## Procedure
 
 1. Parse intake first: symptom report, tracker context, expected behavior, and any prior failed attempts.
-2. Reproduce and stabilize the failing behavior before proposing changes.
-3. Trace backward from the symptom to the point where valid state first became invalid.
-4. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
-5. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
-6. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+2. Compare issue language with `CONTEXT.md` when present so aliases or domain misunderstandings do not become false bug scope.
+3. Reproduce and stabilize the failing behavior before proposing changes.
+4. Trace backward from the symptom to the point where valid state first became invalid.
+5. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+6. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+7. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
 ## Validation
 
 - Confirm reproduction and post-fix verification are both recorded.
 - Confirm the causal chain from trigger to symptom is explicit before fix work proceeds.
 - Confirm fix addresses root cause instead of symptom masking.
+- Confirm Linear issue wording, expected behavior, and domain terms agree or explicitly name the mismatch.
 - Confirm blocked or partial outcomes name the exact missing condition, evidence gap, or next safest route.
 - Fail fast: stop at first failed gate and do not proceed.
 
@@ -62,6 +65,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not mark issue fixed without successful verification evidence.
 - Do not skip straight to edits when reproduction or root-cause evidence is still missing.
+- Do not patch around a domain-model contradiction; route to `he-deepen-spec` when behavior meaning is unclear.
 - Do not use shotgun debugging or bundle unrelated changes into one bug fix.
 - Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
@@ -86,6 +90,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Compatibility mirror (non-canonical): [./references](./references)
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: issue wording may conflict with `CONTEXT.md` or use a non-canonical project term.
 Read when: you need full workflow behavior, diagnosis gates, and fix sequencing.
 Read when: you need contracts, eval fixtures, anti-patterns, or tracker-intake details.
 Read when: you need icon/display metadata and invocation policy.

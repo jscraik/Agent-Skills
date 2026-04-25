@@ -59,6 +59,19 @@ cases:
       - type: regex
         value: "(?i)(score|readiness|gaps|findings)"
 
+  - id: domain-drift-technical-review
+    name: domain drift technical review
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this diff for technical risk. It changes OrderOwner to AccountOwner but does not update CONTEXT.md, and the behavior boundary may have changed."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-technical-review"
+      - type: regex
+        value: "(?i)(domain_drift|CONTEXT\\.md|findings|behavior boundary)"
+
   - id: implementation-route-away
     name: implementation request routes away
     category: negative

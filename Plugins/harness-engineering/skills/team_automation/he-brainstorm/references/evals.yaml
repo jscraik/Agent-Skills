@@ -75,6 +75,24 @@ cases:
         expected_skill: "he-brainstorm"
       - type: regex
         value: "(?i)(spec_required)"
+  - id: domain-language-brainstorm
+    name: domain language clarification
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Before we pick a direction, the team keeps saying account, customer, and workspace like they mean different things. Help me brainstorm the product behavior and settle the language without creating ADRs."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-brainstorm"
+      - type: regex
+        value: "(?i)(CONTEXT\\.md|canonical term|alias|Linear|one question)"
   - id: harness-brainstorm-wording
     name: harness brainstorm wording
     category: happy

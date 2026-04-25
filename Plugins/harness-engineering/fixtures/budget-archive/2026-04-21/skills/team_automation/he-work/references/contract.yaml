@@ -14,6 +14,7 @@ triggers:
 inputs:
   - a plan path, UI plan path, todo path, small low-risk spec path, or an obviously tiny low-risk bare work request
   - linked artifacts such as origin brainstorms, parent specs, UI specs, or related issue context
+  - relevant `CONTEXT-MAP.md` or `CONTEXT.md` when the work depends on project-specific domain terms
   - repo conventions and validation commands from AGENTS.md
   - optional execution posture signals such as test-first, characterization-first, or external-delegate
 
@@ -21,6 +22,7 @@ outputs:
   - a chosen execution lane such as plan-led, todo-led, or small-spec-direct
   - synchronized task and markdown execution progress
   - implemented code plus validation evidence
+  - domain-drift note when implementation discovers term or behavior contradictions
   - updated contract artifacts when execution reveals drift
   - a shipping handoff package with monitoring and validation notes
   - a review-tier decision that defaults to full he-code-review before handoff
@@ -35,6 +37,7 @@ non_goals:
 
 risks:
   - executing from the wrong artifact; mitigate with explicit lane selection and linked-artifact reads
+  - code becoming the only source of a changed domain decision; mitigate with stop-and-update rules for the governing artifact or Linear issue comment
   - inventing structure for an underspecified bare request; mitigate with tiny-scope-only direct execution and upstream routing for anything larger
   - plan/task drift; mitigate with synchronized markdown and task updates
   - contract drift during execution; mitigate with stop-and-update rules

@@ -7,6 +7,7 @@ purpose: >
 triggers:
   - user asks for Harness Engineering help but does not specify a stage
   - stage selection is ambiguous across ideation, spec, plan, optimization, implementation, or review
+  - user asks where domain-model, ubiquitous-language, `CONTEXT.md`, glossary, terminology, or domain drift work belongs
   - user asks where to resume the Harness Engineering workflow
 
 inputs:
@@ -33,6 +34,7 @@ non_goals:
 
 risks:
   - wrong-stage routing; mitigate with explicit rule checks and one blocking clarification when needed
+  - domain-model route confusion; mitigate by routing fuzzy language to `he-brainstorm`, first contract work to `he-spec`, existing spec contradictions to `he-deepen-spec`, execution drift to `he-work`, and review drift to the review stages
   - stage sprawl; mitigate by enforcing exactly one primary stage
   - generic handoff text; mitigate by requiring one executable next command
   - optimize-vs-implement confusion; mitigate by routing measurable experiment loops to `he-improve`

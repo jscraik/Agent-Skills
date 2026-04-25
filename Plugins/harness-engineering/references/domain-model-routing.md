@@ -1,0 +1,1 @@
+../fixtures/budget-archive/2026-04-21/references/domain-model-routing.md

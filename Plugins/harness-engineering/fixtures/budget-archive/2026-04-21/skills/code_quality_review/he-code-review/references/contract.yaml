@@ -21,6 +21,7 @@ outputs:
   - a chosen review mode such as pr-branch-review or artifact-review
   - a resolved post-review policy such as interactive, report-only, autofix, or headless when the user supplied mode modifiers
   - severity-ranked findings with blockers and unknowns
+  - domain-language drift findings when changed code or artifacts introduce unresolved terms, aliases, or relationships
   - protected-artifact cleanup filtering
   - merge or readiness recommendation
   - suggested next action such as fix, deepen, re-review, or proceed
@@ -35,6 +36,7 @@ non_goals:
 
 risks:
   - reviewing the wrong branch or target; mitigate with explicit target resolution and setup checks
+  - missing domain drift; mitigate with `CONTEXT-MAP.md` or `CONTEXT.md` checks for changed domain terms
   - conflicting override tokens; mitigate with fail-fast mode parsing before analysis
   - noisy reviewer fanout; mitigate with bounded reviewer selection and serial fallback
   - stale or unsupported external claims; mitigate with repo-first review and current-source checks only when needed

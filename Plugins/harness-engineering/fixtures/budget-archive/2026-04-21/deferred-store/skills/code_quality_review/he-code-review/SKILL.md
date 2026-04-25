@@ -45,7 +45,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 2. Fail fast on conflicting review-mode flags instead of guessing which one wins.
 3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
 4. Use the smallest reviewer set that still covers readiness risk; always include agent-operability, institutional learnings, and simplicity lenses.
-5. Review for correctness, regression risk, operability, protected-artifact handling, and release readiness.
+5. Review for correctness, regression risk, operability, protected-artifact handling, domain-language drift, and release readiness.
 6. Deduplicate and rank findings as `P0`, `P1`, `P2`, or `P3`, then emit an explicit recommendation: `go`, `go-with-conditions`, or `no-go`.
 7. Only allow in-skill mutation when the selected mode explicitly permits safe auto-fixes; otherwise stop after the report.
 
@@ -54,6 +54,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Ensure each finding includes severity, location, impact, and minimal remediation.
 - Ensure recommendation is explicit (`go`, `go-with-conditions`, `no-go`).
 - Ensure protected artifact cleanup findings are discarded during synthesis.
+- Ensure changed domain terms, aliases, and relationships either match `CONTEXT.md` or are reported as drift.
 - Ensure unresolved `P0` or `P1` findings block a `go` recommendation.
 - Fail fast: stop at first failed gate and do not proceed.
 
@@ -70,6 +71,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Approving high-risk changes without concrete validation evidence.
 - Collapsing multiple blockers into vague summary text without file references.
 - Running maximal reviewer fan-out for simple low-risk changes.
+- Missing a new project term or renamed concept that should update `CONTEXT.md`.
 - Flagging `docs/brainstorms/*`, `docs/plans/*.md`, or `docs/solutions/*.md` for cleanup/removal.
 
 ## Examples
@@ -85,6 +87,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
 - Compatibility mirror (non-canonical): [./references](./references)
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: a review target changes project terminology, `CONTEXT.md`, or Linear issue meaning.
 - Template: [./review-todo.md.tmpl](./review-todo.md.tmpl)
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
