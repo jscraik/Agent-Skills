@@ -1,20 +1,31 @@
-purpose: >
-  Deepen an existing doc/spec (preferred) or explore a topic via an in-depth interview that forces decisions and produces an approval-gated artifact.
-schema_version: 1.0
+schema_version: 1
+skill: deep-interview
+purpose: "Deepen an existing doc, ticket, note, or topic through a structured gap-filling interview."
 triggers:
-  - user requests deep interview, gap-filling, spec refinement, or doc enhancement
-inputs:
-  - file path or topic
-  - optional supporting docs/links
-outputs:
-  - updated file (if applicable) with Delta/Interview Insights
-  - otherwise a structured synthesis (decisions/assumptions/ACs/risks) + approval gate
-  - recap cards per kernel cadence
-  - synthesis with inline glossary translations when needed
+  - "Analyze, deepen, and validate an existing doc or topic through a structured interview. Use when refining PRDs, Linear tickets, notes, or draft specs before planning or execution."
 non_goals:
-  - writing implementation code during the interview
-  - modifying code files with prose by default
+  - "Route unrelated work away from this skill."
+inputs:
+  - "existing draft"
+  - "target outcome"
+  - "known decisions"
+  - "open questions"
+  - "approval posture"
+outputs:
+  - "gap list"
+  - "next interview question"
+  - "resolved assumptions"
+  - "approval-ready summary"
 risks:
-  - scope creep; mitigated by explicit in/out scope and tradeoff forcing
-  - drift/loops; mitigated by strict kernel stop conditions and question budget
-  - jargon overload; mitigated by inline translations and dual-phrase wording
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

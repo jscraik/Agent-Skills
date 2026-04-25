@@ -1,17 +1,31 @@
-schema_version: 1.0
-purpose: Review and stabilize UI visual regression workflows across Storybook, Playwright, and Argos.
+schema_version: 1
+skill: ui-visual-regression
+purpose: "Review and validate Storybook, Playwright, and Argos visual regression diffs."
 triggers:
-  - User asks to investigate visual diffs or snapshot regressions.
-  - Storybook or Argos changes need classification or stabilization.
-inputs:
-  - Diff surface, artifacts, or failing workflow stage.
-  - Repo commands or known snapshot pipeline details.
-outputs:
-  - Diff classification and minimal next-step fix plan.
-  - Evidence-backed summary of build, capture, and review state.
+  - "Review, triage, and validate visual regression diffs. Use when the user wants snapshot-change analysis, layout regression evidence, Storybook diffs, Playwright screenshots, or Argos review."
 non_goals:
-  - Creative redesign work unrelated to regression review.
-  - Blind baseline approval without intent verification.
+  - "Route unrelated work away from this skill."
+inputs:
+  - "diff artifacts"
+  - "baseline context"
+  - "changed files"
+  - "viewport matrix"
+  - "acceptance criteria"
+outputs:
+  - "diff classification"
+  - "regression findings"
+  - "approval or fix plan"
+  - "validation evidence"
 risks:
-  - Flaky capture conditions can masquerade as UI regressions.
-  - Broken build or story inventory can invalidate diff conclusions.
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

@@ -1,0 +1,19 @@
+purpose: Provide fixing-metadata guidance with actionable remediation.
+schema_version: 1.0
+triggers:
+- User requests fixing-metadata guidance
+- User asks for an audit or fix workflow in this domain
+inputs:
+- Target files or scope
+- User constraints
+- Project stack context
+outputs:
+- Prioritized findings
+- Concrete minimal fixes
+- Validation checklist
+non_goals:
+- Large unrelated refactors
+- Framework migrations without approval
+risks:
+- Over-broad changes
+- Assumption drift

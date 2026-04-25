@@ -1,19 +1,31 @@
-purpose: Provide fixing-accessibility guidance with actionable remediation.
-schema_version: 1.0
+schema_version: 1
+skill: fixing-accessibility
+purpose: "Audit and fix HTML and UI accessibility issues with focused WCAG-aligned remediation."
 triggers:
-- User requests fixing-accessibility guidance
-- User asks for an audit or fix workflow in this domain
-inputs:
-- Target files or scope
-- User constraints
-- Project stack context
-outputs:
-- Prioritized findings
-- Concrete minimal fixes
-- Validation checklist
+  - "Audit, fix, and validate accessibility issues. Use when adding or reviewing controls, forms, dialogs, keyboard behavior, focus management, ARIA labels, color contrast, or WCAG compliance."
 non_goals:
-- Large unrelated refactors
-- Framework migrations without approval
+  - "Route unrelated work away from this skill."
+inputs:
+  - "target files"
+  - "framework context"
+  - "interactive states"
+  - "known violations"
+  - "validation tooling"
+outputs:
+  - "accessibility findings"
+  - "minimal fixes"
+  - "validation evidence"
+  - "remaining gaps"
 risks:
-- Over-broad changes
-- Assumption drift
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

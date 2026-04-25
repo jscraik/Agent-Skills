@@ -1,0 +1,33 @@
+schema_version: 1
+name: better-auth-best-practices
+purpose: Provide secure Better Auth integration guidance and validation steps.
+triggers:
+  - Adding Better Auth to a TS/JS app.
+  - Configuring providers/plugins or session storage.
+  - Debugging auth/session flows.
+inputs:
+  - name: framework
+    type: string
+    description: Framework/runtime context.
+  - name: adapter
+    type: string
+    description: Database adapter in use.
+  - name: providers
+    type: array
+    items: string
+    description: Providers/plugins configured.
+outputs:
+  - name: findings
+    type: array
+    items: string
+    description: Issues or improvements identified.
+  - name: verification_steps
+    type: array
+    items: string
+    description: Steps to validate changes.
+non_goals:
+  - Implementing full auth UI or flows without approval.
+  - Exposing secrets or private configuration.
+risks:
+  - Misconfigured providers can break auth flows.
+  - Disabling CSRF/origin checks can introduce vulnerabilities.

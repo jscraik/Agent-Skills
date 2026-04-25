@@ -1,13 +1,31 @@
-purpose: >
-  Define expected behavior and outputs for this skill.
-schema_version: 1.0
+schema_version: 1
+skill: 1password
+purpose: "Plan, validate, and use 1Password CLI for secret references, injection, and authenticated command execution."
 triggers:
-  - user requests the capability described in this skill
-inputs:
-  - user request details
-outputs:
-  - primary response or artifact
+  - "Plan, diagnose, and validate 1Password CLI workflows. Use when tasks need op CLI sign-in, secret references, op run, op inject, item reads, env injection, or service-account secret access."
 non_goals:
-  - out-of-scope work
+  - "Route unrelated work away from this skill."
+inputs:
+  - "desired op workflow"
+  - "account/session state"
+  - "vault or item reference"
+  - "execution context"
+  - "redaction policy"
+outputs:
+  - "safe op command plan"
+  - "prerequisite checks"
+  - "redaction notes"
+  - "validation evidence"
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
