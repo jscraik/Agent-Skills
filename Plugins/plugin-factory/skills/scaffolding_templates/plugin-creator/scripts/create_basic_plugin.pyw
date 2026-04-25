@@ -51,12 +51,15 @@ def _discover_repo_root() -> Path:
     )
 
 
-REPO_ROOT: Path = _discover_repo_root()
-DEFAULT_PLUGIN_PARENT: Path = REPO_ROOT / "Plugins" / "third-party"
-DEFAULT_MARKETPLACE_PATH: Path = REPO_ROOT / OPENAI_MARKETPLACE_RELATIVE_PATH
+REPO_ROOT: Path | None = None
+DEFAULT_PLUGIN_PARENT: Path | None = None
+DEFAULT_MARKETPLACE_PATH: Path | None = None
 
 
 def _get_repo_root() -> Path:
+    global REPO_ROOT
+    if REPO_ROOT is None:
+        REPO_ROOT = _discover_repo_root()
     return REPO_ROOT
 
 
