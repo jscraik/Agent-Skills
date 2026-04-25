@@ -656,9 +656,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         self.assertEqual(runtime_policy.active_projection_mode(["agent-ops"]), "rooted")
         self.assertEqual(runtime_policy.active_projection_mode(["autofix"]), "flat")
+        self.assertEqual(runtime_policy.active_projection_mode(["agent-ops", "autofix"]), "mixed")
         self.assertTrue(runtime_policy.is_default_visible_skill_name("agent-ops"))
         self.assertTrue(runtime_policy.is_default_visible_skill_name("autofix"))
         self.assertFalse(runtime_policy.is_default_visible_skill_name("hidden-latent-skill"))
+        mixed_report = runtime_policy.runtime_surface_report(["agent-ops", "autofix"])
+        self.assertEqual(mixed_report.projection_mode, "mixed")
+        self.assertFalse(mixed_report.is_valid_projection)
+        self.assertEqual(mixed_report.extra_first_level_names, ["autofix"])
         self.assertEqual(
             runtime_policy.rooted_runtime_name_drift(["agent-ops", "unexpected-skill"]),
             (
@@ -666,6 +671,26 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 sorted(set(runtime_policy.ROOT_SKILL_SETS) - {"agent-ops"}),
             ),
         )
+
+    def test_skill_discovery_visibility_predicate_uses_runtime_surface_policy(self) -> None:
+        """Assert visibility policy can be tested without running full discovery."""
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            plugin_router = repo_root / "Plugins" / "cache" / "local" / "plugin" / "skills" / "plugin-router"
+            plugin_lane = repo_root / "Plugins" / "cache" / "local" / "plugin" / "skills" / "code-review"
+            project_skill = repo_root / ".agents" / "skills" / "agent-ops"
+            hidden_skill = repo_root / ".agents" / "skills" / "not-a-default"
+            for path in (plugin_router, plugin_lane, project_skill, hidden_skill):
+                path.mkdir(parents=True, exist_ok=True)
+
+            with mock.patch.object(skill_discovery, "REPO_ROOT", repo_root):
+                self.assertTrue(skill_discovery.is_skill_visible("agent-ops", project_skill, "default"))
+                self.assertFalse(skill_discovery.is_skill_visible("not-a-default", hidden_skill, "default"))
+                self.assertFalse(skill_discovery.is_skill_visible("plugin-router", plugin_router, "default"))
+                self.assertFalse(skill_discovery.is_skill_visible("code-review", plugin_lane, "default"))
+                self.assertTrue(skill_discovery.is_skill_visible("plugin-router", plugin_router, "advanced"))
+                self.assertTrue(skill_discovery.is_skill_visible("code-review", plugin_lane, "advanced"))
 
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_missing_them(self) -> None:
         """

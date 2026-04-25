@@ -75,7 +75,7 @@ class TestSkillScopePrecedence(unittest.TestCase):
             mock.patch.object(skill_discovery, "PLUGIN_VISIBLE_ROUTER_SKILL_NAMES", set(visible)),
             mock.patch.object(skill_discovery, "PLUGIN_HIDDEN_LANE_SKILL_NAMES", set()),
             mock.patch.object(verify_runtime_budget, "REPO_ROOT", self.repo_root),
-            mock.patch.object(verify_runtime_budget, "DEFAULT_VISIBLE_FLAT_SKILL_NAMES", tuple(visible)),
+            mock.patch.object(verify_runtime_budget, "DEFAULT_VISIBLE_FLAT_SKILLS", set(visible)),
         ):
             yield
 
@@ -129,6 +129,21 @@ class TestSkillScopePrecedence(unittest.TestCase):
             "UNRESOLVED_SCOPE_COLLISIONS",
             {violation["code"] for violation in report["violations"]},
         )
+
+    def test_runtime_budget_flags_mixed_rooted_and_flat_first_level_runtime(self) -> None:
+        self._write_skill(".agents/skills/agent-ops", "Root skill set.")
+        self._write_skill(".agents/skills/autofix", "Flat runtime skill.")
+
+        with self._patched_repo(default_visible={"autofix"}):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(report["projection_mode"], "mixed")
+        self.assertIn(
+            "MIXED_RUNTIME_PROJECTION",
+            {violation["code"] for violation in report["violations"]},
+        )
+        self.assertEqual(report["runtime_surface"]["extra_first_level_names"], ["autofix"])
 
 
 if __name__ == "__main__":

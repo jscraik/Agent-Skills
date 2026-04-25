@@ -15,6 +15,7 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
 
         required_fields = {
             "projection_mode",
+            "runtime_surface",
             "first_level_default_entries",
             "hidden_system_entries",
             "primary_runtime_entries",
@@ -32,8 +33,9 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
             "suppressed_entries",
         }
         self.assertTrue(required_fields.issubset(report.keys()))
-        self.assertIn(report["projection_mode"], {"flat", "rooted"})
+        self.assertIn(report["projection_mode"], {"flat", "rooted", "mixed"})
         self.assertEqual(report["budget_status"], report["status"])
+        self.assertEqual(report["runtime_surface"]["projection_mode"], report["projection_mode"])
 
     def test_scope_counts_include_known_scope_lanes(self) -> None:
         """

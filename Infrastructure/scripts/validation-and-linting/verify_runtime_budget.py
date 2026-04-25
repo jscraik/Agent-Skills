@@ -21,11 +21,11 @@ from selection_policy import (  # type: ignore  # noqa: E402
 )
 from runtime_surface_policy import (  # type: ignore  # noqa: E402
     DEFAULT_VISIBLE_FLAT_SKILLS,
+    PROJECTION_MIXED,
+    PROJECTION_ROOTED,
     ROOT_SKILL_SETS,
-    active_projection_mode,
-    expected_first_level_runtime_names,
     is_default_visible_skill_name,
-    rooted_runtime_name_drift,
+    runtime_surface_report,
 )
 from skill_discovery import (  # type: ignore  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
@@ -345,7 +345,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         dict: A report dictionary containing (at minimum) the following keys:
             - status: "pass" if no violations were found, otherwise "fail".
             - budget_status: same value as `status`.
-            - projection_mode: either "flat" or "rooted".
+            - projection_mode: "flat", "rooted", or "mixed".
             - policy_identity: identifier for the policy surface in effect.
             - default_visible_count, default_visible_max: effective default count and the provided budget.
             - advanced_visible_count, advanced_visible_warn: advanced discovery count and informational threshold.
@@ -388,8 +388,10 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     ]
 
     first_level = set(_first_level_skill_names())
-    projection_mode = active_projection_mode(first_level)
-    rooted_mode = projection_mode == "rooted"
+    surface_report = runtime_surface_report(first_level)
+    projection_mode = surface_report.projection_mode
+    rooted_mode = projection_mode == PROJECTION_ROOTED
+    mixed_mode = projection_mode == PROJECTION_MIXED
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILLS)
@@ -450,14 +452,24 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             "message": "system bridge skills must not appear as first-level .agents/skills entries",
             "skills": bridge_exposed,
         })
-    if rooted_mode:
-        unexpected_first_level, missing_roots = rooted_runtime_name_drift(first_level)
-        if missing_roots or unexpected_first_level:
+    if mixed_mode:
+        violations.append({
+            "code": "MIXED_RUNTIME_PROJECTION",
+            "message": (
+                "first-level runtime entries mix rooted root skill sets with non-root entries; "
+                "fix the projection before budget validation"
+            ),
+            "root_skill_set_names": sorted(surface_report.root_skill_set_names),
+            "extra": surface_report.extra_first_level_names,
+            "missing": surface_report.missing_first_level_names,
+        })
+    elif rooted_mode:
+        if surface_report.missing_first_level_names or surface_report.extra_first_level_names:
             violations.append({
                 "code": "ROOTED_POLICY_NAME_DRIFT",
                 "message": "rooted first-level runtime entries differ from root skill-set policy",
-                "extra": unexpected_first_level,
-                "missing": missing_roots,
+                "extra": surface_report.extra_first_level_names,
+                "missing": surface_report.missing_first_level_names,
             })
     elif extra_default or missing_default:
         violations.append({
@@ -485,6 +497,15 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "status": status,
         "budget_status": status,
         "projection_mode": projection_mode,
+        "runtime_surface": {
+            "projection_mode": projection_mode,
+            "first_level_names": sorted(surface_report.first_level_names),
+            "expected_first_level_names": sorted(surface_report.expected_first_level_names),
+            "extra_first_level_names": surface_report.extra_first_level_names,
+            "missing_first_level_names": surface_report.missing_first_level_names,
+            "root_skill_set_names": sorted(surface_report.root_skill_set_names),
+            "flat_skill_names": sorted(surface_report.flat_skill_names),
+        },
         "policy_identity": policy_identity(),
         "default_visible_count": effective_default_count,
         "default_visible_max": default_max,
@@ -515,7 +536,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "system_bridge_skills": sorted(BRIDGE_SKILLS),
         "first_level_bridge_skills": bridge_exposed,
         "policy_default_skill_names": sorted(policy_default),
-        "effective_default_policy_skill_names": sorted(expected_first_level_runtime_names(projection_mode) - BRIDGE_SKILLS),
+        "effective_default_policy_skill_names": sorted(surface_report.expected_first_level_names - BRIDGE_SKILLS),
         "default_visible_skill_names": sorted(default_names),
         "advisories": advisories,
         "violations": violations,

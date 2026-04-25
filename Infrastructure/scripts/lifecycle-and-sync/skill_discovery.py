@@ -518,39 +518,15 @@ def discover_catalog_entries(*, advanced: bool = False, source: str = "auto") ->
     return discover_skill_entries(source=source, visibility="default")
 
 
-def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
-    """
-    Discover skill entries from configured sources and apply visibility filtering.
-    
-    Parameters:
-        source (str): Which repository surface to scan. One of "auto", "flat", "repo", or "catalog".
-            - "auto": prefer flat skills if present, otherwise fall back to repository scan.
-            - "flat": scan the flat skills directory (augments with plugin lanes in advanced visibility).
-            - "repo": scan configured repository roots (includes plugins and system lane).
-            - "catalog": compute the default user-visible catalog surface (delegates to discover_catalog_entries).
-        visibility (str): Visibility mode affecting included skills. One of "default" or "advanced".
-            - "default": hide policy-marked hidden skills and certain plugin lane skills.
-            - "advanced": include plugin lane skills that are otherwise hidden.
-    
-    Returns:
-        List[SkillEntry]: Discovered, deduplicated SkillEntry objects sorted by (category, name). Each entry's
-        category is derived from the skill path relative to the repository root and the description is taken
-        from frontmatter (`metadata.short-description` or `description`) then normalized.
-    
-    Raises:
-        ValueError: If `source` is not one of "auto", "flat", "repo", or "catalog", or if `visibility` is not
-        "default" or "advanced".
-    """
+def collect_skill_dirs(source: str = "auto", visibility: str = "default") -> List[Path]:
+    """Collect candidate skill directories for a source before visibility filtering."""
     if source not in {"auto", "flat", "repo", "catalog"}:
         raise ValueError(f"Unsupported source: {source}")
     if visibility not in {"default", "advanced"}:
         raise ValueError(f"Unsupported visibility mode: {visibility}")
-
     if source == "catalog":
-        return discover_catalog_entries(advanced=visibility == "advanced")
+        return collect_skill_dirs(source="auto", visibility=visibility)
 
-    seen: set[str] = set()
-    entries: List[SkillEntry] = []
     if source == "flat":
         skill_dirs = list(_iter_flat_skill_dirs())
         if visibility == "advanced":
@@ -583,39 +559,86 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
                 *_iter_plugin_skill_dirs(),
                 *_iter_system_lane_skill_dirs(),
             ])
+    return list(skill_dirs)
 
-    for skill_dir in skill_dirs:
-        source_dir = skill_dir.resolve()
-        skill_md = source_dir / "SKILL.md"
-        if not skill_md.exists():
-            continue
 
-        fm = _parse_frontmatter(skill_md)
-        name = skill_dir.name.strip() or source_dir.name
-        if not name or name in seen:
-            continue
-        plugin_owned = _is_plugin_owned_skill_dir(source_dir)
-        if visibility != "advanced" and not is_default_visible_skill_name(name, plugin_owned=plugin_owned):
-            continue
+def is_skill_visible(name: str, source_dir: Path, visibility: str = "default") -> bool:
+    """Return whether a skill candidate belongs on the requested discovery surface."""
+    if visibility not in {"default", "advanced"}:
+        raise ValueError(f"Unsupported visibility mode: {visibility}")
+    if visibility == "advanced":
+        return True
+    return is_default_visible_skill_name(
+        name,
+        plugin_owned=_is_plugin_owned_skill_dir(source_dir.resolve()),
+    )
 
-        try:
-            rel_dir = source_dir.relative_to(REPO_ROOT)
-        except ValueError:
-            continue
 
-        category = rel_dir.parent.as_posix() or "uncategorized"
-        description = _normalize_description(
+def materialize_skill_entry(skill_dir: Path) -> SkillEntry | None:
+    """Parse a skill directory into a SkillEntry, or return None when it is not materializable."""
+    source_dir = skill_dir.resolve()
+    skill_md = source_dir / "SKILL.md"
+    if not skill_md.exists():
+        return None
+
+    try:
+        rel_dir = source_dir.relative_to(REPO_ROOT)
+    except ValueError:
+        return None
+
+    fm = _parse_frontmatter(skill_md)
+    name = skill_dir.name.strip() or source_dir.name
+    if not name:
+        return None
+
+    return SkillEntry(
+        name=name,
+        source_dir=source_dir,
+        category=rel_dir.parent.as_posix() or "uncategorized",
+        description=_normalize_description(
             fm.get("metadata.short-description") or fm.get("description", "")
-        )
-        entries.append(
-            SkillEntry(
-                name=name,
-                source_dir=source_dir,
-                category=category,
-                description=description,
-            )
-        )
-        seen.add(name)
+        ),
+    )
+
+
+def discover_skill_entries(source: str = "auto", visibility: str = "default") -> List[SkillEntry]:
+    """
+    Discover skill entries from configured sources and apply visibility filtering.
+
+    Parameters:
+        source (str): Which repository surface to scan. One of "auto", "flat", "repo", or "catalog".
+            - "auto": prefer flat skills if present, otherwise fall back to repository scan.
+            - "flat": scan the flat skills directory (augments with plugin lanes in advanced visibility).
+            - "repo": scan configured repository roots (includes plugins and system lane).
+            - "catalog": compute the default user-visible catalog surface (delegates to discover_catalog_entries).
+        visibility (str): Visibility mode affecting included skills. One of "default" or "advanced".
+            - "default": hide policy-marked hidden skills and certain plugin lane skills.
+            - "advanced": include plugin lane skills that are otherwise hidden.
+
+    Returns:
+        List[SkillEntry]: Discovered, deduplicated SkillEntry objects sorted by (category, name). Each entry's
+        category is derived from the skill path relative to the repository root and the description is taken
+        from frontmatter (`metadata.short-description` or `description`) then normalized.
+
+    Raises:
+        ValueError: If `source` is not one of "auto", "flat", "repo", or "catalog", or if `visibility` is not
+        "default" or "advanced".
+    """
+    if source == "catalog":
+        return discover_catalog_entries(advanced=visibility == "advanced")
+
+    skill_dirs = collect_skill_dirs(source=source, visibility=visibility)
+
+    seen: set[str] = set()
+    entries: List[SkillEntry] = []
+    for skill_dir in skill_dirs:
+        entry = materialize_skill_entry(skill_dir)
+        if entry is None or entry.name in seen:
+            continue
+        if not is_skill_visible(entry.name, entry.source_dir, visibility):
+            continue
+        entries.append(entry)
+        seen.add(entry.name)
 
     return sorted(entries, key=lambda entry: (entry.category, entry.name))
 
