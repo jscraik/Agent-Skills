@@ -127,7 +127,7 @@ Read these only when the task needs the extra contract detail:
 | [references/output-format.md](./references/output-format.md) | Writing or updating `UBIQUITOUS_LANGUAGE.md`, or when the user asks for a fuller template. |
 | [references/contract.yaml](./references/contract.yaml) | Checking expected triggers, outputs, risks, observability, or rollback behavior. |
 | [references/evals.yaml](./references/evals.yaml) | Updating routing examples, eval prompts, or expected skill-selection behavior. |
-| [Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json) | Inspecting machine-readable task-profile metadata used by lifecycle diagnostics. |
+| [Infrastructure/references/task-profile.json](../../../Infrastructure/references/task-profile.json) | Inspecting machine-readable task-profile metadata used by lifecycle diagnostics. |
 | [references/task-profile.json](./references/task-profile.json) | Inspecting the compatibility task profile required by family benchmark tooling; keep identical to `Infrastructure/references/task-profile.json`. |
 
 ## Re-Running
