@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ubiquitous Language"
+  short_description: "Build shared project vocabulary"
+  default_prompt: "Use $ubiquitous-language to build or update the shared vocabulary and prompt translation map for this project."

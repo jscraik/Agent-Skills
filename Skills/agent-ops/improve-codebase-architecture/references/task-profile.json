@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "Skills-agent-ops-improve-codebase-architecture",
+  "scope_skill": "Skills/agent-ops/improve-codebase-architecture",
+  "scope_profile": "Skills",
+  "rubric_version": "2026-04-08",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "architecture_signal",
+      "label": "Finds high-signal architecture opportunities with file evidence",
+      "threshold": 0.8,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "context_language",
+      "label": "Uses CONTEXT.md language without generic glossary bloat",
+      "threshold": 0.78,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "linear_decision_memory",
+      "label": "Captures durable decisions in Linear instead of ADRs",
+      "threshold": 0.82,
+      "weight": 0.33,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 75.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.74,
+    "rationale": "Architecture review benefits from agent exploration, but user selection is required before broad refactoring or durable decision capture."
+  },
+  "learning_posture": {
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
+    "default": "guided"
+  }
+}

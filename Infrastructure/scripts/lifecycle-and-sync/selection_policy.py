@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-24.v18"
+POLICY_VERSION = "2026-04-25.v19"
 
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
@@ -57,11 +57,14 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "docs-expert",
     "fix-mise",
     "gh-workflow",
+    "improve-codebase-architecture",
     "npm-release",
     "pnpm-manager",
     "project-brain",
     "simplify",
+    "skill-pr-delivery",
     "triage",
+    "ubiquitous-language",
     "verification-before-completion",
 )
 

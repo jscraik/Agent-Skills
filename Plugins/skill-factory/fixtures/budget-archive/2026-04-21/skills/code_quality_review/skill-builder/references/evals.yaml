@@ -7,7 +7,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Use skill-builder for a basic task with structured output."
+    prompt: "Can you harden this existing skill and return structured validation evidence?"
     deterministic_checks: {required_commands: ["bash"]}
     acceptance: [{type: contains, value: "schema_version"}]
   - id: happy-min
@@ -16,7 +16,7 @@ cases:
     eval_modes: [smoke]
     should_trigger: true
     prepend_skill: true
-    prompt: "Run skill-builder with minimal inputs and keep constraints."
+    prompt: "Please review this small skill update with minimal inputs and keep the safety constraints intact."
     acceptance: [{type: contains, value: "validation"}]
   - id: edge-ambiguous
     name: edge-ambiguous
@@ -24,7 +24,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Intent is ambiguous; ask for one missing detail only."
+    prompt: "I want this skill improved, but the scope is vague. Can you ask for one missing detail only?"
     acceptance: [{type: contains, value: "required"}]
   - id: edge-path
     name: edge-path
@@ -32,7 +32,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Respect repository path boundaries and report exact outcomes."
+    prompt: "Please inspect the skill package inside this repo, respect path boundaries, and report exact outcomes."
     acceptance: [{type: contains, value: "path"}]
   - id: negative-nonmatch
     name: negative
@@ -57,7 +57,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Urgent deadline, but keep validation and policy checks visible."
+    prompt: "This is urgent, but please keep validation and policy checks visible."
     acceptance: [{type: contains, value: "pass|fail|blocked"}]
   - id: edge-constraints
     name: edge-constraints
@@ -65,7 +65,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: true
-    prompt: "Conflicting asks: preserve validation evidence and call out blockers before edits."
+    prompt: "I gave conflicting instructions. Can you preserve validation evidence and call out blockers before edits?"
     deterministic_checks: {required_commands: ["bash"]}
     acceptance: [{type: contains, value: "blocked"}]
   - id: negative-other-lane

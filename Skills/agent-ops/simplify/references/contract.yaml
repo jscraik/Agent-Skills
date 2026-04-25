@@ -41,6 +41,12 @@ outputs:
   - name: skipped
     type: array
     description: Skipped findings with concise reason.
+  - name: equivalence_evidence
+    type: array
+    description: Conditional behavior-equivalence proof for non-trivial merge, delete, extract, or abstraction work.
+  - name: metrics_delta
+    type: object
+    description: Conditional before/after signals such as LOC, complexity, warnings, measured hot-path evidence, or explicit n/a values.
   - name: validation
     type: array
     description: Validation commands and outcomes (pass, fail, blocked).
@@ -54,6 +60,8 @@ success_criteria:
   - Output always includes the standard envelope keys: schema_version, summary, diff_source, execution_mode, files_reviewed, actions, skipped, validation, risk_note, next_step.
   - Cleanup remains behavior-preserving unless user explicitly requests semantic changes.
   - Reuse, quality, and efficiency lanes are each evaluated.
+  - Non-trivial refactors include equivalence evidence across relevant behavior axes.
+  - Structure, size, or measured hot-path cleanup reports metrics_delta or explicitly marks those signals n/a.
   - Validation evidence is deterministic and command-specific.
 non_goals:
   - introducing new product features unrelated to current diffs
@@ -63,6 +71,7 @@ risks:
   - behavior drift from aggressive refactors
   - false positives from static-only review
   - cleanup churn that harms readability
+  - deleting dynamically loaded code, exports, or config paths that static search misses
 rollback_procedure: >
   If simplify edits introduce regressions, revert only simplify-touched files, rerun targeted
   checks, and reapply fixes incrementally in smaller batches while preserving finding traceability.

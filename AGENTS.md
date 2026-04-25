@@ -10,6 +10,7 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 
 - [Quick Start](#quick-start)
 - [Unified Interface](#unified-interface-ask)
+- [Shared Vocabulary](#shared-vocabulary)
 - [Robot Mode](#robot-mode)
 - [Testing](#testing)
 - [Shell Scripting](#shell-scripting)
@@ -30,9 +31,9 @@ Canonical source of Codex skills, operator docs, and agent workflows.
 bash
 source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
-ask repo status          # Check repo health
-ask skills list          # List available skills
-ask skills audit <path>  # Audit before editing
+./bin/ask repo status          # Check repo health
+./bin/ask skills list          # List available skills
+./bin/ask skills audit <path>  # Audit before editing
 ```
 
 ## Unified Interface: `ask`
@@ -41,14 +42,18 @@ All agents MUST use `bin/ask` for repo operations.
 
 | Task | Command |
 |------|---------|
-| Repo health | `ask repo status` |
-| Full validation | `ask repo validate` |
-| List skills | `ask skills list --category <topic>` |
-| Audit skill | `ask skills audit <path> --level strict` |
-| Install skill | `ask skills install <url> --remediate` |
-| Find related | `ask graph related <skill> --depth 2` |
+| Repo health | `./bin/ask repo status` |
+| Full validation | `./bin/ask repo validate` |
+| List skills | `./bin/ask skills list --category <topic>` |
+| Audit skill | `./bin/ask skills audit <path> --level strict` |
+| Install skill | `./bin/ask skills install <url> --remediate` |
+| Find related | `./bin/ask graph related <skill> --depth 2` |
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward into `Infrastructure/**`; keep them as real files/directories, not symlinks. `bin/ask` is the public wrapper and forwards to `Infrastructure/bin/ask`.
+
+## Shared Vocabulary
+
+Before changing skills, sync policy, runtime projections, or agent-facing docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md). Use its Prompt Translations table for terse, ambiguous, overloaded, or project-specific user wording.
 
 ## Robot Mode
 
@@ -59,13 +64,13 @@ Behavior contract:
 - If intent is ambiguous, `ask` returns a detailed error that explains what failed, suggests likely fixes, and includes relevant valid examples.
 
 **Examples (intent recovered):**
-- `ask skill list --robot` → runs as `ask skills list`
-- `ask list skills --robot` → runs as `ask skills list`
-- `ask skills --advanced list --robot` → runs as `ask skills list --advanced`
+- `./bin/ask skill list --robot` -> runs as `./bin/ask skills list`
+- `./bin/ask list skills --robot` -> runs as `./bin/ask skills list`
+- `./bin/ask skills --advanced list --robot` -> runs as `./bin/ask skills list --advanced`
 
 **Examples (needs clarification):**
-- `ask status --robot` → error explains ambiguity (`repo status` vs `plugins status`) with concrete examples.
-- `ask skills audit --robot` → error explains missing args and shows correct `skills audit` forms.
+- `./bin/ask status --robot` -> error explains ambiguity (`repo status` vs `plugins status`) with concrete examples.
+- `./bin/ask skills audit --robot` -> error explains missing args and shows correct `skills audit` forms.
 
 ## Testing
 
@@ -103,11 +108,11 @@ For shared documentation guidance, see [Workflow and Safety Guidance](./Docs/age
 
 **Install failure recovery:**
 ```bash
-ask skills install <url> --remediate   # Scaffold missing files
-ask skills audit <path> --level strict  # Mandatory hardening
+./bin/ask skills install <url> --remediate   # Scaffold missing files
+./bin/ask skills audit <path> --level strict  # Mandatory hardening
 ```
 
-**Folding strategy:** If `ask skills fold source target` returns confidence ≥ 0.2, fold rather than duplicate.
+**Folding strategy:** If `./bin/ask skills fold source target` returns confidence >= 0.2, fold rather than duplicate.
 
 **Line budget:** Keep `SKILL.md` body ≤ 360 lines (see `Docs/agents/02-tooling-policy.md`). Move bulk content to `Infrastructure/references/<topic>.md`.
 
@@ -120,8 +125,8 @@ python3 -m http.server  # in relevant directory
 
 ## See Also
 
-- `bin/ask --help` - Full CLI reference
+- `./bin/ask --help` - Full CLI reference
 
 ---
 
-*Entry: `bin/ask` | Implementation: `Infrastructure/scripts/lib/ask/` | Specs: `Docs/cli-specs/`*
+*Entry: `./bin/ask` | Implementation: `Infrastructure/scripts/lib/ask/` | Specs: `Docs/cli-specs/`*

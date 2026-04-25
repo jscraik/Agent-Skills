@@ -13,31 +13,6 @@ metadata:
 
 # Skill Builder
 Design, improve, validate, and package high-quality Codex skills.
-## Table of Contents
-- [Working agreement](#working-agreement)
-- [When to use](#when-to-use)
-- [Iteration Round Contract](#iteration-round-contract)
-- [Evidence Ownership and Readiness](#evidence-ownership-and-readiness)
-- [Category confirmation](#category-confirmation)
-- [OpenAI skill format and progressive disclosure](#openai-skill-format-and-progressive-disclosure)
-- [Semantic tag governance](#semantic-tag-governance)
-- [Compact governance contract](#compact-governance-contract)
-- [Modes](#modes)
-- [Required inputs](#required-inputs)
-- [Agent injection](#agent-injection)
-- [Discovery interview](#discovery-interview)
-- [Deliverables](#deliverables)
-- [Gotchas](#gotchas)
-- [Response format](#response-format)
-- [Philosophy](#philosophy)
-- [Examples](#examples)
-- [Output contract](#output-contract)
-- [Skill creation process](#skill-creation-process)
-- [Execution guardrails](#execution-guardrails)
-- [Validation](#validation)
-- [Constraints and safety](#constraints-and-safety)
-- [Install-distribute mode](#install-distribute-mode)
-- [Antipatterns](#antipatterns)
 
 ## Working agreement
 - Follow the repo `AGENTS.md`; treat it as a map, not a megadoc.
@@ -45,8 +20,8 @@ Design, improve, validate, and package high-quality Codex skills.
 - Path confinement default: write inside approved repo roots and `./Infrastructure/artifacts/`; `USER` scope is an explicit `install-distribute` opt-out with confirmation + allowlist.
 - Start with the smallest viable package boundary and 2-3 focused surfaces on first pass.
 - Move deep policy into `Infrastructure/references/`; move repeatable mechanics into `Infrastructure/scripts/`.
-- Preserve valuable context by relocating it with explicit signposting, not by deleting or flattening nuanced guidance just to make `SKILL.md` shorter.
-- Do not remove important context for budget trimming; move it to `Infrastructure/references/` and add explicit `Read when` signposts in `SKILL.md`.
+- Preserve valuable context by relocating it with explicit signposting, not by deleting or flattening nuanced guidance.
+- Do not remove important context for budget trimming; move it to `Infrastructure/references/` and signpost it.
 - Treat graph-readiness as source quality, not cleanup work after the fact:
   - add a `## See Also` table with at least 2 real related skills,
   - include a topic-map signpost such as `**Topic map:** [[agent-ops]]` when the skill belongs in the graph,
@@ -91,15 +66,7 @@ Downstream handoff guardrail: `skill-installer` and `plugin-builder` are downstr
 ## Category confirmation
 For `create` and `improve` mode, confirm the primary category before drafting:
 
-1. Library & API Reference
-2. Product Verification
-3. Data Fetching & Analysis
-4. Business Process & Automation
-5. Code Scaffolding & Templates
-6. Code Quality & Review
-7. CI/CD & Deployment
-8. Runbooks
-9. Infrastructure Operations
+Category set: Library & API Reference; Product Verification; Data Fetching & Analysis; Business Process & Automation; Code Scaffolding & Templates; Code Quality & Review; CI/CD & Deployment; Runbooks; Infrastructure Operations.
 
 Start with:
 - “Based on what you described, this sounds like a [Category X] skill. Does that match your intent, or is it something different?”
@@ -141,15 +108,7 @@ Governance rules:
 - add new semantic-type values only with explicit user approval;
 - keep folder taxonomy as-is; semantic tags are a second axis, not a replacement.
 
-Lint and generation expectations:
-- in this sandboxed environment, run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh` after semantic-tag changes;
-- run full `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` only when runtime skill paths are writable;
-- run `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh` and require a clean pass (`Missing: 0`, `Invalid: 0`);
-- run `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict` and require a clean pass;
-- run `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn` and remediate warnings over time;
-- run `python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate` to ensure candidate-governance artifacts stay contract-safe;
-- treat `[WARN] Unrecognized metadata.skill-type ...` output as a governance failure to be fixed before claiming completion;
-- confirm `docs/skills-by-type.md` regenerated successfully when tags change.
+Lint and generation expectations: after semantic-tag changes, run sandbox-safe sync in constrained environments or full sync when runtime paths are writable; require clean `lint_skill_types.sh`, `lint_openai_skill_format.sh --mode strict`, progressive-disclosure lint, and `gotcha_pipeline.py validate`; treat unrecognized `metadata.skill-type` warnings as governance failures; confirm `docs/skills-by-type.md` regenerated when tags change.
 
 ## Compact governance contract
 Use this contract for `create` and `improve` mode in this repository.
@@ -300,12 +259,7 @@ Use the compact flow below, then follow the linked references for full detail.
 6. Iterate gate-by-gate: fix one failure, rerun, then continue.
 7. Run description optimization before handoff and deliver only when gates are clear or triaged.
 
-Reference files:
-- `Infrastructure/references/governance-contract.md`
-- `Infrastructure/references/quality-tools.md`
-- `Infrastructure/references/workflows-and-validation.md`
-- `Infrastructure/references/iteration-and-testing.md`
-- `Infrastructure/references/discovery-interview.md`
+Reference files: `Infrastructure/references/governance-contract.md`, `quality-tools.md`, `workflows-and-validation.md`, `iteration-and-testing.md`, and `discovery-interview.md`.
 
 ## Execution guardrails
 - Cap iterative fix loops at 3 rounds per failing gate, then publish a blocker report and wait for user direction.
