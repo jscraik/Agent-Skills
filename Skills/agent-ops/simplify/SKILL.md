@@ -23,6 +23,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - [Execution Modes](#execution-modes)
 - [Outputs](#outputs)
 - [Workflow](#workflow)
+- [Refactor Planning Gate](#refactor-planning-gate)
 - [Modern Hardening Overlay (2026)](#modern-hardening-overlay-2026)
 - [Refactor Playbook Overlay](#refactor-playbook-overlay)
 - [Validation](#validation)
@@ -77,6 +78,24 @@ schema_version: 1
 summary: "<one-paragraph result>"
 execution_mode: "inline|delegated-parallel|delegated-serial"
 diff_source: "staged|unstaged|fallback-files"
+refactor_plan:
+  mode: "n/a|inline-plan|plan-only"
+  problem: "<verified maintainability problem|n/a>"
+  behavior_to_preserve:
+    - "<api, error, ordering, data shape, side effect, or observability contract>"
+  scope_in:
+    - "<path, module, or behavior area>"
+  scope_out:
+    - "<explicit non-goal>"
+  tiny_steps:
+    - "<small working-state-preserving step>"
+  test_strategy:
+    existing_coverage: "<found|missing|blocked|n/a>"
+    validation:
+      - "<exact command, comparable test, or manual equivalence proof>"
+  evidence:
+    - "<diff, test, artifact, prior pattern, or repeated failure>"
+  tracking: "<chat-handoff|Linear issue|GitHub issue only if requested|n/a>"
 files_reviewed:
   - "<path>"
 actions:
@@ -115,7 +134,20 @@ next_step: "<recommended follow-up>"
    - If no files were mentioned, review files edited earlier in the current session.
 3. Keep the full unified diff and pass it unchanged to each review agent.
 
-### Phase 2: Launch Three Review Agents in Parallel
+### Phase 2: Plan Risky Refactors
+
+Use the planning gate before launching review lanes when the request or diff implies cross-file structure changes, risky extraction, deduplication, deletion, public interface changes, or missing-test uncertainty.
+
+1. Verify the user's stated problem against the code and diff evidence before accepting it.
+2. Name the exact `scope_in` and at least one `scope_out` boundary.
+3. Inspect nearby tests or prior validation patterns before choosing how bold the cleanup can be.
+4. Break the refactor into tiny working-state-preserving steps.
+5. If the user asked for plan-only output, stop after the plan; otherwise execute the smallest safe steps and include the plan in the handoff.
+
+Read when planning detail or durable issue handoff is needed:
+- `references/refactor-planning-gate.md`
+
+### Phase 3: Launch Three Review Agents in Parallel
 
 Run all three lanes against the same diff and behavior-preservation constraint.
 
@@ -157,14 +189,26 @@ Review for:
 6. Memory growth risks and missing cleanup.
 7. Overly broad reads/loads when narrow access is sufficient.
 
-### Phase 3: Fix Issues
+### Phase 4: Fix Issues
 
 1. Collect outputs from all three lanes.
 2. Aggregate findings, deduplicate overlap, and prioritize by correctness/safety impact.
-3. Before non-trivial merge, delete, extract, or abstraction work, record the equivalence axes that must stay preserved.
-4. Apply fixes directly in the changed files.
-5. If a finding is a false positive or low value, skip it without debate and continue.
-6. Summarize what was fixed, or explicitly state that code was already clean.
+3. Rank non-trivial suggestions by evidence, impact, confidence, and implementation cost before editing.
+4. Before non-trivial merge, delete, extract, or abstraction work, record the equivalence axes that must stay preserved.
+5. Apply fixes directly in the changed files.
+6. If a finding is a false positive or low value, skip it without debate and continue.
+7. Summarize what was fixed, or explicitly state that code was already clean.
+
+## Refactor Planning Gate
+
+Use this gate as an additive overlay, not a separate ceremony. It applies when a simplify request would otherwise become ambiguous, broad, or hard to verify.
+
+- Keep `inline-plan` as the default for risky simplify work: produce the plan, then execute only the smallest safe steps.
+- Use `plan-only` when the user explicitly asks for a refactor plan, RFC, issue text, or implementation sequence before edits.
+- Ask one blocker question only when the behavioral target, allowed scope, or tracking destination cannot be inferred from repo evidence.
+- For durable tracking, prefer the project's normal issue surface. Use Linear when the project uses Linear; do not create GitHub issues or ADRs unless explicitly requested.
+- Keep evidence anchors close to each recommendation: changed files, tests found or missing, prior patterns, validation commands, and exact skip reasons.
+- Do not omit file paths from chat handoffs; exact local paths are useful for immediate execution even if long-lived issue text may age.
 
 ## Modern Hardening Overlay (2026)
 
@@ -209,8 +253,9 @@ Use this overlay when the user asks for "refactor", "clean up structure", or "ma
    - semantically similar code needs domain evidence before extraction
    - accidental resemblance should stay separate
 5. Use a lightweight priority score when several refactors compete: `(impact x confidence) / risk`.
-6. Guard dead-code deletion with search evidence, config/docs/history checks, and explicit skip notes when ambiguity remains.
-7. Record skipped suggestions when risk is high, tests are missing, or evidence is insufficient.
+6. Use evidence-first ranking when suggestions compete: prefer findings backed by diff, tests, session artifacts, repeated failures, or prior project patterns.
+7. Guard dead-code deletion with search evidence, config/docs/history checks, and explicit skip notes when ambiguity remains.
+8. Record skipped suggestions when risk is high, tests are missing, or evidence is insufficient.
 
 Read when you need the full smell catalog, operation checklist, and examples:
 - `references/refactor-playbook.md`
@@ -275,6 +320,7 @@ Run after fixes:
 
 - `references/modern-hardening-2026.md`
 - `references/refactor-playbook.md`
+- `references/refactor-planning-gate.md`
 - `references/isomorphic-refactor-guide.md`
 
 ## Failure mode

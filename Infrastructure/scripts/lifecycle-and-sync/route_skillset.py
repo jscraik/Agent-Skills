@@ -219,7 +219,7 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
                 return {
                     "row": row,
                     "confidence": 1.0,
-                    "reason": f"matched deterministic HE rule 'direct-stage-invocation'",
+                    "reason": "matched deterministic HE rule 'direct-stage-invocation'",
                 }
 
     for rule in sorted(routing_map.get("deterministic_decision_order", []), key=lambda item: item.get("priority", 999)):
@@ -248,6 +248,223 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
     return None
 
 
+FACTORY_ROUTING_RULES = {
+    "plugin-factory": {
+        "router_id": "plugin-factory-router",
+        "internal_ids": {"plugin-router"},
+        "rules": [
+            {
+                "rule": "plugin-create",
+                "route": "plugin-creator",
+                "signals": [
+                    "create plugin",
+                    "create a new plugin",
+                    "new plugin",
+                    "scaffold plugin",
+                    "plugin scaffold",
+                    "first-pass plugin",
+                    "marketplace entry",
+                    "adopt existing skill",
+                ],
+            },
+            {
+                "rule": "plugin-harden-convert",
+                "route": "plugin-builder",
+                "signals": [
+                    "harden plugin",
+                    "validate plugin",
+                    "convert plugin",
+                    "audit plugin",
+                    "plugin package",
+                    "plugin contract",
+                    "contract validation",
+                    "release plugin",
+                    "plugin release",
+                    "fix plugin warnings",
+                ],
+            },
+            {
+                "rule": "plugin-install",
+                "route": "plugin-installer",
+                "signals": [
+                    "install plugin",
+                    "plugin install",
+                    "plugin visibility",
+                    "repair plugin visibility",
+                    "trusted source",
+                    "quarantine",
+                    "rollback",
+                    "provenance",
+                ],
+            },
+            {
+                "rule": "plugin-router-needed",
+                "route": "plugin-factory-router",
+                "signals": [
+                    "route plugin",
+                    "which plugin lane",
+                    "correct plugin lane",
+                    "plugin routing",
+                    "troubleshoot plugin",
+                    "mixed plugin request",
+                ],
+            },
+        ],
+    },
+    "skill-factory": {
+        "router_id": "skill-factory-router",
+        "internal_ids": set(),
+        "rules": [
+            {
+                "rule": "skill-create",
+                "route": "skill-creator",
+                "signals": [
+                    "create skill",
+                    "create a new skill",
+                    "new skill",
+                    "author skill",
+                    "draft skill",
+                    "reshape draft skill",
+                    "update skill package",
+                ],
+            },
+            {
+                "rule": "skillify-workflow",
+                "route": "skillify",
+                "signals": [
+                    "skillify",
+                    "operationalize workflow",
+                    "convert workflow",
+                    "capture workflow",
+                    "completed workflow",
+                    "session into skill",
+                    "workflow as a reusable skill",
+                    "reusable skill package",
+                ],
+            },
+            {
+                "rule": "skill-harden",
+                "route": "skill-builder",
+                "signals": [
+                    "harden skill",
+                    "audit skill",
+                    "validate skill",
+                    "fix skill warnings",
+                    "benchmark skill",
+                    "release readiness",
+                    "contract readiness",
+                    "skill gate",
+                    "skill-builder",
+                ],
+            },
+            {
+                "rule": "skill-install",
+                "route": "skill-installer",
+                "signals": [
+                    "install skill",
+                    "list installable skills",
+                    "curated skill",
+                    "external skill",
+                    "skill from github",
+                    "runtime visibility",
+                ],
+            },
+            {
+                "rule": "skill-refactor-analysis",
+                "route": "skill-refactor",
+                "signals": [
+                    "skill reliability",
+                    "skill failures",
+                    "coverage gaps",
+                    "merge skills",
+                    "prune skills",
+                    "retire skills",
+                    "improve merge retire",
+                    "compare skills",
+                    "skill-refactor",
+                ],
+            },
+            {
+                "rule": "skill-router-needed",
+                "route": "skill-factory-router",
+                "signals": [
+                    "route skill",
+                    "which skill lane",
+                    "correct skill lane",
+                    "skill routing",
+                    "mixed skill request",
+                ],
+            },
+        ],
+    },
+}
+
+
+def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Apply deterministic routing rules for factory skill sets."""
+    config = FACTORY_ROUTING_RULES.get(skill_set)
+    if not config:
+        return None
+
+    task_text = task.lower()
+    task_tokens = tokenize(task)
+    stage_ids = {str(row.get("id")) for row in rows}
+    router_id = str(config["router_id"])
+    router_row = row_by_id(rows, router_id)
+    internal_ids = {str(stage_id) for stage_id in config.get("internal_ids", set())}
+
+    mentioned_stages = [stage for stage in stage_ids if normalize_phrase(stage.replace("-", " ")) in normalize_phrase(task)]
+    internal_mentions = sorted(stage for stage in mentioned_stages if stage in internal_ids)
+    public_mentions = sorted(stage for stage in mentioned_stages if stage not in internal_ids)
+    if internal_mentions and router_row:
+        return {
+            "row": router_row,
+            "confidence": 0.9,
+            "reason": f"matched multi-lane {skill_set} rule 'internal-router-root-invocation'",
+        }
+    if len(public_mentions) > 1 and router_row:
+        return {
+            "row": router_row,
+            "confidence": 0.9,
+            "reason": f"matched multi-lane {skill_set} rule 'named-lane-ambiguity'",
+        }
+    if public_mentions:
+        row = row_by_id(rows, public_mentions[0])
+        if row:
+            return {
+                "row": row,
+                "confidence": 1.0,
+                "reason": f"matched deterministic {skill_set} rule 'direct-lane-invocation'",
+            }
+
+    matched_rules: list[dict[str, Any]] = []
+    for rule in config["rules"]:
+        route = str(rule["route"])
+        signals = [str(signal) for signal in rule.get("signals", []) if isinstance(signal, str)]
+        if not any(signal_matches(task_text, task_tokens, signal) for signal in signals):
+            continue
+        if route in stage_ids:
+            matched_rules.append(rule)
+
+    matched_routes = sorted({str(rule["route"]) for rule in matched_rules})
+    if len(matched_routes) > 1 and router_row:
+        return {
+            "row": router_row,
+            "confidence": 0.9,
+            "reason": f"matched multi-lane {skill_set} rule 'mixed-intent-ambiguity'",
+        }
+    if len(matched_routes) == 1:
+        row = row_by_id(rows, matched_routes[0])
+        if row:
+            return {
+                "row": row,
+                "confidence": 0.95,
+                "reason": f"matched deterministic {skill_set} rule '{matched_rules[0]['rule']}'",
+            }
+
+    return None
+
+
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
     rows, error_status = read_manifest(skill_set, skillsets_dir)
@@ -263,6 +480,8 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "operator_action": "Generate manifests before routing." if error_status == "manifest_missing" else "Choose a valid root skill set.",
         }
     override = harness_engineering_override(task, rows) if skill_set == "harness-engineering" else None
+    if override is None:
+        override = factory_override(skill_set, task, rows)
     if override:
         selected_row = override["row"]
         selected_confidence = float(override["confidence"])

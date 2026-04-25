@@ -191,6 +191,133 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "he-router")
         self.assertIn("named-stage-ambiguity", payload["candidates"][0]["reason"])
 
+    def test_plugin_factory_routes_create_to_plugin_creator(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "plugin-factory",
+            "create a new plugin from this workflow",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "plugin-creator")
+        self.assertIn("plugin-create", payload["candidates"][0]["reason"])
+
+    def test_plugin_factory_routes_harden_and_install_to_owned_lanes(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        cases = (
+            ("harden this imported plugin before release", "plugin-builder", "plugin-harden-convert"),
+            ("install this plugin from GitHub and repair plugin visibility", "plugin-installer", "plugin-install"),
+        )
+        for task, expected_id, expected_rule in cases:
+            with self.subTest(task=task):
+                payload = route_skillset.route(
+                    "plugin-factory",
+                    task,
+                    skillsets_dir=self.temp_dir / ".skillsets",
+                )
+
+                self.assertEqual(payload["status"], "selected")
+                self.assertEqual(payload["selected"]["id"], expected_id)
+                self.assertIn(expected_rule, payload["candidates"][0]["reason"])
+
+    def test_plugin_factory_routes_multi_lane_questions_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "plugin-factory",
+            "should we use plugin-creator or plugin-builder next?",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "plugin-factory-router")
+        self.assertIn("named-lane-ambiguity", payload["candidates"][0]["reason"])
+
+    def test_plugin_factory_routes_mixed_intent_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "plugin-factory",
+            "create and install plugin for this repo",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "plugin-factory-router")
+        self.assertIn("mixed-intent-ambiguity", payload["candidates"][0]["reason"])
+
+    def test_plugin_factory_blocks_internal_router_as_root_lane(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "plugin-factory",
+            "route this with plugin-router",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "plugin-factory-router")
+        self.assertIn("internal-router-root-invocation", payload["candidates"][0]["reason"])
+
+    def test_skill_factory_routes_core_lanes_deterministically(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        cases = (
+            ("create a new skill from this workflow note", "skill-creator", "skill-create"),
+            ("skillify this completed workflow into a reusable skill package", "skillify", "direct-lane-invocation"),
+            ("harden this existing skill and fix skill warnings", "skill-builder", "skill-harden"),
+            ("install this skill from github", "skill-installer", "skill-install"),
+            ("compare skills for reliability failures and coverage gaps", "skill-refactor", "skill-refactor-analysis"),
+        )
+        for task, expected_id, expected_rule in cases:
+            with self.subTest(task=task):
+                payload = route_skillset.route(
+                    "skill-factory",
+                    task,
+                    skillsets_dir=self.temp_dir / ".skillsets",
+                )
+
+                self.assertEqual(payload["status"], "selected")
+                self.assertEqual(payload["selected"]["id"], expected_id)
+                self.assertIn(expected_rule, payload["candidates"][0]["reason"])
+
+    def test_skill_factory_routes_multi_lane_questions_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "skill-factory",
+            "should we use skill-creator or skill-builder for this?",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "skill-factory-router")
+        self.assertIn("named-lane-ambiguity", payload["candidates"][0]["reason"])
+
+    def test_skill_factory_routes_mixed_intent_to_router(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "skill-factory",
+            "create and install a skill package",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "skill-factory-router")
+        self.assertIn("mixed-intent-ambiguity", payload["candidates"][0]["reason"])
+
     def test_context_budget_validates_written_manifest_provenance(self) -> None:
         skillsets_dir = self.temp_dir / ".skillsets"
         report = generate_skillset_manifests.build_manifest_report(skillsets_dir)

@@ -2,7 +2,6 @@
 name: skill-installer
 description: Install Codex skills into the canonical git source tree from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
 metadata:
-  short-description: Install curated skills from openai/skills or other repos
   skill-type: infrastructure_ops
 ---
 
@@ -107,6 +106,14 @@ For non-trivial responses, include:
 - Required operational context is never removed to shorten `SKILL.md`; relocate depth to `Infrastructure/references/` and add explicit progressive-disclosure signposts (for example: `Read when: <condition>`).
 - Do not remove important context for budget trimming; move it to `Infrastructure/references/` and add explicit `Read when` signposts in `SKILL.md`.
 
+## Encouraging Variation
+
+Vary the flow to fit the source and risk while preserving provenance checks:
+
+- Use list-only output for discovery requests, install output for explicit acquisition, and visibility checks for already-installed packages.
+- Adapt messaging for curated, experimental, private, and arbitrary GitHub sources instead of using one generic install script explanation.
+- Keep the restart reminder and destination evidence stable, but vary examples and blockers to match the actual source path.
+
 ## Anti-Patterns to Avoid
 
 - Do not install from unclear or partially specified repository paths.
@@ -148,6 +155,12 @@ Reference details:
 
 ## Examples
 
+Example requests:
+
+- "Show me curated skills I can install, then install `linear` if it is available."
+- "Install this private GitHub skill URL into the canonical repo tree and stop if the destination already exists."
+- "Check whether this skill is installed and visible to Codex after the sync."
+
 Read when:
 
 - You need trigger phrasing coverage and command-level examples: [references/install-flows.md](./references/install-flows.md).
@@ -172,3 +185,6 @@ Read when:
 
 ## Gotchas
 - Symptom: ambiguous scope. Cause: missing constraints. Do instead: ask one routing question. Check: plan and output contract are explicit.
+
+## Remember
+- The agent is capable of extraordinary install work when provenance is explicit. Make source, destination, reversibility, and restart needs clear enough that the next agent can verify them without guessing.

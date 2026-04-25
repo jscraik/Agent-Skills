@@ -7,6 +7,7 @@ Read when: you need concrete user-prompt examples or troubleshooting guidance wh
 - "I want to create a `gh-release-notes` skill in `github/gh-release-notes`, include `references/contract.yaml` and `references/evals.yaml`, and then run a strict audit."
 - "My `SKILL.md` is too long. Can you move deep implementation details into `references/` while keeping behavior and triggers unchanged?"
 - "I updated trigger phrasing in frontmatter. Please regenerate `agents/openai.yaml` and confirm metadata parity."
+- "Turn this daily Linear cleanup routine into a skill, but keep the first version small: `SKILL.md`, realistic evals, and only the references needed for safe execution."
 
 ## Gotchas
 

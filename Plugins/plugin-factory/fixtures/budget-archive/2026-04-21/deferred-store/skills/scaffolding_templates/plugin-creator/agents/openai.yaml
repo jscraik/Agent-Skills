@@ -1,6 +1,3 @@
 interface:
   display_name: "Plugin Creator"
-  short_description: "Scaffold plugins and marketplace entries"
-  default_prompt: "Use $plugin-creator to scaffold a fully populated plugin manifest, optional structure, and a marketplace.json entry."
-  icon_small: "../assets/plugin-creator.png"
-  icon_large: "../assets/plugin-creator.png"
+  short_description: "Scaffold a minimal Codex plugin package and optional marketplace entry."
