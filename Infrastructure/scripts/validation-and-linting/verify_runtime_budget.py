@@ -83,9 +83,10 @@ def _first_level_skill_entries() -> list[dict[str, str]]:
 
 
 def _system_lane_entries() -> list[dict[str, str]]:
-    entries: list[dict[str, str]] = []
-    for skill_dir in iter_system_lane_skill_dirs():
-        entries.append(_candidate_payload(name=skill_dir.name, source_dir=skill_dir))
+    entries = [
+        _candidate_payload(name=skill_dir.name, source_dir=skill_dir)
+        for skill_dir in iter_system_lane_skill_dirs()
+    ]
     return sorted(entries, key=lambda entry: (entry["name"], entry["path"]))
 
 

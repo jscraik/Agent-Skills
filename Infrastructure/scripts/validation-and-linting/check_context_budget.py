@@ -45,10 +45,16 @@ def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
         return DEFAULTS
     try:
         import yaml  # type: ignore
-
-        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except Exception:
+    except ImportError:
+        # PyYAML not installed; return defaults
         return DEFAULTS
+
+    try:
+        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (yaml.YAMLError, UnicodeDecodeError) as exc:
+        # Malformed YAML or encoding issue; re-raise to surface the error
+        raise ValueError(f"Failed to load configuration from {path}: {exc}") from exc
+
     merged = json.loads(json.dumps(DEFAULTS))
     for section, values in loaded.items():
         if isinstance(values, dict) and isinstance(merged.get(section), dict):

@@ -128,7 +128,7 @@ loads child modules selectively.
 - Keep hidden/system and primary-runtime bridge lanes governed separately from
   first-level skill visibility.
 - Preserve separately browsable local plugin skills for human/operator use, with
-  a shape that matches OpenAI curated plugins.
+  a shape that matches OpenAI-curated plugins.
 - Support global skills and project-level skills with explicit precedence,
   ownership, and budget reporting.
 - Generate or validate latent skill-set manifests without hand-editing derived
@@ -331,7 +331,7 @@ projected as a first-level runtime skill in rooted mode.
 ### `LocalPluginSkillView`
 
 A human/operator-facing view where local plugin skills remain separately
-browsable, matching the OpenAI curated plugin convention of one visible skill
+browsable, matching the OpenAI-curated plugin convention of one visible skill
 folder per plugin skill. This view is for inspection, authoring, and local
 operator navigation; it is not the same as the rooted Codex-visible runtime
 projection.
@@ -1140,7 +1140,7 @@ Recommended event fields for generated reports:
 - Runtime surface reporting distinguishes global, project, local-plugin, system,
   and primary-runtime scopes.
 - Local plugin skills remain separately browsable in local plugin packages, in
-  the same spirit as OpenAI curated plugin skill folders.
+  the same spirit as OpenAI-curated plugin skill folders.
 - Project-level skills can add or explicitly shadow global skills without
   mutating global skill sources.
 - Projection mode can be selected by CLI and environment variable.

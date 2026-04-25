@@ -74,6 +74,19 @@ def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
 
 
 def write_roots(report: dict[str, Any], output_dir: Path) -> list[dict[str, str]]:
+    # Verify output_dir is inside the expected repository subtree before any mutations.
+    root_dir = repo_root()
+    expected_base = root_dir / ".agents" / "skills"
+    resolved_output = output_dir.resolve()
+    resolved_expected = expected_base.resolve()
+    try:
+        resolved_output.relative_to(resolved_expected)
+    except ValueError:
+        raise ValueError(
+            f"Output directory {output_dir} is outside the expected repository subtree {expected_base}. "
+            f"Aborting write to avoid deleting arbitrary paths."
+        )
+
     output_dir.mkdir(parents=True, exist_ok=True)
     writes: list[dict[str, str]] = []
     for root in report["roots"]:

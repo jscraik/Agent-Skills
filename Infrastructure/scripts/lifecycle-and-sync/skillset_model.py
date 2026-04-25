@@ -6,9 +6,10 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skill_discovery import (

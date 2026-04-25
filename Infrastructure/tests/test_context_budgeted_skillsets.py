@@ -17,6 +17,12 @@ import generate_root_skill_sets  # noqa: E402
 import generate_skillset_manifests  # noqa: E402
 import route_skillset  # noqa: E402
 
+# Test constants that should stay in sync with budget configuration.
+# These values match the budget config in Infrastructure/GOVERNANCE/context-budget.yaml
+EXPECTED_ROOT_COUNT = 10
+DESCRIPTION_WORD_LIMIT = 350
+BODY_WORD_LIMIT = 250
+
 
 class TestContextBudgetedSkillsets(unittest.TestCase):
     def setUp(self) -> None:
@@ -29,10 +35,10 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
 
         self.assertEqual(report["status"], "pass")
-        self.assertEqual(report["root_count"], 10)
+        self.assertEqual(report["root_count"], EXPECTED_ROOT_COUNT)
         self.assertFalse(report["violations"])
-        self.assertLessEqual(sum(root["description_words"] for root in report["roots"]), 350)
-        self.assertTrue(all(root["body_words"] <= 250 for root in report["roots"]))
+        self.assertLessEqual(sum(root["description_words"] for root in report["roots"]), DESCRIPTION_WORD_LIMIT)
+        self.assertTrue(all(root["body_words"] <= BODY_WORD_LIMIT for root in report["roots"]))
 
     def test_manifest_generation_writes_provenance_rich_rows(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")

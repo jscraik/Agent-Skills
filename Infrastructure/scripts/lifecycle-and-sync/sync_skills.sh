@@ -91,16 +91,24 @@ projection_args=(--format shell)
 if [ -n "$projection_mode_cli" ]; then
   projection_args+=(--mode "$projection_mode_cli")
 fi
-if ! projection_policy_shell="$(
+if projection_policy_shell="$(
   python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
 )"; then
-  if [ -n "$projection_policy_shell" ]; then
-    eval "$projection_policy_shell"
+  # Only eval on success; validate output is non-empty and contains safe patterns.
+  if [ -z "$projection_policy_shell" ]; then
+    echo "Projection engine returned empty output." >&2
+    exit 2
   fi
+  # Basic validation: ensure output contains only expected variable assignments.
+  if ! echo "$projection_policy_shell" | grep -qE '^[A-Z_]+='; then
+    echo "Projection engine output does not match expected format." >&2
+    exit 2
+  fi
+  eval "$projection_policy_shell"
+else
   echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
   exit 2
 fi
-eval "$projection_policy_shell"
 if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
   ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
   if [[ "$dry_run" == "1" ]]; then
