@@ -70,7 +70,7 @@ def normalize_projection_mode(
     Normalize the requested projection mode.
 
     Precedence is explicit CLI/request value, then SYNC_SKILLS_PROJECTION_MODE,
-    then the flat default.
+    then the rooted default.
     """
     env_values = env if env is not None else os.environ
     raw_requested = (requested_mode or "").strip()

@@ -1437,7 +1437,7 @@ def sync_skills(
         scope (str): Either "workspace" to sync repository-derived views or "user" to populate user-local locations.
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
-            SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
+            SYNC_SKILLS_PROJECTION_MODE is honored before the rooted default.
     
     Returns:
         CallResult: Success result contains a `data` object with:

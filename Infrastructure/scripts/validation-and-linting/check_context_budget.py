@@ -16,7 +16,7 @@ if str(LIFECYCLE_DIR) not in sys.path:
 
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
-from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
+from selection_policy import DEFAULT_PROJECTION_MODE, ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
 
 # codex-primary-runtime is an active runtime projection directory, not a rooted
 # policy skill set, but manifest provenance may legitimately point through it.
@@ -216,7 +216,7 @@ def validate_written_manifest_provenance(
     return violations
 
 
-def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
+def validate_context_budget(*, projection_mode: str = DEFAULT_PROJECTION_MODE) -> dict[str, Any]:
     config = load_config()
     root_report = build_roots()
     manifest_report = build_manifest_report()
@@ -284,7 +284,7 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--projection", choices=("flat", "rooted"), default="flat")
+    parser.add_argument("--projection", choices=("flat", "rooted"), default=DEFAULT_PROJECTION_MODE)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
     report = validate_context_budget(projection_mode=args.projection)

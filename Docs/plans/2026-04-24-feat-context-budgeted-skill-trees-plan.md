@@ -8,7 +8,7 @@ origin: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 spec: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 plan_route: fresh
 plan_depth: deep
-current_phase: C3-rooted-soak
+current_phase: C4-default-flip
 ---
 
 # feat: Context-Budgeted Skill Trees Implementation Plan
@@ -36,8 +36,8 @@ current_phase: C3-rooted-soak
 
 Implement the context-budgeted skill-tree runtime model from the governing spec.
 The work is a refactor of runtime projection and discovery surfaces, not a
-catalog rewrite. The default mode remains `flat` until rooted projection has
-reporting, parity, validation, router, workout, and rollback evidence.
+catalog rewrite. The default mode is now `rooted` after rooted projection
+proved reporting, parity, validation, router, workout, and rollback evidence.
 `rooted` is the canonical projection-mode name; `skill-tree` is a compatibility
 alias for users and docs that started with that terminology.
 
@@ -616,7 +616,7 @@ python3 bin/ask skills sync --scope user --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat --dry-run
 python3 bin/ask skills sync --scope user --projection flat --dry-run
-python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 
 Exit criteria:
@@ -918,7 +918,7 @@ python3 bin/ask skills sync --scope user --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat --dry-run
 python3 bin/ask skills sync --scope user --projection flat --dry-run
-python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 
 C3 requires five consecutive executions of this exact command set on the same
@@ -926,7 +926,8 @@ branch. The full validation gate intentionally runs before flat rollback because
 it verifies the rooted first-level workspace surface. The final flat dry-runs and
 flat context-budget check prove rollback remains available without mixing the two
 runtime surfaces in one validator invocation. C4 reuses the same set immediately
-before flipping the default.
+before flipping the default, then no-flag context-budget validation follows the
+new rooted default.
 
 ## Rollback Strategy
 
@@ -974,6 +975,7 @@ Rollback triggers:
 | Manifest overreach                                   | System/primary-runtime lanes pulled into ordinary manifests | Exclude bridge lanes and report separately                                             |
 | Default flip too early                               | Normal workflows regress                                    | Keep flat default until Phase C gates pass                                             |
 | Runtime-separation conflict                          | This plan conflicts with canonical path migration           | Treat runtime-separation plan as dependency; do not move roots in this plan            |
+| `skill-archive` naming reads as deprecated           | Agents may skip preserved full-context references           | Do not rename during C4; plan a dedicated `full-context`/`preserved-context` migration |
 
 ## Open Decisions Before Execution
 
@@ -990,6 +992,12 @@ Resolve before the relevant Phase B slice starts:
 Resolve before the relevant B3 router slice starts:
 
 - Low-confidence router threshold.
+
+Resolve after C4 in a dedicated compatibility slice:
+
+- Whether to rename `skill-archive/**` paths to clearer `full-context/**` or
+  `preserved-context/**` paths. Do not casually rename during default flip work:
+  these paths are referenced by symlinks, fixtures, and validators.
 
 Recommended defaults:
 
@@ -1043,15 +1051,15 @@ Phase C:
 - [ ] `ask workouts` empty/missing/error paths return structured failures.
 - [ ] Scorecards include pass rate, flake rate, wall-clock, and context estimate.
 - [ ] Amendment dry-run rejects context-budget regression.
-- [ ] Three rooted soak records exist.
-- [ ] Soak records include required metadata fields and report hash.
-- [ ] Three diagnostic workouts pass with scorecards.
-- [ ] Five consecutive executions of the same validation command set pass on the
+- [x] Three rooted soak records exist.
+- [x] Soak records include required metadata fields and report hash.
+- [x] Three diagnostic workouts pass with scorecards.
+- [x] Five consecutive executions of the same validation command set pass on the
       same branch.
 - [ ] No P0/P1 routing regressions remain open.
-- [ ] Default flips to rooted.
-- [ ] Both-scope forward rooted and rollback flat mutation paths pass.
-- [ ] Flat rollback remains documented and tested.
+- [x] Default flips to rooted.
+- [x] Both-scope forward rooted and rollback flat mutation paths pass.
+- [x] Flat rollback remains documented and tested.
 
 ## Next Stage Handoff
 

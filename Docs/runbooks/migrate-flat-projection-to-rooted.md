@@ -3,7 +3,7 @@
 ## Preconditions
 
 - `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
-- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json` passes.
+- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json` passes.
 - At least one workout has a passing scorecard.
 - `.skillsets/**` is generated, provenance-rich, and validated.
 
@@ -43,7 +43,7 @@ python3 bin/ask skills sync --scope user --projection rooted --json
 
 ```bash
 python3 bin/ask skills sync --scope workspace --projection flat --json
-python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 
 Run the full validation gate before rollback while the workspace projection is

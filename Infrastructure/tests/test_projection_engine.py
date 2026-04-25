@@ -14,10 +14,10 @@ from projection_engine import (  # noqa: E402
 
 
 class TestProjectionEngine(unittest.TestCase):
-    def test_default_projection_mode_is_flat(self) -> None:
+    def test_default_projection_mode_is_rooted(self) -> None:
         decision = normalize_projection_mode(env={})
 
-        self.assertEqual(decision.projection_mode, "flat")
+        self.assertEqual(decision.projection_mode, "rooted")
         self.assertEqual(decision.mode_source, "default")
         self.assertTrue(decision.mutation_available)
 

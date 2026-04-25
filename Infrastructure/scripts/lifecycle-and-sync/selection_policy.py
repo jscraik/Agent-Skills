@@ -105,7 +105,7 @@ SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
 # Runtime projection modes. These are intentionally outside the selection
 # policy identity: mode support is command behavior, not a change to which
 # flat skills are selected by default.
-DEFAULT_PROJECTION_MODE = "flat"
+DEFAULT_PROJECTION_MODE = "rooted"
 SUPPORTED_PROJECTION_MODES: tuple[str, ...] = (
     "flat",
     "rooted",
