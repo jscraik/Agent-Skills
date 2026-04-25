@@ -2,13 +2,13 @@
 schema_version: 1
 title: "feat: Context-Budgeted Skill Trees Implementation Plan"
 type: feat
-status: implementation-in-review
+status: completed
 date: 2026-04-24
 origin: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 spec: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 plan_route: fresh
 plan_depth: deep
-current_phase: C4-default-flip
+current_phase: complete
 ---
 
 # feat: Context-Budgeted Skill Trees Implementation Plan
@@ -30,6 +30,7 @@ current_phase: C4-default-flip
 - [Risks and Controls](#risks-and-controls)
 - [Open Decisions Before Execution](#open-decisions-before-execution)
 - [Acceptance Checklist](#acceptance-checklist)
+- [Closeout Ledger](#closeout-ledger)
 - [Next Stage Handoff](#next-stage-handoff)
 
 ## Overview
@@ -1015,47 +1016,47 @@ Recommended defaults:
 
 Phase A:
 
-- [ ] Runtime surface report includes lanes and scopes.
-- [ ] Projection mode parser supports `flat`, `rooted`, and `skill-tree` alias.
-- [ ] `SYNC_SKILLS_PROJECTION_MODE` is tested, and explicit `--projection`
+- [x] Runtime surface report includes lanes and scopes.
+- [x] Projection mode parser supports `flat`, `rooted`, and `skill-tree` alias.
+- [x] `SYNC_SKILLS_PROJECTION_MODE` is tested, and explicit `--projection`
       overrides the environment default.
-- [ ] `--projection` reaches the sync/projection engine and cannot be silently
+- [x] `--projection` reaches the sync/projection engine and cannot be silently
       ignored.
-- [ ] Shell/Python sync scopes have a documented canonical mapping.
-- [ ] Legacy shell scope mapping or retirement is covered by parity tests.
-- [ ] Sync dry-run/mutation JSON contract has schema assertions.
-- [ ] `hybrid` is rejected or marked deferred.
-- [ ] Flat parity passes.
-- [ ] Default remains `flat`.
+- [x] Shell/Python sync scopes have a documented canonical mapping.
+- [x] Legacy shell scope mapping or retirement is covered by parity tests.
+- [x] Sync dry-run/mutation JSON contract has schema assertions.
+- [x] `hybrid` is rejected or marked deferred.
+- [x] Flat parity passes.
+- [x] Default remains `flat`.
 
 Phase B:
 
-- [ ] Root generation dry-run passes budgets.
-- [ ] Manifest generation maps every in-scope module or reports it as unmapped.
-- [ ] Manifest provenance and `.skillsets/**` ownership validation pass.
-- [ ] Router returns at most three candidates and no full body/manifest content.
-- [ ] Router supports stdin/file task input.
-- [ ] Selected canonical `source_path` loads without latent first-level
+- [x] Root generation dry-run passes budgets.
+- [x] Manifest generation maps every in-scope module or reports it as unmapped.
+- [x] Manifest provenance and `.skillsets/**` ownership validation pass.
+- [x] Router returns at most three candidates and no full body/manifest content.
+- [x] Router supports stdin/file task input.
+- [x] Selected canonical `source_path` loads without latent first-level
       projection.
-- [ ] Module-loading budget fixtures enforce max loaded modules and unrelated
+- [x] Module-loading budget fixtures enforce max loaded modules and unrelated
       skill-set bans.
-- [ ] Router and telemetry redaction fixtures pass.
-- [ ] Rooted dry-run passes.
-- [ ] Rooted mutation works in controlled scope.
-- [ ] Local plugin skills remain separately browsable.
-- [ ] Project-level skills can overlay global skills with explicit reporting.
-- [ ] Scope precedence is `project > local-plugin > global`, with bridge lanes
+- [x] Router and telemetry redaction fixtures pass.
+- [x] Rooted dry-run passes.
+- [x] Rooted mutation works in controlled scope.
+- [x] Local plugin skills remain separately browsable.
+- [x] Project-level skills can overlay global skills with explicit reporting.
+- [x] Scope precedence is `project > local-plugin > global`, with bridge lanes
       separate.
-- [ ] Context-budget validator catches seeded failures.
+- [x] Context-budget validator catches seeded failures.
 
 Phase C:
 
-- [ ] Workout MVP runs.
-- [ ] `ask workouts` command surface parses and dispatches before workout MVP
+- [x] Workout MVP runs.
+- [x] `ask workouts` command surface parses and dispatches before workout MVP
       validation depends on it.
-- [ ] `ask workouts` empty/missing/error paths return structured failures.
-- [ ] Scorecards include pass rate, flake rate, wall-clock, and context estimate.
-- [ ] Amendment dry-run rejects context-budget regression.
+- [x] `ask workouts` empty/missing/error paths return structured failures.
+- [x] Scorecards include pass rate, flake rate, wall-clock, and context estimate.
+- [x] Amendment dry-run rejects context-budget regression.
 - [x] Three rooted soak records exist.
 - [x] Soak records include required metadata fields and report hash.
 - [x] Three diagnostic workouts pass with scorecards.
@@ -1066,9 +1067,24 @@ Phase C:
 - [x] Both-scope forward rooted and rollback flat mutation paths pass.
 - [x] Flat rollback remains documented and tested.
 
+## Closeout Ledger
+
+| STEP_ID          | status    | owner | evidence                                                                                                                                                                                                                                                                                          |
+| ---------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase A          | completed | Codex | Projection-mode parsing, scope reporting, explicit projection precedence, JSON contract coverage, flat parity, and `hybrid` deferral landed before rooted mutation work.                                                                                                                          |
+| Phase B          | completed | Codex | Rooted manifests, `.skillsets/**` provenance, router budget/redaction behavior, project/local-plugin/global precedence, and rooted dry-run/mutation gates passed before the default flip.                                                                                                         |
+| Phase C1-C2      | completed | Codex | `ask workouts` command surface, structured failure paths, scorecards, and amendment-record dry-run behavior were validated by the workout CLI ladder.                                                                                                                                             |
+| Phase C3         | completed | Codex | Rooted soak evidence was recorded; PR #136 checks passed, CodeRabbit review completed, and GitHub review threads reported `unresolved_count: 0`, closing the P0/P1 routing-regression gate.                                                                                                       |
+| Phase C4         | completed | Codex | Commit `fd049c01c` changed the default projection to rooted; `67539cfc8` recorded C3 review-gate closure; `d1f5eeecb` completed the post-C4 `skill-archive` to `preserved-context` compatibility slice; `7bf281f6a` completed deterministic factory routing and refactor-planning follow-up work. |
+| Final validation | completed | Codex | `PREK_HOME=/tmp/agent-skills-prek bash Infrastructure/scripts/validate_all.sh --ephemeral` passed with `required_failures: 0` and `warn_only_issues: 0` on 2026-04-25 after post-C4 follow-up commits.                                                                                            |
+
 ## Next Stage Handoff
 
-Recommended next Harness Engineering stage:
+This plan is complete. The next substantial engineering lane is the adjacent
+runtime-separation and factory-consolidation plan:
+`Docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md`.
+
+Recommended next Harness Engineering stage for new implementation work:
 
 ```text
 he-technical-review
