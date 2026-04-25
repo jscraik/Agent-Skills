@@ -114,6 +114,8 @@ class TestAskSkillsSyncSecurity(TestCase):
             any("imagegen" in delete for delete in result.data["plan"]["deletes"]),
             "rooted projection should prune first-level system bridge aliases",
         )
+        self.assertIn("imagegen", result.data["plan"]["system_bridge_skill_names"])
+        self.assertNotIn("imagegen", result.data["plan"]["preserved_bridge_lane_entries"])
 
     def test_sync_skills_projection_does_not_mask_invalid_scope(self) -> None:
         result = skills_commands.sync_skills(

@@ -1483,7 +1483,8 @@ def sync_skills(
         "writes": [],
         "deletes": [],
         "symlinks": [],
-        "preserved_bridge_lane_entries": sorted(SYSTEM_BRIDGE_SKILL_NAMES),
+        "system_bridge_skill_names": sorted(SYSTEM_BRIDGE_SKILL_NAMES),
+        "preserved_bridge_lane_entries": [],
         "preserved_system_lane_entries": [],
         "validation_status": "not_run",
         "ambiguous_entries": [],
@@ -1572,6 +1573,7 @@ def sync_skills(
 
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
+        plan["preserved_bridge_lane_entries"] = sorted(SYSTEM_BRIDGE_SKILL_NAMES)
         keep_names = {entry.name for entry in entries if entry.source_dir.is_relative_to(repo_root)}
         if system_skills_dir.is_dir():
             keep_names.add(".system")
