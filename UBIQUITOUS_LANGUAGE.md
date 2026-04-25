@@ -11,17 +11,17 @@
 | Term | Definition | Aliases to avoid | Confidence |
 | --- | --- | --- | --- |
 | **Agent Skills Kit** | The governed repository and CLI system for authoring, validating, discovering, and syncing Codex skills. | skills repo, agent-skills stuff | High |
-| **`ask` CLI** | The public command interface at `bin/ask` that agents must use for repository operations. | helper script, ask wrapper | High |
+| **`ask` CLI** | The public command interface at `./bin/ask` that agents must use for repository operations. | helper script, ask wrapper | High |
 | **Canonical Skill Source** | The editable source of a skill under `Skills/<topic-cluster>/<skill-name>/` or a plugin-owned skill path. | runtime skill, synced copy | High |
 | **Runtime Projection** | The generated skill view under `.agents/skills/**` that Codex and agent runtimes consume. | canonical skill, source skill | High |
 | **User Runtime Links** | The home-directory links `~/.agents/skills` and `~/.codex/skills` that point to the active runtime projection. | user sync, installed skills | High |
-| **Workspace Sync** | The operation `ask skills sync --scope workspace` that refreshes repo-local runtime projections and the generated root `SKILL.md` index. | sync the repo, update links | High |
-| **User Sync** | The operation `ask skills sync --scope user` that points user-level runtime skill directories at the current workspace projection. | install skills, make Codex see it | High |
+| **Workspace Sync** | The operation `./bin/ask skills sync --scope workspace` that refreshes repo-local runtime projections and the generated root `SKILL.md` index. | sync the repo, update links | High |
+| **User Sync** | The operation `./bin/ask skills sync --scope user` that points user-level runtime skill directories at the current workspace projection. | install skills, make Codex see it | High |
 | **Visible Runtime Surface** | The bounded default skill list exposed by `DEFAULT_VISIBLE_FLAT_SKILL_NAMES` to control always-loaded skill context. | skill list, visible skills | High |
 | **Advanced Repo Discovery** | Repository scan mode that can find skills not promoted into the default visible runtime surface. | hidden skill, missing skill | Medium |
 | **Feature Worktree** | A separate checkout and branch used for isolated feature work without disturbing dirty changes in the primary checkout. | worktree, clean checkout | High |
 | **Projection Refresh Lane** | A bounded change path where generated projections are refreshed from canonical sources instead of hand-edited. | sync pass, generated update | Medium |
-| **Strict Skill Audit** | The `ask skills audit <path> --level strict` check that validates skill structure, runtime links, security gates, family benchmarks, and readiness. | check the skill, make sure it works | High |
+| **Strict Skill Audit** | The `./bin/ask skills audit <path> --level strict` check that validates skill structure, runtime links, security gates, family benchmarks, and readiness. | check the skill, make sure it works | High |
 | **Mise Trust Blocker** | A local runtime state where `mise` refuses to load the worktree config until the specific `.mise.toml` is trusted. | mise broken, toolchain issue | High |
 | **Policy Identity** | The deterministic hash representing the active selection and discovery policy. | policy hash, sync hash | Medium |
 
@@ -30,11 +30,11 @@
 | User phrase | Canonical intent | Better Codex wording |
 | --- | --- | --- |
 | "sync my skills" | Refresh the active workspace projection and point user runtime links at it. | "Run `./bin/ask skills sync --scope workspace --json`, then `./bin/ask skills sync --scope user --json`, and verify `~/.codex/skills` points at this worktree." |
-| "find the ubiquitous-language skill" | Locate the canonical skill source and determine whether the runtime projection exposes it. | "Search `Skills/**`, `Plugins/**`, `.agents/skills/**`, and `ask skills list --json` for `ubiquitous-language`, then report source path and runtime visibility separately." |
+| "find the ubiquitous-language skill" | Locate the canonical skill source and determine whether the runtime projection exposes it. | "Search `Skills/**`, `Plugins/**`, `.agents/skills/**`, and `./bin/ask skills list --json` for `ubiquitous-language`, then report source path and runtime visibility separately." |
 | "so you will not be able to use it?" | Distinguish manual filesystem access from formal runtime skill availability. | "Check whether the skill is available through the active `~/.codex/skills` projection; if not, state whether it can still be read manually from disk." |
 | "proceed" | Carry out the previously described corrective path. | "Copy the missing canonical skill into this feature worktree, promote it to the visible runtime surface if needed, sync workspace and user scopes, then validate discoverability." |
 | "run the skill" | Execute the skill workflow in the current repo scope and produce its expected artifact. | "Use `$ubiquitous-language` to create or update repo-root `UBIQUITOUS_LANGUAGE.md`, citing source files and validating the output file exists." |
-| "make it available" | Ensure Codex runtime discovery can see a skill, not just that source files exist. | "Add the skill to the default visible runtime surface when appropriate, run workspace and user sync, and verify `ask skills list --json` includes it." |
+| "make it available" | Ensure Codex runtime discovery can see a skill, not just that source files exist. | "Add the skill to the default visible runtime surface when appropriate, run workspace and user sync, and verify `./bin/ask skills list --json` includes it." |
 | "check it works" | Produce fresh evidence for the changed surface. | "Run the smallest relevant validation command for the changed skill or sync policy and report exact pass/fail/blocker output." |
 
 ## Relationships
@@ -59,15 +59,15 @@
 >
 > **Dev:** "Why did `ubiquitous-language` not appear after copying it?"
 >
-> **Domain expert:** "Because it existed in the canonical source tree but was not yet part of the visible runtime surface. Add it to the selection policy, sync, and verify with `ask skills list --json`."
+> **Domain expert:** "Because it existed in the canonical source tree but was not yet part of the visible runtime surface. Add it to the selection policy, sync, and verify with `./bin/ask skills list --json`."
 
 ## Flagged Ambiguities
 
 - "Skill" can mean **Canonical Skill Source**, **Runtime Projection**, or a skill advertised in the session prompt. Recommendation: use **Canonical Skill Source** for editable files, **Runtime Projection** for `.agents/skills/**`, and **available skill** for what the active Codex session can invoke.
-- "Sync" can mean **Workspace Sync**, **User Sync**, or a lower-level projection refresh script. Recommendation: default to both `ask skills sync --scope workspace` and `ask skills sync --scope user` when the user says "sync my skills."
+- "Sync" can mean **Workspace Sync**, **User Sync**, or a lower-level projection refresh script. Recommendation: default to both `./bin/ask skills sync --scope workspace` and `./bin/ask skills sync --scope user` when the user says "sync my skills."
 - "Use it" can mean manually reading a skill's instructions or invoking it through runtime skill discovery. Recommendation: answer both availability paths when a skill was just added.
 - "Worktree" can mean the original dirty checkout or the new feature checkout. Recommendation: name the absolute path when reporting where commands ran.
-- "Make it visible" can mean adding files to source control or adding a skill to **Visible Runtime Surface**. Recommendation: verify with `ask skills list --json`, not only `find`.
+- "Make it visible" can mean adding files to source control or adding a skill to **Visible Runtime Surface**. Recommendation: verify with `./bin/ask skills list --json`, not only `find`.
 
 ## Agent Integration
 
