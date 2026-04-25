@@ -109,6 +109,7 @@ FORJAMIE-*.md
 /FORJAMIE
 
 # Misc local throwaways
+/codex-scripts/
 *.skill
 Docs/product/Archive.zip
 logs/
