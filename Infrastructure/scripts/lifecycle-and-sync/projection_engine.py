@@ -8,7 +8,7 @@ import json
 import os
 import shlex
 from dataclasses import asdict, dataclass
-from typing import Mapping
+from collections.abc import Mapping
 
 from selection_policy import (
     DEFAULT_PROJECTION_MODE,
