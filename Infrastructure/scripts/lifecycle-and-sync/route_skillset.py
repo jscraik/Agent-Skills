@@ -170,7 +170,8 @@ def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
 def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool:
     return (
         re.search(r"\bis\s+he-[a-z0-9-]+\s+(correct|right)\b", task_text) is not None
-        or "whether" in task_tokens
+        or re.search(r"\bwhether\s+(to\s+use\s+)?he-[a-z0-9-]+\s+(is\s+)?(correct|right)\b", task_text) is not None
+        or re.search(r"\bwhether\b.*\b(right|correct|best)\s+stage\b", task_text) is not None
         or "right stage" in task_text
         or "correct stage" in task_text
         or "best stage" in task_text
@@ -250,7 +251,20 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
-    rows, error_status = read_manifest(skill_set, skillsets_dir)
+    try:
+        rows, error_status = read_manifest(skill_set, skillsets_dir)
+    except ValueError as exc:
+        return {
+            "schema_version": 1,
+            "status": "manifest_invalid",
+            "policy_identity": policy_identity(),
+            "skill_set": skill_set,
+            "top_k": bounded_top_k,
+            "selected": None,
+            "candidates": [],
+            "error": str(exc),
+            "operator_action": "Repair the skill-set manifest and rerun routing.",
+        }
     if error_status:
         return {
             "schema_version": 1,

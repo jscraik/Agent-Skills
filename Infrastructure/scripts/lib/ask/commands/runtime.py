@@ -21,6 +21,10 @@ def dispatch_runtime(repo_root: Path, args: Any) -> CallResult:
         result = skills_budget(repo_root, default_max=args.default_max)
         if "runtime_budget" in result.data:
             result.data["runtime_surface"] = result.data["runtime_budget"]
+        if args.action == "surface":
+            result.data["runtime_surface_status"] = result.status
+            result.status = "success"
+            result.errors = []
         return result
 
     result = CallResult()

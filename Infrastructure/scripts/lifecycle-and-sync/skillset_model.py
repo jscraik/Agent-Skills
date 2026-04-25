@@ -185,10 +185,12 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
             return None, "untagged"
         if lowered[1] in ROOT_SKILL_SETS:
             return lowered[1], "inferred"
-    if len(lowered) >= 2 and lowered[0] == "plugins":
-        plugin_name = lowered[1]
-        if plugin_name in ROOT_SKILL_SETS:
-            return plugin_name, "inferred"
+    if len(lowered) >= 3 and lowered[0] == "plugins" and "skills" in lowered:
+        skills_index = lowered.index("skills")
+        if skills_index >= 2:
+            plugin_name = lowered[skills_index - 1]
+            if plugin_name in ROOT_SKILL_SETS:
+                return plugin_name, "inferred"
     return None, "untagged"
 
 

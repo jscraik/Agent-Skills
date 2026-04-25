@@ -108,6 +108,20 @@ class TestSkillScopePrecedence(unittest.TestCase):
             {violation["code"] for violation in report["violations"]},
         )
 
+    def test_rooted_runtime_allows_primary_runtime_lane(self) -> None:
+        for skill_set in verify_runtime_budget.ROOT_SKILL_SETS:
+            self._write_skill(f".agents/skills/{skill_set}", f"{skill_set} root skill set.")
+        self._write_skill(".agents/skills/codex-primary-runtime", "Bundled primary runtime skills.")
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["projection_mode"], "rooted")
+        self.assertNotIn(
+            "ROOTED_POLICY_NAME_DRIFT",
+            {violation["code"] for violation in report["violations"]},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

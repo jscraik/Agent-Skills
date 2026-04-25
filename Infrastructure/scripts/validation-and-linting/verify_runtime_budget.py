@@ -322,7 +322,8 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         })
     if rooted_mode:
         missing_roots = sorted(ROOT_SKILL_SETS - first_level)
-        unexpected_first_level = sorted(first_level - ROOT_SKILL_SETS)
+        allowed_rooted_first_level = ROOT_SKILL_SETS | {"codex-primary-runtime"}
+        unexpected_first_level = sorted(first_level - allowed_rooted_first_level)
         if missing_roots or unexpected_first_level:
             violations.append({
                 "code": "ROOTED_POLICY_NAME_DRIFT",

@@ -16,6 +16,7 @@ import check_context_budget  # noqa: E402
 import generate_root_skill_sets  # noqa: E402
 import generate_skillset_manifests  # noqa: E402
 import route_skillset  # noqa: E402
+import skillset_model  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES  # noqa: E402
 
 
@@ -58,6 +59,14 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         first_row = json.loads(lines[0])
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
+
+    def test_skillset_inference_uses_segment_before_nested_plugin_skills_root(self) -> None:
+        source_dir = REPO_ROOT / "Plugins" / "example-org" / "harness-engineering" / "skills" / "he-work"
+
+        skill_set, source = skillset_model.infer_skill_set(source_dir, {})
+
+        self.assertEqual(skill_set, "harness-engineering")
+        self.assertEqual(source, "inferred")
 
     def test_router_returns_bounded_candidates_without_manifest_dump(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
@@ -177,6 +186,20 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
                 self.assertEqual(payload["selected"]["id"], "he-router")
                 self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
 
+    def test_harness_engineering_direct_stage_with_whether_stays_direct(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "use he-plan to determine whether the rollout needs sequencing changes",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-plan")
+        self.assertIn("direct-stage-invocation", payload["candidates"][0]["reason"])
+
     def test_harness_engineering_multiple_named_stages_route_to_router(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
@@ -203,16 +226,16 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
 
         self.assertFalse(violations)
 
-    def test_context_budget_accepts_lowercase_plugin_source_paths(self) -> None:
+    def test_context_budget_accepts_nested_canonical_plugin_source_paths(self) -> None:
         repo_root = self.temp_dir / "repo"
-        skill_path = repo_root / "plugins" / "sample-plugin" / "skills" / "sample-skill" / "SKILL.md"
+        skill_path = repo_root / "Plugins" / "sample-org" / "sample-plugin" / "skills" / "sample-skill" / "SKILL.md"
         skill_path.parent.mkdir(parents=True)
         skill_path.write_text("# Sample skill\n", encoding="utf-8")
         manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
         manifest.parent.mkdir(parents=True)
         manifest.write_text(json.dumps({
             "skill_set": "agent-ops",
-            "source_path": "plugins/sample-plugin/skills/sample-skill/SKILL.md",
+            "source_path": "Plugins/sample-org/sample-plugin/skills/sample-skill/SKILL.md",
             "provenance": {
                 "generator": "test",
                 "projection_mode": "rooted",
@@ -228,6 +251,25 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         )
 
         self.assertFalse(violations)
+
+    def test_context_budget_rejects_lowercase_runtime_plugin_source_paths(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        skill_path = repo_root / "plugins" / "sample-plugin" / "skills" / "sample-skill" / "SKILL.md"
+        skill_path.parent.mkdir(parents=True)
+        skill_path.write_text("# Sample skill\n", encoding="utf-8")
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "plugins/sample-plugin/skills/sample-skill/SKILL.md",
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=repo_root,
+        )
+
+        self.assertIn("SKILLSET_SOURCE_PATH_NOT_CANONICAL", {violation["code"] for violation in violations})
 
     def test_context_budget_rejects_noncanonical_skillset_file(self) -> None:
         rogue = self.temp_dir / ".skillsets" / "agent-ops" / "notes.md"
@@ -282,6 +324,50 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         )
 
         self.assertIn("SKILLSET_SOURCE_PATH_NOT_CANONICAL", {violation["code"] for violation in violations})
+
+    def test_context_budget_rejects_symlink_source_escaping_repo(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        external = self.temp_dir / "external" / "SKILL.md"
+        external.parent.mkdir(parents=True)
+        external.write_text("# External skill\n", encoding="utf-8")
+        skill_path = repo_root / "Skills" / "agent-ops" / "external" / "SKILL.md"
+        skill_path.parent.mkdir(parents=True)
+        skill_path.symlink_to(external)
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "Skills/agent-ops/external/SKILL.md",
+            "provenance": {
+                "generator": "test",
+                "projection_mode": "rooted",
+                "policy_identity": "test",
+                "source_revision": "test",
+                "source_sha256": check_context_budget.file_hash(skill_path),
+            },
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=repo_root,
+        )
+
+        self.assertIn("SKILLSET_SOURCE_PATH_ESCAPES_REPO", {violation["code"] for violation in violations})
+
+    def test_router_returns_structured_error_for_malformed_manifest(self) -> None:
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text("{bad json\n", encoding="utf-8")
+
+        payload = route_skillset.route(
+            "agent-ops",
+            "verify implementation before completion",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "manifest_invalid")
+        self.assertEqual(payload["selected"], None)
+        self.assertIn("Invalid manifest JSON", payload["error"])
 
 
 if __name__ == "__main__":

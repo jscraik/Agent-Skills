@@ -156,6 +156,7 @@ def validate_written_manifest_provenance(
                 })
                 continue
             source_parts = Path(source_path).parts
+            plugin_skills_index = source_parts.index("skills") if "skills" in source_parts else -1
             is_canonical_source = (
                 len(source_parts) >= 3
                 and ".." not in source_parts
@@ -163,8 +164,8 @@ def validate_written_manifest_provenance(
             ) or (
                 len(source_parts) >= 4
                 and ".." not in source_parts
-                and source_parts[0] in {"Plugins", "plugins"}
-                and source_parts[2] == "skills"
+                and source_parts[0] == "Plugins"
+                and plugin_skills_index >= 2
             )
             if not is_canonical_source:
                 violations.append({
@@ -178,6 +179,16 @@ def validate_written_manifest_provenance(
             if not source_file.is_file():
                 violations.append({
                     "code": "SKILLSET_SOURCE_PATH_MISSING",
+                    "path": rel_path.as_posix(),
+                    "line": line_no,
+                    "source_path": source_path,
+                })
+                continue
+            try:
+                source_file.resolve().relative_to(repo_root_path.resolve())
+            except ValueError:
+                violations.append({
+                    "code": "SKILLSET_SOURCE_PATH_ESCAPES_REPO",
                     "path": rel_path.as_posix(),
                     "line": line_no,
                     "source_path": source_path,

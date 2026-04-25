@@ -148,8 +148,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
         loaded = {}
         yaml_error = exc
     except yaml.YAMLError as exc:
-        loaded = {}
-        yaml_error = exc
+        raise ValueError(f"Invalid YAML in {path}: {exc}") from exc
 
     if yaml_error is not None:
         loaded = {}
@@ -571,11 +570,15 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
         else _empty_score()
     )
     score_after = scorecard.get("metrics", {})
-    max_context_tokens = int(
+    raw_max_context_tokens = (
         scorecard.get("limits", {}).get("max_skill_context_tokens", DEFAULT_MAX_SKILL_CONTEXT_TOKENS)
         if isinstance(scorecard.get("limits"), dict)
         else DEFAULT_MAX_SKILL_CONTEXT_TOKENS
     )
+    try:
+        max_context_tokens = int(raw_max_context_tokens)
+    except (TypeError, ValueError):
+        max_context_tokens = DEFAULT_MAX_SKILL_CONTEXT_TOKENS
     context_tokens = int(score_after.get("estimated_skill_context_tokens") or 0)
     pass_rate_before = float(score_before.get("pass_rate") or 0)
     pass_rate_after = float(score_after.get("pass_rate") or 0)

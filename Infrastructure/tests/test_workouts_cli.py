@@ -37,6 +37,17 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue(DIAGNOSTIC_WORKOUT_IDS.issubset({item["id"] for item in result.data["workouts"]}))
 
+    def test_list_workouts_reports_yaml_syntax_errors(self) -> None:
+        workout_dir = self.temp_dir / ".workouts" / "broken"
+        workout_dir.mkdir(parents=True)
+        (workout_dir / "workout.yaml").write_text("id: [unterminated\n", encoding="utf-8")
+
+        result = workouts.list_workouts(self.temp_dir)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["workouts"][0]["status"], "invalid")
+        self.assertIn("Invalid YAML", result.data["workouts"][0]["error"])
+
     def test_run_score_and_promote_dry_run(self) -> None:
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
             run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=2)
@@ -98,6 +109,22 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(len(rejected_records), 1)
         rejected_payload = json.loads(rejected_records[0].read_text(encoding="utf-8"))
         self.assertEqual(rejected_payload["state"], "rejected")
+
+    def test_promote_defaults_malformed_context_budget_limit(self) -> None:
+        with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+            scorecard_path = Path(run_result.data["scorecard_path"])
+            scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
+            scorecard["limits"]["max_skill_context_tokens"] = "not-an-int"
+            scorecard_path.write_text(json.dumps(scorecard, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            promote_result = workouts.promote_workout(REPO_ROOT, WORKOUT_ID, if_better=True, dry_run=True)
+
+        self.assertEqual(run_result.status, "success")
+        self.assertEqual(promote_result.status, "success")
+        self.assertEqual(
+            promote_result.data["promotion"]["context_budget"]["max_skill_context_tokens"],
+            workouts.DEFAULT_MAX_SKILL_CONTEXT_TOKENS,
+        )
 
     def test_score_workout_reports_corrupted_scorecard(self) -> None:
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):

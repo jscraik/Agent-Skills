@@ -1,11 +1,16 @@
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from ask.commands import runtime  # noqa: E402
+from ask.envelope import CallResult, ErrorCode, ErrorObject  # noqa: E402
 from verify_runtime_budget import build_report  # noqa: E402
 
 
@@ -51,6 +56,30 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
             self.assertIn("name", payload)
             self.assertIn("path", payload)
             self.assertIn("description_words", payload)
+
+    def test_runtime_surface_reports_budget_status_without_gating(self) -> None:
+        budget_result = CallResult(status="error")
+        budget_result.data["runtime_budget"] = {
+            "status": "fail",
+            "projection_mode": "flat",
+        }
+        budget_result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message="default skill budget exceeded",
+            )
+        )
+
+        with mock.patch.object(runtime, "skills_budget", return_value=budget_result):
+            result = runtime.dispatch_runtime(
+                REPO_ROOT,
+                SimpleNamespace(action="surface", default_max=30),
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.errors, [])
+        self.assertEqual(result.data["runtime_surface_status"], "error")
+        self.assertEqual(result.data["runtime_surface"]["status"], "fail")
 
 
 if __name__ == "__main__":
