@@ -82,3 +82,10 @@ metadata:
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.
 - Use Infrastructure/references/deferred-skill-context/agent-ops-autofix/ for legacy examples, scripts, assets, or long-form details.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[verification-before-completion]] | Confirm gate outcomes and report deterministic pass/fail evidence before closeout |
+| [[project-brain]] | Capture durable repo learnings and route updates into the canonical memory surface |
