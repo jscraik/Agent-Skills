@@ -51,7 +51,8 @@ flat_names_file="$(mktemp "${TMPDIR:-/tmp}/flat-skill-names.XXXXXX")"
 overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-flat-overlap.XXXXXX")"
 shadowed_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-shadowed-overlap.XXXXXX")"
 system_bridge_names_file="$(mktemp "${TMPDIR:-/tmp}/system-bridge-skill-names.XXXXXX")"
-trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file"' EXIT
+root_skill_names_file="$(mktemp "${TMPDIR:-/tmp}/root-skill-set-names.XXXXXX")"
+trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file" "$root_skill_names_file"' EXIT
 
 selection_policy_shell="$(
   python3 "$selection_policy_path" --format shell
@@ -71,6 +72,23 @@ is_allowlisted_overlap_skill_name() {
     return 0
   fi
   return 1
+}
+
+is_rooted_projection_active() {
+  [ -s "$root_skill_names_file" ] || return 1
+  while IFS= read -r root_skill_name; do
+    [ -n "$root_skill_name" ] || continue
+    if [ -f ".agents/skills/$root_skill_name/SKILL.md" ]; then
+      return 0
+    fi
+  done < "$root_skill_names_file"
+  return 1
+}
+
+is_root_skill_set_name() {
+  local skill_name="$1"
+  [ -s "$root_skill_names_file" ] || return 1
+  grep -Fxq "$skill_name" "$root_skill_names_file"
 }
 
 # Only treat bridge names as intentional when the top-level skill path is a
@@ -96,6 +114,10 @@ if [ -s "$system_bridge_names_file" ]; then
   done < "$system_bridge_names_file"
 fi
 
+for root_skill_name in "${SELECTION_POLICY_ROOT_SKILL_SETS[@]:-}"; do
+  printf '%s\n' "$root_skill_name" >> "$root_skill_names_file"
+done
+
 plugins_root="Plugins"
 if [ ! -d "$plugins_root" ] && [ -d "plugins" ]; then
   plugins_root="plugins"
@@ -118,6 +140,9 @@ if [ -s "$plugin_names_file" ] && [ -s "$flat_names_file" ]; then
   comm -12 "$plugin_names_file" "$flat_names_file" | sed '/^$/d' > "$overlap_names_file"
   while IFS= read -r overlap_name; do
     if [ -z "$overlap_name" ] || is_allowlisted_overlap_skill_name "$overlap_name"; then
+      continue
+    fi
+    if is_rooted_projection_active && is_root_skill_set_name "$overlap_name"; then
       continue
     fi
     printf '%s\n' "$overlap_name" >> "$shadowed_names_file"

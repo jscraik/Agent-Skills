@@ -195,6 +195,7 @@ def render_shell() -> str:
             "SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS",
             SYSTEM_BRIDGE_SKILL_NAMES,
         ),
+        _shell_array("SELECTION_POLICY_ROOT_SKILL_SETS", ROOT_SKILL_SET_NAMES),
         f"SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB={shlex.quote(PLUGIN_SKILL_ROOT_GLOB)}",
     ]
     return "\n".join(lines)

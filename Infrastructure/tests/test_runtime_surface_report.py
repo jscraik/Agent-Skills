@@ -32,7 +32,7 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
             "suppressed_entries",
         }
         self.assertTrue(required_fields.issubset(report.keys()))
-        self.assertEqual(report["projection_mode"], "flat")
+        self.assertIn(report["projection_mode"], {"flat", "rooted"})
         self.assertEqual(report["budget_status"], report["status"])
 
     def test_scope_counts_include_known_scope_lanes(self) -> None:

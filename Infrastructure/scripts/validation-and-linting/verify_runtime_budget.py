@@ -223,6 +223,19 @@ def _first_level_skill_names() -> list[str]:
     return names
 
 
+def _active_projection_mode(first_level_names: set[str]) -> str:
+    if first_level_names & ROOT_SKILL_SETS:
+        return "rooted"
+    return DEFAULT_PROJECTION_MODE
+
+
+def _skill_file_word_count(entry: dict[str, str]) -> int:
+    skill_path = REPO_ROOT / entry["path"] / "SKILL.md"
+    if not skill_path.is_file():
+        return 0
+    return _word_count(skill_path.read_text(encoding="utf-8", errors="ignore"))
+
+
 def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     default_entries = list(discover_skill_entries(visibility="default"))
     advanced_entries = list(discover_skill_entries(visibility="advanced"))
@@ -245,6 +258,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     ]
 
     first_level = set(_first_level_skill_names())
+    projection_mode = _active_projection_mode(first_level)
+    rooted_mode = projection_mode == "rooted"
+    root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
     # Bridge skills are intentionally not expected in default first-level discovery.
@@ -257,7 +273,11 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     missing_default = sorted(expected_default - default_names)
     catalog_only_default_names = sorted(catalog_names - default_names)
     discovery_only_default_names = sorted(default_names - catalog_names)
-    estimated_description_words = sum(_word_count(entry.description) for entry in default_entries)
+    estimated_description_words = (
+        sum(_skill_file_word_count(entry) for entry in first_level_entries if entry["name"] in ROOT_SKILL_SETS)
+        if rooted_mode
+        else sum(_word_count(entry.description) for entry in default_entries)
+    )
     unmapped_skill_names = sorted(
         entry["name"]
         for entry in scoped_entries
@@ -274,10 +294,11 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
 
     violations: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
-    if len(default_entries) > default_max:
+    effective_default_count = root_skill_set_count if rooted_mode else len(default_entries)
+    if effective_default_count > default_max:
         violations.append({
             "code": "DEFAULT_SKILL_BUDGET_EXCEEDED",
-            "message": f"default skill count {len(default_entries)} exceeds budget {default_max}",
+            "message": f"default skill count {effective_default_count} exceeds budget {default_max}",
         })
     if len(advanced_entries) > ADVANCED_WARN_VISIBLE:
         advisories.append({
@@ -299,14 +320,24 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             "message": "system bridge skills must not appear as first-level .agents/skills entries",
             "skills": bridge_exposed,
         })
-    if extra_default or missing_default:
+    if rooted_mode:
+        missing_roots = sorted(ROOT_SKILL_SETS - first_level)
+        unexpected_first_level = sorted(first_level - ROOT_SKILL_SETS)
+        if missing_roots or unexpected_first_level:
+            violations.append({
+                "code": "ROOTED_POLICY_NAME_DRIFT",
+                "message": "rooted first-level runtime entries differ from root skill-set policy",
+                "extra": unexpected_first_level,
+                "missing": missing_roots,
+            })
+    elif extra_default or missing_default:
         violations.append({
             "code": "DEFAULT_POLICY_NAME_DRIFT",
             "message": "default discovery names differ from effective selection policy",
             "extra": extra_default,
             "missing": missing_default,
         })
-    if catalog_only_default_names or discovery_only_default_names:
+    if not rooted_mode and (catalog_only_default_names or discovery_only_default_names):
         violations.append({
             "code": "CATALOG_DEFAULT_DRIFT",
             "message": "catalog default surface differs from discovery default surface",
@@ -324,9 +355,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     return {
         "status": status,
         "budget_status": status,
-        "projection_mode": DEFAULT_PROJECTION_MODE,
+        "projection_mode": projection_mode,
         "policy_identity": policy_identity(),
-        "default_visible_count": len(default_entries),
+        "default_visible_count": effective_default_count,
         "default_visible_max": default_max,
         "advanced_visible_count": len(advanced_entries),
         "advanced_visible_warn": ADVANCED_WARN_VISIBLE,
@@ -347,7 +378,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "unresolved_scope_collisions": unresolved_scope_collisions,
         "duplicate_default_names": duplicate_default_names,
         "largest_descriptions": _largest_description_payloads(advanced_entries),
-        "root_skill_set_count": len({entry["name"] for entry in first_level_entries} & ROOT_SKILL_SETS),
+        "root_skill_set_count": root_skill_set_count,
         "unmapped_skill_names": unmapped_skill_names,
         "estimated_description_words": estimated_description_words,
         "estimated_description_tokens": _estimated_tokens_from_words(estimated_description_words),
