@@ -25,8 +25,8 @@ Use this template when creating or updating `UBIQUITOUS_LANGUAGE.md`.
 
 ## Relationships
 
-- A **Term** belongs to exactly one **Other Term**.
-- A **Workflow** produces zero or more **Artifacts**.
+- Example relationship (only if supported by source evidence): **Term A** is part of **Term B**.
+- Example workflow link (only if observed): **Workflow X** may produce **Artifact Y**.
 
 ## Example Dialogue
 
