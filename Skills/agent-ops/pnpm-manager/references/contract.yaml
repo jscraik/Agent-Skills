@@ -1,27 +1,31 @@
-schema_version: "1.0"
+schema_version: 1
 skill: pnpm-manager
-type: runbook
-purpose: >
-  Provide pnpm workspace command guidance using recursive mode and filter
-  selectors for targeted multi-package operations.
+purpose: "Run pnpm workspace operations with scoped recursive and filter selectors."
 triggers:
-  - User asks for pnpm workspace command planning.
-  - User needs filter selectors by package/path/changed commit.
-  - User needs recursive pnpm operations across all packages.
-inputs:
-  - workspace structure
-  - command target mode (single, filtered, recursive)
-  - git ref context for changed-package selectors
-outputs:
-  - exact pnpm command sequence
-  - selector and scope rationale
-  - validation and fail-fast checks
+  - "Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing."
 non_goals:
-  - npm/yarn specific package-manager policy
-  - non-workspace single-package tutorials
+  - "Route unrelated work away from this skill."
+inputs:
+  - "workspace root"
+  - "target packages"
+  - "command intent"
+  - "filter selector"
+  - "risk posture"
+outputs:
+  - "pnpm command plan"
+  - "selector evidence"
+  - "validation command"
+  - "blockers"
 risks:
-  - broad recursive commands can affect unintended packages
-  - invalid selectors can skip required packages silently
-source_basis:
-  execution_path: cli_primary
-  context7_library_id: /websites/pnpm_io
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

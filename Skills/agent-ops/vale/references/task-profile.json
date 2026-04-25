@@ -17,21 +17,21 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Operational clarity",
+      "label": "Clarity",
       "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Actionable setup specificity",
-      "threshold": 0.7,
+      "label": "Specificity",
+      "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety and non-destructive behavior",
+      "label": "Safety",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -39,10 +39,10 @@
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 30.0,
-    "ai_process_minutes": 10.0,
-    "probability_of_success": 0.78,
-    "rationale": "Vale setup is deterministic and mostly command-contract driven, with moderate repo-specific variation."
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "Skills-agent-ops-pnpm-manager",
+  "scope_skill": "Skills/agent-ops/pnpm-manager",
+  "scope_profile": "Skills",
+  "rubric_version": "2026-04-13",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "clarity",
+      "label": "Instructional clarity",
+      "threshold": 0.72,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "specificity",
+      "label": "Workspace command specificity",
+      "threshold": 0.7,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Scoped execution safety",
+      "threshold": 0.87,
+      "weight": 0.33,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 40,
+    "ai_process_minutes": 14,
+    "probability_of_success": 0.8,
+    "rationale": "pnpm workspace operations benefit from automated selector planning but still require explicit scoping for high-impact recursive commands."
+  },
+  "learning_posture": {
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
+    "default": "guided"
+  }
+}

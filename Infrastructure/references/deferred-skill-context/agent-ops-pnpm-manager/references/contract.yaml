@@ -1,0 +1,27 @@
+schema_version: "1.0"
+skill: pnpm-manager
+type: runbook
+purpose: >
+  Provide pnpm workspace command guidance using recursive mode and filter
+  selectors for targeted multi-package operations.
+triggers:
+  - User asks for pnpm workspace command planning.
+  - User needs filter selectors by package/path/changed commit.
+  - User needs recursive pnpm operations across all packages.
+inputs:
+  - workspace structure
+  - command target mode (single, filtered, recursive)
+  - git ref context for changed-package selectors
+outputs:
+  - exact pnpm command sequence
+  - selector and scope rationale
+  - validation and fail-fast checks
+non_goals:
+  - npm/yarn specific package-manager policy
+  - non-workspace single-package tutorials
+risks:
+  - broad recursive commands can affect unintended packages
+  - invalid selectors can skip required packages silently
+source_basis:
+  execution_path: cli_primary
+  context7_library_id: /websites/pnpm_io

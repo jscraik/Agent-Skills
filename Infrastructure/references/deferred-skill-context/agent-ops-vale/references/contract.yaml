@@ -1,0 +1,30 @@
+schema_version: "1.0"
+skill: vale
+type: runbook
+purpose: >
+  Ensure Vale prose linting is correctly installed, configured, synchronized,
+  and enforced in local developer and CI workflows.
+triggers:
+  - User asks to install or enable Vale in a repository.
+  - User asks to fix broken Vale setup, missing styles, or config drift.
+  - User asks to add pre-commit or CI automation for Vale.
+inputs:
+  - repository root and prose target paths
+  - desired alert threshold for enforcement
+  - current `.vale.ini` and style package state
+outputs:
+  - command sequence for installation, setup, and verification
+  - config guidance for `.vale.ini` and style package sync
+  - local and CI validation commands with explicit pass/fail interpretation
+non_goals:
+  - full editorial rewriting of content
+  - style-guide policy authoring disconnected from tool setup
+risks:
+  - unsynced packages can create false confidence
+  - broad path globs can lint generated/vendor content unexpectedly
+source_basis:
+  execution_path: cli_primary
+  context7_library_ids:
+    - /errata-ai/vale
+    - /websites/vale_sh
+  docs_snapshot_month: "2026-04"
