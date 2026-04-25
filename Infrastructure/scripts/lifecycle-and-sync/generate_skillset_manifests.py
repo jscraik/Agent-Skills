@@ -22,11 +22,15 @@ SCOPE_PRECEDENCE = {
 
 def _apply_scope_precedence(modules: list[Any]) -> list[Any]:
     """
-    Keep the highest-precedence module for each rooted manifest identity.
-
-    Rooted manifests are built from all canonical scopes, but runtime selection
-    follows project > local-plugin > global. Apply that precedence before the
-    duplicate-ID gate so valid overlays do not block sync.
+    Keep only modules with the highest scope precedence for each (skill_set, id) identity.
+    
+    This function groups the input modules by their manifest identity (skill_set, id)
+    and selects modules whose scope has the highest precedence according to
+    SCOPE_PRECEDENCE (e.g., project > local-plugin > global). The selected modules
+    are returned in a deterministic order.
+    
+    Returns:
+        list[Any]: Selected modules sorted by (module.skill_set, module.id, module.source_path).
     """
     rows_by_identity: dict[tuple[str, str], list[Any]] = defaultdict(list)
     selected: list[Any] = []
@@ -39,6 +43,33 @@ def _apply_scope_precedence(modules: list[Any]) -> list[Any]:
 
 
 def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
+    """
+    Builds a validation report and per-skill-set manifest descriptors for rooted manifests under the given output directory.
+    
+    Parameters:
+        output_dir (Path): Target base directory where manifests would be written (used to compute manifest paths in the report).
+    
+    Returns:
+        dict[str, Any]: A report containing:
+            - status: "pass" if no violations, "fail" otherwise.
+            - projection_mode: "rooted".
+            - policy_identity: policy identity string.
+            - manifest_count: number of skill-set manifests described.
+            - module_count: number of modules selected after scope precedence.
+            - unmapped: unmapped data returned by the skill module builder.
+            - duplicate_ids: list of duplicate (skill_set, id) entries with their source paths.
+            - duplicate_source_paths: list of source paths shared by multiple modules with their entries.
+            - violations: list of violation objects (each with a `code` and details) for:
+                - DUPLICATE_MANIFEST_IDS
+                - DUPLICATE_MANIFEST_SOURCE_PATHS
+                - MISSING_MANIFEST_PROVENANCE
+            - manifests: list of manifest descriptors for each root skill set, each including:
+                - skill_set: skill set name
+                - path: relative manifest path
+                - count: number of rows
+                - metadata_status_counts: counts of `metadata_status` values
+                - rows: list of row dictionaries suitable for serialization
+    """
     discovered_modules, unmapped = build_skill_modules()
     modules = _apply_scope_precedence(discovered_modules)
     grouped = modules_by_skill_set(modules)
@@ -102,6 +133,16 @@ def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, An
 
 
 def _count_by(rows: list[Any], attr: str) -> dict[str, int]:
+    """
+    Count occurrences of an attribute's values across a sequence of row-like objects.
+    
+    Parameters:
+        rows (list[Any]): Iterable of objects from which the attribute will be read.
+        attr (str): Name of the attribute to count on each row; each attribute value is converted to a string.
+    
+    Returns:
+        dict[str, int]: Mapping from the stringified attribute value to the number of times it appears, sorted by key.
+    """
     counts: dict[str, int] = {}
     for row in rows:
         value = str(getattr(row, attr))
@@ -110,6 +151,21 @@ def _count_by(rows: list[Any], attr: str) -> dict[str, int]:
 
 
 def write_manifests(report: dict[str, Any], output_dir: Path) -> list[dict[str, str]]:
+    """
+    Write manifest JSONL files for each skill set described in `report["manifests"]`.
+    
+    Parameters:
+    	report (dict): Report containing a "manifests" iterable. Each manifest must be a mapping with at least:
+    		- "skill_set" (str): target skill set directory name.
+    		- "rows" (Iterable[dict]): manifest rows; each row must include "id" and "source_path" keys used for sorting.
+    	output_dir (Path): Base directory where per-skill-set subdirectories and `manifest.jsonl` files will be created.
+    
+    Returns:
+    	writes (list[dict[str, str]]): List of write action records with keys:
+    		- "path": relative path to the written manifest file,
+    		- "action": the action performed (always "write"),
+    		- "count": number of rows written as a string.
+    """
     writes: list[dict[str, str]] = []
     output_dir.mkdir(parents=True, exist_ok=True)
     for manifest in report["manifests"]:
@@ -123,6 +179,15 @@ def write_manifests(report: dict[str, Any], output_dir: Path) -> list[dict[str, 
 
 
 def public_report(report: dict[str, Any]) -> dict[str, Any]:
+    """
+    Produce a copy of a manifest report with each manifest's "rows" field omitted.
+    
+    Parameters:
+        report (dict[str, Any]): A manifest report containing a "manifests" key whose value is an iterable of manifest dictionaries.
+    
+    Returns:
+        dict[str, Any]: A shallow copy of `report` where each manifest dict in `"manifests"` excludes the `"rows"` key.
+    """
     return {
         **report,
         "manifests": [
@@ -133,6 +198,14 @@ def public_report(report: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> int:
+    """
+    CLI entrypoint that builds rooted skill-set manifest reports and optionally writes manifest files.
+    
+    Parses command-line flags (--output-dir, --dry-run, --write, --json), invokes the manifest build process, optionally writes manifest.jsonl files when validations pass, and emits either a JSON payload or a human-readable summary.
+    
+    Returns:
+        int: `0` if the generated report has status "pass", `1` otherwise.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--dry-run", action="store_true")

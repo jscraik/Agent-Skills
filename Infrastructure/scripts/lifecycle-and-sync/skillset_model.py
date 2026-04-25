@@ -113,14 +113,32 @@ class SkillModule:
     provenance: dict[str, str]
 
     def to_manifest_row(self) -> dict[str, Any]:
+        """
+        Return a plain dictionary representation of the SkillModule suitable for writing to manifests.
+        
+        Returns:
+            dict[str, Any]: Dictionary mapping each dataclass field name to its value.
+        """
         return asdict(self)
 
 
 def repo_root() -> Path:
+    """
+    Return the repository root path used for skill discovery.
+    
+    Returns:
+        Path: The repository root directory (`REPO_ROOT`).
+    """
     return REPO_ROOT
 
 
 def rel(path: Path) -> str:
+    """
+    Compute the POSIX path string for `path` relative to the repository root when possible.
+    
+    Returns:
+        A POSIX-formatted string: the path relative to `REPO_ROOT` if `path` is inside the repository, otherwise the absolute POSIX path.
+    """
     try:
         return path.relative_to(REPO_ROOT).as_posix()
     except ValueError:
@@ -128,6 +146,12 @@ def rel(path: Path) -> str:
 
 
 def source_revision() -> str:
+    """
+    Get the current repository Git short revision hash.
+    
+    Returns:
+        str: The short SHA-1 hash of HEAD (e.g., "abc1234"), or the literal string "unknown" if the `git` executable is not found or the revision cannot be determined.
+    """
     git_bin = shutil.which("git")
     if not git_bin:
         return "unknown"
@@ -143,12 +167,27 @@ def source_revision() -> str:
 
 
 def file_hash(path: Path) -> str:
+    """
+    Compute the SHA-256 hexadecimal digest of the file at the given path.
+    
+    Returns:
+        str: Hexadecimal SHA-256 digest of the file's contents.
+    """
     digest = hashlib.sha256()
     digest.update(path.read_bytes())
     return digest.hexdigest()
 
 
 def listish(value: str | None) -> list[str]:
+    """
+    Parse a free-form string into a list of trimmed items supporting bullet, comma, or single-value formats.
+    
+    Parameters:
+        value (str | None): Input text which may be None, a newline- or dash-prefixed bullet list, a comma-separated list, or a single item.
+    
+    Returns:
+        list[str]: Parsed list of items. Returns an empty list for None or empty/whitespace input. For inputs containing dash-style bullets (e.g., "- item"), splits on bullets; otherwise if commas are present splits on commas; otherwise returns a single-item list containing the trimmed input.
+    """
     if not value:
         return []
     cleaned = value.replace("\n", " ").strip()
@@ -162,6 +201,21 @@ def listish(value: str | None) -> list[str]:
 
 
 def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str | None, str]:
+    """
+    Infer the root skill-set for a skill directory from declared frontmatter or by deriving it from the repository path.
+    
+    Checks frontmatter keys ("metadata.skill-set", "metadata.skill_set", "skill-set", "skill_set") first; if present the value is normalized (trimmed, lowercased, "_" → "-") and returned as the declared skill-set when it matches one of ROOT_SKILL_SETS. If no declaration is present, attempts to infer the skill-set from source_dir relative to REPO_ROOT:
+    - skills/<name>/... → returns <name> when <name> is a known root skill-set; treats skills/project as untagged.
+    - plugins/<name>/... → returns <name> when <name> is a known root skill-set.
+    If neither declaration nor inference yields a known root skill-set, returns None with status "untagged".
+    
+    Parameters:
+        source_dir (Path): Path to the skill directory to inspect; used for path-based inference relative to REPO_ROOT.
+        frontmatter (dict[str, str]): Parsed SKILL.md frontmatter potentially containing declared skill-set keys.
+    
+    Returns:
+        tuple[str | None, str]: A tuple of (skill_set, status) where `skill_set` is the normalized root skill-set name or `None`, and `status` is one of `"declared"`, `"inferred"`, or `"untagged"`.
+    """
     declared = (
         frontmatter.get("metadata.skill-set")
         or frontmatter.get("metadata.skill_set")
@@ -193,6 +247,19 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
 
 
 def infer_level(skill_id: str, frontmatter: dict[str, str], description: str) -> tuple[str, str]:
+    """
+    Infer a skill's normalized level from frontmatter or textual hints.
+    
+    If `frontmatter` contains `metadata.level` or `level` whose normalized value is one of the allowed LEVEL_CHOICES, that declared value is returned with status `"declared"`. Otherwise the function inspects `skill_id` and `description` for keywords to choose a level and returns that level with status `"inferred"`. Keywords map to levels as follows: presence of "router" → `"router"`; any of "playbook", "orchestrator", "workflow", "lifecycle" → `"compound"`; any of "factory", "builder", "review", "audit", "plan" → `"molecule"`; any of "reference", "docs", "documentation" → `"reference"`; otherwise `"atom"`.
+    
+    Parameters:
+        skill_id (str): Identifier of the skill (used as part of the text inspected when inferring).
+        frontmatter (dict[str, str]): Parsed frontmatter; the function checks `metadata.level` then `level` for a declared value.
+        description (str): Skill description text used with `skill_id` when inferring from keywords.
+    
+    Returns:
+        tuple[str, str]: A pair `(level, status)` where `level` is one of the normalized LEVEL_CHOICES and `status` is either `"declared"` if taken from frontmatter or `"inferred"` if derived from keywords.
+    """
     declared = frontmatter.get("metadata.level") or frontmatter.get("level")
     if declared:
         normalized = declared.strip().lower().replace("_", "-")
@@ -212,6 +279,17 @@ def infer_level(skill_id: str, frontmatter: dict[str, str], description: str) ->
 
 
 def triggers_for(skill_id: str, frontmatter: dict[str, str], description: str) -> list[str]:
+    """
+    Produce a short list of search triggers for a skill.
+    
+    Parameters:
+        skill_id (str): Skill identifier (e.g., "my-skill") used as a fallback trigger with hyphens replaced by spaces.
+        frontmatter (dict[str, str]): Parsed frontmatter; if it contains `metadata.triggers` or `triggers`, those declared values are used.
+        description (str): Skill description used to derive an additional phrase when no declared triggers exist.
+    
+    Returns:
+        A list of trigger strings. If the frontmatter provides triggers, returns those (up to 8). Otherwise returns a list starting with the skill-id-derived trigger and, when the description is sufficiently long, an additional phrase composed of the first up to 8 words from the description.
+    """
     declared = listish(frontmatter.get("metadata.triggers") or frontmatter.get("triggers"))
     if declared:
         return declared[:8]
@@ -223,15 +301,47 @@ def triggers_for(skill_id: str, frontmatter: dict[str, str], description: str) -
 
 
 def exclusions_for(frontmatter: dict[str, str]) -> list[str]:
+    """
+    Extract up to eight exclusion identifiers from parsed frontmatter.
+    
+    Parameters:
+        frontmatter (dict[str, str]): Mapping of frontmatter keys; this function reads
+            `metadata.exclusions` or `exclusions` if present.
+    
+    Returns:
+        list[str]: A list (maximum length 8) of parsed exclusion strings. The input
+            value is interpreted as a list-like string (supports bullet-style,
+            comma-separated, or single-value formats) and normalized into elements.
+    """
     return listish(frontmatter.get("metadata.exclusions") or frontmatter.get("exclusions"))[:8]
 
 
 def risk_for(frontmatter: dict[str, str]) -> str:
+    """
+    Normalize and validate a risk level extracted from frontmatter.
+    
+    Parameters:
+        frontmatter (dict[str, str]): Parsed frontmatter mapping (e.g., keys like "metadata.risk" or "risk").
+    
+    Returns:
+        str: One of "low", "medium", or "high"; defaults to "low" for missing or unrecognized values.
+    """
     risk = (frontmatter.get("metadata.risk") or frontmatter.get("risk") or "low").strip().lower()
     return risk if risk in {"low", "medium", "high"} else "low"
 
 
 def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
+    """
+    Determine the runtime visibility value for a skill from its frontmatter.
+    
+    Checks the frontmatter for `metadata.runtime-visibility`, `metadata.runtime_visibility`, or `runtime-visibility`, normalizes the value (lowercase, underscores to hyphens), and returns one of: `latent`, `root`, `flat`, or `hidden`. If none is present or the value is not one of the allowed choices, returns `latent`.
+    
+    Parameters:
+        frontmatter (dict[str, str]): Parsed frontmatter key/value pairs from a SKILL.md file.
+    
+    Returns:
+        str: One of `latent`, `root`, `flat`, or `hidden`.
+    """
     visibility = (
         frontmatter.get("metadata.runtime-visibility")
         or frontmatter.get("metadata.runtime_visibility")
@@ -242,6 +352,14 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
 
 
 def iter_candidate_skill_dirs() -> list[Path]:
+    """
+    Yield a sorted list of candidate skill directories that contain a SKILL.md file and are eligible for projection.
+    
+    Scans repository and plugin skill directories, filters out entries missing a SKILL.md or whose scope is one of "system", "primary-runtime", "external", or "unknown", de-duplicates directories (preferring filesystem inode/device when available, falling back to resolved path), and returns the remaining directories sorted by their repository-relative path.
+    
+    Returns:
+        list[Path]: Sorted list of unique candidate skill directory paths.
+    """
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
     for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs()]:
@@ -264,6 +382,16 @@ def iter_candidate_skill_dirs() -> list[Path]:
 
 
 def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
+    """
+    Builds SkillModule objects for all discoverable skill directories and collects skills that cannot be mapped to a root skill set.
+    
+    Each constructed SkillModule captures identity, selection fields, inferred or declared metadata, scope, description, and provenance (including generator, projection_mode "rooted", policy identity, git short revision, and SHA-256 of the SKILL.md). Skills that lack a determinable root skill-set are returned in the unmapped list as dicts with keys 'id', 'source_path', and 'reason'.
+    
+    Returns:
+        tuple[list[SkillModule], list[dict[str, str]]]: 
+            - A list of SkillModule instances sorted by (skill_set, id, source_path).
+            - A list of unmapped skill descriptors where each dict contains 'id', 'source_path', and 'reason'.
+    """
     modules: list[SkillModule] = []
     unmapped: list[dict[str, str]] = []
     revision = source_revision()
@@ -306,6 +434,17 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
 
 
 def modules_by_skill_set(modules: Iterable[SkillModule]) -> dict[str, list[SkillModule]]:
+    """
+    Group SkillModule objects by root skill-set name.
+    
+    Parameters:
+        modules (Iterable[SkillModule]): Iterable of SkillModule instances to group.
+    
+    Returns:
+        dict[str, list[SkillModule]]: A mapping from skill-set name to a list of modules belonging to that skill-set.
+        The returned dictionary always includes keys for every name in `ROOT_SKILL_SETS` (each mapped to an empty list if no modules match).
+        Each list is sorted by `(module.id, module.source_path)`. Modules whose `skill_set` is not in `ROOT_SKILL_SETS` are included under their declared `skill_set` key.
+    """
     grouped: dict[str, list[SkillModule]] = {name: [] for name in ROOT_SKILL_SETS}
     for module in modules:
         grouped.setdefault(module.skill_set, []).append(module)
@@ -313,5 +452,12 @@ def modules_by_skill_set(modules: Iterable[SkillModule]) -> dict[str, list[Skill
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
+    """
+    Write a mapping as pretty-printed JSON to the given file path, creating parent directories if needed.
+    
+    Parameters:
+        path (Path): Destination file path to write the JSON payload to.
+        payload (dict[str, Any]): JSON-serializable mapping to serialize and write.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")

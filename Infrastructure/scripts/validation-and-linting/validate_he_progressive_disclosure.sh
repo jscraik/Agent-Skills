@@ -34,6 +34,7 @@ resolve_base_ref() {
   printf '%s' "$base_ref"
 }
 
+# collect_changed_he_skills prints changed Plugins/harness-engineering SKILL.md file paths (one per line), optionally including diffs relative to the provided base_ref; files under Plugins/harness-engineering/fixtures/preserved-context/ are ignored.
 collect_changed_he_skills() {
   local base_ref="$1"
   local -a all_changed=()
@@ -92,6 +93,7 @@ numstat_added_deleted() {
   printf '%s %s\n' "$added" "$deleted"
 }
 
+# collect_unified_diff outputs unified diffs with zero context for the given target: the diff from `base_ref...HEAD` if `base_ref` is non-empty, then the working tree diff, and finally the staged (index) diff.
 collect_unified_diff() {
   local base_ref="$1"
   local target="$2"
@@ -102,6 +104,7 @@ collect_unified_diff() {
   git diff --cached --unified=0 -- "$target"
 }
 
+# append_candidate adds a candidate path to the referenced array and, if that candidate is a symlink whose target exists, also appends a normalized resolved path relative to REPO_ROOT.
 append_candidate() {
   local -n candidate_list="$1"
   local candidate="$2"
@@ -127,6 +130,7 @@ append_candidate() {
   candidate_list+=("${resolved_dir#$REPO_ROOT/}/$(basename -- "$resolved")")
 }
 
+# has_context_move_evidence determines whether any non-blank lines removed from a SKILL.md file reappear verbatim as added lines in the repository's reference candidates (the global INDEX_PATH plus files under the skill's references and Infrastructure/references), returning success (0) if at least one removed line is found and failure (1) otherwise.
 has_context_move_evidence() {
   local base_ref="$1"
   local skill_path="$2"

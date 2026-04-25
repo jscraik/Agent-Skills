@@ -25,9 +25,19 @@ ROUTING_BUDGET = BUDGET_CONFIG["routing"]
 
 class TestContextBudgetedSkillsets(unittest.TestCase):
     def setUp(self) -> None:
+        """
+        Create a temporary directory for the test and store its path on self.temp_dir.
+        
+        The directory is created with the prefix "context-budgeted-skillsets-" and is intended for use by the test case.
+        """
         self.temp_dir = Path(tempfile.mkdtemp(prefix="context-budgeted-skillsets-"))
 
     def tearDown(self) -> None:
+        """
+        Remove the temporary directory created for the test.
+        
+        Deletes self.temp_dir and all its contents recursively; any filesystem errors raised during removal are ignored.
+        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_root_skill_generation_stays_inside_budget(self) -> None:
@@ -46,6 +56,11 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         )
 
     def test_manifest_generation_writes_provenance_rich_rows(self) -> None:
+        """
+        Verify that manifest generation produces provenance-rich JSONL rows and writes them to disk.
+        
+        Asserts that the manifest build report signals success, the number of written manifests matches the expected root skillset count, a manifest.jsonl file exists for the "agent-ops" skillset, the file contains at least one JSON line, and the first manifest row includes a `provenance.projection_mode` equal to "rooted" and a non-empty `provenance.source_sha256`.
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         writes = generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -60,6 +75,15 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertTrue(first_row["provenance"]["source_sha256"])
 
     def test_router_returns_bounded_candidates_without_manifest_dump(self) -> None:
+        """
+        Verify routing selects a skill, bounds candidates to the configured routing budget, and does not expose manifest dump data.
+        
+        Asserts that:
+        - the router reports a "selected" status and normalizes the returned top_k to ROUTING_BUDGET["max_candidates_returned"];
+        - the selected skill id is "verification-before-completion";
+        - the number of returned candidates is <= ROUTING_BUDGET["max_candidates_returned"];
+        - candidate entries do not include manifest-only fields such as "source_path".
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -130,6 +154,11 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertIn("review-before-more-work", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_routes_regression_first_to_tdd(self) -> None:
+        """
+        Verify harness-engineering routes regression-first intent to the TDD lane.
+        
+        Builds and writes skillset manifests, routes a request asking to "write failing regression test first" to the "harness-engineering" skillset, and asserts the router selects the "he-tdd" lane and that the top candidate's reason contains "test-first-work".
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -144,6 +173,11 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertIn("test-first-work", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_multistage_rules_route_to_router(self) -> None:
+        """
+        Ensure multistage harness-engineering requests about unclear expected behavior route to the router stage.
+        
+        Builds and writes manifests, routes a clarifying QA request for the `harness-engineering` skillset, and asserts the router (`he-router`) is selected and the top candidate's reason includes `qa-intake-by-clarity`.
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -158,6 +192,14 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertIn("qa-intake-by-clarity", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_stage_correctness_questions_route_to_router(self) -> None:
+        """
+        Verify that stage-correctness inquiries for the harness-engineering skillset are routed to the router stage.
+        
+        For each task variant asking whether "he-plan" is the correct stage, generates manifests, routes the request to the "harness-engineering" skillset, and asserts:
+        - the payload status is "selected";
+        - the selected stage id is "he-router";
+        - the top candidate's reason contains "stage-correctness-question".
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -178,6 +220,9 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
                 self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_multiple_named_stages_route_to_router(self) -> None:
+        """
+        Verify that a harness-engineering request mentioning multiple named stages is routed to the router lane and that the chosen candidate's reason contains "named-stage-ambiguity".
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -206,6 +251,11 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertIn("plugin-create", payload["candidates"][0]["reason"])
 
     def test_plugin_factory_routes_harden_and_install_to_owned_lanes(self) -> None:
+        """
+        Verify that plugin-factory routes "harden" and "install" intents to their owned lanes and annotates the chosen candidate with the expected routing rule.
+        
+        For each test phrase, asserts that the router selects a candidate (status "selected"), that the selected skillset id matches the expected lane ("plugin-builder" or "plugin-installer"), and that the top candidate's reason string contains the expected rule identifier (e.g., "plugin-harden-convert", "plugin-install").
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -268,6 +318,14 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertIn("internal-router-root-invocation", payload["candidates"][0]["reason"])
 
     def test_skill_factory_routes_core_lanes_deterministically(self) -> None:
+        """
+        Verify that skill-factory routing maps specific user requests deterministically to expected core lanes.
+        
+        Generates and writes manifests, then for a set of example task phrasings asserts each route selection:
+        - returns status "selected",
+        - chooses the expected lane id for the skill-factory,
+        - and includes the expected rule identifier substring in the top candidate's reason.
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -291,6 +349,11 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
                 self.assertIn(expected_rule, payload["candidates"][0]["reason"])
 
     def test_skill_factory_routes_multi_lane_questions_to_router(self) -> None:
+        """
+        Verifies that an ambiguous skill-factory request referencing multiple lanes is routed to the skill-factory router.
+        
+        Ensures the router selects the "skill-factory-router" as the chosen lane and that the top candidate's reason includes "named-lane-ambiguity".
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -305,6 +368,11 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertIn("named-lane-ambiguity", payload["candidates"][0]["reason"])
 
     def test_skill_factory_routes_mixed_intent_to_router(self) -> None:
+        """
+        Verifies that a request mixing "create" and "install" intents is routed to the skill-factory router.
+        
+        Generates and writes skillset manifests, routes the query "create and install a skill package" against the "skill-factory" skillset, and asserts that the router selects the router lane ("skill-factory-router") and that the top candidate's reason includes "mixed-intent-ambiguity".
+        """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
 
@@ -357,6 +425,13 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertFalse(violations)
 
     def test_context_budget_rejects_noncanonical_skillset_file(self) -> None:
+        """
+        Verifies that stray files inside a skillset directory are reported as unowned by the provenance validator.
+        
+        Creates a non-manifest file under `.skillsets/<skillset>/` and asserts that
+        check_context_budget.validate_written_manifest_provenance returns at least one
+        violation whose `code` is `"UNOWNED_SKILLSET_FILE"`.
+        """
         rogue = self.temp_dir / ".skillsets" / "agent-ops" / "notes.md"
         rogue.parent.mkdir(parents=True)
         rogue.write_text("manual note\n", encoding="utf-8")

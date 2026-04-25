@@ -11,6 +11,7 @@ lock_pid_file="$lock_dir/pid"
 lock_owned=0
 watchdog_pid=""
 
+# usage prints the command-line usage message and short description for sync_skills.sh.
 usage() {
   cat <<'USAGE'
 Usage:
@@ -84,7 +85,7 @@ else
 fi
 cd "$repo_root"
 
-# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to ensure only one sync run runs at a time, waits briefly for in-progress initialisation, and reclaims stale locks (with PID or based on directory mtime) before failing.
+# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to prevent concurrent sync runs, writes the current PID to $lock_pid_file when successful, and reclaims stale locks (by PID or directory age) before failing.
 acquire_sync_lock() {
   local existing_pid=""
   local lock_mtime=""
@@ -147,6 +148,7 @@ acquire_sync_lock() {
   exit 1
 }
 
+# release_sync_lock releases the exclusive sync lock owned by the current process by removing the lock directory and clearing the lock ownership state.
 release_sync_lock() {
   if [[ "$lock_owned" -eq 1 ]]; then
     rm -rf -- "$lock_dir"
@@ -198,6 +200,7 @@ if [ -z "$selection_policy_shell" ]; then
 fi
 eval "$selection_policy_shell"
 
+# start_watchdog starts a background watchdog that sleeps for $timeout_seconds and, if the timeout elapses, logs an error and sends SIGTERM to the main script; it records the background PID in $watchdog_pid.
 start_watchdog() {
   (
     sleep "$timeout_seconds"
@@ -207,6 +210,7 @@ start_watchdog() {
   watchdog_pid="$!"
 }
 
+# stop_watchdog stops the background watchdog timer process (if any) and clears its PID.
 stop_watchdog() {
   if [[ -n "$watchdog_pid" ]]; then
     kill "$watchdog_pid" 2>/dev/null || true
@@ -1039,7 +1043,7 @@ readme_path.write_text(content, encoding="utf-8")
 PY
 generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
-# remove_legacy_symlink removes the symlink at the given path if it exists and echoes a confirmation.
+# remove_legacy_symlink removes the symlink at the given path if it exists and prints a confirmation; does nothing if the path is not a symlink.
 remove_legacy_symlink() {
   local target_dir="$1"
   if [ -L "$target_dir" ]; then

@@ -24,9 +24,22 @@ class TestSkillScopePrecedence(unittest.TestCase):
         (self.repo_root / ".agents" / "skills").mkdir(parents=True)
 
     def tearDown(self) -> None:
+        """
+        Remove the temporary test directory created in setUp, ignoring any filesystem errors.
+        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def _write_skill(self, relative_dir: str, description: str) -> Path:
+        """
+        Create a skill directory under the test repository and write a `SKILL.md` file containing YAML frontmatter.
+        
+        Parameters:
+            relative_dir (str): Path, relative to the test repository root, where the skill directory will be created.
+            description (str): Description text to include in the `SKILL.md` frontmatter.
+        
+        Returns:
+            Path: The filesystem path of the created skill directory.
+        """
         skill_dir = self.repo_root / relative_dir
         skill_dir.mkdir(parents=True)
         skill_dir.joinpath("SKILL.md").write_text(
@@ -37,6 +50,15 @@ class TestSkillScopePrecedence(unittest.TestCase):
 
     @contextmanager
     def _patched_repo(self, *, default_visible: Optional[set[str]] = None):
+        """
+        Provide a context manager that temporarily patches skill discovery and runtime-budget configuration constants to point at the test repository.
+        
+        Parameters:
+        	default_visible (Optional[set[str]]): Set of flat skill names treated as visible during the patched context; if omitted, defaults to {"shared-skill"}.
+        
+        Description:
+        	The context manager patches module-level settings in both `skill_discovery` and `verify_runtime_budget` (including repository root, flat skills directory, system lane, scan roots, plugin skill glob, and visibility/hidden name sets) so tests operate against `self.repo_root`. Use in a `with` statement to apply the patches for the block's duration.
+        """
         visible = default_visible if default_visible is not None else {"shared-skill"}
         with (
             mock.patch.object(skill_discovery, "REPO_ROOT", self.repo_root),

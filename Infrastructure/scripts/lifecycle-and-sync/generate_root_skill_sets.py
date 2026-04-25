@@ -19,10 +19,32 @@ MAX_BODY_WORDS = 250
 
 
 def word_count(text: str) -> int:
+    """
+    Count non-empty whitespace-separated tokens in the given text.
+    
+    Parameters:
+        text (str): Input string to evaluate; tokens are produced by splitting on any whitespace.
+    
+    Returns:
+        int: Number of tokens after splitting on whitespace and excluding tokens that are empty or only whitespace.
+    """
     return len([word for word in text.split() if word.strip()])
 
 
 def render_template(skill_set_name: str, metadata: dict[str, str]) -> str:
+    """
+    Render the SKILL.md template for a root skill-set using provided metadata.
+    
+    Parameters:
+    	skill_set_name (str): Root skill-set identifier (used for `{{ skill_set_name }}` and to generate `{{ title }}` by replacing hyphens with spaces and title-casing).
+    	metadata (dict[str, str]): Mapping providing values for template tokens:
+    		- "description": substituted for `{{ short_mutually_exclusive_description }}`
+    		- "scope": substituted for `{{ scope }}`
+    		- "exclusions": substituted for `{{ exclusions }}`
+    
+    Returns:
+    	rendered (str): The template text with all known tokens replaced by their corresponding values from `skill_set_name` and `metadata`.
+    """
     title = skill_set_name.replace("-", " ").title()
     template = TEMPLATE.read_text(encoding="utf-8")
     replacements = {
@@ -39,6 +61,30 @@ def render_template(skill_set_name: str, metadata: dict[str, str]) -> str:
 
 
 def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
+    """
+    Generate a report of rendered root skill-set entrypoints and validate their lengths.
+    
+    Renders the SKILL.md template for each root skill-set name, counts words in each root's short description and rendered body, groups modules by root, and records any length violations.
+    
+    Returns:
+        report (dict): A dictionary with the following keys:
+            - status (str): "pass" if no violations, otherwise "fail".
+            - projection_mode (str): Always "rooted".
+            - policy_identity (str): Identity string from the selection policy.
+            - root_count (int): Number of root entries processed.
+            - roots (list[dict]): List of root records, each containing:
+                - name (str): Root skill-set name.
+                - path (str): Relative path where SKILL.md would be written.
+                - description_words (int): Word count of the short description.
+                - body_words (int): Word count of the rendered SKILL.md body.
+                - module_count (int): Number of modules associated with this root.
+                - content (str): Rendered SKILL.md body.
+            - unmapped (Any): Modules returned as unmapped by build_skill_modules().
+            - violations (list[dict]): List of violation records; each contains:
+                - code (str): Violation code, e.g. "ROOT_DESCRIPTION_TOO_LONG" or "ROOT_BODY_TOO_LONG".
+                - name (str): Affected root skill-set name.
+                - words (int): The offending word count.
+    """
     modules, unmapped = build_skill_modules()
     grouped = modules_by_skill_set(modules)
     roots = []
@@ -75,6 +121,20 @@ def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
 
 def write_roots(report: dict[str, Any], output_dir: Path, *, repo_root_path: Path | None = None) -> list[dict[str, str]]:
     # Verify output_dir is inside the expected repository subtree before any mutations.
+    """
+    Write SKILL.md files for each root in the report into the specified output directory and return a list of write records.
+    
+    Parameters:
+        report (dict[str, Any]): Report produced by build_roots; must contain a "roots" iterable where each root is a mapping with at least "name" (directory name) and "content" (file contents).
+        output_dir (Path): Target base directory under which per-root subdirectories will be created (e.g., <output_dir>/<root_name>/SKILL.md).
+        repo_root_path (Path | None): Optional repository root override used to validate that `output_dir` resides under the expected `.agents/skills` subtree. If None, the repository root is determined automatically.
+    
+    Returns:
+        list[dict[str, str]]: A list of records for each written file, each containing `path` (relative path string) and `action` (e.g., `"write"`).
+    
+    Raises:
+        ValueError: If `output_dir` is not located within the expected repository subtree (.agents/skills) relative to `repo_root_path` or the detected repository root.
+    """
     repository_root = repo_root_path or repo_root()
     expected_base = repository_root / ".agents" / "skills"
     resolved_output = output_dir.resolve()
@@ -104,6 +164,15 @@ def write_roots(report: dict[str, Any], output_dir: Path, *, repo_root_path: Pat
 
 
 def public_report(report: dict[str, Any]) -> dict[str, Any]:
+    """
+    Return a copy of the report with the `content` field removed from each root entry.
+    
+    Parameters:
+        report (dict[str, Any]): Report dictionary produced by build_roots, containing a "roots" list of per-root dictionaries.
+    
+    Returns:
+        dict[str, Any]: A shallow copy of `report` where each item in `report["roots"]` has had its `"content"` key omitted.
+    """
     return {
         **report,
         "roots": [
@@ -114,6 +183,14 @@ def public_report(report: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> int:
+    """
+    Run the CLI to build rooted skill-set SKILL.md files and emit a report.
+    
+    Builds a report for all root skill sets, optionally writes generated SKILL.md files to the specified output directory when `--write` is provided (skipped if `--dry-run`), and prints either a JSON payload (`--json`) or a human-readable summary with violation lines. If `--write` is requested and the report contains violations, the write is aborted; when `--json` is set the public report is printed before aborting.
+    
+    Returns:
+        int: Process exit code: `0` when the report status is "pass", `1` otherwise.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--dry-run", action="store_true")

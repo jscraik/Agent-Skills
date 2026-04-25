@@ -61,6 +61,17 @@ TOKEN_ALIASES = {
 
 
 def tokenize(text: str) -> set[str]:
+    """
+    Convert input text into a deduplicated set of normalized tokens useful for matching.
+    
+    The function lowercases text, removes common stopwords, strips leading and trailing hyphens, expands token aliases, and includes both whole hyphenated tokens and their individual hyphen-separated parts.
+    
+    Parameters:
+        text (str): Input text to tokenize.
+    
+    Returns:
+        set[str]: A set of normalized token strings extracted from the input.
+    """
     tokens: set[str] = set()
     for token in TOKEN_RE.findall(text.lower()):
         cleaned = token.strip("-")
@@ -77,10 +88,32 @@ def tokenize(text: str) -> set[str]:
 
 
 def normalize_phrase(text: str) -> str:
+    """
+    Normalize a phrase by lowercasing and replacing non-alphanumeric sequences with single spaces.
+    
+    Returns:
+        A normalized string containing only lowercase letters and digits separated by single spaces, with leading and trailing whitespace removed.
+    """
     return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
 
 
 def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> tuple[list[dict[str, Any]], str | None]:
+    """
+    Load and validate the manifest.jsonl for a specified root skill set and return the parsed rows or an error status.
+    
+    Parameters:
+        skill_set (str): Name of the root skill set to load (must be in ROOT_SKILL_SET_NAMES).
+        skillsets_dir (Path): Base directory containing skill set subdirectories (defaults to DEFAULT_SKILLSETS_DIR).
+    
+    Returns:
+        tuple[list[dict[str, Any]], str | None]: A pair where the first element is the list of validated manifest rows (each a dict with required keys: `id`, `description`, `level`, `source_path`, and optional `triggers`), and the second element is an error status string when applicable:
+            - "invalid_skill_set" if `skill_set` is not recognized,
+            - "manifest_missing" if the manifest.jsonl file is not present,
+            - None on successful load.
+    
+    Raises:
+        ValueError: If any manifest line contains invalid JSON, a non-object row, missing/empty required fields, or a malformed `triggers` field.
+    """
     if skill_set not in ROOT_SKILL_SET_NAMES:
         return [], "invalid_skill_set"
     manifest_path = skillsets_dir / skill_set / "manifest.jsonl"
@@ -111,6 +144,16 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
 
 
 def score_row(row: dict[str, Any], task: str) -> tuple[float, list[str]]:
+    """
+    Score how well a manifest row matches the given task text.
+    
+    Parameters:
+        row (dict[str, Any]): A manifest row containing at least `id`, `description`, and optional `triggers`.
+        task (str): The task text to match against the row.
+    
+    Returns:
+        tuple[float, list[str]]: A pair (confidence, reasons). `confidence` is a number between 0.0 and 1.0 indicating match strength (rounded to 4 decimals). `reasons` is a short list of human-readable match reasons; when a multi-word trigger or id phrase is found in the task the confidence is `1.0` and the reason lists the matched phrase, otherwise reasons enumerate up to three matched terms.
+    """
     task_phrase = normalize_phrase(task)
     phrase_candidates = [
         normalize_phrase(str(row.get("id", "")).replace("-", " ")),
@@ -140,6 +183,17 @@ def score_row(row: dict[str, Any], task: str) -> tuple[float, list[str]]:
 
 
 def signal_matches(task_text: str, task_tokens: set[str], signal: str) -> bool:
+    """
+    Determine whether a routing signal matches the task text.
+    
+    Parameters:
+        task_text (str): Lowercased task text used for substring checks.
+        task_tokens (set[str]): Tokenized task used for token-subset checks.
+        signal (str): Signal phrase to test.
+    
+    Returns:
+        bool: `True` if `signal` is a non-empty substring of `task_text` or all tokens from `signal` are contained in `task_tokens`, `False` otherwise.
+    """
     signal_text = signal.lower().strip()
     if not signal_text:
         return False
@@ -152,6 +206,16 @@ def signal_matches(task_text: str, task_tokens: set[str], signal: str) -> bool:
 
 
 def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | None:
+    """
+    Finds the first manifest row whose `"id"` equals the given stage identifier.
+    
+    Parameters:
+        rows (list[dict[str, Any]]): Sequence of manifest rows (dictionaries) to search; each row is expected to contain an `"id"` key.
+        stage_id (str): Stage identifier to match against each row's `"id"`.
+    
+    Returns:
+        dict[str, Any] | None: The matched row dictionary if found, `None` otherwise.
+    """
     for row in rows:
         if row.get("id") == stage_id:
             return row
@@ -159,6 +223,20 @@ def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | Non
 
 
 def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
+    """
+    Builds a standardized selection payload for a manifest row.
+    
+    Parameters:
+        row (dict[str, Any]): Manifest row dictionary containing at least `id`, `level`, and `source_path`.
+        confidence (float): Confidence score for the selection (typically 0.0–1.0).
+    
+    Returns:
+        dict[str, Any]: Payload with keys:
+            - `id`: row's `id`
+            - `level`: row's `level`
+            - `source_path`: row's `source_path`
+            - `confidence`: `confidence` rounded to four decimal places
+    """
     return {
         "id": row.get("id"),
         "level": row.get("level"),
@@ -168,6 +246,16 @@ def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
 
 
 def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool:
+    """
+    Detect whether the task text is asking if a stage (or lane) is correct or which stage to use.
+    
+    Parameters:
+    	task_text (str): The task text (expected lowercased) to inspect for correctness-question phrasing.
+    	task_tokens (set[str]): Tokenized words from the task text for phrase/token membership checks.
+    
+    Returns:
+    	bool: `True` if the task appears to ask about stage correctness or which stage to use, `False` otherwise.
+    """
     return (
         re.search(r"\bis\s+he-[a-z0-9-]+\s+(correct|right)\b", task_text) is not None
         or "whether" in task_tokens
@@ -183,7 +271,20 @@ def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool
 
 
 def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Apply the HE deterministic stage policy before generic token scoring."""
+    """
+    Apply harness-engineering deterministic routing rules to select a manifest row for the given task.
+    
+    Parameters:
+        task (str): The task text to evaluate for deterministic routing.
+        rows (list[dict[str, Any]]): List of manifest rows (each must contain an `id`) to consider.
+    
+    Returns:
+        dict[str, Any] | None: If a deterministic rule matches, returns a dict with keys:
+            - `row` (dict): The selected manifest row.
+            - `confidence` (float): Numeric confidence between 0.0 and 1.0.
+            - `reason` (str): Short rationale for the selection.
+        Returns `None` when no deterministic harness-engineering rule applies.
+    """
     routing_map_path = repo_root() / "Plugins/harness-engineering/references/routing-map.json"
     if not routing_map_path.is_file():
         return None
@@ -401,7 +502,21 @@ FACTORY_ROUTING_RULES = {
 
 
 def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Apply deterministic routing rules for factory skill sets."""
+    """
+    Apply deterministic routing rules for factory-style skill sets (for example, "plugin-factory" or "skill-factory") and return a routing decision when a configured rule matches.
+    
+    Parameters:
+        skill_set (str): The name of the factory skill set to evaluate.
+        task (str): The task text to match against configured signals and stage names.
+        rows (list[dict[str, Any]]): Parsed manifest rows for the skill set.
+    
+    Returns:
+        dict[str, Any] | None: A routing decision dictionary with keys:
+            - "row": the selected manifest row (dict),
+            - "confidence": the routing confidence as a float,
+            - "reason": a short string describing which deterministic rule matched;
+        or `None` when no deterministic factory rule applies.
+    """
     config = FACTORY_ROUTING_RULES.get(skill_set)
     if not config:
         return None
@@ -466,6 +581,28 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
 
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
+    """
+    Route a textual task to a stage within a root skill set and return a structured routing payload.
+    
+    Performs manifest loading, deterministic overrides (harness-engineering and factory rules), and manifest-driven scoring to produce a selection and ranked candidates.
+    
+    Parameters:
+        skill_set (str): Root skill set name to route against (e.g., "harness-engineering", "plugin-factory").
+        task (str): The textual task to route.
+        top_k (int, optional): Maximum number of candidate rows to return (bounded to 1..MAX_TOP_K). Defaults to MAX_TOP_K.
+        skillsets_dir (Path, optional): Root directory containing .skillsets/<skill_set>/manifest.jsonl. Defaults to DEFAULT_SKILLSETS_DIR.
+    
+    Returns:
+        dict: A routing payload with the following keys:
+            - schema_version (int)
+            - status (str): One of "selected", "low_confidence", "no_match", or manifest error codes like "manifest_missing" / "invalid_skill_set".
+            - policy_identity (dict): Policy identity metadata.
+            - skill_set (str): Echo of the requested skill_set.
+            - top_k (int): Bounded top_k actually used.
+            - selected (dict | None): Standardized selected row payload (id, level, source_path, confidence) when a selection is made and confidence meets threshold; otherwise None.
+            - candidates (list[dict]): Ranked candidate entries each with keys `id`, `level`, `confidence`, and `reason`.
+            - operator_action (str | None): Guidance for an operator when human action or clarification is required, otherwise None.
+    """
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
     rows, error_status = read_manifest(skill_set, skillsets_dir)
     if error_status:
@@ -548,6 +685,22 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
 
 
 def read_task(args: argparse.Namespace) -> str:
+    """
+    Read task text from exactly one of the provided CLI sources.
+    
+    Parameters:
+        args (argparse.Namespace): Parsed CLI namespace exposing one and only one of:
+            - `task` (str | None): inline task text provided via --task.
+            - `task_stdin` (bool): when true, read task text from standard input (--task-stdin).
+            - `task_file` (str | None): path to a UTF-8 file containing the task (--task-file).
+    
+    Returns:
+        str: The task text with leading and trailing whitespace removed.
+    
+    Raises:
+        SystemExit: If none or more than one of the task sources is provided, or if the specified
+        task file does not exist.
+    """
     sources = [bool(args.task), bool(args.task_stdin), bool(args.task_file)]
     if sum(sources) != 1:
         raise SystemExit("Specify exactly one of --task, --task-stdin, or --task-file.")
@@ -564,6 +717,21 @@ def read_task(args: argparse.Namespace) -> str:
 
 
 def main() -> int:
+    """
+    CLI entry point for routing a task to a skill set stage.
+    
+    Parses command-line arguments, reads the task text from one of the supported inputs, invokes the routing logic, and prints either JSON or a brief human-readable result. Supported flags:
+      --skill-set (required): name of the skill set to route against.
+      --task: task text (avoid for sensitive input; use --task-stdin or --task-file).
+      --task-stdin: read task text from standard input.
+      --task-file: read task text from the given file path.
+      --top-k: number of candidate stages to return (bounded by MAX_TOP_K).
+      --skillsets-dir: directory containing .skillsets manifests.
+      --json: output the full payload as formatted JSON.
+    
+    Returns:
+      exit_code (int): 0 when the route status is one of "selected", "low_confidence", or "no_match"; 1 otherwise.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skill-set", required=True)
     parser.add_argument("--task", help="Task text; use --task-stdin or --task-file for sensitive tasks")

@@ -226,7 +226,11 @@ class TestAskCLI(unittest.TestCase):
                 os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
 
     def test_runtime_budget_json_contract(self):
-        """Verify ask runtime budget remains a first-class budget gate command."""
+        """
+        Verify that 'ask runtime budget --json' reports passing runtime budget and surface while using a deterministic projection mode.
+        
+        Runs the CLI with SYNC_SKILLS_PROJECTION_MODE set to "flat" and asserts the process exits successfully, the top-level `status` equals `"success"`, and both `data.runtime_budget.status` and `data.runtime_surface.status` equal `"pass"`.
+        """
         # Pin SYNC_SKILLS_PROJECTION_MODE to ensure deterministic test behavior.
         saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
         try:
