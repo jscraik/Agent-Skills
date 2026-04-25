@@ -15,9 +15,6 @@ disable=
     protected-access,
     too-few-public-methods
 
-[FORMAT]
-max-line-length=120
-
 [DESIGN]
 max-args=8
 max-attributes=12

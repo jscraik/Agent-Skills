@@ -123,7 +123,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
     try:
         import yaml  # type: ignore
 
-        loaded = yaml.safe_load(text) or {}
+        loaded = yaml.safe_load(text)
     except ImportError as exc:
         loaded = {}
         yaml_error = exc
@@ -131,7 +131,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
         loaded = {}
         yaml_error = exc
 
-    if "loaded" in locals() and loaded == {}:
+    if yaml_error is not None:
         loaded = {}
         current_key: Optional[str] = None
         for raw_line in text.splitlines():
@@ -150,6 +150,8 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
                 loaded[current_key].append(line[2:].strip().strip("\"'"))
         if not loaded:
             raise ValueError(f"Unable to parse {path}: {yaml_error or 'empty mapping'}") from yaml_error
+    if loaded is None:
+        loaded = {}
     if not isinstance(loaded, dict):
         raise ValueError(f"Expected mapping in {path}")
     return loaded
@@ -223,7 +225,6 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
     successes = sum(1 for attempt in attempts if attempt.get("outcome") == "success")
     failures = total - successes
     wall_clock = sum(float(attempt.get("wall_clock_seconds") or 0) for attempt in attempts)
-    tool_steps = sum(int(attempt.get("tool_steps") or 0) for attempt in attempts)
     return {
         "attempts": total,
         "successes": successes,
@@ -231,8 +232,6 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
         "pass_rate": round(successes / total, 4) if total else 0,
         "flake_rate": 1 if successes and failures else 0,
         "wall_clock_seconds": round(wall_clock, 4),
-        "tool_steps": tool_steps,
-        "retries": max(0, total - 1),
     }
 
 
@@ -279,7 +278,10 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
     try:
         max_attempts = int(config.get("max_attempts", 5))
         requested_attempts = int(attempts)
+        max_skill_context_tokens = int(config.get("max_skill_context_tokens", 1500))
         if max_attempts < 1 or requested_attempts < 1:
+            raise ValueError
+        if max_skill_context_tokens < 1:
             raise ValueError
         bounded_attempts = min(requested_attempts, max_attempts)
         seed_path = _resolve_inside(directory, str(config.get("seed", "seed.sh")), label="seed")
@@ -352,8 +354,6 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             "seed_exit_code": seed.returncode,
             "verify_exit_code": verify.returncode,
             "wall_clock_seconds": round(elapsed, 4),
-            "tool_steps": 1 if seed_timed_out else 2,
-            "retries": max(0, attempt_no - 1),
             "context_budget": {
                 "modules_loaded": 1,
                 "estimated_skill_context_tokens": context_tokens,
@@ -376,7 +376,7 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             **score,
             "estimated_skill_context_tokens": context_tokens,
         },
-        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= int(config.get("max_skill_context_tokens", 1500)),
+        "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= max_skill_context_tokens,
     }
     scorecard_path = telemetry_dir / "scorecards" / f"{_safe_filename(workout_id)}.json"
     scorecard_path.parent.mkdir(parents=True, exist_ok=True)

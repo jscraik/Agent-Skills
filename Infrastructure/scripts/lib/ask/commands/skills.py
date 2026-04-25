@@ -1456,11 +1456,16 @@ def sync_skills(
         ensure_mutation_supported(projection_decision, dry_run=dry_run)
     except ProjectionModeError as exc:
         resolved_mode = getattr(exc, "resolved_mode", None)
+        fix_suggestions = {
+            "ERR_INVALID_PROJECTION_MODE": "Choose a supported projection mode such as --projection flat or --projection rooted.",
+            "ERR_DEFERRED_PROJECTION_MODE": "Use --projection flat or --projection rooted until the deferred projection mode is available.",
+            "ERR_PROJECTION_MUTATION_UNAVAILABLE": "Use --dry-run for this projection mode, or choose --projection flat or --projection rooted for mutation.",
+        }
         result.status = "error"
         result.errors.append(ErrorObject(
             code=exc.code,
             message=exc.message,
-            fix_suggestion="Use --projection flat, or rerun rooted mode with --dry-run until rooted mutation lands.",
+            fix_suggestion=fix_suggestions.get(exc.code, "Choose a supported projection mode or rerun with --dry-run."),
         ))
         result.data["projection_mode"] = resolved_mode
         result.data["requested_projection_mode"] = getattr(exc, "requested_mode", projection or "")

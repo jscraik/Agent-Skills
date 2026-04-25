@@ -48,6 +48,16 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
             raise ValueError(f"Invalid manifest JSON at {rel(manifest_path)}:{line_no}: {exc}") from exc
         if not isinstance(row, dict):
             raise ValueError(f"Invalid manifest row at {rel(manifest_path)}:{line_no}: expected JSON object")
+        for field in ("id", "description", "level", "source_path"):
+            if not isinstance(row.get(field), str) or not row.get(field):
+                raise ValueError(
+                    f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field {field!r} must be a non-empty string"
+                )
+        triggers = row.get("triggers", [])
+        if not isinstance(triggers, list) or any(not isinstance(item, str) for item in triggers):
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'triggers' must be a list of strings"
+            )
         rows.append(row)
     return rows, None
 

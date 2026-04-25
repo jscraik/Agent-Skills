@@ -151,7 +151,18 @@ def validate_written_manifest_provenance(
                     "source_path": source_path,
                 })
                 continue
-            if source_path.startswith((".agents/", "Plugins/cache/")):
+            source_parts = Path(source_path).parts
+            is_canonical_source = (
+                len(source_parts) >= 3
+                and ".." not in source_parts
+                and source_parts[0] == "Skills"
+            ) or (
+                len(source_parts) >= 4
+                and ".." not in source_parts
+                and source_parts[0] == "Plugins"
+                and source_parts[2] == "skills"
+            )
+            if not is_canonical_source:
                 violations.append({
                     "code": "SKILLSET_SOURCE_PATH_NOT_CANONICAL",
                     "path": rel_path.as_posix(),

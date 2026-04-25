@@ -110,6 +110,36 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
 
         self.assertIn("INVALID_SKILLSET_MANIFEST_ROW_TYPE", {violation["code"] for violation in violations})
 
+    def test_context_budget_rejects_noncanonical_source_path(self) -> None:
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "skills-system/openai-docs/SKILL.md",
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=REPO_ROOT,
+        )
+
+        self.assertIn("SKILLSET_SOURCE_PATH_NOT_CANONICAL", {violation["code"] for violation in violations})
+
+    def test_context_budget_rejects_traversal_source_path(self) -> None:
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "../Skills/agent-ops/autofix/SKILL.md",
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=REPO_ROOT,
+        )
+
+        self.assertIn("SKILLSET_SOURCE_PATH_NOT_CANONICAL", {violation["code"] for violation in violations})
+
 
 if __name__ == "__main__":
     unittest.main()
