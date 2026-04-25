@@ -30,8 +30,9 @@ if state.get("rollback") != "present":
     print("rollback_missing", file=sys.stderr)
     raise SystemExit(1)
 
+required_recommendations = {"keep", "improve", "merge", "retire"}
 recommendations = {item.strip() for item in state.get("recommendations", "").split(",") if item.strip()}
-if {"keep", "improve", "merge", "retire"} - recommendations:
+if recommendations != required_recommendations:
     print("recommendation_classes_incomplete", file=sys.stderr)
     raise SystemExit(1)
 

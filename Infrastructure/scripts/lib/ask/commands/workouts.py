@@ -14,6 +14,14 @@ from ask.envelope import CallResult, ErrorObject
 
 WORKOUTS_DIRNAME = ".workouts"
 TELEMETRY_DIRNAME = ".skill-telemetry"
+EXPECTED_DECLARED_METRICS = {
+    "success",
+    "wall_clock_seconds",
+    "tool_steps",
+    "retries",
+    "flake_rate",
+    "estimated_skill_context_tokens",
+}
 
 
 def add_workouts_parser(subparsers: Any, global_parser: Any) -> None:
@@ -68,6 +76,16 @@ def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     digest.update(path.read_bytes())
     return digest.hexdigest()
+
+
+def _declared_metrics(config: dict[str, Any]) -> set[str]:
+    constraints = config.get("constraints") or {}
+    if not isinstance(constraints, dict):
+        raise ValueError("Workout constraints must be a mapping")
+    declared = constraints.get("metrics") or []
+    if not isinstance(declared, list) or not all(isinstance(item, str) and item.strip() for item in declared):
+        raise ValueError("Workout constraints.metrics must be a list of non-empty metric names")
+    return {item.strip() for item in declared}
 
 
 def _timeout_text(value: bytes | str | None) -> str:
@@ -232,6 +250,8 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
         "pass_rate": round(successes / total, 4) if total else 0,
         "flake_rate": 1 if successes and failures else 0,
         "wall_clock_seconds": round(wall_clock, 4),
+        "tool_steps": total * 2,
+        "retries": max(total - 1, 0),
     }
 
 
@@ -286,6 +306,15 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         bounded_attempts = min(requested_attempts, max_attempts)
         seed_path = _resolve_inside(directory, str(config.get("seed", "seed.sh")), label="seed")
         verify_path = _resolve_inside(directory, str(config.get("verify", "verify.py")), label="verify")
+        declared_metrics = _declared_metrics(config)
+        if declared_metrics and declared_metrics != EXPECTED_DECLARED_METRICS:
+            raise ValueError(
+                "Workout constraints.metrics must exactly match "
+                f"{', '.join(sorted(EXPECTED_DECLARED_METRICS))}"
+            )
+        target_source = str(config.get("target_source_path") or "")
+        if target_source:
+            _resolve_repo_path(repo_root, target_source, label="target_source_path")
     except (TypeError, ValueError) as exc:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -305,12 +334,16 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
 
     telemetry_dir = _telemetry_dir(repo_root)
     run_id = f"{_safe_filename(workout_id)}-{int(time.time())}"
-    target_source = str(config.get("target_source_path") or "")
     context_tokens = _estimate_context_tokens(repo_root, target_source)
     attempt_results: list[dict[str, Any]] = []
 
     for attempt_no in range(1, bounded_attempts + 1):
-        verifier_hash_before = _sha256(verify_path)
+        verifier_hash_failed = False
+        try:
+            verifier_hash_before: Optional[str] = _sha256(verify_path)
+        except OSError:
+            verifier_hash_before = None
+            verifier_hash_failed = True
         with tempfile.TemporaryDirectory(prefix="skill-workout-") as state_dir:
             start = time.monotonic()
             env = {
@@ -331,10 +364,21 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             else:
                 verify, verify_timed_out = _run_workout_command([sys.executable, str(verify_path)], repo_root=repo_root, env=env)
             elapsed = time.monotonic() - start
-        verifier_hash_after = _sha256(verify_path)
-        outcome = "success" if seed.returncode == 0 and verify.returncode == 0 and verifier_hash_before == verifier_hash_after else "failure"
+        try:
+            verifier_hash_after: Optional[str] = _sha256(verify_path)
+        except OSError:
+            verifier_hash_after = None
+            verifier_hash_failed = True
+        outcome = (
+            "success"
+            if not verifier_hash_failed
+            and seed.returncode == 0
+            and verify.returncode == 0
+            and verifier_hash_before == verifier_hash_after
+            else "failure"
+        )
         failure_type: Optional[str] = None
-        if verifier_hash_before != verifier_hash_after:
+        if verifier_hash_failed or verifier_hash_before != verifier_hash_after:
             failure_type = "contract_violation"
         elif seed_timed_out or verify_timed_out:
             failure_type = "timeout"
@@ -374,6 +418,7 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         "target_source_path": target_source,
         "metrics": {
             **score,
+            "success": score["failures"] == 0,
             "estimated_skill_context_tokens": context_tokens,
         },
         "promotion_eligible": score["pass_rate"] > 0 and context_tokens <= max_skill_context_tokens,
