@@ -1,15 +1,32 @@
-purpose: macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only
-  when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and
-  the "ChatGPT Atlas" app is installed; do not trigger for general browser tasks or
-  non-macOS environments.
-schema_version: '1.0'
+schema_version: 1
+skill: atlas
+purpose: "Perform explicit, user-approved ChatGPT Atlas desktop operations on macOS without treating Atlas as a generic browser target."
 triggers:
-- When requests match atlas scope and intent.
-inputs:
-- user request details
-outputs:
-- structured response or artifacts defined by the skill
+  - "Use when the user request matches the skill scope."
 non_goals:
-- out-of-scope requests outside the skill boundary
+  - "Route unrelated work away from this skill."
+inputs:
+  - "requested Atlas action"
+  - "macOS/Atlas availability"
+  - "target tab, bookmark, or history scope"
+  - "privacy constraints"
+  - "confirmation for state-changing actions"
+outputs:
+  - "action summary"
+  - "AppleScript or command evidence"
+  - "changed browser state"
+  - "blocked permissions"
+  - "privacy notes"
 risks:
-- missing context; mitigated by clarifying questions and explicit assumptions
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

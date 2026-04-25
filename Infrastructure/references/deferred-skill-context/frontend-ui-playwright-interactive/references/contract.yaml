@@ -1,0 +1,34 @@
+schema_version: "1.0"
+
+purpose: >
+  Run persistent Playwright-driven web or Electron debugging through js_repl so UI
+  sessions can be reused across iterations instead of relaunched on every turn.
+
+triggers:
+  - User asks for iterative browser debugging with persistent state.
+  - User needs Electron runtime inspection or repeated renderer reloads.
+  - User wants functional and visual QA from the same live session.
+
+inputs:
+  - Workspace path and runtime type (web or Electron).
+  - Target URL or Electron entrypoint.
+  - QA goal and important viewport or state expectations.
+
+outputs:
+  - Persistent session plan and runtime-specific setup cells.
+  - QA inventory tied to user-visible claims.
+  - Functional and visual evidence summary.
+
+risks:
+  - Stale Playwright handles after runtime or workspace changes.
+  - False UI signoff without explicit QA coverage per claim.
+  - Relaunching too often and losing useful in-session state.
+
+non_goals:
+  - One-shot browser screenshots without iterative debugging.
+  - Backend-only debugging.
+
+guardrails:
+  - Keep handles persistent only within the same workspace and runtime.
+  - Separate functional QA from visual QA.
+  - Use js_repl_reset only as a recovery action.
