@@ -1,0 +1,3 @@
+interface:
+  display_name: Improve Codebase Architecture
+  short_description: Find deeper module boundaries using CONTEXT.md language and Linear decision memory

@@ -23,6 +23,7 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 ## Outputs
 
 - A local `UBIQUITOUS_LANGUAGE.md` with canonical terms, aliases, relationships, prompt translations, example dialogue, ambiguities, and open questions.
+- A small integration patch to the nearest active agent instruction surface, usually `AGENTS.md`, that tells future agents when and how to use `UBIQUITOUS_LANGUAGE.md`.
 - A concise chat summary of the highest-value term choices and prompt translations.
 - Source notes for files or evidence that materially shaped terminology.
 
@@ -43,7 +44,11 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 7. Identify synonyms, overloaded words, vague phrases, and places where user wording should map to a more precise operator or technical term.
 8. Choose canonical terms, keeping the user's natural phrase as an alias when it helps agents understand future prompts.
 9. Write or update `UBIQUITOUS_LANGUAGE.md`.
-10. Return a concise summary of the main terms, prompt translations, and open ambiguities.
+10. Identify the nearest active agent instruction surface, usually `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/**`, or repo-specific instruction docs.
+11. Add or update a concise "Shared Vocabulary" instruction that points agents to `UBIQUITOUS_LANGUAGE.md` and tells them to use the Prompt Translations table for terse, ambiguous, overloaded, or project-specific user wording.
+12. If no safe agent instruction surface exists, leave the glossary in place and report the missing integration surface instead of creating broad documentation sprawl.
+13. Add validation or routing integration only when the repo already has an obvious validation lane, the user explicitly asks for enforcement, or the glossary is part of a governance change.
+14. Return a concise summary of the main terms, prompt translations, integration surface, and open ambiguities.
 
 ## Output Location
 
@@ -65,17 +70,22 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 
 - Be opinionated, but mark low-confidence choices.
 - Prefer the term that improves execution, not the fanciest technical word.
+- Prefer one high-traffic agent instruction surface over broad documentation edits.
+- Keep integration text short and operational; do not add generic explanation.
 - Keep definitions to one sentence and define what the thing is.
 - Include only domain, product, workflow, or operator language; skip generic programming words unless they have project-specific meaning.
 - Do not hide conflicts. Flag overloaded words and recommend how to disambiguate them.
 - Do not expose secrets, tokens, private transcript details, or unnecessary personal data from logs.
 - Cite source names or file paths when they materially influenced a term.
 - Keep the file useful for future prompts: a teammate should be able to copy a phrase from "Prompt translations" and get a better Codex result.
+- Do not invent validation infrastructure in small or unfamiliar repos unless the user asks for enforcement.
 
 ## Validation
 
 - Confirm `UBIQUITOUS_LANGUAGE.md` exists at the selected output path after writing.
-- Fail fast: if the output path is unsafe or a requested source would expose secrets, stop and report the blocker instead of proceeding.
+- Confirm the nearest agent instruction surface references `UBIQUITOUS_LANGUAGE.md`, or report why no safe integration surface was updated.
+- Confirm the integration text tells agents to use Prompt Translations for terse or overloaded user phrases.
+- Fail fast: if the output path is unsafe, a mandatory requested source is unavailable, or a requested source would expose secrets, stop and report the blocker instead of proceeding.
 - Proceed with available evidence when optional requested sources are missing; list skipped sources in the closeout.
 - Check that every canonical term has a one-sentence definition.
 - Check that `Prompt translations` includes at least one user phrase and one copy-pasteable improved prompt when the source material includes informal wording.
@@ -108,9 +118,17 @@ Example rows:
 | "Make sure it works" | Validate the changed surface | "Run the repo-defined fast validation gate and report exact pass/fail/blocker outcomes." |
 | "Check the logs" | Evidence-backed session analysis | "Inspect the relevant session and collector logs, group repeated failure patterns, and recommend prompt or workflow changes." |
 
-## Reference
+## References
 
-Read [references/output-format.md](./references/output-format.md) when writing the file or when the user asks for a fuller template.
+Read these only when the task needs the extra contract detail:
+
+| Reference | Read when |
+| --- | --- |
+| [references/output-format.md](./references/output-format.md) | Writing or updating `UBIQUITOUS_LANGUAGE.md`, or when the user asks for a fuller template. |
+| [references/contract.yaml](./references/contract.yaml) | Checking expected triggers, outputs, risks, observability, or rollback behavior. |
+| [references/evals.yaml](./references/evals.yaml) | Updating routing examples, eval prompts, or expected skill-selection behavior. |
+| [Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json) | Inspecting machine-readable task-profile metadata used by lifecycle diagnostics. |
+| [references/task-profile.json](./references/task-profile.json) | Inspecting the compatibility task profile required by family benchmark tooling; parity with `Infrastructure/references/task-profile.json` is enforced by centralized infrastructure validators. |
 
 ## Re-Running
 

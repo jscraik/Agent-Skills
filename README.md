@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed repository of Codex skills for AI coding agents. Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **21 skills** for AI coding agents. Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 

@@ -671,7 +671,7 @@ else
     echo
     echo "[family-gate] === $skill_dir ==="
     skill_slug="${skill_dir//\//-}"
-    skill_log="$(mktemp "${TMPDIR:-/tmp}/skill-family-${skill_slug}.XXXXXX.log")"
+    skill_log="$(mktemp "${TMPDIR:-/tmp}/skill-family-${skill_slug}.log.XXXXXX")"
 
     (
       run_structural_skill_suite "$skill_dir"

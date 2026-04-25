@@ -25,8 +25,8 @@ Use this template when creating or updating `UBIQUITOUS_LANGUAGE.md`.
 
 ## Relationships
 
-- A **Term** belongs to exactly one **Other Term**.
-- A **Workflow** produces zero or more **Artifacts**.
+- Example relationship (only if supported by source evidence): **Term A** is part of **Term B**.
+- Example workflow link (only if observed): **Workflow X** may produce **Artifact Y**.
 
 ## Example Dialogue
 
@@ -42,6 +42,12 @@ Use this template when creating or updating `UBIQUITOUS_LANGUAGE.md`.
 
 - "Ambiguous term" was used to mean both **Term A** and **Term B**. Recommendation: use **Term A** for <case> and **Term B** for <case>.
 
+## Agent Integration
+
+- Instruction surface updated: <path or "not found">
+- Integration summary: <how future agents are told to use this glossary>
+- Validation/enforcement: <none, existing gate, or new check>
+
 ## Open Questions
 
 - Should "<unclear phrase>" map to **Term A** or **Term B**?
@@ -53,3 +59,4 @@ Use this template when creating or updating `UBIQUITOUS_LANGUAGE.md`.
 - Canonical terms should be boringly useful, not impressive.
 - Prompt translations should be copy-pasteable.
 - Ambiguities should be visible enough that future agents do not silently choose the wrong meaning.
+- Agent integration should be short, operational, and attached to a high-traffic instruction surface.

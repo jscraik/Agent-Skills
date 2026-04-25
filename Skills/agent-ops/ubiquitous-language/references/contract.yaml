@@ -18,15 +18,17 @@ inputs:
 
 outputs:
   - UBIQUITOUS_LANGUAGE.md at the selected local path
+  - A concise integration update to the nearest active agent instruction surface when one exists
   - Canonical terms with one-sentence definitions and avoided aliases
   - Prompt translations from user phrases to agent-actionable wording
   - Relationships, example dialogue, flagged ambiguities, and open questions
-  - Concise closeout summary with output path and skipped-source notes
+  - Concise closeout summary with output path, integration surface, and skipped-source notes
 
 non_goals:
   - Generic programming vocabulary education
   - Code symbol renaming without a domain-language need
   - Broad documentation rewrites
+  - New validation or routing infrastructure unless explicitly requested or already natural to the repo
   - Raw transcript or log extraction
 
 risks:
@@ -35,9 +37,9 @@ risks:
   - False precision; mitigated by flagging low-confidence terms and open questions
 
 observability: >
-  Report the output path, skipped or unavailable sources, and low-confidence
-  canonical terms in the closeout so future agents can understand the evidence
-  behind the vocabulary.
+  Report the output path, agent instruction integration surface, skipped or
+  unavailable sources, and low-confidence canonical terms in the closeout so
+  future agents can understand the evidence behind the vocabulary.
 
 rollback_procedure: >
   Restore the previous `UBIQUITOUS_LANGUAGE.md` from version control or local

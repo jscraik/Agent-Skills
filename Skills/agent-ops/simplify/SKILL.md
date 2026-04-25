@@ -38,6 +38,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - Keep findings actionable: identify issue, apply fix, then verify.
 - Use parallel specialist review for coverage, then one integrated edit pass.
 - Refactor in small reversible steps and keep validation tight after each meaningful edit cluster.
+- For non-trivial simplify work, prove behavioral equivalence before removing, merging, or deleting code.
 
 ## When to use
 
@@ -69,7 +70,7 @@ Choose one mode before review and keep it explicit in the handoff.
 
 ## Deliverables
 
-Return a single handoff envelope in this shape:
+Return a single handoff envelope in this shape. Include `equivalence_evidence` and `metrics_delta` when a non-trivial refactor, deletion, deduplication, or measured cleanup makes them relevant; otherwise omit them or mark the values `n/a`.
 
 ```yaml
 schema_version: 1
@@ -86,6 +87,14 @@ actions:
 skipped:
   - lane: "reuse|quality|efficiency"
     reason: "<brief reason>"
+equivalence_evidence:
+  - axis: "<api|errors|ordering|side-effects|data-shape|concurrency|observability>"
+    outcome: "preserved|n/a|blocked"
+    evidence: "<brief proof for non-trivial refactors>"
+metrics_delta:
+  loc: "<before -> after|n/a>"
+  complexity: "<before -> after|n/a>"
+  warnings: "<before -> after|n/a>"
 validation:
   - command: "<exact command>"
     outcome: "pass|fail|blocked"
@@ -152,9 +161,10 @@ Review for:
 
 1. Collect outputs from all three lanes.
 2. Aggregate findings, deduplicate overlap, and prioritize by correctness/safety impact.
-3. Apply fixes directly in the changed files.
-4. If a finding is a false positive or low value, skip it without debate and continue.
-5. Summarize what was fixed, or explicitly state that code was already clean.
+3. Before non-trivial merge, delete, extract, or abstraction work, record the equivalence axes that must stay preserved.
+4. Apply fixes directly in the changed files.
+5. If a finding is a false positive or low value, skip it without debate and continue.
+6. Summarize what was fixed, or explicitly state that code was already clean.
 
 ## Modern Hardening Overlay (2026)
 
@@ -164,6 +174,7 @@ Use this additive overlay for high-signal cleanup passes while preserving all ex
    - detect the compare base (PR base when available; fallback to merge-base)
    - record changed-file scope, exclusions, and diff source
    - assign light risk tiers so validation depth scales with impact
+   - capture quick before signals when useful: test result, warning count, LOC, or complexity hotspot
 2. Run cross-cutting checks in addition to the three core review lanes:
    - contract drift on exported symbols, schema shapes, and payload contracts
    - async correctness (cancellation, stale closure, race, dropped promise handling)
@@ -179,7 +190,7 @@ Use this additive overlay for high-signal cleanup passes while preserving all ex
    - skipped findings and reasons
 
 Read when you need the full modern checklist and output schema:
-- `Infrastructure/references/modern-hardening-2026.md`
+- `references/modern-hardening-2026.md`
 
 ## Refactor Playbook Overlay
 
@@ -193,10 +204,19 @@ Use this overlay when the user asks for "refactor", "clean up structure", or "ma
    - flatten nested conditionals with guard clauses
 2. Keep scope anchored to changed files unless the user explicitly widens scope.
 3. Prefer incremental edits over pattern-heavy rewrites; introduce patterns only when they remove a concrete smell.
-4. Record skipped suggestions when risk is high, tests are missing, or evidence is insufficient.
+4. Classify duplication before merging it:
+   - exact copies and structural clones are good simplify candidates when behavior is proven equivalent
+   - semantically similar code needs domain evidence before extraction
+   - accidental resemblance should stay separate
+5. Use a lightweight priority score when several refactors compete: `(impact x confidence) / risk`.
+6. Guard dead-code deletion with search evidence, config/docs/history checks, and explicit skip notes when ambiguity remains.
+7. Record skipped suggestions when risk is high, tests are missing, or evidence is insufficient.
 
 Read when you need the full smell catalog, operation checklist, and examples:
-- `Infrastructure/references/refactor-playbook.md`
+- `references/refactor-playbook.md`
+
+Read when deduplication, dead-code removal, or abstraction work needs a stronger proof checklist:
+- `references/isomorphic-refactor-guide.md`
 
 ## Validation
 
@@ -206,6 +226,8 @@ Run after fixes:
 - `git diff --stat` (confirm only expected files changed)
 - Repo-required checks from local `AGENTS.md` guidance
 - Any targeted tests relevant to modified files
+- For non-trivial refactors, compare baseline and final behavior with targeted tests, golden/snapshot checks, CLI output checks, or explicit equivalence reasoning.
+- When the cleanup goal includes structure or size, report useful before/after metrics such as LOC, warning count, complexity hotspot, or repeated-call count. Do not claim a performance gain without measurement.
 
 ## Constraints
 
@@ -214,6 +236,8 @@ Run after fixes:
 - Keep edits minimal and scoped to findings.
 - Follow repository `AGENTS.md` and local validation policy before handoff.
 - Redact secrets, credentials, tokens, private keys, and sensitive personal data by default in outputs.
+- Do not remove files, exports, tests, migrations, config, runtime paths, or apparent dead code unless usage search plus config/docs/history checks support removal, or the user explicitly accepts the residual risk.
+- Do not merge semantic or accidental-rhyme duplication without equivalence evidence.
 
 ## Anti-patterns
 
@@ -222,13 +246,16 @@ Run after fixes:
 - Applying speculative micro-optimizations with no observable benefit.
 - Keeping explanatory comments that restate obvious code behavior.
 - Introducing broad new abstraction layers when a local extract/rename would resolve the smell.
+- Claiming behavior preservation without equivalence evidence for a risky refactor.
+- Merging lookalike code that differs in data shape, errors, ordering, side effects, or ownership.
+- Making code smaller by weakening validation, types, error handling, observability, or security boundaries.
 
 ## Examples
 
-- "I’m done with this fix. Before I push, can you clean up duplication and obvious inefficiencies in the files I changed?"
-- "Please run a simplify pass on this PR diff and tighten up quality issues without changing behavior."
-- "I refactored auth handlers today; do a final cleanup check for reuse opportunities and hot-path waste."
-- "Refactor this changed service surgically: break down long functions and improve naming, but do not change behavior."
+- User says: "I finished the checkout retry fix. Before I push, can you clean up any duplicated helpers or obvious hot-path waste in the files I touched?"
+- User says: "This GitHub PR changes the user export endpoint. Tighten the diff for readability and reuse, but keep the API, errors, and CSV output identical."
+- User says: "I split the auth handler and it feels clumsy now. Please improve the names and structure without changing login behavior."
+- User says: "There are two similar config loaders in my patch. Inspect them and merge only if the defaults, errors, and env-var precedence stay the same."
 
 ## See Also
 
@@ -239,10 +266,16 @@ Run after fixes:
 
 **Topic map:** [[code-quality]]
 
+## Package Assets
+
+- `assets/icon-small.png`
+- `assets/icon.png`
+
 ## References
 
-- `Infrastructure/references/modern-hardening-2026.md`
-- `Infrastructure/references/refactor-playbook.md`
+- `references/modern-hardening-2026.md`
+- `references/refactor-playbook.md`
+- `references/isomorphic-refactor-guide.md`
 
 ## Failure mode
 - Stop at the first blocker, report root cause, and provide the safest next command.

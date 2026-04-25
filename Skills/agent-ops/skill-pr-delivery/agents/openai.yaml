@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill PR Delivery"
+  short_description: "Ship skill changes to PR"
+  default_prompt: "Use $skill-pr-delivery to deliver this skill change through sync, audit, reviewer validation, commit, push, and PR evidence."

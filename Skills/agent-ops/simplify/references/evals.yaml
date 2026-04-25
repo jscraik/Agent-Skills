@@ -8,7 +8,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "I just wrapped this feature branch. Can you do a final cleanup pass for duplication, hacky patterns, and inefficiencies before I open the PR?"
+    prompt: "The checkout retry patch is working now. Can you clean up duplicated helpers, rough naming, and any obvious wasted work before I open the PR?"
     acceptance:
       - type: regex
         value: "(?i)(reuse|quality|efficiency|cleanup|diff)"
@@ -21,7 +21,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Please polish this diff and prioritize redundant state plus expensive work in hot paths."
+    prompt: "The dashboard refresh feels heavier after my last change. Please inspect the diff for redundant state and repeated work in render or polling paths."
     acceptance:
       - type: regex
         value: "(?i)(redundant state|hot path|efficiency|performance)"
@@ -34,7 +34,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "There are no git changes right now, but can you still run the cleanup flow on the files I edited earlier in this session?"
+    prompt: "I already stashed the patch, but the files we edited earlier still need a cleanup review. Can you use the recent session context if the git diff is empty?"
     acceptance:
       - type: regex
         value: "(?i)(no git changes|empty diff|recently modified|edited earlier)"
@@ -45,7 +45,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Run a cleanup sweep, fix real issues, and skip any low-value false positives quickly."
+    prompt: "Please give this branch a cleanup sweep, fix the real issues, and skip style nits that are not worth changing."
     acceptance:
       - type: regex
         value: "(?i)(skip|false positive|low value|deduplicate)"
@@ -53,10 +53,13 @@ cases:
   - id: simplify-modern-contract-drift
     name: modern overlay contract drift checks
     category: happy
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Do a simplify pass on this API diff and explicitly check for schema or exported-contract drift before making cleanup edits."
+    prompt: "This API patch only meant to reorganize code. Can you validate that exported names and response schemas stay compatible before changing anything?"
+    deterministic_checks:
+      required_commands:
+        - "git diff"
     acceptance:
       - type: regex
         value: "(?i)(contract drift|schema|exported|compatibility|cross-cutting)"
@@ -69,7 +72,7 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Run simplify and return exact validation commands with pass/fail/blocked outcomes and skipped-finding reasons."
+    prompt: "When you clean up this patch, please include the exact validation commands you ran and call out anything you skipped with the reason."
     acceptance:
       - type: regex
         value: "(?i)(validation commands|pass|fail|blocked|skipped findings\\s*[:\\-\\(]\\s*\\S+)"
@@ -80,7 +83,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Refactor this changed handler surgically: split the long function, improve names, and keep behavior exactly the same."
+    prompt: "The changed webhook handler is too long now. Can you split it into clearer pieces and improve names while keeping request handling exactly the same?"
     acceptance:
       - type: regex
         value: "(?i)(extract|split|long function|naming|surgical refactor)"
@@ -90,15 +93,60 @@ cases:
   - id: simplify-refactor-magic-values
     name: refactor magic values and conditionals
     category: happy
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Clean up this diff by replacing magic numbers, flattening nested conditionals, and deduplicating repeated logic."
+    prompt: "My rate-limit patch has magic numbers and nested conditionals. Please clean that up and reuse existing helpers where it is safe."
     acceptance:
       - type: regex
         value: "(?i)(magic|constants|guard clauses|nested|deduplicat)"
       - type: regex
         value: "(?i)(reuse|quality|cleanup|changed code|diff)"
+
+  - id: simplify-isomorphic-dedup-proof
+    name: deduplicate only with equivalence proof
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The two config helpers in my patch look almost identical. Can you inspect them and only merge them if the defaults and errors stay the same?"
+    deterministic_checks:
+      required_commands:
+        - "rg"
+    acceptance:
+      - type: regex
+        value: "(?i)(equivalence|behavior.*same|preserve.*behavior|api|errors|side effects)"
+      - type: regex
+        value: "(?i)(deduplicat|extract|helper|skip)"
+
+  - id: simplify-dead-code-safety
+    name: dead-code deletion guard
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I think this patch left behind an unused export and a stale helper. Please inspect search results and dynamic config usage before removing them."
+    deterministic_checks:
+      required_commands:
+        - "rg"
+    acceptance:
+      - type: regex
+        value: "(?i)(dead code|usage search|export|dynamic|config|skip)"
+      - type: regex
+        value: "(?i)(validation|evidence|preserve behavior|risk)"
+
+  - id: simplify-metrics-delta-evidence
+    name: metrics delta for structure cleanup
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "This module got bigger after my change. Can you clean up the structure and tell me the LOC or complexity delta, or say n/a if you cannot measure it?"
+    acceptance:
+      - type: regex
+        value: "(?i)(metrics_delta|LOC|complexity|warnings|n/a)"
+      - type: regex
+        value: "(?i)(validation|preserve behavior|behavior-preserving)"
 
   - id: simplify-negative-new-build
     name: negative new feature build
@@ -157,5 +205,5 @@ cases:
         value: "(?i)(redact|secret|credential|cannot|refuse|safety)"
 
 metadata:
-  last_updated: "2026-04-09"
+  last_updated: "2026-04-25"
   review_status: "validated"
