@@ -223,6 +223,7 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
     successes = sum(1 for attempt in attempts if attempt.get("outcome") == "success")
     failures = total - successes
     wall_clock = sum(float(attempt.get("wall_clock_seconds") or 0) for attempt in attempts)
+    tool_steps = sum(int(attempt.get("tool_steps") or 0) for attempt in attempts)
     return {
         "attempts": total,
         "successes": successes,
@@ -230,6 +231,8 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
         "pass_rate": round(successes / total, 4) if total else 0,
         "flake_rate": 1 if successes and failures else 0,
         "wall_clock_seconds": round(wall_clock, 4),
+        "tool_steps": tool_steps,
+        "retries": max(0, total - 1),
     }
 
 
@@ -349,6 +352,8 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             "seed_exit_code": seed.returncode,
             "verify_exit_code": verify.returncode,
             "wall_clock_seconds": round(elapsed, 4),
+            "tool_steps": 1 if seed_timed_out else 2,
+            "retries": max(0, attempt_no - 1),
             "context_budget": {
                 "modules_loaded": 1,
                 "estimated_skill_context_tokens": context_tokens,

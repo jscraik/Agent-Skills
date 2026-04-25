@@ -1,0 +1,23 @@
+id: skill-refactor-diagnostic
+target_skill_set: skill-factory
+target_module: skill-refactor
+target_source_path: Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md
+level: molecule
+projection_mode: rooted
+seed: seed.sh
+verify: verify.py
+max_attempts: 5
+max_skill_context_tokens: 1500
+goal: Verify skill-refactor can produce evidence-backed keep/improve/merge/retire recommendations from session signals.
+constraints:
+  forbidden_shortcuts:
+    - modifying_verifier
+    - inventing_evidence
+    - destructive_pruning_without_rollback
+metrics:
+  - success
+  - wall_clock_seconds
+  - tool_steps
+  - retries
+  - flake_rate
+  - estimated_skill_context_tokens

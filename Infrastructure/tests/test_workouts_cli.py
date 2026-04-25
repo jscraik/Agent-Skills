@@ -15,6 +15,11 @@ from ask.commands import workouts  # noqa: E402
 
 
 WORKOUT_ID = "agent-ops/verification-before-completion"
+DIAGNOSTIC_WORKOUT_IDS = {
+    WORKOUT_ID,
+    "harness-engineering/he-spec",
+    "skill-factory/skill-refactor",
+}
 
 
 class TestWorkoutsCLI(unittest.TestCase):
@@ -29,7 +34,7 @@ class TestWorkoutsCLI(unittest.TestCase):
         result = workouts.list_workouts(REPO_ROOT)
 
         self.assertEqual(result.status, "success")
-        self.assertIn(WORKOUT_ID, {item["id"] for item in result.data["workouts"]})
+        self.assertTrue(DIAGNOSTIC_WORKOUT_IDS.issubset({item["id"] for item in result.data["workouts"]}))
 
     def test_run_score_and_promote_dry_run(self) -> None:
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
@@ -40,11 +45,25 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(run_result.status, "success")
         self.assertEqual(run_result.data["scorecard"]["metrics"]["attempts"], 2)
         self.assertEqual(run_result.data["scorecard"]["metrics"]["pass_rate"], 1.0)
+        self.assertEqual(run_result.data["scorecard"]["metrics"]["tool_steps"], 4)
+        self.assertEqual(run_result.data["scorecard"]["metrics"]["retries"], 1)
         self.assertTrue((self.telemetry_dir / "runs.jsonl").is_file())
         self.assertEqual(score_result.status, "success")
         self.assertEqual(promote_result.status, "success")
         self.assertEqual(promote_result.data["rollback_validation"]["status"], "pass")
         self.assertTrue(promote_result.data["promotion"]["dry_run"])
+
+    def test_all_diagnostic_workouts_run_and_score(self) -> None:
+        for workout_id in sorted(DIAGNOSTIC_WORKOUT_IDS):
+            telemetry_dir = self.temp_dir / workout_id.replace("/", "__")
+            with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(telemetry_dir)}):
+                run_result = workouts.run_workout(REPO_ROOT, workout_id, attempts=1)
+                score_result = workouts.score_workout(REPO_ROOT, workout_id)
+
+            self.assertEqual(run_result.status, "success", workout_id)
+            self.assertEqual(run_result.data["scorecard"]["metrics"]["pass_rate"], 1.0)
+            self.assertGreater(run_result.data["scorecard"]["metrics"]["tool_steps"], 0)
+            self.assertEqual(score_result.status, "success", workout_id)
 
     def test_run_workout_records_subprocess_timeout(self) -> None:
         timeout = subprocess.TimeoutExpired(cmd=["bash", "seed.sh"], timeout=60, output="", stderr="")

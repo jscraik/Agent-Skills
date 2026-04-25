@@ -1,0 +1,23 @@
+id: he-spec-diagnostic
+target_skill_set: harness-engineering
+target_module: he-spec
+target_source_path: Plugins/harness-engineering/skills/team_automation/he-spec/SKILL.md
+level: molecule
+projection_mode: rooted
+seed: seed.sh
+verify: verify.py
+max_attempts: 5
+max_skill_context_tokens: 1500
+goal: Verify the Harness Engineering spec stage can classify spec-ready input and produce handoff evidence.
+constraints:
+  forbidden_shortcuts:
+    - modifying_verifier
+    - hardcoding_flag
+    - skipping_stage_handoff
+metrics:
+  - success
+  - wall_clock_seconds
+  - tool_steps
+  - retries
+  - flake_rate
+  - estimated_skill_context_tokens

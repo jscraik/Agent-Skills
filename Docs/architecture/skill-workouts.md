@@ -30,13 +30,17 @@ Each workout run:
 
 Promotion dry-run validates rollback before writing amendment metadata.
 
-## MVP Fixture
+## Diagnostic Fixtures
 
-The first fixture is:
+The first diagnostic fixture set is:
 
 ```text
 .workouts/agent-ops/verification-before-completion/
+.workouts/harness-engineering/he-spec/
+.workouts/skill-factory/skill-refactor/
 ```
 
-It validates the `verification-before-completion` atom and exercises the
-rollback dry-run path used by promotion.
+These fixtures validate one agent-ops atom, one Harness Engineering stage, and
+one factory workflow. Together they exercise the scorecard writer and rollback
+dry-run path used by promotion while keeping runtime telemetry out of normal
+skill context.
