@@ -1,0 +1,48 @@
+schema_version: "1.0"
+
+purpose: >
+  Review a codebase for architecture deepening opportunities, align recommendations
+  with project-specific CONTEXT.md language, and capture durable decisions in Linear
+  rather than ADRs.
+
+triggers:
+  - User asks for architecture improvements, structure review, or module boundary cleanup
+  - User asks to find shallow modules, deeper interfaces, or testability improvements
+  - User wants CONTEXT.md language updated as part of architecture work
+  - User wants a durable architecture decision recorded in Linear
+
+inputs:
+  - Repository path and optional focus area
+  - Existing CONTEXT.md or CONTEXT-MAP.md
+  - Active Linear issue, workpad, branch, or project when available
+  - Relevant docs, tests, changed files, and module entry points
+  - Existing ADRs only as legacy evidence when already present and relevant
+
+outputs:
+  - Numbered architecture opportunities with files, problem, proposed direction, benefits, risks, and validation
+  - CONTEXT.md or CONTEXT-MAP.md updates when project-specific terms are resolved
+  - Linear decision note update, creation, or explicit not-persisted status when a durable decision qualifies
+  - Interface alternatives only after the user chooses an opportunity to explore
+  - Exact validation command outcomes after implementation
+
+non_goals:
+  - Immediate broad rewrites before the user chooses a direction
+  - Generic code cleanup of an existing diff
+  - Generic programming glossaries
+  - ADR creation by default
+  - Hypothetical adapters or seams without real dependency pressure
+
+risks:
+  - Over-architecting; mitigated by the deletion test and user choice before implementation
+  - False domain vocabulary; mitigated by source-backed CONTEXT.md updates and ambiguity flags
+  - Lost decisions; mitigated by Linear decision capture when criteria are met
+  - Test churn; mitigated by replacing shallow tests only when deeper interface tests preserve behavior
+
+observability: >
+  Report opportunity evidence, exact files inspected, context-language changes,
+  Linear persistence status, and validation pass/fail/blocked outcomes.
+
+rollback_procedure: >
+  Revert code changes from version control, restore the previous CONTEXT.md or
+  CONTEXT-MAP.md, and add a Linear note explaining why the direction was reversed
+  if the original decision met the capture criteria.

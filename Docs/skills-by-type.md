@@ -13,14 +13,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 3
 - `product_verification`: 4
 - `data_fetch_analysis`: 4
-- `team_automation`: 33
+- `team_automation`: 35
 - `scaffolding_templates`: 19
-- `code_quality_review`: 24
+- `code_quality_review`: 25
 - `ci_cd_deployment`: 1
 - `runbook`: 11
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 103
+- `total_tagged`: 106
 
 ## Semantic Types
 
@@ -74,8 +74,10 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `plugin-router` — `Plugins/plugin-factory/skills`
 - `production-deployment` — `Skills/agent-ops`
 - `skill-factory-router` — `Plugins/skill-factory/skills`
+- `skill-pr-delivery` — `Skills/agent-ops`
 - `slides` — `Skills/content-publishing`
 - `triage` — `Skills/agent-ops`
+- `ubiquitous-language` — `Skills/agent-ops`
 - `video-transcript-downloader` — `Skills/content-publishing`
 - `visual-explainer` — `Skills/content-publishing`
 - `youtube-hooks-scripts` — `Skills/content-publishing`
@@ -117,6 +119,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-code-review` — `Plugins/harness-engineering/skills/code_quality_review`
 - `he-reliability-review` — `Plugins/harness-engineering/skills/code_quality_review`
 - `he-technical-review` — `Plugins/harness-engineering/skills/code_quality_review`
+- `improve-codebase-architecture` — `Skills/agent-ops`
 - `javascript-pro` — `Skills/agent-ops`
 - `plugin-builder` — `Plugins/plugin-factory/skills/code_quality_review`
 - `rust-pro` — `Skills/agent-ops`

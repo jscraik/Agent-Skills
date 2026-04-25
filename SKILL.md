@@ -8,10 +8,10 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
-- `total_skills`: 20
+- `total_skills`: 21
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 385896a21348f245
+- `policy_identity`: 15717dccdac902e4
 
 ## Catalog
 
@@ -29,6 +29,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `docs-expert` — Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
 - `fix-mise` — Diagnose and repair mise trust, runtime, activation, and version-drift failures. Use when commands fail from mise config, missing runtimes, stale pins, or shell activation drift.
 - `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
+- `improve-codebase-architecture` — Review codebase architecture to find deeper module boundaries, sharper context language, and Linear-backed decision notes. Use when users ask to improve architecture, consolidate shallow modules, design better interfaces, improve testability, or make a repo easier for humans and agents to navigate.
 - `npm-release` — Create and validate npm package release workflows with deterministic installs, semver, dist-tags, provenance, and 2FA safeguards. Use when preparing or publishing npm releases.
 - `pnpm-manager` — Run pnpm workspace operations with recursive and filter selectors for scoped install, test, build, and publish flows. Use when a user needs pnpm monorepo command routing.
 - `project-brain` — Bootstrap and operate Project Brain
