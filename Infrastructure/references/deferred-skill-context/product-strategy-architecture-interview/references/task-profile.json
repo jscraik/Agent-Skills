@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Skills-content-publishing-slides",
-  "scope_skill": "Skills/content-publishing/slides",
+  "profile_id": "Skills-product-strategy-architecture-interview",
+  "scope_skill": "Skills/product-strategy/architecture-interview",
   "scope_profile": "Skills",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
@@ -17,21 +17,21 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Clarity",
+      "label": "Instructional clarity",
       "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Specificity",
+      "label": "Concrete implementation detail",
       "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety",
+      "label": "Safety/compliance compliance",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -39,17 +39,9 @@
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 45,
-    "ai_process_minutes": 15,
+    "human_baseline_minutes": 45.0,
+    "ai_process_minutes": 15.0,
     "probability_of_success": 0.75,
-    "rationale": "Human oversight for promotion."
-  },
-  "learning_posture": {
-    "supported": [
-      "learn",
-      "guided",
-      "execute"
-    ],
-    "default": "guided"
+    "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
   }
 }
