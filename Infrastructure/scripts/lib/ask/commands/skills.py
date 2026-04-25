@@ -1400,9 +1400,9 @@ def _sync_rooted_projection(
         logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
     else:
         try:
-            root_writes = write_roots(root_report, skills_dir)
+            root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
-        except OSError as exc:
+        except (OSError, ValueError) as exc:
             plan["validation_status"] = "fail"
             plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
             return False, [ErrorObject(

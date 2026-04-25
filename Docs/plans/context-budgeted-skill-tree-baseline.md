@@ -15,12 +15,6 @@ tasks:
 
 ## Command Evidence
 
-```bash
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python python3 bin/ask runtime surface --json
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python python3 bin/ask runtime budget --json
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python python3 bin/ask skills budget --json
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python python3 bin/ask skills sync --scope workspace --projection flat --dry-run --json
-```
 
 ## Runtime Surface Summary
 

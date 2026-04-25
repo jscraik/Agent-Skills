@@ -94,6 +94,10 @@ def _timed_out_process(exc: subprocess.TimeoutExpired) -> subprocess.CompletedPr
 
 
 def _run_workout_command(command: list[str], *, repo_root: Path, env: dict[str, str]) -> tuple[subprocess.CompletedProcess[str], bool]:
+    # Workout scripts (seed.sh under .workouts/) are trusted repository content.
+    # Path-traversal checks elsewhere prevent escaping the workouts directory,
+    # so executing these scripts is considered safe. We intentionally pass check=False
+    # to handle non-zero exit codes ourselves rather than raising CalledProcessError.
     try:
         process = subprocess.run(
             command,
@@ -102,6 +106,7 @@ def _run_workout_command(command: list[str], *, repo_root: Path, env: dict[str, 
             capture_output=True,
             text=True,
             timeout=60,
+            check=False,
         )
     except subprocess.TimeoutExpired as exc:
         return _timed_out_process(exc), True
@@ -191,7 +196,7 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
         "successes": successes,
         "failures": failures,
         "pass_rate": round(successes / total, 4) if total else 0,
-        "flake_rate": round(1 if successes and failures else 0, 4) if total > 1 else 0,
+        "flake_rate": 1 if successes and failures else 0,
         "wall_clock_seconds": round(wall_clock, 4),
     }
 
@@ -362,9 +367,11 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
 
     result = CallResult()
     scorecard = score.data["scorecard"]
+    import shlex
+    
     target_source = str(scorecard.get("target_source_path") or "")
     target_path = repo_root / target_source if target_source else None
-    rollback_command = f"git checkout -- {target_source}" if target_source else ""
+    rollback_command = f"git checkout -- {shlex.quote(target_source)}" if target_source else ""
     rollback_validation = {
         "status": "pass" if target_path and target_path.is_file() and rollback_command else "fail",
         "rollback_command": rollback_command,

@@ -15,7 +15,10 @@ from skillset_model import rel, repo_root
 DEFAULT_SKILLSETS_DIR = repo_root() / ".skillsets"
 MAX_TOP_K = 3
 LOW_CONFIDENCE_THRESHOLD = 0.18
-TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9-]{1,}")
+# TOKEN_RE captures alphanumeric tokens with optional hyphens.
+# Minimum token length is 1 character to include single-letter terms like "i".
+# The second character group is optional to allow single-character tokens.
+TOKEN_RE = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
 
 
 def tokenize(text: str) -> set[str]:

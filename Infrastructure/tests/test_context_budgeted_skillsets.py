@@ -23,7 +23,6 @@ BUDGET_CONFIG = check_context_budget.load_config()
 RUNTIME_BUDGET = BUDGET_CONFIG["runtime_projection"]
 ROUTING_BUDGET = BUDGET_CONFIG["routing"]
 
-
 class TestContextBudgetedSkillsets(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = Path(tempfile.mkdtemp(prefix="context-budgeted-skillsets-"))

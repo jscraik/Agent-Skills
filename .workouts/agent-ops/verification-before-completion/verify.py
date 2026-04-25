@@ -4,7 +4,11 @@ import sys
 from pathlib import Path
 
 
-state_dir = Path(os.environ.get("WORKOUT_STATE_DIR", ""))
+WORKOUT_STATE_DIR = os.environ.get("WORKOUT_STATE_DIR")
+if not WORKOUT_STATE_DIR:
+    print("WORKOUT_STATE_DIR environment variable is required", file=sys.stderr)
+    raise SystemExit(1)
+state_dir = Path(WORKOUT_STATE_DIR)
 state_file = state_dir / "verifier_state.env"
 if not state_file.is_file():
     print("verifier_state_missing", file=sys.stderr)

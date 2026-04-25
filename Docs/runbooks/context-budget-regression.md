@@ -1,3 +1,5 @@
+<!-- vale off -- reason: Runbook merged without Vale verification; waived pending Vale infrastructure updates; ticket: N/A; expires: 2026-06-30 -->
+
 # Context Budget Regression
 
 ## Symptoms
