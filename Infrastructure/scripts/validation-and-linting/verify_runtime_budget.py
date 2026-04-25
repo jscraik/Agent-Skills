@@ -17,7 +17,6 @@ if str(LIFECYCLE_DIR) not in sys.path:
 
 from selection_policy import (  # type: ignore  # noqa: E402
     DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
-    DEFAULT_PROJECTION_MODE,
     ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
@@ -226,7 +225,7 @@ def _first_level_skill_names() -> list[str]:
 def _active_projection_mode(first_level_names: set[str]) -> str:
     if first_level_names & ROOT_SKILL_SETS:
         return "rooted"
-    return DEFAULT_PROJECTION_MODE
+    return "flat"
 
 
 def _skill_file_word_count(entry: dict[str, str]) -> int:

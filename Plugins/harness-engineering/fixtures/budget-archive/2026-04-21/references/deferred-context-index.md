@@ -36,6 +36,16 @@ The QA intake routing refresh preserved these pre-insertion procedure lines:
 - `3. Repeat in vertical slices and preserve traceability to accepted behavior targets.`
 - `4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.`
 
+The session-evidence routing refresh preserved these pre-insertion `he-compound` procedure lines:
+
+- `6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.`
+- `7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.`
+- ``8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.``
+
+6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
+7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
+8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
+
 2. Map service boundaries and dependency failure paths.
 3. Produce reliability findings with concrete blast-radius and mitigation guidance.
 4. Route review subagents per policy; if unavailable, continue inline and state manual role options.

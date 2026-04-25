@@ -30,6 +30,15 @@ class TestAskSkillsSyncSecurity(TestCase):
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
+    def _sync_rooted_workspace(self) -> None:
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+        self.assertEqual(result.status, "success")
+
     def test_sync_dir_copy_rejects_symlink_payload(self) -> None:
         secret = Path(self.temp_dir) / "secret.txt"
         secret.write_text("TOPSECRET", encoding="utf-8")
@@ -41,6 +50,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn("symlink", str(ctx.exception).lower())
 
     def test_sync_skills_user_scope_defaults_to_rooted_and_writes_runtime_links(self) -> None:
+        self._sync_rooted_workspace()
+
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
@@ -51,6 +62,31 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
         self.assertEqual(result.data["projection_mode"], "rooted")
+
+    def test_sync_skills_user_scope_rooted_rejects_invalid_workspace_runtime(self) -> None:
+        flat_skill = self.repo_root / ".agents" / "skills" / "safe-skill"
+        flat_skill.mkdir()
+        (flat_skill / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="user",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("workspace", result.errors[0].message.lower())
+        self.assertFalse((self.fake_home / ".agents" / "skills").exists())
+        self.assertIn(
+            "ROOTED_WORKSPACE_POLICY_NAME_DRIFT",
+            {violation["code"] for violation in result.data["plan"]["violations"]},
+        )
 
     def test_sync_skills_user_scope_explicit_flat_rollback_writes_runtime_links(self) -> None:
         with (
@@ -109,6 +145,25 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "rooted")
         self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
+
+    def test_sync_skills_rooted_non_dry_run_prunes_unowned_skillset_files(self) -> None:
+        rogue_file = self.repo_root / ".skillsets" / "agent-ops" / "notes.md"
+        rogue_file.parent.mkdir(parents=True)
+        rogue_file.write_text("hand-written file\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(rogue_file.exists())
+        self.assertTrue(
+            any("notes.md" in delete for delete in result.data["plan"]["deletes"]),
+            "rooted projection should prune unowned .skillsets files",
+        )
 
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
@@ -202,6 +257,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(os.readlink(system_link), "../../skills-system")
 
     def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
+        self._sync_rooted_workspace()
+
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),

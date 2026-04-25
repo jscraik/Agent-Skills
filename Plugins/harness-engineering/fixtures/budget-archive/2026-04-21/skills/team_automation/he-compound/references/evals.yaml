@@ -117,6 +117,19 @@ cases:
       - type: regex
         value: "(?i)(supplementary|auto memory|supplemental|conversation history)"
 
+  - id: session-evidence-routes-out
+    name: generic session evidence routes to skill factory lanes
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-compound, but first search old agent sessions to decide if this should become a reusable skill or a skill-refactor finding."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-compound"
+      - type: regex
+        value: "(?i)(skill-refactor|skillify|session evidence|route)"
+
   - id: ui-lifecycle-branch
     name: ui lifecycle branch
     category: edge

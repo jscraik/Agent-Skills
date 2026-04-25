@@ -3,7 +3,6 @@
 Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ## Table of Contents
-
 - [Summary](#summary)
 - [Validation Notes](#validation-notes)
 - [Canonical Values](#canonical-values)
