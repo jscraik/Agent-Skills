@@ -1,0 +1,3 @@
+interface:
+  display_name: "Release Notes"
+  short_description: "PR notes, changelog entries, release lookup, and npm handoff"

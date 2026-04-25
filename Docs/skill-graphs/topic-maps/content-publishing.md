@@ -40,6 +40,7 @@ covers:
 
 - [[video-transcript-downloader]] — Extract, summarize, and download video/audio/subtitles using yt-dlp/ffmpeg.
 - [[markdown-converter]] — Convert source files into Markdown outputs using the bundled converter workflow.
+- [[release-notes]] — Draft PR release notes, changelog entries, GitHub release-history summaries, and npm publish handoffs from evidence.
 - [[spreadsheet]] — Create, edit, analyze, and format spreadsheets (.xlsx, .csv, .tsv) with formula-aware workflows.
 - [[llm-wiki]] — Build and maintain a persistent markdown wiki from source material and transcripts.
 
@@ -50,6 +51,7 @@ covers:
 - YouTube workflow: [[youtube-hooks-scripts]] → [[youtube-titles-thumbnails]] → (record and upload).
 - Demo walkthrough: [[visual-explainer]] → [[slides]] → [[remotion]] → upload.
 - Research-to-publish: [[video-transcript-downloader]] → [[llm-wiki]] → [[markdown-converter]].
+- Release pipeline: implementation/review → [[release-notes]] → [[npm-release]].
 
 ## Cross-links
 

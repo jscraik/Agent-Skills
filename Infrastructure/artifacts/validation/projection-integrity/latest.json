@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-24T07:55:10.678223+00:00",
+  "generated_at": "2026-04-25T13:07:20.926039+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -47,9 +47,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 199,
-      "source_manifest_sha256": "4c059d8c79dfa4dd023bc10be509e6f97c0e5e5103162abf438f8c3498eaee85",
-      "projection_manifest_sha256": "4c059d8c79dfa4dd023bc10be509e6f97c0e5e5103162abf438f8c3498eaee85",
+      "checked_files": 205,
+      "source_manifest_sha256": "eae389601a8a8bdb4664a381bab656213f136e511820f631c3527b150e7947c4",
+      "projection_manifest_sha256": "eae389601a8a8bdb4664a381bab656213f136e511820f631c3527b150e7947c4",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -63,9 +63,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 35,
-      "source_manifest_sha256": "31dd7fb51ec65657a79c1fd7b18c97515a9682f1acb34158903045d566dbfced",
-      "projection_manifest_sha256": "31dd7fb51ec65657a79c1fd7b18c97515a9682f1acb34158903045d566dbfced",
+      "checked_files": 36,
+      "source_manifest_sha256": "c429a25ce84c864dd537fd7fc94d46dead0dc89eb938421f39c0bd84e1b3ac50",
+      "projection_manifest_sha256": "c429a25ce84c864dd537fd7fc94d46dead0dc89eb938421f39c0bd84e1b3ac50",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 180,
-      "source_manifest_sha256": "0431592516c6c4847eb41f40fe06b58342682e30900a293333cfd312f3d8b895",
-      "projection_manifest_sha256": "0431592516c6c4847eb41f40fe06b58342682e30900a293333cfd312f3d8b895",
+      "checked_files": 181,
+      "source_manifest_sha256": "b6ad6f505cb75381d4f8b4f0f71ead18837debb1e467eef43a35d896d63af2f6",
+      "projection_manifest_sha256": "b6ad6f505cb75381d4f8b4f0f71ead18837debb1e467eef43a35d896d63af2f6",
       "manifest_mismatch": false,
       "status": "pass"
     }

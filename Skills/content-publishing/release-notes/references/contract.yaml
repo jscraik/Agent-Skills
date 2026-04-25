@@ -1,0 +1,61 @@
+schema_version: "1.0"
+skill: release-notes
+type: team_automation
+purpose: >
+  Draft and validate release communication from repository evidence, including
+  PR release-note sections, changelog entries, GitHub release-history answers,
+  and npm publish handoff artifacts.
+triggers:
+  - user asks for release notes, changelog entries, or release summaries
+  - user asks when a change shipped or what a past release included
+  - a PR template requires a Release notes section
+  - npm publish work needs release-note and channel validation before publish
+inputs:
+  - repository or local checkout
+  - PR, commit range, diff, Linear issue, tag, or changelog evidence
+  - target audience and output mode
+  - package, version, and channel for npm handoff mode
+outputs:
+  - evidence-backed release notes or changelog text
+  - version-cited release-history answer
+  - release-notes-handoff.v1 for npm-release
+  - explicit no-release-notes-needed decision when evidence supports it
+output_contract:
+  schema_version: "release-notes-handoff.v1"
+  required_fields:
+    - schema_version
+    - package
+    - version
+    - channel
+    - audience
+    - summary
+    - sections
+    - evidence
+    - publish_blockers
+  sections_required_fields:
+    - user_facing
+    - fixes
+    - breaking_changes
+    - operational_notes
+    - internal_only
+  sections_contract:
+    user_facing: "Public-facing changes safe for release notes."
+    fixes: "Bug fixes or corrections safe for release notes."
+    breaking_changes: "Breaking changes, migrations, removals, or an explicit empty list."
+    operational_notes: "Install, rollout, compatibility, or verification notes."
+    internal_only: "Changes deliberately excluded from public notes with reason."
+non_goals:
+  - publishing npm packages or mutating dist-tags
+  - broad documentation rewrites unrelated to release communication
+  - creating ADRs for release workflow decisions
+risks:
+  - overstating shipped behavior without evidence
+  - leaking confidential issue or customer details into public notes
+  - allowing npm publish to proceed with mismatched version, channel, or breaking-change messaging
+rollback_procedure: >
+  If release-note guidance regresses audits or routing, restore the skill
+  directory and npm-release handoff text from the previous known-good git state,
+  then rerun strict skill audit and projection validation.
+observability: >
+  Monitor strict skill audit output, route decisions for release-note prompts,
+  and npm-release responses to ensure handoff blockers are honored before publish.

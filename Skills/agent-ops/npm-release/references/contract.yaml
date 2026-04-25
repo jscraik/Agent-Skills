@@ -12,16 +12,19 @@ inputs:
   - package/version target
   - release channel and access requirements
   - account security constraints (2FA/OTP)
+  - release-notes-handoff.v1 when user-facing release communication is required
 outputs:
   - exact release command sequence
   - channel/dist-tag guidance
   - post-release verification checks
+  - release-note handoff validation result
 non_goals:
   - non-npm registry publishing workflows
   - dependency install-only guidance with no release scope
 risks:
   - wrong dist-tag can expose unstable versions as latest
   - missing OTP/provenance/access flags can fail or misconfigure releases
+  - missing or mismatched release notes can publish breaking or prerelease changes with the wrong public messaging
 source_basis:
   execution_path: cli_primary
   context7_library_id: /websites/npmjs

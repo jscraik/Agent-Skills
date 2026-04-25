@@ -3,7 +3,6 @@
 Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ## Table of Contents
-
 - [Summary](#summary)
 - [Validation Notes](#validation-notes)
 - [Canonical Values](#canonical-values)
@@ -14,14 +13,14 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - `library_api_reference`: 3
 - `product_verification`: 4
 - `data_fetch_analysis`: 4
-- `team_automation`: 35
+- `team_automation`: 36
 - `scaffolding_templates`: 19
 - `code_quality_review`: 25
 - `ci_cd_deployment`: 1
 - `runbook`: 11
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 106
+- `total_tagged`: 107
 
 ## Validation Notes
 
@@ -93,6 +92,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - plugin-factory-router (Plugins/plugin-factory/skills)
 - plugin-router (Plugins/plugin-factory/skills/team_automation)
 - production-deployment (Skills/agent-ops)
+- release-notes (Skills/content-publishing)
 - skill-factory-router (Plugins/skill-factory/skills)
 - skill-pr-delivery (Skills/agent-ops)
 - slides (Skills/content-publishing)

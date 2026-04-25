@@ -515,6 +515,17 @@
       ],
       "route_to_skill": "coding-harness",
       "reason": "These operations belong to @brainwav/coding-harness setup and governance, not Harness Engineering stage orchestration."
+    },
+    {
+      "intent": "release-communication",
+      "examples": [
+        "draft release notes",
+        "update changelog",
+        "prepare npm release notes handoff",
+        "what release shipped this"
+      ],
+      "route_to_skill": "content-publishing:release-notes",
+      "reason": "Harness Engineering may produce the implementation or review evidence, but release communication and npm handoff artifacts belong to the content-publishing release-notes pipeline."
     }
   ],
   "subagent_stage_map": {
