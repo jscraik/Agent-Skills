@@ -2,12 +2,13 @@
 schema_version: 1
 title: "feat: Context-Budgeted Skill Trees Implementation Plan"
 type: feat
-status: draft
+status: implementation-in-review
 date: 2026-04-24
 origin: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 spec: Docs/specs/2026-04-24-feat-context-budgeted-skill-trees-spec.md
 plan_route: fresh
 plan_depth: deep
+current_phase: C3-rooted-soak
 ---
 
 # feat: Context-Budgeted Skill Trees Implementation Plan
@@ -610,11 +611,12 @@ python3 bin/ask skills sync --scope workspace --projection rooted --dry-run
 python3 bin/ask skills sync --scope user --projection rooted --dry-run
 python3 bin/ask skills sync --scope workspace --projection rooted
 python3 bin/ask skills sync --scope user --projection rooted
+bash Infrastructure/scripts/validate_all.sh --ephemeral
 python3 bin/ask skills sync --scope user --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat --dry-run
 python3 bin/ask skills sync --scope user --projection flat --dry-run
-bash Infrastructure/scripts/validate_all.sh --ephemeral
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
 ```
 
 Exit criteria:
@@ -622,7 +624,7 @@ Exit criteria:
 - Rooted dry-run and mutation mode work in controlled scope.
 - Rooted dry-run contract coverage includes both `workspace` and `user` scopes.
 - Controlled non-dry-run rooted workspace sync writes projection provenance and
-  is immediately rolled back to flat.
+  passes the rooted validation gate before rollback.
 - Controlled non-dry-run user sync exercises forward rooted and rollback flat
   commands, then leaves the user surface in flat mode.
 - Flat and rooted dry-run/mutation outputs satisfy the sync JSON contract.
@@ -911,15 +913,20 @@ python3 bin/ask skills sync --scope workspace --projection rooted --dry-run
 python3 bin/ask skills sync --scope workspace --projection rooted
 python3 bin/ask skills sync --scope user --projection rooted --dry-run
 python3 bin/ask skills sync --scope user --projection rooted
+bash Infrastructure/scripts/validate_all.sh --ephemeral
 python3 bin/ask skills sync --scope user --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat
 python3 bin/ask skills sync --scope workspace --projection flat --dry-run
 python3 bin/ask skills sync --scope user --projection flat --dry-run
-bash Infrastructure/scripts/validate_all.sh --ephemeral
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
 ```
 
 C3 requires five consecutive executions of this exact command set on the same
-branch. C4 reuses the same set immediately before flipping the default.
+branch. The full validation gate intentionally runs before flat rollback because
+it verifies the rooted first-level workspace surface. The final flat dry-runs and
+flat context-budget check prove rollback remains available without mixing the two
+runtime surfaces in one validator invocation. C4 reuses the same set immediately
+before flipping the default.
 
 ## Rollback Strategy
 

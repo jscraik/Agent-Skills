@@ -30,6 +30,7 @@ Then validate rooted budget:
 
 ```bash
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
+bash Infrastructure/scripts/validate_all.sh --ephemeral
 ```
 
 ## User Relink
@@ -44,3 +45,7 @@ python3 bin/ask skills sync --scope user --projection rooted --json
 python3 bin/ask skills sync --scope workspace --projection flat --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
 ```
+
+Run the full validation gate before rollback while the workspace projection is
+still rooted. The full gate checks rooted first-level runtime entries, so flat
+rollback is validated separately with the flat context-budget check.
