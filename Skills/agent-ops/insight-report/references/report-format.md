@@ -1,118 +1,95 @@
 # Report Format Specification
 
-The HTML report structure and content sections.
+HTML report structure for Codex-authored insight reports.
+
+## Table of Contents
+
+- [File Location](#file-location)
+- [Artifact Chain](#artifact-chain)
+- [Report Sections](#report-sections)
+- [Browser Launch](#browser-launch)
 
 ## File Location
 
-```
+```text
 file://$HOME/dev/configs/codex/usage-data/report.html
 ```
 
-Also saved with timestamp: `~/.codex/usage-data/report-{YYYY-MM-DD}.html`
+## Artifact Chain
 
-## Visual Design
+```text
+insight-evidence.json -> INSIGHT_PROMPT.md -> insights.generated.json -> report.html
+```
 
-- Single-file HTML with embedded CSS
-- Responsive layout (mobile-friendly)
-- CSS bar charts (no external dependencies)
-- Color coding:
-  - Green: Working well, wins
-  - Red: Friction, issues
-  - Blue: Patterns, suggestions
-  - Gray: Neutral sections
+Codex writes `insights.generated.json`. Python renders `report.html`.
 
 ## Report Sections
 
-### 1. Header
+### Header
 
-```
+```text
 Codex Insights Report
 Generated: {date}
 Period: Last {N} days
-Sessions: {count} | Success Rate: {percent} | Avg Duration: {minutes}m
+Sessions: {count}
 ```
 
-### 2. At a Glance (4-box grid)
+### At a Glance
 
-| Box | Content |
-|-----|---------|
-| **What's working** | 3-4 bullets of effective patterns |
-| **What's hindering** | 3-4 friction points |
-| **Quick wins** | Immediate improvements to try |
-| **On the horizon** | Future AI capabilities to prepare for |
+- What's working.
+- What's hindering you.
+- Quick wins to try.
+- Ambitious workflows.
 
-### 3. Charts
+### Charts
 
-- **Tool Usage**: Horizontal bar chart (top 10 tools)
-- **Response Time**: Histogram buckets (fast/medium/slow)
+- Tool usage.
+- Tool errors.
+- Response-time distribution.
+- Parallel Codex sessions.
 
-### 4. What You Work On
+### What You Work On
 
-Project area breakdown:
+Project or workflow areas inferred by Codex from the evidence bundle.
+
+### How You Use Codex
+
+Narrative analysis of interaction style, written in second person.
+
+### Impressive Things
+
+Concrete wins and effective workflows supported by the evidence.
+
+### Where Things Go Wrong
+
+Friction categories with examples and consequences.
+
+### Plain-English Prompting Help
+
+Copyable prompts and small vocabulary bridges for moments where Jamie knows the desired outcome but not the technical term.
+
+### AGENTS.md Suggestions
+
+Repeated preferences or instructions that should be made durable.
+
+### Features to Try
+
+Codex features, skills, hooks, subagents, or browser workflows that fit the observed usage.
+
+### Priority Fixes
+
+Actionable improvements with impact, root cause, enforcement, and verification.
+
+### On the Horizon
+
+Future workflows Jamie can prepare for as Codex improves.
+
+## Browser Launch
+
+The runner prints:
+
+```text
+REPORT_URL=file:///Users/jamiecraik/dev/configs/codex/usage-data/report.html
 ```
-Backend/API development — 12 sessions
-Frontend/UX — 8 sessions
-DevOps/Infrastructure — 3 sessions
-```
 
-### 5. How You Use Codex
-
-Narrative paragraph describing interaction style:
-> "You tend to start with broad exploratory requests, then narrow down...
-> You validate changes carefully before accepting them..."
-
-### 6. Impressive Things
-
-Bulleted list of wins:
-- Completed complex refactor across 15 files
-- Effective use of parallel tool calls
-- Quick recovery from errors
-
-### 7. Where Things Go Wrong
-
-Friction categories with session examples:
-
-| Category | Count | Example |
-|----------|-------|---------|
-| Misunderstood request | 3 | "Session #abc123: asked for refactoring, got new feature" |
-| Wrong tool suggested | 2 | "Session #def456: grep would have been faster" |
-
-### 8. Suggestions for AGENTS.md
-
-Patterns to codify:
-- "You often ask for tests — add testing requirement to AGENTS.md"
-- "You prefer compact edits — add style preference"
-
-### 9. Features to Try
-
-| Feature | Why | How |
-|---------|-----|-----|
-| MCP servers | You do a lot of API work | `codex mcp add` |
-| Skills | Repeated workflows | Create a skill |
-
-### 10. On the Horizon
-
-Upcoming AI capabilities to prepare for:
-- **Agent teams**: Start structuring work for delegation
-- **Long context**: You could use deeper codebase understanding
-
-## Output Example
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
-    .section { margin: 20px 0; padding: 15px; border-radius: 8px; }
-    .working { background: #f0fdf4; border-left: 4px solid #22c55e; }
-    .friction { background: #fef2f2; border-left: 4px solid #ef4444; }
-    /* ... */
-  </style>
-</head>
-<body>
-  <h1>Codex Insights Report</h1>
-  <!-- sections -->
-</body>
-</html>
-```
+When running inside Codex, open that URL with the Codex in-app browser. If Browser tooling is unavailable, disclose that and provide the URL.

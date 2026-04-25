@@ -1,70 +1,66 @@
 schema_version: "1.0"
 
 skill_name: "insight-report"
-effective_date: "2026-03-31"
+effective_date: "2026-04-24"
 
 purpose: >
-  Generate repeatable Codex usage insights artifacts from local sessions, OTEL,
-  and cross-project brief inputs with explicit provenance, freshness checks, and
-  privacy-safe reporting boundaries.
+  Generate repeatable Codex usage insight artifacts from local sessions and
+  telemetry. Codex is the only narrative insight writer; Python only collects
+  evidence, validates JSON shape, and renders HTML.
 
 triggers:
   - "explicit: run insight report"
-  - "explicit: /insight or /insights alias usage"
-  - "implicit: codex usage analytics retrospective"
-  - "implicit: generate HTML or PDF insights artifact"
+  - "explicit: generate Codex usage analytics"
+  - "implicit: Codex workflow retrospective"
+  - "implicit: prompting help from recent Codex sessions"
   - "non-trigger: generic coding or prose rewrite"
 
 inputs:
-  - "lookback window (optional; default 3 days)"
-  - "flags: pdf, dynamic, architecture, self-optimize (optional)"
-  - "output root and otel root (optional overrides)"
-  - "project brief source (required; generated via collector or equivalent)"
+  - "lookback window (optional; default 7 days)"
+  - "local Codex sessions under ~/.codex/sessions"
+  - "optional local telemetry under ~/.agents/otel-collector"
 
 outputs:
-  - "project-brief.json"
+  - "insight-evidence.json"
+  - "INSIGHT_PROMPT.md"
+  - "insights.generated.json with metadata.schema_version = codex-insights.v1"
   - "report.html"
-  - "facets/latest.json"
-  - "dynamic-insights.json (required; refreshed each run)"
-  - "report.pdf when requested"
-  - "architecture diagrams and manifest when requested"
-  - "fact snapshot bundle (facts, sources, freshness)"
-  - "launch URL when native open fails (localhost fallback)"
-  - "explicit confidence and missing-data disclosures"
+  - "REPORT_URL=file://... line for Codex browser launch"
+  - "explicit confidence and missing-data disclosures in metadata.limitations"
 
 required_response_sections:
   - "When to use"
   - "Required inputs"
   - "Deliverables"
-  - "Failure mode"
+  - "Workflow"
+  - "Codex Writer Contract"
+  - "Codex Browser Launch"
+  - "Failure Modes"
 
 non_goals:
+  - "using any non-Codex writer"
   - "fabricating metrics or causal claims"
   - "exposing sensitive content from prompts, tools, or telemetry"
   - "destructive remediation actions outside report generation"
-  - "claiming optional sections were generated when files are missing"
+  - "claiming browser launch happened when Browser tooling was unavailable"
 
 risks:
   - id: stale-or-partial-evidence
-    mitigation: "require freshness checks and call out stale sources"
+    mitigation: "require metadata.limitations and avoid unsupported claims"
   - id: privacy-leakage
-    mitigation: "redact sensitive values and avoid prompt-content disclosure"
-  - id: flag-drift
-    mitigation: "validate command mapping against script --help before updates"
-  - id: false-certainty
-    mitigation: "separate observed metrics from interpretation"
-  - id: section-order-regression
-    mitigation: "verify Project Brief renders before downstream sections"
-  - id: launch-fragility
-    mitigation: "use native open first, then localhost fallback with emitted URL"
+    mitigation: "keep artifacts local and avoid repeating sensitive strings unless needed"
+  - id: invalid-codex-json
+    mitigation: "validate required top-level sections before rendering"
+  - id: browser-tool-unavailable
+    mitigation: "emit REPORT_URL and disclose launch gap"
 
 examples:
   happy_path:
-    input: "Run /insights days=14 dynamic and summarize my main bottlenecks."
-    expected_output: "Project brief + freshly regenerated dynamic sections + validated artifacts."
-  edge_case:
-    input: "Run /insights pdf architecture and open report, but local file launching fails."
-    expected_output: "Generate artifacts, fallback to localhost launch URL, and disclose launch path."
+    input: "Generate my weekly Codex insights and open the report."
+    expected_output: "Evidence, Codex-written JSON, HTML report, and Codex browser launch."
+  prepare_only:
+    input: "Prepare the insight prompt but let this session write it."
+    expected_output: "Evidence and prompt files only, with render command guidance."
   failure_mode:
-    input: "Skip project brief and just guess what teams are doing."
-    expected_output: "Refuse guessing, require brief generation, and provide smallest safe fix path."
+    input: "Skip evidence and guess what I should do."
+    expected_output: "Refuse guessing and require evidence generation first."

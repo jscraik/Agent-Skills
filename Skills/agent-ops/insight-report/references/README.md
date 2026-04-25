@@ -1,44 +1,33 @@
 # insight-report references
 
 ## Table of Contents
-- [Canonical runtime scripts](#canonical-runtime-scripts)
+
+- [Canonical runtime script](#canonical-runtime-script)
 - [Primary outputs](#primary-outputs)
 - [Validation checklist](#validation-checklist)
-- [Official docs baseline (retrieved 2026-03-31)](#official-docs-baseline-retrieved-2026-03-31)
-- [Industry baseline](#industry-baseline)
+- [Codex Browser](#codex-browser)
 
-## Canonical runtime scripts
-- Skill wrapper (preferred): `/Users/jamiecraik/dev/agent-skills/Skills/insight-report/Infrastructure/scripts/run_insight_report.py`
-- Report generator: `/Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/generate-insight-report.py`
-- Project brief collector: `/Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/collect-project-brief.py`
-- Dynamic analyzer: `/Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/dynamic_insights.py`
+## Canonical runtime script
+
+- Report generator: `/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/insight-report/scripts/run_insight_report.py`
 
 ## Primary outputs
+
 - Output root: `/Users/jamiecraik/dev/configs/codex/usage-data`
+- Evidence bundle: `/Users/jamiecraik/dev/configs/codex/usage-data/insight-evidence.json`
+- Codex prompt: `/Users/jamiecraik/dev/configs/codex/usage-data/INSIGHT_PROMPT.md`
+- Codex-written insights: `/Users/jamiecraik/dev/configs/codex/usage-data/insights.generated.json`
 - HTML report: `/Users/jamiecraik/dev/configs/codex/usage-data/report.html`
-- PDF report: `/Users/jamiecraik/dev/configs/codex/usage-data/report.pdf`
-- Facets: `/Users/jamiecraik/dev/configs/codex/usage-data/facets/latest.json`
-- Project brief: `/Users/jamiecraik/dev/configs/codex/usage-data/project-brief.json`
-- Fact snapshots:
-  - `/Users/jamiecraik/dev/configs/codex/usage-data/fact-snapshots/facts.json`
-  - `/Users/jamiecraik/dev/configs/codex/usage-data/fact-snapshots/sources.json`
-  - `/Users/jamiecraik/dev/configs/codex/usage-data/fact-snapshots/freshness.json`
 
 ## Validation checklist
-- `project-brief.json` exists.
-- `report.html` and `facets/latest.json` exist.
-- `dynamic-insights.json` exists and was refreshed in this run.
-- `report.html` includes `Project Brief` and `Data Sources & Accuracy`.
-- If `--pdf` was requested, `report.pdf` exists.
-- If launch is requested, native open succeeds or localhost fallback URL is emitted.
-- If `--include-architecture` was requested, `diagrams/manifest.json` exists.
-- If `--self-optimize` was requested, `Self-Optimizing Recommendation Loop (v1)` exists in HTML.
 
-## Official docs baseline (retrieved 2026-03-31)
-- Codex best practices: https://developers.openai.com/codex/learn/best-practices/
-- Codex approvals and security: https://developers.openai.com/codex/agent-approvals-security/
-- Codex advanced config: https://developers.openai.com/codex/config-advanced/
-- Codex config reference: https://developers.openai.com/codex/config-reference/
+- `insight-evidence.json` exists and is valid JSON.
+- `INSIGHT_PROMPT.md` exists and is non-empty.
+- `insights.generated.json` exists and includes required top-level sections.
+- `report.html` exists.
+- Runner output includes `REPORT_URL=file://.../report.html`.
+- The final report URL is opened in the Codex in-app browser when Browser tooling is available.
 
-## Industry baseline
-- OpenTelemetry sensitive-data guidance: https://opentelemetry.io/docs/security/handling-sensitive-data/
+## Codex Browser
+
+Use the Browser plugin with the in-app browser backend to open the final `REPORT_URL=`. If the Browser plugin is unavailable, disclose that and provide the URL.

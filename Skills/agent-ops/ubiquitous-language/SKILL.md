@@ -36,8 +36,8 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 
 1. Determine the scope and output path.
 2. Read any existing `UBIQUITOUS_LANGUAGE.md` in scope and preserve intentional choices unless new evidence contradicts them.
-3. Gather source language from the current conversation first.
-4. Inspect nearby project guidance when useful: `AGENTS.md`, `README.md`, `docs/**`, `instructions/**`, handoff files, or domain docs.
+3. Gather source language from the current conversation first; treat it as the primary evidence unless the user names a different source.
+4. Inspect nearby project guidance only as needed to resolve or validate terminology: `AGENTS.md`, `README.md`, `docs/**`, `instructions/**`, handoff files, or domain docs.
 5. Use session logs or collector data only when the user asks for history-backed vocabulary, and summarize evidence instead of copying raw logs.
 6. Extract domain-relevant nouns, verbs, actor names, lifecycle states, workflow names, and repeated user phrases.
 7. Identify synonyms, overloaded words, vague phrases, and places where user wording should map to a more precise operator or technical term.
@@ -94,7 +94,7 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 - Choosing fancy technical terms that make future prompts less clear.
 - Treating the user's plain-language phrases as mistakes instead of useful aliases.
 - Hiding unresolved ambiguity by choosing a canonical term without confidence notes.
-- Reading broad raw logs when current conversation and project docs are sufficient.
+- Reading broad raw logs when the current conversation and targeted project docs are sufficient.
 
 ## Prompt Translations
 
