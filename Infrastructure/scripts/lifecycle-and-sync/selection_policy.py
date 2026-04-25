@@ -61,6 +61,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "pnpm-manager",
     "project-brain",
     "simplify",
+    "skill-pr-delivery",
     "triage",
     "ubiquitous-language",
     "verification-before-completion",
