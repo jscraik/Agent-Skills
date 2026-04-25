@@ -183,8 +183,8 @@ class TestWorkoutsCLI(unittest.TestCase):
         env["SKILL_TELEMETRY_DIR"] = str(self.telemetry_dir)
         result = subprocess.run(
             [
-                "python3",
-                "Infrastructure/bin/ask",
+                sys.executable,
+                str(REPO_ROOT / "Infrastructure" / "bin" / "ask"),
                 "workouts",
                 "run",
                 WORKOUT_ID,

@@ -127,7 +127,12 @@ append_candidate() {
   fi
 
   resolved_dir="$(cd -P -- "$(dirname -- "$resolved")" && pwd -P)" || return 0
-  candidate_list+=("${resolved_dir#"$REPO_ROOT"/}/$(basename -- "$resolved")")
+  resolved_name="$(basename -- "$resolved")"
+  if [[ "$resolved_dir" == "$REPO_ROOT" ]]; then
+    candidate_list+=("$resolved_name")
+  elif [[ "$resolved_dir" == "$REPO_ROOT/"* ]]; then
+    candidate_list+=("${resolved_dir#"$REPO_ROOT"/}/$resolved_name")
+  fi
 }
 
 # has_context_move_evidence determines whether any non-blank lines removed from a SKILL.md file reappear verbatim as added lines in the repository's reference candidates (the global INDEX_PATH plus files under the skill's references and Infrastructure/references), returning success (0) if at least one removed line is found and failure (1) otherwise.

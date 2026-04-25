@@ -1608,6 +1608,9 @@ def sync_skills(
                 warnings=plan["warnings"],
             )
             return result
+        projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
+        logs.extend(projection_logs)
         plan["mutation_counts"] = {
             "writes": len(plan["writes"]),
             "deletes": len(plan["deletes"]),

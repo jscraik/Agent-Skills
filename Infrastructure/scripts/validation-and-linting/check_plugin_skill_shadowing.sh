@@ -62,6 +62,16 @@ if [ -z "$selection_policy_shell" ]; then
   exit 1
 fi
 eval "$selection_policy_shell"
+projection_engine_path="$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py"
+if [ ! -f "$projection_engine_path" ]; then
+  projection_engine_path="$script_dir/../lifecycle-and-sync/projection_engine.py"
+fi
+if [ -f "$projection_engine_path" ]; then
+  projection_policy_shell="$(python3 "$projection_engine_path" --format shell 2>/dev/null || true)"
+  if [ -n "$projection_policy_shell" ]; then
+    eval "$projection_policy_shell"
+  fi
+fi
 # Safely handle empty arrays under bash 3.x where ${arr[@]} with set -u
 # is_allowlisted_overlap_skill_name checks whether SKILL_NAME appears in the space-separated system_bridge_skill_names and returns success (0) if it does, failure (1) otherwise.
 is_allowlisted_overlap_skill_name() {
@@ -74,16 +84,10 @@ is_allowlisted_overlap_skill_name() {
   return 1
 }
 
-# is_rooted_projection_active checks whether any name listed in root_skill_names_file has a corresponding .agents/skills/<name>/SKILL.md and returns success (0) if at least one is found.
+# is_rooted_projection_active checks the authoritative projection policy instead
+# of inferring mode from stale generated .agents/skills contents.
 is_rooted_projection_active() {
-  [ -s "$root_skill_names_file" ] || return 1
-  while IFS= read -r root_skill_name; do
-    [ -n "$root_skill_name" ] || continue
-    if [ -f ".agents/skills/$root_skill_name/SKILL.md" ]; then
-      return 0
-    fi
-  done < "$root_skill_names_file"
-  return 1
+  [ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-}" = "rooted" ]
 }
 
 # is_root_skill_set_name checks whether the provided skill name appears in the root skill names file and returns success (0) if it does.

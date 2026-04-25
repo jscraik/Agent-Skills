@@ -39,6 +39,12 @@ bash Infrastructure/scripts/validate_all.sh --ephemeral
 bin/ask skills sync --scope user --projection rooted --json
 ```
 
+## Full Gate
+
+```bash
+bin/ask repo validate --ephemeral
+```
+
 ## Rollback
 
 ```bash
@@ -46,6 +52,5 @@ bin/ask skills sync --scope workspace --projection flat --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 
-Run the full validation gate before rollback while the workspace projection is
-still rooted. The full gate checks rooted first-level runtime entries, so flat
-rollback is validated separately with the flat context-budget check.
+The full gate checks rooted first-level runtime entries, so flat rollback is
+validated separately with the flat context-budget check.

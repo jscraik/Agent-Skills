@@ -89,6 +89,24 @@ def dispatch_workouts(repo_root: Path, args: Any) -> CallResult:
     return result
 
 
+def render_workouts_human(args: Any, result: CallResult) -> None:
+    """Print a compact human summary for workout command results."""
+    print(f"✅ Workout {args.action}: {result.status}")
+    if args.action == "list":
+        print(f"Workouts: {result.data.get('count', 0)}")
+        for workout in result.data.get("workouts", []):
+            print(f"  - {workout.get('id')} ({workout.get('path')})")
+    elif args.action == "run":
+        print(f"Workout: {result.data.get('workout', args.workout_id)}")
+        print(f"Run id: {result.data.get('run_id')}")
+        print(f"Scorecard: {result.data.get('scorecard_path')}")
+    elif args.action == "score":
+        print(f"Scorecard: {result.data.get('scorecard_path')}")
+    elif args.action == "promote":
+        promotion = result.data.get("promotion", {})
+        print(f"Promotion state: {promotion.get('state', 'unknown')}")
+
+
 def _timestamp() -> str:
     """
     Produce an ISO-8601 UTC timestamp with second precision and a trailing "Z".
@@ -374,9 +392,12 @@ def _workout_dir(repo_root: Path, workout_id: str) -> Path:
         ValueError: If the normalized workout id is empty, equals "..", or attempts directory traversal.
     """
     safe = _safe_id(workout_id)
-    if not safe or safe.startswith("../") or "/../" in safe or safe == "..":
+    if not safe:
         raise ValueError("Workout id must be a relative .workouts path")
-    return repo_root / WORKOUTS_DIRNAME / safe
+    try:
+        return _resolve_inside(repo_root / WORKOUTS_DIRNAME, safe, label="id")
+    except ValueError as exc:
+        raise ValueError("Workout id must be a relative .workouts path") from exc
 
 
 def _load_workout(repo_root: Path, workout_id: str) -> tuple[Path, dict[str, Any]]:
@@ -528,7 +549,7 @@ def _record_amendment(telemetry_dir: Path, state: str, workout_id: str, proposal
     Returns:
         Path: The path to the written JSON file.
     """
-    target = telemetry_dir / "amendments" / state / f"{_safe_filename(workout_id)}-{int(time.time())}.json"
+    target = telemetry_dir / "amendments" / state / f"{_safe_filename(workout_id)}-{time.time_ns()}.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(proposal, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return target
@@ -912,7 +933,7 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
         rejection_reasons.append("pass_rate_not_improved")
     if not budget_ok:
         rejection_reasons.append("context_budget_exceeded")
-    if if_better and not scorecard.get("promotion_eligible"):
+    if not scorecard.get("promotion_eligible"):
         rejection_reasons.append("scorecard_not_promotion_eligible")
 
     promotion = {

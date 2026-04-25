@@ -4,7 +4,8 @@ import tempfile
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator, Optional
+from collections.abc import Iterator
+from typing import Optional
 from unittest import mock
 
 

@@ -252,7 +252,10 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
             if not plugin_root.is_dir():
                 continue
             cache_rel = _cache_plugin_source_root(plugin_root)
-            if cache_rel and (REPO_ROOT / "Plugins" / cache_rel / "skills").is_dir():
+            if cache_rel and any(
+                (REPO_ROOT / root_name / cache_rel / "skills").is_dir()
+                for root_name in ("Plugins", "plugins")
+            ):
                 continue
             for skill_md in sorted(plugin_root.rglob("SKILL.md")):
                 rel_parts = skill_md.relative_to(plugin_root).parts

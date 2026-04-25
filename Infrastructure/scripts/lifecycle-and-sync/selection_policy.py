@@ -185,7 +185,8 @@ def render_shell() -> str:
     """
     lines = [
         f"SELECTION_POLICY_IDENTITY={shlex.quote(policy_identity())}",
-        _shell_array("SELECTION_POLICY_PROJECTION_MODES", PROJECTION_MODE_CHOICES),
+        _shell_array("SELECTION_POLICY_PROJECTION_MODES", SUPPORTED_PROJECTION_MODES),
+        _shell_array("SELECTION_POLICY_DEFERRED_PROJECTION_MODES", DEFERRED_PROJECTION_MODES),
         _shell_array("SELECTION_POLICY_ROOT_SKILL_SETS", ROOT_SKILL_SET_NAMES),
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),

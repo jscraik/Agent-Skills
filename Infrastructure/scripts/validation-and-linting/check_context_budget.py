@@ -243,6 +243,15 @@ def validate_written_manifest_provenance(
                     "line": line_no,
                     "missing": missing,
                 })
+                continue
+            if provenance.get("policy_identity") != policy_identity():
+                violations.append({
+                    "code": "SKILLSET_POLICY_IDENTITY_STALE",
+                    "path": rel_path.as_posix(),
+                    "line": line_no,
+                    "policy_identity": provenance.get("policy_identity"),
+                    "expected_policy_identity": policy_identity(),
+                })
             if provenance.get("projection_mode") != "rooted":
                 violations.append({
                     "code": "SKILLSET_PROVENANCE_MODE_MISMATCH",
@@ -323,16 +332,17 @@ def validate_context_budget(*, projection_mode: str = DEFAULT_PROJECTION_MODE) -
                 "code": "LATENT_SKILLS_EXPOSED_FIRST_LEVEL",
                 "skills": latent_first_level,
             })
-    if manifest_report["violations"]:
-        violations.extend(manifest_report["violations"])
-    violations.extend(validate_written_manifest_provenance())
-    manifest_paths = [manifest["path"] for manifest in manifest_report["manifests"]]
-    missing_manifest_files = [path for path in manifest_paths if not (REPO_ROOT / path).is_file()]
-    if projection_mode == "rooted" and missing_manifest_files:
-        violations.append({
-            "code": "MANIFEST_FILES_MISSING",
-            "paths": missing_manifest_files,
-        })
+    if projection_mode == "rooted":
+        if manifest_report["violations"]:
+            violations.extend(manifest_report["violations"])
+        violations.extend(validate_written_manifest_provenance())
+        manifest_paths = [manifest["path"] for manifest in manifest_report["manifests"]]
+        missing_manifest_files = [path for path in manifest_paths if not (REPO_ROOT / path).is_file()]
+        if missing_manifest_files:
+            violations.append({
+                "code": "MANIFEST_FILES_MISSING",
+                "paths": missing_manifest_files,
+            })
     return {
         "status": "pass" if not violations else "fail",
         "projection_mode": projection_mode,

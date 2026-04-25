@@ -97,7 +97,9 @@ def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, An
         module.source_path
         for module in modules
         if not module.provenance.get("generator")
+        or not module.provenance.get("projection_mode")
         or not module.provenance.get("policy_identity")
+        or not module.provenance.get("source_revision")
         or not module.provenance.get("source_sha256")
     ]
     violations: list[dict[str, Any]] = []

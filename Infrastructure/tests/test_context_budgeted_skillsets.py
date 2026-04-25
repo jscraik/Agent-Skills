@@ -16,7 +16,7 @@ import check_context_budget  # noqa: E402
 import generate_root_skill_sets  # noqa: E402
 import generate_skillset_manifests  # noqa: E402
 import route_skillset  # noqa: E402
-from selection_policy import ROOT_SKILL_SET_NAMES  # noqa: E402
+from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # noqa: E402
 
 
 BUDGET_CONFIG = check_context_budget.load_config()
@@ -76,13 +76,13 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
 
     def test_router_returns_bounded_candidates_without_manifest_dump(self) -> None:
         """
-        Verify routing selects a skill, bounds candidates to the configured routing budget, and does not expose manifest dump data.
+        Verify routing selects a skill, bounds candidates to the configured routing budget, and includes source paths for deterministic consumers.
         
         Asserts that:
         - the router reports a "selected" status and normalizes the returned top_k to ROUTING_BUDGET["max_candidates_returned"];
         - the selected skill id is "verification-before-completion";
         - the number of returned candidates is <= ROUTING_BUDGET["max_candidates_returned"];
-        - candidate entries do not include manifest-only fields such as "source_path".
+        - candidate entries include source_path so callers can load the selected latent module deterministically.
         """
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
@@ -98,9 +98,14 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(payload["top_k"], ROUTING_BUDGET["max_candidates_returned"])
         self.assertEqual(payload["selected"]["id"], "verification-before-completion")
         self.assertLessEqual(len(payload["candidates"]), ROUTING_BUDGET["max_candidates_returned"])
-        self.assertNotIn("source_path", payload["candidates"][0])
+        self.assertIn("source_path", payload["selected"])
+        self.assertIn("source_path", payload["candidates"][0])
 
     def test_router_ignores_generic_stopwords_when_scoring(self) -> None:
+        for skill_name in ("generic-stage", "specific-stage"):
+            skill_file = self.temp_dir / "Skills" / "agent-ops" / skill_name / "SKILL.md"
+            skill_file.parent.mkdir(parents=True, exist_ok=True)
+            skill_file.write_text(f"# {skill_name}\n", encoding="utf-8")
         manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
         manifest.parent.mkdir(parents=True)
         manifest.write_text(
@@ -411,7 +416,7 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
             "provenance": {
                 "generator": "test",
                 "projection_mode": "rooted",
-                "policy_identity": "test",
+                "policy_identity": policy_identity(),
                 "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },

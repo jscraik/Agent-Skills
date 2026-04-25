@@ -120,6 +120,10 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
     if not manifest_path.is_file():
         return [], "manifest_missing"
     rows: list[dict[str, Any]] = []
+    source_root = skillsets_dir.parent if skillsets_dir.name == ".skillsets" else repo_root()
+    source_roots = [source_root]
+    if source_root.resolve() != repo_root().resolve():
+        source_roots.append(repo_root())
     for line_no, line in enumerate(manifest_path.read_text(encoding="utf-8").splitlines(), start=1):
         if not line.strip():
             continue
@@ -138,6 +142,31 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
         if not isinstance(triggers, list) or any(not isinstance(item, str) for item in triggers):
             raise ValueError(
                 f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'triggers' must be a list of strings"
+            )
+        source_path = Path(row["source_path"])
+        if source_path.is_absolute():
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path must be repository-relative"
+            )
+        found_source = False
+        escaped_source = False
+        for candidate_root in source_roots:
+            source_file = candidate_root / source_path
+            try:
+                source_file.resolve().relative_to(candidate_root.resolve())
+            except ValueError:
+                escaped_source = True
+                continue
+            if source_file.is_file():
+                found_source = True
+                break
+        if escaped_source and not found_source:
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path escapes repo root"
+            )
+        if not found_source:
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path does not exist: {row['source_path']}"
             )
         rows.append(row)
     return rows, None
@@ -222,7 +251,7 @@ def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | Non
     return None
 
 
-def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
+def selected_payload(row: dict[str, Any], confidence: float, rationale: str | None = None) -> dict[str, Any]:
     """
     Builds a standardized selection payload for a manifest row.
     
@@ -237,12 +266,15 @@ def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
             - `source_path`: row's `source_path`
             - `confidence`: `confidence` rounded to four decimal places
     """
-    return {
+    payload = {
         "id": row.get("id"),
         "level": row.get("level"),
         "source_path": row.get("source_path"),
         "confidence": round(confidence, 4),
     }
+    if rationale:
+        payload["rationale"] = rationale
+    return payload
 
 
 def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool:
@@ -626,6 +658,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             {
                 "id": selected_row.get("id"),
                 "level": selected_row.get("level"),
+                "source_path": selected_row.get("source_path"),
                 "confidence": round(selected_confidence, 4),
                 "reason": override["reason"],
             }
@@ -636,7 +669,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "policy_identity": policy_identity(),
             "skill_set": skill_set,
             "top_k": bounded_top_k,
-            "selected": selected_payload(selected_row, selected_confidence),
+            "selected": selected_payload(selected_row, selected_confidence, str(override["reason"])),
             "candidates": candidates,
             "operator_action": None,
         }
@@ -648,12 +681,13 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
         scored.append((confidence, row, reasons))
     scored.sort(key=lambda item: (-item[0], item[1].get("id", "")))
     candidates = [
-        {
-            "id": row.get("id"),
-            "level": row.get("level"),
-            "confidence": confidence,
-            "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
-        }
+            {
+                "id": row.get("id"),
+                "level": row.get("level"),
+                "source_path": row.get("source_path"),
+                "confidence": round(confidence, 4),
+                "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
+            }
         for confidence, row, reasons in scored[:bounded_top_k]
     ]
     if not candidates:
@@ -667,11 +701,15 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "candidates": [],
             "operator_action": "Ask a clarifying question or choose a documented fallback root skill set.",
         }
-    selected_confidence, selected_row, _reasons = scored[0]
+    selected_confidence, selected_row, selected_reasons = scored[0]
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":
-        selected = selected_payload(selected_row, selected_confidence)
+        selected = selected_payload(
+            selected_row,
+            selected_confidence,
+            "; ".join(selected_reasons) if selected_reasons else "matched manifest metadata",
+        )
     return {
         "schema_version": 1,
         "status": status,

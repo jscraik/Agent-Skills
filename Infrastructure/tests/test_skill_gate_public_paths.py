@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+from importlib.machinery import SourceFileLoader
 import sys
 import tempfile
 import unittest
@@ -19,7 +20,7 @@ SKILL_GATE = (
     / "code_quality_review"
     / "skill-builder"
     / "scripts"
-    / "skill_gate.py"
+    / "skill_gate.pyw"
 )
 
 
@@ -35,7 +36,10 @@ def load_skill_gate():
     Raises:
         RuntimeError: If a module spec or loader cannot be created for SKILL_GATE.
     """
-    spec = importlib.util.spec_from_file_location("skill_gate_public_paths", SKILL_GATE)
+    spec = importlib.util.spec_from_loader(
+        "skill_gate_public_paths",
+        SourceFileLoader("skill_gate_public_paths", str(SKILL_GATE)),
+    )
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load skill_gate from {SKILL_GATE}")
     module = importlib.util.module_from_spec(spec)
@@ -66,7 +70,7 @@ class SkillGatePublicPathTests(unittest.TestCase):
         """
         return self.module.SkillDoc(
             path=path,
-            raw="---\nname: sample\ndescription: test\n---\nbody",
+            raw=f"---\nname: sample\ndescription: test\n---\n{body}",
             frontmatter={"name": "sample", "description": "test"},
             body=body,
             fm_start_line=1,

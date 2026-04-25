@@ -66,6 +66,7 @@ Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/ar
 Plugins/plugin-factory/skills/**/.DS_Store
 Plugins/plugin-factory/skills/**/__pycache__/
 sync-symlink/
+**/.codex-repo-plugin-source
 
 # Generated artifacts
 .diagram/*

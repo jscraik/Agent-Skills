@@ -24,10 +24,13 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 
 ## Validation Notes
 
+- Regeneration command:
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/skill_scan.py write-skill-type-index --output Docs/skills-by-type.md`
 - Source scope: `Skills Plugins/harness-engineering Plugins/plugin-factory Plugins/skill-factory`.
 - Companion mode: sandbox-safe (no protected runtime path mutations).
 - Validation command:
   - `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`
+  - `bash Infrastructure/scripts/validation-and-linting/check-doc-style.sh --changed`
 
 ## Canonical Values
 

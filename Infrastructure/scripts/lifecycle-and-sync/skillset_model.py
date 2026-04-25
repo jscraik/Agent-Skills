@@ -353,7 +353,7 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
 
 def iter_candidate_skill_dirs() -> list[Path]:
     """
-    Yield a sorted list of candidate skill directories that contain a SKILL.md file and are eligible for projection.
+    Return a sorted list of candidate skill directories that contain a SKILL.md file and are eligible for projection.
     
     Scans repository and plugin skill directories, filters out entries missing a SKILL.md or whose scope is one of "system", "primary-runtime", "external", or "unknown", de-duplicates directories (preferring filesystem inode/device when available, falling back to resolved path), and returns the remaining directories sorted by their repository-relative path.
     

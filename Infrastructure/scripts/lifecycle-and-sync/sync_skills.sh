@@ -156,6 +156,25 @@ release_sync_lock() {
   fi
 }
 
+# start_watchdog starts a background watchdog that sleeps for $timeout_seconds and, if the timeout elapses, logs an error and sends SIGTERM to the main script; it records the background PID in $watchdog_pid.
+start_watchdog() {
+  trap 'echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2; exit 124' TERM
+  (
+    sleep "$timeout_seconds"
+    kill -TERM "$$" 2>/dev/null || true
+  ) >/dev/null 2>&1 &
+  watchdog_pid="$!"
+}
+
+# stop_watchdog stops the background watchdog timer process (if any) and clears its PID.
+stop_watchdog() {
+  if [[ -n "$watchdog_pid" ]]; then
+    kill "$watchdog_pid" 2>/dev/null || true
+    wait "$watchdog_pid" 2>/dev/null || true
+    watchdog_pid=""
+  fi
+}
+
 projection_args=(--format shell)
 if [ -n "$projection_mode_cli" ]; then
   projection_args+=(--mode "$projection_mode_cli")
@@ -178,7 +197,7 @@ else
   echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
   exit 2
 fi
-if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}" != "flat" ]]; then
+if [[ "$dry_run" == "1" || ( "$sync_scope" != "user" && "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}" != "flat" ) ]]; then
   ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}")
   if [[ "$dry_run" == "1" ]]; then
     ask_sync_args+=(--dry-run)
@@ -187,6 +206,8 @@ if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "${SYNC_SKILLS_RESOLVED_PR
     acquire_sync_lock
     trap release_sync_lock EXIT
   fi
+  start_watchdog
+  trap 'stop_watchdog; release_sync_lock' EXIT
   python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
   exit $?
 fi
@@ -199,25 +220,6 @@ if [ -z "$selection_policy_shell" ]; then
   exit 1
 fi
 eval "$selection_policy_shell"
-
-# start_watchdog starts a background watchdog that sleeps for $timeout_seconds and, if the timeout elapses, logs an error and sends SIGTERM to the main script; it records the background PID in $watchdog_pid.
-start_watchdog() {
-  (
-    sleep "$timeout_seconds"
-    echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2
-    kill -TERM "$$" 2>/dev/null || true
-  ) &
-  watchdog_pid="$!"
-}
-
-# stop_watchdog stops the background watchdog timer process (if any) and clears its PID.
-stop_watchdog() {
-  if [[ -n "$watchdog_pid" ]]; then
-    kill "$watchdog_pid" 2>/dev/null || true
-    wait "$watchdog_pid" 2>/dev/null || true
-    watchdog_pid=""
-  fi
-}
 
 acquire_sync_lock
 start_watchdog

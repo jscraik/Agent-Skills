@@ -14,6 +14,8 @@ disable=
     protected-access,
     too-few-public-methods
 
+# Infrastructure validators intentionally keep moderate branching/local limits:
+# many scripts validate several file contracts in one command boundary.
 [DESIGN]
 max-args=8
 max-attributes=12
