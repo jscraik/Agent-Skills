@@ -85,7 +85,6 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 - Confirm `UBIQUITOUS_LANGUAGE.md` exists at the selected output path after writing.
 - Confirm the nearest agent instruction surface references `UBIQUITOUS_LANGUAGE.md`, or report why no safe integration surface was updated.
 - Confirm the integration text tells agents to use Prompt Translations for terse or overloaded user phrases.
-- If both task-profile compatibility paths exist, confirm `Infrastructure/references/task-profile.json` and `references/task-profile.json` are identical; if they differ, stop and report the parity blocker instead of silently updating one path.
 - Fail fast: if the output path is unsafe, source evidence is unavailable, or a requested source would expose secrets, stop and report the blocker instead of proceeding.
 - Check that every canonical term has a one-sentence definition.
 - Check that `Prompt translations` includes at least one user phrase and one copy-pasteable improved prompt when the source material includes informal wording.
@@ -127,8 +126,8 @@ Read these only when the task needs the extra contract detail:
 | [references/output-format.md](./references/output-format.md) | Writing or updating `UBIQUITOUS_LANGUAGE.md`, or when the user asks for a fuller template. |
 | [references/contract.yaml](./references/contract.yaml) | Checking expected triggers, outputs, risks, observability, or rollback behavior. |
 | [references/evals.yaml](./references/evals.yaml) | Updating routing examples, eval prompts, or expected skill-selection behavior. |
-| [Infrastructure/references/task-profile.json](../../../Infrastructure/references/task-profile.json) | Inspecting machine-readable task-profile metadata used by lifecycle diagnostics. |
-| [references/task-profile.json](./references/task-profile.json) | Inspecting the compatibility task profile required by family benchmark tooling; keep identical to `Infrastructure/references/task-profile.json`. |
+| [Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json) | Inspecting machine-readable task-profile metadata used by lifecycle diagnostics. |
+| [references/task-profile.json](./references/task-profile.json) | Inspecting the compatibility task profile required by family benchmark tooling; parity with `Infrastructure/references/task-profile.json` is enforced by centralized infrastructure validators. |
 
 ## Re-Running
 
