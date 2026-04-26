@@ -11,10 +11,12 @@ triggers:
 inputs:
   - workspace structure
   - command target mode (single, filtered, recursive)
+  - explicit root workspace inclusion decision (`include-root` or `exclude-root`)
   - git ref context for changed-package selectors
 outputs:
   - exact pnpm command sequence
   - selector and scope rationale
+  - root workspace inclusion or exclusion rationale
   - validation and fail-fast checks
 non_goals:
   - npm/yarn specific package-manager policy

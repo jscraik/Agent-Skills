@@ -28,10 +28,13 @@ non_goals:
   - unrelated environment refactors outside mise scope
   - claiming recovery without rerunning verification commands
   - unrelated global toolchain policy changes
+  - fetching remote scripts or network payloads as part of trust repair
+  - destructive filesystem cleanup outside the scoped mise configuration path
 
 risks:
   - over-broad trust actions; mitigated by path-scoped trust steps
   - sensitive output exposure; mitigated by redaction in logs and summaries
+  - command-injection pressure; mitigated by refusing `curl`, `wget`, `rm -rf`, and `nc` during mise repair
 
 examples:
   happy_path:

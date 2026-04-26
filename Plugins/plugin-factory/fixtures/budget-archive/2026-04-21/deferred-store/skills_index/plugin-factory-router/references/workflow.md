@@ -21,10 +21,10 @@
 
 ## Route Map
 
-- create scaffolds -> `Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md`
-- harden or convert packages -> `Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md`
-- install or repair plugin visibility -> `Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md`
-- classify mixed requests in this router first; use `Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md` only as an internal follow-up when troubleshooting remains ambiguous after one routing pass
+- create scaffolds -> `plugin-creator`
+- harden or convert packages -> `plugin-builder`
+- install or repair plugin visibility -> `plugin-installer`
+- classify mixed requests in this router first; use `plugin-router` only as an internal follow-up when troubleshooting remains ambiguous after one routing pass
 
 ## Procedure
 

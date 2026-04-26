@@ -101,6 +101,15 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
                 raise ValueError(
                     f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field {field!r} must be a non-empty string"
                 )
+        source_path = Path(str(row["source_path"]))
+        if source_path.is_absolute() or ".." in source_path.parts:
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'source_path' must be a repo-relative path"
+            )
+        if not (repo_root() / source_path).is_file():
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path {row['source_path']!r} does not exist"
+            )
         triggers = row.get("triggers", [])
         if not isinstance(triggers, list) or any(not isinstance(item, str) for item in triggers):
             raise ValueError(
@@ -285,7 +294,7 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
             (
                 "plugin-installer",
                 "install-plugin",
-                {"install", "add", "sync", "marketplace"},
+                {"install", "add", "sync", "marketplace", "repair", "visibility", "visible", "import", "discover", "discovery"},
                 {"plugin", "plugins"},
             ),
             (

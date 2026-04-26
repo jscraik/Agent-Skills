@@ -96,7 +96,7 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
                             "id": "generic-stage",
                             "description": "Use when the request says and with before",
                             "level": "atom",
-                            "source_path": "Skills/agent-ops/generic-stage/SKILL.md",
+                            "source_path": "Skills/agent-ops/verification-before-completion/SKILL.md",
                             "triggers": ["and with before"],
                         }
                     ),
@@ -105,7 +105,7 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
                             "id": "specific-stage",
                             "description": "Use for branch review readiness",
                             "level": "atom",
-                            "source_path": "Skills/agent-ops/specific-stage/SKILL.md",
+                            "source_path": "Skills/agent-ops/gh-workflow/SKILL.md",
                             "triggers": ["branch review readiness"],
                         }
                     ),

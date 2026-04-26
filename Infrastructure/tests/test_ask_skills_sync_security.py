@@ -55,6 +55,26 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "flat")
 
+    def test_sync_skills_user_scope_preserves_existing_plugins_directory(self) -> None:
+        user_plugins = self.fake_home / "plugins"
+        user_plugins.mkdir()
+        (user_plugins / "README.md").write_text("user owned\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_dir())
+        self.assertFalse(user_plugins.is_symlink())
+        self.assertTrue((user_plugins / "README.md").is_file())
+        self.assertIn(
+            f"Skipped existing non-symlink path: {user_plugins}",
+            result.data["logs"],
+        )
+
     def test_sync_skills_projection_env_reaches_engine(self) -> None:
         with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
             result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=True)
@@ -114,6 +134,24 @@ class TestAskSkillsSyncSecurity(TestCase):
             any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
             result.data["plan"],
         )
+
+    def test_sync_skills_rooted_reports_skillset_prune_failures(self) -> None:
+        with mock.patch.object(
+            skills_commands,
+            "prune_unowned_skillset_files",
+            side_effect=OSError("permission denied"),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
+        self.assertIn("permission denied", result.errors[0].message)
+        self.assertIn("ROOTED_PROJECTION_WRITE_FAILED", result.data["plan"]["warnings"])
 
     def test_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
         with mock.patch.object(Path, "home", return_value=self.fake_home):

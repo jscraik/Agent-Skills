@@ -1144,25 +1144,24 @@ def goal_skills(
 def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
     """
     Create or update a filesystem symbolic link at `target` that points to `source`.
-    
-    Ensures `target.parent` exists before creating the link. When `dry_run` is True no filesystem changes are made; otherwise the function will replace any existing file, symlink, or directory at `target` with a symlink pointing to `source`.
-    
+
+    Ensures `target.parent` exists before creating the link. Existing non-symlink paths are preserved so user-owned directories like `~/plugins` are not deleted during relink.
+
     Parameters:
-    	source (Path): Destination path that the symlink should reference.
-    	target (Path): Filesystem path where the symlink will be created or updated.
-    	dry_run (bool): If True, do not perform filesystem mutations; only simulate the action.
-    
+        source (Path): Destination path that the symlink should reference.
+        target (Path): Filesystem path where the symlink will be created or updated.
+        dry_run (bool): If True, do not perform filesystem mutations; only simulate the action.
+
     Returns:
-    	action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>" or "Updated symlink: <target> -> <source>".
+        action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>", "Updated symlink: <target> -> <source>", or "Skipped existing non-symlink path: <target>".
     """
+    if target.exists() and not target.is_symlink():
+        return f"Skipped existing non-symlink path: {target}"
     action = "Created" if not target.exists() else "Updated"
     if not dry_run:
         target.parent.mkdir(parents=True, exist_ok=True)
-        if target.is_symlink() or target.exists():
-            if target.is_dir() and not target.is_symlink():
-                shutil.rmtree(target)
-            else:
-                target.unlink()
+        if target.is_symlink():
+            target.unlink()
         target.symlink_to(source)
     return f"{action} symlink: {target} -> {source}"
 
@@ -1401,6 +1400,7 @@ def _sync_rooted_projection(
         try:
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
+            prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
         except (OSError, ValueError) as exc:
             plan["validation_status"] = "fail"
             plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
@@ -1411,7 +1411,7 @@ def _sync_rooted_projection(
             )]
         logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
-        for log in prune_unowned_skillset_files(repo_root / ".skillsets", dry_run):
+        for log in prune_logs:
             plan["deletes"].append(log)
             logs.append(log)
 
