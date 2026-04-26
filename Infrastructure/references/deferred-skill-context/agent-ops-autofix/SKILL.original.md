@@ -247,9 +247,9 @@ Use one commit for all applied fixes in this run.
 ### Step 8: Prompt Build/Lint Before Push
 
 If a consolidated commit was created:
-- Prompt user interactively to run validation before push (recommended, not required).
-- Remind the user of the `AGENTS.md` instructions already loaded in Step 0 (if present).
-- If user agrees, run the requested checks and report results.
+- Run the scoped validation required by the loaded `AGENTS.md` instructions before push.
+- If validation cannot run, stop in a blocked state with the exact reason and do not present the work as complete.
+- Report the command results and any remaining risk before pushing.
 
 ### Step 9: Push Changes
 

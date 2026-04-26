@@ -58,8 +58,12 @@ cases:
     acceptance:
       - type: contains
         value: "pr_merge_server"
-      - type: contains
-        value: "--squash --delete-branch --auto"
+      - type: regex
+        value: "(?is)merge:.*strategy:.*squash"
+      - type: regex
+        value: "(?is)merge:.*auto_merge_enabled: true"
+      - type: regex
+        value: "(?is)merge:.*delete_branch: true"
       - type: contains
         value: "merge"
 

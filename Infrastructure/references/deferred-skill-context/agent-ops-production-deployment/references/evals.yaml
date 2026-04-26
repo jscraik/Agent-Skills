@@ -1,3 +1,6 @@
+schema_version: "2.0"
+skill_name: production-deployment
+
 cases:
   - name: happy-path
     prompt: "Deploy version 2.3.1 to production using a rolling strategy."

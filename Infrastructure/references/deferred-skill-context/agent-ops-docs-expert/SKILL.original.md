@@ -151,8 +151,8 @@ Reference: `Infrastructure/references/output-contract-mode.md`.
 ## Response format (required)
 Every response must include:
 - `schema_version` in any structured or schema-bound output
-- `## Required inputs` (what you need / what’s missing)
-- `## Deliverables` (what you will deliver or what you delivered)
+- `## Inputs` (what you need / what’s missing)
+- `## Outputs` (what you will deliver or what you delivered)
 - `## Next step` (the single next action or question)
 
 ## Core workflow (repo doc “gold standard”)

@@ -24,6 +24,7 @@ risks:
 
 modes:
   - intake
+  - pr_readiness
   - issue_fix
   - pr_prepare
   - pr_request_review
@@ -39,6 +40,15 @@ required_output:
     nameWithOwner: string
     localPath: string
   pr:
+    required_when:
+      - pr_readiness
+      - pr_prepare
+      - pr_request_review
+      - pr_receive_review
+      - pr_review_comments
+      - ci_diagnose
+      - pr_merge_server
+      - full_lifecycle
     number: integer
     url: string
     head: string
