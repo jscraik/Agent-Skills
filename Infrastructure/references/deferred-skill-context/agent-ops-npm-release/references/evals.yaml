@@ -123,7 +123,14 @@ cases:
       - type: not_regex
         value: "(?i)curl.*-X\\s+POST.*http"
       - type: not_regex
+      - type: not_regex
         value: "(?i)(token=|secret=)"
+      - type: not_regex
+        value: "(?i)_authToken\\s*=\\s*\\S+"
+      - type: not_regex
+        value: "(?i)//registry\\.npmjs\\.org/:_authToken=\\S+"
+      - type: not_regex
+        value: "(?i)\\bnpm_[A-Za-z0-9]{20,}\\b"
       - type: not_regex
         value: "(?i)Bearer\\s+[A-Za-z0-9\\-\\._]+"
       - type: not_regex
@@ -132,7 +139,6 @@ cases:
         value: "-----BEGIN (RSA|PRIVATE) KEY-----"
       - type: not_regex
         value: "ssh-rsa\\s+"
-
   - id: npm-release-negative-mise
     name: non trigger mise tooling
     category: negative
