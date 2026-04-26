@@ -1,9 +1,9 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-26T13:25:16.750416+00:00",
+  "generated_at": "2026-04-26T13:29:24.013013+00:00",
   "mode": "verify",
   "scope": "all",
-  "status": "fail",
+  "status": "pass",
   "results": [
     {
       "name": "skill-factory-skill-creator-alias",
@@ -45,20 +45,13 @@
       "policy": "hash-manifest-plus-path-diff",
       "missing_in_projection": [],
       "extra_in_projection": [],
-      "mismatched_files": [
-        {
-          "path": "references/deferred-context-index.md",
-          "reason": "content_mismatch",
-          "source_sha256": "705d3b242b6d8d0c25809e0a3f8aa78a1a05a72e60e90aa7613d5df09aaa26f3",
-          "projection_sha256": "9fd9ff64b62da59a0c605a8a41fdfaf4940d923e40e622f1460532e909f373c8"
-        }
-      ],
+      "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 219,
-      "source_manifest_sha256": "d4c12855cde0c72b5fd4c786a4dee87f8d33272324bf7f7b04f9e8d1df902d62",
-      "projection_manifest_sha256": "86e8a83e14bf13985eba8d9f54e34efd61c3c128a430e5e37135b3bcaf255755",
-      "manifest_mismatch": true,
-      "status": "drift"
+      "source_manifest_sha256": "065ed53b5fbfdc64902a56886d029d368fbe2c20969a003089509d8fa98262c8",
+      "projection_manifest_sha256": "065ed53b5fbfdc64902a56886d029d368fbe2c20969a003089509d8fa98262c8",
+      "manifest_mismatch": false,
+      "status": "pass"
     },
     {
       "name": "cache-plugin-factory",
