@@ -151,10 +151,10 @@ def find_session_files(days):
     """Find session files from ~/.codex/sessions/ within the lookback period."""
     if not SESSIONS_DIR.exists():
         return []
-    
+
     cutoff = datetime.now() - timedelta(days=days)
     cutoff_timestamp = cutoff.timestamp()
-    files = []
+    files_with_mtime = []
 
     for year_dir in SESSIONS_DIR.iterdir():
         if not year_dir.is_dir() or not year_dir.name.isdigit():
@@ -176,12 +176,13 @@ def find_session_files(days):
                     try:
                         file_timestamp = f.stat().st_mtime
                         if file_timestamp >= cutoff_timestamp:
-                            files.append(f)
+                            files_with_mtime.append((f, file_timestamp))
                     except OSError:
                         continue
-    
+
     # Sort by modification time (newest first) so max_sessions limit keeps recent sessions
-    return sorted(files, key=lambda p: p.stat().st_mtime, reverse=True)
+    files_with_mtime.sort(key=lambda item: item[1], reverse=True)
+    return [path for path, mtime in files_with_mtime]
 
 
 def is_meta_session(events):
@@ -1544,8 +1545,8 @@ def collect_session_data(args):
     
     data = {
         "period": {
-            "start": (datetime.now() - timedelta(days=args.days)).isoformat(),
-            "end": datetime.now().isoformat(),
+            "start": (datetime.now(tz=timezone.utc) - timedelta(days=args.days)).isoformat(),
+            "end": datetime.now(tz=timezone.utc).isoformat(),
             "days": args.days,
         },
         "sessions": {
