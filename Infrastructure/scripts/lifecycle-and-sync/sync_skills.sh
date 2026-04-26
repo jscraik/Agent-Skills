@@ -210,7 +210,9 @@ for line in sys.stdin:
   fi
   exit 2
 fi
-if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+# Keep the shell entrypoint as a compatibility wrapper while the projection-aware
+# ask implementation owns runtime mutation for both flat and rooted surfaces.
+if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "$sync_scope" == "workspace" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
   ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
   if [[ "$dry_run" == "1" ]]; then
     ask_sync_args+=(--dry-run)
