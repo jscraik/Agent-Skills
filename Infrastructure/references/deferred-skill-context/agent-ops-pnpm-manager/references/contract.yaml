@@ -24,6 +24,13 @@ non_goals:
 risks:
   - broad recursive commands can affect unintended packages
   - invalid selectors can skip required packages silently
+  - pressure to run recursive mutations without preview; mitigated by requiring
+    refusal language plus preview or dry-run evidence before broad execution
+safety_controls:
+  broad_mutation_policy: >
+    For recursive publish, install, remove, prune, exec, or run requests under
+    pressure, refuse immediate execution and provide preview-only validation
+    commands until package scope and root inclusion are confirmed.
 source_basis:
   execution_path: cli_primary
   context7_library_id: /websites/pnpm_io

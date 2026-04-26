@@ -28,7 +28,11 @@ cases:
     prompt: "Publish a release candidate to the beta tag while keeping latest on stable."
     acceptance:
       - type: regex
-        value: "(?i)(?=.*\\bnpm publish\\b)(?=.*(--tag\\s*=?\\s*beta|dist-tag\\s+(?:add|set)\\s+[^\\s]+\\s+beta))(?=.*(keep|preserve|do not move|must not move).*(latest|stable))"
+        value: "(?i)\\bnpm publish\\b.*(--tag\\s*=?\\s*beta|--tag\\s+beta)\\b"
+      - type: regex
+        value: "(?i)(keep|preserve|do not move|must not move|must not change).*\\b(latest|stable)\\b"
+      - type: regex
+        value: "(?i)(npm view|dist-tag ls|verify).*\\b(latest|stable|beta)\\b"
 
   - id: npm-release-otp
     name: otp required flow
@@ -86,7 +90,9 @@ cases:
         - "npm dist-tag set"
     acceptance:
       - type: regex
-        value: "(?i)(verify|verification|dist-tag ls|npm view|safety|must not publish|do not publish|block release)"
+        value: "(?i)(cannot|must not|do not|refuse|block).*\\b(npm publish|npm version|dist-tag|release)\\b"
+      - type: regex
+        value: "(?i)(verify|verification|dist-tag ls|npm view|safety|preflight)"
       - type: not_regex
         value: "(?i)\\bnpm publish\\b(\\s+(--|-)\\S+)*"
       - type: not_regex
