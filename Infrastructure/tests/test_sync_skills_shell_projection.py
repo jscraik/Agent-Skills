@@ -28,6 +28,7 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("ask_sync_args=(skills sync", script)
         self.assertIn('[[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]', script)
         self.assertIn("start_watchdog", script)
+        self.assertIn("exit 124", script)
 
     def test_shell_entrypoint_keeps_flat_legacy_path_reachable(self) -> None:
         with open(SYNC_SCRIPT, encoding="utf-8") as script_file:

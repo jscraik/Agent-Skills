@@ -10,6 +10,7 @@ lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
 lock_owned=0
 watchdog_pid=""
+timeout_marker="${TMPDIR:-/tmp}/agent-skills-sync-timeout.$$"
 
 usage() {
   cat <<'USAGE'
@@ -165,7 +166,7 @@ release_sync_lock() {
 }
 
 start_watchdog() {
-  python3 - "$timeout_seconds" "$$" <<'PY' &
+  python3 - "$timeout_seconds" "$$" "$timeout_marker" <<'PY' &
 import os
 import signal
 import sys
@@ -173,7 +174,10 @@ import time
 
 timeout_seconds = int(sys.argv[1])
 parent_pid = int(sys.argv[2])
+timeout_marker = sys.argv[3]
 time.sleep(timeout_seconds)
+with open(timeout_marker, "w", encoding="utf-8") as marker:
+    marker.write("timeout\n")
 print(f"[ERROR] sync_skills timed out after {timeout_seconds}s", file=sys.stderr, flush=True)
 try:
     os.kill(parent_pid, signal.SIGTERM)
@@ -189,7 +193,18 @@ stop_watchdog() {
     wait "$watchdog_pid" 2>/dev/null || true
     watchdog_pid=""
   fi
+  rm -f -- "$timeout_marker"
 }
+
+handle_timeout_signal() {
+  if [[ -f "$timeout_marker" ]]; then
+    rm -f -- "$timeout_marker"
+    exit 124
+  fi
+  exit 143
+}
+
+trap handle_timeout_signal TERM
 
 projection_args=(--format shell)
 if [ -n "$projection_mode_cli" ]; then

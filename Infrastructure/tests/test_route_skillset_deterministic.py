@@ -27,6 +27,16 @@ def _write_manifest(root: Path, skill_set: str, rows: list[dict[str, object]]) -
             handle.write(json.dumps(row) + "\n")
 
 
+def _write_source_files(root: Path, rows: list[dict[str, object]]) -> None:
+    for row in rows:
+        source_path = str(row.get("source_path", ""))
+        if not source_path or "Plugins/missing/" in source_path:
+            continue
+        skill_file = root / source_path
+        skill_file.parent.mkdir(parents=True, exist_ok=True)
+        skill_file.write_text("# Test skill\n", encoding="utf-8")
+
+
 def _row(skill_id: str, description: str) -> dict[str, object]:
     return {
         "id": skill_id,
@@ -47,7 +57,9 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         expected_returncode: int = 0,
     ) -> dict[str, object]:
         with tempfile.TemporaryDirectory(prefix="route-skillset-") as tmp:
-            skillsets_dir = Path(tmp)
+            fixture_root = Path(tmp)
+            skillsets_dir = fixture_root / ".skillsets"
+            _write_source_files(fixture_root, rows)
             _write_manifest(skillsets_dir, skill_set, rows)
             result = subprocess.run(
                 [
