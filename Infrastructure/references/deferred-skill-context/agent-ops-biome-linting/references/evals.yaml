@@ -13,7 +13,7 @@ cases:
       - type: regex
         value: "(?i)(read-only|preview|baseline).*biome (lint|check|format) \\."
       - type: regex
-        value: "(?i)(safe fix|--write).*explicit.*(--unsafe|unsafe approval)|(@biomejs/biome|biome) ci"
+        value: "(?i)(safe fix|--write).*explicit.*(--unsafe|unsafe approval)"
 
   - id: biome-rule-targeting
     name: rule targeting flow

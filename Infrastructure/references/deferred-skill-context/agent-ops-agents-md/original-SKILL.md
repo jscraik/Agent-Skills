@@ -63,10 +63,10 @@ Use this section as an adaptation guideline for generated AGENTS.md files, not r
 - Existing `AGENTS.md`, `AGENTS.override.md`, fallback-named instruction files, and related linked docs.
 - Verified commands/paths from repository sources.
 - Active Codex config knobs when present: `project_doc_fallback_filenames`, `project_doc_max_bytes`, and any custom `CODEX_HOME` expectations.
-- Preferred linked-doc tree (`instructions/agents` or `docs/agents`) based on repo convention.
+- Preferred linked-doc tree (`instructions/agents` or `Docs/agents`) based on repo convention.
 - Repo preflight command state, including whether `./Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` exists and which flags are supported, such as `--repo-fragment`, `--bins`, and `--paths`.
 - Root manifest signals for stack detection, such as `package.json`, `pyproject.toml`, or `Cargo.toml`.
-- Required repo paths and whether they are present, especially `docs/`, `Docs/plans/`, and any repo-specific operating folders.
+- Required repo paths and whether they are present, especially `Docs/`, `Docs/plans/`, and any repo-specific operating folders.
 - Whether the repo has explicitly adopted the harness-memory convention and, if so, whether `.harness/memory/LEARNINGS.md` is part of the required operating surface.
 - Local Memory policy expectations and whether required-mode checks are genuinely part of the repo standard.
 - Project Brain expectations, including whether `instructions/project-brain.md` exists, whether a root-visible Project Brain section is expected, and whether a bootstrap helper such as `Infrastructure/scripts/init-project-brain.sh` is part of the documented workflow.

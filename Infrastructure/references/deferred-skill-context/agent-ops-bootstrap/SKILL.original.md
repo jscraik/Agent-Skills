@@ -130,7 +130,7 @@ If bootstrap fails:
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with the repo-local feedback recorder when one exists, for example `python3 Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`. If the recorder is unavailable, report feedback as non-persisted instead of inventing a path.
+- Persist with the repo-local feedback recorder when one exists, using the actual skill path and recorder flags. If the recorder is unavailable, report feedback as non-persisted instead of inventing a path.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 

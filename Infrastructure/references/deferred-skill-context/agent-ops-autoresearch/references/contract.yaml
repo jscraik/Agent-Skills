@@ -17,6 +17,7 @@ inputs:
 outputs:
   - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv
   - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/journal.md
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/targets.txt
   - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/run.json
   - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/iteration_journal.jsonl
   - final findings summary with validation evidence

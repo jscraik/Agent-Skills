@@ -24,6 +24,7 @@ outputs:
   - explicit confirmation requirement and decision log when global edits are requested but ambiguous
   - stable runtime execution pattern for repeated tasks, such as `mise exec -- <command>` or documented shell activation
   - clear unresolved blocker summary when full recovery is not possible
+  - residual risk summary for any trust, version, or shell-activation issue that remains after verification
 
 non_goals:
   - unrelated environment refactors outside mise scope

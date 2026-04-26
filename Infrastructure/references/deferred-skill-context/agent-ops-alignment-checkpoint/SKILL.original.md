@@ -185,7 +185,7 @@ Assistant: STASIS_RECORD → JSON → options → gate (no tools).
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with the repo-local feedback recorder when available. If no recorder exists, report the feedback as non-persisted instead of inventing a path.
+- Persist with the repo-local feedback recorder only after verifying the recorder exists in the current repo. If no recorder exists, report the feedback as non-persisted instead of inventing a path.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 

@@ -40,9 +40,9 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 - If the user specifies an exact loop count (for example "do five loops"), treat that as the active iteration cap and run exactly that many unless a blocker forces an early stop.
 
 ## Deliverables
-- `artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv`
-- `artifacts/autoresearch/<run-tag>-<timestamp>/journal.md`
-- `artifacts/autoresearch/<run-tag>-<timestamp>/targets.txt`
+- `Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv`
+- `Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/journal.md`
+- `Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/targets.txt`
 - A final summary with:
   - kept vs discarded experiments,
   - validation evidence,

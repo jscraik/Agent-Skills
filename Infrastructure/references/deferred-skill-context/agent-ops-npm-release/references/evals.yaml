@@ -67,7 +67,13 @@ cases:
       - type: regex
         value: "release-notes-handoff\\.v1"
       - type: regex
-        value: "(?i)(package|version|channel|publish_blockers)"
+        value: "(?i)\\bpackage\\b"
+      - type: regex
+        value: "(?i)\\bversion\\b"
+      - type: regex
+        value: "(?i)\\bchannel\\b"
+      - type: regex
+        value: "(?i)\\bpublish_blockers\\b"
       - type: regex
         value: "(?i)(validate|block|mismatch|before publish)"
 

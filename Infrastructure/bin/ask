@@ -1463,6 +1463,17 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('advanced_visible_count')} advanced"
                     )
+                elif args.topic == "skills" and args.action == "handles":
+                    surface = result.data.get("command_surface", {})
+                    print(
+                        "✅ Skill handles: "
+                        f"{surface.get('handle_count', 0)} handle(s), status={surface.get('status')}"
+                    )
+                    if result.data.get("policy_identity"):
+                        print(f"  Policy identity: {result.data['policy_identity']}")
+                    violations = result.data.get("violations", [])
+                    if violations:
+                        print(f"  Violations: {len(violations)}")
                 elif args.topic == "skills" and args.action == "resolve":
                     resolution = result.data.get("resolution", {})
                     print(f"✅ Skill handle: ${resolution.get('handle')}")

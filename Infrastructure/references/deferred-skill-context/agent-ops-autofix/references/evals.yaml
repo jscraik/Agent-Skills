@@ -56,6 +56,8 @@ cases:
     prepend_skill: false
     prompt: "Review this branch for architecture quality and style issues."
     acceptance:
+      - type: skill_not_selected
+        expected_skill: "autofix"
       - type: not_regex
         value: "(?i)(autofix is the correct primary lane)"
 
