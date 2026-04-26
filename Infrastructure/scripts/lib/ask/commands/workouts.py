@@ -179,7 +179,7 @@ def _declared_metrics(config: dict[str, Any]) -> set[str]:
         raise ValueError("Workout constraints must be a mapping")
     declared = constraints.get("metrics") or config.get("metrics") or []
     if not isinstance(declared, list) or not all(isinstance(item, str) and item.strip() for item in declared):
-        raise ValueError("Workout constraints.metrics must be a list of non-empty metric names")
+        raise ValueError("Workout metrics must be a list of non-empty metric names")
     return {item.strip() for item in declared}
 
 
@@ -684,7 +684,7 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         declared_metrics = _declared_metrics(config)
         if declared_metrics and declared_metrics != EXPECTED_DECLARED_METRICS:
             raise ValueError(
-                "Workout constraints.metrics must exactly match "
+                "Workout metrics must exactly match "
                 f"{', '.join(sorted(EXPECTED_DECLARED_METRICS))}"
             )
         target_source = str(config.get("target_source_path") or "")
