@@ -150,6 +150,25 @@ class TestAskSkillsSyncSecurity(TestCase):
             result.data["plan"],
         )
 
+    def test_sync_skills_rooted_dry_run_reports_unowned_skillset_files(self) -> None:
+        stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
+        stale_file.parent.mkdir(parents=True)
+        stale_file.write_text("{}\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=True,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(stale_file.exists())
+        self.assertTrue(
+            any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
+            result.data["plan"],
+        )
+
     def test_sync_skills_rooted_reports_skillset_prune_failures(self) -> None:
         with mock.patch.object(
             skills_commands,

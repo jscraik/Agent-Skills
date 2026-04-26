@@ -156,6 +156,7 @@ For a chosen direction, add:
 When authoring or changing this skill, run:
 
 - `./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json`
+- `vale Skills/agent-ops/improve-codebase-architecture/SKILL.md`
 - `./bin/ask repo validate --robot`
 - `git diff --check -- Skills/agent-ops/improve-codebase-architecture`
 

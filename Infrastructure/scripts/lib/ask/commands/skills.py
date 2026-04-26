@@ -1446,6 +1446,9 @@ def _sync_rooted_projection(
 
     if dry_run:
         logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
+        for log in prune_unowned_skillset_files(repo_root / ".skillsets", dry_run=True):
+            plan["deletes"].append(log)
+            logs.append(f"Dry-run {log}")
     else:
         try:
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)

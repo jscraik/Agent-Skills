@@ -10,7 +10,9 @@ cases:
       - type: regex
         value: "(?i)DECISION:\\s*(SKILL|CUSTOM_PROMPT|AGENT_AUTOMATION)"
       - type: regex
-        value: "(?i)(autonomy|invocation|context|portability|operational burden|supporting factors)"
+        value: "(?i)SUPPORTING_FACTORS:"
+      - type: regex
+        value: "(?i)(autonomy|invocation|context|portability|operational burden)"
   - id: edge-missing-inputs
     name: missing decision facts
     category: edge
