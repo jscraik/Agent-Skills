@@ -51,7 +51,6 @@ class ProjectionModeDecision:
     policy_identity: str
     engine: str = ENGINE_NAME
     alias_of: str | None = None
-    mutation_available: bool = True
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -110,23 +109,7 @@ def normalize_projection_mode(
         mode_source=mode_source,
         default_projection_mode=DEFAULT_PROJECTION_MODE,
         alias_of=alias_of,
-        mutation_available=canonical in {"flat", "rooted"},
         policy_identity=policy_identity(),
-    )
-
-
-def ensure_mutation_supported(decision: ProjectionModeDecision, *, dry_run: bool) -> None:
-    """Fail before mutation when a parsed mode is not implemented for writes."""
-    if dry_run or decision.mutation_available:
-        return
-    raise ProjectionModeError(
-        "ERR_PROJECTION_MUTATION_UNAVAILABLE",
-        (
-            f"Projection mode '{decision.projection_mode}' is parsed but mutation is not "
-            "implemented in this phase; use --dry-run or --projection flat."
-        ),
-        requested_mode=decision.requested_mode,
-        resolved_mode=decision.projection_mode,
     )
 
 
@@ -152,7 +135,7 @@ def _format_shell(decision: ProjectionModeDecision) -> str:
         "SYNC_SKILLS_REQUESTED_PROJECTION_MODE": decision.requested_mode,
         "SYNC_SKILLS_PROJECTION_MODE_SOURCE": decision.mode_source,
         "SYNC_SKILLS_PROJECTION_ENGINE": decision.engine,
-        "SYNC_SKILLS_PROJECTION_MUTATION_AVAILABLE": "1" if decision.mutation_available else "0",
+        "SYNC_SKILLS_PROJECTION_MUTATION_AVAILABLE": "1",
     }
     return "\n".join(f"{name}={shlex.quote(value)}" for name, value in values.items())
 

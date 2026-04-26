@@ -169,6 +169,66 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(attempt["seed_exit_code"], 124)
         self.assertEqual(attempt["verify_exit_code"], 124)
 
+    def test_run_workout_records_seed_failure(self) -> None:
+        def _mock_run(cmd: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            if any("seed.sh" in part for part in cmd):
+                return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr="seed failed")
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
+            mock.patch.object(workouts.subprocess, "run", side_effect=_mock_run),
+        ):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+
+        self.assertEqual(run_result.status, "error")
+        attempt = run_result.data["attempts"][0]
+        self.assertEqual(attempt["outcome"], "failure")
+        self.assertEqual(attempt["failure_type"], "tool_error")
+        self.assertEqual(attempt["seed_exit_code"], 1)
+        self.assertEqual(attempt["verify_exit_code"], 0)
+
+    def test_run_workout_records_verify_failure(self) -> None:
+        def _mock_run(cmd: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            if any("verify.py" in part for part in cmd):
+                return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr="verify failed")
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
+            mock.patch.object(workouts.subprocess, "run", side_effect=_mock_run),
+        ):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+
+        self.assertEqual(run_result.status, "error")
+        attempt = run_result.data["attempts"][0]
+        self.assertEqual(attempt["outcome"], "failure")
+        self.assertEqual(attempt["failure_type"], "tool_error")
+        self.assertEqual(attempt["seed_exit_code"], 0)
+        self.assertEqual(attempt["verify_exit_code"], 1)
+
+    def test_run_workout_records_contract_violation(self) -> None:
+        hash_iter = iter(["hash_before", "hash_after"])
+
+        def _mock_sha256(path: Path) -> str:
+            return next(hash_iter)
+
+        with (
+            mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
+            mock.patch.object(
+                workouts.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr=""),
+            ),
+            mock.patch.object(workouts, "_sha256", side_effect=_mock_sha256),
+        ):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+
+        self.assertEqual(run_result.status, "error")
+        attempt = run_result.data["attempts"][0]
+        self.assertEqual(attempt["outcome"], "failure")
+        self.assertEqual(attempt["failure_type"], "contract_violation")
+
     def test_ask_workouts_run_json_contract(self) -> None:
         env = os.environ.copy()
         env["SKILL_TELEMETRY_DIR"] = str(self.telemetry_dir)

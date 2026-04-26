@@ -27,7 +27,6 @@ from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa:
 from projection_engine import (  # noqa: E402
     ProjectionModeError,
     build_projection_plan_metadata,
-    ensure_mutation_supported,
     normalize_projection_mode,
 )
 from command_surface import (  # noqa: E402
@@ -1818,13 +1817,11 @@ def sync_skills(
     result = CallResult()
     try:
         projection_decision = normalize_projection_mode(projection)
-        ensure_mutation_supported(projection_decision, dry_run=dry_run)
     except ProjectionModeError as exc:
         resolved_mode = getattr(exc, "resolved_mode", None)
         fix_suggestions = {
             "ERR_INVALID_PROJECTION_MODE": "Choose a supported projection mode such as --projection flat or --projection rooted.",
             "ERR_DEFERRED_PROJECTION_MODE": "Use --projection flat or --projection rooted until the deferred projection mode is available.",
-            "ERR_PROJECTION_MUTATION_UNAVAILABLE": "Use --dry-run for this projection mode, or choose --projection flat or --projection rooted for mutation.",
         }
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -1853,7 +1850,6 @@ def sync_skills(
         "preserved_bridge_lane_entries": [],
         "preserved_system_lane_entries": [],
         "validation_status": "not_run",
-        "ambiguous_entries": [],
         "unmapped_entries": [],
         "violations": [],
         "mutation_counts": {
@@ -1861,7 +1857,6 @@ def sync_skills(
             "deletes": 0,
             "symlinks": 0,
         },
-        "report_path": None,
         "warnings": [],
     }
     logs = []

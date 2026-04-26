@@ -8,7 +8,6 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 
 from projection_engine import (  # noqa: E402
     ProjectionModeError,
-    ensure_mutation_supported,
     normalize_projection_mode,
 )
 
@@ -19,14 +18,12 @@ class TestProjectionEngine(unittest.TestCase):
 
         self.assertEqual(decision.projection_mode, "flat")
         self.assertEqual(decision.mode_source, "default")
-        self.assertTrue(decision.mutation_available)
 
     def test_env_projection_mode_is_used_when_cli_missing(self) -> None:
         decision = normalize_projection_mode(env={"SYNC_SKILLS_PROJECTION_MODE": "rooted"})
 
         self.assertEqual(decision.projection_mode, "rooted")
         self.assertEqual(decision.mode_source, "env")
-        self.assertTrue(decision.mutation_available)
 
     def test_cli_projection_mode_wins_over_env(self) -> None:
         decision = normalize_projection_mode("flat", env={"SYNC_SKILLS_PROJECTION_MODE": "rooted"})
@@ -45,11 +42,6 @@ class TestProjectionEngine(unittest.TestCase):
             normalize_projection_mode("hybrid", env={})
 
         self.assertEqual(ctx.exception.code, "ERR_DEFERRED_PROJECTION_MODE")
-
-    def test_rooted_non_dry_run_is_mutation_supported(self) -> None:
-        decision = normalize_projection_mode("rooted", env={})
-
-        ensure_mutation_supported(decision, dry_run=False)
 
 
 if __name__ == "__main__":
