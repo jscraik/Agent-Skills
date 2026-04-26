@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""
-Agent Skills Kit (ask) CLI - Agent-Native Interface
-
-Designed for AI coding agents with:
-- --robot / --agent-mode: Flexible parsing, helpful corrections
-- --json: Structured output for programmatic use
-- Fuzzy command matching when intent is clear
-- Detailed error messages with examples
-"""
 import sys
 import os
 import argparse
@@ -15,7 +6,6 @@ import time
 import difflib
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
 # Add Infrastructure/scripts/lib and scripts to path
 repo_root_path = Path(__file__).resolve().parents[1]
 sys.path.append(str(repo_root_path / "scripts" / "lib"))
@@ -27,6 +17,8 @@ from ask.context import find_repo_root
 from ask.commands.skills import (
     list_skills,
     skills_budget,
+    skills_handles,
+    skills_resolve,
     route_skills,
     goal_skills,
     sync_skills,
@@ -77,7 +69,7 @@ ERROR_MAP = {
 VALID_TOPICS = ["repo", "skills", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog", "provider-audit"],
-    "skills": ["list", "budget", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
+    "skills": ["list", "budget", "handles", "resolve", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
     "evals": ["run", "benchmark", "dashboard"],
@@ -92,14 +84,13 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask repo status",
         "ask repo validate --ephemeral",
         "ask repo doctor-catalog --strict",
-        "ask repo provider-audit --json",
-        "ask repo check-stability --changed-files Skills/backend-platform/cli-spec/SKILL.md",
     ],
     "skills": [
         "ask skills list",
         "ask skills budget --json",
+        "ask skills handles --check --json",
+        "ask skills resolve he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
-        "ask skills goal \"implement this feature safely\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
     ],
     "runtime": [
@@ -109,12 +100,10 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "plugins": [
         "ask plugins list",
         "ask plugins status plugin-factory",
-        "ask plugins sync-local-runtime",
         "ask plugins harden Plugins/plugin-factory",
     ],
     "evals": [
         "ask evals run Skills/backend-platform/cli-spec --mode smoke",
-        "ask evals benchmark",
         "ask evals dashboard",
     ],
     "graph": [
@@ -124,52 +113,47 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     ],
     "mcp": [
         "ask mcp sync",
-        "ask mcp sync --dry-run",
     ],
     "wiki": [
         "ask wiki lint",
-        "ask wiki add --interactive",
         "ask wiki query \"1password signing\"",
     ],
-    "workouts": ["ask workouts list --json", "ask workouts run harness-engineering/he-spec --attempts 3 --json"],
+    "workouts": ["ask workouts list --json"],
 }
 
 COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("repo", "doctor-catalog"): [
         "ask repo doctor-catalog",
-        "ask repo doctor-catalog --strict",
     ],
     ("repo", "provider-audit"): [
         "ask repo provider-audit",
-        "ask repo provider-audit --json",
     ],
     ("skills", "budget"): [
         "ask skills budget",
-        "ask skills budget --default-max 30 --json",
+    ],
+    ("skills", "handles"): [
+        "ask skills handles --json",
+    ],
+    ("skills", "resolve"): [
+        "ask skills resolve he-heartbeat --json",
     ],
     ("runtime", "surface"): [
         "ask runtime surface --json",
-        "ask runtime surface --default-max 30 --json",
     ],
     ("runtime", "budget"): [
         "ask runtime budget",
-        "ask runtime budget --default-max 30 --json",
     ],
     ("skills", "audit"): [
         "ask skills audit Skills/backend-platform/cli-spec --level compat",
-        "ask skills audit Skills/backend-platform/cli-spec --level strict",
     ],
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",
-        "ask goal \"implement auth safely\"",
     ],
     ("skills", "route"): [
         "ask skills route \"debug flaky tests\"",
-        "ask skills route \"improve UI accessibility\" --top-k 5",
     ],
     ("skills", "install"): [
         "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --remediate",
-        "ask skills install https://github.com/<owner>/<repo>/tree/main/.codex/skills/<skill> --dry-run",
     ],
     ("wiki", "add-asset"): [
         "ask wiki add-asset ./tmp/screenshot.png --title \"Checkout\" --summary \"Reference layout\"",
@@ -212,6 +196,8 @@ FUZZY_MATCHES = {
     "instal": "install",
     "list": "list",
     "ls": "list",
+    "resolve": "resolve",
+    "handles": "handles",
     "init": "init",
     "create": "init",
     "harden": "harden",
@@ -664,26 +650,8 @@ def main():
     parser = argparse.ArgumentParser(
         prog="ask",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=(
-            "Agent Skills Kit CLI. Use --robot / --agent-mode / -r for AI-agent workflows: "
-            "it auto-recovers clear-intent syntax mistakes, prints canonical command corrections, "
-            "and returns actionable error guidance when intent is ambiguous."
-        ),
+        description="Agent Skills Kit CLI. Use --robot / --agent-mode / -r for AI-agent workflows.",
         parents=[global_parser],
-        epilog=(
-            "Quick Start:\n"
-            "  ask repo status\n"
-            "  ask skills list --json\n"
-            "  ask skills audit Skills/backend-platform/cli-spec --level strict\n"
-            "\n"
-            "Robot Mode (--robot | --agent-mode | -r):\n"
-            "  1) Honors clear intent with minor syntax issues.\n"
-            "     - ask skill ls --robot                -> ask skills list\n"
-            "     - ask list skills --robot             -> ask skills list\n"
-            "     - ask skills --advanced list --robot  -> ask skills list --advanced\n"
-            "  2) Prints correction notes so future calls use canonical syntax.\n"
-            "  3) If intent is ambiguous, returns a detailed error with likely fixes and examples."
-        ),
     )
     subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
     # --- repo ---
@@ -717,6 +685,11 @@ def main():
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
     skills_budget_parser = skills_subparsers.add_parser("budget", help="Verify default skill runtime budget", parents=[global_parser])
     skills_budget_parser.add_argument("--default-max", type=int, default=30, help="Maximum default-visible skills")
+    skills_handles_parser = skills_subparsers.add_parser("handles", help="List or validate command-visible skill handles", parents=[global_parser])
+    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-handle validation finds drift")
+    skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
+    skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve a command-visible skill handle", parents=[global_parser])
+    skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
 
     # --- runtime ---
     add_runtime_parser(subparsers, global_parser)
@@ -760,7 +733,7 @@ def main():
     skills_init_parser.add_argument("name", help="Name of the new skill")
     skills_init_parser.add_argument("--category", required=True, help="Category directory")
     skills_init_parser.add_argument("--description", required=True, help="Short routing description")
-    
+
     # --- plugins ---
     plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
     plugins_subparsers = plugins_parser.add_subparsers(dest="action")
@@ -1094,6 +1067,10 @@ def main():
             )
         elif args.action == "budget":
             result = skills_budget(repo_root, default_max=args.default_max)
+        elif args.action == "handles":
+            result = skills_handles(repo_root, check=args.check, include_handles=not args.no_handles)
+        elif args.action == "resolve":
+            result = skills_resolve(repo_root, handle=args.handle)
         elif args.action == "route":
             result = route_skills(
                 repo_root,
@@ -1132,12 +1109,12 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'skills'",
-                fix_suggestion="Valid actions: list, budget, route, goal, starter, sync, audit, install, fold, init"
+                fix_suggestion="Valid actions: list, budget, handles, resolve, route, goal, starter, sync, audit, install, fold, init"
             ))
 
     elif args.topic == "runtime":
         result = dispatch_runtime(repo_root, args)
-            
+
     elif args.topic == "plugins":
         if args.action == "list":
             result = list_plugins_state(repo_root)
@@ -1486,6 +1463,13 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('advanced_visible_count')} advanced"
                     )
+                elif args.topic == "skills" and args.action == "resolve":
+                    resolution = result.data.get("resolution", {})
+                    print(f"✅ Skill handle: ${resolution.get('handle')}")
+                    print(f"  Visibility: {resolution.get('command_visibility')}")
+                    print(f"  Source: {resolution.get('source_path')}")
+                    if resolution.get("invoke_via"):
+                        print(f"  Invoke via: {resolution.get('invoke_via')}")
                 elif args.topic == "runtime" and args.action in ("surface", "budget"):
                     report = result.data.get("runtime_surface") or result.data.get("runtime_budget", {})
                     label = "surface" if args.action == "surface" else "budget"

@@ -98,6 +98,32 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("considered_limit", decision)
         self.assertIn("selected_candidates", decision)
 
+    def test_skills_handles_json_contract(self):
+        """Verify ask skills handles exposes the command-surface contract."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "handles", "--check", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        surface = output["data"]["command_surface"]
+        self.assertEqual(surface["schema_version"], "command-surface.v1")
+        self.assertEqual(surface["status"], "pass")
+        self.assertGreater(surface["handle_count"], 0)
+
+    def test_skills_resolve_json_contract(self):
+        """Verify ask skills resolve returns a latent source path for a command handle."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        resolution = output["data"]["resolution"]
+        self.assertEqual(resolution["status"], "ok")
+        self.assertEqual(resolution["handle"], "he-heartbeat")
+        self.assertEqual(resolution["command_visibility"], "target")
+        self.assertEqual(resolution["invoke_via"], "harness-engineering")
+
     def test_skills_goal_json_contract(self):
         """
         Ensure the `ask skills goal create` CLI returns a JSON envelope containing a `goal_decision` with required fields.

@@ -25,6 +25,10 @@ from projection_engine import (  # noqa: E402
     ensure_mutation_supported,
     normalize_projection_mode,
 )
+from command_surface import (  # noqa: E402
+    handles_report,
+    resolve_skill_handle,
+)
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
 from generate_skillset_manifests import build_manifest_report, write_manifests  # noqa: E402
 from rooted_projection_runtime import prune_unowned_skillset_files, validate_workspace_runtime  # noqa: E402
@@ -450,6 +454,46 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
             )
         )
     return result
+
+
+def skills_handles(repo_root: Path, check: bool = False, include_handles: bool = True) -> CallResult:
+    """Return or validate the rooted command-handle surface."""
+    result = CallResult()
+    result.metadata["command"] = "skills handles"
+    report = handles_report(repo_root_path=repo_root, include_handles=include_handles)
+    result.data["command_surface"] = report
+    result.data["handles"] = report["handles"]
+    result.data["violations"] = report["violations"]
+    result.data["policy_identity"] = report["policy_identity"]
+    if check and report["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Command-handle validation failed.",
+                fix_suggestion="Inspect data.violations, fix command-handle metadata, and rerun `ask skills handles --check --json`.",
+            )
+        )
+    return result
+
+
+def skills_resolve(repo_root: Path, handle: str) -> CallResult:
+    """Resolve one command-visible skill handle to its latent source module."""
+    result = CallResult()
+    result.metadata["command"] = "skills resolve"
+    payload = resolve_skill_handle(handle, repo_root_path=repo_root)
+    result.data["resolution"] = payload
+    if payload.get("status") != "ok":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Could not resolve skill handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
+                fix_suggestion=payload.get("operator_action"),
+            )
+        )
+    return result
+
 
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
     """Initializes a new skill scaffold using the repo template logic."""

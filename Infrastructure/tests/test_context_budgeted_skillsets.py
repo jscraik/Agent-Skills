@@ -13,6 +13,7 @@ sys.path.insert(0, str(LIFECYCLE_DIR))
 sys.path.insert(0, str(VALIDATION_DIR))
 
 import check_context_budget  # noqa: E402
+import command_surface  # noqa: E402
 import generate_root_skill_sets  # noqa: E402
 import generate_skillset_manifests  # noqa: E402
 import route_skillset  # noqa: E402
@@ -59,6 +60,66 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         first_row = json.loads(lines[0])
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
+
+    def test_command_surface_resolves_latent_skill_handles(self) -> None:
+        payload = command_surface.resolve_skill_handle("he-heartbeat", repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["handle"], "he-heartbeat")
+        self.assertEqual(payload["kind"], "skill")
+        self.assertEqual(payload["command_visibility"], "target")
+        self.assertEqual(payload["invoke_via"], "harness-engineering")
+        self.assertTrue(payload["source_path"].endswith("/he-heartbeat/SKILL.md"))
+
+    def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
+        payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["handle"], "skill-builder")
+        self.assertEqual(payload["command_visibility"], "orchestrator")
+        self.assertIsNone(payload.get("invoke_via"))
+
+    def test_command_surface_validation_rejects_duplicate_normalized_handles(self) -> None:
+        handles = [
+            command_surface.CommandHandle(
+                handle="he-heartbeat",
+                kind="skill",
+                command_visibility="target",
+                runtime_visibility="latent",
+                source_path="Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md",
+                stub_path=".agents/skills/he-heartbeat/SKILL.md",
+                owner="harness-engineering",
+                description="one",
+                invoke_via="harness-engineering",
+            ),
+            command_surface.CommandHandle(
+                handle="he_heartbeat",
+                kind="skill",
+                command_visibility="target",
+                runtime_visibility="latent",
+                source_path="Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md",
+                stub_path=".agents/skills/he_heartbeat/SKILL.md",
+                owner="harness-engineering",
+                description="two",
+                invoke_via="harness-engineering",
+            ),
+        ]
+
+        violations = command_surface.validate_skill_handles(handles, repo_root_path=REPO_ROOT)
+
+        codes = {violation["code"] for violation in violations}
+        self.assertIn("INVALID_HANDLE_SLUG", codes)
+        self.assertIn("DUPLICATE_NORMALIZED_HANDLE", codes)
+
+    def test_reviewer_resolver_keeps_reviewers_out_of_skill_namespace(self) -> None:
+        manifest = self.temp_dir / "agents.json"
+        manifest.write_text(json.dumps([{"role": "skill-inspector", "source": "test", "output": "agents/skill-inspector.toml"}]), encoding="utf-8")
+
+        payload = command_surface.resolve_reviewer_handle("skillinspector", manifest_path=manifest)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["kind"], "reviewer")
+        self.assertEqual(payload["canonical_handle"], "skill-inspector")
 
     def test_skillset_inference_uses_segment_before_nested_plugin_skills_root(self) -> None:
         source_dir = REPO_ROOT / "Plugins" / "example-org" / "harness-engineering" / "skills" / "he-work"

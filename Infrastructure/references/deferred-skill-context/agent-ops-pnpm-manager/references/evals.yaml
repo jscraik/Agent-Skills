@@ -23,6 +23,8 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(pnpm -r install|recursive)"
+      - type: regex
+        value: "(?i)(include-root|exclude-root|workspace root|--workspace-root)"
 
   - id: pnpm-recursive-publish
     name: recursive publish
@@ -45,6 +47,21 @@ cases:
     acceptance:
       - type: regex
         value: "(?i)(pnpm\\s+--filter\\s+['\\\"]?\\{packages/\\*\\*\\}\\[[^\\]]+\\]['\\\"]?|default branch|base-ref)"
+      - type: regex
+        value: "(?i)(include-root|exclude-root|root workspace)"
+
+  - id: pnpm-root-workspace-inclusion
+    name: explicit root workspace inclusion decision
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Plan a recursive pnpm build for a workspace where the root package also has scripts. Decide whether to include or exclude the root and explain the validation check."
+    acceptance:
+      - type: regex
+        value: "(?i)(include-root|exclude-root|workspace root|root package)"
+      - type: regex
+        value: "(?i)(pnpm -r|--filter|--workspace-root|validation|dry-run|list)"
 
   - id: pnpm-command-guard
     name: risky command guard
