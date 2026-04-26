@@ -260,19 +260,21 @@ def _sync_one_runtime_root(
 ) -> dict[str, Any]:
     """
     Replaces local plugin runtime mirrors from the repository's local marketplace entries.
-    
+
     Replaces only the repository-local plugins listed in `marketplace_entries`
-    inside `runtime_root`. Non-local plugin cache entries are preserved. When
+    inside `runtime_root`. Non-local plugin cache entries are preserved. Stale
+    local mirrors (directories bearing the `.codex-repo-plugin-source` marker)
+    that are no longer declared in `marketplace_entries` are removed. When
     `dry_run` is True no filesystem mutations are performed; a report of
-    planned/copied/replaced names is still returned.
-    
+    planned/copied/replaced/pruned names is still returned.
+
     Parameters:
         runtime_root (Path): Absolute path to the runtime profile directory to synchronize.
         repo_root (Path): Repository root used to resolve marketplace entry paths.
         marketplace_path (Path): Path to the source `marketplace.json` in the repository.
         marketplace_entries (list[dict[str, Any]]): List of marketplace entries; each entry must contain `"name"` and `"path"` (repo-relative).
         dry_run (bool): If True, perform a non-mutating dry run (no copies, removals, or manifest write).
-    
+
     Returns:
         dict[str, Any]: Report containing:
             - "runtime_root": str path of the runtime root.
@@ -280,8 +282,9 @@ def _sync_one_runtime_root(
             - "planned_plugins": list of plugin names processed from the marketplace.
             - "copied_plugins": list of plugin names copied (empty if dry_run).
             - "removed_entries": local plugin target names that were replaced or would be replaced.
+            - "pruned_plugins": list of stale local plugin names removed (empty if dry_run).
             - "dry_run": the `dry_run` input flag.
-    
+
     Raises:
         FileNotFoundError: If a marketplace entry's source directory does not exist under `repo_root`.
     """
@@ -290,7 +293,9 @@ def _sync_one_runtime_root(
     planned_plugins: list[str] = []
     copied_plugins: list[str] = []
     removed_entries: list[str] = []
+    pruned_plugins: list[str] = []
     marketplace_target = runtime_root / "marketplace.json"
+    marker_name = ".codex-repo-plugin-source"
 
     resolved_sources: list[tuple[str, Path]] = []
     for entry in marketplace_entries:
@@ -304,6 +309,7 @@ def _sync_one_runtime_root(
     if not dry_run:
         shutil.copy2(marketplace_path, marketplace_target)
 
+    keep_names = {plugin_name for plugin_name, _ in resolved_sources}
     for plugin_name, source_dir in resolved_sources:
         planned_plugins.append(plugin_name)
         target_dir = runtime_root / plugin_name
@@ -312,7 +318,26 @@ def _sync_one_runtime_root(
         if not dry_run:
             _copy_directory_contents(source_dir, target_dir)
             _materialize_first_level_skill_aliases(target_dir)
+            (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
             copied_plugins.append(plugin_name)
+
+    # Prune stale local plugin mirrors no longer declared in the marketplace.
+    reserved = {"marketplace.json", "cache"}
+    if runtime_root.is_dir():
+        for child in runtime_root.iterdir():
+            if child.name in keep_names or child.name in reserved:
+                continue
+            if not child.is_dir():
+                continue
+            marker_file = child / marker_name
+            if not marker_file.is_file():
+                continue
+            pruned_plugins.append(child.name)
+            if not dry_run:
+                if child.is_symlink():
+                    child.unlink()
+                else:
+                    shutil.rmtree(child)
 
     return {
         "runtime_root": str(runtime_root),
@@ -320,6 +345,7 @@ def _sync_one_runtime_root(
         "planned_plugins": planned_plugins,
         "copied_plugins": copied_plugins,
         "removed_entries": removed_entries,
+        "pruned_plugins": pruned_plugins,
         "dry_run": dry_run,
     }
 

@@ -164,6 +164,86 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse((stale_local / "stale.txt").exists())
         self.assertEqual((stale_local / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
 
+    def test_local_plugin_runtime_sync_prunes_stale_marked_plugins(self) -> None:
+        plugin_a = self.repo_root / "Plugins" / "plugin-a"
+        plugin_a.mkdir(parents=True)
+        (plugin_a / "SKILL.md").write_text("plugin-a\n", encoding="utf-8")
+        plugin_b = self.repo_root / "Plugins" / "plugin-b"
+        plugin_b.mkdir(parents=True)
+        (plugin_b / "SKILL.md").write_text("plugin-b\n", encoding="utf-8")
+        marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace_path.write_text(
+            '{"plugins":['
+            '{"name":"plugin-a","source":{"source":"local","path":"./Plugins/plugin-a"}},'
+            '{"name":"plugin-b","source":{"source":"local","path":"./Plugins/plugin-b"}}'
+            ']}\n',
+            encoding="utf-8",
+        )
+        runtime_root = self.fake_home / ".codex" / "Plugins"
+
+        # Initial sync with both plugins
+        plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[
+                {"name": "plugin-a", "path": "./Plugins/plugin-a"},
+                {"name": "plugin-b", "path": "./Plugins/plugin-b"},
+            ],
+            dry_run=False,
+        )
+        self.assertTrue((runtime_root / "plugin-a" / "SKILL.md").is_file())
+        self.assertTrue((runtime_root / "plugin-b" / "SKILL.md").is_file())
+
+        # Update marketplace to remove plugin-b
+        marketplace_path.write_text(
+            '{"plugins":['
+            '{"name":"plugin-a","source":{"source":"local","path":"./Plugins/plugin-a"}}'
+            ']}\n',
+            encoding="utf-8",
+        )
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[{"name": "plugin-a", "path": "./Plugins/plugin-a"}],
+            dry_run=False,
+        )
+
+        self.assertEqual(report["planned_plugins"], ["plugin-a"])
+        self.assertEqual(report["pruned_plugins"], ["plugin-b"])
+        self.assertTrue((runtime_root / "plugin-a" / "SKILL.md").is_file())
+        self.assertFalse((runtime_root / "plugin-b").exists())
+
+    def test_local_plugin_runtime_sync_dry_run_does_not_prune_stale_plugins(self) -> None:
+        plugin_source = self.repo_root / "Plugins" / "plugin-a"
+        plugin_source.mkdir(parents=True)
+        (plugin_source / "SKILL.md").write_text("plugin-a\n", encoding="utf-8")
+        marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace_path.write_text(
+            '{"plugins":['
+            '{"name":"plugin-a","source":{"source":"local","path":"./Plugins/plugin-a"}}'
+            ']}\n',
+            encoding="utf-8",
+        )
+        runtime_root = self.fake_home / ".codex" / "Plugins"
+        stale_plugin = runtime_root / "plugin-b"
+        stale_plugin.mkdir(parents=True)
+        (stale_plugin / ".codex-repo-plugin-source").write_text("/old/path\n", encoding="utf-8")
+        (stale_plugin / "SKILL.md").write_text("stale\n", encoding="utf-8")
+
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[{"name": "plugin-a", "path": "./Plugins/plugin-a"}],
+            dry_run=True,
+        )
+
+        self.assertEqual(report["planned_plugins"], ["plugin-a"])
+        self.assertEqual(report["pruned_plugins"], ["plugin-b"])
+        self.assertTrue((stale_plugin / "SKILL.md").is_file())
+
     def test_sync_skills_user_scope_relinks_managed_runtime_directories(self) -> None:
         managed_skills = self.fake_home / ".agents" / "skills"
         managed_skills.mkdir(parents=True)
