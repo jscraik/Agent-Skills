@@ -57,6 +57,26 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "flat")
 
+    def test_sync_skills_user_scope_preserves_existing_agents_plugins_directory(self) -> None:
+        user_plugins = self.fake_home / ".agents" / "plugins"
+        user_plugins.mkdir(parents=True)
+        (user_plugins / "README.md").write_text("user owned\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_dir())
+        self.assertFalse(user_plugins.is_symlink())
+        self.assertEqual((user_plugins / "README.md").read_text(encoding="utf-8"), "user owned\n")
+        self.assertIn(
+            f"Skipped existing non-symlink path: {user_plugins}",
+            result.data["logs"],
+        )
+
     def test_sync_skills_user_scope_preserves_existing_plugins_directory(self) -> None:
         user_plugins = self.fake_home / "plugins"
         user_plugins.mkdir()
@@ -200,6 +220,31 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "agents" / "openai.yaml").is_file())
         self.assertEqual(result.data["plan"]["command_handles"]["status"], "pass")
+
+    def test_sync_skills_rooted_prunes_flat_symlink_before_command_handle_write(self) -> None:
+        canonical_skill = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
+        canonical_skill.mkdir(parents=True)
+        source_skill_md = canonical_skill / "SKILL.md"
+        source_skill_md.write_text("# Canonical Source\n", encoding="utf-8")
+        runtime_handle = self.repo_root / ".agents" / "skills" / "he-heartbeat"
+        runtime_handle.parent.mkdir(parents=True, exist_ok=True)
+        runtime_handle.symlink_to(canonical_skill)
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(runtime_handle.is_symlink())
+        self.assertIn("Generated command handle", (runtime_handle / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(source_skill_md.read_text(encoding="utf-8"), "# Canonical Source\n")
+        self.assertTrue(
+            any("Removed stale symlink" in item and "he-heartbeat" in item for item in result.data["logs"]),
+            result.data["logs"],
+        )
 
     def test_sync_skills_rooted_prunes_unowned_skillset_files(self) -> None:
         stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"

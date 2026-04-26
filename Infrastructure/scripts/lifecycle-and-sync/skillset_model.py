@@ -218,9 +218,12 @@ def triggers_for(skill_id: str, frontmatter: dict[str, str], description: str) -
     if declared:
         return declared[:8]
     trigger = skill_id.replace("-", " ")
+    first_sentence = re.split(r"(?<=[.!?])\s+", description.strip(), maxsplit=1)[0].strip()
+    if first_sentence and first_sentence != description.strip():
+        return [trigger, first_sentence]
     words = description.split()
-    if len(words) >= 4:
-        return [trigger, " ".join(words[:8]).strip()]
+    if 4 <= len(words) <= 12:
+        return [trigger, description.strip()]
     return [trigger]
 
 

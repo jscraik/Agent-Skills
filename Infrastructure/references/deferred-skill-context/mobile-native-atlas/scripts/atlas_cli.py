@@ -380,7 +380,7 @@ def _render_bookmarks(rows: list[Bookmark], as_json: bool) -> None:
 
 
 def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Control ChatGPT Atlas from the terminal.")
+    parser = argparse.ArgumentParser(description="Control Atlas from the terminal.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("app-name", help="Print the detected Atlas application name")

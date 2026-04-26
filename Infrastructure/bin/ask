@@ -235,10 +235,14 @@ def build_helpful_error(
         full_message += "\n\n📚 Try one of these:\n"
         full_message += "\n".join(f"   • {e}" for e in examples[:3])
 
+    fix_suggestion = "Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
+    if topic in VALID_ACTIONS:
+        fix_suggestion = f"Valid actions: {', '.join(VALID_ACTIONS[topic])}"
+
     result.errors.append(ErrorObject(
         code=ErrorCode.ERR_VALIDATION,
         message=full_message,
-        fix_suggestion="Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
+        fix_suggestion=fix_suggestion,
     ))
 
     return result
@@ -968,7 +972,7 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'skills'",
-                fix_suggestion="Valid actions: list, budget, handles, resolve, route, goal, starter, sync, audit, install, fold, init"
+                fix_suggestion="Valid actions: list, budget, handles, resolve, proof, route, goal, starter, sync, audit, install, fold, init"
             ))
 
     elif args.topic == "reviewers":
@@ -1352,6 +1356,21 @@ def main():
                     print(f"  Source: {resolution.get('source_path')}")
                     if resolution.get("invoke_via"):
                         print(f"  Invoke via: {resolution.get('invoke_via')}")
+                elif args.topic == "skills" and args.action == "proof":
+                    proof = result.data.get("proof", {})
+                    print(f"✅ Skill handle proof: ${proof.get('handle')} ({proof.get('status')})")
+                    for gate, passed in proof.get("gates", {}).items():
+                        marker = "pass" if passed else "fail"
+                        print(f"  {gate}: {marker}")
+                    live = proof.get("live_codex_invocation", {})
+                    if live.get("status"):
+                        print(f"  live invocation: {live.get('status')}")
+                elif args.topic == "reviewers" and args.action == "resolve":
+                    resolution = result.data.get("resolution", {})
+                    handle = resolution.get("canonical_handle") or resolution.get("handle")
+                    print(f"✅ Reviewer handle: @{handle}")
+                    print(f"  Visibility: {resolution.get('command_visibility')}")
+                    print(f"  Source: {resolution.get('source_path')}")
                 elif args.topic == "runtime" and args.action in ("surface", "budget"):
                     report = result.data.get("runtime_surface") or result.data.get("runtime_budget", {})
                     label = "surface" if args.action == "surface" else "budget"

@@ -16,33 +16,33 @@ Do not hand-edit runtime projections.
 
 ## Summary
 - `total_skills`: 21
-- `catalog_source`: default user-visible catalog surface
+- `catalog_source`: repository skill scan
 - `visibility`: default
-- `policy_identity`: 146a6f20347f3958
+- `policy_identity`: 14c1588c6febe0c0
 
 ## Catalog
 
 ## Skills — Agent Ops
 
-- `agents-md` — Create or refactor AGENTS.md and linked instruction docs using progressive disclosure. Use when the user wants repo-specific agent guidance organized, deduplicated, or routed cleanly, not ordinary product documentation edits.
-- `autofix` — Review and apply CodeRabbit PR review-thread feedback from GitHub with per-change approval. Use this skill when a branch PR has unresolved CodeRabbit issues that need safe, human-approved fixes.
-- `autoresearch` — Analyze and improve this repo's skills and plugin packages through bounded experiment loops. Use this skill when users request autonomous research passes with hypothesis-validation-keep/discard decisions.
-- `bootstrap` — Bootstrap a local development environment from a GitHub repository URL. Use when the user asks to clone a repo, install toolchains/dependencies, and validate a working dev setup automatically.
-- `codex-agent-creator` — Create, install, validate, and orchestrate Codex custom subagents as standalone TOMLs with canonical global defaults (`~/dev/configs/codex/agents/{name}/{name}.toml`, `~/dev/configs/codex/config.toml`) plus optional project scope (`${project_root}/.codex/agents/{name}/{name}.toml`), where project config writes occur only when runtime-limit flags are explicitly requested.
-- `codex-automation-architect` — Design, review, or merge Codex app automations using current OpenAI/Codex guidance and validation. Use when the user wants recurring Codex automation workflows built, audited, or consolidated.
-- `codex-hooks-builder` — Create, upgrade, or audit Codex hook packs for repo-local or user-level `.codex` installs. Use when the user wants hook runtime files or hook-script hardening, not general agent role creation.
-- `coding-harness` — Use when a repository needs `@brainwav/coding-harness` installed, bootstrapped, updated, audited, or explained. Covers `harness init`, harness-managed CI migration, governance checks, and Codex environment action-sync guidance. Do not use for unrelated coding, general deployment, or broad cloud work.
-- `context7` — Analyze current external library/API documentation and generate Context7 CLI guidance when the user asks for version-sensitive dependency behavior, library API references, or Context7 skills/setup/auth command help.
-- `docs-expert` — Audit and rewrite repository documentation, runbooks, and in-code docs with repo-visibility and brand-quality checks. Use when the user wants README, docs, JSDoc, DocC, or config documentation improved, not editorial house-style copyediting.
-- `fix-mise` — Diagnose and repair mise trust, runtime, activation, and version-drift failures. Use when commands fail from mise config, missing runtimes, stale pins, or shell activation drift.
-- `gh-workflow` — Operate the GitHub lifecycle through `gh`: issue work, PR readiness checks, PR preparation, review handling, CI diagnosis, and merge execution. Use when the user wants GitHub state changed, advanced, or reconciled.
-- `improve-codebase-architecture` — Review codebase architecture to find deeper module boundaries, sharper context language, and Linear-backed decision notes. Use when users ask to improve architecture, consolidate shallow modules, design better interfaces, improve testability, or make a repo easier for humans and agents to navigate.
-- `npm-release` — Create and validate npm package release workflows with deterministic installs, semver, dist-tags, provenance, and 2FA safeguards. Use when preparing or publishing npm releases.
-- `pnpm-manager` — Run pnpm workspace operations with recursive and filter selectors for scoped install, test, build, and publish flows. Use when a user needs pnpm monorepo command routing.
-- `project-brain` — Bootstrap and operate Project Brain
+- `agents-md` — Review or refactor AGENTS.md instruction surfaces with progressive disclosure. Use this skill when repo agent guidance needs routing, dedupe, or contradiction fixes.
+- `autofix` — Review, validate, and apply scoped CodeRabbit PR feedback when unresolved GitHub review threads need human-approved code fixes and repo-check evidence.
+- `autoresearch` — Analyze and improve skills or plugins through bounded experiments when the user wants hypothesis-driven research loops with keep, discard, blocked, and validation decisions.
+- `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
+- `codex-agent-creator` — Create or validate Codex custom subagent TOML files. Use this skill when users need agent config, install, or bounded orchestration.
+- `codex-automation-architect` — Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.
+- `codex-hooks-builder` — Create, audit, and validate Codex hook packs when repo-local or user-level .codex installs need hook runtime files or hook-script hardening.
+- `coding-harness` — Install, update, audit, diagnose, and explain @brainwav/coding-harness when repository governance, harness init, CI migration, or action-sync needs live command evidence.
+- `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
+- `docs-expert` — Audit, rewrite, and validate repository documentation when README, runbook, code-doc, config-doc, or public trust-surface claims must match live repo evidence.
+- `fix-mise` — Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift.
+- `gh-workflow` — Operate GitHub issue, PR, review, CI, and merge workflows through gh when repository state must be advanced, reconciled, or verified with live evidence.
+- `improve-codebase-architecture` — Review and improve codebase architecture when deeper module boundaries, clearer context language, better interfaces, testability, or Linear-backed decisions are needed.
+- `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
+- `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.
+- `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.
 - `simplify` — Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.
-- `skill-pr-delivery` — Ship a Codex skill change from source edits through sync, audit, inspector review, commit, push, and PR evidence. Use when adding, hardening, skillifying, or making a skill available and the user wants the work delivered to a pull request.
-- `triage` — Review and triage file-based `todos/` findings into ready, skipped, or revised states before execution. Use this skill when the repo already uses the file-based todo workflow and the user wants approval-style triage, not tracker triage or todo execution.
+- `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
+- `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
 - `ubiquitous-language` — Build or update a shared project vocabulary, DDD-style glossary, and prompt translation map from the current conversation, project docs, and relevant session evidence. Use when terminology is fuzzy, the user wants consistent naming, asks what to call something, wants agents to interpret their wording consistently, mentions glossary, domain model, DDD, ubiquitous language, naming, vocabulary, terminology, or says they do not know the technical term.
-- `verification-before-completion` — Validate completion claims with fresh command evidence. Use when you are about to claim work is complete, fixed, or passing.
+- `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
 

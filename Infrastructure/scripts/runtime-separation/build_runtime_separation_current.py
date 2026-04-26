@@ -307,6 +307,33 @@ def _command_check(
     }
 
 
+def _command_check_issue(check_name: str, check: dict[str, Any]) -> dict[str, Any]:
+    normalized_fields = check.get("normalized_fields")
+    return {
+        "check": check_name,
+        "returncode": check.get("returncode"),
+        "drift_class": check.get("drift_class"),
+        "decision_status": (
+            normalized_fields.get("decision_status")
+            if isinstance(normalized_fields, dict)
+            else None
+        ),
+        "blocker_id": check.get("blocker_id"),
+    }
+
+
+def _command_check_passed_or_skipped(check: dict[str, Any]) -> bool:
+    returncode = check.get("returncode")
+    if returncode in (None, 0):
+        return True
+    normalized_fields = check.get("normalized_fields")
+    return (
+        returncode == SKIPPED_RETURN_CODE
+        and isinstance(normalized_fields, dict)
+        and normalized_fields.get("status") == "not_run_recursive_guard"
+    )
+
+
 def _collect_plugin_names(rows: Any) -> set[str]:
     names: set[str] = set()
     if not isinstance(rows, list):
@@ -539,13 +566,13 @@ def main() -> int:
         "command_checks_digest": command_checks_digest,
     }
 
-    issues: list[str] = []
+    issues: list[dict[str, Any]] = []
     for check_name, check in command_checks.items():
-        if isinstance(check, dict) and check.get("returncode") not in (None, 0, SKIPPED_RETURN_CODE):
-            issues.append(f"{check_name} exited {check.get('returncode')}")
+        if isinstance(check, dict) and not _command_check_passed_or_skipped(check):
+            issues.append(_command_check_issue(check_name, check))
     for plugin, check in plugins_status_checks.items():
-        if check.get("returncode") not in (0, SKIPPED_RETURN_CODE):
-            issues.append(f"plugins_status.{plugin} exited {check.get('returncode')}")
+        if not _command_check_passed_or_skipped(check):
+            issues.append(_command_check_issue(f"plugins_status.{plugin}", check))
 
     status = "healthy" if not issues else "degraded"
     payload = {

@@ -49,6 +49,50 @@ class TestBuildRuntimeSeparationCurrent(unittest.TestCase):
             ["coderabbit", "harness-engineering", "openai-curated", "plugin-factory", "skill-factory"],
         )
 
+    def test_nonzero_command_checks_become_structured_issues(self) -> None:
+        checks = {
+            "repo_doctor_catalog": {
+                "blocker_id": "catalog:abc123",
+                "drift_class": "command_exit_nonzero",
+                "normalized_fields": {
+                    "decision_status": "blocked_catalog_parity",
+                },
+                "returncode": 2,
+            }
+        }
+
+        issues = [
+            self.module._command_check_issue(check_name, check)
+            for check_name, check in checks.items()
+            if isinstance(check, dict) and not self.module._command_check_passed_or_skipped(check)
+        ]
+
+        self.assertEqual(
+            issues,
+            [
+                {
+                    "check": "repo_doctor_catalog",
+                    "returncode": 2,
+                    "drift_class": "command_exit_nonzero",
+                    "decision_status": "blocked_catalog_parity",
+                    "blocker_id": "catalog:abc123",
+                }
+            ],
+        )
+
+    def test_recursive_guard_returncode_is_skipped_only_with_skip_status(self) -> None:
+        skipped = {
+            "returncode": self.module.SKIPPED_RETURN_CODE,
+            "normalized_fields": {"status": "not_run_recursive_guard"},
+        }
+        failed = {
+            "returncode": self.module.SKIPPED_RETURN_CODE,
+            "normalized_fields": {"status": "error"},
+        }
+
+        self.assertTrue(self.module._command_check_passed_or_skipped(skipped))
+        self.assertFalse(self.module._command_check_passed_or_skipped(failed))
+
 
 if __name__ == "__main__":
     unittest.main()

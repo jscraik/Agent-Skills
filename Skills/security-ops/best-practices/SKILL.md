@@ -3,6 +3,7 @@ name: best-practices
 description: "Audit, review, and harden Better Auth integrations. Use when the user wants Better Auth security review, config debugging, provider hardening, session checks, or operational risk guidance."
 metadata:
   skill-type: code_quality_review
+  triggers: better auth review, better auth security, better auth hardening
 ---
 
 # Better Auth Best Practices

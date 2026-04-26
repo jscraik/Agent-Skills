@@ -1,6 +1,6 @@
-purpose: macOS-only AppleScript control for the ChatGPT Atlas desktop app. Use only
+purpose: macOS-only AppleScript control for the Atlas desktop app. Use only
   when the user explicitly asks to control Atlas tabs/bookmarks/history on macOS and
-  the "ChatGPT Atlas" app is installed; do not trigger for general browser tasks or
+  the "Atlas" app is installed; do not trigger for general browser tasks or
   non-macOS environments.
 schema_version: '1.0'
 triggers:

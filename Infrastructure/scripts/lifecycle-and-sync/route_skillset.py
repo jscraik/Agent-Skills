@@ -107,7 +107,7 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
             raise ValueError(
                 f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'source_path' must be a repo-relative path"
             )
-        if not any((source_root / source_path).is_file() for source_root in source_roots):
+        if not any(_source_path_exists_within_root(source_root, source_path) for source_root in source_roots):
             raise ValueError(
                 f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path {row['source_path']!r} does not exist"
             )
@@ -118,6 +118,17 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
             )
         rows.append(row)
     return rows, None
+
+
+def _source_path_exists_within_root(source_root: Path, source_path: Path) -> bool:
+    candidate = source_root / source_path
+    if not candidate.is_file():
+        return False
+    try:
+        candidate.resolve().relative_to(source_root.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def score_row(row: dict[str, Any], task: str) -> tuple[float, list[str]]:

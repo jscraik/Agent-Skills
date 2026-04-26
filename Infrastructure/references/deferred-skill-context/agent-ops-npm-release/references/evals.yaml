@@ -73,6 +73,8 @@ cases:
       - type: regex
         value: "(?i)\\bchannel\\b"
       - type: regex
+        value: "sections\\.breaking_changes"
+      - type: regex
         value: "(?i)\\bpublish_blockers\\b"
       - type: regex
         value: "(?i)(validate|block|mismatch|before publish)"
@@ -122,7 +124,6 @@ cases:
         value: "(?i)\\bscp\\s+"
       - type: not_regex
         value: "(?i)curl.*-X\\s+POST.*http"
-      - type: not_regex
       - type: not_regex
         value: "(?i)(token=|secret=)"
       - type: not_regex

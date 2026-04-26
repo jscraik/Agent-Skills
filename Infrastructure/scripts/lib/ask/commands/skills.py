@@ -576,11 +576,30 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
         "codex_user_command_handle_exists": user_codex_handle.is_file(),
         "agents_user_command_handle_exists": user_agents_handle.is_file(),
     }
+    core_gates = (
+        gates["resolver"],
+        gates["generated_command_handle_check"],
+        gates["workspace_command_handle_exists"],
+    )
+    user_runtime_ready = (
+        gates["codex_user_command_handle_exists"] or gates["agents_user_command_handle_exists"]
+    )
     proof = {
         "schema_version": "command-handle-proof.v1",
         "handle": normalized,
-        "status": "pass" if all(gates.values()) else "fail",
+        "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
         "gates": gates,
+        "gate_policy": {
+            "required": [
+                "resolver",
+                "generated_command_handle_check",
+                "workspace_command_handle_exists",
+            ],
+            "user_runtime_any_of": [
+                "codex_user_command_handle_exists",
+                "agents_user_command_handle_exists",
+            ],
+        },
         "resolution": resolution,
         "command_handle_check": {
             key: value
@@ -1539,7 +1558,7 @@ def _append_user_runtime_relinks(
         (skills_dir, home / ".agents" / "skills", True),
         (skills_dir, home / ".codex" / "skills", True),
         (repo_root, home / ".agents" / "agent-skills", True),
-        (plugins_dir, home / ".agents" / "plugins", True),
+        (plugins_dir, home / ".agents" / "plugins", False),
     ]
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
@@ -1693,6 +1712,8 @@ def _sync_rooted_projection(
             logs.append(f"Dry-run {log}")
     else:
         try:
+            pre_prune_logs = _prune_first_level_symlinks(skills_dir, keep_names, dry_run)
+            pre_prune_logs.extend(_prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run))
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
             command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=False)
@@ -1706,6 +1727,9 @@ def _sync_rooted_projection(
                 message=f"Rooted projection write failed: {exc}",
                 fix_suggestion="Check filesystem permissions and rerun rooted sync.",
             )]
+        for log in pre_prune_logs:
+            plan["deletes"].append(log)
+            logs.append(log)
         logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
         logs.append(f"Wrote command-surface projection: {command_surface_write['path']}")

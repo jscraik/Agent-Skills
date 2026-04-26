@@ -36,6 +36,7 @@ Create, review, and validate an alignment checkpoint. Use when a request is ambi
 - success criteria
 - approach options
 - approval gate
+- validation artifacts or explicit evidence gap
 - Schema-bound outputs include `schema_version`.
 
 ## Workflow
@@ -54,7 +55,7 @@ Create, review, and validate an alignment checkpoint. Use when a request is ambi
 ## Validation
 - Run the narrowest real validator or command path available for the requested work.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
-- Report exact command outcomes, blocker reasons, or unverified gaps.
+- Report exact command outcomes, validation artifact paths, blocker reasons, or unverified gaps.
 
 ## Anti-Patterns
 - Loading every deferred file before the task requires it.

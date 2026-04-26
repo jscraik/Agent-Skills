@@ -61,6 +61,34 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
 
+    def test_write_roots_replaces_stale_reference_symlinks_before_writing(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        output_dir = repo_root / ".agents" / "skills"
+        target_dir = output_dir / "agent-ops"
+        refs_dir = target_dir / "references"
+        refs_dir.mkdir(parents=True)
+        outside = self.temp_dir / "outside-contract.yaml"
+        outside.write_text("keep me\n", encoding="utf-8")
+        (refs_dir / "contract.yaml").symlink_to(outside)
+        report = {
+            "roots": [
+                {
+                    "name": "agent-ops",
+                    "content": "# Agent Ops\n",
+                    "contract": "{}\n",
+                    "evals": "{}\n",
+                    "task_profile": "{}\n",
+                    "prompt_injection_context": "{}\n",
+                }
+            ]
+        }
+
+        generate_root_skill_sets.write_roots(report, output_dir, repo_root_path=repo_root)
+
+        self.assertEqual(outside.read_text(encoding="utf-8"), "keep me\n")
+        self.assertFalse((refs_dir / "contract.yaml").is_symlink())
+        self.assertEqual((refs_dir / "contract.yaml").read_text(encoding="utf-8"), "{}\n")
+
     def test_command_surface_resolves_latent_skill_handles(self) -> None:
         payload = command_surface.resolve_skill_handle("he-heartbeat", repo_root_path=REPO_ROOT)
 
@@ -197,6 +225,34 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "verification-before-completion")
         self.assertLessEqual(len(payload["candidates"]), ROUTING_BUDGET["max_candidates_returned"])
         self.assertNotIn("source_path", payload["candidates"][0])
+
+    def test_router_rejects_manifest_source_path_symlink_escape(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        outside = self.temp_dir / "outside.md"
+        outside.write_text("# Outside\n", encoding="utf-8")
+        source_dir = repo_root / "Skills" / "agent-ops" / "evil"
+        source_dir.mkdir(parents=True)
+        (source_dir / "SKILL.md").symlink_to(outside)
+        manifest = repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(
+            json.dumps(
+                {
+                    "id": "evil",
+                    "description": "Use for evil routing.",
+                    "level": "atom",
+                    "source_path": "Skills/agent-ops/evil/SKILL.md",
+                    "triggers": ["evil routing"],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(ValueError) as ctx:
+            route_skillset.read_manifest("agent-ops", skillsets_dir=repo_root / ".skillsets")
+
+        self.assertIn("source_path", str(ctx.exception))
 
     def test_router_ignores_generic_stopwords_when_scoring(self) -> None:
         manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"

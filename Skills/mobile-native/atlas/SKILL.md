@@ -1,6 +1,6 @@
 ---
 name: atlas
-description: Automate ChatGPT Atlas on macOS when users explicitly ask to control Atlas tabs, bookmarks, history, or desktop browser state.
+description: Automate Atlas on macOS when users explicitly ask to control Atlas tabs, bookmarks, history, or desktop browser state.
 metadata:
   skill-type: team_automation
   lifecycle_state: active
@@ -19,7 +19,7 @@ metadata:
 - Prefer repo-local contracts, wrappers, and validation before generic advice.
 
 ## When To Use
-- The user explicitly asks to control ChatGPT Atlas on macOS.
+- The user explicitly asks to control Atlas on macOS.
 - Atlas tabs, bookmarks, history, or desktop browser state need automation.
 - AppleScript-based Atlas inspection is safer than manual instructions.
 
@@ -45,7 +45,7 @@ metadata:
 
 ## Workflow
 - Start with 2-3 focused surfaces before expanding scope.
-- Confirm the request is specifically for ChatGPT Atlas on macOS.
+- Confirm the request is specifically for Atlas on macOS.
 - Inspect current Atlas state only as needed for the requested action.
 - Ask before state-changing or privacy-sensitive actions when not already explicit.
 - Run AppleScript or helper commands with minimal scope.
@@ -71,7 +71,7 @@ metadata:
 - Loading archived context before the active workflow proves it is needed.
 
 ## Examples
-- Open these docs in ChatGPT Atlas tabs and leave the current tab alone.
+- Open these docs in Atlas tabs and leave the current tab alone.
 - Find whether Atlas already has this project bookmarked.
 - Close the duplicate Atlas tabs from this research session.
 

@@ -3,6 +3,7 @@ name: oak-api
 description: Build safe Oak Curriculum API learning flows. Use this skill when Oak endpoints, curriculum maps, or child-facing Apps SDK guidance are needed.
 metadata:
   skill-type: library_api_reference
+  risk: medium
 ---
 
 # Oak API

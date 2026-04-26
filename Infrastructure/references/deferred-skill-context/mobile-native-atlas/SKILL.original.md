@@ -1,6 +1,6 @@
 ---
 name: atlas
-description: Control the ChatGPT Atlas desktop app on macOS via AppleScript. Use when and only when the user explicitly wants Atlas tabs, bookmarks, or history manipulated on macOS, not general browser automation.
+description: Control the Atlas desktop app on macOS via AppleScript. Use when and only when the user explicitly wants Atlas tabs, bookmarks, or history manipulated on macOS, not general browser automation.
 metadata:
   skill-type: team_automation
 ---
@@ -26,14 +26,14 @@ metadata:
 - Treat local browser history and bookmarks as sensitive user data.
 
 ## When to use
-- The user explicitly asks to control ChatGPT Atlas tabs or windows.
+- The user explicitly asks to control Atlas tabs or windows.
 - The user wants to inspect Atlas bookmarks or history on macOS.
 - The task needs Atlas-specific browser state rather than a general browser automation workflow.
 
 ## When not to use
 - General browsing, scraping, or browser automation. Use a browser automation skill instead.
 - Non-macOS environments.
-- Requests that do not explicitly target ChatGPT Atlas.
+- Requests that do not explicitly target Atlas.
 
 ## Required inputs
 - The Atlas task: tabs, bookmarks, history, or app metadata.
@@ -80,7 +80,7 @@ metadata:
 - Assuming the beta and stable Atlas data roots are interchangeable without verifying freshness.
 
 ## Examples
-- "List my ChatGPT Atlas tabs and focus the tab on chatgpt.com."
+- "List my Atlas tabs and focus the tab on chatgpt.com."
 - "Search Atlas history for OpenAI docs from today only."
 
 ## See Also

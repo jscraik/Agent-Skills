@@ -3,6 +3,7 @@ name: create-auth
 description: "Create, migrate, or validate Better Auth implementation work. Use when the user wants Better Auth added or changed in code, including OAuth, passkeys, 2FA, magic links, or org flows."
 metadata:
   skill-type: scaffolding_templates
+  triggers: better auth implementation, create better auth, better auth migration
 ---
 
 # Create Auth

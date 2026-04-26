@@ -29,7 +29,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Examples](#examples)
 - [Resource map](#resource-map)
-- [Decision Quality Feedback](`#decision-quality-feedback`)
+- [Decision Quality Feedback](#decision-quality-feedback)
 
 ## When to use
 
@@ -179,6 +179,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 
 - Confirm commands exist in repo Infrastructure/scripts/docs.
 - Confirm file paths exist and links resolve.
+- Run Vale or the repo's prose-lint equivalent when AGENTS guidance or linked instruction docs change.
 - Confirm any prescribed preflight command and flags actually exist before inserting them.
 - Confirm stack detection guidance matches observed root manifests or documented repo scripts.
 - Confirm required-path guidance only names directories that exist or are explicit repo policy.

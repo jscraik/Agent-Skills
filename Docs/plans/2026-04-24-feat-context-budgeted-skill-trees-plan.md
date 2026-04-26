@@ -350,6 +350,7 @@ Validation:
 ```bash
 ./bin/ask skills budget --json
 git diff --check
+vale Docs/plans/2026-04-24-feat-context-budgeted-skill-trees-plan.md
 ```
 
 Exit criteria:
@@ -1060,6 +1061,13 @@ Implementation tasks:
   sandboxed home directory for any non-dry-run `--scope user` mutation.
 - Before any non-dry-run user-scope cutover run, require:
   - no active Codex session is using the same user runtime surface;
+  - one isolation method is selected and recorded: `HOME=/tmp/isolated-codex-test`,
+    a distinct OS user, or a container/VM with separate `.codex` and `.agents`
+    roots;
+  - the cutover command runs through the selected isolation wrapper before the
+    real user home is touched;
+  - environment variables that redirect Codex or Agents homes are listed in the
+    run log with their resolved filesystem roots;
   - pre-mutation snapshot and hash of user-facing projection files;
   - post-rollback snapshot parity check;
   - documented recovery commands for interrupted workspace/user sequences.
@@ -1161,6 +1169,7 @@ Per rooted slice:
 Per validation-gate slice:
 
 ```bash
+vale Docs/
 bash Infrastructure/scripts/validate_all.sh --ephemeral
 ```
 

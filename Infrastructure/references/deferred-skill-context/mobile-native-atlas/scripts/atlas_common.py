@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-ATLAS_APP_NAME = "ChatGPT Atlas"
+ATLAS_APP_NAME = "Atlas"
 
 LOCAL_STATE_PATH = (
     Path.home()
@@ -42,7 +42,7 @@ def detect_atlas_app_name() -> str:
     if is_app_installed(ATLAS_APP_NAME):
         return ATLAS_APP_NAME
 
-    raise AtlasError("Could not find ChatGPT Atlas. Install the ChatGPT Atlas app.")
+    raise AtlasError("Could not find Atlas. Install the Atlas app.")
 
 
 def _ensure_local_state_path(path: Path = LOCAL_STATE_PATH) -> Path:
@@ -116,7 +116,7 @@ def _applescript_hint(stderr: str) -> str | None:
     if "-1743" in stderr or "not authorized" in lower or "not permitted" in lower:
         return (
             "Grant Automation permission in System Settings > Privacy & Security > Automation, "
-            "and allow your terminal to control ChatGPT Atlas."
+            "and allow your terminal to control Atlas."
         )
     return None
 
@@ -156,7 +156,7 @@ def detect_tab_capable_app_name() -> str:
     app_name = detect_atlas_app_name()
     if not is_tab_capable(app_name):
         raise AtlasError(
-            "ChatGPT Atlas is installed but does not appear to expose window/tab scripting."
+            "Atlas is installed but does not appear to expose window/tab scripting."
         )
     return app_name
 

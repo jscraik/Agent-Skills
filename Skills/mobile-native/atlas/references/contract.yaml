@@ -1,6 +1,6 @@
 schema_version: 1
 skill: atlas
-purpose: "Perform explicit, user-approved ChatGPT Atlas desktop operations on macOS without treating Atlas as a generic browser target."
+purpose: "Perform explicit, user-approved Atlas desktop operations on macOS without treating Atlas as a generic browser target."
 triggers:
   - "Use when the user request matches the skill scope."
 non_goals:

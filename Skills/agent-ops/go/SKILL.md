@@ -3,6 +3,7 @@ name: go
 description: Best practices for working with Go codebases. Use when writing, debugging, or exploring Go code, including reading dependency sources and documentation.
 metadata:
   skill-type: code_quality_review
+  triggers: golang, go programming, go code, go module
 ---
 
 ## Table of Contents

@@ -14,6 +14,7 @@ EXPECTED_PLUGIN_SKILLS = {
         "he-deepen-plan",
         "he-deepen-spec",
         "he-fix-bugs",
+        "he-heartbeat",
         "he-ideate",
         "he-improve",
         "he-plan",

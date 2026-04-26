@@ -186,7 +186,17 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("generated_command_handle_check", proof["gates"])
         self.assertIn("workspace_command_handle_exists", proof["gates"])
         self.assertIn("codex_user_link", proof["gates"])
+        self.assertIn("agents_user_command_handle_exists", proof["gate_policy"]["user_runtime_any_of"])
         self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
+
+    def test_skills_proof_human_output(self):
+        """Verify ask skills proof has a useful non-JSON success render."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
+        self.assertIn("live invocation: manual_session_gate", result.stdout)
 
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""
@@ -200,6 +210,25 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(resolution["kind"], "reviewer")
         self.assertEqual(resolution["command_visibility"], "reviewer")
         self.assertEqual(resolution["canonical_handle"], "skill-inspector")
+
+    def test_reviewers_resolve_human_output(self):
+        """Verify ask reviewers resolve has a useful non-JSON success render."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Reviewer handle: @skill-inspector", result.stdout)
+        self.assertIn("codex/agents/skill-inspector/skill-inspector.toml", result.stdout)
+
+    def test_skills_invalid_action_mentions_proof(self):
+        """Verify invalid skill-action guidance includes the public proof command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "nonsense", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        suggestion = output["errors"][0]["fix_suggestion"]
+        self.assertIn("proof", suggestion)
 
     def test_skills_goal_json_contract(self):
         """
