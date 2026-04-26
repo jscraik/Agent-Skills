@@ -11,7 +11,8 @@ triggers:
   - user asks for global mise config upkeep (`~/.Infrastructure/config/mise/config.toml`) while resolving trust/runtime issues
 
 inputs:
-  - failing command/error output
+  - failing_command: the command invocation that failed (e.g., `mise trust`, `node --version`, or any mise-managed tool execution)
+  - error_output: stderr, trace output, or error messages from the failing command; required when available as preferred evidence for reproducible diagnosis
   - path to repo or directory with mise config
   - optional global mise config path (typically `~/.Infrastructure/config/mise/config.toml`) when global repair is requested or implicated
   - optional expected runtime versions
