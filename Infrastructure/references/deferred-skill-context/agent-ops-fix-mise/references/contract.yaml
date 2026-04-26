@@ -11,18 +11,12 @@ triggers:
   - user asks for global mise config upkeep (`~/.Infrastructure/config/mise/config.toml`) while resolving trust/runtime issues
 
 inputs:
-  - name: failing_command
-    description: The command invocation that failed, such as `mise trust`, `node --version`, or any mise-managed tool execution.
-  - name: error_output
-    description: stderr, trace output, or error messages from the failing command; required when available as preferred evidence for reproducible diagnosis.
-  - name: repo_or_config_path
-    description: Path to the repository or directory with mise config.
-  - name: global_mise_config_path
-    description: Optional global mise config path, typically `~/.Infrastructure/config/mise/config.toml`, when global repair is requested or implicated.
-  - name: expected_runtime_versions
-    description: Optional expected runtime versions.
-  - name: global_toolchain_edit_confirmation
-    description: Explicit permission or confirmation for global toolchain edits when intent is not explicit.
+  - a failing command invocation
+  - stderr/trace/error output
+  - repo or config path
+  - optional global mise config path
+  - optional expected runtime versions
+  - explicit permission for global toolchain edits
 
 outputs:
   - diagnosed root cause and remediation actions
@@ -47,10 +41,34 @@ risks:
 
 safety_controls:
   forbidden_commands:
-    - "curl"
-    - "wget"
-    - "rm -rf"
-    - "nc"
+    - command: "curl"
+    - command: "wget"
+    - command: "nc"
+    - command: "rm"
+      # Reject when BOTH recursive flags AND force flags are present in any order/form
+      # Check for presence of any from {-r, -R, --recursive} AND any from {-f, --force}
+      # This includes mixed forms like: rm -rf, rm -r -f, rm --recursive -f, rm -f -R, etc.
+      forbidden_arg_patterns:
+        - "-rf"
+        - "-fr"
+        - "-Rf"
+        - "-fR"
+        - "-rF"
+        - "-Fr"
+        - "-RF"
+        - "-FR"
+        - "--recursive --force"
+        - "--force --recursive"
+        - "--recursive -f"
+        - "-f --recursive"
+        - "--force -r"
+        - "-r --force"
+        - "--force -R"
+        - "-R --force"
+        - "-r -f"
+        - "-f -r"
+        - "-R -f"
+        - "-f -R"
   pressure_response: >
     Refuse requests to skip validation or fetch remote payloads, then continue
     only with local mise diagnostics, scoped trust actions, and rerun evidence.

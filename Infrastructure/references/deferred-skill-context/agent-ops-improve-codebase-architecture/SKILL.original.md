@@ -155,7 +155,7 @@ For a chosen direction, add:
 
 When authoring or changing this skill, run:
 
-- `./bin/ask skills audit Infrastructure/references/deferred-skill-context/agent-ops-improve-codebase-architecture/SKILL.original.md --level strict --json`
+- `./bin/ask skills audit Infrastructure/references/deferred-skill-context/agent-ops-improve-codebase-architecture --level strict --json`
 - `vale Infrastructure/references/deferred-skill-context/agent-ops-improve-codebase-architecture/SKILL.original.md`
 - `./bin/ask repo validate --robot`
 - `git diff --check -- Infrastructure/references/deferred-skill-context/agent-ops-improve-codebase-architecture`
