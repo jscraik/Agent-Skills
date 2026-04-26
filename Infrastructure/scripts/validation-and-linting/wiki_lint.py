@@ -91,6 +91,7 @@ def _collect_wiki_pages(wiki_root: Path) -> list[Path]:
 
 
 def lint_wiki(wiki_root: Path, max_age_days: int, now: date) -> list[Issue]:
+    wiki_root = wiki_root.resolve()
     issues: list[Issue] = []
     pages = _collect_wiki_pages(wiki_root)
     page_set = {p.resolve() for p in pages}
@@ -173,7 +174,7 @@ def _parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Lint the Skill Ops Wiki.")
     parser.add_argument(
         "--wiki-root",
-        default="Wiki/skill-ops-wiki/wiki",
+        default="Wiki/wiki",
         help="Path to wiki root directory.",
     )
     parser.add_argument(

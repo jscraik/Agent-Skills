@@ -16,14 +16,14 @@ The Skill Ops Wiki captures recurring maintenance knowledge so each incident bec
 
 ## Directory Layout
 
-- `Wiki/skill-ops-wiki/raw/`
-- `Wiki/skill-ops-wiki/raw/assets/`
-- `Wiki/skill-ops-wiki/wiki/index.md`
-- `Wiki/skill-ops-wiki/wiki/log.md`
-- `Wiki/skill-ops-wiki/wiki/failures/`
-- `Wiki/skill-ops-wiki/wiki/playbooks/`
-- `Wiki/skill-ops-wiki/wiki/assets/ui/`
-- `Wiki/skill-ops-wiki/wiki/learnings/`
+- `Wiki/raw/`
+- `Wiki/raw/assets/`
+- `Wiki/wiki/index.md`
+- `Wiki/wiki/log.md`
+- `Wiki/wiki/failures/`
+- `Wiki/wiki/playbooks/`
+- `Wiki/wiki/assets/ui/`
+- `Wiki/wiki/learnings/`
 
 `raw/` is immutable evidence input. `wiki/` is LLM-maintained synthesis.
 

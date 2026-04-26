@@ -147,6 +147,14 @@ The PR 136 main-sync refresh preserved these lines removed from compact runtime 
 - `description: Review reliability risks in diffs, plans, specs, or fixes. Use when failures, retries, concurrency, data integrity, or operational resilience need evidence-backed review.`
 - `description: Route ambiguous Harness Engineering requests to one lifecycle stage. Use when users ask where to start, resume, plan, implement, review, debug, or resolve terminology.`
 
+The `he-heartbeat` routing refresh preserved the prior `he-router` tail steps
+before inserting the recurring-loop route:
+
+- `5. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.`
+- `6. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.`
+- `7. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.`
+- `8. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.`
+
 Exact moved-line preservation for the progressive-disclosure gate:
 
 ```text

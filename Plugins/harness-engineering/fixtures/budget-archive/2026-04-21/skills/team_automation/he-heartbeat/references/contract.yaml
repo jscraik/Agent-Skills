@@ -1,0 +1,50 @@
+schema_version: 1
+
+purpose: >
+  Create, review, or repair recurring Harness Engineering heartbeats that wake a
+  thread, re-check live state, route into the correct HE stage, and stop when the
+  target is done, blocked, stale, or cancelled.
+
+triggers:
+  - the user wants a recurring Harness Engineering check, monitor, loop, or heartbeat
+  - a PR, CI run, review thread, validation ladder, deploy, or Linear issue must stay open until live state changes
+  - a compound HE workflow needs periodic refresh against branch, tracker, or review state
+  - the user asks to keep checking until green, merged, reviewed, unblocked, or complete
+
+inputs:
+  - concrete target such as repository path, PR number, branch, Linear issue, validation command, deploy, or artifact path
+  - recurrence cadence or permission to default to 10m when recurrence is clear
+  - expected HE stage for each wake-up, or enough context for stage routing
+  - live checks and status surfaces that must be refreshed before each action
+  - stop conditions and reporting policy
+
+outputs:
+  - selected cadence and parsed interval evidence
+  - selected Harness Engineering stage invocation for each wake-up
+  - durable heartbeat prompt with target, cwd, live checks, stop conditions, reporting policy, and safety gates
+  - automation creation status or clear blocker when no automation tool is available
+  - immediate first-run result when safe to execute in the current turn
+
+non_goals:
+  - replacing the underlying HE implementation, review, debug, or planning stage
+  - creating generic reminders that are not tied to Harness Engineering work
+  - auto-merging, destructive cleanup, production mutation, or approval-sensitive actions
+  - scheduling loops with no bounded target or stop condition
+  - pretending a Markdown skill can create automations when the runtime tool is unavailable
+
+risks:
+  - stale thread context causing wrong action; mitigate by requiring live-state reads before every wake-up
+  - endless loops on deterministic blockers; mitigate by stopping after repeated identical credential, permission, or environment failures
+  - wrong HE stage selection; mitigate by routing through he-router when stage is ambiguous
+  - unattended risky action; mitigate with explicit approval gates for merge, destructive cleanup, and production mutation
+  - noisy updates; mitigate with a state-change-first reporting policy
+
+observability: >
+  Track whether heartbeats select the correct HE stage, include exact live
+  checks, stop after real completion or deterministic blockers, and avoid noisy
+  updates when nothing changed.
+
+rollback_procedure: >
+  Restore the previous he-heartbeat SKILL.md and references from git, remove the
+  routing-map entries, rerun strict skill audit, and delete or cancel any
+  heartbeat automation created from the reverted prompt contract.

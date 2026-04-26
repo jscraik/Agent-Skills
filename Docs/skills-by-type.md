@@ -82,6 +82,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - he-deepen-plan (Plugins/harness-engineering/skills/team_automation)
 - he-deepen-spec (Plugins/harness-engineering/skills/team_automation)
 - he-fix-bugs (Plugins/harness-engineering/skills/team_automation)
+- he-heartbeat (Plugins/harness-engineering/skills/team_automation)
 - he-ideate (Plugins/harness-engineering/skills/team_automation)
 - he-improve (Plugins/harness-engineering/skills/team_automation)
 - he-plan (Plugins/harness-engineering/skills/team_automation)

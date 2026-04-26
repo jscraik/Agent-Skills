@@ -31,5 +31,5 @@ Keep emitted artifacts internally coherent so CI/review signals are trustworthy.
 
 ## Related
 
-- [Code Scanning Remediation](/Wiki/skill-ops-wiki/wiki/playbooks/code-scanning-remediation.md)
-- [Git Conflict Resolution for Validation Logs](/Wiki/skill-ops-wiki/wiki/playbooks/git-conflict-resolution-validation-logs.md)
+- [Code Scanning Remediation](code-scanning-remediation.md)
+- [Git Conflict Resolution for Validation Logs](git-conflict-resolution-validation-logs.md)

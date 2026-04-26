@@ -33,6 +33,21 @@
       ]
     },
     {
+      "priority": 18,
+      "rule": "recurring-control-loop",
+      "route": "he-heartbeat",
+      "signals": [
+        "heartbeat",
+        "keep checking",
+        "monitor until",
+        "wake this thread",
+        "every 10m",
+        "until green",
+        "until merged",
+        "recurring follow-up"
+      ]
+    },
+    {
       "priority": 20,
       "rule": "workflow-hygiene",
       "route": "he-prune-branches",
@@ -191,10 +206,31 @@
     "he-technical-review": "$harness-engineering:he-technical-review <review-target>",
     "he-reliability-review": "$harness-engineering:he-reliability-review <review-target>",
     "he-prune-branches": "$harness-engineering:he-prune-branches <repo-path>",
+    "he-heartbeat": "$harness-engineering:he-heartbeat <target-and-cadence>",
     "he-compound": "$harness-engineering:he-compound <request>",
     "he-compound-refresh": "$harness-engineering:he-compound-refresh <evidence-path>"
   },
   "routes": [
+    {
+      "intent": "recurring-harness-engineering-heartbeat",
+      "match": [
+        "he-heartbeat",
+        "heartbeat",
+        "keep checking",
+        "monitor until green",
+        "wake this thread",
+        "run this every",
+        "poll until merged",
+        "recurring follow-up"
+      ],
+      "skill": "he-heartbeat",
+      "required_inputs": [
+        "target such as repo, PR, branch, Linear issue, validation command, or artifact",
+        "cadence or permission to default to 10m",
+        "stop conditions and reporting policy"
+      ],
+      "output": "durable heartbeat prompt + selected HE stage + live checks + stop conditions"
+    },
     {
       "intent": "stage-routing-or-resume",
       "match": [
@@ -704,6 +740,21 @@
         "security-reviewer"
       ],
       "trigger": "delegation requested or bug complexity/risk signals present"
+    },
+    "he-heartbeat": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "worker",
+        "testing-reviewer",
+        "correctness-reviewer",
+        "reliability-reviewer",
+        "deployment-verification-agent"
+      ],
+      "trigger": "delegation requested or heartbeat target spans PR, CI, deploy, tracker, or long-running compound state"
     },
     "he-prune-branches": {
       "policy": "manual-only",
