@@ -29,7 +29,7 @@ Create and maintain concise, high-signal AGENTS guidance with progressive disclo
 - [Mandatory workflow snippet](#mandatory-workflow-snippet)
 - [Examples](#examples)
 - [Resource map](#resource-map)
-- [Decision feedback protocol](#decision-quality-feedback)
+- [Decision Quality Feedback](`#decision-quality-feedback`)
 
 ## When to use
 
