@@ -47,10 +47,15 @@ risks:
 
 safety_controls:
   forbidden_commands:
-    - "curl"
-    - "wget"
-    - "rm -rf"
-    - "nc"
+    - command: "curl"
+    - command: "wget"
+    - command: "nc"
+    - command: "rm"
+      forbidden_arg_patterns:
+        - "-rf"
+        - "-fr"
+        - "--recursive --force"
+        - "--force --recursive"
   pressure_response: >
     Refuse requests to skip validation or fetch remote payloads, then continue
     only with local mise diagnostics, scoped trust actions, and rerun evidence.
