@@ -87,7 +87,7 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 - Confirm `UBIQUITOUS_LANGUAGE.md` exists at the selected output path after writing.
 - Confirm the nearest agent instruction surface references `UBIQUITOUS_LANGUAGE.md`, or report why no safe integration surface was updated.
 - Confirm the integration text tells agents to use Prompt Translations for terse or overloaded user phrases.
-- Fail fast: if the output path is unsafe, a mandatory requested source is unavailable, or a requested source would expose secrets, stop and report the blocker instead of proceeding.
+- Fail fast: if the output path is unsafe, a mandatory requested source is unavailable, or a mandatory requested source would expose secrets, stop and report the blocker instead of proceeding.
 - Proceed with available evidence when optional requested sources are missing; list skipped sources in the closeout.
 - Check that every canonical term has a one-sentence definition.
 - Check that `Prompt translations` includes at least one user phrase and one copy-pasteable improved prompt when the source material includes informal wording.
