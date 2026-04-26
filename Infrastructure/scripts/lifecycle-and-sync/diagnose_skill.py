@@ -176,6 +176,33 @@ def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir:
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
 
 
+def is_plugin_owned_skill(skill_arg: str, skill_dir: Path) -> bool:
+    """Return whether the audited skill is plugin-owned and not expected in the default runtime index."""
+    candidate = Path(skill_arg).expanduser()
+    paths = [candidate]
+    if not candidate.is_absolute():
+        paths.append(REPO_ROOT / candidate)
+    paths.append(skill_dir)
+
+    for path in paths:
+        try:
+            rel_parts = path.resolve().relative_to(REPO_ROOT).parts
+        except ValueError:
+            continue
+        if rel_parts and rel_parts[0] == "Plugins":
+            return True
+    return False
+
+
+def check_plugin_runtime_surface(skill_name: str, label: str) -> DiagnosticResult:
+    """Skip default-runtime checks for plugin-owned skills."""
+    return DiagnosticResult(
+        f"symlink ({label})",
+        "skip",
+        f"Plugin-owned skill is not expected as a default user-runtime symlink: {skill_name}",
+    )
+
+
 def check_skill_index(skill_name: str) -> DiagnosticResult:
     """Check if skill appears in root SKILL.md index."""
     if not SKILL_INDEX.exists():
@@ -191,6 +218,15 @@ def check_skill_index(skill_name: str) -> DiagnosticResult:
             "Not found in SKILL.md index",
             "Run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` to regenerate the surfaced catalog.",
         )
+
+
+def check_plugin_skill_index(skill_name: str) -> DiagnosticResult:
+    """Skip root index checks for plugin-owned skills outside the default visible catalog."""
+    return DiagnosticResult(
+        "skill index",
+        "skip",
+        f"Plugin-owned skill is not expected in the root default visible skill index: {skill_name}",
+    )
 
 
 def check_task_profile(skill_dir: Path) -> DiagnosticResult:
@@ -261,9 +297,15 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
     results.append(check_nested_git(skill_dir))
     # Skill audits may be invoked with a path argument (for example, utilities/my-skill).
     # Symlink/index checks must always use the canonical skill directory name.
-    results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
-    results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
-    results.append(check_skill_index(resolved_skill_name))
+    plugin_owned = is_plugin_owned_skill(skill_name, skill_dir)
+    if plugin_owned:
+        results.append(check_plugin_runtime_surface(resolved_skill_name, "codex"))
+        results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
+        results.append(check_plugin_skill_index(resolved_skill_name))
+    else:
+        results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+        results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+        results.append(check_skill_index(resolved_skill_name))
     results.append(check_task_profile(skill_dir))
     results.append(check_lifecycle_readiness(skill_dir))
 
