@@ -22,7 +22,7 @@ ALLOWED_API_BASES = {DEFAULT_API_BASE}
 
 def emit(payload: dict[str, Any]) -> int:
     print(json.dumps(payload, indent=2, sort_keys=True))
-    return 0
+    return 1 if payload.get("ok") is False else 0
 
 
 def infer_repo_from_git() -> str | None:
