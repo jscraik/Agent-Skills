@@ -155,6 +155,22 @@ before inserting the recurring-loop route:
 - `7. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.`
 - `8. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.`
 
+The `he-heartbeat` prompt-contract refresh preserved the previous fixture
+reference wording before replacing it with package-relative paths:
+
+- `Infrastructure/references/automation-prompt-contract.md`
+- `` `Infrastructure/references/automation-prompt-contract.md` for the full prompt``
+- `template.`
+- ``Read `Infrastructure/references/automation-prompt-contract.md` when writing a``
+- `new heartbeat prompt, reviewing a heartbeat prompt, or repairing a drifted loop.`
+
+```text
+`Infrastructure/references/automation-prompt-contract.md` for the full prompt
+template.
+Read `Infrastructure/references/automation-prompt-contract.md` when writing a
+new heartbeat prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
+```
+
 Exact moved-line preservation for the progressive-disclosure gate:
 
 ```text

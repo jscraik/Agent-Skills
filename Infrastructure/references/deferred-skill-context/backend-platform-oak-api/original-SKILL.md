@@ -45,6 +45,7 @@ Turn Oak Curriculum API content into age-appropriate learning flows, endpoint ma
 
 ## Constraints
 - Redact API keys, tokens, and any sensitive learner or classroom details by default.
+- **Allowed network domains:** only `https://open-api.thenational.academy` for Oak Curriculum API fetches.
 - Keep network usage explicit and limited to Oak API hosts when `Infrastructure/scripts/oak_api_fetch.py` is used.
 - Do not imply endorsement by Oak or omit the required licensing and rate-limit reminders.
 

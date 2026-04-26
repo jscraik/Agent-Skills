@@ -75,10 +75,9 @@ improve-codebase-architecture:
   verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
     evidence before closeout
 insight-report:
-  project-brain: Capture durable repo learnings and route updates into the canonical
-    memory surface
-  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
-    evidence before closeout
+  codex-automation-architect: Convert recommendations into Codex automations
+  skill-refactor: Analyze skill usage and improvement opportunities
+  ubiquitous-language: Extract terminology Jamie can reuse in future prompts
 interview-me:
   project-brain: Capture durable repo learnings and route updates into the canonical
     memory surface
@@ -123,16 +122,25 @@ security-ownership-map:
   verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
     evidence before closeout
 simplify:
-  project-brain: Capture durable repo learnings and route updates into the canonical
-    memory surface
-  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
-    evidence before closeout
+  he-code-review: Run a structured code-review pass to surface and prioritize risk
+    findings before fix work
+  he-fix-bugs: Use when simplify findings indicate likely regressions or uncertain
+    root cause needing evidence-first diagnosis
+skill-builder:
+  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
+    for skill-linked delegation flows
+  decide-build-primitive: Decide whether the capability should be a skill, prompt,
+    or agent before authoring it
+  skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
+    instead of authoring doctrine alone
 skill-creator:
-  codex-agent-creator: Dedicated role files
-  skillify: Canonicalize rough workflows
+  codex-agent-creator: Create or update custom agents when skill workflows need dedicated
+    role files
+  skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
+    packages
 skill-installer:
-  skill-creator: Author or repair local packages before installation
-  skillify: Canonicalize source workflows before distribution
+  skill-creator: Author or repair local skill packages before installation
+  skillify: Harden source skills into canonical templates before install/distribution
 swift-development:
   he-fix-bugs: Triage Swift concurrency and actor isolation issues with evidence-first
     diagnosis
@@ -150,6 +158,13 @@ typescript:
   biome-linting: Enforce TypeScript lint and format rules with Biome
   javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
     need attention
+ubiquitous-language:
+  agents-md: Use when the glossary needs to influence repo-level agent instructions
+    after terminology is stable.
+  docs-expert: Use for broader documentation rewrites after the canonical vocabulary
+    is agreed.
+  verification-before-completion: Pair with prompt translations that turn vague completion
+    language into exact validation evidence.
 ui-ux-creative-coding:
   project-brain: Capture durable repo learnings and route updates into the canonical
     memory surface

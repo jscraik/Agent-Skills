@@ -18,6 +18,7 @@ Use this plugin when you need stage routing and delivery workflow:
 - implementation execution
 - technical/readiness/reliability reviews
 - solved-problem learning capture
+- recurring heartbeat follow-up for PRs, CI, reviews, deploys, validation, and compound runs
 
 Use `coding-harness` instead when you need:
 - `harness init`, `harness upgrade`, or scaffold updates
@@ -33,6 +34,7 @@ Use `coding-harness` instead when you need:
   - `he-compound-refresh`
   - `he-deepen-plan`
   - `he-deepen-spec`
+  - `he-heartbeat`
   - `he-ideate`
   - `he-improve`
   - `he-fix-bugs`
@@ -68,7 +70,7 @@ Use `he-compound` when the user needs lifecycle orchestration:
 - It outputs a stage decision, required inputs, and next skill invocation.
 
 Call stage skills directly when stage intent is explicit:
-- `he-router`, `he-ideate`, `he-brainstorm`, `he-spec`, `he-deepen-spec`, `he-plan`, `he-deepen-plan`, `he-improve`, `he-fix-bugs`, `he-prune-branches`, `he-refine`, `he-work`, `he-code-review`, `he-technical-review`, `he-reliability-review`, `he-tdd`, `he-compound`, `he-compound-refresh`.
+- `he-router`, `he-ideate`, `he-brainstorm`, `he-spec`, `he-deepen-spec`, `he-plan`, `he-deepen-plan`, `he-improve`, `he-fix-bugs`, `he-heartbeat`, `he-prune-branches`, `he-refine`, `he-work`, `he-code-review`, `he-technical-review`, `he-reliability-review`, `he-tdd`, `he-compound`, `he-compound-refresh`.
 
 ## Subagent Orchestration
 - Canonical mapping: `Plugins/harness-engineering/references/subagent-routing.md`

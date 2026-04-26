@@ -123,12 +123,14 @@ Return a concise structured summary:
 ```yaml
 schema_version: 1
 selected_cadence: "<cadence>"
+parsed_interval: "<normalized interval or default rationale>"
 selected_stage: "$harness-engineering:<he-stage>"
 target: "<target>"
 live_checks:
   - "<check>"
 stop_conditions:
   - "<condition>"
+heartbeat_prompt: "<durable prompt payload or path to generated prompt>"
 automation_status: "<created | needs-user-action | blocked>"
 immediate_run: "<pass | fail | blocked | not-run with reason>"
 next_wakeup_behavior: "<what the next wake-up should do>"
@@ -139,8 +141,7 @@ next_wakeup_behavior: "<what the next wake-up should do>"
 Build the recurring prompt as a durable instruction block with `target`,
 `cadence`, `route_each_wakeup_to`, `cwd`, `live_checks`, `stop_conditions`,
 `report_policy`, and `safety`. Use
-`Infrastructure/references/automation-prompt-contract.md` for the full prompt
-template.
+`./references/automation-prompt-contract.md` for the full prompt template.
 
 The prompt must tell the next wake-up agent to:
 
@@ -234,7 +235,7 @@ Before claiming a heartbeat is ready:
 
 ## Full Context
 
-Read `Infrastructure/references/automation-prompt-contract.md` when writing a
-new heartbeat prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
+Read `./references/automation-prompt-contract.md` when writing a new heartbeat
+prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
 Use `Plugins/harness-engineering/references/deferred-context-index.md` to locate
 deferred Harness Engineering context before expanding this root skill body.

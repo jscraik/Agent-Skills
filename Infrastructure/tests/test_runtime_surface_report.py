@@ -81,6 +81,30 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
         self.assertEqual(result.data["runtime_surface_status"], "error")
         self.assertEqual(result.data["runtime_surface"]["status"], "fail")
 
+    def test_runtime_surface_preserves_non_validation_errors(self) -> None:
+        budget_result = CallResult(status="error")
+        budget_result.data["runtime_budget"] = {
+            "status": "unknown",
+            "projection_mode": "flat",
+        }
+        budget_result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_RUNTIME,
+                message="budget command crashed",
+            )
+        )
+
+        with mock.patch.object(runtime, "skills_budget", return_value=budget_result):
+            result = runtime.dispatch_runtime(
+                REPO_ROOT,
+                SimpleNamespace(action="surface", default_max=30),
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(len(result.errors), 1)
+        self.assertEqual(result.errors[0].code, ErrorCode.ERR_RUNTIME)
+        self.assertEqual(result.data["runtime_surface_status"], "error")
+
 
 if __name__ == "__main__":
     unittest.main()

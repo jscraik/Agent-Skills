@@ -23,8 +23,14 @@ def dispatch_runtime(repo_root: Path, args: Any) -> CallResult:
             result.data["runtime_surface"] = dict(result.data["runtime_budget"])
         if args.action == "surface":
             result.data["runtime_surface_status"] = result.status
-            result.status = "success"
-            result.errors = []
+            only_validation_errors = (
+                result.status == "error"
+                and bool(result.errors)
+                and all(error.code == ErrorCode.ERR_VALIDATION for error in result.errors)
+            )
+            if only_validation_errors:
+                result.status = "success"
+                result.errors = []
         return result
 
     result = CallResult()
