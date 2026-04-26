@@ -11,10 +11,10 @@ triggers:
   - user asks for global mise config upkeep (`~/.Infrastructure/config/mise/config.toml`) while resolving trust/runtime issues
 
 inputs:
-  - a failing command invocation
-  - stderr/trace/error output
+  - failing command invocation that failed, such as `mise trust`, `node --version`, or any mise-managed tool execution
+  - stderr, trace output, or error messages from the failing command; required when available as preferred evidence for reproducible diagnosis
   - repo or config path
-  - optional global mise config path
+  - optional global mise config path, typically `~/.Infrastructure/config/mise/config.toml`, when global repair is requested or implicated
   - optional expected runtime versions
   - explicit permission for global toolchain edits
 
@@ -45,9 +45,9 @@ safety_controls:
     - command: "wget"
     - command: "nc"
     - command: "rm"
-      # Reject when BOTH recursive flags AND force flags are present in any order/form
-      # Check for presence of any from {-r, -R, --recursive} AND any from {-f, --force}
-      # This includes mixed forms like: rm -rf, rm -r -f, rm --recursive -f, rm -f -R, etc.
+      # Reject common dangerous patterns combining recursive and force flags.
+      # This is pattern-based matching, not semantic flag detection.
+      # Patterns cover common forms but may not catch all variations.
       forbidden_arg_patterns:
         - "-rf"
         - "-fr"
