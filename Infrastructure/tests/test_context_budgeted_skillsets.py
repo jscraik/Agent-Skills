@@ -1,5 +1,6 @@
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -223,6 +224,21 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(payload["status"], "ok")
         self.assertEqual(payload["kind"], "reviewer")
         self.assertEqual(payload["canonical_handle"], "skill-inspector")
+
+    def test_insight_report_documented_runner_path_stays_runnable(self) -> None:
+        runner = REPO_ROOT / "Skills" / "agent-ops" / "insight-report" / "scripts" / "run_insight_report.py"
+
+        result = subprocess.run(
+            [sys.executable, str(runner), "--help"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Generate Codex insights report", result.stdout)
 
     def test_skillset_inference_uses_segment_before_nested_plugin_skills_root(self) -> None:
         source_dir = REPO_ROOT / "Plugins" / "example-org" / "harness-engineering" / "skills" / "he-work"

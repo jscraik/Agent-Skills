@@ -1063,7 +1063,18 @@ def generate_html_report(data, insights):
     friction = insights.get('friction_analysis', {})
     friction_html = ""
     if friction and friction.get('categories'):
-        cats_html = "".join([f'<div class="friction-category"><div class="friction-title">{escape_html(c.get("category", ""))}</div><div class="friction-desc">{escape_html(c.get("description", ""))}</div>{"<ul class=\"friction-examples\">" + "".join([f"<li>{escape_html(e)}</li>" for e in c.get("examples", [])]) + "</ul>" if c.get("examples") else ""}</div>' for c in friction['categories']])
+        cat_parts = []
+        for category in friction['categories']:
+            examples = category.get("examples", [])
+            examples_html = ""
+            if examples:
+                items_html = "".join(f"<li>{escape_html(example)}</li>" for example in examples)
+                examples_html = f'<ul class="friction-examples">{items_html}</ul>'
+            cat_parts.append(
+                f'<div class="friction-category"><div class="friction-title">{escape_html(category.get("category", ""))}</div>'
+                f'<div class="friction-desc">{escape_html(category.get("description", ""))}</div>{examples_html}</div>'
+            )
+        cats_html = "".join(cat_parts)
         intro = f'<p class="section-intro">{escape_html(friction.get("intro", ""))}</p>' if friction.get('intro') else ""
         friction_html = f'<h2 id="section-friction">Where Things Go Wrong</h2>{intro}<div class="friction-categories">{cats_html}</div>'
 
