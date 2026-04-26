@@ -78,6 +78,11 @@ if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seco
   exit 2
 fi
 
+# Normalize legacy alias before validation so env vars like SYNC_SKILLS_SCOPE=project-local work.
+if [[ "$sync_scope" == "project-local" ]]; then
+  sync_scope="workspace"
+fi
+
 case "$sync_scope" in
   workspace|user)
     ;;

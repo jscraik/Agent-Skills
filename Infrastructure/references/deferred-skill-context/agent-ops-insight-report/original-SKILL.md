@@ -51,10 +51,10 @@ Generate a local Codex usage report where **Codex is the only narrative insight 
 
 ## Deliverables
 
-- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insight-evidence.json`
-- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/INSIGHT_PROMPT.md`
-- Codex-written insight JSON: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insights.generated.json`
-- HTML report: `file://${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/report.html`
+- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/insight-evidence.json`
+- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/INSIGHT_PROMPT.md`
+- Codex-written insight JSON: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/insights.generated.json`
+- HTML report: `file://${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/report.html`
 - Browser launch: open the final `REPORT_URL=` in the Codex in-app browser when available.
 
 The report includes:
@@ -103,7 +103,7 @@ python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-o
 After the HTML report is completed, read the runner output line:
 
 ```text
-REPORT_URL=file://$HOME/dev/configs/codex/usage-data/report.html
+REPORT_URL=file://$HOME/.codex/usage-data/report.html
 ```
 
 Then use the Browser plugin's in-app browser workflow to open that URL. Prefer the Codex browser over macOS `open` when this skill is running inside Codex.
@@ -175,7 +175,7 @@ Open `INSIGHT_PROMPT.md`, ask Codex to repair the JSON shape, save `insights.gen
 
 - `--prepare-only` intentionally does not render HTML; it only writes the evidence bundle and prompt for Codex-authored analysis.
 - Sparse or missing sessions are not a runner failure. Preserve the limitation in the generated insight JSON instead of inventing patterns.
-- The report path is outside this repository under `$HOME/dev/configs/codex/usage-data/`; do not commit generated reports or prompts to `agent-skills`.
+- The report path is outside this repository under `$HOME/.codex/usage-data/`; do not commit generated reports or prompts to `agent-skills`.
 - Browser launch is a separate verification step. The runner printing `REPORT_URL=` is not proof that the Codex in-app browser opened it.
 
 ## Safety
@@ -225,7 +225,7 @@ python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-o
 - Configuration: `references/configuration.md`
 - Writer contract: `references/codex-writer.md`
 - Report format: `references/report-format.md`
-- Output root: `$HOME/dev/configs/codex/usage-data/`
+- Output root: `$HOME/.codex/usage-data/`
 
 ## See Also
 

@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -278,7 +279,12 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
 
         loaded = yaml.safe_load(text)
     except ImportError:
-        pass
+        # When PyYAML is unavailable, reject YAML-specific syntax that the
+        # fallback parser cannot safely validate (flow sequences/objects).
+        if re.search(r"[\[\{]", text):
+            raise ValueError(
+                f"Invalid YAML in {path}: flow syntax detected but PyYAML is not available"
+            )
     except yaml.YAMLError as exc:
         raise ValueError(f"Invalid YAML in {path}: {exc}") from exc
 

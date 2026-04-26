@@ -26,7 +26,7 @@ outputs:
   - "full_run: insights.generated.json with metadata.schema_version = codex-insights.v1"
   - "full_run: report.html"
   - "full_run: REPORT_URL=file://... line for Codex browser launch"
-  - "prepare_only: render command guidance instead of generated report artifacts"
+  - "prepare_only: insight-evidence.json and INSIGHT_PROMPT.md only (no insights.generated.json, report.html, or REPORT_URL)"
   - "explicit confidence and missing-data disclosures in metadata.limitations"
 
 required_response_sections:
@@ -34,6 +34,7 @@ required_response_sections:
   - "Required inputs"
   - "Deliverables"
   - "Workflow"
+  - "Validation"
   - "Codex Writer Contract"
   - "Codex Browser Launch"
   - "Failure Modes"

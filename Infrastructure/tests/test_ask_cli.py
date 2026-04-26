@@ -336,17 +336,26 @@ class TestAskCLI(unittest.TestCase):
 
     def test_runtime_surface_json_contract(self):
         """Verify ask runtime surface exposes the runtime report under an obvious topic."""
-        cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--json"]
-        result = _run_cli(cmd)
+        # Pin projection mode so assertions remain deterministic regardless of ambient runtime.
+        saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
+        try:
+            os.environ["SYNC_SKILLS_PROJECTION_MODE"] = "flat"
+            cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--json"]
+            result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 0, result.stderr)
-        output = json.loads(result.stdout)
-        self.assertEqual(output["status"], "success")
-        report = output["data"]["runtime_surface"]
-        self.assertIn(report["projection_mode"], {"flat", "rooted"})
-        self.assertIn("first_level_default_entries", report)
-        self.assertIn("hidden_system_entries", report)
-        self.assertIn("estimated_description_tokens", report)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["status"], "success")
+            report = output["data"]["runtime_surface"]
+            self.assertIn(report["projection_mode"], {"flat", "rooted"})
+            self.assertIn("first_level_default_entries", report)
+            self.assertIn("hidden_system_entries", report)
+            self.assertIn("estimated_description_tokens", report)
+        finally:
+            if saved_projection_mode is None:
+                os.environ.pop("SYNC_SKILLS_PROJECTION_MODE", None)
+            else:
+                os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
 
     def test_runtime_budget_json_contract(self):
         """Verify ask runtime budget remains a first-class budget gate command."""

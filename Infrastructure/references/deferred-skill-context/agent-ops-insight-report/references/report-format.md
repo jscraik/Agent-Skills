@@ -12,7 +12,7 @@ HTML report structure for Codex-authored insight reports.
 ## File Location
 
 ```text
-file://$HOME/dev/configs/codex/usage-data/report.html
+file://$HOME/.codex/usage-data/report.html
 ```
 
 ## Artifact Chain
@@ -89,7 +89,7 @@ Future workflows Jamie can prepare for as Codex improves.
 The runner prints:
 
 ```text
-REPORT_URL=file://$HOME/dev/configs/codex/usage-data/report.html
+REPORT_URL=file://$HOME/.codex/usage-data/report.html
 ```
 
 When running inside Codex, open that URL with the Codex in-app browser. If Browser tooling is unavailable, disclose that and provide the URL.

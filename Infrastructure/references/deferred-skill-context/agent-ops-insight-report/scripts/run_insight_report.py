@@ -144,18 +144,21 @@ def parse_args():
     parser.add_argument("--prompt-out", default=str(PROMPT_MD), help=f"Codex prompt path (default: {PROMPT_MD})")
     parser.add_argument("--insights-out", default=str(INSIGHTS_JSON), help=f"Generated insights JSON path (default: {INSIGHTS_JSON})")
     parser.add_argument("--insights-in", default=str(INSIGHTS_JSON), help=f"Insights JSON path for --render-only (default: {INSIGHTS_JSON})")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.prepare_only and args.render_only:
+        parser.error("--prepare-only and --render-only are mutually exclusive")
+    return args
 
 
 def find_session_files(days):
     """Find session files from ~/.codex/sessions/ within the lookback period."""
     if not SESSIONS_DIR.exists():
         return []
-
-    cutoff = datetime.now() - timedelta(days=days)
+    
+    cutoff = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days)
     cutoff_timestamp = cutoff.timestamp()
     files_with_mtime = []
-
+    
     for year_dir in SESSIONS_DIR.iterdir():
         if not year_dir.is_dir() or not year_dir.name.isdigit():
             continue
@@ -169,7 +172,9 @@ def find_session_files(days):
                     continue
                 day = int(day_dir.name)
                 try:
-                    datetime(year, month, day)
+                    dir_date = datetime(year, month, day)
+                    if dir_date < cutoff - timedelta(days=1):
+                        continue
                 except ValueError:
                     continue
                 for f in day_dir.glob("rollout-*.jsonl"):
@@ -179,7 +184,7 @@ def find_session_files(days):
                             files_with_mtime.append((f, file_timestamp))
                     except OSError:
                         continue
-
+    
     # Sort by modification time (newest first) so max_sessions limit keeps recent sessions
     files_with_mtime.sort(key=lambda item: item[1], reverse=True)
     return [path for path, mtime in files_with_mtime]
@@ -366,7 +371,8 @@ def parse_session_file(file_path):
 
                         elif payload_type == 'function_call':
                             name = payload.get('name') or 'unknown'
-                            tool_calls[name] += 1
+                            normalized_name = TOOL_ALIASES.get(name, name)
+                            tool_calls[normalized_name] += 1
                             arguments = payload.get('arguments') or {}
                             if isinstance(arguments, dict):
                                 tool_input = arguments
@@ -376,19 +382,21 @@ def parse_session_file(file_path):
                                 except json.JSONDecodeError:
                                     tool_input = {}
 
-                            if name in ('Edit', 'Write', 'apply_patch'):
+                            # Use normalized name for edit-metric classification so aliases
+                            # like str_replace_file / write_file still count.
+                            if normalized_name in ('Edit', 'Write', 'apply_patch', 'StrReplaceFile', 'WriteFile'):
                                 file_path_mod = tool_input.get('file_path') or tool_input.get('path') or ''
                                 if file_path_mod:
                                     files_modified.add(file_path_mod)
 
-                                if name == 'Edit':
+                                if normalized_name in ('Edit', 'StrReplaceFile'):
                                     old_str = tool_input.get('old_string', '')
                                     new_str = tool_input.get('new_string', '')
                                     if old_str is not None and new_str is not None:
                                         a, r = count_lines_in_diff(old_str, new_str)
                                         lines_added += a
                                         lines_removed += r
-                                elif name == 'Write':
+                                elif normalized_name in ('Write', 'WriteFile'):
                                     write_content = tool_input.get('content', '')
                                     if write_content:
                                         lines_added += write_content.count('\n') + 1
@@ -486,11 +494,13 @@ def categorize_tool_error(content):
 
 
 def is_substantive_session(session):
-    """Check if session is substantive enough to analyze (2+ messages and 1+ minute)."""
+    """Check if session is substantive enough to analyze."""
     # Require at least 2 user messages and 1+ minute duration
+    # to filter out warmup, meta, and accidental micro-sessions.
     if session['user_messages'] < 2:
         return False
-    if session.get('duration_minutes', 0) < 1:
+    duration_minutes = session.get('duration_minutes', 0) or 0
+    if duration_minutes < 1:
         return False
     return True
 
@@ -512,7 +522,7 @@ def detect_parallel_codex_sessions(sessions):
     
     all_messages.sort(key=lambda x: x['ts'])
     
-    parallel_codex_pairs = set()
+    parallel_codex_pairs = []
     messages_during = set()
     
     window_start = 0
@@ -531,7 +541,7 @@ def detect_parallel_codex_sessions(sessions):
                 between = all_messages[j]
                 if between['session_id'] != msg['session_id']:
                     pair = tuple(sorted([msg['session_id'], between['session_id']]))
-                    parallel_codex_pairs.add(pair)
+                    parallel_codex_pairs.append(pair)
                     messages_during.add(f"{all_messages[prev_index]['ts']}:{msg['session_id']}")
                     messages_during.add(f"{between['ts']}:{between['session_id']}")
                     messages_during.add(f"{msg['ts']}:{msg['session_id']}")
@@ -618,12 +628,17 @@ def load_cached_session_meta(session_id):
 
 
 def save_session_meta(session_id, meta):
-    """Save session metadata cache to disk with restrictive permissions."""
+    """Save session metadata cache to disk with private-by-default permissions."""
     try:
         meta_dir = USAGE_DIR / "session-meta"
         meta_dir.mkdir(parents=True, exist_ok=True)
         cache_path = meta_dir / f"{session_id}.json"
-        write_json(cache_path, meta)
+        with open(cache_path, 'w', encoding="utf-8") as f:
+            json.dump(meta, f, indent=2)
+        try:
+            cache_path.chmod(0o600)
+        except OSError:
+            pass
     except OSError:
         return
 

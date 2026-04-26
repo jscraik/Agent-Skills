@@ -1622,6 +1622,7 @@ def _refresh_home_plugin_mirrors(
         return
 
     marker_name = ".codex-repo-plugin-source"
+    keep_names = {entry["name"] for entry in entries}
     for entry in entries:
         plugin_name = entry["name"]
         relative = entry["path"]
@@ -1646,6 +1647,26 @@ def _refresh_home_plugin_mirrors(
         _materialize_first_level_skill_aliases(target_dir)
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
+
+    # Prune stale home plugin mirrors that are no longer declared in the marketplace.
+    reserved = {"marketplace.json", "cache"}
+    if home_plugins_dir.is_dir():
+        for child in home_plugins_dir.iterdir():
+            if child.name in keep_names or child.name in reserved:
+                continue
+            if not child.is_dir():
+                continue
+            marker_file = child / marker_name
+            if not marker_file.is_file():
+                continue
+            if dry_run:
+                logs.append(f"Would remove stale home plugin mirror: {child}")
+                continue
+            if child.is_symlink():
+                child.unlink()
+            else:
+                shutil.rmtree(child)
+            logs.append(f"Removed stale home plugin mirror: {child}")
 
 
 def _sync_rooted_projection(
@@ -1695,6 +1716,7 @@ def _sync_rooted_projection(
         )]
 
     keep_names = {root["name"] for root in root_report.get("roots", [])}
+    keep_names.add("codex-primary-runtime")
     if system_skills_dir.is_dir():
         keep_names.add(".system")
 
@@ -1714,11 +1736,11 @@ def _sync_rooted_projection(
         try:
             pre_prune_logs = _prune_first_level_symlinks(skills_dir, keep_names, dry_run)
             pre_prune_logs.extend(_prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run))
+            prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
             command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=False)
             command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=False)
-            prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
         except (OSError, ValueError) as exc:
             plan["validation_status"] = "fail"
             plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
