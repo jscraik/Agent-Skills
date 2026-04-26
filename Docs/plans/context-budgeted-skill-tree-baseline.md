@@ -1,5 +1,3 @@
-<!-- vale off -- reason: generated baseline report with machine-formatted metrics and tables; ticket: 136; expires: 2026-07-24 -->
-
 # Context-Budgeted Skill Tree Baseline
 
 Date: 2026-04-24
@@ -7,6 +5,8 @@ Date: 2026-04-24
 Source commit before Phase A implementation: `bcba348c7`
 
 ## Task Graph
+
+<!-- vale off -- reason: generated baseline report with machine-formatted metrics and tables; ticket: 136; expires: 2026-07-24 -->
 
 ```yaml
 tasks:
@@ -118,6 +118,7 @@ Preserved system-lane entries:
 - `plugin-installer`
 - `skill-creator`
 - `skill-installer`
+<!-- vale on -->
 
 ## Notes
 
@@ -125,5 +126,3 @@ Preserved system-lane entries:
 - Rooted projection is not active yet; `root_skill_set_count` is expected to be `0` in this baseline.
 - Project skill overlays use `Skills/project/<skill>/SKILL.md`; none exist in this baseline.
 - Local plugin skills remain separately browsable and are counted as `local-plugin`, not first-level rooted runtime entries.
-
-<!-- vale on -->
