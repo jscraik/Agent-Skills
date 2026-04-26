@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="3200" viewBox="0 0 2400 3200" role="img" aria-labelledby="title desc">
+  <title id="title">Source Skills Under Headings</title>
+  <desc id="desc">Printable source-only map showing each Skills heading and the skill folders with SKILL.md beneath it.</desc>
+  <defs>
+    <style>
+      .page { fill: #fbfaf7; }
+      .ink { fill: #17202a; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+      .h1 { font-size: 78px; font-weight: 850; }
+      .sub { font-size: 34px; fill: #5b6670; }
+      .rule { font-size: 27px; fill: #5b6670; }
+      .heading { font-size: 32px; font-weight: 830; }
+      .count { font-size: 27px; fill: #5b6670; }
+      .item { font-size: 20px; fill: #1e2933; }
+      .agentItem { font-size: 18px; fill: #1e2933; }
+      .box { fill: #ffffff; stroke: #d1c8ba; stroke-width: 2.4; rx: 18; }
+      .agent { fill: #eef7fb; stroke: #6c9fc2; }
+      .front { fill: #f2f5ff; stroke: #809bd1; }
+      .content { fill: #fbf2ff; stroke: #b58bc7; }
+      .security { fill: #fff2f0; stroke: #ce8783; }
+      .backend { fill: #f0f8f1; stroke: #84ad88; }
+      .product { fill: #fff5e8; stroke: #d7a15e; }
+      .mobile { fill: #effaf8; stroke: #7db5ad; }
+      .system { fill: #f5f4f8; stroke: #9a95a8; }
+      .line { stroke: #d1c8ba; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect class="page" width="2400" height="3200"/>
+  <g class="ink">
+    <text class="h1" x="88" y="120">Source Skills Under Headings</text>
+    <text class="sub" x="92" y="174">Print map for discovery: find the heading, then the skill folder and SKILL.md underneath.</text>
+    <text class="rule mono" x="92" y="226">Every item resolves as: Skills/&lt;heading&gt;/&lt;skill-folder&gt;/SKILL.md</text>
+
+    <rect class="box agent" x="80" y="300" width="1080" height="1420"/>
+    <text class="heading" x="118" y="360">Skills/agent-ops/</text>
+    <text class="count mono" x="118" y="402">41 files</text>
+    <line class="line" x1="118" y1="430" x2="1122" y2="430"/>
+    <g class="mono agentItem">
+      <text x="118" y="478">biome-linting/SKILL.md</text>
+      <text x="118" y="512">diagram-cli/SKILL.md</text>
+      <text x="118" y="546">autoresearch/SKILL.md</text>
+      <text x="118" y="580">toml/SKILL.md</text>
+      <text x="118" y="614">go/SKILL.md</text>
+      <text x="118" y="648">evals-router/SKILL.md</text>
+      <text x="118" y="682">vale/SKILL.md</text>
+      <text x="118" y="716">pnpm-manager/SKILL.md</text>
+      <text x="118" y="750">bootstrap/SKILL.md</text>
+      <text x="118" y="784">context7/SKILL.md</text>
+      <text x="118" y="818">autofix/SKILL.md</text>
+      <text x="118" y="852">ubiquitous-language/SKILL.md</text>
+      <text x="118" y="886">elixir-pro/SKILL.md</text>
+      <text x="118" y="920">typescript/SKILL.md</text>
+      <text x="118" y="954">swift-development/SKILL.md</text>
+      <text x="118" y="988">insight-report/SKILL.md</text>
+      <text x="118" y="1022">improve-codebase-architecture/SKILL.md</text>
+      <text x="118" y="1056">project-brain/SKILL.md</text>
+      <text x="118" y="1090">triage/SKILL.md</text>
+      <text x="118" y="1124">alignment-checkpoint/SKILL.md</text>
+      <text x="118" y="1158">codex-hooks-builder/SKILL.md</text>
+
+      <text x="608" y="478">codex-automation-architect/SKILL.md</text>
+      <text x="608" y="512">agents-md/SKILL.md</text>
+      <text x="608" y="546">prek-pro/SKILL.md</text>
+      <text x="608" y="580">codex-agent-creator/SKILL.md</text>
+      <text x="608" y="614">gh-workflow/SKILL.md</text>
+      <text x="608" y="648">yaml/SKILL.md</text>
+      <text x="608" y="682">bash-hygiene/SKILL.md</text>
+      <text x="608" y="716">skill-pr-delivery/SKILL.md</text>
+      <text x="608" y="750">frontend-design/SKILL.md</text>
+      <text x="608" y="784">javascript-pro/SKILL.md</text>
+      <text x="608" y="818">simplify/SKILL.md</text>
+      <text x="608" y="852">coding-harness/SKILL.md</text>
+      <text x="608" y="886">uv-python-project-setup/SKILL.md</text>
+      <text x="608" y="920">verification-before-completion/SKILL.md</text>
+      <text x="608" y="954">production-deployment/SKILL.md</text>
+      <text x="608" y="988">docs-expert/SKILL.md</text>
+      <text x="608" y="1022">rust-pro/SKILL.md</text>
+      <text x="608" y="1056">npm-release/SKILL.md</text>
+      <text x="608" y="1090">decide-build-primitive/SKILL.md</text>
+      <text x="608" y="1124">fix-mise/SKILL.md</text>
+    </g>
+
+    <rect class="box front" x="1220" y="300" width="1100" height="520"/>
+    <text class="heading" x="1258" y="360">Skills/frontend-ui/</text>
+    <text class="count mono" x="1258" y="402">13 files</text>
+    <line class="line" x1="1258" y1="430" x2="2282" y2="430"/>
+    <g class="mono item">
+      <text x="1258" y="478">frontend-ui-design/SKILL.md</text>
+      <text x="1258" y="516">ui-visual-regression/SKILL.md</text>
+      <text x="1258" y="554">og-image-creator/SKILL.md</text>
+      <text x="1258" y="592">shadcn-ui/SKILL.md</text>
+      <text x="1258" y="630">ui-ux-creative-coding/SKILL.md</text>
+      <text x="1258" y="668">baseline-ui/SKILL.md</text>
+      <text x="1258" y="706">fixing-accessibility/SKILL.md</text>
+      <text x="1748" y="478">react-ui-patterns/SKILL.md</text>
+      <text x="1748" y="516">better-icons/SKILL.md</text>
+      <text x="1748" y="554">playwright-interactive/SKILL.md</text>
+      <text x="1748" y="592">design-system/SKILL.md</text>
+      <text x="1748" y="630">fixing-metadata/SKILL.md</text>
+      <text x="1748" y="668">agentation/SKILL.md</text>
+    </g>
+
+    <rect class="box content" x="1220" y="880" width="530" height="500"/>
+    <text class="heading" x="1258" y="940">Skills/content-publishing/</text>
+    <text class="count mono" x="1258" y="982">8 files</text>
+    <line class="line" x1="1258" y1="1010" x2="1712" y2="1010"/>
+    <g class="mono item">
+      <text x="1258" y="1060">spreadsheet/SKILL.md</text>
+      <text x="1258" y="1098">youtube-hooks-scripts/SKILL.md</text>
+      <text x="1258" y="1136">beautiful-mermaid/SKILL.md</text>
+      <text x="1258" y="1174">release-notes/SKILL.md</text>
+      <text x="1258" y="1212">slides/SKILL.md</text>
+      <text x="1258" y="1250">visual-explainer/SKILL.md</text>
+      <text x="1258" y="1288">llm-wiki/SKILL.md</text>
+      <text x="1258" y="1326">video-transcript-downloader/SKILL.md</text>
+    </g>
+
+    <rect class="box security" x="1790" y="880" width="530" height="500"/>
+    <text class="heading" x="1828" y="940">Skills/security-ops/</text>
+    <text class="count mono" x="1828" y="982">7 files</text>
+    <line class="line" x1="1828" y1="1010" x2="2282" y2="1010"/>
+    <g class="mono item">
+      <text x="1828" y="1060">security-threat-model/SKILL.md</text>
+      <text x="1828" y="1098">security-best-practices/SKILL.md</text>
+      <text x="1828" y="1136">create-auth/SKILL.md</text>
+      <text x="1828" y="1174">recon-workbench/SKILL.md</text>
+      <text x="1828" y="1212">best-practices/SKILL.md</text>
+      <text x="1828" y="1250">security-ownership-map/SKILL.md</text>
+      <text x="1828" y="1288">1password/SKILL.md</text>
+    </g>
+
+    <rect class="box backend" x="1220" y="1440" width="530" height="320"/>
+    <text class="heading" x="1258" y="1500">Skills/backend-platform/</text>
+    <text class="count mono" x="1258" y="1542">4 files</text>
+    <line class="line" x1="1258" y1="1570" x2="1712" y2="1570"/>
+    <g class="mono item">
+      <text x="1258" y="1620">oak-api/SKILL.md</text>
+      <text x="1258" y="1658">cli-spec/SKILL.md</text>
+      <text x="1258" y="1696">backend-engineer/SKILL.md</text>
+      <text x="1258" y="1734">mcp-builder/SKILL.md</text>
+    </g>
+
+    <rect class="box product" x="1790" y="1440" width="530" height="320"/>
+    <text class="heading" x="1828" y="1500">Skills/product-strategy/</text>
+    <text class="count mono" x="1828" y="1542">4 files</text>
+    <line class="line" x1="1828" y1="1570" x2="2282" y2="1570"/>
+    <g class="mono item">
+      <text x="1828" y="1620">deep-interview/SKILL.md</text>
+      <text x="1828" y="1658">chatgpt-apps/SKILL.md</text>
+      <text x="1828" y="1696">interview-me/SKILL.md</text>
+      <text x="1828" y="1734">architecture-interview/SKILL.md</text>
+    </g>
+
+    <rect class="box mobile" x="80" y="1780" width="520" height="210"/>
+    <text class="heading" x="118" y="1840">Skills/mobile-native/</text>
+    <text class="count mono" x="118" y="1882">1 file</text>
+    <line class="line" x1="118" y1="1910" x2="562" y2="1910"/>
+    <text class="mono item" x="118" y="1960">atlas/SKILL.md</text>
+
+    <rect class="box system" x="640" y="1780" width="720" height="210"/>
+    <text class="heading" x="678" y="1840">skills-system/</text>
+    <text class="count mono" x="678" y="1882">2 files</text>
+    <line class="line" x1="678" y1="1910" x2="1322" y2="1910"/>
+    <text class="mono item" x="678" y="1960">openai-docs/SKILL.md</text>
+    <text class="mono item" x="1010" y="1960">imagegen/SKILL.md</text>
+
+    <rect class="box" x="1400" y="1780" width="920" height="210"/>
+    <text class="heading" x="1438" y="1840">Visible router headings</text>
+    <text class="count mono" x="1438" y="1882">.agents/skills/&lt;heading&gt;/SKILL.md</text>
+    <line class="line" x1="1438" y1="1910" x2="2282" y2="1910"/>
+    <text class="mono item" x="1438" y="1960">agent-ops, backend-platform, content-publishing, frontend-ui,</text>
+    <text class="mono item" x="1438" y="1998">harness-engineering, mobile-native, plugin-factory, product-strategy,</text>
+    <text class="mono item" x="1438" y="2036">security-ops, skill-factory</text>
+
+    <rect class="box" x="80" y="2080" width="2240" height="620"/>
+    <text class="heading" x="118" y="2140">Plugin skill headings, separate from Skills/</text>
+    <text class="count mono" x="118" y="2182">These sit under Plugins/&lt;plugin&gt;/skills/ and project into Plugins/cache/agent-skills-local/...</text>
+    <line class="line" x1="118" y1="2210" x2="2282" y2="2210"/>
+    <g class="mono item">
+      <text x="118" y="2264">Plugins/plugin-factory/skills/</text>
+      <text x="158" y="2302">plugin-factory-router/SKILL.md</text>
+      <text x="158" y="2340">plugin-builder/SKILL.md</text>
+      <text x="158" y="2378">plugin-router/SKILL.md</text>
+
+      <text x="780" y="2264">Plugins/skill-factory/skills/</text>
+      <text x="820" y="2302">skill-factory-router/SKILL.md</text>
+      <text x="820" y="2340">skill-builder/SKILL.md</text>
+      <text x="820" y="2378">skillify/SKILL.md</text>
+      <text x="820" y="2416">skill-refactor/SKILL.md</text>
+
+      <text x="1420" y="2264">Plugins/harness-engineering/skills/</text>
+      <text x="1460" y="2302">he-router/SKILL.md</text>
+      <text x="1460" y="2340">he-brainstorm/SKILL.md</text>
+      <text x="1460" y="2378">he-spec/SKILL.md</text>
+      <text x="1460" y="2416">he-plan/SKILL.md</text>
+      <text x="1460" y="2454">he-work/SKILL.md</text>
+      <text x="1460" y="2492">he-code-review/SKILL.md</text>
+      <text x="1460" y="2530">plus he-* review/deepen/refine lanes</text>
+    </g>
+
+    <text class="rule" x="90" y="2828">Counts from live repo inspection on 2026-04-26: Skills/ has 78 source skill files; skills-system/ has 2 system skill files.</text>
+    <text class="rule" x="90" y="2872">Use this as the print discovery sheet. The previous settings/caches poster is separate and more detailed than this map.</text>
+  </g>
+</svg>

@@ -224,12 +224,12 @@ def _first_level_skill_names() -> list[str]:
     return names
 
 
-def _generated_command_stub_names() -> set[str]:
-    """Return command handles intentionally projected as first-level stubs."""
+def _generated_command_handle_names() -> set[str]:
+    """Return command handles intentionally projected as first-level runtime entries."""
     return {
         handle.handle
         for handle in build_skill_handles()
-        if handle.kind == "skill" and handle.stub_path and handle.handle not in ROOT_SKILL_SETS
+        if handle.kind == "skill" and handle.command_handle_path and handle.handle not in ROOT_SKILL_SETS
     }
 
 
@@ -270,9 +270,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     first_level = set(_first_level_skill_names())
     projection_mode = _active_projection_mode(first_level)
     rooted_mode = projection_mode == "rooted"
-    command_stub_names = _generated_command_stub_names() if rooted_mode else set()
+    command_handle_names = _generated_command_handle_names() if rooted_mode else set()
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
-    bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_stub_names)
+    bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_handle_names)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
     # Bridge skills are intentionally not expected in default first-level discovery.
     # They can exist in policy metadata while remaining routed through the hidden
@@ -334,7 +334,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     if rooted_mode:
         missing_roots = sorted(ROOT_SKILL_SETS - first_level)
         allowed_rooted_first_level = ROOT_SKILL_SETS | {"codex-primary-runtime"}
-        unexpected_first_level = sorted(first_level - allowed_rooted_first_level - command_stub_names)
+        unexpected_first_level = sorted(first_level - allowed_rooted_first_level - command_handle_names)
         if missing_roots or unexpected_first_level:
             violations.append({
                 "code": "ROOTED_POLICY_NAME_DRIFT",
@@ -397,7 +397,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "catalog_default_skill_names": sorted(catalog_names),
         "system_bridge_skills": sorted(BRIDGE_SKILLS),
         "first_level_bridge_skills": bridge_exposed,
-        "generated_command_stub_names": sorted(command_stub_names),
+        "generated_command_handle_names": sorted(command_handle_names),
         "policy_default_skill_names": sorted(policy_default),
         "effective_default_policy_skill_names": sorted(expected_default),
         "default_visible_skill_names": sorted(default_names),

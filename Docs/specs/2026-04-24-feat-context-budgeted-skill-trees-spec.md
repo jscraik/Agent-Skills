@@ -904,8 +904,10 @@ Canonical artifact ownership:
 | Artifact Class | Canonical Path | Committed | Generator | Validator | Edit Rule |
 | --- | --- | --- | --- | --- | --- |
 | Runtime projection | `.agents/skills/**` | No, except explicitly tracked workflow files already allowed by repo policy | `ask skills sync` or canonical projection engine | Runtime budget and path ownership validators | Never hand-edit |
+| Generated command handles | `.agents/skills/<handle>/SKILL.md` for command-visible non-root handles | No, except when explicitly committed as generated projection output by repo policy | Command-surface generator under `Infrastructure/scripts/lifecycle-and-sync/` | `ask skills handles --check --json` and handle proof gates | Never hand-edit; regenerate from rooted manifests |
 | Project skill source | `Skills/project/<skill>/SKILL.md` | Yes when used by a repo | Project skill authoring workflow | Skill audit and projection validators | Edit as project-local canonical source |
 | Local plugin skill view | `Plugins/<plugin>/skills/<skill>/SKILL.md` or installed plugin-equivalent skill folders | Yes when part of a canonical local plugin package | Plugin authoring/sync workflow | Plugin audit and skill audit validators | Edit canonical plugin source, not generated cache |
+| Plugin runtime mirror | `~/plugins/<plugin>`, `<codex-profile>/Plugins/<plugin>` | No | `ask plugins sync-local-runtime` and `ask skills sync --scope user --projection rooted` | Runtime sync reports and plugin diagnostics | Replace copied mirrors after any canonical plugin or marketplace update |
 | Skill-set manifests | `.skillsets/<skill-set>/manifest.jsonl` | Yes, after generator/provenance exists | Manifest generator under `Infrastructure/scripts/lifecycle-and-sync/` | Manifest validator and budget validator | Never hand-edit |
 | Runtime surface reports | `Infrastructure/artifacts/runtime-surface/**` | No | `ask skills budget --json` or follow-on report command | JSON schema and budget validator | Never hand-edit |
 | Workout scorecards | `Infrastructure/artifacts/skill-workouts/**` | No by default | Workout runner | Workout score validator | Never hand-edit |
@@ -922,6 +924,13 @@ Rules:
 - Local plugin skill browseability is a source-layout/user-experience
   requirement. It must be preserved without counting every local plugin skill as
   a rooted first-level runtime entry.
+- Plugin runtime mirrors are copied runtime surfaces, not canonical plugin
+  sources. After changing `Plugins/<plugin>` or `Plugins/marketplace.json`, the
+  mirror replacement command must run before claiming Codex runtime behavior is
+  updated.
+- Generated command handles are runtime pointers for `$<handle>` mentionability.
+  They are generated from rooted manifests and must not be treated as full
+  workflow sources.
 - Project skill sources are canonical within their repository and may be
   committed when a project needs repo-specific skills.
 - Global skill sources must not be edited to satisfy one project's local

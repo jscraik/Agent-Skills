@@ -84,12 +84,12 @@ def first_level_runtime_entries() -> list[str]:
     )
 
 
-def generated_command_stub_names() -> set[str]:
-    """Return command handles intentionally projected as first-level stubs."""
+def generated_command_handle_names() -> set[str]:
+    """Return command handles intentionally projected as first-level runtime entries."""
     return {
         handle.handle
         for handle in build_skill_handles()
-        if handle.kind == "skill" and handle.stub_path and handle.handle not in ROOT_SKILL_SET_NAMES
+        if handle.kind == "skill" and handle.command_handle_path and handle.handle not in ROOT_SKILL_SET_NAMES
     }
 
 
@@ -290,8 +290,8 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
         violations.append({"code": "ROUTER_CANDIDATE_BUDGET_TOO_HIGH"})
     if projection_mode == "rooted":
         allowed = ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS
-        command_stubs = generated_command_stub_names()
-        latent_first_level = [name for name in runtime_entries if name not in allowed and name not in command_stubs]
+        command_handles = generated_command_handle_names()
+        latent_first_level = [name for name in runtime_entries if name not in allowed and name not in command_handles]
         if latent_first_level:
             violations.append({
                 "code": "LATENT_SKILLS_EXPOSED_FIRST_LEVEL",
@@ -315,7 +315,7 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
         "root_count": root_report["root_count"],
         "root_description_words_total": total_description_words,
         "runtime_entries": runtime_entries,
-        "generated_command_stub_names": sorted(generated_command_stub_names()) if projection_mode == "rooted" else [],
+        "generated_command_handle_names": sorted(generated_command_handle_names()) if projection_mode == "rooted" else [],
         "manifest_count": manifest_report["manifest_count"],
         "module_count": manifest_report["module_count"],
         "unmapped_count": len(manifest_report["unmapped"]),

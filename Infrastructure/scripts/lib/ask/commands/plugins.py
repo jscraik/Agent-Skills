@@ -259,9 +259,12 @@ def _sync_one_runtime_root(
     dry_run: bool,
 ) -> dict[str, Any]:
     """
-    Synchronizes a single runtime plugin root with the repository's local marketplace entries.
+    Replaces local plugin runtime mirrors from the repository's local marketplace entries.
     
-    Copies the repository-local plugins listed in `marketplace_entries` into `runtime_root`, removes top-level entries not present in the marketplace (excluding `marketplace.json` and `cache`), and writes the marketplace manifest to the runtime root. When `dry_run` is True no filesystem mutations are performed; a report of planned/copied/removed names is still returned.
+    Replaces only the repository-local plugins listed in `marketplace_entries`
+    inside `runtime_root`. Non-local plugin cache entries are preserved. When
+    `dry_run` is True no filesystem mutations are performed; a report of
+    planned/copied/replaced names is still returned.
     
     Parameters:
         runtime_root (Path): Absolute path to the runtime profile directory to synchronize.
@@ -276,7 +279,7 @@ def _sync_one_runtime_root(
             - "marketplace_target": str path where the manifest would be/was written.
             - "planned_plugins": list of plugin names processed from the marketplace.
             - "copied_plugins": list of plugin names copied (empty if dry_run).
-            - "removed_entries": list of top-level entry names removed (empty if dry_run).
+            - "removed_entries": local plugin target names that were replaced or would be replaced.
             - "dry_run": the `dry_run` input flag.
     
     Raises:
@@ -298,24 +301,14 @@ def _sync_one_runtime_root(
             raise FileNotFoundError(f"Local plugin source missing for '{plugin_name}': {source_dir}")
         resolved_sources.append((plugin_name, source_dir))
 
-    desired_names = {entry["name"] for entry in marketplace_entries}
-
-    existing_entries = [child for child in runtime_root.iterdir() if child.name not in {"marketplace.json", "cache"}]
-    for child in existing_entries:
-        if child.name not in desired_names:
-            removed_entries.append(child.name)
-            if not dry_run:
-                if child.is_symlink() or child.is_file():
-                    child.unlink()
-                else:
-                    shutil.rmtree(child)
-
     if not dry_run:
         shutil.copy2(marketplace_path, marketplace_target)
 
     for plugin_name, source_dir in resolved_sources:
         planned_plugins.append(plugin_name)
         target_dir = runtime_root / plugin_name
+        if target_dir.exists() or target_dir.is_symlink():
+            removed_entries.append(plugin_name)
         if not dry_run:
             _copy_directory_contents(source_dir, target_dir)
             _materialize_first_level_skill_aliases(target_dir)
@@ -333,7 +326,11 @@ def _sync_one_runtime_root(
 
 def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> CallResult:
     """
-    Syncs repository-local plugins into each Codex profile's runtime plugin roots by copying plugin directories and the repository marketplace manifest.
+    Replaces repository-local plugin runtime mirrors in each Codex profile from canonical `Plugins/` sources.
+
+    Use this after changing or updating any local plugin source or
+    `Plugins/marketplace.json`. Runtime plugin mirrors are copied directories,
+    not symlinks, so they must be replaced to make plugin changes visible.
     
     Parameters:
         repo_root (Path): Path to the repository root containing the Plugins/ tree and Plugins/marketplace.json.
@@ -360,7 +357,7 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
     if not entries:
         return _validation_error_result(
             "No local plugins were found in Plugins/marketplace.json.",
-            fix_suggestion="Add local plugin entries before syncing runtime installs.",
+            fix_suggestion="Add local plugin entries before replacing runtime mirrors.",
         )
 
     home = Path.home()
@@ -391,7 +388,7 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
             )
 
     result.status = "success"
-    result.data["message"] = "Synced local plugin runtime installs."
+    result.data["message"] = "Replaced local-plugin runtime mirrors."
     result.data["profile_homes"] = [str(path) for path in profile_homes]
     result.data["plugin_names"] = [entry["name"] for entry in entries]
     result.data["runtime_reports"] = runtime_reports

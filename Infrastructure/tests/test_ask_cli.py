@@ -131,14 +131,14 @@ class TestAskCLI(unittest.TestCase):
         self.assertTrue(write["dry_run"])
         self.assertEqual(write["path"], ".skillsets/command-surface.json")
 
-    def test_skills_handles_stub_dry_run_contract(self):
-        """Verify ask can preview generated runtime command stubs."""
+    def test_skills_handles_command_handle_dry_run_contract(self):
+        """Verify ask can preview generated runtime command handles."""
         cmd = [
             sys.executable,
             "Infrastructure/bin/ask",
             "skills",
             "handles",
-            "--write-stubs",
+            "--write-command-handles",
             "--dry-run",
             "--json",
         ]
@@ -146,10 +146,10 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
-        write = output["data"]["command_stub_write"]
+        write = output["data"]["command_handle_write"]
         self.assertEqual(write["status"], "pass")
         self.assertTrue(write["dry_run"])
-        self.assertGreater(write["stub_count"], 0)
+        self.assertGreater(write["command_handle_count"], 0)
         paths = {row["path"] for row in write["writes"] if row["handle"] == "he-heartbeat"}
         self.assertEqual(
             paths,
@@ -173,7 +173,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(resolution["invoke_via"], "harness-engineering")
 
     def test_skills_proof_json_contract(self):
-        """Verify ask skills proof separates resolver, stub, and runtime-link gates."""
+        """Verify ask skills proof separates resolver, command handle, and runtime-link gates."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat", "--json"]
         result = _run_cli(cmd)
 
@@ -183,8 +183,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(proof["schema_version"], "command-handle-proof.v1")
         self.assertEqual(proof["handle"], "he-heartbeat")
         self.assertIn("resolver", proof["gates"])
-        self.assertIn("generated_stub_check", proof["gates"])
-        self.assertIn("workspace_stub_exists", proof["gates"])
+        self.assertIn("generated_command_handle_check", proof["gates"])
+        self.assertIn("workspace_command_handle_exists", proof["gates"])
         self.assertIn("codex_user_link", proof["gates"])
         self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
 

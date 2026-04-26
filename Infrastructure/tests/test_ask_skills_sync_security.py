@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.append(str(REPO_ROOT / "scripts"))
 
+from ask.commands import plugins as plugins_commands  # noqa: E402
 from ask.commands import skills as skills_commands  # noqa: E402
 
 
@@ -52,7 +53,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
-        self.assertTrue((self.fake_home / "plugins").is_symlink())
+        self.assertTrue((self.fake_home / "plugins").is_dir())
+        self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "flat")
 
     def test_sync_skills_user_scope_preserves_existing_plugins_directory(self) -> None:
@@ -71,9 +73,73 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse(user_plugins.is_symlink())
         self.assertTrue((user_plugins / "README.md").is_file())
         self.assertIn(
-            f"Skipped existing non-symlink path: {user_plugins}",
+            f"Ensured plugin mirror directory: {user_plugins}",
             result.data["logs"],
         )
+
+    def test_sync_skills_user_scope_replaces_local_plugin_mirror_copies(self) -> None:
+        plugin_source = self.repo_root / "Plugins" / "harness-engineering"
+        plugin_source.mkdir(parents=True)
+        (plugin_source / ".codex-plugin").mkdir()
+        (plugin_source / ".codex-plugin" / "plugin.json").write_text("{}", encoding="utf-8")
+        (plugin_source / "skills").mkdir()
+        (plugin_source / "skills" / "he-heartbeat").mkdir()
+        (plugin_source / "skills" / "he-heartbeat" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
+        (self.repo_root / "Plugins" / "marketplace.json").write_text(
+            '{"plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}\n',
+            encoding="utf-8",
+        )
+        stale_target = self.fake_home / "plugins" / "harness-engineering"
+        stale_target.mkdir(parents=True)
+        (stale_target / "stale.txt").write_text("stale\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse((stale_target / "stale.txt").exists())
+        self.assertEqual((stale_target / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
+        self.assertTrue((stale_target / ".codex-repo-plugin-source").is_file())
+        self.assertTrue(
+            any("Replaced home plugin mirror" in item for item in result.data["logs"]),
+            result.data["logs"],
+        )
+
+    def test_local_plugin_runtime_sync_preserves_non_local_plugin_entries(self) -> None:
+        plugin_source = self.repo_root / "Plugins" / "harness-engineering"
+        plugin_source.mkdir(parents=True)
+        (plugin_source / "skills").mkdir()
+        (plugin_source / "skills" / "he-heartbeat").mkdir()
+        (plugin_source / "skills" / "he-heartbeat" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
+        marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace_path.write_text(
+            '{"plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}\n',
+            encoding="utf-8",
+        )
+        runtime_root = self.fake_home / ".codex" / "Plugins"
+        curated_plugin = runtime_root / "linear"
+        curated_plugin.mkdir(parents=True)
+        (curated_plugin / "marker.txt").write_text("keep\n", encoding="utf-8")
+        stale_local = runtime_root / "harness-engineering"
+        stale_local.mkdir()
+        (stale_local / "stale.txt").write_text("stale\n", encoding="utf-8")
+
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[{"name": "harness-engineering", "path": "./Plugins/harness-engineering"}],
+            dry_run=False,
+        )
+
+        self.assertEqual(report["copied_plugins"], ["harness-engineering"])
+        self.assertEqual(report["removed_entries"], ["harness-engineering"])
+        self.assertTrue((curated_plugin / "marker.txt").is_file())
+        self.assertFalse((stale_local / "stale.txt").exists())
+        self.assertEqual((stale_local / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
 
     def test_sync_skills_user_scope_relinks_managed_runtime_directories(self) -> None:
         managed_skills = self.fake_home / ".agents" / "skills"
@@ -133,7 +199,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.repo_root / ".skillsets" / "command-surface.json").is_file())
         self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "agents" / "openai.yaml").is_file())
-        self.assertEqual(result.data["plan"]["command_stubs"]["status"], "pass")
+        self.assertEqual(result.data["plan"]["command_handles"]["status"], "pass")
 
     def test_sync_skills_rooted_prunes_unowned_skillset_files(self) -> None:
         stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
@@ -231,7 +297,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
-        self.assertTrue((self.fake_home / "plugins").is_symlink())
+        self.assertTrue((self.fake_home / "plugins").is_dir())
+        self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "rooted")
 
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:

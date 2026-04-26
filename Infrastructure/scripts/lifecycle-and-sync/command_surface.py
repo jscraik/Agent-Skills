@@ -18,8 +18,8 @@ from skillset_model import repo_root
 HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 COMMAND_VISIBILITY = {"orchestrator", "direct", "target", "reviewer", "none"}
 COMMAND_SURFACE_PATH = Path(".skillsets") / "command-surface.json"
-MAX_STUB_DESCRIPTION_WORDS = 14
-MAX_STUB_BODY_WORDS = 90
+MAX_COMMAND_HANDLE_DESCRIPTION_WORDS = 14
+MAX_COMMAND_HANDLE_BODY_WORDS = 90
 REVIEWER_MANIFEST = Path(os.environ.get("CODEX_AGENTS_MANIFEST", Path.home() / ".codex" / "agents" / "manifest.json"))
 RESERVED_SKILL_HANDLES = {
     "repo",
@@ -44,7 +44,7 @@ class CommandHandle:
     command_visibility: str
     runtime_visibility: str | None
     source_path: str | None
-    stub_path: str | None
+    command_handle_path: str | None
     owner: str
     description: str
     invoke_via: str | None = None
@@ -105,14 +105,14 @@ def _handle_from_manifest_row(row: dict[str, Any]) -> CommandHandle:
     handle = str(row.get("handle") or row.get("id") or "").strip()
     command_visibility = _command_visibility_for(row)
     source_path = str(row.get("source_path") or "").strip() or None
-    stub_path = f".agents/skills/{handle}/SKILL.md" if handle and command_visibility != "none" else None
+    command_handle_path = f".agents/skills/{handle}/SKILL.md" if handle and command_visibility != "none" else None
     return CommandHandle(
         handle=handle,
         kind="skill",
         command_visibility=command_visibility,
         runtime_visibility=str(row.get("runtime_visibility") or "latent"),
         source_path=source_path,
-        stub_path=stub_path,
+        command_handle_path=command_handle_path,
         owner=str(row.get("skill_set") or ""),
         description=str(row.get("description") or ""),
         invoke_via=_invoke_via_for(row, command_visibility),
@@ -132,16 +132,16 @@ def _word_count(text: str) -> int:
     return len(re.findall(r"[A-Za-z0-9$@./_-]+", text))
 
 
-def requires_generated_stub(handle: CommandHandle) -> bool:
-    """Return whether a handle needs a generated runtime stub beyond rooted projection."""
-    if handle.kind != "skill" or not handle.stub_path:
+def requires_generated_command_handle(handle: CommandHandle) -> bool:
+    """Return whether a handle needs a generated runtime command handle beyond rooted projection."""
+    if handle.kind != "skill" or not handle.command_handle_path:
         return False
     if handle.handle in ROOT_SKILL_SET_NAMES:
         return False
     return handle.command_visibility in {"orchestrator", "direct", "target"}
 
 
-def render_skill_handle_stub(handle: CommandHandle) -> str:
+def render_skill_command_handle(handle: CommandHandle) -> str:
     """Render a minimal Codex-visible SKILL.md command handle."""
     display_name = _display_name(handle)
     description = f"Explicit command handle for {display_name}. Use only when named as ${handle.handle}."
@@ -154,7 +154,8 @@ def render_skill_handle_stub(handle: CommandHandle) -> str:
             "",
             f"# {display_name} Handle",
             "",
-            "Thin command handle for a routed skill. The real workflow is not here.",
+            f"Generated command handle for a child skill under the `{handle.owner}` router heading.",
+            "The real workflow is not here.",
             "",
             "When invoked:",
             f"1. Run `./bin/ask skills resolve {handle.handle} --json`.",
@@ -185,51 +186,51 @@ def render_openai_yaml(handle: CommandHandle) -> str:
     )
 
 
-def _validate_stub_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
+def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
     frontmatter_description = f"Explicit command handle for {_display_name(handle)}. Use only when named as ${handle.handle}."
-    if _word_count(frontmatter_description) > MAX_STUB_DESCRIPTION_WORDS:
+    if _word_count(frontmatter_description) > MAX_COMMAND_HANDLE_DESCRIPTION_WORDS:
         violations.append({
-            "code": "STUB_DESCRIPTION_BUDGET_EXCEEDED",
+            "code": "COMMAND_HANDLE_DESCRIPTION_BUDGET_EXCEEDED",
             "handle": handle.handle,
             "words": _word_count(frontmatter_description),
-            "max_words": MAX_STUB_DESCRIPTION_WORDS,
+            "max_words": MAX_COMMAND_HANDLE_DESCRIPTION_WORDS,
         })
     body = re.sub(r"(?s)^---.*?---", "", skill_body).strip()
-    if _word_count(body) > MAX_STUB_BODY_WORDS:
+    if _word_count(body) > MAX_COMMAND_HANDLE_BODY_WORDS:
         violations.append({
-            "code": "STUB_BODY_BUDGET_EXCEEDED",
+            "code": "COMMAND_HANDLE_BODY_BUDGET_EXCEEDED",
             "handle": handle.handle,
             "words": _word_count(body),
-            "max_words": MAX_STUB_BODY_WORDS,
+            "max_words": MAX_COMMAND_HANDLE_BODY_WORDS,
         })
     forbidden = ["## Procedure", "## Full Context", "## Examples", "Progressive Disclosure Entry"]
     matches = [marker for marker in forbidden if marker in body]
     if matches:
         violations.append({
-            "code": "STUB_CONTAINS_FULL_WORKFLOW_MARKERS",
+            "code": "COMMAND_HANDLE_CONTAINS_FULL_WORKFLOW_MARKERS",
             "handle": handle.handle,
             "markers": matches,
         })
     return violations
 
 
-def _stub_write_rows(handles: list[CommandHandle]) -> list[dict[str, Any]]:
+def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for handle in handles:
-        if not requires_generated_stub(handle):
+        if not requires_generated_command_handle(handle):
             continue
-        skill_body = render_skill_handle_stub(handle)
+        skill_body = render_skill_command_handle(handle)
         yaml_body = render_openai_yaml(handle)
-        base = Path(handle.stub_path or "").parent
+        base = Path(handle.command_handle_path or "").parent
         rows.extend(
             [
                 {
                     "handle": handle.handle,
-                    "kind": "skill_stub",
+                    "kind": "skill_command_handle",
                     "path": (base / "SKILL.md").as_posix(),
                     "bytes": len(skill_body.encode("utf-8")),
-                    "violations": _validate_stub_payload(handle, skill_body),
+                    "violations": _validate_command_handle_payload(handle, skill_body),
                     "content": skill_body,
                 },
                 {
@@ -281,7 +282,7 @@ def build_reviewer_handles(manifest_path: Path = REVIEWER_MANIFEST) -> tuple[lis
             command_visibility="reviewer",
             runtime_visibility=None,
             source_path=str(row.get("source") or ""),
-            stub_path=None,
+            command_handle_path=None,
             owner="codex-agents",
             description=f"Codex subagent role: {row['role']}",
             provenance={
@@ -413,13 +414,16 @@ def resolve_reviewer_handle(handle: str, *, manifest_path: Path = REVIEWER_MANIF
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
     handles = build_skill_handles(repo_root_path=repo_root_path)
     violations = validate_skill_handles(handles, repo_root_path=repo_root_path)
-    stub_rows = _stub_write_rows(handles)
-    stub_violations = [
+    command_handle_rows = _command_handle_write_rows(handles)
+    command_handle_violations = [
         violation
-        for row in stub_rows
+        for row in command_handle_rows
         for violation in row.get("violations", [])
     ]
-    violations.extend(stub_violations)
+    violations.extend(command_handle_violations)
+    command_handle_count = len({
+        row["handle"] for row in command_handle_rows if row["kind"] == "skill_command_handle"
+    })
     return {
         "schema_version": "command-surface.v1",
         "status": "pass" if not violations else "fail",
@@ -427,13 +431,14 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "generated_from": "rooted_manifests",
         "projection_path": COMMAND_SURFACE_PATH.as_posix(),
         "handle_count": len(handles),
-        "generated_stub_count": len({row["handle"] for row in stub_rows if row["kind"] == "skill_stub"}),
+        "generated_command_handle_count": command_handle_count,
         "violations": violations,
         "handles": [handle.to_dict() for handle in handles] if include_handles else [],
         "notes": [
             "Skill handles are resolved from rooted manifest metadata.",
             "The command-surface manifest is a generated projection, not a source of truth.",
-            "Runtime command stubs are generated only for handles absent from rooted runtime projection.",
+            "Generated command handles are runtime pointers for $ invocation; they are not canonical skill sources.",
+            "Generated command handles are written only for handles absent from rooted runtime projection.",
             "Reviewer handles are intentionally kept outside the skill command surface.",
         ],
     }
@@ -460,16 +465,16 @@ def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_
         "path": COMMAND_SURFACE_PATH.as_posix(),
         "bytes": len(serialized.encode("utf-8")),
         "handle_count": payload["handle_count"],
-        "generated_stub_count": payload["generated_stub_count"],
+        "generated_command_handle_count": payload["generated_command_handle_count"],
         "violations": payload["violations"],
     }
 
 
-def write_command_stubs(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
-    """Write or preview generated runtime command stubs for non-root handles."""
+def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
+    """Write or preview generated runtime command handles for non-root handles."""
     root = repo_root_path or repo_root()
     handles = build_skill_handles(repo_root_path=root)
-    rows = _stub_write_rows(handles)
+    rows = _command_handle_write_rows(handles)
     violations = [
         violation
         for row in rows
@@ -481,26 +486,26 @@ def write_command_stubs(*, repo_root_path: Path | None = None, dry_run: bool = F
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(row["content"], encoding="utf-8")
     return {
-        "schema_version": "command-stub-write.v1",
+        "schema_version": "command-handle-write.v1",
         "status": "pass" if not violations else "fail",
         "dry_run": dry_run,
-        "stub_count": len({row["handle"] for row in rows if row["kind"] == "skill_stub"}),
+        "command_handle_count": len({row["handle"] for row in rows if row["kind"] == "skill_command_handle"}),
         "write_count": len(rows),
         "writes": [{key: value for key, value in row.items() if key != "content"} for row in rows],
         "violations": violations,
     }
 
 
-def check_command_stubs(*, repo_root_path: Path | None = None) -> dict[str, Any]:
-    """Verify generated runtime command stubs exist and match the rooted projection."""
+def check_command_handles(*, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Verify generated runtime command handles exist and match the rooted projection."""
     root = repo_root_path or repo_root()
-    rows = _stub_write_rows(build_skill_handles(repo_root_path=root))
+    rows = _command_handle_write_rows(build_skill_handles(repo_root_path=root))
     violations: list[dict[str, Any]] = []
     for row in rows:
         path = root / row["path"]
         if not path.exists():
             violations.append({
-                "code": "COMMAND_STUB_MISSING",
+                "code": "COMMAND_HANDLE_MISSING",
                 "handle": row["handle"],
                 "path": row["path"],
             })
@@ -510,7 +515,7 @@ def check_command_stubs(*, repo_root_path: Path | None = None) -> dict[str, Any]
             actual = path.read_text(encoding="utf-8")
         except OSError as exc:
             violations.append({
-                "code": "COMMAND_STUB_UNREADABLE",
+                "code": "COMMAND_HANDLE_UNREADABLE",
                 "handle": row["handle"],
                 "path": row["path"],
                 "error": str(exc),
@@ -518,14 +523,14 @@ def check_command_stubs(*, repo_root_path: Path | None = None) -> dict[str, Any]
             continue
         if actual != expected:
             violations.append({
-                "code": "COMMAND_STUB_DRIFT",
+                "code": "COMMAND_HANDLE_DRIFT",
                 "handle": row["handle"],
                 "path": row["path"],
             })
     return {
-        "schema_version": "command-stub-check.v1",
+        "schema_version": "command-handle-check.v1",
         "status": "pass" if not violations else "fail",
-        "stub_count": len({row["handle"] for row in rows if row["kind"] == "skill_stub"}),
+        "command_handle_count": len({row["handle"] for row in rows if row["kind"] == "skill_command_handle"}),
         "checked_count": len(rows),
         "violations": violations,
     }

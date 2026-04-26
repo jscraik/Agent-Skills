@@ -17,6 +17,11 @@ if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
+from ask.commands.plugins import (  # noqa: E402
+    _copy_directory_contents,
+    _load_local_marketplace,
+    _materialize_first_level_skill_aliases,
+)
 from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
@@ -26,11 +31,11 @@ from projection_engine import (  # noqa: E402
     normalize_projection_mode,
 )
 from command_surface import (  # noqa: E402
-    check_command_stubs,
+    check_command_handles,
     handles_report,
     resolve_reviewer_handle,
     resolve_skill_handle,
-    write_command_stubs,
+    write_command_handles,
     write_command_surface_projection,
 )
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
@@ -465,8 +470,8 @@ def skills_handles(
     check: bool = False,
     include_handles: bool = True,
     write_projection: bool = False,
-    write_stubs: bool = False,
-    check_stubs: bool = False,
+    write_command_handle_files: bool = False,
+    check_command_handle_files: bool = False,
     dry_run: bool = False,
 ) -> CallResult:
     """Return or validate the rooted command-handle surface."""
@@ -482,13 +487,13 @@ def skills_handles(
             repo_root_path=repo_root,
             dry_run=dry_run,
         )
-    if write_stubs:
-        result.data["command_stub_write"] = write_command_stubs(
+    if write_command_handle_files:
+        result.data["command_handle_write"] = write_command_handles(
             repo_root_path=repo_root,
             dry_run=dry_run,
         )
-    if check_stubs:
-        result.data["command_stub_check"] = check_command_stubs(repo_root_path=repo_root)
+    if check_command_handle_files:
+        result.data["command_handle_check"] = check_command_handles(repo_root_path=repo_root)
     if check and report["status"] != "pass":
         result.status = "error"
         result.errors.append(
@@ -500,8 +505,8 @@ def skills_handles(
         )
     for key, message in (
         ("command_surface_projection_write", "Command-surface projection write failed."),
-        ("command_stub_write", "Command-stub generation failed."),
-        ("command_stub_check", "Command-stub validation failed."),
+        ("command_handle_write", "Command-handle generation failed."),
+        ("command_handle_check", "Command-handle validation failed."),
     ):
         payload = result.data.get(key)
         if payload and payload.get("status") != "pass":
@@ -510,7 +515,7 @@ def skills_handles(
                 ErrorObject(
                     code="ERR_VALIDATION",
                     message=message,
-                    fix_suggestion="Inspect data.violations and data.command_stub_write.violations, then fix handle metadata or stub budgets.",
+                    fix_suggestion="Inspect data.violations and data.command_handle_write.violations, then fix handle metadata or command-handle budgets.",
                 )
             )
     return result
@@ -540,10 +545,10 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     result.metadata["command"] = "skills proof"
     resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
     normalized = resolution.get("handle", handle.lstrip("$"))
-    stub_check = check_command_stubs(repo_root_path=repo_root)
-    workspace_stub = repo_root / str(resolution.get("stub_path", ""))
-    user_codex_stub = Path.home() / ".codex" / "skills" / str(normalized) / "SKILL.md"
-    user_agents_stub = Path.home() / ".agents" / "skills" / str(normalized) / "SKILL.md"
+    handle_check = check_command_handles(repo_root_path=repo_root)
+    workspace_handle = repo_root / str(resolution.get("command_handle_path", ""))
+    user_codex_handle = Path.home() / ".codex" / "skills" / str(normalized) / "SKILL.md"
+    user_agents_handle = Path.home() / ".agents" / "skills" / str(normalized) / "SKILL.md"
     codex_skills = Path.home() / ".codex" / "skills"
     agents_skills = Path.home() / ".agents" / "skills"
     expected_runtime = repo_root / ".agents" / "skills"
@@ -564,12 +569,12 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
 
     gates = {
         "resolver": resolution.get("status") == "ok",
-        "generated_stub_check": stub_check.get("status") == "pass",
-        "workspace_stub_exists": workspace_stub.is_file(),
+        "generated_command_handle_check": handle_check.get("status") == "pass",
+        "workspace_command_handle_exists": workspace_handle.is_file(),
         "codex_user_link": codex_skills.is_symlink() and codex_skills.resolve() == expected_runtime.resolve(),
         "agents_user_link": agents_skills.is_symlink() and agents_skills.resolve() == expected_runtime.resolve(),
-        "codex_user_stub_exists": user_codex_stub.is_file(),
-        "agents_user_stub_exists": user_agents_stub.is_file(),
+        "codex_user_command_handle_exists": user_codex_handle.is_file(),
+        "agents_user_command_handle_exists": user_agents_handle.is_file(),
     }
     proof = {
         "schema_version": "command-handle-proof.v1",
@@ -577,25 +582,25 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
         "status": "pass" if all(gates.values()) else "fail",
         "gates": gates,
         "resolution": resolution,
-        "stub_check": {
+        "command_handle_check": {
             key: value
-            for key, value in stub_check.items()
+            for key, value in handle_check.items()
             if key != "violations" or value
         },
         "workspace_runtime": {
             "path": str(expected_runtime),
-            "stub_path": str(workspace_stub),
-            "stub_exists": workspace_stub.is_file(),
+            "command_handle_path": str(workspace_handle),
+            "command_handle_exists": workspace_handle.is_file(),
         },
         "user_runtime_links": {
             "codex_skills": _link_payload(codex_skills),
             "agents_skills": _link_payload(agents_skills),
         },
-        "user_runtime_stubs": {
-            "codex_stub": str(user_codex_stub),
-            "codex_stub_exists": user_codex_stub.is_file(),
-            "agents_stub": str(user_agents_stub),
-            "agents_stub_exists": user_agents_stub.is_file(),
+        "user_runtime_command_handles": {
+            "codex_handle": str(user_codex_handle),
+            "codex_handle_exists": user_codex_handle.is_file(),
+            "agents_handle": str(user_agents_handle),
+            "agents_handle_exists": user_agents_handle.is_file(),
         },
         "live_codex_invocation": {
             "status": "manual_session_gate",
@@ -1535,11 +1540,93 @@ def _append_user_runtime_relinks(
         (skills_dir, home / ".codex" / "skills", True),
         (repo_root, home / ".agents" / "agent-skills", True),
         (plugins_dir, home / ".agents" / "plugins", True),
-        (plugins_dir, home / "plugins", False),
     ]
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
         logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
+    _refresh_home_plugin_mirrors(plan, logs, repo_root, home / "plugins", dry_run=dry_run)
+
+
+def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, dry_run: bool) -> str:
+    """Ensure a home plugin mirror root is a real directory, not a repo-backed symlink."""
+    canonical_real = canonical_plugins_dir.resolve()
+    if target.is_symlink():
+        try:
+            link_real = target.resolve()
+        except OSError:
+            link_real = None
+        if link_real == canonical_real or (link_real and canonical_real in link_real.parents):
+            if not dry_run:
+                target.unlink()
+                target.mkdir(parents=True, exist_ok=True)
+            return f"Replaced repo-backed plugin mirror symlink with directory: {target}"
+        return f"Skipped non-repo plugin mirror symlink: {target}"
+    if target.exists() and not target.is_dir():
+        return f"Skipped non-directory plugin mirror path: {target}"
+    if not dry_run:
+        target.mkdir(parents=True, exist_ok=True)
+    return f"Ensured plugin mirror directory: {target}"
+
+
+def _refresh_home_plugin_mirrors(
+    plan: dict,
+    logs: list[str],
+    repo_root: Path,
+    home_plugins_dir: Path,
+    *,
+    dry_run: bool,
+) -> None:
+    """
+    Replace managed home plugin mirror copies from canonical Plugins/ sources.
+
+    `~/.agents/plugins` is the live symlink to the canonical source tree. `~/plugins`
+    is a materialized runtime mirror so marketplace paths like `./Plugins/<name>`
+    remain resolvable without aliasing the repo. Every user sync refreshes listed
+    local plugins from `Plugins/marketplace.json`, so plugin edits and updates
+    replace stale runtime copies.
+    """
+    plugins_dir = repo_root / "Plugins"
+    mirror_plan = {
+        "from": str(plugins_dir),
+        "to": str(home_plugins_dir),
+        "mode": "copy-replace",
+        "trigger": "refresh after canonical Plugins/ or Plugins/marketplace.json changes",
+        "plugins": [],
+    }
+    plan.setdefault("runtime_plugin_mirrors", []).append(mirror_plan)
+    logs.append(_ensure_real_plugin_mirror_root(home_plugins_dir, plugins_dir, dry_run))
+
+    try:
+        _marketplace_path, entries = _load_local_marketplace(repo_root)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        logs.append(f"Skipped home plugin mirror refresh: {exc}")
+        return
+
+    marker_name = ".codex-repo-plugin-source"
+    for entry in entries:
+        plugin_name = entry["name"]
+        relative = entry["path"]
+        source_dir = repo_root / relative.removeprefix("./")
+        target_dir = home_plugins_dir / plugin_name
+        mirror_plan["plugins"].append({
+            "name": plugin_name,
+            "source": str(source_dir),
+            "target": str(target_dir),
+        })
+        if not source_dir.is_dir():
+            logs.append(f"Skipped missing home plugin mirror source: {source_dir}")
+            continue
+        if dry_run:
+            logs.append(f"Would replace home plugin mirror: {target_dir} <- {source_dir}")
+            continue
+        if target_dir.is_symlink() or target_dir.is_file():
+            target_dir.unlink()
+        elif target_dir.exists():
+            shutil.rmtree(target_dir)
+        _copy_directory_contents(source_dir, target_dir)
+        _materialize_first_level_skill_aliases(target_dir)
+        (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
+        logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
 
 
 def _sync_rooted_projection(
@@ -1556,13 +1643,13 @@ def _sync_rooted_projection(
     root_report = build_roots(skills_dir)
     manifest_report = build_manifest_report(repo_root / ".skillsets")
     command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=True)
-    command_stub_write = write_command_stubs(repo_root_path=repo_root, dry_run=True)
+    command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=True)
     plan["root_skill_sets"] = _public_root_report(root_report)
     plan["skillset_manifests"] = _public_manifest_report(manifest_report)
     plan["command_surface"] = command_surface_write
-    plan["command_stubs"] = {
+    plan["command_handles"] = {
         key: value
-        for key, value in command_stub_write.items()
+        for key, value in command_handle_write.items()
         if key != "writes"
     }
     plan["unmapped_entries"] = root_report.get("unmapped", [])
@@ -1571,14 +1658,14 @@ def _sync_rooted_projection(
         *root_report.get("violations", []),
         *manifest_report.get("violations", []),
         *command_surface_write.get("violations", []),
-        *command_stub_write.get("violations", []),
+        *command_handle_write.get("violations", []),
     ]
     plan["violations"] = violations
     if (
         root_report.get("status") != "pass"
         or manifest_report.get("status") != "pass"
         or command_surface_write.get("status") != "pass"
-        or command_stub_write.get("status") != "pass"
+        or command_handle_write.get("status") != "pass"
     ):
         plan["validation_status"] = "fail"
         plan["warnings"].extend([str(violation.get("code", violation)) for violation in violations])
@@ -1597,7 +1684,7 @@ def _sync_rooted_projection(
     for manifest in manifest_report.get("manifests", []):
         plan["writes"].append(manifest["path"])
     plan["writes"].append(command_surface_write["path"])
-    plan["writes"].extend(row["path"] for row in command_stub_write.get("writes", []))
+    plan["writes"].extend(row["path"] for row in command_handle_write.get("writes", []))
 
     if dry_run:
         logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
@@ -1609,7 +1696,7 @@ def _sync_rooted_projection(
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
             command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=False)
-            command_stub_write = write_command_stubs(repo_root_path=repo_root, dry_run=False)
+            command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=False)
             prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
         except (OSError, ValueError) as exc:
             plan["validation_status"] = "fail"
@@ -1623,8 +1710,8 @@ def _sync_rooted_projection(
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
         logs.append(f"Wrote command-surface projection: {command_surface_write['path']}")
         logs.append(
-            "Wrote command runtime stubs: "
-            f"{command_stub_write['stub_count']} stubs ({command_stub_write['write_count']} files)"
+            "Wrote generated command handles: "
+            f"{command_handle_write['command_handle_count']} handles ({command_handle_write['write_count']} files)"
         )
         for log in prune_logs:
             plan["deletes"].append(log)

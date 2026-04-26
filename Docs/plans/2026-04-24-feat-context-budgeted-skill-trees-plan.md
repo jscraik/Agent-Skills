@@ -107,7 +107,7 @@ In scope:
 - Latent manifests.
 - Generated command-surface projection for `$` skill handles and `@` reviewer
   handles.
-- Thin generated command stubs for command-visible latent modules.
+- Generated command handles for command-visible latent modules.
 - Durable `./bin/ask reviewers resolve` command surface for `@<handle>`
   references.
 - Public `./bin/ask` wrappers for generator, manifest, router, handle, and
@@ -176,10 +176,10 @@ promotes it.
 
 Rationale: handle metadata must not drift from rooted routing metadata. Keeping
 the manifests canonical lets command-surface validation catch duplicate handles,
-missing `source_path`, missing `invoke_via`, stale generated stubs, and
+missing `source_path`, missing `invoke_via`, stale generated command handles, and
 skill/reviewer namespace collisions from one input set.
 
-### D6: Command Handles Require Stub and Invocation Gates
+### D6: Command Handles Require Runtime and Invocation Gates
 
 Resolver success is not enough to claim `$<handle>` works. A command-visible
 latent module must pass these gates in order:
@@ -188,7 +188,7 @@ latent module must pass these gates in order:
    module;
 2. generated command-surface gate: command metadata is present in the generated
    command-surface projection;
-3. stub gate: `.agents/skills/<handle>/SKILL.md` is generated as a thin pointer
+3. command-handle gate: `.agents/skills/<handle>/SKILL.md` is generated as a pointer
    with no full workflow body;
 4. sync gate: workspace and user runtime projections are refreshed from
    canonical sources;
@@ -227,14 +227,14 @@ Required public wrappers before Phase B completion:
 
 `./bin/ask skills proof` is the deterministic runtime-surface proof command. It
 must not claim active Codex picker proof; it records the live picker check as a
-manual session gate after resolver, generated-stub, workspace-runtime, and
+manual session gate after resolver, command-handle, workspace-runtime, and
 user-runtime gates pass. Reviewer handles stay separate and are proven with
 `./bin/ask reviewers resolve <handle> --json`.
 
 ### D9: Review Before Work
 
 This plan requires a review gate before implementation resumes. Any slice that
-changes command handles, generated runtime stubs, projection mutation, router
+changes command handles, generated runtime command handles, projection mutation, router
 fallback, or reviewer resolution must complete plan review and reviewer
 synthesis before `he-work` starts.
 
@@ -245,8 +245,8 @@ follow-up reviewer swarm findings:
 
 | Finding | Correction |
 | --- | --- |
-| Resolver proof was mistaken for runtime/picker proof | D6 splits resolver, generated command surface, stub projection, sync, black-box proof, and live invocation into separate gates. |
-| Rooted projection requires a generated runtime-stub phase | B2a adds generated command stubs before any claim that `$he-heartbeat` is command-visible. |
+| Resolver proof was mistaken for runtime/picker proof | D6 splits resolver, generated command surface, command-handle projection, sync, black-box proof, and live invocation into separate gates. |
+| Rooted projection requires a generated runtime command-handle phase | B2a adds generated command handles before any claim that `$he-heartbeat` is command-visible. |
 | Reviewer resolver lacks durable CLI ownership | D7 and B2a assign reviewers to `./bin/ask reviewers resolve`, separate from `./bin/ask skills resolve`. |
 | Command surface needs explicit ownership | D5 keeps rooted manifests canonical and treats `.skillsets/command-surface.json` as a generated projection. |
 | Internal script commands risk public contract drift | D8 requires public `./bin/ask` wrappers before generator, manifest, router, and proof commands become validation gates. |
@@ -289,7 +289,7 @@ tasks:
     title: "Manifest generator and validator"
     depends_on: [B1]
   - id: B2a
-    title: "Command surface projection and handle stubs"
+    title: "Command surface projection and command handles"
     depends_on: [B2]
   - id: B3
     title: "Bounded router MVP"
@@ -631,20 +631,20 @@ Implementation tasks:
 - Keep skill and reviewer namespaces separate. A `$` handle and an `@` handle
   may share spelling only when the resolver reports an explicit namespace and no
   command path is ambiguous.
-- Generate thin `.agents/skills/<handle>/SKILL.md` stubs only for rooted
+- Generate `.agents/skills/<handle>/SKILL.md` command handles only for rooted
   manifest rows with `command_visibility != none`.
-- Generate `agents/openai.yaml` beside each stub where the runtime surface
+- Generate `agents/openai.yaml` beside each generated command handle where the runtime surface
   supports it.
-- Enforce command-stub budgets:
+- Enforce command-handle budgets:
   - maximum command handle count;
   - maximum description words;
   - maximum body words;
   - no full workflow instructions;
   - no examples;
-  - no alias-only stubs.
+  - no alias-only command handles.
 - Require every target handle to declare `invoke_via`.
 - Require every command-visible handle to resolve to exactly one `source_path`
-  and, when applicable, exactly one `stub_path`.
+  and, when applicable, exactly one `command_handle_path`.
 - Define a versioned handle-proof artifact schema with at least:
   - `schema_version`;
   - `handle`;
@@ -653,7 +653,7 @@ Implementation tasks:
   - `kind`;
   - `command_visibility`;
   - `source_path`;
-  - `stub_path`;
+  - `command_handle_path`;
   - `projection_mode`;
   - `policy_identity`;
   - `budget_checks`;
@@ -672,7 +672,7 @@ Files likely touched:
 
 - `Infrastructure/scripts/lifecycle-and-sync/command_surface.py`
 - `Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py`
-- command-stub templates under `Infrastructure/templates/**`
+- command-handle template code under `Infrastructure/scripts/lifecycle-and-sync/**`
 - `Infrastructure/scripts/lib/ask/commands/skills.py`
 - reviewer command routing under `Infrastructure/scripts/lib/ask/**`
 - `.skillsets/command-surface.json` as generated output
@@ -697,15 +697,15 @@ Exit criteria:
 - `.skillsets/command-surface.json` is generated from rooted manifests and
   carries provenance proving that source.
 - `he-heartbeat` resolves as a target skill handle with one source path and a
-  generated thin stub path.
+  generated command-handle path.
 - `skill-builder` resolves as an orchestrator skill handle.
 - `skillinspector` resolves only through the reviewer namespace.
-- Generated stubs stay within budget and contain pointer instructions rather
+- Generated command handles stay within budget and contain pointer instructions rather
   than full workflows.
-- Workspace and user rooted dry-runs show the command-visible stubs that would
+- Workspace and user rooted dry-runs show the command-visible command handles that would
   be projected.
 - Handle proof artifact exists, validates against schema, and distinguishes
-  resolver, stub, sync, and invocation evidence.
+  resolver, command-handle, sync, and invocation evidence.
 - Live Codex invocation proof has a deterministic artifact path, validates
   against schema, and is not inferred from CLI resolution alone.
 
@@ -800,6 +800,8 @@ Implementation tasks:
 - Preserve system and primary-runtime lanes.
 - Ensure local plugin skills remain separately browsable but not automatically
   first-level rooted entries.
+- Ensure user-scope rooted sync replaces copied plugin runtime mirrors from
+  canonical `Plugins/` sources after any local plugin or marketplace update.
 - Ensure project skill overlays participate in manifests and reports.
 - Add budget fixtures for:
   - too many roots;
@@ -815,9 +817,9 @@ Implementation tasks:
   - missing or stale manifest provenance;
   - hand-edited generated manifest rows;
   - scope collision;
-  - full workflow body in a generated command stub;
-  - over-budget command stub description or body;
-  - alias-only command stub;
+  - full workflow body in a generated command handle;
+  - over-budget command handle description or body;
+  - alias-only command handle;
   - target command handle missing `invoke_via`;
   - skill/reviewer namespace collision;
   - stale command-surface projection;
@@ -843,6 +845,7 @@ Validation:
 ./bin/ask skills sync --scope user --projection rooted --dry-run
 ./bin/ask skills sync --scope workspace --projection rooted
 ./bin/ask skills sync --scope user --projection rooted
+./bin/ask plugins sync-local-runtime --dry-run
 bash Infrastructure/scripts/validate_all.sh --ephemeral
 ./bin/ask skills sync --scope user --projection flat
 ./bin/ask skills sync --scope workspace --projection flat
@@ -859,6 +862,9 @@ Exit criteria:
   passes the rooted validation gate before rollback.
 - Controlled non-dry-run user sync exercises forward rooted and rollback flat
   commands, then leaves the user surface in flat mode.
+- User-scope rooted sync reports copied plugin runtime mirrors as replaced from
+  canonical `Plugins/` sources; plugin updates must not rely on stale runtime
+  copies or symlinked `~/plugins`.
 - Flat and rooted dry-run/mutation outputs satisfy the sync JSON contract.
 - User mutation outputs satisfy the sync JSON contract, including
   created/updated/removed/preserved counts, report path, and changed-surface
@@ -869,7 +875,7 @@ Exit criteria:
 - Manifest ownership/provenance validator catches missing provenance and
   hand-edited `.skillsets/**` fixtures.
 - Command-surface validator catches stale projections, duplicate handles,
-  over-budget stubs, alias-only stubs, namespace collisions, target handles
+  over-budget command handles, alias-only command handles, namespace collisions, target handles
   missing `invoke_via`, and invalid handle-proof artifacts.
 - Redaction fixtures catch raw task text in router and telemetry persistence.
 - Default remains `flat`.
@@ -908,6 +914,8 @@ Exit criteria:
 
 - Docs explain `flat`, `rooted`, `skill-tree` alias, and deferred `hybrid`.
 - Docs explain project skill overlays and local plugin browseability.
+- Docs explain that plugin runtime mirrors are copied directories and must be
+  replaced after plugin source or marketplace updates.
 
 ## Phase C: Workouts and Default Flip
 
@@ -1232,8 +1240,8 @@ Rollback triggers:
 | Plugin browseability mistaken for runtime visibility | Rooted surface grows accidentally                           | Separate `LocalPluginSkillView` from runtime projection and validate first-level count |
 | Router leaks task text                               | Sensitive prompt text appears in argv/logs                  | Support stdin/file input and redacted persistence                                      |
 | Manifest overreach                                   | System/primary-runtime lanes pulled into ordinary manifests | Exclude bridge lanes and report separately                                             |
-| Resolver proof mistaken for invocation proof         | `$` handles appear resolved but are not Codex-visible        | Require resolver, stub, sync, proof artifact, and live invocation gates                |
-| Command-surface drift                                | Generated stubs diverge from rooted manifests               | Treat `.skillsets/command-surface.json` as generated projection with provenance checks |
+| Resolver proof mistaken for invocation proof         | `$` handles appear resolved but are not Codex-visible        | Require resolver, command-handle, sync, proof artifact, and live invocation gates      |
+| Command-surface drift                                | Generated command handles diverge from rooted manifests     | Treat `.skillsets/command-surface.json` as generated projection with provenance checks |
 | Reviewer namespace ambiguity                         | `@` reviewers collide with `$` skills                       | Use `./bin/ask reviewers resolve` and fail ambiguous aliases                           |
 | Router fallback ambiguity                            | Low-confidence routes leave agents without executable path   | Require executable fallback command or explicit clarification-required response        |
 | Default state not re-asserted                        | Rollback tests accidentally persist the wrong default        | End cutover/default-flip validation with `./bin/ask runtime surface --json`            |
@@ -1300,18 +1308,18 @@ Phase B:
       carries provenance.
 - [ ] `./bin/ask skills handles --check --json` passes.
 - [ ] `./bin/ask skills resolve he-heartbeat --json` resolves one target
-      module and generated stub.
+      module and generated command handle.
 - [ ] `./bin/ask skills resolve skill-builder --json` resolves one orchestrator
-      module and generated stub.
+      module and generated command handle.
 - [ ] `./bin/ask reviewers resolve skillinspector --json` resolves a reviewer
       outside the skill namespace.
-- [ ] Generated command stubs are thin and include supported
+- [ ] Generated command handles are thin and include supported
       `agents/openai.yaml` metadata.
-- [ ] Workspace and user rooted dry-runs show command-visible stubs.
-- [ ] Handle-proof artifact validates and distinguishes resolver, stub, sync,
+- [ ] Workspace and user rooted dry-runs show command-visible command handles.
+- [ ] Handle-proof artifact validates and distinguishes resolver, command-handle, sync,
       and invocation evidence.
 - [ ] `./bin/ask skills proof he-heartbeat --json` passes resolver,
-      generated-stub, workspace-runtime, and user-runtime gates, and reports
+      command-handle, workspace-runtime, and user-runtime gates, and reports
       live Codex picker invocation as a separate manual session gate.
 - [ ] Router returns at most three candidates and no full body/manifest content.
 - [ ] Router supports stdin/file task input.
@@ -1366,7 +1374,7 @@ Review this plan before `he-work`, with emphasis on:
 - whether Phase A is small enough;
 - whether project/global/local-plugin scope semantics are implementable;
 - whether the projection-engine boundary should be decided before coding;
-- whether B2a correctly separates resolver, stub, sync, proof artifact, and
+- whether B2a correctly separates resolver, command-handle, sync, proof artifact, and
   live invocation gates;
 - whether rooted manifests are clearly the command-handle source of truth;
 - whether reviewer handles belong in the separate `./bin/ask reviewers`

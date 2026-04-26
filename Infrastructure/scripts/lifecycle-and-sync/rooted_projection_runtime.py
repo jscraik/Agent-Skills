@@ -8,7 +8,7 @@ from pathlib import Path
 
 from runtime_surface_policy import PROJECTION_MIXED, runtime_surface_report
 from selection_policy import ROOT_SKILL_SET_NAMES
-from command_surface import build_skill_handles, check_command_stubs
+from command_surface import build_skill_handles, check_command_handles
 
 
 ROOT_SKILL_SET_NAMES_SET = set(ROOT_SKILL_SET_NAMES)
@@ -76,17 +76,17 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
             "message": f"Workspace runtime directory is missing: {skills_dir}",
         }]
 
-    command_stub_names = {
+    command_handle_names = {
         handle.handle
         for handle in build_skill_handles(repo_root_path=repo_root_path)
-        if handle.stub_path and handle.handle not in ROOT_SKILL_SET_NAMES_SET
+        if handle.command_handle_path and handle.handle not in ROOT_SKILL_SET_NAMES_SET
     }
     first_level = sorted(
         item.name
         for item in skills_dir.iterdir()
         if not item.name.startswith(".") and item.is_dir() and (item / "SKILL.md").is_file()
     )
-    policy_first_level = [name for name in first_level if name not in command_stub_names]
+    policy_first_level = [name for name in first_level if name not in command_handle_names]
     surface = runtime_surface_report(policy_first_level)
     violations: list[dict[str, object]] = []
 
@@ -96,7 +96,7 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
             "message": "workspace first-level runtime entries mix rooted roots with non-root entries",
             "missing": surface.missing_first_level_names,
             "extra": surface.extra_first_level_names,
-            "allowed_command_stubs": sorted(set(first_level) & command_stub_names),
+            "allowed_command_handles": sorted(set(first_level) & command_handle_names),
         })
     elif surface.missing_first_level_names or surface.extra_first_level_names:
         violations.append({
@@ -104,7 +104,7 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
             "message": "workspace first-level runtime entries differ from rooted policy",
             "missing": surface.missing_first_level_names,
             "extra": surface.extra_first_level_names,
-            "allowed_command_stubs": sorted(set(first_level) & command_stub_names),
+            "allowed_command_handles": sorted(set(first_level) & command_handle_names),
         })
 
     non_generated_roots = sorted(
@@ -119,12 +119,12 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
             "roots": non_generated_roots,
         })
     if repo_root_path is not None:
-        stub_check = check_command_stubs(repo_root_path=repo_root_path)
-        if stub_check.get("status") != "pass":
+        handle_check = check_command_handles(repo_root_path=repo_root_path)
+        if handle_check.get("status") != "pass":
             violations.append({
-                "code": "ROOTED_WORKSPACE_COMMAND_STUB_DRIFT",
-                "message": "workspace command stubs are missing or drifted from rooted manifests",
-                "violations": stub_check.get("violations", []),
+                "code": "ROOTED_WORKSPACE_COMMAND_HANDLE_DRIFT",
+                "message": "workspace command handles are missing or drifted from rooted manifests",
+                "violations": handle_check.get("violations", []),
             })
     return violations
 

@@ -526,9 +526,9 @@ def main():
     skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-handle validation finds drift")
     skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
     skills_handles_parser.add_argument("--write-projection", action="store_true", help="Write .skillsets/command-surface.json from rooted manifests")
-    skills_handles_parser.add_argument("--write-stubs", action="store_true", help="Write generated runtime stubs for non-root command handles")
-    skills_handles_parser.add_argument("--check-stubs", action="store_true", help="Verify generated runtime stubs exist and match rooted manifests")
-    skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection or stub writes without changing files")
+    skills_handles_parser.add_argument("--write-command-handles", action="store_true", help="Write generated runtime command handles for non-root handles")
+    skills_handles_parser.add_argument("--check-command-handles", action="store_true", help="Verify generated runtime command handles exist and match rooted manifests")
+    skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection or command-handle writes without changing files")
     skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve a command-visible skill handle", parents=[global_parser])
     skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
     skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser])
@@ -616,7 +616,7 @@ def main():
 
     plugins_sync_runtime_parser = plugins_subparsers.add_parser(
         "sync-local-runtime",
-        help="Install local plugins into Codex runtime homes as copied directories",
+        help="Replace copied local-plugin runtime mirrors from canonical Plugins/",
         parents=[global_parser],
     )
     plugins_sync_runtime_parser.add_argument("--dry-run", action="store_true", help="Preview runtime sync without writing")
@@ -922,8 +922,8 @@ def main():
                 check=args.check,
                 include_handles=not args.no_handles,
                 write_projection=args.write_projection,
-                write_stubs=args.write_stubs,
-                check_stubs=args.check_stubs,
+                write_command_handle_files=args.write_command_handles,
+                check_command_handle_files=args.check_command_handles,
                 dry_run=args.dry_run,
             )
         elif args.action == "resolve":
@@ -1474,9 +1474,9 @@ def main():
                             print(f"  - {blocker}")
                 elif args.topic == "plugins" and args.action == "sync-local-runtime":
                     if result.data.get("dry_run"):
-                        print("🔍 Dry run - would sync local plugins into runtime homes:")
+                        print("🔍 Dry run - would replace local-plugin runtime mirrors:")
                     else:
-                        print(f"✅ {result.data.get('message', 'Synced local plugin runtime installs.')}")
+                        print(f"✅ {result.data.get('message', 'Replaced local-plugin runtime mirrors.')}")
                     print(f"Profiles: {len(result.data.get('profile_homes', []))}")
                     print(f"Plugins: {', '.join(result.data.get('plugin_names', []))}")
                     for report in result.data.get("runtime_reports", []):

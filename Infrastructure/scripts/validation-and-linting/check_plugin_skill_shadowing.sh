@@ -52,8 +52,8 @@ overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-flat-overlap.XXXXXX")"
 shadowed_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-shadowed-overlap.XXXXXX")"
 system_bridge_names_file="$(mktemp "${TMPDIR:-/tmp}/system-bridge-skill-names.XXXXXX")"
 root_skill_names_file="$(mktemp "${TMPDIR:-/tmp}/root-skill-set-names.XXXXXX")"
-command_stub_names_file="$(mktemp "${TMPDIR:-/tmp}/command-stub-skill-names.XXXXXX")"
-trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file" "$root_skill_names_file" "$command_stub_names_file"' EXIT
+command_handle_names_file="$(mktemp "${TMPDIR:-/tmp}/command-handle-skill-names.XXXXXX")"
+trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file" "$root_skill_names_file" "$command_handle_names_file"' EXIT
 
 selection_policy_shell="$(
   python3 "$selection_policy_path" --format shell
@@ -92,10 +92,10 @@ is_root_skill_set_name() {
   grep -Fxq "$skill_name" "$root_skill_names_file"
 }
 
-is_command_stub_skill_name() {
+is_command_handle_skill_name() {
   local skill_name="$1"
-  [ -s "$command_stub_names_file" ] || return 1
-  grep -Fxq "$skill_name" "$command_stub_names_file"
+  [ -s "$command_handle_names_file" ] || return 1
+  grep -Fxq "$skill_name" "$command_handle_names_file"
 }
 
 # Only treat bridge names as intentional when the top-level skill path is a
@@ -126,7 +126,7 @@ for root_skill_name in "${SELECTION_POLICY_ROOT_SKILL_SETS[@]:-}"; do
 done
 
 if [ -f ".skillsets/command-surface.json" ]; then
-  python3 - <<'PY' > "$command_stub_names_file"
+  python3 - <<'PY' > "$command_handle_names_file"
 import json
 from pathlib import Path
 
@@ -135,7 +135,7 @@ payload = json.loads(path.read_text(encoding="utf-8"))
 for handle in payload.get("handles", []):
     if not isinstance(handle, dict):
         continue
-    if handle.get("kind") == "skill" and handle.get("stub_path") and handle.get("handle"):
+    if handle.get("kind") == "skill" and handle.get("command_handle_path") and handle.get("handle"):
         print(handle["handle"])
 PY
 fi
@@ -167,7 +167,7 @@ if [ -s "$plugin_names_file" ] && [ -s "$flat_names_file" ]; then
     if is_rooted_projection_active && is_root_skill_set_name "$overlap_name"; then
       continue
     fi
-    if is_rooted_projection_active && is_command_stub_skill_name "$overlap_name"; then
+    if is_rooted_projection_active && is_command_handle_skill_name "$overlap_name"; then
       continue
     fi
     printf '%s\n' "$overlap_name" >> "$shadowed_names_file"
