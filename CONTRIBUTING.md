@@ -23,6 +23,7 @@
 - Required checks must pass before merge.
 - CodeRabbit + Codex review artifacts are required before merge.
 - The coding agent must not approve its own PR; review must be independent.
+- No third-party directory, marketplace, mirror, sponsorship, or promotional links without maintainer approval.
 - Merge only after all gates pass.
 - Delete branch/worktree after merge.
 

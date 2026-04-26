@@ -26,8 +26,6 @@ ask repo validate --ephemeral
 ask skills sync --scope user
 ```
 
-Chinese users can also search and install skills through [Skills宝](https://skilery.com).
-
 ## What you can do
 
 ### Discover skills
@@ -74,6 +72,12 @@ ask skills init my-skill --category backend --description "Does X when Y"
 # Create plugin scaffold
 ask plugins init my-plugin --with-marketplace
 ```
+
+## Distribution
+
+Official installation instructions are maintained in this repository only.
+
+Third-party indexes or mirrors may list this project, but they are not affiliated with, endorsed by, or maintained by this project unless explicitly stated here.
 
 ## Robot mode for AI agents
 
