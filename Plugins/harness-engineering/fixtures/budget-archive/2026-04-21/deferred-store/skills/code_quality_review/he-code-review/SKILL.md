@@ -24,6 +24,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 ## When to use
 
 - Use when package-level readiness, merge risk, or release go/no-go is the core question.
+- Use when merge readiness depends on proving a PR actually satisfies linked Linear QA issues.
 - Route to `he-technical-review` when deep implementation-level correctness analysis is needed.
 
 ## Inputs
@@ -45,15 +46,18 @@ This entrypoint stays concise and keeps full operational context in archived ref
 2. Fail fast on conflicting review-mode flags instead of guessing which one wins.
 3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
 4. Use the smallest reviewer set that still covers readiness risk; always include agent-operability, institutional learnings, and simplicity lenses.
-5. Review for correctness, regression risk, operability, protected-artifact handling, and release readiness.
-6. Deduplicate and rank findings as `P0`, `P1`, `P2`, or `P3`, then emit an explicit recommendation: `go`, `go-with-conditions`, or `no-go`.
-7. Only allow in-skill mutation when the selected mode explicitly permits safe auto-fixes; otherwise stop after the report.
+5. Review for correctness, regression risk, operability, protected-artifact handling, domain-language drift, and release readiness.
+6. When Linear QA issues are linked, confirm the PR satisfies expected behavior, preserves reproduction coverage, and includes validation evidence before recommending `go`.
+7. Deduplicate and rank findings as `P0`, `P1`, `P2`, or `P3`, then emit an explicit recommendation: `go`, `go-with-conditions`, or `no-go`.
+8. Only allow in-skill mutation when the selected mode explicitly permits safe auto-fixes; otherwise stop after the report.
 
 ## Validation
 
 - Ensure each finding includes severity, location, impact, and minimal remediation.
 - Ensure recommendation is explicit (`go`, `go-with-conditions`, `no-go`).
 - Ensure protected artifact cleanup findings are discarded during synthesis.
+- Ensure changed domain terms, aliases, and relationships either match `CONTEXT.md` or are reported as drift.
+- Ensure linked Linear QA issues are closed by behavior and evidence, not just by code proximity.
 - Ensure unresolved `P0` or `P1` findings block a `go` recommendation.
 - Fail fast: stop at first failed gate and do not proceed.
 
@@ -70,6 +74,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Approving high-risk changes without concrete validation evidence.
 - Collapsing multiple blockers into vague summary text without file references.
 - Running maximal reviewer fan-out for simple low-risk changes.
+- Missing a new project term or renamed concept that should update `CONTEXT.md`.
 - Flagging `docs/brainstorms/*`, `docs/plans/*.md`, or `docs/solutions/*.md` for cleanup/removal.
 
 ## Examples
@@ -77,6 +82,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - "When the user asks, `Can you review GitHub PR #482 and tell me whether anything still blocks merge?`"
 - "Please inspect the current branch against `origin/main`, validate the risky changes, and give me the go/no-go call."
 - "Review `Docs/plans/2026-03-23-001-feat-example-plan.md` and tell me whether it is ready for the next workflow stage."
+- "Can you review this PR and verify it actually closes the linked Linear QA issues before we merge?"
 
 ## Full Context
 
@@ -85,6 +91,10 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
 - Compatibility mirror (non-canonical): [./references](./references)
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
+Read when: a review target changes project terminology, `CONTEXT.md`, or Linear issue meaning.
+Read when: readiness depends on linked Linear QA issues, reproduction steps, or expected-behavior evidence.
 - Template: [./review-todo.md.tmpl](./review-todo.md.tmpl)
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`

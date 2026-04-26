@@ -12,16 +12,19 @@ triggers:
   - the user needs help deciding whether a spec is required
   - the user wants a durable brainstorm or requirements artifact written to docs/brainstorms
   - the request is vague or ambitious enough that scope, behavior, or success criteria still need to be shaped
+  - a QA report or user feedback describes confusing behavior but expected behavior is not clear enough for a Linear issue
 
 inputs:
   - a feature idea, problem, or improvement to explore
   - relevant context, constraints, risks, and success criteria when available
   - optional repo context and prior artifacts, including existing requirements or legacy brainstorm docs
+  - optional QA feedback that needs expected-behavior clarification before Linear filing
 
 outputs:
   - a clarified problem frame
   - 2-3 approaches with trade-offs and a recommendation
   - explicit `spec_required`, `risk_level`, and `complexity` values
+  - expected-behavior clarification for ambiguous QA reports, with a next route to Linear intake, spec, plan, or fix work
   - exact parallel research support via `repo-research-analyst` and `learnings-researcher` when repo context matters
   - a requirements document in `docs/brainstorms/*-requirements.md` for new substantial work, with compatibility-safe updates to legacy `*-brainstorm.md` files when resuming
   - a recommended next workflow stage, and immediate handoff guidance when the runtime supports it
@@ -38,6 +41,7 @@ risks:
   - weak handoff; mitigate with explicit next-stage guidance and artifact writing
   - planner/source mismatch; mitigate by defaulting new durable docs to `*-requirements.md`
   - shallow recommendations without repo context; mitigate with bounded parallel subagent research when relevant
+  - misfiling product ambiguity as a bug; mitigate by clarifying expected behavior before routing to Linear intake
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

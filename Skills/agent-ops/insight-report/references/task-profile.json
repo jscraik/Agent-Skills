@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-insight-report",
   "scope_skill": "Skills/agent-ops/insight-report",
   "scope_profile": "Skills",
-  "rubric_version": "2026-02-26",
+  "rubric_version": "2026-04-24",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -16,32 +16,36 @@
   },
   "criteria": [
     {
-      "id": "clarity",
-      "label": "Instructional clarity",
-      "threshold": 0.72,
+      "id": "evidence_grounding",
+      "label": "Evidence-grounded reporting",
+      "threshold": 0.78,
       "weight": 0.34,
       "critical": true
     },
     {
-      "id": "specificity",
-      "label": "Concrete implementation detail",
-      "threshold": 0.68,
+      "id": "codex_only_contract",
+      "label": "Codex-only writer contract",
+      "threshold": 0.82,
       "weight": 0.33,
       "critical": true
     },
     {
-      "id": "safety",
-      "label": "Safety/compliance compliance",
-      "threshold": 0.85,
+      "id": "privacy_and_safety",
+      "label": "Privacy, safety, and browser-launch honesty",
+      "threshold": 0.88,
       "weight": 0.33,
       "critical": true
     }
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 45.0,
-    "ai_process_minutes": 15.0,
-    "probability_of_success": 0.75,
-    "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.78,
+    "rationale": "The runner handles deterministic evidence and rendering while Codex writes the narrative JSON from bounded local artifacts."
+  },
+  "learning_posture": {
+    "supported": ["learn", "guided", "execute"],
+    "default": "guided"
   }
 }

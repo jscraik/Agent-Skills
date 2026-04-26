@@ -16,11 +16,28 @@ if str(SCRIPTS_ROOT) not in sys.path:
 if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
-from ask.envelope import CallResult, ErrorObject
-from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index
-from selection_policy import REPO_SCAN_ROOTS
-from ask.catalog_parity import compute_catalog_parity
-from ask.selection_contract import (
+from ask.envelope import CallResult, ErrorObject  # noqa: E402
+from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
+from selection_policy import (  # noqa: E402
+    REPO_SCAN_ROOTS,
+    SYSTEM_BRIDGE_SKILL_NAMES,
+)
+from projection_engine import (  # noqa: E402
+    ProjectionModeError,
+    build_projection_plan_metadata,
+    ensure_mutation_supported,
+    normalize_projection_mode,
+)
+from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
+from generate_skillset_manifests import build_manifest_report, write_manifests  # noqa: E402
+from rooted_projection_runtime import (  # noqa: E402
+    build_user_relink_plan,
+    prune_generated_root_skill_dirs,
+    prune_unowned_skillset_files,
+    validate_workspace_runtime,
+)
+from ask.catalog_parity import compute_catalog_parity  # noqa: E402
+from ask.selection_contract import (  # noqa: E402
     EligibleCandidate,
     build_decision_payload,
     build_goal_decision,
@@ -1276,7 +1293,173 @@ def _refresh_system_lane_link(
 
     return [_create_symlink(Path("../../skills-system"), target_link, dry_run)]
 
-def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False) -> CallResult:
+
+def _public_root_report(report: dict) -> dict:
+    """
+    Produce a public-safe copy of a root report by omitting the `content` field from each root entry.
+    
+    Parameters:
+    	report (dict): Report mapping that may contain a "roots" key with a list of root entry dicts.
+    
+    Returns:
+    	public_report (dict): A copy of `report` where each dict in `roots` excludes the `content` key.
+    """
+    return {
+        **report,
+        "roots": [
+            {key: value for key, value in root.items() if key != "content"}
+            for root in report.get("roots", [])
+        ],
+    }
+
+
+def _public_manifest_report(report: dict) -> dict:
+    """
+    Produce a sanitized manifest report by removing the `rows` field from each manifest entry.
+    
+    Parameters:
+        report (dict): Original manifest report containing a `"manifests"` list of dicts.
+    
+    Returns:
+        dict: A shallow copy of `report` where each dict in `"manifests"` omits the `"rows"` key.
+    """
+    return {
+        **report,
+        "manifests": [
+            {key: value for key, value in manifest.items() if key != "rows"}
+            for manifest in report.get("manifests", [])
+        ],
+    }
+
+
+def _append_user_runtime_relinks(plan: dict, logs: list[str], skills_dir: Path, *, dry_run: bool) -> None:
+    """
+    Append symlink relinking operations for user-local runtimes to the provided plan and logs.
+    
+    Adds two symlink entries to plan["symlinks"] mapping the repository skills directory to the user's
+    home locations (~/.agents/skills and ~/.codex/skills), and appends the human-readable creation/update
+    messages returned by _create_symlink to logs.
+    
+    Parameters:
+        plan (dict): Mutation plan that will be modified; this function appends dicts of the form
+            {"from": "<user_dest_path>", "to": "<repo_source_path>"} to plan["symlinks"].
+        logs (list[str]): Log list that will be extended with messages describing each planned or performed
+            symlink operation.
+        skills_dir (Path): Absolute or repo-relative path to the repository skills directory to link from.
+        dry_run (bool): If True, no filesystem changes are performed; messages will describe planned actions.
+    """
+    for relink in build_user_relink_plan(skills_dir):
+        src = Path(relink["to"])
+        dst = Path(relink["from"])
+        plan["symlinks"].append(relink)
+        logs.append(_create_symlink(src, dst, dry_run))
+
+
+def _sync_rooted_projection(
+    repo_root: Path,
+    *,
+    scope: str,
+    dry_run: bool,
+    plan: dict,
+    logs: list[str],
+    skills_dir: Path,
+    system_skills_dir: Path,
+) -> tuple[bool, list[ErrorObject]]:
+    """
+    Builds and applies the rooted runtime projection plan for workspace synchronization.
+    
+    Validates rooted root and manifest reports, prunes stale/generated runtime entries, schedules and (unless `dry_run`) writes rooted root files and skill-set manifests, refreshes the system lane link, and records planned writes/deletes/symlinks in `plan` while appending human-readable messages to `logs`.
+    
+    Parameters:
+        repo_root (Path): Repository root path used to locate `.skillsets` and resolve writes.
+        scope (str): Sync scope (expected to be `"workspace"` for rooted projection).
+        dry_run (bool): If True, perform validation and planning without mutating the filesystem.
+        plan (dict): Mutable synchronization plan; this function appends to `writes`, `deletes`, `symlinks`, `violations`, and `warnings`.
+        logs (list[str]): Mutable list to which human-readable action logs are appended.
+        skills_dir (Path): Path to the runtime skills directory (typically repo_root / ".agents" / "skills").
+        system_skills_dir (Path): Path to the repository-managed system skills directory (typically repo_root / "skills-system").
+    
+    Returns:
+        tuple[bool, list[ErrorObject]]: `True, []` when projection validated and (if not `dry_run`) applied successfully; otherwise `False` and a list containing one or more `ErrorObject` describing the validation or runtime failure.
+    """
+    root_report = build_roots(skills_dir)
+    manifest_report = build_manifest_report(repo_root / ".skillsets")
+    plan["root_skill_sets"] = _public_root_report(root_report)
+    plan["skillset_manifests"] = _public_manifest_report(manifest_report)
+    plan["unmapped_entries"] = root_report.get("unmapped", [])
+
+    violations = [
+        *root_report.get("violations", []),
+        *manifest_report.get("violations", []),
+    ]
+    plan["violations"] = violations
+    if root_report.get("status") != "pass" or manifest_report.get("status") != "pass":
+        plan["validation_status"] = "fail"
+        plan["warnings"].extend([str(violation.get("code", violation)) for violation in violations])
+        return False, [ErrorObject(
+            code="ERR_VALIDATION",
+            message="Rooted projection validation failed before mutation.",
+            fix_suggestion="Inspect plan.violations and rerun `bin/ask skills sync --projection rooted --dry-run --json`.",
+        )]
+
+    keep_names = {root["name"] for root in root_report.get("roots", [])}
+    if system_skills_dir.is_dir():
+        keep_names.add(".system")
+    try:
+        for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+        for log in prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+        for log in prune_unowned_skillset_files(repo_root / ".skillsets", dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+    except OSError as exc:
+        plan["validation_status"] = "fail"
+        plan["warnings"].append("RUNTIME_PROJECTION_MUTATION_FAILED")
+        return False, [ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Rooted projection could not update {skills_dir}: {exc}",
+            fix_suggestion="Check filesystem permissions on .agents/skills or rerun with --dry-run.",
+        )]
+
+    for root in root_report.get("roots", []):
+        plan["writes"].append(root["path"])
+    for manifest in manifest_report.get("manifests", []):
+        plan["writes"].append(manifest["path"])
+
+    if dry_run:
+        logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
+    else:
+        try:
+            root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
+            manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
+        except (OSError, ValueError) as exc:
+            plan["validation_status"] = "fail"
+            plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
+            return False, [ErrorObject(
+                code="ERR_RUNTIME",
+                message=f"Rooted projection write failed: {exc}",
+                fix_suggestion="Check filesystem permissions and rerun rooted sync.",
+            )]
+        logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
+        logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
+
+    system_lane_logs = _refresh_system_lane_link(skills_dir, system_skills_dir, dry_run)
+    if system_lane_logs:
+        plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
+        logs.extend(system_lane_logs)
+    plan["validation_status"] = "pass"
+    return True, []
+
+
+def sync_skills(
+    repo_root: Path,
+    scope: str = "workspace",
+    dry_run: bool = False,
+    projection: Optional[str] = None,
+) -> CallResult:
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
     
@@ -1286,6 +1469,8 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
         repo_root (Path): Root path of the repository containing skills directories.
         scope (str): Either "workspace" to sync repository-derived views or "user" to populate user-local locations.
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
+        projection (Optional[str]): Explicit runtime projection mode. When omitted,
+            SYNC_SKILLS_PROJECTION_MODE is honored before the rooted default.
     
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -1298,16 +1483,162 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
           - Other errors may be returned for copy/sync failures (e.g., when `_sync_dir_copy` detects symlinks).
     """
     result = CallResult()
-    plan = {"writes": [], "deletes": [], "symlinks": []}
+    try:
+        projection_decision = normalize_projection_mode(projection)
+        ensure_mutation_supported(projection_decision, dry_run=dry_run)
+    except ProjectionModeError as exc:
+        resolved_mode = getattr(exc, "resolved_mode", None)
+        fix_suggestions = {
+            "ERR_INVALID_PROJECTION_MODE": "Choose a supported projection mode such as --projection flat or --projection rooted.",
+            "ERR_DEFERRED_PROJECTION_MODE": "Use --projection flat or --projection rooted until the deferred projection mode is available.",
+            "ERR_PROJECTION_MUTATION_UNAVAILABLE": "Use --dry-run for this projection mode, or choose --projection flat or --projection rooted for mutation.",
+        }
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code=exc.code,
+            message=exc.message,
+            fix_suggestion=fix_suggestions.get(exc.code, "Choose a supported projection mode or rerun with --dry-run."),
+        ))
+        result.data["projection_mode"] = resolved_mode
+        result.data["requested_projection_mode"] = getattr(exc, "requested_mode", projection or "")
+        return result
+
+    if scope not in {"workspace", "user"}:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_INVALID_SCOPE",
+            message=f"Invalid scope: '{scope}'. Must be 'workspace' or 'user'.",
+            fix_suggestion="Use --scope workspace or --scope user"
+        ))
+        return result
+
+    plan = {
+        "writes": [],
+        "deletes": [],
+        "symlinks": [],
+        "system_bridge_skill_names": sorted(SYSTEM_BRIDGE_SKILL_NAMES),
+        "preserved_bridge_lane_entries": [],
+        "preserved_system_lane_entries": [],
+        "validation_status": "not_run",
+        "ambiguous_entries": [],
+        "unmapped_entries": [],
+        "violations": [],
+        "mutation_counts": {
+            "writes": 0,
+            "deletes": 0,
+            "symlinks": 0,
+        },
+        "report_path": None,
+        "warnings": [],
+    }
     logs = []
     skills_dir = repo_root / ".agents" / "skills"
     system_skills_dir = repo_root / "skills-system"
+
+    if system_skills_dir.is_dir():
+        plan["preserved_system_lane_entries"] = sorted(
+            item.name
+            for item in system_skills_dir.iterdir()
+            if item.is_dir() and (item / "SKILL.md").exists()
+        )
+
+    if projection_decision.projection_mode == "rooted":
+        if scope == "user":
+            workspace_violations = validate_workspace_runtime(skills_dir)
+            if workspace_violations:
+                plan["validation_status"] = "fail"
+                plan["violations"].extend(workspace_violations)
+                plan["warnings"].append("ROOTED_WORKSPACE_RUNTIME_INVALID")
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Rooted user sync requires a valid rooted workspace projection before relinking.",
+                    fix_suggestion="Run `ask skills sync --scope workspace --projection rooted` first, then rerun user sync.",
+                ))
+                result.data["plan"] = plan
+                result.data["logs"] = logs
+                result.data["policy_identity"] = get_policy_identity()
+                result.data["projection_mode"] = projection_decision.projection_mode
+                result.data["projection"] = build_projection_plan_metadata(
+                    projection_decision,
+                    scope=scope,
+                    dry_run=dry_run,
+                    warnings=plan["warnings"],
+                )
+                return result
+            _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+            plan["validation_status"] = "pass"
+            plan["mutation_counts"] = {
+                "writes": len(plan["writes"]),
+                "deletes": len(plan["deletes"]),
+                "symlinks": len(plan["symlinks"]),
+            }
+            result.data["plan"] = plan
+            result.data["logs"] = logs
+            result.data["policy_identity"] = get_policy_identity()
+            result.data["projection_mode"] = projection_decision.projection_mode
+            result.data["projection"] = build_projection_plan_metadata(
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                warnings=plan["warnings"],
+            )
+            result.status = "success"
+            return result
+        ok, errors = _sync_rooted_projection(
+            repo_root,
+            scope=scope,
+            dry_run=dry_run,
+            plan=plan,
+            logs=logs,
+            skills_dir=skills_dir,
+            system_skills_dir=system_skills_dir,
+        )
+        if not ok:
+            result.status = "error"
+            result.errors.extend(errors)
+            result.data["plan"] = plan
+            result.data["logs"] = logs
+            result.data["policy_identity"] = get_policy_identity()
+            result.data["projection_mode"] = projection_decision.projection_mode
+            result.data["projection"] = build_projection_plan_metadata(
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                warnings=plan["warnings"],
+            )
+            return result
+        projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
+        logs.extend(projection_logs)
+        plan["mutation_counts"] = {
+            "writes": len(plan["writes"]),
+            "deletes": len(plan["deletes"]),
+            "symlinks": len(plan["symlinks"]),
+        }
+        result.data["plan"] = plan
+        result.data["logs"] = logs
+        result.data["policy_identity"] = get_policy_identity()
+        result.data["projection_mode"] = projection_decision.projection_mode
+        result.data["projection"] = build_projection_plan_metadata(
+            projection_decision,
+            scope=scope,
+            dry_run=dry_run,
+            warnings=plan["warnings"],
+        )
+        result.status = "success"
+        return result
+
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
+        plan["preserved_bridge_lane_entries"] = sorted(SYSTEM_BRIDGE_SKILL_NAMES)
         keep_names = {entry.name for entry in entries if entry.source_dir.is_relative_to(repo_root)}
         if system_skills_dir.is_dir():
             keep_names.add(".system")
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+        for log in prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
         for entry in entries:
@@ -1327,21 +1658,22 @@ def sync_skills(repo_root: Path, scope: str = "workspace", dry_run: bool = False
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
     elif scope == "user":
-        home = Path.home()
-        targets = [(skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills")]
-        for src, dst in targets:
-            plan["symlinks"].append({"from": str(dst), "to": str(src)})
-            logs.append(_create_symlink(src, dst, dry_run))
-    else:
-        result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_INVALID_SCOPE",
-            message=f"Invalid scope: '{scope}'. Must be 'workspace' or 'user'.",
-            fix_suggestion="Use --scope workspace or --scope user"
-        ))
-        return result
+        _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+    plan["validation_status"] = "pass"
+    plan["mutation_counts"] = {
+        "writes": len(plan["writes"]),
+        "deletes": len(plan["deletes"]),
+        "symlinks": len(plan["symlinks"]),
+    }
     result.data["plan"] = plan
     result.data["logs"] = logs
     result.data["policy_identity"] = get_policy_identity()
+    result.data["projection_mode"] = projection_decision.projection_mode
+    result.data["projection"] = build_projection_plan_metadata(
+        projection_decision,
+        scope=scope,
+        dry_run=dry_run,
+        warnings=plan["warnings"],
+    )
     result.status = "success"
     return result

@@ -7,17 +7,22 @@ purpose: >
 triggers:
   - user asks to debug or fix a bug
   - user shares stack trace, failing test, regression symptoms, or issue tracker reference
+  - user starts a QA session, reports bugs conversationally, or asks to turn feedback into Linear issues
   - prior fix attempts failed and a structured investigation is required
 
 inputs:
   - issue source and reference (`linear`, `github`, or `manual-context`)
   - observable symptoms and expected behavior
+  - relevant `CONTEXT-MAP.md` or `CONTEXT.md` when the issue uses project-specific terms
   - environment clues and reproduction constraints
   - execution permission (`diagnosis-only` vs `diagnose-and-fix`)
+  - optional QA-intake mode for conversational reports that need tracker filing before diagnosis
 
 outputs:
+  - Linear issue payloads or URLs for QA intake, including single/breakdown decision and blocker relationships
   - reproduction status (`confirmed`, `not_reproduced`, `partial`, or `blocked`)
   - root-cause chain with evidence references
+  - issue-language/domain-model mismatch note when the report uses ambiguous or non-canonical terms
   - fix plan and test recommendations
   - implementation summary when fix execution is requested
   - structured summary including `schema_version: 1` on request
@@ -25,11 +30,14 @@ outputs:
 non_goals:
   - greenfield implementation work outside bug scope
   - speculative fixes without diagnosis evidence
-  - automatic tracker mutations without explicit approval
+  - GitHub issue creation or ADR creation for QA intake unless the user explicitly overrides the Linear-first project convention
 
 risks:
   - symptom-fix bias; mitigate with causal-chain gate and prediction checks for uncertain links
+  - tracker-language mismatch; mitigate by comparing Linear issue wording with `CONTEXT.md` before treating wording as bug scope
   - unreliable reproduction; mitigate with iterative instrumentation and environment notes
+  - over-broad QA tickets; mitigate with single-vs-breakdown classification and thin independently verifiable Linear issues
+  - brittle tracker bodies; mitigate by omitting file paths, line numbers, and internal implementation details from Linear issue descriptions
   - scope drift into redesign; mitigate with explicit route to `he-brainstorm` when needed
 
 observability: >

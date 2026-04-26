@@ -1,8 +1,12 @@
 import importlib.util
 import os
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import contextmanager
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
 
@@ -15,7 +19,7 @@ PLUGIN_CREATOR_SCRIPT = (
     / "scaffolding_templates"
     / "plugin-creator"
     / "scripts"
-    / "create_basic_plugin.py"
+    / "create_basic_plugin.pyw"
 )
 PLUGIN_BUILDER_SCRIPT = (
     REPO_ROOT
@@ -25,11 +29,12 @@ PLUGIN_BUILDER_SCRIPT = (
     / "code_quality_review"
     / "plugin-builder"
     / "scripts"
-    / "plugin_builder.py"
+    / "plugin_builder.pyw"
 )
 PLUGIN_CREATOR_SKILL = (
     REPO_ROOT / "Plugins" / "plugin-factory" / "skills" / "scaffolding_templates" / "plugin-creator" / "SKILL.md"
 )
+PLUGIN_CREATOR_WORKFLOW = PLUGIN_CREATOR_SKILL.parent / "references" / "workflow.md"
 
 
 def _load_module(module_name: str, script_path: Path):
@@ -46,7 +51,8 @@ def _load_module(module_name: str, script_path: Path):
     Raises:
         RuntimeError: If an import spec or loader cannot be created for the given script_path.
     """
-    spec = importlib.util.spec_from_file_location(module_name, script_path)
+    loader = SourceFileLoader(module_name, str(script_path))
+    spec = importlib.util.spec_from_file_location(module_name, script_path, loader=loader)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Unable to load module from {script_path}")
     module = importlib.util.module_from_spec(spec)
@@ -118,11 +124,62 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
         )
 
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
+        """
+        Verify that the plugin-creator skill document references the workflow and that the workflow contains the repository-local `.pyw` script path for create_basic_plugin.
+        
+        The test reads the skill and workflow documentation files and asserts that:
+        - "references/workflow.md" appears in the skill document.
+        - The workflow document includes the repository-local path "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw".
+        """
         skill_doc = PLUGIN_CREATOR_SKILL.read_text(encoding="utf-8")
+        workflow_doc = PLUGIN_CREATOR_WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("references/workflow.md", skill_doc)
         self.assertIn(
-            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py",
-            skill_doc,
+            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw",
+            workflow_doc,
         )
+
+    def test_plugin_builder_accepts_required_codex_manifest_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="plugin-builder-validate-") as temp_dir:
+            plugin_root = Path(temp_dir) / "sample-plugin"
+            manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+            skills_dir = plugin_root / "skills"
+            manifest_path.parent.mkdir(parents=True)
+            (skills_dir / "sample-skill").mkdir(parents=True)
+            (skills_dir / "sample-skill" / "SKILL.md").write_text(
+                "---\nname: sample-skill\ndescription: Sample plugin skill.\n---\n\n# Sample Skill\n",
+                encoding="utf-8",
+            )
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "name": "sample-plugin",
+                        "version": "0.1.0",
+                        "description": "Sample plugin for validator coverage.",
+                        "author": {"name": "Agent Skills Team"},
+                        "skills": "./skills/",
+                        "interface": {
+                            "displayName": "Sample Plugin",
+                            "shortDescription": "Sample plugin",
+                            "longDescription": "Sample plugin for validator coverage.",
+                            "developerName": "Agent Skills Team",
+                            "category": "Coding",
+                            "capabilities": ["Read"],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [sys.executable, str(PLUGIN_BUILDER_SCRIPT), "validate", str(plugin_root)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,21 @@ from typing import Any, Iterable
 
 POLICY_VERSION = "2026-04-25.v19"
 
+PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
+
+ROOT_SKILL_SET_NAMES: tuple[str, ...] = (
+    "agent-ops",
+    "frontend-ui",
+    "backend-platform",
+    "product-strategy",
+    "security-ops",
+    "content-publishing",
+    "mobile-native",
+    "skill-factory",
+    "plugin-factory",
+    "harness-engineering",
+)
+
 # Canonical roots for repo-owned skills.
 REPO_SCAN_ROOTS: tuple[str, ...] = (
     "Skills",
@@ -87,6 +102,20 @@ SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
     "skill-installer",
 )
 
+# Runtime projection modes. These are intentionally outside the selection
+# policy identity: mode support is command behavior, not a change to which
+# flat skills are selected by default.
+DEFAULT_PROJECTION_MODE = "rooted"
+SUPPORTED_PROJECTION_MODES: tuple[str, ...] = (
+    "flat",
+    "rooted",
+)
+PROJECTION_MODE_ALIASES: dict[str, str] = {
+    "skill-tree": "rooted",
+}
+DEFERRED_PROJECTION_MODES: tuple[str, ...] = (
+    "hybrid",
+)
 
 def repo_scan_roots_with_prefix() -> tuple[str, ...]:
     """
@@ -102,13 +131,15 @@ def repo_scan_roots_with_prefix() -> tuple[str, ...]:
 
 def payload() -> dict[str, Any]:
     """
-    Produce a stable dictionary of all inputs that define the selection policy identity.
+    Produce a deterministic mapping of the inputs that define the selection policy identity.
     
-    Tuples are converted to lists to ensure deterministic JSON serialization for hashing and storage.
+    Tuples are converted to lists to ensure stable JSON serialization for hashing and storage.
     
     Returns:
-        payload (dict[str, Any]): Mapping with the following keys:
+        dict[str, Any]: Mapping with the following keys:
             - "policy_version": str
+            - "projection_mode_choices": list[str]
+            - "root_skill_set_names": list[str]
             - "repo_scan_roots": list[str]
             - "plugin_skill_root_glob": str
             - "excluded_scan_segments": list[str]
@@ -120,6 +151,8 @@ def payload() -> dict[str, Any]:
     """
     return {
         "policy_version": POLICY_VERSION,
+        "projection_mode_choices": list(PROJECTION_MODE_CHOICES),
+        "root_skill_set_names": list(ROOT_SKILL_SET_NAMES),
         "repo_scan_roots": list(REPO_SCAN_ROOTS),
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,
         "excluded_scan_segments": list(EXCLUDED_SCAN_SEGMENTS),
@@ -143,15 +176,18 @@ def _shell_array(name: str, values: Iterable[str]) -> str:
 
 def render_shell() -> str:
     """
-    Produce a newline-delimited shell fragment defining selection policy variables.
+    Render a newline-delimited shell fragment that exports selection policy variables.
     
-    The fragment contains a quoted `SELECTION_POLICY_IDENTITY`, shell-array assignments for repo scan roots, excluded segments, hidden flat skills, plugin-visible router skills and plugin-hidden lane skills, and a quoted `SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB`.
+    The fragment defines SELECTION_POLICY_IDENTITY and SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB as quoted strings, and emits array-style assignments for projection modes, root skill sets, repo scan roots, excluded scan segments, hidden and default-visible flat skills, plugin-visible router skills, plugin-hidden lane skills, and system bridge skills.
     
     Returns:
-        shell_fragment (str): Lines joined by newlines representing shell assignments.
+        shell_fragment (str): Newline-joined shell assignments representing the policy values.
     """
     lines = [
         f"SELECTION_POLICY_IDENTITY={shlex.quote(policy_identity())}",
+        _shell_array("SELECTION_POLICY_PROJECTION_MODES", SUPPORTED_PROJECTION_MODES),
+        _shell_array("SELECTION_POLICY_DEFERRED_PROJECTION_MODES", DEFERRED_PROJECTION_MODES),
+        _shell_array("SELECTION_POLICY_ROOT_SKILL_SETS", ROOT_SKILL_SET_NAMES),
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),
         _shell_array("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", HIDDEN_FLAT_SKILL_NAMES),

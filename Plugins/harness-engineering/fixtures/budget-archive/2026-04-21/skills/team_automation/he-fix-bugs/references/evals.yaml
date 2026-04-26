@@ -30,6 +30,53 @@ cases:
       - type: regex
         value: "(?i)(confirmed|not_reproduced|partial|blocked)"
 
+  - id: linear-domain-language-intake
+    name: linear domain language mismatch
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Linear issue ENG-456 calls this an account deletion bug, but CONTEXT.md says Account and Customer are different concepts. Diagnose without patching around the terminology mismatch."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(Linear|CONTEXT\\.md|domain|terminology|he-deepen-spec)"
+
+  - id: qa-session-linear-intake
+    name: conversational QA session creates Linear issue payloads
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you run a QA session with me? First bug: invite links show success, but the invited user never receives access. File this in Linear if it is clear enough."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(QA intake|Linear|What happened|What I expected|Steps to reproduce)"
+      - type: not_regex
+        value: "(?i)(GitHub issue|docs/adr|line \\d+)"
+
+  - id: qa-breakdown-thin-issues
+    name: QA report breaks into thin Linear issues
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "In this QA session the export form rejects valid dates, the success toast is missing, and the redirect goes to the wrong workspace. Turn these into Linear issues."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(breakdown|multiple Linear issues|Blocked by|None - can start immediately|dependency order)"
+
   - id: github-issue-intake
     name: tracker intake from github
     category: happy

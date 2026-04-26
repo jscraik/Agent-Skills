@@ -43,7 +43,7 @@ class TestAskPluginsCommands(unittest.TestCase):
             / "scaffolding_templates"
             / "plugin-creator"
             / "scripts"
-            / "create_basic_plugin.py"
+            / "create_basic_plugin.pyw"
         )
         creator_script.parent.mkdir(parents=True, exist_ok=True)
         creator_script.write_text("#!/usr/bin/env python3\n", encoding="utf-8")

@@ -55,6 +55,10 @@ ask evals run backend/cli-spec --mode smoke
 
 # Validate entire repository
 ask repo validate --ephemeral
+
+# Report the current runtime surface and context budget
+ask runtime surface --json
+ask runtime budget --json
 ```
 
 ### Manage lifecycle
@@ -90,7 +94,7 @@ Errors include suggestions and examples:
 ❌ Unknown topic: 'invalid'
 
 💡 Did you mean 'ask skills'?
-   Valid topics: repo, skills, plugins, evals, graph
+   Valid topics: repo, skills, runtime, plugins, evals, graph, mcp, wiki, workouts
 
 📚 Examples:
    • ask skills list
@@ -144,7 +148,9 @@ This table is a human-oriented grouping for quick navigation and is not used for
 agent-skills/
 ├── bin/ask                   # Stable public wrapper entry point
 ├── scripts/                  # Stable wrapper entry points for canonical scripts
-├── .agents/skills/           # Flat runtime projection (read-only)
+├── .agents/skills/           # Runtime projection: flat or rooted (read-only)
+├── .skillsets/               # Generated rooted manifests (read-only)
+├── .workouts/                # Canonical skill workout fixtures
 │
 ├── Skills/                   # All canonical skills organised by topic cluster
 │   ├── agent-ops/            # 44 skills: coding-harness, evals-router, simplify, …
@@ -176,7 +182,8 @@ Ownership boundaries:
 - Factory mechanics: `Infrastructure/scripts/**`, validation/governance contracts
 - Root command wrappers: `bin/**` and `scripts/**` are stable wrappers that forward into `Infrastructure/**`; keep these as real files/directories (not symlinks)
 - `bin/ask` is the only public CLI entrypoint and must remain a thin forwarder to `Infrastructure/bin/ask`.
-- Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
+- Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `.skillsets/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
+- Workout evidence: `.skill-telemetry/**` is local runtime output and is ignored by git.
 - Full policy: [Docs/agents/14-path-ownership-boundaries.md](Docs/agents/14-path-ownership-boundaries.md)
 
 ## Documentation
@@ -184,6 +191,8 @@ Ownership boundaries:
 - **[CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
 - **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
 - **[Skill Index](SKILL.md)** – Current surfaced skill catalog by category
+- **[Context-Budgeted Skill Trees](Docs/architecture/context-budgeted-skill-trees.md)** – Rooted projection and latent routing model
+- **[Skill Workouts](Docs/architecture/skill-workouts.md)** – Workout CLI, telemetry, and scorecard model
 - **[Implementation Review](Docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
 
 ## Privacy and Data Handling

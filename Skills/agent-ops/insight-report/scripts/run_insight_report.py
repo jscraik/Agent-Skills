@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Codex Insights Report Generator with Ollama LLM Analysis
-Full-featured insights matching commercial tools—local LLM-powered facet extraction.
+Codex Insights Report Generator
+Full-featured insights matching commercial tools, with Codex as the only
+narrative insight writer.
 
 DATA SOURCE NOTES:
 - ~/.codex/sessions/ — Session metadata + conversation events (no tool data)
@@ -10,7 +11,7 @@ DATA SOURCE NOTES:
 
 Codex runs tools server-side for security, so detailed tool logs aren't stored 
 locally like Codex's ~/.codex/projects/ format. This report focuses on
-session patterns, message analysis, timing, and LLM-generated insights.
+session patterns, message analysis, timing, and Codex-generated insights.
 """
 
 from __future__ import annotations
@@ -20,32 +21,33 @@ import difflib
 import json
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
-import webbrowser
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HOME = Path.home()
-USAGE_DIR = HOME / "dev" / "config" / "codex" / "usage-data"
+USAGE_DIR = Path(os.getenv("INSIGHT_REPORT_USAGE_DIR", HOME / ".codex" / "usage-data")).expanduser()
 REPORT_HTML = USAGE_DIR / "report.html"
-FACETS_CACHE = USAGE_DIR / "facets-cache.json"
+EVIDENCE_JSON = USAGE_DIR / "insight-evidence.json"
+PROMPT_MD = USAGE_DIR / "INSIGHT_PROMPT.md"
+INSIGHTS_JSON = USAGE_DIR / "insights.generated.json"
 
 # Data sources
-SESSIONS_DIR = HOME / ".codex" / "sessions"
-HISTORY_FILE = HOME / ".codex" / "history.jsonl"
+SESSIONS_DIR = Path(os.getenv("CODEX_SESSIONS_DIR", HOME / ".codex" / "sessions")).expanduser()
+HISTORY_FILE = Path(os.getenv("CODEX_HISTORY_FILE", HOME / ".codex" / "history.jsonl")).expanduser()
 OTEL_PATHS = [
     HOME / ".agents" / "otel-collector",
     HOME / ".codex" / "otel-collector",
     HOME / "Library" / "Application Support" / "Codex" / "otel-collector",
 ]
 
-# Ollama configuration
-OLLAMA_MODEL = os.getenv("INSIGHTS_MODEL", "qwen3-coder")
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-MAX_WORKERS = int(os.getenv("INSIGHTS_WORKERS", "3"))
+# Codex writer configuration
+CODEX_TIMEOUT = int(os.getenv("INSIGHTS_CODEX_TIMEOUT", "900"))
+PARSER_VERSION = 3
 
 # Tool name normalization
 TOOL_ALIASES = {
@@ -127,14 +129,18 @@ OUTCOME_ORDER = [
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Generate Codex insights report with LLM analysis")
+    parser = argparse.ArgumentParser(description="Generate Codex insights report with Codex-authored analysis")
     parser.add_argument("--days", type=int, default=7, help="Lookback window (default: 7)")
-    parser.add_argument("--no-open", action="store_true", help="Don't open browser")
+    parser.add_argument("--no-open", action="store_true", help="Compatibility flag; the runner never opens the OS browser")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument("--model", default=OLLAMA_MODEL, help=f"Ollama model (default: {OLLAMA_MODEL})")
-    parser.add_argument("--skip-llm", action="store_true", help="Skip LLM facet extraction (faster)")
+    parser.add_argument("--prepare-only", action="store_true", help="Write evidence and Codex prompt, then exit before invoking Codex")
+    parser.add_argument("--render-only", action="store_true", help="Render HTML from existing evidence and insights JSON")
     parser.add_argument("--max-sessions", type=int, default=200, help="Max sessions to analyze (default: 200)")
-    parser.add_argument("--max-facets", type=int, default=50, help="Max sessions for LLM facet extraction (default: 50)")
+    parser.add_argument("--max-evidence-sessions", type=int, default=30, help="Max transcript excerpts to include for Codex (default: 30)")
+    parser.add_argument("--evidence-out", default=str(EVIDENCE_JSON), help=f"Evidence JSON path (default: {EVIDENCE_JSON})")
+    parser.add_argument("--prompt-out", default=str(PROMPT_MD), help=f"Codex prompt path (default: {PROMPT_MD})")
+    parser.add_argument("--insights-out", default=str(INSIGHTS_JSON), help=f"Generated insights JSON path (default: {INSIGHTS_JSON})")
+    parser.add_argument("--insights-in", default=str(INSIGHTS_JSON), help=f"Insights JSON path for --render-only (default: {INSIGHTS_JSON})")
     return parser.parse_args()
 
 
@@ -178,7 +184,7 @@ def is_meta_session(events):
             payload = event.get('payload', {})
             if payload.get('type') == 'user_message':
                 content = payload.get('message', '') or payload.get('content', '')
-                if 'RESPOND WITH ONLY A VALID JSON OBJECT' in content or 'record_facets' in content:
+                if 'RESPOND WITH ONLY A VALID JSON OBJECT' in content:
                     return True
     return False
 
@@ -199,12 +205,31 @@ def count_lines_in_diff(old, new):
     return added, removed
 
 
+def extract_message_text(content):
+    """Extract visible text from Codex message content blocks."""
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return ""
+
+    parts = []
+    for block in content:
+        if not isinstance(block, dict):
+            continue
+        text = block.get("text")
+        if isinstance(text, str):
+            parts.append(text)
+    return "\n".join(parts)
+
+
 def parse_session_file(file_path):
     """Parse a Codex session file into structured data."""
     events = []
     session_meta = None
     user_messages = []
     agent_messages = []
+    seen_user_messages = set()
+    seen_agent_messages = set()
     tool_calls = defaultdict(int)
     errors = 0
     tool_error_categories = defaultdict(int)
@@ -232,7 +257,7 @@ def parse_session_file(file_path):
                     elif event.get('type') == 'event_msg':
                         payload = event.get('payload', {})
                         msg_type = payload.get('type')
-                        msg_timestamp = payload.get('timestamp')
+                        msg_timestamp = payload.get('timestamp') or event.get('timestamp')
                         
                         if msg_type == 'user_message':
                             content = payload.get('message', '') or payload.get('content', '')
@@ -242,6 +267,10 @@ def parse_session_file(file_path):
                             is_human = bool(content and isinstance(content, str) and content.strip())
                             
                             if is_human:
+                                message_key = (msg_timestamp, content.strip())
+                                if message_key in seen_user_messages:
+                                    continue
+                                seen_user_messages.add(message_key)
                                 user_messages.append((msg_timestamp, content))
                                 
                                 if msg_timestamp:
@@ -268,7 +297,10 @@ def parse_session_file(file_path):
                         elif msg_type == 'agent_message':
                             content = payload.get('content', '')
                             if content:
-                                agent_messages.append((msg_timestamp, content))
+                                message_key = (msg_timestamp, str(content).strip())
+                                if message_key not in seen_agent_messages:
+                                    seen_agent_messages.add(message_key)
+                                    agent_messages.append((msg_timestamp, content))
                             if msg_timestamp:
                                 last_assistant_timestamp = msg_timestamp
                         
@@ -287,29 +319,80 @@ def parse_session_file(file_path):
                     
                     elif event.get('type') == 'response_item':
                         payload = event.get('payload', {})
-                        tool_calls_data = payload.get('tool_calls', [])
-                        for tc in tool_calls_data:
-                            name = tc.get('name', 'unknown')
+                        payload_type = payload.get('type')
+
+                        if payload_type == 'message':
+                            role = payload.get('role')
+                            content = extract_message_text(payload.get('content'))
+                            msg_timestamp = event.get('timestamp')
+                            if role == 'user' and content.strip():
+                                message_key = (msg_timestamp, content.strip())
+                                if message_key in seen_user_messages:
+                                    continue
+                                seen_user_messages.add(message_key)
+                                user_messages.append((msg_timestamp, content))
+                                if msg_timestamp:
+                                    try:
+                                        msg_date = datetime.fromisoformat(msg_timestamp.replace('Z', '+00:00'))
+                                        message_hours.append(msg_date.hour)
+                                        user_message_timestamps.append(msg_timestamp)
+                                    except (TypeError, ValueError):
+                                        pass
+                                if last_assistant_timestamp and msg_timestamp:
+                                    try:
+                                        assistant_time = datetime.fromisoformat(last_assistant_timestamp.replace('Z', '+00:00'))
+                                        user_time = datetime.fromisoformat(msg_timestamp.replace('Z', '+00:00'))
+                                        response_time = (user_time - assistant_time).total_seconds()
+                                        if 2 < response_time < 3600:
+                                            user_response_times.append(response_time)
+                                    except (TypeError, ValueError):
+                                        pass
+                            elif role == 'assistant' and content.strip():
+                                message_key = (msg_timestamp, content.strip())
+                                if message_key in seen_agent_messages:
+                                    continue
+                                seen_agent_messages.add(message_key)
+                                agent_messages.append((msg_timestamp, content))
+                                if msg_timestamp:
+                                    last_assistant_timestamp = msg_timestamp
+
+                        elif payload_type == 'function_call':
+                            name = payload.get('name') or 'unknown'
                             tool_calls[name] += 1
-                            
-                            if name in ('Edit', 'Write'):
-                                tool_input = tc.get('input', {})
-                                file_path_mod = tool_input.get('file_path', '')
+                            arguments = payload.get('arguments') or {}
+                            if isinstance(arguments, dict):
+                                tool_input = arguments
+                            else:
+                                try:
+                                    tool_input = json.loads(arguments) if isinstance(arguments, str) else {}
+                                except json.JSONDecodeError:
+                                    tool_input = {}
+
+                            if name in ('Edit', 'Write', 'apply_patch'):
+                                file_path_mod = tool_input.get('file_path') or tool_input.get('path') or ''
                                 if file_path_mod:
                                     files_modified.add(file_path_mod)
-                                    
-                                    if name == 'Edit':
-                                        old_str = tool_input.get('old_string', '')
-                                        new_str = tool_input.get('new_string', '')
-                                        if old_str is not None and new_str is not None:
-                                            a, r = count_lines_in_diff(old_str, new_str)
-                                            lines_added += a
-                                            lines_removed += r
-                                    
-                                    elif name == 'Write':
-                                        content = tool_input.get('content', '')
-                                        if content:
-                                            lines_added += content.count('\n') + 1
+
+                                if name == 'Edit':
+                                    old_str = tool_input.get('old_string', '')
+                                    new_str = tool_input.get('new_string', '')
+                                    if old_str is not None and new_str is not None:
+                                        a, r = count_lines_in_diff(old_str, new_str)
+                                        lines_added += a
+                                        lines_removed += r
+                                elif name == 'Write':
+                                    write_content = tool_input.get('content', '')
+                                    if write_content:
+                                        lines_added += write_content.count('\n') + 1
+
+                        elif payload_type == 'function_call_output':
+                            output = payload.get('output', '')
+                            if isinstance(output, str):
+                                match = re.search(r'Process exited with code ([1-9]\d*)', output)
+                                if match:
+                                    errors += 1
+                                    category = categorize_tool_error(output)
+                                    tool_error_categories[category] += 1
                 except json.JSONDecodeError:
                     continue
     except (OSError, UnicodeError):
@@ -346,13 +429,17 @@ def parse_session_file(file_path):
             duration_minutes = 0
     
     return {
+        'parser_version': PARSER_VERSION,
         'session_id': session_meta.get('id', 'unknown'),
+        'project_path': session_meta.get('cwd', ''),
+        'start_time': start_time,
         'timestamp': start_time,
         'cwd': session_meta.get('cwd', ''),
         'cli_version': session_meta.get('cli_version', ''),
         'model_provider': session_meta.get('model_provider', ''),
         'agent_role': session_meta.get('agent_role', ''),
         'user_messages': len(user_messages),
+        'agent_messages': len(agent_messages),
         'agent_responses': len(agent_messages),
         'tool_calls': dict(tool_calls),
         'errors': errors,
@@ -361,6 +448,7 @@ def parse_session_file(file_path):
         'lines_added': lines_added,
         'lines_removed': lines_removed,
         'duration_minutes': duration_minutes,
+        'first_prompt': user_messages[0][1] if user_messages else '',
         'message_hours': message_hours,
         'user_message_timestamps': user_message_timestamps,
         'user_response_times': user_response_times,
@@ -397,15 +485,8 @@ def is_substantive_session(session):
     return True
 
 
-def is_warmup_only_session(facet):
-    """Check if session only has warmup_minimal as goal category."""
-    cats = facet.get('goal_categories', {})
-    active_cats = [k for k, v in cats.items() if v > 0]
-    return len(active_cats) == 1 and active_cats[0] == 'warmup_minimal'
-
-
-def detect_multi_clauding(sessions):
-    """Detect multi-codex usage via timestamp overlap analysis."""
+def detect_parallel_codex_sessions(sessions):
+    """Detect parallel Codex usage via timestamp overlap analysis."""
     OVERLAP_WINDOW_MS = 30 * 60000
     
     all_messages = []
@@ -421,7 +502,7 @@ def detect_multi_clauding(sessions):
     
     all_messages.sort(key=lambda x: x['ts'])
     
-    multi_codex_pairs = set()
+    parallel_codex_pairs = set()
     messages_during = set()
     
     window_start = 0
@@ -440,7 +521,7 @@ def detect_multi_clauding(sessions):
                 between = all_messages[j]
                 if between['session_id'] != msg['session_id']:
                     pair = tuple(sorted([msg['session_id'], between['session_id']]))
-                    multi_codex_pairs.add(pair)
+                    parallel_codex_pairs.add(pair)
                     messages_during.add(f"{all_messages[prev_index]['ts']}:{msg['session_id']}")
                     messages_during.add(f"{between['ts']}:{between['session_id']}")
                     messages_during.add(f"{msg['ts']}:{msg['session_id']}")
@@ -449,12 +530,12 @@ def detect_multi_clauding(sessions):
         session_last_index[msg['session_id']] = i
     
     sessions_with_overlaps = set()
-    for pair in multi_codex_pairs:
+    for pair in parallel_codex_pairs:
         sessions_with_overlaps.add(pair[0])
         sessions_with_overlaps.add(pair[1])
     
     return {
-        'overlap_events': len(multi_codex_pairs),
+        'overlap_events': len(parallel_codex_pairs),
         'sessions_involved': len(sessions_with_overlaps),
         'user_messages_during': len(messages_during)
     }
@@ -477,73 +558,39 @@ def deduplicate_sessions(sessions):
     return list(best_by_session.values())
 
 
-def check_ollama_available(model):
-    """Check if Ollama is running and model is available."""
+def extract_json_object(text):
+    """Extract the first JSON object from a Codex response."""
+    if not text:
+        return None
     try:
-        result = subprocess.run(
-            ["curl", "-s", f"{OLLAMA_HOST}/api/tags"],
-            capture_output=True,
-            text=True,
-            timeout=5
-        )
-        if result.returncode != 0:
-            return False
-        data = json.loads(result.stdout)
-        models = [m.get("name", "") for m in data.get("models", [])]
-        return any(model in m or m in model for m in models)
-    except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
-        return False
-
-
-def ollama_generate(prompt, model, system=""):
-    """Generate text using Ollama API."""
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    match = re.search(r'\{[\s\S]*\}', text)
+    if not match:
+        return None
     try:
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.3, "num_predict": 2000}
-        }
-        if system:
-            payload["system"] = system
-        
-        result = subprocess.run(
-            ["curl", "-s", "-X", "POST", f"{OLLAMA_HOST}/api/generate",
-             "-H", "Content-Type: application/json",
-             "-d", json.dumps(payload)],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        
-        if result.returncode != 0:
-            return ""
-        
-        response = json.loads(result.stdout)
-        return response.get("response", "")
-    except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
-        return ""
+        return json.loads(match.group())
+    except json.JSONDecodeError:
+        return None
 
 
-def load_cached_facets():
-    """Load cached facets from disk."""
+def write_json(path, value):
+    """Write JSON with private-by-default permissions."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding="utf-8")
     try:
-        if FACETS_CACHE.exists():
-            with open(FACETS_CACHE, 'r') as f:
-                return json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return {}
-    return {}
-
-
-def save_cached_facets(cache):
-    """Save facets cache to disk."""
-    try:
-        USAGE_DIR.mkdir(parents=True, exist_ok=True)
-        with open(FACETS_CACHE, 'w') as f:
-            json.dump(cache, f, indent=2)
+        path.chmod(0o600)
     except OSError:
-        return
+        pass
+
+
+def read_json(path):
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise TypeError(f"Expected JSON object in {path}")
+    return value
 
 
 def load_cached_session_meta(session_id):
@@ -552,7 +599,9 @@ def load_cached_session_meta(session_id):
         cache_path = USAGE_DIR / "session-meta" / f"{session_id}.json"
         if cache_path.exists():
             with open(cache_path, 'r') as f:
-                return json.load(f)
+                cached = json.load(f)
+            if cached.get("parser_version") == PARSER_VERSION:
+                return cached
     except (OSError, json.JSONDecodeError):
         return None
     return None
@@ -570,351 +619,312 @@ def save_session_meta(session_id, meta):
         return
 
 
-def extract_facets_with_llm(session_id, transcript, model, cache):
-    """Extract session facets using local LLM."""
-    if session_id in cache:
-        return cache[session_id]
-    
-    prompt = f"""Analyze this Codex session and extract structured facets.
+def build_evidence_bundle(data, sessions, args):
+    """Build the evidence bundle Codex uses to write the report."""
+    samples = []
+    for session in sessions[:args.max_evidence_sessions]:
+        samples.append({
+            "session_id": session.get("session_id", "")[:12],
+            "project_path": session.get("project_path", ""),
+            "start_time": session.get("start_time", ""),
+            "duration_minutes": session.get("duration_minutes", 0),
+            "user_messages": session.get("user_messages", 0),
+            "assistant_messages": session.get("agent_messages", 0),
+            "tool_calls": session.get("tool_calls", {}),
+            "errors": session.get("errors", 0),
+            "first_prompt": session.get("first_prompt", ""),
+            "transcript_excerpt": session.get("transcript", "")[:3500],
+        })
 
-CRITICAL GUIDELINES:
-
-1. **goal_categories**: Count ONLY what the USER explicitly asked for.
-   - DO NOT count the assistant's autonomous codebase exploration
-   - DO NOT count work the assistant decided to do on its own
-   - ONLY count when user says "can you...", "please...", "I need...", "let's..."
-
-2. **user_satisfaction_counts**: Base ONLY on explicit user signals.
-   - "Yay!", "great!", "perfect!" → happy
-   - "thanks", "looks good", "that works" → satisfied
-   - "ok, now let's..." (continuing without complaint) → likely_satisfied
-   - "that's not right", "try again" → dissatisfied
-   - "this is broken", "I give up" → frustrated
-
-3. **friction_counts**: Be specific about what went wrong.
-   - misunderstood_request: Assistant interpreted incorrectly
-   - wrong_approach: Right goal, wrong solution method
-   - buggy_code: Code didn't work correctly
-   - user_rejected_action: User said no/stop to a tool call
-   - excessive_changes: Over-engineered or changed too much
-
-4. If very short or just warmup, use warmup_minimal for goal_category
-
-SESSION:
-{transcript[:8000]}
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "underlying_goal": "What the user fundamentally wanted to achieve",
-  "goal_categories": {{"category_name": count, ...}},
-  "outcome": "fully_achieved|mostly_achieved|partially_achieved|not_achieved|unclear_from_transcript",
-  "user_satisfaction_counts": {{"level": count, ...}},
-  "assistant_helpfulness": "unhelpful|slightly_helpful|moderately_helpful|very_helpful|essential",
-  "session_type": "single_task|multi_task|iterative_refinement|exploration|quick_question",
-  "friction_counts": {{"friction_type": count, ...}},
-  "friction_detail": "One sentence describing friction or empty",
-  "primary_success": "none|fast_accurate_search|correct_code_edits|good_explanations|proactive_help|multi_file_changes|good_debugging",
-  "brief_summary": "One sentence: what user wanted and whether they got it",
-  "user_instructions_to_assistant": ["instruction 1", "instruction 2"]
-}}"""
-
-    response = ollama_generate(prompt, model)
-    if not response:
-        return None
-    
-    try:
-        json_match = re.search(r'\{[\s\S]*\}', response)
-        if json_match:
-            facet = json.loads(json_match.group())
-            facet['session_id'] = session_id
-            cache[session_id] = facet
-            return facet
-    except (json.JSONDecodeError, TypeError, ValueError):
-        return None
-    return None
-
-
-def generate_parallel_insights(data, facets, model):
-    """Generate insight sections in parallel using LLM."""
-    if not facets:
-        return {}
-    
-    facet_summaries = [f"- {f.get('brief_summary', 'Unknown')} ({f.get('outcome')}, {f.get('assistant_helpfulness')})" for f in facets[:30]]
-    friction_details = [f"- {f.get('friction_detail', '')}" for f in facets if f.get('friction_detail')][:20]
-    user_instructions = []
-    for f in facets:
-        user_instructions.extend(f.get('user_instructions_to_assistant', []))
-    user_instructions = user_instructions[:15]
-    
-    data_context = json.dumps({
-        "sessions": data['sessions']['total'],
-        "analyzed": len(facets),
-        "messages": data['metrics']['total_user_messages'],
-        "hours": data['sessions'].get('avg_duration_minutes', 0) * data['sessions']['total'] / 60,
-        "top_tools": sorted(data['tools']['counts'].items(), key=lambda x: x[1], reverse=True)[:8],
-        "lines_added": data['metrics'].get('total_lines_added', 0),
-        "lines_removed": data['metrics'].get('total_lines_removed', 0),
-        "files_modified": data['metrics'].get('total_files_modified', 0),
-        "multi_clauding": data.get('multi_clauding', {}),
-    }, indent=2)
-    
-    full_context = f"""{data_context}
-
-SESSION SUMMARIES:
-{chr(10).join(facet_summaries)}
-
-FRICTION DETAILS:
-{chr(10).join(friction_details)}
-
-USER INSTRUCTIONS TO ASSISTANT:
-{chr(10).join([f"- {i}" for i in user_instructions]) or "None captured"}"""
-
-    sections = {
-        "project_areas": f"""Analyze this Codex usage data and identify project areas.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "areas": [
-    {{"name": "Area name", "session_count": N, "description": "2-3 sentences about what was worked on."}}
-  ]
-}}
-
-Include 4-5 areas.
-
-DATA:
-{full_context}""",
-        "interaction_style": f"""Analyze this Codex usage data and describe the user's interaction style.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "narrative": "2-3 paragraphs analyzing HOW the user interacts with Codex. Use second person 'you'. Describe patterns.",
-  "key_pattern": "One sentence summary of most distinctive interaction style"
-}}
-
-DATA:
-{full_context}""",
-        "what_works": f"""Analyze this Codex usage data and identify what's working well.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "intro": "1 sentence of context",
-  "impressive_workflows": [
-    {{"title": "Short title (3-6 words)", "description": "2-3 sentences describing the impressive workflow. Use 'you'."}}
-  ]
-}}
-
-Include 3 impressive workflows.
-
-DATA:
-{full_context}""",
-        "friction_analysis": f"""Analyze this Codex usage data and identify friction points.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "intro": "1 sentence summarizing friction patterns",
-  "categories": [
-    {{"category": "Concrete category name", "description": "1-2 sentences explaining this category.", "examples": ["Example 1", "Example 2"]}}
-  ]
-}}
-
-Include 3 friction categories with 2 examples each.
-
-DATA:
-{full_context}""",
-        "suggestions": f"""Analyze this Codex usage data and suggest improvements.
-
-CODEX FEATURES REFERENCE:
-1. **MCP Servers**: Connect Codex to external tools via Model Context Protocol.
-   - How: Run `codex mcp add <server-name> -- <command>`
-   - Good for: database queries, Slack, GitHub, internal APIs
-
-2. **Custom Skills**: Reusable prompts as markdown files.
-   - How: Create `.codex/skills/<name>/SKILL.md`. Then type `/<name>` to run.
-   - Good for: repetitive workflows - /commit, /review, /test, /deploy
-
-3. **Hooks**: Shell commands that auto-run at lifecycle events.
-   - How: Enable `codex_hooks` feature flag, then configure in ~/.codex/config.toml
-   - Good for: auto-formatting, type checks, enforcing conventions
-
-4. **Headless Mode**: Run Codex non-interactively from scripts.
-   - How: `codex exec --full-auto "fix lint errors"` (or without --full-auto for approvals)
-   - Good for: CI/CD, batch fixes, automated reviews
-
-5. **Task Agents**: Codex spawns focused sub-agents for complex work.
-   - How: Ask "use an agent to explore X"
-   - Good for: codebase exploration, understanding complex systems
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "agents_md_additions": [
-    {{"addition": "A specific instruction to add to AGENTS.md", "why": "Why this helps", "where": "Where to add it"}}
-  ],
-  "features_to_try": [
-    {{"feature": "Feature name", "one_liner": "What it does", "why_for_you": "Why this helps you", "example_code": "Command to copy"}}
-  ],
-  "usage_patterns": [
-    {{"title": "Short title", "suggestion": "Summary", "detail": "Explanation", "copyable_prompt": "Prompt to try"}}
-  ]
-}}
-
-Include 2-3 items per category.
-
-DATA:
-{full_context}""",
-        "on_the_horizon": f"""Analyze this Codex usage data and identify future opportunities.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "intro": "1 sentence about evolving AI-assisted development",
-  "opportunities": [
-    {{"title": "Short title", "whats_possible": "2-3 sentences about autonomous workflows", "how_to_try": "Getting started tip", "copyable_prompt": "Prompt to try"}}
-  ]
-}}
-
-Include 3 opportunities. Think BIG.
-
-DATA:
-{full_context}""",
-        "actionable_fixes": f"""Convert friction patterns into v3 actionable fixes.
-
-For each recurring friction pattern in the data, create an execution block with:
-1. IMPACT - Why this matters (time lost, sessions wasted)
-2. ROOT CAUSE - What's actually happening
-3. FIX (shell command) - Exact command to run
-4. CODEX/CODEX COMMAND - Prompt to auto-fix
-5. ENFORCE - Hook/rule/config to prevent recurrence
-6. VERIFY - Metric to confirm fix worked
-
-PRIORITIZE by frequency and impact. Include only actionable items.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "executive_summary": {{
-    "failures": "High/Medium/Low",
-    "time_loss_driver": "Single biggest time sink",
-    "top_issue": "Primary fix to apply",
-    "priority": "One-line action priority"
-  }},
-  "harness_gaps": [
-    {{"layer": "Preflight|Local Dev|CI Strategy|Git Workflow|Model Mgmt", "missing": "What's missing", "impact": "High/Medium/Low"}}
-  ],
-  "priority_fixes": [
-    {{
-      "rank": 1,
-      "title": "Fix title",
-      "impact": "What this costs you",
-      "root_cause": "Why it happens",
-      "fix_shell": "Exact shell command to run now",
-      "codex_command": "codex exec [options] 'prompt' — headless execution command",
-      "enforce": "Hook/Infrastructure/config/rule to add (use ~/.codex/config.toml or AGENTS.md)",
-      "verify": "Metric to track (before -> target)"
-    }}
-  ],
-  "autofix_queue": [
-    "codex exec --full-auto 'First fix to auto-apply'",
-    "codex exec 'Second fix to auto-apply'"
-  ],
-  "stop_doing": [
-    "❌ Specific anti-pattern to stop"
-  ],
-  "execution_order": [
-    "1. First step",
-    "2. Second step"
-  ]
-}}
-
-SESSION DATA:
-{full_context}""",
-        "fun_ending": f"""Find a memorable moment from these session summaries.
-
-RESPOND WITH ONLY A VALID JSON OBJECT:
-{{
-  "headline": "A memorable QUALITATIVE moment - not a statistic. Something human, funny, or surprising.",
-  "detail": "Brief context"
-}}
-
-SESSIONS:
-{chr(10).join(facet_summaries[:15])}""",
+    metrics = {
+        "period": data.get("period", {}),
+        "sessions": data.get("sessions", {}),
+        "tools": data.get("tools", {}),
+        "metrics": data.get("metrics", {}),
+        "tool_error_categories": data.get("tool_error_categories", {}),
+        "parallel_codex": data.get("parallel_codex", {}),
+        "data_quality": data.get("data_quality", "unknown"),
     }
-    
-    insights = {}
-    print(f"Generating {len(sections)} insight sections with {model}...")
-    
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_name = {
-            executor.submit(ollama_generate, spec, model): name
-            for name, spec in sections.items()
-        }
-        
-        for future in as_completed(future_to_name):
-            name = future_to_name[future]
-            try:
-                response = future.result(timeout=180)
-                if response:
-                    json_match = re.search(r'\{[\s\S]*\}', response, re.DOTALL)
-                    if json_match:
-                        insights[name] = json.loads(json_match.group())
-                        print(f"  ✓ {name}")
-                    else:
-                        print(f"  ✗ {name} - no JSON found")
-                else:
-                    print(f"  ✗ {name} - no response")
-            except (TimeoutError, ValueError, TypeError, json.JSONDecodeError) as e:
-                print(f"  ✗ {name} - {e}")
-    
-    # Generate At a Glance
-    if insights:
-        project_areas_text = "\n".join([f"- {a.get('name')}: {a.get('description', '')}" for a in insights.get('project_areas', {}).get('areas', [])[:5]])
-        big_wins_text = "\n".join([f"- {w.get('title')}: {w.get('description', '')}" for w in insights.get('what_works', {}).get('impressive_workflows', [])[:3]])
-        friction_text = "\n".join([f"- {c.get('category')}: {c.get('description', '')}" for c in insights.get('friction_analysis', {}).get('categories', [])[:3]])
-        features_text = "\n".join([f"- {f.get('feature')}: {f.get('one_liner', '')}" for f in insights.get('suggestions', {}).get('features_to_try', [])[:3]])
-        horizon_text = "\n".join([f"- {o.get('title')}: {o.get('whats_possible', '')}" for o in insights.get('on_the_horizon', {}).get('opportunities', [])[:3]])
-        
-        at_a_glance_prompt = f"""Write an "At a Glance" summary for a Codex usage report.
 
-Use this 4-part structure:
+    return {
+        "schema_version": "codex-insight-evidence.v1",
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "writer": "codex",
+        "notes": [
+            "This file is evidence only; narrative insight must be written by Codex.",
+            "Use only the evidence here. Do not invent unavailable tool logs, outcomes, or user intent.",
+        ],
+        "data": data,
+        "metrics": metrics,
+        "session_samples": samples,
+    }
 
-1. **What's working** - User's unique style and impactful things they've done.
-2. **What's hindering you** - Split into (a) assistant issues and (b) user-side friction.
-3. **Quick wins to try** - Specific Codex features to try.
-4. **Ambitious workflows** - What becomes possible as AI improves.
 
-Keep each section to 2-3 sentences. Use a coaching tone.
+def build_codex_prompt(evidence):
+    """Create the prompt passed to Codex for JSON insight writing."""
+    evidence_json = json.dumps(evidence, indent=2, ensure_ascii=False)
+    return f"""# Codex Insight Report Writer
 
-RESPOND WITH ONLY A VALID JSON OBJECT:
+You are Codex writing Jamie's Codex usage insight report from local evidence.
+
+Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include commentary outside JSON.
+
+## Grounding Rules
+
+- Use only the evidence in this prompt.
+- Do not invent exact outcomes, files, tools, errors, or user feelings when the evidence is weak.
+- Write in second person ("you") and use plain English.
+- Be candid and useful, not fluffy.
+- Separate Codex-side friction from Jamie-side ambiguity when possible.
+- Include prompt help for moments where Jamie may not know the technical vocabulary.
+- Prefer copyable prompts that let Jamie describe intent without knowing the exact term.
+- If evidence is thin, say so in `metadata.limitations`.
+
+## Required JSON Shape
+
 {{
-  "whats_working": "...",
-  "whats_hindering": "...",
-  "quick_wins": "...",
-  "ambitious_workflows": "..."
+  "metadata": {{
+    "schema_version": "codex-insights.v1",
+    "writer_provider": "codex",
+    "generated_at": "ISO-8601 timestamp",
+    "confidence": "high|medium|low",
+    "limitations": ["missing or weak evidence"]
+  }},
+  "at_a_glance": {{
+    "whats_working": "2-3 sentences",
+    "whats_hindering": "2-3 sentences",
+    "quick_wins": "2-3 sentences",
+    "ambitious_workflows": "2-3 sentences"
+  }},
+  "project_areas": {{
+    "areas": [
+      {{"name": "Area name", "session_count": 1, "description": "2-3 sentences", "evidence": ["session id, metric, or transcript summary"]}}
+    ]
+  }},
+  "interaction_style": {{
+    "narrative": "2-3 paragraphs describing how Jamie uses Codex",
+    "key_pattern": "One concise sentence"
+  }},
+  "what_works": {{
+    "intro": "One sentence",
+    "impressive_workflows": [
+      {{"title": "Short title", "description": "2-3 sentences", "evidence": ["session id, metric, or transcript summary"]}}
+    ]
+  }},
+  "friction_analysis": {{
+    "intro": "One sentence",
+    "categories": [
+      {{"category": "Concrete category", "description": "1-2 sentences", "examples": ["specific example", "specific example"], "evidence": ["session id, metric, or transcript summary"]}}
+    ]
+  }},
+  "prompting_help": {{
+    "plain_english_patterns": [
+      {{"situation": "When to use this", "copyable_prompt": "Prompt Jamie can paste", "evidence": ["session id, metric, or transcript summary"]}}
+    ],
+    "terms_to_learn": [
+      {{"term": "technical term", "plain_english": "plain explanation", "when_to_use": "when it helps", "evidence": ["session id, metric, or transcript summary"]}}
+    ]
+  }},
+  "suggestions": {{
+    "agents_md_additions": [
+      {{"addition": "Instruction to add", "why": "Why it helps", "where": "Suggested location", "evidence": ["session id, metric, or transcript summary"]}}
+    ],
+    "features_to_try": [
+      {{"feature": "Codex feature", "one_liner": "What it does", "why_for_you": "Why it helps Jamie", "example_code": "Copyable command or prompt", "evidence": ["session id, metric, or transcript summary"]}}
+    ],
+    "usage_patterns": [
+      {{"title": "Short title", "suggestion": "1-2 sentences", "detail": "3-4 sentences", "copyable_prompt": "Prompt to try", "evidence": ["session id, metric, or transcript summary"]}}
+    ]
+  }},
+  "on_the_horizon": {{
+    "intro": "One sentence",
+    "opportunities": [
+      {{"title": "Short title", "whats_possible": "2-3 sentences", "how_to_try": "1-2 sentences", "copyable_prompt": "Prompt to try", "evidence": ["session id, metric, or transcript summary"]}}
+    ]
+  }},
+  "actionable_fixes": {{
+    "executive_summary": {{
+      "failures": "High|Medium|Low",
+      "time_loss_driver": "Single biggest time sink",
+      "top_issue": "Primary fix to apply",
+      "priority": "One-line action priority"
+    }},
+    "priority_fixes": [
+      {{
+        "rank": 1,
+        "title": "Fix title",
+        "impact": "What this costs",
+        "root_cause": "Why it happens",
+        "fix_shell": "Exact shell command if safe, or empty string",
+        "codex_command": "Copyable Codex prompt or command",
+        "enforce": "AGENTS.md/hook/skill/config enforcement",
+        "verify": "How Jamie knows it improved",
+        "evidence": ["session id, metric, or transcript summary"]
+      }}
+    ],
+    "stop_doing": ["Specific anti-pattern to stop"],
+    "execution_order": ["1. First step", "2. Second step"]
+  }},
+  "fun_ending": {{
+    "headline": "A memorable qualitative moment",
+    "detail": "Brief context"
+  }}
 }}
 
-PROJECT AREAS:
-{project_areas_text}
+## Evidence
 
-BIG WINS:
-{big_wins_text}
+{evidence_json}
+"""
 
-FRICTION:
-{friction_text}
 
-FEATURES:
-{features_text}
+def validate_insights(insights):
+    """Return writer-contract validation errors for generated insight JSON."""
+    errors = []
+    required_sections = {
+        "metadata": ("schema_version", "writer_provider", "generated_at", "confidence", "limitations"),
+        "at_a_glance": ("whats_working", "whats_hindering", "quick_wins", "ambitious_workflows"),
+        "project_areas": ("areas",),
+        "interaction_style": ("narrative", "key_pattern"),
+        "what_works": ("intro", "impressive_workflows"),
+        "friction_analysis": ("intro", "categories"),
+        "prompting_help": ("plain_english_patterns", "terms_to_learn"),
+        "suggestions": ("agents_md_additions", "features_to_try", "usage_patterns"),
+        "on_the_horizon": ("intro", "opportunities"),
+        "actionable_fixes": ("executive_summary", "priority_fixes", "stop_doing", "execution_order"),
+        "fun_ending": ("headline", "detail"),
+    }
+    required_list_fields = {
+        "metadata.limitations",
+        "project_areas.areas",
+        "what_works.impressive_workflows",
+        "friction_analysis.categories",
+        "prompting_help.plain_english_patterns",
+        "prompting_help.terms_to_learn",
+        "suggestions.agents_md_additions",
+        "suggestions.features_to_try",
+        "suggestions.usage_patterns",
+        "on_the_horizon.opportunities",
+        "actionable_fixes.priority_fixes",
+        "actionable_fixes.stop_doing",
+        "actionable_fixes.execution_order",
+    }
+    second_person_paths = {
+        "at_a_glance.whats_working",
+        "at_a_glance.whats_hindering",
+        "at_a_glance.quick_wins",
+        "at_a_glance.ambitious_workflows",
+        "interaction_style.narrative",
+        "interaction_style.key_pattern",
+        "suggestions.features_to_try[].why_for_you",
+    }
+    evidence_item_paths = {
+        "project_areas.areas",
+        "what_works.impressive_workflows",
+        "friction_analysis.categories",
+        "prompting_help.plain_english_patterns",
+        "prompting_help.terms_to_learn",
+        "suggestions.agents_md_additions",
+        "suggestions.features_to_try",
+        "suggestions.usage_patterns",
+        "on_the_horizon.opportunities",
+        "actionable_fixes.priority_fixes",
+    }
 
-HORIZON:
-{horizon_text}"""
-        
-        print("  Generating at_a_glance...")
-        response = ollama_generate(at_a_glance_prompt, model)
-        if response:
-            try:
-                json_match = re.search(r'\{[\s\S]*\}', response, re.DOTALL)
-                if json_match:
-                    insights['at_a_glance'] = json.loads(json_match.group())
-                    print("  ✓ at_a_glance")
-            except (json.JSONDecodeError, TypeError, ValueError):
-                insights.pop("at_a_glance", None)
-    
+    def has_second_person(value: str) -> bool:
+        return bool(re.search(r"\b(you|your|yours|yourself)\b", value, flags=re.IGNORECASE))
+
+    def section_payload(name: str) -> dict:
+        payload = insights.get(name)
+        return payload if isinstance(payload, dict) else {}
+
+    for section, fields in required_sections.items():
+        payload = insights.get(section)
+        if not isinstance(payload, dict):
+            errors.append(f"{section} must be an object")
+            continue
+        for field in fields:
+            path = f"{section}.{field}"
+            value = payload.get(field)
+            if path in required_list_fields:
+                if not isinstance(value, list):
+                    errors.append(f"{path} must be a list")
+                continue
+            if value in (None, "", [], {}):
+                errors.append(f"{path} is required")
+
+    for path in evidence_item_paths:
+        section, field = path.split(".", 1)
+        values = section_payload(section).get(field, [])
+        if not isinstance(values, list):
+            continue
+        for index, item in enumerate(values):
+            if not isinstance(item, dict):
+                errors.append(f"{path}[{index}] must be an object")
+                continue
+            evidence = item.get("evidence")
+            if not isinstance(evidence, list) or not any(isinstance(entry, str) and entry.strip() for entry in evidence):
+                errors.append(f"{path}[{index}].evidence must include at least one evidence entry")
+
+    features = section_payload("suggestions").get("features_to_try", [])
+    if isinstance(features, list):
+        for index, item in enumerate(features):
+            if not isinstance(item, dict):
+                errors.append(f"suggestions.features_to_try[{index}] must be an object")
+                continue
+            for field in ("feature", "one_liner", "why_for_you", "example_code"):
+                if not item.get(field):
+                    errors.append(f"suggestions.features_to_try[{index}].{field} is required")
+
+    for path in second_person_paths:
+        if "[]" in path:
+            section, rest = path.split(".", 1)
+            list_name, field = rest.split("[].")
+            values = section_payload(section).get(list_name, [])
+            if isinstance(values, list) and not any(
+                isinstance(item, dict) and isinstance(item.get(field), str) and has_second_person(item[field])
+                for item in values
+            ):
+                errors.append(f"{path} must use second-person phrasing")
+            continue
+        section, field = path.split(".", 1)
+        value = section_payload(section).get(field)
+        if isinstance(value, str) and not has_second_person(value):
+            errors.append(f"{path} must use second-person phrasing")
+
+    return errors
+
+
+def codex_command() -> list[str]:
+    configured = os.getenv("INSIGHTS_CODEX_COMMAND", "").strip()
+    if configured:
+        return shlex.split(configured)
+    codex_bin = shutil.which("codex")
+    if not codex_bin:
+        raise RuntimeError("Codex CLI unavailable; set INSIGHTS_CODEX_COMMAND or rerun with --prepare-only.")
+    return [codex_bin]
+
+
+def run_codex_writer(prompt):
+    """Ask Codex CLI to write the insight JSON and return the parsed object."""
+    # Safety: fixed executable and fixed arguments; session evidence is passed on stdin only.
+    result = subprocess.run(
+        [*codex_command(), "exec", "--sandbox", "read-only"],
+        input=prompt,
+        capture_output=True,
+        text=True,
+        timeout=CODEX_TIMEOUT,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        raise RuntimeError(f"Codex writer failed with exit code {result.returncode}: {detail}")
+
+    insights = extract_json_object(result.stdout)
+    if not isinstance(insights, dict):
+        raise RuntimeError("Codex writer did not return a valid JSON object")
+    missing = validate_insights(insights)
+    if missing:
+        raise RuntimeError(f"Codex writer JSON missing required sections: {', '.join(missing)}")
     return insights
 
 
@@ -1056,6 +1066,32 @@ def generate_html_report(data, insights):
         cats_html = "".join([f'<div class="friction-category"><div class="friction-title">{escape_html(c.get("category", ""))}</div><div class="friction-desc">{escape_html(c.get("description", ""))}</div>{"<ul class=\"friction-examples\">" + "".join([f"<li>{escape_html(e)}</li>" for e in c.get("examples", [])]) + "</ul>" if c.get("examples") else ""}</div>' for c in friction['categories']])
         intro = f'<p class="section-intro">{escape_html(friction.get("intro", ""))}</p>' if friction.get('intro') else ""
         friction_html = f'<h2 id="section-friction">Where Things Go Wrong</h2>{intro}<div class="friction-categories">{cats_html}</div>'
+
+    prompting_help = insights.get('prompting_help', {})
+    prompting_help_html = ""
+    if prompting_help:
+        pattern_parts = []
+        for item in prompting_help.get('plain_english_patterns', [])[:4]:
+            pattern_parts.append(
+                f'<div class="pattern-card"><div class="pattern-title">{escape_html(item.get("situation", ""))}</div>'
+                f'<div class="copyable-prompt-section"><div class="prompt-label">Paste into Codex:</div>'
+                f'<div class="copyable-prompt-row"><code class="copyable-prompt">{escape_html(item.get("copyable_prompt", ""))}</code>'
+                f'<button class="copy-btn" onclick="copyText(this)">Copy</button></div></div></div>'
+            )
+        term_parts = []
+        for item in prompting_help.get('terms_to_learn', [])[:6]:
+            term_parts.append(
+                f'<div class="feature-card"><div class="feature-title">{escape_html(item.get("term", ""))}</div>'
+                f'<div class="feature-oneliner">{escape_html(item.get("plain_english", ""))}</div>'
+                f'<div class="feature-why"><strong>When to use:</strong> {escape_html(item.get("when_to_use", ""))}</div></div>'
+            )
+        if pattern_parts or term_parts:
+            prompting_help_html = (
+                '<h2 id="section-prompting">Plain-English Prompting Help</h2>'
+                '<p class="section-intro">Use these when you know what you want but not the technical vocabulary.</p>'
+                f'<div class="patterns-section">{"".join(pattern_parts)}</div>'
+                f'<div class="features-section">{"".join(term_parts)}</div>'
+            )
     
     suggestions = insights.get('suggestions', {})
     suggestions_html = ""
@@ -1114,7 +1150,7 @@ def generate_html_report(data, insights):
         exec_summary = actionable.get('executive_summary', {})
         summary_html = ""
         if exec_summary:
-            summary_html = f'<div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin-bottom: 24px;"><div style="font-weight: 600; color: #991b1b; margin-bottom: 8px;">Executive Summary</div>'
+            summary_html = '<div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin-bottom: 24px;"><div style="font-weight: 600; color: #991b1b; margin-bottom: 8px;">Executive Summary</div>'
             if exec_summary.get('failures'):
                 summary_html += f'<div style="font-size: 13px; color: #7f1d1d; margin-bottom: 4px;"><strong>Failures:</strong> {escape_html(exec_summary["failures"])}</div>'
             if exec_summary.get('time_loss_driver'):
@@ -1128,7 +1164,7 @@ def generate_html_report(data, insights):
         # Priority Fixes
         fixes_html = ""
         for fix in actionable.get('priority_fixes', []):
-            fix_card = f'<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">'
+            fix_card = '<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">'
             fix_card += f'<div style="font-weight: 600; font-size: 16px; color: #0f172a; margin-bottom: 8px;">#{fix.get("rank", "")} {escape_html(fix.get("title", ""))}</div>'
             if fix.get('impact'):
                 fix_card += f'<div style="font-size: 13px; color: #64748b; margin-bottom: 8px;"><strong>Impact:</strong> {escape_html(fix["impact"])}</div>'
@@ -1148,7 +1184,7 @@ def generate_html_report(data, insights):
         # Autofix Queue
         autofix_html = ""
         if actionable.get('autofix_queue'):
-            autofix_html = f'<div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin: 24px 0;"><div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;">⚡ Autofix Queue (run in order)</div>'
+            autofix_html = '<div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin: 24px 0;"><div style="font-weight: 600; color: #5b21b6; margin-bottom: 12px;">Autofix Queue (run in order)</div>'
             for cmd in actionable['autofix_queue']:
                 autofix_html += f'<div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;"><code style="font-family: monospace; font-size: 12px; flex: 1;">{escape_html(cmd)}</code><button class="copy-btn" onclick="copyText(this)">Copy</button></div>'
             autofix_html += '</div>'
@@ -1156,7 +1192,7 @@ def generate_html_report(data, insights):
         # Stop Doing
         stop_html = ""
         if actionable.get('stop_doing'):
-            stop_html = f'<div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin: 24px 0;"><div style="font-weight: 600; color: #991b1b; margin-bottom: 12px;">🛑 Stop Doing</div><ul style="margin: 0; padding-left: 20px;">'
+            stop_html = '<div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin: 24px 0;"><div style="font-weight: 600; color: #991b1b; margin-bottom: 12px;">Stop Doing</div><ul style="margin: 0; padding-left: 20px;">'
             for item in actionable['stop_doing']:
                 stop_html += f'<li style="font-size: 13px; color: #7f1d1d; margin-bottom: 4px;">{escape_html(item)}</li>'
             stop_html += '</ul></div>'
@@ -1164,7 +1200,7 @@ def generate_html_report(data, insights):
         # Execution Order
         order_html = ""
         if actionable.get('execution_order'):
-            order_html = f'<div style="background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 16px; margin: 24px 0;"><div style="font-weight: 600; color: #0369a1; margin-bottom: 12px;">📋 Execution Order</div><ol style="margin: 0; padding-left: 20px;">'
+            order_html = '<div style="background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 16px; margin: 24px 0;"><div style="font-weight: 600; color: #0369a1; margin-bottom: 12px;">Execution Order</div><ol style="margin: 0; padding-left: 20px;">'
             for step in actionable['execution_order']:
                 order_html += f'<li style="font-size: 13px; color: #0c4a6e; margin-bottom: 4px;">{escape_html(step)}</li>'
             order_html += '</ol></div>'
@@ -1179,13 +1215,13 @@ def generate_html_report(data, insights):
         fun_html += f'<div class="fun-detail">{escape_html(fun_ending.get("detail", ""))}</div>'
     fun_html += '</div>'
     
-    multi = data.get('multi_clauding', {})
+    multi = data.get('parallel_codex', {})
     if multi.get('overlap_events', 0) == 0:
         multi_html = '<p style="font-size: 14px; color: #64748b; padding: 8px 0;">No parallel session usage detected. You typically work with one Codex session at a time.</p>'
     else:
         total_msgs = data['metrics'].get('total_user_messages', 0)
         pct = round(100 * multi.get('user_messages_during', 0) / total_msgs) if total_msgs else 0
-        multi_html = f'<div style="display: flex; gap: 24px; margin: 12px 0;"><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{multi["overlap_events"]}</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Overlap Events</div></div><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{multi["sessions_involved"]}</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Sessions Involved</div></div><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{pct}%</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Of Messages</div></div></div><p style="font-size: 13px; color: #475569; margin-top: 12px;">You run multiple Codex sessions simultaneously. Multi-codex is detected when sessions overlap in time, suggesting parallel workflows.</p>'
+        multi_html = f'<div style="display: flex; gap: 24px; margin: 12px 0;"><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{multi["overlap_events"]}</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Overlap Events</div></div><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{multi["sessions_involved"]}</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Sessions Involved</div></div><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{pct}%</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Of Messages</div></div></div><p style="font-size: 13px; color: #475569; margin-top: 12px;">You run multiple Codex sessions simultaneously. Parallel Codex usage is detected when sessions overlap in time.</p>'
     
     tool_errors = data.get('tool_error_categories', {})
     tool_errors_html = generate_bar_chart(tool_errors, '#dc2626') if tool_errors else '<p class="empty">No tool errors</p>'
@@ -1196,7 +1232,7 @@ def generate_html_report(data, insights):
     
     css = """
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
     .container { max-width: 800px; margin: 0 auto; }
     h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
     h2 { font-size: 20px; font-weight: 600; color: #0f172a; margin-top: 48px; margin-bottom: 16px; }
@@ -1302,7 +1338,6 @@ def generate_html_report(data, insights):
 <head>
   <meta charset="utf-8">
   <title>Codex Insights</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>{css}</style>
 </head>
 <body>
@@ -1317,6 +1352,7 @@ def generate_html_report(data, insights):
       <a href="#section-usage">How You Use Codex</a>
       <a href="#section-wins">Impressive Things</a>
       <a href="#section-friction">Where Things Go Wrong</a>
+      <a href="#section-prompting">Plain-English Prompting</a>
       <a href="#section-features">Features to Try</a>
       <a href="#section-patterns">New Usage Patterns</a>
       <a href="#section-horizon">On the Horizon</a>
@@ -1385,6 +1421,8 @@ def generate_html_report(data, insights):
 
     {friction_html}
 
+    {prompting_help_html}
+
     <div class="charts-row">
       <div class="chart-card">
         <div class="chart-title">Primary Friction Types</div>
@@ -1413,8 +1451,8 @@ def generate_html_report(data, insights):
 
 def collect_session_data(args):
     """Collect and analyze Codex session data."""
-    print(f"Codex Insights Report")
-    print(f"=" * 40)
+    print("Codex Insights Report")
+    print("=" * 40)
     
     session_files = find_session_files(args.days)
     if args.verbose:
@@ -1423,18 +1461,7 @@ def collect_session_data(args):
     if not session_files:
         print("No session data found in ~/.codex/sessions/")
         return _generate_no_data_response(args.days)
-    
-    use_llm = not args.skip_llm
-    ollama_ok = False
-    if use_llm:
-        ollama_ok = check_ollama_available(args.model)
-        if args.verbose:
-            print(f"Ollama {args.model}: {'available' if ollama_ok else 'not available'}")
-        if not ollama_ok:
-            print(f"⚠ Ollama not available. Install: curl -fsSL https://ollama.com/install.sh | sh")
-            print(f"  Then: ollama pull {args.model}")
-            use_llm = False
-    
+
     sessions = []
     to_parse = []
     
@@ -1470,20 +1497,6 @@ def collect_session_data(args):
         print("No substantive sessions found (need 2+ messages and 1+ minute duration)")
         return _generate_no_data_response(args.days)
     
-    cache = load_cached_facets()
-    
-    facets = []
-    if use_llm and ollama_ok:
-        print(f"\nExtracting facets with {args.model}...")
-        for session in sessions[:args.max_facets]:
-            if args.verbose:
-                print(f"  Extracting facets for {session['session_id'][:8]}...")
-            facet = extract_facets_with_llm(session['session_id'], session['transcript'], args.model, cache)
-            if facet and not is_warmup_only_session(facet):
-                facets.append(facet)
-        save_cached_facets(cache)
-        print(f"  Extracted {len(facets)} facets")
-    
     all_tool_counts = defaultdict(int)
     total_errors = 0
     total_user_msgs = 0
@@ -1494,14 +1507,7 @@ def collect_session_data(args):
     all_tool_error_categories = defaultdict(int)
     all_message_hours = []
     all_response_times = []
-    goal_categories = defaultdict(int)
-    outcomes = defaultdict(int)
-    satisfaction = defaultdict(int)
-    helpfulness = defaultdict(int)
-    session_types = defaultdict(int)
-    friction = defaultdict(int)
-    success = defaultdict(int)
-    
+
     for session in sessions:
         for tool, count in session['tool_calls'].items():
             all_tool_counts[tool] += count
@@ -1515,24 +1521,7 @@ def collect_session_data(args):
             all_tool_error_categories[cat] += count
         all_message_hours.extend(session['message_hours'])
         all_response_times.extend(session['user_response_times'])
-    
-    for facet in facets:
-        for cat, count in facet.get('goal_categories', {}).items():
-            if count > 0:
-                goal_categories[cat] += count
-        outcomes[facet.get('outcome', 'unknown')] += 1
-        for level, count in facet.get('user_satisfaction_counts', {}).items():
-            if count > 0:
-                satisfaction[level] += count
-        helpfulness[facet.get('assistant_helpfulness', 'unknown')] += 1
-        session_types[facet.get('session_type', 'unknown')] += 1
-        for ftype, count in facet.get('friction_counts', {}).items():
-            if count > 0:
-                friction[ftype] += count
-        if facet.get('primary_success') and facet['primary_success'] != 'none':
-            success[facet['primary_success']] += 1
-    
-    multi_clauding = detect_multi_clauding(sessions)
+    parallel_codex = detect_parallel_codex_sessions(sessions)
     
     data = {
         "period": {
@@ -1557,21 +1546,17 @@ def collect_session_data(args):
         "tool_error_categories": dict(all_tool_error_categories),
         "message_hours": all_message_hours,
         "user_response_times": all_response_times,
-        "goal_categories": dict(goal_categories),
-        "outcomes": dict(outcomes),
-        "satisfaction": dict(satisfaction),
-        "session_types": dict(session_types),
-        "friction": dict(friction),
-        "success": dict(success),
-        "multi_clauding": multi_clauding,
+        "goal_categories": {},
+        "outcomes": {},
+        "satisfaction": {},
+        "session_types": {},
+        "friction": {},
+        "success": {},
+        "parallel_codex": parallel_codex,
         "data_quality": "real",
     }
-    
-    if use_llm and facets:
-        print(f"\nGenerating insights with {args.model}...")
-        insights = generate_parallel_insights(data, facets, args.model)
-        data["insights"] = insights
-    
+    data["_sessions_for_evidence"] = sessions
+
     return data
 
 
@@ -1589,24 +1574,54 @@ def _generate_no_data_response(days):
 def main():
     args = parse_args()
     USAGE_DIR.mkdir(parents=True, exist_ok=True)
-    
-    data = collect_session_data(args)
-    
+
+    if args.render_only:
+        evidence = read_json(args.evidence_out)
+        data = evidence.get("data", {})
+        insights = read_json(args.insights_in)
+        data["insights"] = insights
+    else:
+        data = collect_session_data(args)
+        sessions_for_evidence = data.pop("_sessions_for_evidence", [])
+        evidence = build_evidence_bundle(data, sessions_for_evidence, args)
+        prompt = build_codex_prompt(evidence)
+        write_json(args.evidence_out, evidence)
+        Path(args.prompt_out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.prompt_out).write_text(prompt, encoding="utf-8")
+        try:
+            Path(args.prompt_out).chmod(0o600)
+        except OSError:
+            pass
+
+        print(f"\nCodex evidence ready: {args.evidence_out}")
+        print(f"Codex prompt ready: {args.prompt_out}")
+
+        insights = {}
+        if data.get("data_quality") == "real" and not args.prepare_only:
+            print("\nAsking Codex to write insights...")
+            insights = run_codex_writer(prompt)
+            write_json(args.insights_out, insights)
+            print(f"Codex insights ready: {args.insights_out}")
+        elif args.prepare_only:
+            print("Prepare-only mode: Codex prompt written; report rendering skipped.")
+            return 0
+
+        data["insights"] = insights
+
     html = generate_html_report(data, data.get("insights", {}))
     REPORT_HTML.write_text(html, encoding="utf-8")
+    report_url = f"file://{REPORT_HTML}"
     
-    print(f"\n✓ Report ready: file://{REPORT_HTML}")
+    print(f"\n✓ Report ready: {report_url}")
+    print(f"REPORT_URL={report_url}")
     
     if data.get("data_quality") == "real":
         sessions = data["sessions"]
         metrics = data.get("metrics", {})
-        llm_status = "with LLM analysis" if data.get("insights") else "(basic metrics only)"
-        print(f"  Analyzed {sessions['total']} sessions, {metrics.get('total_user_messages', 0)} messages {llm_status}")
+        codex_status = "with Codex-written insights" if data.get("insights") else "(metrics only)"
+        print(f"  Analyzed {sessions['total']} sessions, {metrics.get('total_user_messages', 0)} messages {codex_status}")
     else:
         print("  No session data found.")
-    
-    if not args.no_open:
-        webbrowser.open(f"file://{REPORT_HTML}")
     
     return 0
 

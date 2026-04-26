@@ -1,6 +1,13 @@
 # Agent Skills Index
 
-Canonical skills live in categorized folders below. Each tool loads skills via the flat symlink directory at `~/dev/agent-skills/.agents/skills`.
+Canonical skills live in categorized folders below.
+
+Runtime projection is mode-dependent:
+- `flat`: selected allowlisted skills are projected directly.
+- `rooted`: only root skill sets are projected; latent modules route through `.skillsets/**` manifests.
+- `hybrid`: deferred until a named consumer and budget gate exist.
+
+Do not hand-edit runtime projections.
 
 ## Table of Contents
 - [Summary](#summary)
@@ -11,7 +18,7 @@ Canonical skills live in categorized folders below. Each tool loads skills via t
 - `total_skills`: 21
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 15717dccdac902e4
+- `policy_identity`: 146a6f20347f3958
 
 ## Catalog
 

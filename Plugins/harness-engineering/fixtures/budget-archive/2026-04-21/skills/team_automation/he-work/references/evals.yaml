@@ -91,6 +91,18 @@ cases:
         expected_skill: "he-work"
       - type: regex
         value: "(?i)(route to he-plan|medium/high-risk|plan first|cannot safely)"
+  - id: domain-drift-during-work
+    name: domain drift during execution
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Implement this approved plan, but if the code shows that Subscriber and Customer mean different things than the spec says, stop and update the Linear issue before continuing."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-work"
+      - type: regex
+        value: "(?i)(domain drift|CONTEXT\\.md|governing artifact|Linear|stop)"
   - id: execution-note-posture
     name: execution note posture
     category: edge

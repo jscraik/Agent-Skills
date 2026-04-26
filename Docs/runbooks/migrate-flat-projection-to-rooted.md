@@ -1,0 +1,56 @@
+# Migrate Flat Projection To Rooted
+
+## Preconditions
+
+- `bin/ask skills sync --scope workspace --projection rooted --dry-run --json` passes.
+- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json` passes.
+- At least one workout has a passing scorecard.
+- `.skillsets/**` is generated, provenance-rich, and validated.
+
+## Dry Run
+
+```bash
+bin/ask skills sync --scope workspace --projection rooted --dry-run --json
+```
+
+Confirm:
+
+- `projection_mode` is `rooted`;
+- `validation_status` is `pass`;
+- root skill-set count is at or below 10;
+- no individual latent skill is planned as first-level runtime output.
+
+## Apply
+
+```bash
+bin/ask skills sync --scope workspace --projection rooted --json
+```
+
+Then validate rooted budget:
+
+```bash
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
+bash Infrastructure/scripts/validate_all.sh --ephemeral
+```
+
+## User Relink
+
+```bash
+bin/ask skills sync --scope user --projection rooted --json
+```
+
+## Full Gate
+
+```bash
+bin/ask repo validate --ephemeral
+```
+
+## Rollback
+
+```bash
+bin/ask skills sync --scope workspace --projection flat --json
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
+```
+
+The full gate checks rooted first-level runtime entries, so flat rollback is
+validated separately with the flat context-budget check.

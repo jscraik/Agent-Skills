@@ -22,10 +22,7 @@ Design, improve, validate, and package high-quality Codex skills.
 - Move deep policy into `Infrastructure/references/`; move repeatable mechanics into `Infrastructure/scripts/`.
 - Preserve valuable context by relocating it with explicit signposting, not by deleting or flattening nuanced guidance.
 - Do not remove important context for budget trimming; move it to `Infrastructure/references/` and signpost it.
-- Treat graph-readiness as source quality, not cleanup work after the fact:
-  - add a `## See Also` table with at least 2 real related skills,
-  - include a topic-map signpost such as `**Topic map:** [[agent-ops]]` when the skill belongs in the graph,
-  - create or preserve `Infrastructure/references/task-profile.json` for in-scope operational skills.
+- Treat graph-readiness as source quality, not cleanup work after the fact: add `## See Also`, include a topic-map signpost when graph-visible, and create or preserve `Infrastructure/references/task-profile.json` for in-scope operational skills.
 
 ## When to use
 Use this skill when the user asks to:
@@ -73,33 +70,18 @@ Start with:
 
 ## OpenAI skill format and progressive disclosure
 Enforce OpenAI/Codex skill format by default:
-- frontmatter uses official keys only:
-  - required: `name`, `description`
-  - optional: `metadata` in `SKILL.md` frontmatter when repo governance needs classification tags
+- frontmatter uses official keys only: required `name` and `description`, plus optional `metadata` only when repo governance needs classification tags
 - keep optional runtime metadata in `agents/openai.yaml` (for interface details, invocation policy, and tool dependencies) instead of overloading frontmatter
 - for this repository, use `metadata.skill-type` to classify skills for semantic indexing and governance checks
 - keep `description` as routing logic (what + when), not a procedure dump;
-- keep `SKILL.md` as the map:
-  - route-critical boundaries, required inputs, output contract, and safety guardrails stay in `SKILL.md`
-  - long examples, compatibility matrices, and operational runbooks move to `Infrastructure/references/`
-  - when relocating material, preserve high-value nuance, caveats, and doctrine in `Infrastructure/references/` instead of summarizing them away
-  - add explicit signposts so `SKILL.md` tells the reader which reference to open and when
-  - deterministic helpers stay in `Infrastructure/scripts/`
+- keep `SKILL.md` as the map: route-critical boundaries, required inputs, output contract, and safety guardrails stay in `SKILL.md`; long examples, compatibility matrices, and operational runbooks move to `Infrastructure/references/`; deterministic helpers stay in `Infrastructure/scripts/`
+- when relocating material, preserve high-value nuance, caveats, and doctrine in `Infrastructure/references/` and add explicit signposts so `SKILL.md` tells the reader which reference to open and when
 - for non-trivial responses, include machine-checkable output contracts with `schema_version`.
 
 ## Semantic tag governance
 Use semantic tags to complement directory categories without renaming folders.
 
-Canonical `metadata.skill-type` values:
-- `library_api_reference`
-- `product_verification`
-- `data_fetch_analysis`
-- `team_automation`
-- `scaffolding_templates`
-- `code_quality_review`
-- `ci_cd_deployment`
-- `runbook`
-- `infrastructure_ops`
+Canonical `metadata.skill-type` values: `library_api_reference`, `product_verification`, `data_fetch_analysis`, `team_automation`, `scaffolding_templates`, `code_quality_review`, `ci_cd_deployment`, `runbook`, `infrastructure_ops`.
 
 Governance rules:
 - for `create` mode in this repo, set `metadata.skill-type` on every new skill;
@@ -251,10 +233,7 @@ Use the compact flow below, then follow the linked references for full detail.
 3. Set trigger logic first (`description`) and add 8+/8+ trigger coverage in `Infrastructure/references/evals.yaml`.
 4. Scaffold and draft with minimal structure, moving deep policy to `Infrastructure/references/` and deterministic mechanics to `Infrastructure/scripts/`.
    - When slimming `SKILL.md`, preserve high-impact context in `Infrastructure/references/` and add explicit read-when signposts instead of collapsing the source material into a weaker summary.
-   - For repo skills, wire graph navigation while drafting:
-     - add `## See Also` with 2+ real related skills,
-     - add a topic-map signpost,
-     - create or preserve `Infrastructure/references/task-profile.json` when the skill is in the operational graph.
+   - For repo skills, wire graph navigation while drafting: add `## See Also`, add a topic-map signpost, and create or preserve `Infrastructure/references/task-profile.json` when operational.
 5. When recursive run evidence exists, consume `lesson_observations.json`, `lesson_candidates.json`, and `promotion_decision.json` and promote only repeated, rubric-bound lessons.
 6. Iterate gate-by-gate: fix one failure, rerun, then continue.
 7. Run description optimization before handoff and deliver only when gates are clear or triaged.
@@ -311,3 +290,6 @@ Reference files: `Infrastructure/references/governance-contract.md`, `quality-to
 - Overfitted routing language -> description only matches one phrasing -> expand to realistic paraphrases and near-neighbor cases, then recheck `Infrastructure/references/evals.yaml`.
 - Checklist dump in frontmatter -> `description` becomes procedure-heavy and undertriggers -> move process detail to `SKILL.md` or `Infrastructure/references/` and keep frontmatter routing-first.
 - Over-compression during cleanup -> valuable context gets deleted to satisfy disclosure rules -> preserve nuance in `Infrastructure/references/` and make `SKILL.md` a stronger signpost instead of a thinner substitute.
+
+## Remember
+- The agent is capable of extraordinary work in this domain when evidence is explicit and context is preserved. Use judgment, keep the next safe action obvious, and do not flatten nuance to satisfy a line budget.

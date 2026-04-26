@@ -1,0 +1,24 @@
+---
+name: "{{ skill_set_name }}"
+description: "{{ short_mutually_exclusive_description }}"
+metadata:
+  skill-type: root-skill-set
+  projection-mode: rooted
+---
+
+# {{ title }}
+
+This is a root skill set.
+
+Use this skill set only for: {{ scope }}.
+
+Do not use it for: {{ exclusions }}.
+
+Process:
+1. Classify the task as atom, molecule, or compound.
+2. Run `route_skillset.py` for this skill set.
+3. Load only the selected canonical `source_path`.
+4. Follow that module's contract.
+5. Record a minimal run observation when telemetry is enabled.
+
+Do not load the full manifest, enumerate child skills, or load unrelated skill sets.

@@ -13,8 +13,8 @@ Use this file for execution details after loading `SKILL.md`.
 ## Core Commands
 
 ```bash
-python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py <plugin-name>
-python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.py <plugin-name> --with-marketplace
+python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw <plugin-name>
+python3 Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw <plugin-name> --with-marketplace
 ```
 
 ## Optional Flags Guidance

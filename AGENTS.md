@@ -76,6 +76,8 @@ Behavior contract:
 
 For shared testing workflow guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#testing).
 
+When changing executable behavior, run the smallest real code path that exercises the exact production code touched before claiming the work is complete. If no existing test or command covers it, create a temporary reproduction under `/codex-scripts/` and keep that directory gitignored.
+
 ## Shell Scripting
 
 For shared shell scripting guidance, see [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md#shell-scripting).

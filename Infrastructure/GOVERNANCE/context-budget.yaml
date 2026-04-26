@@ -1,0 +1,17 @@
+runtime_projection:
+  max_root_skill_sets: 10
+  max_root_description_words_total: 350
+  max_root_body_words_each: 250
+  max_visible_flat_skills_in_hybrid: 5
+
+routing:
+  max_candidates_returned: 3
+  forbid_full_manifest_output: true
+  forbid_unrelated_skillset_load: true
+
+modules:
+  max_loaded_modules_per_task: 3
+  max_module_body_words: 900
+
+workouts:
+  max_skill_context_tokens: 1500

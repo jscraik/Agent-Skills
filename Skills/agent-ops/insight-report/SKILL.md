@@ -1,6 +1,6 @@
 ---
 name: insight-report
-description: "WHAT: Generate comprehensive HTML insights from Codex OTEL data using local Ollama LLMs. WHEN: Use when the user asks for usage analytics, workflow patterns, Codex session summaries, or recommendations for improving their development workflow."
+description: "WHAT: Generate Codex-authored HTML insights from local Codex sessions and telemetry. WHEN: Use when the user asks for Codex usage analytics, workflow patterns, session summaries, prompting help, or recommendations for improving how they use Codex."
 metadata:
   skill-type: data_fetch_analysis
 ---
@@ -13,268 +13,226 @@ metadata:
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Workflow](#workflow)
+- [Codex Writer Contract](#codex-writer-contract)
+- [Codex Browser Launch](#codex-browser-launch)
+- [Validation](#validation)
+- [Failure Modes](#failure-modes)
+- [Gotchas](#gotchas)
+- [Safety](#safety)
+- [Anti-patterns](#anti-patterns)
 - [Examples](#examples)
-- [Implementation details](#implementation-details)
 - [References](#references)
 - [See Also](#see-also)
 
-Full-featured Codex analytics with local LLM-powered session analysis. Uses **local Ollama LLMs** for intelligent session analysis.
+Generate a local Codex usage report where **Codex is the only narrative insight writer**. The Python runner collects evidence and renders HTML; Codex writes the analysis JSON.
 
 ## Philosophy
 
-- **Evidence over intuition** — OTEL telemetry, not guesswork
-- **Local LLM analysis** — Privacy-first with Ollama
-- **Actionable recommendations** — Specific, contextual advice
-- **Visual clarity** — Clean charts, structured presentation
+- **Evidence over intuition**: use local sessions and telemetry, not guesswork.
+- **Codex-authored insight**: Codex writes the narrative, recommendations, and prompting help.
+- **Plain-English coaching**: translate technical patterns into language Jamie can reuse without needing specialist vocabulary.
+- **Auditable artifacts**: keep the evidence bundle, prompt, generated insight JSON, and HTML report on disk.
 
 ## When to use
 
 - "Show me my Codex analytics"
 - "Generate my weekly insights report"
-- "What am I doing well?"
+- "What am I doing well with Codex?"
 - "Where am I getting stuck?"
-
-**Requirements:** `CODEX_OTEL_ENABLED=1`, Ollama installed
+- "Help me prompt better when I don't know the technical terms"
 
 ## Required inputs
 
-- Session data in `~/.codex/sessions/` (primary) or OTEL data in `~/.agents/otel-collector/`
-- Time window: `--days N` (default: 7)
-- Ollama model: `--model MODEL` (default: qwen3-coder)
-
-Optional:
-- `--skip-llm` — Basic metrics only (faster)
-- `--verbose` — Show progress
-- `--no-open` — Don't launch browser
+- Session data in `~/.codex/sessions/`.
+- Optional telemetry data in `~/.agents/otel-collector/` when available.
+- Time window: `--days N` (default: 7).
+- Codex CLI available as `codex` unless using `--prepare-only`.
 
 ## Deliverables
 
-- HTML report: `file://$HOME/dev/configs/codex/usage-data/report.html`
-- Facet cache: `$HOME/dev/configs/codex/usage-data/facets-cache.json`
-- Report includes:
-  - Session stats (count, duration, success rate)
-  - Tool usage charts
-  - **At a Glance** summary (4 sections)
-  - Project areas analysis
-  - Interaction style narrative
-  - Friction point analysis
-  - AGENTS.md suggestions
-  - Feature recommendations
-  - Ambitious workflows for future AI
+- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insight-evidence.json`
+- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/INSIGHT_PROMPT.md`
+- Codex-written insight JSON: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insights.generated.json`
+- HTML report: `file://${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/report.html`
+- Browser launch: open the final `REPORT_URL=` in the Codex in-app browser when available.
 
-## Quick Start
+The report includes:
 
-```bash
-# 1. Enable OTEL
-export CODEX_OTEL_ENABLED=1
-codex
-
-# 2. Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-# Uses your installed models (qwen3-coder recommended)
-
-# 3. Generate report
-python3 Skills/insight-report/Infrastructure/scripts/run_insight_report.py
-```
-
-## Report Sections
-
-| Section | Description |
-|---------|-------------|
-| **At a Glance** | 4 summaries: working, hindering, quick wins, ambitious workflows |
-| **What You Work On** | Project areas with session counts |
-| **How You Use Codex** | Narrative analysis of interaction style |
-| **Impressive Things** | Your wins and effective workflows |
-| **Where Things Go Wrong** | Friction categories with examples |
-| **AGENTS.md Suggestions** | Rules you repeat that should be in AGENTS.md |
-| **Features to Try** | MCP, Skills, Hooks, Headless, Agent recommendations |
-| **On the Horizon** | Ambitious workflows for upcoming AI capabilities |
-
-## LLM Analysis
-
-### Facet Extraction (per session)
-
-```json
-{
-  "underlying_goal": "What user wanted",
-  "goal_categories": {"implement_feature": 2},
-  "outcome": "fully_achieved",
-  "user_satisfaction": "happy",
-  "assistant_helpfulness": "essential",
-  "session_type": "iterative_refinement",
-  "friction_counts": {"misunderstood_request": 1},
-  "friction_summary": "Description",
-  "primary_success": "correct_edits",
-  "brief_summary": "One sentence"
-}
-```
-
-### Parallel Insight Generation
-
-6 sections generated concurrently via Ollama:
-- at_a_glance, project_areas, interaction_style
-- what_works, friction_analysis, suggestions, on_the_horizon
-
-**Time:** ~60s with qwen3-coder, ~3 parallel workers
-
-### Model Recommendations
-
-| Model | Speed | Quality |
-|-------|-------|---------|
-| `qwen3-coder` | Fast | ★★★☆ |
-| `phi4` | Fast | ★★★☆ |
-| `qwen3.5` | Medium | ★★★★ |
-
-## Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `CODEX_OTEL_ENABLED` | `0` | Enable OTEL collection |
-| `INSIGHTS_MODEL` | `qwen3-coder` | Ollama model |
-| `OLLAMA_HOST` | `http://localhost:11434` | API endpoint |
-| `INSIGHTS_WORKERS` | `3` | Parallel workers |
+- Session stats and tool usage charts.
+- At-a-glance summary.
+- Project area analysis.
+- Interaction style narrative.
+- Friction analysis.
+- Plain-English prompting help.
+- AGENTS.md suggestions.
+- Codex feature recommendations.
+- Priority fixes and future workflows.
 
 ## Workflow
 
 ```bash
-python3 Skills/insight-report/Infrastructure/scripts/run_insight_report.py [options]
-
-# Process:
-# 1. Parse OTEL spans from ~/.agents/otel-collector/
-# 2. Group by session, extract metrics
-# 3. [LLM] Extract facets from transcripts
-# 4. [LLM] Generate 6 insight sections in parallel
-# 5. Render HTML with charts
-# 6. Open in browser
+python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --days 7
 ```
+
+Process:
+
+1. Parse recent sessions from `~/.codex/sessions/`.
+2. Compute deterministic metrics, tool counts, errors, response timing, and parallel Codex usage.
+3. Write `insight-evidence.json`.
+4. Write `INSIGHT_PROMPT.md`.
+5. Invoke `codex exec --sandbox read-only` and pass the prompt on stdin.
+6. Parse Codex's JSON response into `insights.generated.json`.
+7. Render `report.html` from the deterministic metrics and Codex-written insights.
+8. Open the printed `REPORT_URL=` in the Codex in-app browser.
+
+Use `--prepare-only` when this live Codex session should write the insight JSON manually instead of invoking `codex exec`:
+
+```bash
+python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --prepare-only --no-open
+```
+
+Use `--render-only` after editing or regenerating `insights.generated.json`:
+
+```bash
+python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-only --no-open
+```
+
+## Codex Browser Launch
+
+After the HTML report is completed, read the runner output line:
+
+```text
+REPORT_URL=file://$HOME/dev/configs/codex/usage-data/report.html
+```
+
+Then use the Browser plugin's in-app browser workflow to open that URL. Prefer the Codex browser over macOS `open` when this skill is running inside Codex.
+
+If Browser tooling is unavailable, report the `REPORT_URL` clearly and leave the file on disk.
+
+Do not claim the browser launch happened until the Codex browser has actually navigated to the `REPORT_URL`.
+
+## Codex Writer Contract
+
+Codex must return only valid JSON with these top-level sections:
+
+- `metadata`
+- `at_a_glance`
+- `project_areas`
+- `interaction_style`
+- `what_works`
+- `friction_analysis`
+- `prompting_help`
+- `suggestions`
+- `on_the_horizon`
+- `actionable_fixes`
+- `fun_ending`
+
+The writer must:
+
+- Use only the evidence bundle.
+- Avoid inventing outcomes, files, tools, or user sentiment.
+- Write in second person.
+- Separate Codex-side friction from user-side ambiguity.
+- Include copyable prompts for situations where Jamie lacks the technical vocabulary.
+- Put missing-data caveats in `metadata.limitations`.
 
 ## Validation
 
-- [ ] OTEL directory exists with span files
-- [ ] Ollama running (if using LLM)
-- [ ] Model available
-- [ ] Sessions parsed successfully
-- [ ] Insights generated
-- [ ] HTML renders correctly
+Stop at the first failed gate. Do not continue to report rendering, browser launch, or final summary if evidence generation, prompt writing, Codex JSON generation, JSON validation, or HTML generation fails.
 
-## Failure mode
+- Evidence file exists and is valid JSON.
+- Prompt file exists and is non-empty.
+- `insights.generated.json` exists and is valid JSON.
+- Required insight sections are present.
+- HTML renders without requiring a network connection.
+- Final `REPORT_URL=` was opened in the Codex in-app browser, or Browser unavailability was disclosed.
+- Use repo validation before finishing changes to the skill:
 
-**No tool data available:**
-```
-Top Tools Used: Not available — Codex runs tools server-side
-```
-OpenAI Codex runs tools server-side for security. Tool execution data is not stored 
-locally (unlike Codex's ~/.codex/projects/ format).
-
-**To enable general analytics:**
 ```bash
-codex features enable general_analytics
+./bin/ask skills audit Skills/agent-ops/insight-report --level strict --json
 ```
 
-Or add to `~/.codex/config.toml`:
-```toml
-general_analytics = true
+## Failure Modes
+
+**No session data found:**
+
+```text
+No session data found in ~/.codex/sessions/
 ```
 
-Note: `general_analytics` is currently under development (default: false).
+Run Codex for a few sessions first, then regenerate the report.
 
-**Ollama not running:**
-```
-⚠ Ollama not available. Install: curl -fsSL https://ollama.com/install.sh | sh
-  Uses your installed models (qwen3-coder recommended)
-```
+**Codex CLI unavailable:**
 
-**Model not found:**
-```
-⚠ Model not found. Run: ollama pull qwen3-coder
-```
+Use `--prepare-only`, then ask the current Codex session to read `INSIGHT_PROMPT.md`, write `insights.generated.json`, and rerun with `--render-only`.
 
-## Constraints
+**Codex returned invalid JSON:**
 
-- OTEL must be enabled before collection (can't retroactively collect)
-- LLM requires Ollama running locally
-- First report may show "no data" (wait for sessions)
-- Large windows (30+ days) with LLM: 2-5 minutes
-- Facet extraction limited to 50 recent sessions
-- Secrets and sensitive data are redacted by default in session content
+Open `INSIGHT_PROMPT.md`, ask Codex to repair the JSON shape, save `insights.generated.json`, and rerun `--render-only`.
+
+## Gotchas
+
+- `--prepare-only` intentionally does not render HTML; it only writes the evidence bundle and prompt for Codex-authored analysis.
+- Sparse or missing sessions are not a runner failure. Preserve the limitation in the generated insight JSON instead of inventing patterns.
+- The report path is outside this repository under `$HOME/dev/configs/codex/usage-data/`; do not commit generated reports or prompts to `agent-skills`.
+- Browser launch is a separate verification step. The runner printing `REPORT_URL=` is not proof that the Codex in-app browser opened it.
 
 ## Safety
 
-- Session data is processed locally by Ollama and never sent to external APIs
-- API keys and secrets in session content are redacted by default in the HTML report
-- Reports are saved to local filesystem only (`$HOME/dev/configs/codex/usage-data/`)
+- The runner reads local Codex session data and writes local report artifacts only.
+- Codex receives a bounded evidence bundle, not unrestricted filesystem access.
+- `codex exec` is invoked with `--sandbox read-only`.
+- The Python runner saves the generated JSON and HTML locally.
+- Sensitive-looking values in sessions should be treated as evidence only, not repeated unless needed for a safe recommendation.
 
 ## Anti-patterns
 
-| Anti-pattern | Why it fails | Do instead |
-|--------------|--------------|------------|
-| Not enabling telemetry | Missing analytics data | Run `codex features enable general_analytics` |
-| Skipping LLM always | Miss personalized insights | Use LLM for weekly reviews |
-| Ignoring AGENTS.md suggestions | Repeat instructions | Add repeated rules to AGENTS.md |
-| Not acting on friction | Miss improvements | Address high-priority friction |
+| Anti-pattern | Safer behavior |
+|--------------|----------------|
+| Asking another model or local service to write the narrative | Use the Codex writer path only, or stop in `--prepare-only` for this Codex session to write it |
+| Guessing insights when sessions are missing or sparse | State the evidence gap in `metadata.limitations` and keep claims conservative |
+| Passing user-supplied shell commands into the report runner | Use the fixed `codex exec --sandbox read-only` invocation |
+| Repeating secrets, tokens, or private prompt fragments from session logs | Summarize the pattern without exposing sensitive strings |
+| Saying the report opened in the Codex browser before navigation succeeds | Report the `REPORT_URL` and disclose Browser unavailability or failure |
+| Turning report suggestions into automatic cleanup commands | Keep recommendations copyable and non-destructive unless the user explicitly asks for follow-up implementation |
 
 ## Examples
 
-**Standard weekly review:**
-```
-User: "Generate my weekly insights"
-→ python3 Skills/insight-report/Infrastructure/scripts/run_insight_report.py
-→ Full analysis with qwen3-coder
+**Standard weekly review with browser launch:**
+
+```bash
+python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --days 7
 ```
 
-**Quick metrics (no LLM):**
-```
-User: "Just the numbers"
-→ python3 Skills/insight-report/Infrastructure/scripts/run_insight_report.py --skip-llm
-→ 5 seconds vs 60 seconds
+After the runner prints `REPORT_URL=file://...`, open that URL in the Codex in-app browser and mention the local path in the summary.
+
+**Prepare artifacts for this Codex conversation to write:**
+
+```bash
+python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --prepare-only --no-open
 ```
 
-**Monthly with better model:**
-```
-User: "Monthly report"
-→ python3 Skills/insight-report/Infrastructure/scripts/run_insight_report.py \
-    --days 30 --model llama3.1:8b --no-open
+**Render after Codex-written JSON exists:**
+
+```bash
+python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-only --no-open
 ```
 
 ## References
 
-- Generator: `Infrastructure/scripts/run_insight_report.py`
-- Facet cache: `$HOME/dev/configs/codex/usage-data/facets-cache.json`
-- OTEL paths: `~/.agents/otel-collector/`
+- Generator: `Skills/agent-ops/insight-report/scripts/run_insight_report.py`
+- Configuration: `references/configuration.md`
+- Writer contract: `references/codex-writer.md`
+- Report format: `references/report-format.md`
+- Output root: `$HOME/dev/configs/codex/usage-data/`
 
 ## See Also
 
 | Skill | When to use |
 |-------|-------------|
-| [[codex-automation-architect]] | Convert recommendations into automations |
-| [[codex-home-audit]] | Check Codex setup health |
-| [[skill-refactor]] | Analyze skill usage |
-| [[visual-explainer]] | Convert outcomes into visual explainers |
+| [[codex-automation-architect]] | Convert recommendations into Codex automations |
+| [[skill-refactor]] | Analyze skill usage and improvement opportunities |
+| [[ubiquitous-language]] | Extract terminology Jamie can reuse in future prompts |
 
 **Topic map:** [[agent-ops]]
-
-## Gotchas
-
-- **OTEL first** — Enable before running sessions
-- **Ollama running** — Start with `ollama serve`
-- **Uses your installed models** — qwen3-coder, phi4, or qwen3.5
-- **Large models need VRAM** — 8B needs ~8GB GPU
-- **50 session limit** — Only recent sessions analyzed
-- **Facet cache speeds reruns** — Same sessions not re-analyzed
-
-## Implementation
-
-**Comparison:**
-
-| Feature | Cloud Analytics | This (Local) |
-|---------|-----------------|--------------|
-| Data source | Remote collection | `~/.agents/otel-collector/*.jsonl` |
-| LLM backend | Cloud API | Local Ollama |
-| Privacy | Data leaves machine | Fully local |
-| Facet extraction | Yes | Yes (async/parallel) |
-| Parallel insights | 6 sections | 6 sections |
-| Charts | 8+ | 2-3 |
-| Remote hosts | Yes | No |
-| Lines | ~1,600 | ~865 |
-
-**Key differences:** Local Ollama (privacy), Python, focused scope.

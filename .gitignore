@@ -66,6 +66,7 @@ Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/ar
 Plugins/plugin-factory/skills/**/.DS_Store
 Plugins/plugin-factory/skills/**/__pycache__/
 sync-symlink/
+**/.codex-repo-plugin-source
 
 # Generated artifacts
 .diagram/*
@@ -109,6 +110,7 @@ FORJAMIE-*.md
 /FORJAMIE
 
 # Misc local throwaways
+/codex-scripts/
 *.skill
 Docs/product/Archive.zip
 logs/
@@ -126,6 +128,9 @@ environment.toml
 Infrastructure/artifacts/skill-graphs/telemetry/candidates.jsonl
 Infrastructure/artifacts/skill-graphs/telemetry/skill-genome-processing-stats.json
 Infrastructure/artifacts/skill-graphs/telemetry/.genome-watermark
+
+# Skill workout runtime telemetry
+.skill-telemetry/
 
 Infrastructure/artifacts/policy/
 

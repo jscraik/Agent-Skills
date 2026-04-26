@@ -45,6 +45,14 @@ Read when:
 
 - adapt only to requested scope (repo-local, home-local, or migration)
 - include optional surfaces only when requested
+- vary scaffold examples for marketplace, private/internal, and skill-adoption requests while keeping manifest fields deterministic
+
+## Examples
+
+- "Create a repo-local plugin called `linear-helpers` with the required `.codex-plugin/plugin.json`, but do not add marketplace metadata yet."
+- "Create `review-tools` as a plugin and add it to the local marketplace with explicit installation and authentication policy fields."
+- "Move my existing `agent-ops/branch-cleanup` skill into a new plugin without leaving a duplicate canonical copy."
+- "Can you migrate this GitHub workflow helper into a plugin scaffold and validate the manifest before marketplace wiring?"
 
 ## Validation
 
@@ -74,3 +82,6 @@ Fail fast: stop at first failed gate and report blocker text.
 - `references/task-profile.json`
 - `references/plugin-json-spec.md`
 - `assets/`
+
+## Remember
+- The agent is capable of extraordinary plugin work when the scaffold stays deterministic. Keep names boring, policy fields explicit, and optional surfaces limited to what the user actually asked for.

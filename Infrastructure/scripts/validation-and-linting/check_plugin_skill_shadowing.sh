@@ -51,7 +51,8 @@ flat_names_file="$(mktemp "${TMPDIR:-/tmp}/flat-skill-names.XXXXXX")"
 overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-flat-overlap.XXXXXX")"
 shadowed_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-shadowed-overlap.XXXXXX")"
 system_bridge_names_file="$(mktemp "${TMPDIR:-/tmp}/system-bridge-skill-names.XXXXXX")"
-trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file"' EXIT
+root_skill_names_file="$(mktemp "${TMPDIR:-/tmp}/root-skill-set-names.XXXXXX")"
+trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file" "$root_skill_names_file"' EXIT
 
 selection_policy_shell="$(
   python3 "$selection_policy_path" --format shell
@@ -61,8 +62,18 @@ if [ -z "$selection_policy_shell" ]; then
   exit 1
 fi
 eval "$selection_policy_shell"
+projection_engine_path="$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py"
+if [ ! -f "$projection_engine_path" ]; then
+  projection_engine_path="$script_dir/../lifecycle-and-sync/projection_engine.py"
+fi
+if [ -f "$projection_engine_path" ]; then
+  projection_policy_shell="$(python3 "$projection_engine_path" --format shell 2>/dev/null || true)"
+  if [ -n "$projection_policy_shell" ]; then
+    eval "$projection_policy_shell"
+  fi
+fi
 # Safely handle empty arrays under bash 3.x where ${arr[@]} with set -u
-# fails when the array is empty.  Re-parse the variable line from the eval output.
+# is_allowlisted_overlap_skill_name checks whether SKILL_NAME appears in the space-separated system_bridge_skill_names and returns success (0) if it does, failure (1) otherwise.
 is_allowlisted_overlap_skill_name() {
   local skill_name="$1"
   local _rv_list=""
@@ -71,6 +82,19 @@ is_allowlisted_overlap_skill_name() {
     return 0
   fi
   return 1
+}
+
+# is_rooted_projection_active checks the authoritative projection policy instead
+# of inferring mode from stale generated .agents/skills contents.
+is_rooted_projection_active() {
+  [ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-}" = "rooted" ]
+}
+
+# is_root_skill_set_name checks whether the provided skill name appears in the root skill names file and returns success (0) if it does.
+is_root_skill_set_name() {
+  local skill_name="$1"
+  [ -s "$root_skill_names_file" ] || return 1
+  grep -Fxq "$skill_name" "$root_skill_names_file"
 }
 
 # Only treat bridge names as intentional when the top-level skill path is a
@@ -96,6 +120,10 @@ if [ -s "$system_bridge_names_file" ]; then
   done < "$system_bridge_names_file"
 fi
 
+for root_skill_name in "${SELECTION_POLICY_ROOT_SKILL_SETS[@]:-}"; do
+  printf '%s\n' "$root_skill_name" >> "$root_skill_names_file"
+done
+
 plugins_root="Plugins"
 if [ ! -d "$plugins_root" ] && [ -d "plugins" ]; then
   plugins_root="plugins"
@@ -118,6 +146,9 @@ if [ -s "$plugin_names_file" ] && [ -s "$flat_names_file" ]; then
   comm -12 "$plugin_names_file" "$flat_names_file" | sed '/^$/d' > "$overlap_names_file"
   while IFS= read -r overlap_name; do
     if [ -z "$overlap_name" ] || is_allowlisted_overlap_skill_name "$overlap_name"; then
+      continue
+    fi
+    if is_rooted_projection_active && is_root_skill_set_name "$overlap_name"; then
       continue
     fi
     printf '%s\n' "$overlap_name" >> "$shadowed_names_file"

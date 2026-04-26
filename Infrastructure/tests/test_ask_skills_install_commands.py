@@ -10,8 +10,8 @@ from unittest.mock import patch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills import install_skill
-from ask.envelope import CallResult
+from ask.commands.skills import install_skill  # noqa: E402
+from ask.envelope import CallResult  # noqa: E402
 
 
 class TestAskSkillsInstallCommands(unittest.TestCase):
@@ -206,7 +206,7 @@ class TestAskSkillsInstallCommands(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         sync_mock.assert_called_once_with(self.repo_root, scope="workspace", dry_run=False)
-        self.assertEqual(result.data.get("canonical_dest"), "github")
+        self.assertEqual(result.data.get("canonical_dest"), "Skills/github")
 
 
 if __name__ == "__main__":

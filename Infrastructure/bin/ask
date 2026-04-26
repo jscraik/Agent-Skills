@@ -36,6 +36,7 @@ from ask.commands.skills import (
     init_skill,
     extract_family_fail_lines,
 )
+from ask.commands.runtime import add_runtime_parser, dispatch_runtime
 from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog, provider_audit
 from ask.commands.plugins import (
     init_plugin,
@@ -51,7 +52,7 @@ from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
 from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
-
+from ask.commands.workouts import add_workouts_parser, dispatch_workouts, render_workouts_human
 # Error Code Mapping (per spec Error Registry)
 ERROR_MAP = {
     ErrorCode.SUCCESS: ExitCode.SUCCESS,
@@ -62,6 +63,10 @@ ERROR_MAP = {
     ErrorCode.ERR_SCHEMA_INVALID: ExitCode.ERR_VALIDATION,
     ErrorCode.ERR_INVALID_HANDOFF: ExitCode.ERR_VALIDATION,
     ErrorCode.ERR_INVALID_STATE: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_INVALID_SCOPE: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_INVALID_PROJECTION_MODE: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_DEFERRED_PROJECTION_MODE: ExitCode.ERR_VALIDATION,
+    ErrorCode.ERR_PROJECTION_MUTATION_UNAVAILABLE: ExitCode.ERR_VALIDATION,
     ErrorCode.ERR_DEPENDENCY: ExitCode.ERR_DEPENDENCY,
     ErrorCode.ERR_CONFLICT: ExitCode.ERR_CONFLICT,
     ErrorCode.ERR_REDUNDANCY: ExitCode.ERR_CONFLICT,
@@ -69,15 +74,17 @@ ERROR_MAP = {
 }
 
 # Valid commands for fuzzy matching
-VALID_TOPICS = ["repo", "skills", "plugins", "evals", "graph", "mcp", "wiki"]
+VALID_TOPICS = ["repo", "skills", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog", "provider-audit"],
     "skills": ["list", "budget", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
+    "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
     "wiki": ["lint", "ingest", "add", "query", "add-asset"],
+    "workouts": ["list", "run", "score", "promote"],
 }
 
 TOPIC_EXAMPLES: Dict[str, List[str]] = {
@@ -94,6 +101,10 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills route \"find the right security skill\"",
         "ask skills goal \"implement this feature safely\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
+    ],
+    "runtime": [
+        "ask runtime surface --json",
+        "ask runtime budget --json",
     ],
     "plugins": [
         "ask plugins list",
@@ -120,6 +131,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask wiki add --interactive",
         "ask wiki query \"1password signing\"",
     ],
+    "workouts": ["ask workouts list --json", "ask workouts run harness-engineering/he-spec --attempts 3 --json"],
 }
 
 COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
@@ -134,6 +146,14 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("skills", "budget"): [
         "ask skills budget",
         "ask skills budget --default-max 30 --json",
+    ],
+    ("runtime", "surface"): [
+        "ask runtime surface --json",
+        "ask runtime surface --default-max 30 --json",
+    ],
+    ("runtime", "budget"): [
+        "ask runtime budget",
+        "ask runtime budget --default-max 30 --json",
     ],
     ("skills", "audit"): [
         "ask skills audit Skills/backend-platform/cli-spec --level compat",
@@ -214,6 +234,7 @@ FUZZY_MATCHES = {
     "catalog": "doctor-catalog",
     "provider": "provider-audit",
     "provider-audit": "provider-audit",
+    "surface": "surface",
     "budget": "budget",
     "topics": "topics",
     "tags": "topics",
@@ -665,14 +686,11 @@ def main():
         ),
     )
     subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
-    
     # --- repo ---
     repo_parser = subparsers.add_parser("repo", help="Repository management", parents=[global_parser])
     repo_subparsers = repo_parser.add_subparsers(dest="action")
-    
     repo_status_parser = repo_subparsers.add_parser("status", help="Show repository status", parents=[global_parser])
     repo_status_parser.add_argument("--verbose", action="store_true", help="Include more details")
-    
     repo_validate_parser = repo_subparsers.add_parser("validate", help="Run all repository validations", parents=[global_parser])
     repo_validate_parser.add_argument("--ephemeral", action="store_true", help="Do not mutate repo validation artifacts")
     repo_validate_parser.add_argument("--fail-fast", action="store_true", help="Stop after the first required failure")
@@ -691,7 +709,6 @@ def main():
     # --- skills ---
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
     skills_subparsers = skills_parser.add_subparsers(dest="action")
-    
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
     skills_list_parser.add_argument("--category", help="Filter by category")
     skills_list_parser.add_argument("--advanced", action="store_true", help="Include lane skills hidden in default listings")
@@ -700,6 +717,9 @@ def main():
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
     skills_budget_parser = skills_subparsers.add_parser("budget", help="Verify default skill runtime budget", parents=[global_parser])
     skills_budget_parser.add_argument("--default-max", type=int, default=30, help="Maximum default-visible skills")
+
+    # --- runtime ---
+    add_runtime_parser(subparsers, global_parser)
 
     skills_route_parser = skills_subparsers.add_parser("route", help="Route a request to matching skills", parents=[global_parser])
     skills_route_parser.add_argument("request", nargs="+", help="Request text to route")
@@ -714,11 +734,13 @@ def main():
     skills_starter_parser = skills_subparsers.add_parser("starter", help="List starter-mode curated skills", parents=[global_parser])
     skills_starter_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
     skills_starter_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
-    
     skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
     skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
-    
+    skills_sync_parser.add_argument(
+        "--projection",
+        help="Runtime projection mode: flat, rooted, or skill-tree alias for rooted",
+    )
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
@@ -811,6 +833,9 @@ def main():
     
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
+
+    # --- workouts ---
+    add_workouts_parser(subparsers, global_parser)
 
     # --- graph ---
     graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
@@ -1092,7 +1117,7 @@ def main():
                 limit=args.limit,
             )
         elif args.action == "sync":
-            result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run)
+            result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run, projection=args.projection)
         elif args.action == "audit":
             result = audit_skill(repo_root, skill_path=args.path, level=args.level)
         elif args.action == "install":
@@ -1109,6 +1134,9 @@ def main():
                 message=f"{action_msg} for topic 'skills'",
                 fix_suggestion="Valid actions: list, budget, route, goal, starter, sync, audit, install, fold, init"
             ))
+
+    elif args.topic == "runtime":
+        result = dispatch_runtime(repo_root, args)
             
     elif args.topic == "plugins":
         if args.action == "list":
@@ -1190,6 +1218,9 @@ def main():
                 message=f"{action_msg} for topic 'evals'",
                 fix_suggestion="Valid actions: run, benchmark, dashboard"
             ))
+
+    elif args.topic == "workouts":
+        result = dispatch_workouts(repo_root, args)
 
     elif args.topic == "graph":
         if args.action == "related":
@@ -1455,6 +1486,15 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('advanced_visible_count')} advanced"
                     )
+                elif args.topic == "runtime" and args.action in ("surface", "budget"):
+                    report = result.data.get("runtime_surface") or result.data.get("runtime_budget", {})
+                    label = "surface" if args.action == "surface" else "budget"
+                    print(
+                        f"✅ Runtime {label}: "
+                        f"{report.get('projection_mode')} projection, "
+                        f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
+                        f"{report.get('hidden_system_count')} system lane"
+                    )
                 elif args.topic == "skills" and args.action == "route":
                     decision = result.data["decision"]
                     print(f"🧭 Route decision: {decision['decision_status']}")
@@ -1520,6 +1560,8 @@ def main():
                         print("  (Dry run - no changes made)")
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
+                elif args.topic == "workouts":
+                    render_workouts_human(args, result)
                 elif args.topic == "skills" and args.action == "audit":
                     print(f"✅ Audit passed: {args.path}")
                     print(result.data["diagnostics"]["stdout"])

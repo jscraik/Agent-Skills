@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import tempfile
 import unittest
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from unittest.mock import patch
 
@@ -9,19 +10,32 @@ from unittest.mock import patch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INSTALLER_PATH = (
     REPO_ROOT
-    / "Skills"
+    / "Plugins"
+    / "skill-factory"
+    / "skills"
+    / "infrastructure_ops"
     / "skill-installer"
     / "scripts"
-    / "install-skill-from-github.py"
+    / "install-skill-from-github.pyw"
 )
 INSTALLER_DIR = INSTALLER_PATH.parent
 
 
 def _load_installer():
+    """
+    Dynamically load the installer script from INSTALLER_PATH and return it as a module.
+    
+    If INSTALLER_DIR is not already on sys.path, it is inserted. The loaded module is registered in
+    sys.modules under the name "skill_installer_security_policy".
+    
+    Returns:
+        module: The imported installer module object.
+    """
     if str(INSTALLER_DIR) not in sys.path:
         sys.path.insert(0, str(INSTALLER_DIR))
     module_name = "skill_installer_security_policy"
-    spec = importlib.util.spec_from_file_location(module_name, INSTALLER_PATH)
+    loader = SourceFileLoader(module_name, str(INSTALLER_PATH))
+    spec = importlib.util.spec_from_loader(module_name, loader)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module

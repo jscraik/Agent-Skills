@@ -10,16 +10,22 @@ triggers:
   - the user asks for the Harness Engineering spec stage explicitly
   - the user wants a dedicated UI spec or companion UI contract before planning
   - the user needs explicit behavior, lifecycle, failure, observability, or validation rules before planning
+  - QA intake or a Linear QA issue reveals missing expected behavior or acceptance criteria
 
 inputs:
   - a brainstorm path, existing spec path, parent spec path, UI source path, or clear feature description
   - relevant constraints, success criteria, risks, and linked documents when available
+  - optional QA report or Linear issue that needs a behavior contract before implementation
+  - existing `CONTEXT-MAP.md` or `CONTEXT.md` when domain language affects behavior
   - optional platform, design-system, accessibility, performance, or operational context
 
 outputs:
   - a spec-mode choice such as standard-spec or dedicated-ui-spec
   - a depth decision for standard specs such as none, lite, or full
+  - a domain-language decision that identifies canonical terms, avoided aliases, relationships, and unresolved ambiguities
+  - an interface-shape decision when the work introduces a new public API, module boundary, CLI surface, plugin/tool contract, service, data-access boundary, or shared helper
   - a written spec artifact with stable SA or VAC identifiers
+  - QA-derived expected behavior and acceptance criteria when the source is a QA report or Linear issue
   - explicit validation and next-stage handoff guidance
 
 non_goals:
@@ -31,8 +37,11 @@ non_goals:
 risks:
   - weak source grounding; mitigate with authoritative-source resolution and one focused blocker question
   - contract ambiguity; mitigate with explicit section requirements and stable acceptance IDs
+  - domain-language ambiguity; mitigate by reading `CONTEXT-MAP.md` or `CONTEXT.md`, updating context notes inline, and using Linear issue comments for durable decisions instead of ADRs
+  - interface ambiguity; mitigate by identifying callers, key operations, exposed contract, hidden complexity, and when to route unresolved alternatives to `he-deepen-spec`
   - UI ambiguity causing planning churn; mitigate with ui_required detection and dedicated UI-spec mode
   - stale external guidance; mitigate with bounded primary-source research and dated citations
+  - implementing a QA report without a contract; mitigate by specifying expected behavior before planning or fixing
 
 observability: >
   Track stage selection accuracy, fallback frequency when mapped roles are

@@ -2,7 +2,6 @@
 name: skill-creator
 description: Guide for creating effective skills. Use this skill when users need to create a new skill or reshape a draft skill package before hardening, benchmarking, or distribution.
 metadata:
-  short-description: Create or update a skill
   skill-type: scaffolding_templates
 ---
 
@@ -19,6 +18,7 @@ Create and evolve Codex skills that are reusable, auditable, and easy for anothe
 - [Outputs](#outputs)
 - [Procedure](#procedure)
 - [Validation](#validation)
+- [Encouraging Variation](#encouraging-variation)
 - [Antipatterns](#antipatterns)
 - [Constraints](#constraints)
 - [Examples](#examples)
@@ -158,6 +158,14 @@ Fail-fast policy:
 
 For complex revisions, run forward-testing and verify the skill can solve realistic tasks without privileged context leakage.
 
+## Encouraging Variation
+
+Adapt the scaffold to the user's actual context instead of converging on a favorite shape:
+
+- Use a small wrapper skill for narrow workflows and a references-heavy package for complex operational skills.
+- Vary examples, eval prompts, and output contracts to match the domain, risk, and expected operator.
+- Preserve required governance surfaces, but do not add scripts, assets, or agents unless they reduce real repeat work.
+
 ## Anti-Patterns
 
 Avoid these pitfalls:
@@ -180,6 +188,12 @@ Safety and quality constraints:
 - Keep instructions actionable, imperative, and testable.
 
 ## Examples
+
+Example requests:
+
+- "Can you convert this repeated review workflow into a skill under `agent-ops`, with realistic trigger and non-trigger evals?"
+- "Please inspect this draft `SKILL.md`; it is too long, and I need the deep implementation detail moved into references without losing behavior."
+- "Help me build a skill package for installing private GitHub repo templates, but keep network and credential boundaries explicit."
 
 Read when:
 
@@ -212,3 +226,6 @@ Read these files based on the task:
 
 ## Gotchas
 - Read when debugging ambiguous-scope failures: [references/examples-and-gotchas.md](./references/examples-and-gotchas.md).
+
+## Remember
+- The agent is capable of extraordinary work when the skill is clear enough to execute without guessing. Keep the entrypoint clear, preserve the deep context, and vary the package to fit the work.

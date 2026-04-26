@@ -39,6 +39,15 @@ Route skill lifecycle requests to one primary lane before execution.
 3. Return lane + rationale + next step.
 4. If ambiguity is material, request clarification.
 
+## Deterministic Decision Order
+
+1. Explicit lane names (`skill-creator`, `skill-builder`, `skill-installer`, `skill-refactor`, `skillify`) win unless multiple lanes are named; multiple named lanes stay with this router.
+2. Create, author, update, or reshape a draft skill package -> `skill-creator`.
+3. Capture, operationalize, or convert a completed workflow/session into a reusable skill -> `skillify`.
+4. Harden, audit, validate, benchmark, gate, or fix warnings on an existing skill -> `skill-builder`.
+5. Install, list, import, or verify runtime visibility for external/curated skills -> `skill-installer`.
+6. Analyze skill reliability, failures, coverage gaps, merge/prune/retire options, or portfolio improvement evidence -> `skill-refactor`.
+
 ## Validation
 
 - Fail fast: if routing uncertainty could cause wrong or unsafe actions, stop and ask.

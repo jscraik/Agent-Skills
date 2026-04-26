@@ -4,15 +4,18 @@ set -euo pipefail
 timeout_seconds="${SYNC_SKILLS_TIMEOUT_SECONDS:-300}"
 lock_stale_after_seconds="${SYNC_SKILLS_LOCK_STALE_AFTER_SECONDS:-900}"
 sync_scope="${SYNC_SKILLS_SCOPE:-workspace}"
+projection_mode_cli=""
+dry_run=0
 lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
 lock_owned=0
 watchdog_pid=""
 
+# usage prints the command-line usage message and short description for sync_skills.sh.
 usage() {
   cat <<'USAGE'
 Usage:
-  Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh [--timeout-seconds <int>] [--project-local|--workspace]
+  Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh [--timeout-seconds <int>] [--workspace|--user|--project-local] [--projection <mode>] [--dry-run]
 
 Regenerates skill/plugin symlinks and SKILL.md index for this repository.
 USAGE
@@ -25,11 +28,23 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --project-local)
-      sync_scope="project-local"
+      sync_scope="workspace"
       shift
       ;;
     --workspace)
       sync_scope="workspace"
+      shift
+      ;;
+    --user)
+      sync_scope="user"
+      shift
+      ;;
+    --projection)
+      projection_mode_cli="${2:-}"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=1
       shift
       ;;
     -h|--help)
@@ -53,15 +68,14 @@ if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seco
   exit 2
 fi
 
-if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
-  echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
-  exit 2
-fi
-
-if [[ "$sync_scope" != "project-local" && "$sync_scope" != "workspace" ]]; then
-  echo "Invalid sync scope: $sync_scope (expected project-local or workspace)" >&2
-  exit 2
-fi
+case "$sync_scope" in
+  workspace|user)
+    ;;
+  *)
+    echo "Invalid sync scope: $sync_scope (expected workspace or user; project-local is a legacy alias for workspace)" >&2
+    exit 2
+    ;;
+esac
 
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 if repo_root="$(git -C "$script_dir/../.." rev-parse --show-toplevel 2>/dev/null)"; then
@@ -71,16 +85,7 @@ else
 fi
 cd "$repo_root"
 
-selection_policy_shell="$(
-  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/selection_policy.py" --format shell
-)"
-if [ -z "$selection_policy_shell" ]; then
-  echo "Failed to load selection policy shell exports." >&2
-  exit 1
-fi
-eval "$selection_policy_shell"
-
-# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to ensure only one sync run runs at a time, waits briefly for in-progress initialisation, and reclaims stale locks (with PID or based on directory mtime) before failing.
+# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to prevent concurrent sync runs, writes the current PID to $lock_pid_file when successful, and reclaims stale locks (by PID or directory age) before failing.
 acquire_sync_lock() {
   local existing_pid=""
   local lock_mtime=""
@@ -143,15 +148,25 @@ acquire_sync_lock() {
   exit 1
 }
 
+# release_sync_lock releases the exclusive sync lock owned by the current process by removing the lock directory and clearing the lock ownership state.
+release_sync_lock() {
+  if [[ "$lock_owned" -eq 1 ]]; then
+    rm -rf -- "$lock_dir"
+    lock_owned=0
+  fi
+}
+
+# start_watchdog starts a background watchdog that sleeps for $timeout_seconds and, if the timeout elapses, logs an error and sends SIGTERM to the main script; it records the background PID in $watchdog_pid.
 start_watchdog() {
+  trap 'echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2; exit 124' TERM
   (
     sleep "$timeout_seconds"
-    echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2
     kill -TERM "$$" 2>/dev/null || true
-  ) &
+  ) >/dev/null 2>&1 &
   watchdog_pid="$!"
 }
 
+# stop_watchdog stops the background watchdog timer process (if any) and clears its PID.
 stop_watchdog() {
   if [[ -n "$watchdog_pid" ]]; then
     kill "$watchdog_pid" 2>/dev/null || true
@@ -160,12 +175,51 @@ stop_watchdog() {
   fi
 }
 
-release_sync_lock() {
-  if [[ "$lock_owned" -eq 1 ]]; then
-    rm -rf -- "$lock_dir"
-    lock_owned=0
+projection_args=(--format shell)
+if [ -n "$projection_mode_cli" ]; then
+  projection_args+=(--mode "$projection_mode_cli")
+fi
+if projection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
+)"; then
+  # Only eval on success; validate output is non-empty and contains safe patterns.
+  if [ -z "$projection_policy_shell" ]; then
+    echo "Projection engine returned empty output." >&2
+    exit 2
   fi
-}
+  # Basic validation: ensure output contains only expected variable assignments.
+  if ! echo "$projection_policy_shell" | grep -qE '^[A-Z_]+=' || echo "$projection_policy_shell" | grep -qEv '^[A-Z_]+='; then
+    echo "Projection engine output does not match expected format." >&2
+    exit 2
+  fi
+  eval "$projection_policy_shell"
+else
+  echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
+  exit 2
+fi
+if [[ "$dry_run" == "1" || ( "$sync_scope" != "user" && "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}" != "flat" ) ]]; then
+  ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}")
+  if [[ "$dry_run" == "1" ]]; then
+    ask_sync_args+=(--dry-run)
+  fi
+  if [[ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}" != "flat" ]]; then
+    acquire_sync_lock
+    trap release_sync_lock EXIT
+  fi
+  start_watchdog
+  trap 'stop_watchdog; release_sync_lock' EXIT
+  python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
+  exit $?
+fi
+
+selection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/selection_policy.py" --format shell
+)"
+if [ -z "$selection_policy_shell" ]; then
+  echo "Failed to load selection policy shell exports." >&2
+  exit 1
+fi
+eval "$selection_policy_shell"
 
 acquire_sync_lock
 start_watchdog
@@ -991,7 +1045,7 @@ readme_path.write_text(content, encoding="utf-8")
 PY
 generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
-# remove_legacy_symlink removes the symlink at the given path if it exists and echoes a confirmation.
+# remove_legacy_symlink removes the symlink at the given path if it exists and prints a confirmation; does nothing if the path is not a symlink.
 remove_legacy_symlink() {
   local target_dir="$1"
   if [ -L "$target_dir" ]; then
@@ -1001,7 +1055,7 @@ remove_legacy_symlink() {
 }
 
 # Remove old/legacy symlinks from unsupported locations.
-# Keep this workspace-only so project-local sync stays side-effect free outside
+# Keep this user-only so workspace/project-local sync stays side-effect free outside.
 # remove_legacy_home_skill_symlinks removes legacy per-user skill symlinks from common home locations if they exist.
 remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.copilot/skills"
@@ -1821,7 +1875,7 @@ else
   sync_user_skills "$skills_dir" "$repo_root/skills" 1
 fi
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
-if [[ "$sync_scope" == "workspace" ]]; then
+if [[ "$sync_scope" == "user" ]]; then
   remove_legacy_home_skill_symlinks
   sync_user_skills "$skills_dir" "$HOME/.agents/skills"
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
@@ -1830,7 +1884,7 @@ if [[ "$sync_scope" == "workspace" ]]; then
   sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
   sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
 else
-  echo "Project-local scope: skipped home runtime projections."
+  echo "Workspace scope: skipped home runtime projections."
 fi
 
 chmod +x "$repo_root/Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
