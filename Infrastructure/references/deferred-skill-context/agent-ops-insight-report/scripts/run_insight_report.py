@@ -49,6 +49,9 @@ OTEL_PATHS = [
 CODEX_TIMEOUT = int(os.getenv("INSIGHTS_CODEX_TIMEOUT", "900"))
 PARSER_VERSION = 3
 
+# Missing tool data message
+MISSING_TOOL_DATA_MSG = "Not available — Codex runs tools server-side. Enable CODEX_OTEL_ENABLED=1 for tool data"
+
 # Tool name normalization
 TOOL_ALIASES = {
     "bash": "Shell",
@@ -150,8 +153,9 @@ def find_session_files(days):
         return []
     
     cutoff = datetime.now() - timedelta(days=days)
+    cutoff_timestamp = cutoff.timestamp()
     files = []
-    
+
     for year_dir in SESSIONS_DIR.iterdir():
         if not year_dir.is_dir() or not year_dir.name.isdigit():
             continue
@@ -165,13 +169,16 @@ def find_session_files(days):
                     continue
                 day = int(day_dir.name)
                 try:
-                    dir_date = datetime(year, month, day)
-                    if dir_date < cutoff:
-                        continue
+                    datetime(year, month, day)
                 except ValueError:
                     continue
                 for f in day_dir.glob("rollout-*.jsonl"):
-                    files.append(f)
+                    try:
+                        file_timestamp = f.stat().st_mtime
+                        if file_timestamp >= cutoff_timestamp:
+                            files.append(f)
+                    except OSError:
+                        continue
     
     # Sort by modification time (newest first) so max_sessions limit keeps recent sessions
     return sorted(files, key=lambda p: p.stat().st_mtime, reverse=True)
@@ -478,9 +485,11 @@ def categorize_tool_error(content):
 
 
 def is_substantive_session(session):
-    """Check if session is substantive enough to analyze."""
-    # Require at least 1 user message (filters out warmup/meta sessions)
-    if session['user_messages'] < 1:
+    """Check if session is substantive enough to analyze (2+ messages and 1+ minute)."""
+    # Require at least 2 user messages and 1+ minute duration
+    if session['user_messages'] < 2:
+        return False
+    if session.get('duration_minutes', 0) < 1:
         return False
     return True
 
@@ -608,13 +617,12 @@ def load_cached_session_meta(session_id):
 
 
 def save_session_meta(session_id, meta):
-    """Save session metadata cache to disk."""
+    """Save session metadata cache to disk with restrictive permissions."""
     try:
         meta_dir = USAGE_DIR / "session-meta"
         meta_dir.mkdir(parents=True, exist_ok=True)
         cache_path = meta_dir / f"{session_id}.json"
-        with open(cache_path, 'w') as f:
-            json.dump(meta, f, indent=2)
+        write_json(cache_path, meta)
     except OSError:
         return
 
@@ -1387,7 +1395,7 @@ def generate_html_report(data, insights):
       </div>
       <div class="chart-card">
         <div class="chart-title">Top Tools Used</div>
-        {generate_bar_chart(data['tools']['counts'], '#0891b2', not_available_text="Not available — Codex runs tools server-side. Enable OPENAI_TELEMETRY_ENABLED=1 for tool data")}
+        {generate_bar_chart(data['tools']['counts'], '#0891b2', not_available_text=MISSING_TOOL_DATA_MSG)}
       </div>
     </div>
 
@@ -1413,7 +1421,7 @@ def generate_html_report(data, insights):
       </div>
       <div class="chart-card">
         <div class="chart-title">Tool Errors Encountered</div>
-        {tool_errors_html if data.get('tool_error_categories') else '<p class="empty">Not available — Codex runs tools server-side. Enable OPENAI_TELEMETRY_ENABLED=1 for tool data</p>'}
+        {tool_errors_html if data.get('tool_error_categories') else f'<p class="empty">{MISSING_TOOL_DATA_MSG}</p>'}
       </div>
     </div>
 
@@ -1505,7 +1513,7 @@ def collect_session_data(args):
         print(f"After substantive filter: {len(sessions)} sessions")
     
     if not sessions:
-        print("No substantive sessions found (need 2+ messages and 1+ minute duration)")
+        print("No substantive sessions found (need 2+ user messages and 1+ minute duration)")
         return _generate_no_data_response(args.days)
     
     all_tool_counts = defaultdict(int)
