@@ -155,10 +155,10 @@ def listish(value: str | None) -> list[str]:
     if not cleaned:
         return []
     if re.search(r"(?:^|\s)-\s+", cleaned):
-        return [part.strip() for part in re.split(r"(?:^|\s)-\s+", cleaned) if part.strip()]
+        return [part.strip().strip("\"'") for part in re.split(r"(?:^|\s)-\s+", cleaned) if part.strip()]
     if "," in cleaned:
-        return [part.strip() for part in cleaned.split(",") if part.strip()]
-    return [cleaned]
+        return [part.strip().strip("\"'") for part in cleaned.split(",") if part.strip()]
+    return [cleaned.strip().strip("\"'")]
 
 
 def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str | None, str]:
