@@ -27,10 +27,13 @@ from typing import List, Optional
 SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
+if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 if str(SCRIPTS_ROOT / "validation-and-linting") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "validation-and-linting"))
 
 from verify_skill_catalog_freshness import analyze_skill_file, canonical_skill_map, discover_skill_files
+from command_surface import resolve_skill_handle
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
@@ -304,7 +307,19 @@ def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
     """Check governed lifecycle readiness for a skill."""
     skill_files = discover_skill_files(REPO_ROOT)
     canonical_by_name = canonical_skill_map(skill_files, REPO_ROOT)
-    report = analyze_skill_file(skill_dir / "SKILL.md", REPO_ROOT, canonical_by_name)
+    skill_file = skill_dir / "SKILL.md"
+    try:
+        rel_parts = skill_dir.resolve().relative_to(SKILLS_DIR.resolve()).parts
+    except ValueError:
+        rel_parts = ()
+    if len(rel_parts) == 1:
+        resolution = resolve_skill_handle(rel_parts[0], repo_root_path=REPO_ROOT)
+        source_path = resolution.get("source_path") if resolution.get("status") == "ok" else None
+        if isinstance(source_path, str):
+            source_skill_file = REPO_ROOT / source_path
+            if source_skill_file.is_file():
+                skill_file = source_skill_file
+    report = analyze_skill_file(skill_file, REPO_ROOT, canonical_by_name)
 
     if report.readiness == "blocked":
         return DiagnosticResult(
