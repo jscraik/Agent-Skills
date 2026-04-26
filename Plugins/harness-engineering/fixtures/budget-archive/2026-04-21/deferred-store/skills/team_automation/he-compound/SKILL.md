@@ -36,9 +36,10 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 3. If the user intent is ambiguous between stage orchestration and solved-problem capture, ask one direct question before continuing.
 4. For learning capture, preserve `full` as the default and treat `compact-safe` as explicit opt-in.
 5. For learning capture, validate solved evidence, gather supporting inputs, and write exactly one durable solution artifact.
-6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
-7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
-8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
+6. If past agent sessions are needed as evidence, route broad session inventory/extraction to `skill-refactor`; if the result is a reusable workflow, route skill creation to `skillify`.
+7. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
+8. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
+9. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
 
 ## Validation
 
@@ -53,6 +54,7 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not document unverified fixes as durable solutions.
 - Do not treat `he-compound` as a substitute for implementation, debugging, review, or refresh stages that still need to happen.
+- Do not turn generic session-history search into a Harness Engineering stage; consume `skill-refactor` or `skillify` outputs when session evidence is relevant.
 - Do not let helper agents write intermediate files during learning capture.
 - Do not recommend deleting or ignoring protected process artifacts just to simplify the handoff.
 - Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.

@@ -286,9 +286,7 @@ def _enforce_signer_allowlist(
 
     verified = bool(commit_verification.get("verified") is True)
     reason = str(commit_verification.get("reason") or "unknown").strip().lower()
-    if not verified:
-        if allow_unsigned_provenance:
-            return
+    if not verified and allow_unsigned_provenance:
         raise InstallError(
             "Signer allowlist checks require a signed/verified commit. "
             f"Observed verification reason='{reason}' for {owner}/{repo}@{resolved_commit}."
@@ -350,10 +348,6 @@ def _download_repo_zip(owner: str, repo: str, ref: str, dest_dir: str) -> str:
         payload = _request(zip_url)
     except urllib.error.HTTPError as exc:
         raise InstallError(f"Download failed: HTTP {exc.code}") from exc
-    except urllib.error.URLError as exc:
-        raise InstallError(f"Download failed (network error): {exc.reason}") from exc
-    except Exception as exc:
-        raise InstallError(f"Download failed for {zip_url}: {exc}") from exc
 
     with open(zip_path, "wb") as file_handle:
         file_handle.write(payload)
@@ -369,23 +363,9 @@ def _download_repo_zip(owner: str, repo: str, ref: str, dest_dir: str) -> str:
 
 
 def _run_git(args: list[str]) -> None:
-    env = os.environ.copy()
-    env["GIT_TERMINAL_PROMPT"] = "0"
-    env["GIT_SSH_COMMAND"] = "ssh -o BatchMode=yes"
-    try:
-        result = subprocess.run(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            stdin=subprocess.DEVNULL,
-            timeout=120,
-            env=env
-        )
-        if result.returncode != 0:
-            raise InstallError(result.stderr.strip() or "Git command failed.")
-    except subprocess.TimeoutExpired as exc:
-        raise InstallError(f"Git command timed out after 120 seconds: {' '.join(args)}") from exc
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode != 0:
+        raise InstallError(result.stderr.strip() or "Git command failed.")
 
 
 def _safe_extract_zip(zip_file: zipfile.ZipFile, dest_dir: str) -> None:
@@ -625,16 +605,13 @@ def _redact_manifest_payload_for_storage(payload: dict[str, object]) -> dict[str
 
 def _append_journal(path: Path, event: str, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.parent.chmod(0o700)
     row = {
         "ts": _utc_now_iso(),
         "event": event,
         "payload": payload,
     }
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
-    with os.fdopen(fd, "a", encoding="utf-8") as handle:
+    with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(row, sort_keys=True) + "\n")
-    path.chmod(0o600)
 
 
 def _parse_args(argv: list[str]) -> Args:

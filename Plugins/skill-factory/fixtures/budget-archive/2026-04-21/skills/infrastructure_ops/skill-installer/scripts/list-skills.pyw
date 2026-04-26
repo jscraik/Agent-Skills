@@ -92,11 +92,6 @@ def _list_skills(repo: str, path: str, ref: str) -> list[str]:
     api_url = github_api_contents_url(repo, path, ref)
     try:
         payload = _request(api_url)
-        data = json.loads(payload.decode("utf-8"))
-        if not isinstance(data, list):
-            raise ListError("Unexpected skills listing response.")
-        skills = [item["name"] for item in data if item.get("type") == "dir"]
-        return sorted(skills)
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
             raise ListError(
@@ -104,12 +99,11 @@ def _list_skills(repo: str, path: str, ref: str) -> list[str]:
                 f"https://github.com/{repo}/tree/{ref}/{path}"
             ) from exc
         raise ListError(f"Failed to fetch skills: HTTP {exc.code}") from exc
-    except urllib.error.URLError as exc:
-        raise ListError(f"Failed to fetch skills (network error): {exc.reason}") from exc
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ListError(f"Failed to parse skills listing response: {exc}") from exc
-    except (KeyError, TypeError) as exc:
-        raise ListError(f"Failed to extract skills from response: {exc}") from exc
+    data = json.loads(payload.decode("utf-8"))
+    if not isinstance(data, list):
+        raise ListError("Unexpected skills listing response.")
+    skills = [item["name"] for item in data if item.get("type") == "dir"]
+    return sorted(skills)
 
 
 def _parse_args(argv: list[str]) -> Args:
@@ -118,7 +112,7 @@ def _parse_args(argv: list[str]) -> Args:
     parser.add_argument(
         "--path",
         default=DEFAULT_PATH,
-        help="Repo path to list (default: Skills/.curated)",
+        help="Repo path to list (default: skills/.curated)",
     )
     parser.add_argument("--ref", default=DEFAULT_REF)
     parser.add_argument(

@@ -1,0 +1,24 @@
+{
+  "path_patterns": [
+    "assets/**",
+    "references/evals*.yaml",
+    "references/prompt-injection-expected-context.json",
+    "references/session-evidence-workflow.md",
+    "scripts/correlate_multi_source_skill_failures.py",
+    "scripts/correlate_multi_source_skill_failures.pyw",
+    "scripts/scan_codex_sessions.py",
+    "scripts/scan_codex_sessions.pyw",
+    "scripts/test_*.py"
+  ],
+  "context_signals": [
+    "prompt injection",
+    "adversarial",
+    "jailbreak",
+    "forbidden_commands",
+    "security coverage",
+    "red team"
+  ],
+  "skip_binary_globs": [
+    "assets/**"
+  ]
+}

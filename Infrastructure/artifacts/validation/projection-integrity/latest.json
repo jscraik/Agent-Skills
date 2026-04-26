@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-04-25T16:11:06.201492+00:00",
+  "generated_at": "2026-04-26T12:27:01.960292+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -47,9 +47,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 205,
-      "source_manifest_sha256": "d28a012b4f73f5c06d63b8c14110f8baf8d924ebe8bdd4ad34facef4bd333954",
-      "projection_manifest_sha256": "d28a012b4f73f5c06d63b8c14110f8baf8d924ebe8bdd4ad34facef4bd333954",
+      "checked_files": 207,
+      "source_manifest_sha256": "3a2a51dbdc224f89beacdfe621a45dc11f923753af55bf560bd105a50735500f",
+      "projection_manifest_sha256": "3a2a51dbdc224f89beacdfe621a45dc11f923753af55bf560bd105a50735500f",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -64,8 +64,8 @@
       "mismatched_files": [],
       "unstamped_files": [],
       "checked_files": 36,
-      "source_manifest_sha256": "c429a25ce84c864dd537fd7fc94d46dead0dc89eb938421f39c0bd84e1b3ac50",
-      "projection_manifest_sha256": "c429a25ce84c864dd537fd7fc94d46dead0dc89eb938421f39c0bd84e1b3ac50",
+      "source_manifest_sha256": "676c6bc1f7698c9dea234a8180248446b30f3fee510be0f40e1fa2d5c7c1d675",
+      "projection_manifest_sha256": "676c6bc1f7698c9dea234a8180248446b30f3fee510be0f40e1fa2d5c7c1d675",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 180,
-      "source_manifest_sha256": "6486abbe4b856a58166203c3c701ff8fda79f456130b77ca5d09cbc29c09a57a",
-      "projection_manifest_sha256": "6486abbe4b856a58166203c3c701ff8fda79f456130b77ca5d09cbc29c09a57a",
+      "checked_files": 182,
+      "source_manifest_sha256": "cbf480f8ed609adbac0c725cb29591f921a81bcb35858301ab710cd650e85e4a",
+      "projection_manifest_sha256": "cbf480f8ed609adbac0c725cb29591f921a81bcb35858301ab710cd650e85e4a",
       "manifest_mismatch": false,
       "status": "pass"
     }

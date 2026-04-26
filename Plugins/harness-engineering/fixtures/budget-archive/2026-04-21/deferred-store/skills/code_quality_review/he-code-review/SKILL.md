@@ -1,6 +1,6 @@
 ---
 name: he-code-review
-description: Review Harness Engineering diffs, PRs, plans, or implemented work for merge readiness and regression risk. Use when users ask for a go/no-go review.
+description: Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with severity-ranked synthesis. Use when users need readiness synthesis rather than detailed technical-risk critique.
 metadata:
   skill-type: code_quality_review
 ---
@@ -8,6 +8,11 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
+
+## Use
+
+- Use this skill as normal for this Harness Engineering code-review stage.
+- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -24,11 +29,16 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Inputs
 
-- Request, artifacts, repo context, and linked Linear issues.
+- Review target (PR, branch, diff, plan, or release artifact).
+- Access to changed files, validation logs, and related context.
+- Optional mode modifiers such as `mode:interactive`, `mode:report-only`, `mode:autofix`, `mode:headless`, `base:<ref>`, and `plan:<path>`.
 
 ## Outputs
 
-- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+- Severity-ranked readiness findings with exact locations.
+- Explicit go/no-go recommendation with blocking conditions.
+- Resolved target mode (`pr-branch-review` or `artifact-review`) and next action.
+- Include `schema_version: 1` when structured output is requested.
 
 ## Procedure
 
@@ -57,7 +67,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not claim readiness without repository evidence.
 - Do not switch a shared checkout for `mode:report-only` or `mode:headless`; require an isolated checkout/worktree or review the current checkout with an explicit base.
 - Do not ask blocking questions in `mode:report-only` or `mode:headless`.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
 ## Anti-patterns
 
@@ -66,6 +76,34 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Running maximal reviewer fan-out for simple low-risk changes.
 - Missing a new project term or renamed concept that should update `CONTEXT.md`.
 - Flagging `docs/brainstorms/*`, `docs/plans/*.md`, or `docs/solutions/*.md` for cleanup/removal.
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "When the user asks, `Can you review GitHub PR #482 and tell me whether anything still blocks merge?`"
+- "Please inspect the current branch against `origin/main`, validate the risky changes, and give me the go/no-go call."
+- "Review `Docs/plans/2026-03-23-001-feat-example-plan.md` and tell me whether it is ready for the next workflow stage."
+- "Can you review this PR and verify it actually closes the linked Linear QA issues before we merge?"
+
+## Full Context
+
+- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
+- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
+- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
+- Compatibility mirror (non-canonical): [./references](./references)
+- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
+Read when: a review target changes project terminology, `CONTEXT.md`, or Linear issue meaning.
+Read when: readiness depends on linked Linear QA issues, reproduction steps, or expected-behavior evidence.
+- Template: [./review-todo.md.tmpl](./review-todo.md.tmpl)
+- Assets: [./assets](./assets)
+- Assets directory marker: `assets/`
+
+## Subagent Routing
+
+- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
+- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
+- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
+- If required roles are missing from the manifest, route to [codex-agent-creator](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) and provide the exact role names to create or install.

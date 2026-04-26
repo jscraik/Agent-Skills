@@ -22,6 +22,15 @@ INSTALLER_DIR = INSTALLER_PATH.parent
 
 
 def _load_installer():
+    """
+    Dynamically load the installer script from INSTALLER_PATH and return it as a module.
+
+    If INSTALLER_DIR is not already on sys.path, it is inserted. The loaded module is registered in
+    sys.modules under the name "skill_installer_security_policy".
+
+    Returns:
+        module: The imported installer module object.
+    """
     if str(INSTALLER_DIR) not in sys.path:
         sys.path.insert(0, str(INSTALLER_DIR))
     module_name = "skill_installer_security_policy"

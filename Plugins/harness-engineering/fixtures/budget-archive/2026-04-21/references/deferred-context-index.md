@@ -4,9 +4,12 @@ This reference preserves context moved out of active `SKILL.md` entrypoints duri
 
 Use this file when you need detailed stage doctrine, extended examples, legacy/archive context, or full stage asset/script references that are intentionally deferred from always-loaded entrypoints.
 
+In this index, archive means preserved deferred context used by active skills, not deprecated or inactive guidance.
+
 ## Preserved Context
 
-- Full stage guides and archived references remain in `fixtures/skill-archive/**`.
+- Full stage guides and preserved references remain in `fixtures/preserved-context/**`.
+- `fixtures/skill-archive` remains a compatibility alias for older links only.
 - Canonical contract/eval/task profiles remain in each stage under `Infrastructure/references/**`.
 - Canonical subagent role policy remains in:
   - `references/routing-map.json`
@@ -24,42 +27,6 @@ Use this file when you need detailed stage doctrine, extended examples, legacy/a
 
 The following lines were intentionally moved out of active or fixture `SKILL.md` entrypoints during context-budget hardening. They remain preserved here for auditability and historical review of the compacted flow contracts.
 
-The Harness Engineering A-grade optimization pass preserved representative removed entrypoint context here while compacting active skill bodies into progressive-disclosure entrypoints:
-
-- `description: Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with severity-ranked synthesis. Use when users need readiness synthesis rather than detailed technical-risk critique.`
-- `description: "Review services, APIs, and multi-component systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness. Use when the work involves new services, significant service changes, multiple external dependencies, or high blast-radius failure scenarios."`
-- `description: Review diffs, PRs, specs, plans, or review-feedback items and return severity-ranked engineering findings with exact locations. Use when technical risks or feedback correctness must be verified before implementation.`
-- `description: Define problem scope, requirements, and decision options before spec or plan stages. Use when the user has ambiguity in what to build, why it matters, or which direction to choose.`
-- `description: Use when Harness Engineering needs to review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation after refactors, migrations, or dependency upgrades.`
-- `description: "Analyze Harness Engineering lifecycle state, plan the correct stage routing, and capture verified solved problems into durable docs/solutions knowledge. Use when the user asks to start or resume from the correct stage, or to document a verified fix as reusable team guidance."`
-- `description: Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants Harness Engineering spec hardening or a requirements review pass before planning.`
-- `description: Restore broken behavior by reproducing failures, identifying root cause, and delivering verified fixes. Use when the user needs regression debugging, incident triage, or bug repair from tracker or direct reports.`
-- `description: Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants the Harness Engineering ideation stage before brainstorming in depth, not a general product brainstorm.`
-- `description: Analyze and improve an existing implementation through metric-driven, bounded iteration loops. Use when the user wants Harness Engineering optimization or tuning rather than one-shot implementation.`
-- `description: Plan execution work from specs, brainstorm outputs, bugs, or feature requests into an implementation-ready sequence. Use when the user needs the Harness Engineering planning stage before execution.`
-- `description: Automate stale local git branch cleanup with worktree-aware deletion and explicit confirmation gates. Use this skill when the user asks to prune local branches whose remote tracking refs are gone.`
-- `description: Own the Harness Engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the WHAT-before-planning artifact, not a broader product-planning pipeline.`
-- `description: "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned."`
-- `description: "[BETA] Improve user-facing quality of an existing feature through guided refinement and validation loops. Use when behavior works but UX, accessibility, or polish quality must be raised before review."`
-- `description: Route ambiguous Harness Engineering requests to one lifecycle stage when users ask where to start, resume, plan, implement, review, debug, or resolve domain terminology.`
-
-description: Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with severity-ranked synthesis. Use when users need readiness synthesis rather than detailed technical-risk critique.
-description: "Review services, APIs, and multi-component systems for reliability risks including failure modes, cascading failures, resilience gaps, and SLO readiness. Use when the work involves new services, significant service changes, multiple external dependencies, or high blast-radius failure scenarios."
-description: Review diffs, PRs, specs, plans, or review-feedback items and return severity-ranked engineering findings with exact locations. Use when technical risks or feedback correctness must be verified before implementation.
-description: Define problem scope, requirements, and decision options before spec or plan stages. Use when the user has ambiguity in what to build, why it matters, or which direction to choose.
-description: Use when Harness Engineering needs to review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation after refactors, migrations, or dependency upgrades.
-description: "Analyze Harness Engineering lifecycle state, plan the correct stage routing, and capture verified solved problems into durable docs/solutions knowledge. Use when the user asks to start or resume from the correct stage, or to document a verified fix as reusable team guidance."
-description: Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants Harness Engineering spec hardening or a requirements review pass before planning.
-description: Restore broken behavior by reproducing failures, identifying root cause, and delivering verified fixes. Use when the user needs regression debugging, incident triage, or bug repair from tracker or direct reports.
-description: Generate and rank grounded improvement ideas for the current project before committing to one direction. Use when the user wants the Harness Engineering ideation stage before brainstorming in depth, not a general product brainstorm.
-description: Analyze and improve an existing implementation through metric-driven, bounded iteration loops. Use when the user wants Harness Engineering optimization or tuning rather than one-shot implementation.
-description: Plan execution work from specs, brainstorm outputs, bugs, or feature requests into an implementation-ready sequence. Use when the user needs the Harness Engineering planning stage before execution.
-description: Automate stale local git branch cleanup with worktree-aware deletion and explicit confirmation gates. Use this skill when the user asks to prune local branches whose remote tracking refs are gone.
-description: Own the Harness Engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the WHAT-before-planning artifact, not a broader product-planning pipeline.
-description: "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned."
-description: "[BETA] Improve user-facing quality of an existing feature through guided refinement and validation loops. Use when behavior works but UX, accessibility, or polish quality must be raised before review."
-description: Route ambiguous Harness Engineering requests to one lifecycle stage when users ask where to start, resume, plan, implement, review, debug, or resolve domain terminology.
-
 The QA intake routing refresh preserved these pre-insertion procedure lines:
 
 - `2. Map service boundaries and dependency failure paths.`
@@ -68,6 +35,16 @@ The QA intake routing refresh preserved these pre-insertion procedure lines:
 - `2. Produce a failing test first (RED), then apply the smallest fix (GREEN).`
 - `3. Repeat in vertical slices and preserve traceability to accepted behavior targets.`
 - `4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.`
+
+The session-evidence routing refresh preserved these pre-insertion `he-compound` procedure lines:
+
+- `6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.`
+- `7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.`
+- ``8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.``
+
+6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
+7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
+8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
 
 2. Map service boundaries and dependency failure paths.
 3. Produce reliability findings with concrete blast-radius and mitigation guidance.
@@ -108,29 +85,155 @@ The QA intake routing refresh preserved these pre-insertion procedure lines:
 6. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
 6. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
+The PR 136 main-sync refresh preserved these lines removed from compact runtime and archive entrypoints:
+
+- `## Philosophy`
+- `## Subagent Routing`
+- `## Validation`
+- `- Apply the mapped stage policy before spawning helpers.`
+- `- Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)`
+- `- Assets: [./assets](./assets)`
+- `- Assets: `./assets``
+- `- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)`
+- `- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).`
+- `- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.`
+- `- Do not remove important context for budget trimming; move it to references and index it in `../../references/deferred-context-index.md`.`
+- `- Domain model routing: `../../../references/domain-model-routing.md``
+- `- Ensure exactly one selected stage, one next invocation, request evidence, and blocked output when required inputs are missing.`
+- `- Ensure new caller-facing interfaces and domain terms are specified before implementation tasks.`
+- `- Fail fast: stop at first failed gate and do not proceed.`
+- `- For full stage policy, workflow details, and examples, load the archived full guide.`
+- `- If mapped roles are missing, continue inline and tell the user to provision the role with [$codex-agent-creator](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md).`
+- `- If roles are missing, continue inline and route role provisioning to `[[codex-agent-creator]]`.`
+- `- Link Linear decision notes when durable tradeoffs shaped the plan.`
+- `- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)`
+- `- Preserve evidence, safety, and deterministic Harness Engineering routing.`
+- `- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)`
+- `- QA intake routing: `../../../references/qa-intake-routing.md``
+- `- Replanning from scratch when a current plan should be updated.`
+- `- Request, artifacts, repo context, and linked Linear issues.`
+- `- Resolve roles from `~/.codex/agents/manifest.json` before delegation.`
+- `- Routing to execution while the user is still asking for planning.`
+- `- Stay in planning mode when directly invoked.`
+- `- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)`
+- `- Subagent routing: `../../../references/subagent-routing.md``
+- `- Use when a spec, brainstorm, bug report, or raw feature description must become a durable implementation plan.`
+- `- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.`
+- `1. Load archived TDD guidance and choose the first behavior slice.`
+- `1. Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.`
+- `2. Apply the deterministic decision order in `../../references/deterministic-stage-routing.md` because overlapping requests must route the same way every time.`
+- `2. Resume or deepen a matching current plan instead of duplicating it.`
+- `3. Carry forward problem frame, scope, requirements, and open questions from the authoritative artifact.`
+- `4. Check interface and domain readiness before task decomposition; route to `he-deepen-spec` when contracts or terms are missing.`
+- `4. Reproduce and stabilize the failing behavior before proposing changes.`
+- `5. Put blockers first for Linear QA issue sets, preserve issue links, and keep independent defects parallel.`
+- `5. Trace backward from the symptom to the point where valid state first became invalid.`
+- `6. Research local patterns only when they affect sequencing or risk.`
+- `6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.`
+- `7. Decompose into ordered, verifiable tasks with dependencies, tests, and next-stage handoff.`
+- `7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.`
+- `8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.`
+- `Read `../shared/references/approval-flow.md` before deciding whether to continue, ask a blocker question, or stop for approval.`
+- `Read when: examples or role-routing details are needed, open the archived references for this skill.`
+- `This entrypoint stays concise and keeps full operational context in archived references.`
+- `description: Clarify problem scope, requirements, options, and expected behavior before spec or plan stages. Use when what to build, why it matters, or the right direction is ambiguous.`
+- `description: Create Harness Engineering specs that define behavior, boundaries, acceptance criteria, and Linear decision notes. Use when users ask to turn clarified requirements into a durable contract.`
+- `description: Create or update an execution plan from an approved spec or clarified scope. Use when work needs sequencing, validation gates, and Linear-aware task breakdown before implementation.`
+- `description: Debug Harness Engineering bugs with reproduction evidence and regression coverage. Use when defects are reproducible, QA failures have expected behavior, or bugfix validation is required.`
+- `description: Execute an approved plan, todo list, or tightly scoped spec with traceable progress and validation. Use when Harness Engineering work should be implemented.`
+- `description: Improve an existing Harness Engineering spec with missing behavior, boundaries, domain terms, and acceptance criteria. Use when a user asks to deepen or complete a spec before planning.`
+- `description: Review Harness Engineering diffs, PRs, plans, or implemented work for merge readiness and regression risk. Use when users ask for a go/no-go review.`
+- `description: Review diffs, PRs, specs, plans, or feedback for technical correctness. Use when engineering risks or review-feedback validity must be verified before implementation.`
+- `description: Review reliability risks in diffs, plans, specs, or fixes. Use when failures, retries, concurrency, data integrity, or operational resilience need evidence-backed review.`
+- `description: Route ambiguous Harness Engineering requests to one lifecycle stage. Use when users ask where to start, resume, plan, implement, review, debug, or resolve terminology.`
+
+Exact moved-line preservation for the progressive-disclosure gate:
+
+```text
+## Philosophy
+## Subagent Routing
+## Validation
+- Apply the mapped stage policy before spawning helpers.
+- Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)
+- Assets: [./assets](./assets)
+- Assets: `./assets`
+- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Do not remove important context for budget trimming; move it to references and index it in `../../references/deferred-context-index.md`.
+- Domain model routing: `../../../references/domain-model-routing.md`
+- Ensure exactly one selected stage, one next invocation, request evidence, and blocked output when required inputs are missing.
+- Ensure new caller-facing interfaces and domain terms are specified before implementation tasks.
+- Fail fast: stop at first failed gate and do not proceed.
+- For full stage policy, workflow details, and examples, load the archived full guide.
+- If mapped roles are missing, continue inline and tell the user to provision the role with [$codex-agent-creator](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md).
+- If roles are missing, continue inline and route role provisioning to `[[codex-agent-creator]]`.
+- Link Linear decision notes when durable tradeoffs shaped the plan.
+- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Preserve evidence, safety, and deterministic Harness Engineering routing.
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
+- QA intake routing: `../../../references/qa-intake-routing.md`
+- Replanning from scratch when a current plan should be updated.
+- Request, artifacts, repo context, and linked Linear issues.
+- Resolve roles from `~/.codex/agents/manifest.json` before delegation.
+- Routing to execution while the user is still asking for planning.
+- Stay in planning mode when directly invoked.
+- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Subagent routing: `../../../references/subagent-routing.md`
+- Use when a spec, brainstorm, bug report, or raw feature description must become a durable implementation plan.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+1. Load archived TDD guidance and choose the first behavior slice.
+1. Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.
+2. Apply the deterministic decision order in `../../references/deterministic-stage-routing.md` because overlapping requests must route the same way every time.
+2. Resume or deepen a matching current plan instead of duplicating it.
+3. Carry forward problem frame, scope, requirements, and open questions from the authoritative artifact.
+4. Check interface and domain readiness before task decomposition; route to `he-deepen-spec` when contracts or terms are missing.
+4. Reproduce and stabilize the failing behavior before proposing changes.
+5. Put blockers first for Linear QA issue sets, preserve issue links, and keep independent defects parallel.
+5. Trace backward from the symptom to the point where valid state first became invalid.
+6. Research local patterns only when they affect sequencing or risk.
+6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+7. Decompose into ordered, verifiable tasks with dependencies, tests, and next-stage handoff.
+7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+Read `../shared/references/approval-flow.md` before deciding whether to continue, ask a blocker question, or stop for approval.
+Read when: examples or role-routing details are needed, open the archived references for this skill.
+This entrypoint stays concise and keeps full operational context in archived references.
+description: Clarify problem scope, requirements, options, and expected behavior before spec or plan stages. Use when what to build, why it matters, or the right direction is ambiguous.
+description: Create Harness Engineering specs that define behavior, boundaries, acceptance criteria, and Linear decision notes. Use when users ask to turn clarified requirements into a durable contract.
+description: Create or update an execution plan from an approved spec or clarified scope. Use when work needs sequencing, validation gates, and Linear-aware task breakdown before implementation.
+description: Debug Harness Engineering bugs with reproduction evidence and regression coverage. Use when defects are reproducible, QA failures have expected behavior, or bugfix validation is required.
+description: Execute an approved plan, todo list, or tightly scoped spec with traceable progress and validation. Use when Harness Engineering work should be implemented.
+description: Improve an existing Harness Engineering spec with missing behavior, boundaries, domain terms, and acceptance criteria. Use when a user asks to deepen or complete a spec before planning.
+description: Review Harness Engineering diffs, PRs, plans, or implemented work for merge readiness and regression risk. Use when users ask for a go/no-go review.
+description: Review diffs, PRs, specs, plans, or feedback for technical correctness. Use when engineering risks or review-feedback validity must be verified before implementation.
+description: Review reliability risks in diffs, plans, specs, or fixes. Use when failures, retries, concurrency, data integrity, or operational resilience need evidence-backed review.
+description: Route ambiguous Harness Engineering requests to one lifecycle stage. Use when users ask where to start, resume, plan, implement, review, debug, or resolve terminology.
+```
+
 ## Stage Archive Paths
 
 - `he-router`: `skills/he-router/references/*` (active canonical), plus router policy in `references/routing-map.json`.
 - Domain-model workflow: `references/domain-model-routing.md`
 - QA intake workflow: `references/qa-intake-routing.md`
 - Deterministic stage routing: `references/deterministic-stage-routing.md`
-- `he-code-review`: `fixtures/skill-archive/skills/code_quality_review/he-code-review/`
-- `he-reliability-review`: `fixtures/skill-archive/skills/code_quality_review/he-reliability-review/`
-- `he-technical-review`: `fixtures/skill-archive/skills/code_quality_review/he-technical-review/`
-- `he-brainstorm`: `fixtures/skill-archive/skills/team_automation/he-brainstorm/`
-- `he-compound`: `fixtures/skill-archive/skills/team_automation/he-compound/`
-- `he-compound-refresh`: `fixtures/skill-archive/skills/team_automation/he-compound-refresh/`
-- `he-deepen-plan`: `fixtures/skill-archive/skills/team_automation/he-deepen-plan/`
-- `he-deepen-spec`: `fixtures/skill-archive/skills/team_automation/he-deepen-spec/`
-- `he-fix-bugs`: `fixtures/skill-archive/skills/team_automation/he-fix-bugs/`
-- `he-ideate`: `fixtures/skill-archive/skills/team_automation/he-ideate/`
-- `he-improve`: `fixtures/skill-archive/skills/team_automation/he-improve/`
-- `he-plan`: `fixtures/skill-archive/skills/team_automation/he-plan/`
-- `he-prune-branches`: `fixtures/skill-archive/skills/team_automation/he-prune-branches/`
-- `he-refine`: `fixtures/skill-archive/skills/team_automation/he-refine/`
-- `he-spec`: `fixtures/skill-archive/skills/team_automation/he-spec/`
-- `he-tdd`: `fixtures/skill-archive/skills/team_automation/he-tdd/`
-- `he-work`: `fixtures/skill-archive/skills/team_automation/he-work/`
+- `he-code-review`: `fixtures/preserved-context/skills/code_quality_review/he-code-review/`
+- `he-reliability-review`: `fixtures/preserved-context/skills/code_quality_review/he-reliability-review/`
+- `he-technical-review`: `fixtures/preserved-context/skills/code_quality_review/he-technical-review/`
+- `he-brainstorm`: `fixtures/preserved-context/skills/team_automation/he-brainstorm/`
+- `he-compound`: `fixtures/preserved-context/skills/team_automation/he-compound/`
+- `he-compound-refresh`: `fixtures/preserved-context/skills/team_automation/he-compound-refresh/`
+- `he-deepen-plan`: `fixtures/preserved-context/skills/team_automation/he-deepen-plan/`
+- `he-deepen-spec`: `fixtures/preserved-context/skills/team_automation/he-deepen-spec/`
+- `he-fix-bugs`: `fixtures/preserved-context/skills/team_automation/he-fix-bugs/`
+- `he-ideate`: `fixtures/preserved-context/skills/team_automation/he-ideate/`
+- `he-improve`: `fixtures/preserved-context/skills/team_automation/he-improve/`
+- `he-plan`: `fixtures/preserved-context/skills/team_automation/he-plan/`
+- `he-prune-branches`: `fixtures/preserved-context/skills/team_automation/he-prune-branches/`
+- `he-refine`: `fixtures/preserved-context/skills/team_automation/he-refine/`
+- `he-spec`: `fixtures/preserved-context/skills/team_automation/he-spec/`
+- `he-tdd`: `fixtures/preserved-context/skills/team_automation/he-tdd/`
+- `he-work`: `fixtures/preserved-context/skills/team_automation/he-work/`
 
 ## Preservation Contract
 

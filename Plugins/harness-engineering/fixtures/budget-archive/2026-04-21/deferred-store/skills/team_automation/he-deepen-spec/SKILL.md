@@ -1,6 +1,6 @@
 ---
 name: he-deepen-spec
-description: Improve an existing Harness Engineering spec with missing behavior, boundaries, domain terms, and acceptance criteria. Use when a user asks to deepen or complete a spec before planning.
+description: Deepen an existing system or UI spec so boundaries, lifecycle rules, failure handling, and validation are strong enough for planning. Use when the user wants Harness Engineering spec hardening or a requirements review pass before planning.
 metadata:
   skill-type: team_automation
 ---
@@ -8,6 +8,11 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
+
+## Use
+
+- Use this skill as normal for this Harness Engineering stage.
+- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -23,11 +28,16 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Inputs
 
-- Request, artifacts, repo context, and linked Linear issues.
+- Existing specification plus related requirements and constraints.
+- Interfaces, lifecycle assumptions, and validation expectations.
 
 ## Outputs
 
-- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+- Deepened specification with explicit boundaries, invariants, and acceptance criteria.
+- A domain-consistency pass for project terms, aliases, relationships, code/spec contradictions, and unresolved ambiguities.
+- An interface-design pass for any new or weak module/API boundary, including alternatives, usage examples, hidden complexity, and the selected shape.
+- Clear readiness recommendation for planning.
+- Include `schema_version: 1` when structured output is requested.
 
 ## Procedure
 
@@ -67,7 +77,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not silently alter core scope without explicit rationale.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
 ## Anti-patterns
 
@@ -76,6 +86,30 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Comparing cosmetic variants instead of genuinely different interface shapes.
 - Choosing an interface because it is easiest to implement rather than easiest to use correctly.
 - Passing specs downstream with unresolved contract gaps.
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you deepen the export spec before planning because retries, ownership terms, and rollback behavior are still unclear?"
+- "Please inspect the code, Linear issue, and `CONTEXT.md`; the code says `member`, Linear says `user`, and `CONTEXT.md` says `Customer`."
+- "This spec adds a parser module boundary; can you validate two caller-facing APIs and choose the one that is easiest to use correctly?"
+
+## Full Context
+
+- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
+- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
+- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
+- Compatibility mirror (non-canonical): [./references](./references)
+- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects spec readiness.
+- Assets: [./assets](./assets)
+- Assets directory marker: `assets/`
+
+## Subagent Routing
+
+- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
+- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
+- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
+- If required roles are missing from the manifest, create or install them with [../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) before rerunning delegated coverage.

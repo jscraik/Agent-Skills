@@ -1,8 +1,8 @@
 ---
 name: plugin-router
-description: Front-door router for the Plugin Factory plugin. Use when users ask generally to create, harden, convert, install, or troubleshoot plugins and need the correct lane before deeper execution.
+description: Analyze broad, mixed, or unclear Plugin Factory follow-up requests and select the correct plugin lane. Use when plugin intent lacks a clear lane owner.
 metadata:
-  short-description: Route plugin requests to the right factory lane
+  short-description: Route plugin follow-ups to the right factory lane
   skill-type: team_automation
   lifecycle_state: active
   maturity: canonical
@@ -13,6 +13,8 @@ metadata:
 
 # Plugin Router
 
+Internal helper for Plugin Factory follow-up routing. The canonical front door is `[[plugin-factory-router]]`; use this skill only after that router selects a router follow-up or when a loaded Plugin Factory workflow explicitly asks for the detailed route map.
+
 ## Philosophy
 
 - Route first, execute second.
@@ -20,7 +22,9 @@ metadata:
 
 ## When to Use
 
-Use when plugin intent is broad, mixed, or missing a clear lane owner.
+Use when plugin intent remains broad, mixed, or missing a clear lane owner after canonical Plugin Factory routing.
+
+Do not use this as the root Plugin Factory entrypoint. Route root-level plugin lifecycle requests through `[[plugin-factory-router]]` first.
 
 ## Inputs
 

@@ -39,6 +39,7 @@ risks:
   - over-broad refresh recommendations; mitigate with narrow scope hints and evidence thresholds
   - compact-safe overlap blind spots; mitigate by treating compact-safe as an explicit tradeoff and only recommending narrow follow-up refreshes when obvious
   - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used
+  - generic session-history scope creep; mitigate by routing broad session evidence to `skill-refactor` and reusable workflow capture to `skillify`
   - helper-role drift during learning capture; mitigate with the one-file-write rule and orchestrator-owned final assembly
 
 observability: >

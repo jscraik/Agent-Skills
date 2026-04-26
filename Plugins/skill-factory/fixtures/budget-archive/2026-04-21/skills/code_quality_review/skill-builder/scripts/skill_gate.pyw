@@ -750,20 +750,77 @@ def check_path_safety(doc: SkillDoc) -> List[Finding]:
     if re.search(r"(?m)^[A-Za-z]:\\", body):
         out.append(Finding(Level.WARN, "PATH_WINDOWS", "Windows-style paths detected; prefer POSIX-style relative paths."))
 
-    if re.search(r"(?m)^\s*/", body):
-        out.append(Finding(Level.WARN, "PATH_ABSOLUTE", "Absolute paths detected; prefer repo-relative paths."))
+    local_absolute_refs = sorted(
+        set(re.findall(r"(?<![\w:])/(?:Users|home|Volumes|private|tmp|var|etc|opt)/[^\s)`>]+", body))
+    )
+    if re.search(r"(?m)^\s*/", body) or local_absolute_refs:
+        evidence = ", ".join(local_absolute_refs[:3])
+        out.append(
+            Finding(
+                Level.WARN,
+                "PATH_ABSOLUTE",
+                "Absolute paths detected; prefer public-safe repo-relative paths.",
+                evidence=evidence,
+            )
+        )
 
     repo_root: Optional[Path] = None
     for base in [doc.path.parent, *doc.path.parent.parents]:
         if (base / ".git").exists():
-            repo_root = base
+            repo_root = base.resolve()
             break
+
+    if repo_root is None:
+        for base in [doc.path.resolve().parent, *doc.path.resolve().parent.parents]:
+            if (base / ".git").exists():
+                repo_root = base.resolve()
+                break
+
+    repo_link_pattern = re.compile(r"\]\(repo:([^)]+)\)")
+    bad_repo_links: List[str] = []
+    missing_repo_links: List[str] = []
+    for raw_target in sorted(set(repo_link_pattern.findall(body))):
+        target = raw_target.strip()
+        if target.startswith("/") or target.startswith("../") or "/../" in target:
+            bad_repo_links.append(f"repo:{target}")
+            continue
+        if repo_root is None:
+            continue
+        resolved = (repo_root / target).resolve()
+        if not resolved.is_relative_to(repo_root):
+            bad_repo_links.append(f"repo:{target}")
+        elif not resolved.exists():
+            missing_repo_links.append(f"repo:{target}")
+
+    if bad_repo_links:
+        sample = ", ".join(bad_repo_links[:3])
+        out.append(
+            Finding(
+                Level.WARN,
+                "PATH_REPO_LINK_TRAVERSAL",
+                "`repo:` link(s) must stay inside the repository root.",
+                evidence=sample,
+            )
+        )
+    if missing_repo_links:
+        sample = ", ".join(missing_repo_links[:3])
+        out.append(
+            Finding(
+                Level.WARN,
+                "PATH_REPO_LINK_MISSING",
+                "`repo:` link target(s) were not found.",
+                evidence=sample,
+            )
+        )
 
     traversal_refs = sorted(set(re.findall(r"\.\./[A-Za-z0-9._/\-]+", body)))
     unresolved_or_external: List[str] = []
     for rel in traversal_refs:
-        resolved = (doc.path.parent / rel).resolve()
-        if repo_root and resolved.is_relative_to(repo_root):
+        candidates = [
+            (doc.path.parent / rel).resolve(),
+            (doc.path.resolve().parent / rel).resolve(),
+        ]
+        if repo_root and any(candidate.is_relative_to(repo_root) for candidate in candidates):
             continue
         unresolved_or_external.append(rel)
 

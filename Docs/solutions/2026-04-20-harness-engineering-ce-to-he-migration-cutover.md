@@ -31,7 +31,7 @@ This made the migration non-durable until naming, routing, and validation enforc
 Applied a complete cutover with canonical HE naming plus validator hardening:
 
 1. Renamed active harness-engineering skills from `ce-*` to `he-*` and updated plugin/routing metadata to HE identifiers.
-2. Normalized archived skill fixtures (`Plugins/harness-engineering/fixtures/skill-archive`) from `ce-*` to `he-*`, including anti-pattern reference filenames and task-profile IDs.
+2. Normalized preserved skill fixtures (then `Plugins/harness-engineering/fixtures/skill-archive`, now `Plugins/harness-engineering/fixtures/preserved-context` with a compatibility alias) from `ce-*` to `he-*`, including anti-pattern reference filenames and task-profile IDs.
 3. Updated `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` to:
    - validate `he-work`/`he-tdd` approval-flow linkage,
    - fix stale CE variable references,

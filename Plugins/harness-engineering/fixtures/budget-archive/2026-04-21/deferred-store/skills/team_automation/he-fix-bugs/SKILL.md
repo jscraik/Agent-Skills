@@ -1,6 +1,6 @@
 ---
 name: he-fix-bugs
-description: Debug Harness Engineering bugs with reproduction evidence and regression coverage. Use when defects are reproducible, QA failures have expected behavior, or bugfix validation is required.
+description: Restore broken behavior by reproducing failures, identifying root cause, and delivering verified fixes. Use when the user needs regression debugging, incident triage, or bug repair from tracker or direct reports.
 metadata:
   skill-type: team_automation
 ---
@@ -8,6 +8,11 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
+
+## Use
+
+- Use this skill as the canonical Harness Engineering bug-fixing stage.
+- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -24,22 +29,32 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Inputs
 
-- Request, artifacts, repo context, and linked Linear issues.
+- Symptom report, repro context, and affected scope.
+- Logs, traces, tests, and relevant code paths.
+- Optional issue-tracker reference or pasted issue context.
+- Relevant `CONTEXT.md` when issue language uses project-specific terms.
+- Execution permission: `diagnosis-only` or `diagnose-and-fix`.
+- Optional QA-intake mode when reports need Linear issue filing before diagnosis.
 
 ## Outputs
 
-- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+- Reproduction evidence, root-cause analysis, fix scope, and verification outcome.
+- Linear issue payloads or URLs for QA intake, including single/breakdown decision and blocker links.
+- Clear next action when blocked or when diagnosis is complete but remediation is not yet chosen.
+- Regression test recommendation and why existing checks missed the issue when that is knowable.
+- Include `schema_version: 1` when structured output is requested.
 
 ## Procedure
 
 1. Parse intake first: symptom report, tracker context, expected behavior, and any prior failed attempts.
 2. If the request is a QA session or conversational report, run QA intake: ask at most 2-3 focused questions, lightly inspect domain language, decide single issue vs breakdown, and file or prepare Linear issue payloads before diagnosis.
 3. Compare issue language with `CONTEXT.md` when present so aliases or domain misunderstandings do not become false bug scope.
-4. Reproduce and stabilize the failing behavior before proposing changes.
-5. Trace backward from the symptom to the point where valid state first became invalid.
-6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
-7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
-8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+4. For runtime, CLI, startup, agent-routing, or session-log failures, collect bounded runtime evidence before reproduction: identify relevant logs/config paths, read only tails or targeted matches, capture `[ERROR]`/`[WARN]` markers, and state when logging began too late to prove the original failure.
+5. Reproduce and stabilize the failing behavior before proposing changes.
+6. Trace backward from the symptom to the point where valid state first became invalid.
+7. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+8. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+9. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
 ## Validation
 
@@ -60,7 +75,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not create GitHub issues or ADRs for QA intake unless the user explicitly overrides the Linear-first project convention.
 - Do not over-interview during QA intake; ask only the minimum short questions needed to file a durable issue.
 - Do not use shotgun debugging or bundle unrelated changes into one bug fix.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
 
 ## Anti-patterns
 
@@ -68,6 +83,39 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Shipping fixes that lack regression checks.
 - Accepting a symptom fix when the causal chain prediction failed.
 - Treating tracker intake, diagnosis, and issue management as one speculative step.
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "When the user asks, `Can you inspect this regression that started after the auth refactor, reproduce it, and find the root cause before you fix anything?`"
+- "Please investigate this crash, but stop at diagnosis and test recommendations because I do not want edits yet."
+- "Help me validate why the last two quick patches failed and tell me what is actually broken."
+- "Can you run a QA session and file Linear issues for each bug I report?"
+
+## Full Context
+
+- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
+- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
+- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
+- Compatibility mirror (non-canonical): [./references](./references)
+- Assets: [./assets](./assets)
+- Assets directory marker: `assets/`
+- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
+Read when: issue wording may conflict with `CONTEXT.md` or use a non-canonical project term.
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
+Read when: the user reports bugs conversationally, asks for a QA session, or wants feedback turned into Linear issues.
+- Runtime evidence intake: [./Infrastructure/references/runtime-evidence-intake.md](./Infrastructure/references/runtime-evidence-intake.md)
+Read when: the failure involves logs, startup, CLI/runtime state, agent routing, or debug evidence that may be incomplete.
+Read when: you need full workflow behavior, diagnosis gates, and fix sequencing.
+Read when: you need contracts, eval fixtures, anti-patterns, or tracker-intake details.
+Read when: you need icon/display metadata and invocation policy.
+- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+Read when: you need canonical stage policy and fallback behavior.
+
+## Subagent Routing
+
+- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
+- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
+- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
+- If required roles are missing from the manifest, create or install them with [../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) before rerunning delegated coverage.

@@ -52,8 +52,7 @@ from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
 from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
-from ask.commands.workouts import add_workouts_parser, dispatch_workouts
-
+from ask.commands.workouts import add_workouts_parser, dispatch_workouts, render_workouts_human
 # Error Code Mapping (per spec Error Registry)
 ERROR_MAP = {
     ErrorCode.SUCCESS: ExitCode.SUCCESS,
@@ -132,6 +131,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask wiki add --interactive",
         "ask wiki query \"1password signing\"",
     ],
+    "workouts": ["ask workouts list --json", "ask workouts run harness-engineering/he-spec --attempts 3 --json"],
 }
 
 COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
@@ -1560,6 +1560,8 @@ def main():
                         print("  (Dry run - no changes made)")
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
+                elif args.topic == "workouts":
+                    render_workouts_human(args, result)
                 elif args.topic == "skills" and args.action == "audit":
                     print(f"✅ Audit passed: {args.path}")
                     print(result.data["diagnostics"]["stdout"])

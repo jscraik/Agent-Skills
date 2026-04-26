@@ -66,11 +66,9 @@ class SkillInstallerDestPolicyTests(unittest.TestCase):
 
     def test_resolve_dest_root_allows_repo_relative_category(self) -> None:
         """
-        Verifies that a repo-relative category name resolves to a directory under the repository root.
+        Verify that a repository-relative category name resolves to a directory under the repository's Skills root.
         
-        Patches the installer's canonical repository destination to a path ending with `agent-skills/github`
-        and asserts that passing `"utilities"` to `_resolve_dest_root` yields the resolved path
-        `agent-skills/utilities`.
+        Patches the installer's canonical repository destination to a path under `agent-skills/Skills/github` and asserts that calling `_resolve_dest_root("utilities")` returns the resolved path `agent-skills/Skills/utilities`.
         """
         with tempfile.TemporaryDirectory(prefix="installer-canonical-") as tmpdir:
             repo_root = Path(tmpdir) / "agent-skills"

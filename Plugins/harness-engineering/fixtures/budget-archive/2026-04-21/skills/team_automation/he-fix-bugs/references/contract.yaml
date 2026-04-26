@@ -15,6 +15,7 @@ inputs:
   - observable symptoms and expected behavior
   - relevant `CONTEXT-MAP.md` or `CONTEXT.md` when the issue uses project-specific terms
   - environment clues and reproduction constraints
+  - bounded runtime evidence when the issue involves logs, startup, CLI state, agent routing, or debug output
   - execution permission (`diagnosis-only` vs `diagnose-and-fix`)
   - optional QA-intake mode for conversational reports that need tracker filing before diagnosis
 
@@ -23,6 +24,7 @@ outputs:
   - reproduction status (`confirmed`, `not_reproduced`, `partial`, or `blocked`)
   - root-cause chain with evidence references
   - issue-language/domain-model mismatch note when the report uses ambiguous or non-canonical terms
+  - bounded runtime evidence summary, including log/config paths checked and whether logging captured the original failure
   - fix plan and test recommendations
   - implementation summary when fix execution is requested
   - structured summary including `schema_version: 1` on request
@@ -36,6 +38,8 @@ risks:
   - symptom-fix bias; mitigate with causal-chain gate and prediction checks for uncertain links
   - tracker-language mismatch; mitigate by comparing Linear issue wording with `CONTEXT.md` before treating wording as bug scope
   - unreliable reproduction; mitigate with iterative instrumentation and environment notes
+  - unbounded log or trace reads; mitigate with tail-first inspection and targeted error/warning searches
+  - late-enabled logging; mitigate by naming the evidence gap and asking for a reproduction before claiming root cause
   - over-broad QA tickets; mitigate with single-vs-breakdown classification and thin independently verifiable Linear issues
   - brittle tracker bodies; mitigate by omitting file paths, line numbers, and internal implementation details from Linear issue descriptions
   - scope drift into redesign; mitigate with explicit route to `he-brainstorm` when needed

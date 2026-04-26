@@ -1,0 +1,86 @@
+{
+  "schema_version": "context-budget-rooted-soak.v1",
+  "generated_at": "2026-04-25T08:06:22Z",
+  "branch": "develop",
+  "commit_sha": "22840fad87ad0d2e9e58830834e6fa98dd491b96",
+  "recorded_after_commit_sha": "7c54617641e296a9f7f4a169e20fb9bb83aa0333",
+  "plan": "Docs/plans/2026-04-24-feat-context-budgeted-skill-trees-plan.md",
+  "projection_mode_final": "rooted",
+  "policy_identity": "146a6f20347f3958",
+  "artifact_root": "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z",
+  "checksums_path": "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/checksums.sha256",
+  "checksums_sha256": "c0848187cf5e06e43f1762984ddc5ffd00dc7a482bd86f3c51fbd024b9dd977f",
+  "soak": {
+    "runs": 5,
+    "steps_per_run": 11,
+    "result": "pass",
+    "required_failures": 0,
+    "warn_only_issues": 0,
+    "runtime_surface_artifacts": [
+      ".agents/skills",
+      ".skillsets",
+      "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/final-workspace-rooted.log",
+      "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/final-user-rooted.log"
+    ],
+    "command_set": [
+      "python3 bin/ask skills budget --json",
+      "python3 bin/ask skills sync --scope workspace --projection rooted --dry-run",
+      "python3 bin/ask skills sync --scope workspace --projection rooted",
+      "python3 bin/ask skills sync --scope user --projection rooted --dry-run",
+      "python3 bin/ask skills sync --scope user --projection rooted",
+      "python3 bin/ask repo validate --ephemeral",
+      "python3 bin/ask skills sync --scope user --projection flat",
+      "python3 bin/ask skills sync --scope workspace --projection flat",
+      "python3 bin/ask skills sync --scope workspace --projection flat --dry-run",
+      "python3 bin/ask skills sync --scope user --projection flat --dry-run",
+      "python3 bin/ask runtime budget --json"
+    ]
+  },
+  "final_restore": {
+    "result": "pass",
+    "commands": [
+      "python3 bin/ask skills sync --scope workspace --projection rooted",
+      "python3 bin/ask skills sync --scope user --projection rooted"
+    ],
+    "logs": [
+      "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/final-workspace-rooted.log",
+      "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/final-user-rooted.log"
+    ]
+  },
+  "diagnostic_workouts": [
+    {
+      "workout": "agent-ops/verification-before-completion",
+      "command": "python3 bin/ask workouts run agent-ops/verification-before-completion --attempts 3 --json",
+      "result": "pass",
+      "attempts": 3,
+      "pass_rate": 1.0,
+      "flake_rate": 0,
+      "scorecard_path": "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/scorecards/agent-ops__verification-before-completion.json",
+      "scorecard_sha256": "4935a7f50ebf4603aa22bef20c40cbff5cd99f7d3974cd7ef3d1df85d98685cb"
+    },
+    {
+      "workout": "harness-engineering/he-spec",
+      "command": "python3 bin/ask workouts run harness-engineering/he-spec --attempts 3 --json",
+      "result": "pass",
+      "attempts": 3,
+      "pass_rate": 1.0,
+      "flake_rate": 0,
+      "scorecard_path": "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/scorecards/harness-engineering__he-spec.json",
+      "scorecard_sha256": "ed0a7d4639d245f476fe59e752168034290dfb25fbfed3420a610f147ef5e223"
+    },
+    {
+      "workout": "skill-factory/skill-refactor",
+      "command": "python3 bin/ask workouts run skill-factory/skill-refactor --attempts 3 --json",
+      "result": "pass",
+      "attempts": 3,
+      "pass_rate": 1.0,
+      "flake_rate": 0,
+      "scorecard_path": "Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/scorecards/skill-factory__skill-refactor.json",
+      "scorecard_sha256": "be6b517d6432cb139d4f49a63e80bbde573a3b08cadc32ac659d41f38925dde8"
+    }
+  ],
+  "open_regression_state": {
+    "p0_p1_routing_regressions": "none observed in this local soak artifact",
+    "review_status": "local evidence only; no external issue tracker sweep was run in this step"
+  }
+}

@@ -348,12 +348,26 @@ def generate_suggestions(doc: SkillDoc, *, min_description_len: int = 120) -> Li
         except Exception:
             has_openai_short_description = False
 
-    if metadata is not None:
+    governance_metadata_keys = {
+        "skill-type",
+        "skill_type",
+        "lifecycle_state",
+        "maturity",
+        "owner",
+        "review_cadence",
+        "last_reviewed",
+        "metadata_source",
+    }
+    metadata_is_governance_only = (
+        isinstance(metadata, dict)
+        and set(str(key) for key in metadata.keys()) <= governance_metadata_keys
+    )
+    if metadata is not None and not metadata_is_governance_only:
         add(
             rule="frontmatter.metadata.discouraged",
             category="Frontmatter",
             priority=Priority.LOW,
-            message="Prefer minimal SKILL.md frontmatter (name + description). Move UI metadata to `agents/openai.yaml` and remove `metadata`.",
+            message="Prefer minimal SKILL.md frontmatter (name + description). Move UI metadata to `agents/openai.yaml` and keep `metadata` only for repo governance tags.",
             example="""\
             # agents/openai.yaml
             interface:

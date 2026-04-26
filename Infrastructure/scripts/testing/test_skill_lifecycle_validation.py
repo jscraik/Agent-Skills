@@ -20,6 +20,9 @@ SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "
 SHADOW_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "check_plugin_skill_shadowing.sh"
 SELECTION_POLICY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "selection_policy.py"
 SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "skill_discovery.py"
+RUNTIME_SURFACE_POLICY_SCRIPT = (
+    REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "runtime_surface_policy.py"
+)
 SYNC_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
 
 # macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
@@ -93,6 +96,19 @@ def load_skill_discovery_module():
     spec = importlib.util.spec_from_file_location("skill_discovery", SKILL_DISCOVERY_SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load skill discovery module from {SKILL_DISCOVERY_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_runtime_surface_policy_module():
+    script_dir = str(RUNTIME_SURFACE_POLICY_SCRIPT.parent)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+    spec = importlib.util.spec_from_file_location("runtime_surface_policy", RUNTIME_SURFACE_POLICY_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load runtime surface policy module from {RUNTIME_SURFACE_POLICY_SCRIPT}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -403,7 +419,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_packaged_representation_uses_symlinked_canonical_skill_alias(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
-            packaged_skill = f"""
+            packaged_skill = """
                 ---
                 name: skill-builder
                 description: "Packaged skill representation mirrored from canonical source."
@@ -597,6 +613,85 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(default_names, expected_default)
         self.assertEqual(advanced_names, sorted(skill_names))
 
+    def test_skill_discovery_default_visibility_includes_rooted_runtime_roots(self) -> None:
+        """Ensure rooted first-level runtime entries stay visible in the default catalog."""
+        skill_discovery = load_skill_discovery_module()
+        root_names = ("agent-ops", "harness-engineering", "skill-factory")
+        latent_name = "hidden-latent-skill"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            for name in (*root_names, latent_name):
+                write_text(
+                    flat_root / name / "SKILL.md",
+                    f"""
+                    ---
+                    name: {name}
+                    description: "{name} test skill"
+                    ---
+
+                    # {name}
+                    """,
+                )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="flat",
+                    visibility="advanced",
+                )
+
+        self.assertEqual(sorted(entry.name for entry in default_entries), sorted(root_names))
+        self.assertEqual(sorted(entry.name for entry in advanced_entries), sorted([*root_names, latent_name]))
+
+    def test_runtime_surface_policy_classifies_rooted_visibility(self) -> None:
+        """Keep rooted runtime visibility in one policy module instead of discovery-only logic."""
+        runtime_policy = load_runtime_surface_policy_module()
+
+        self.assertEqual(runtime_policy.active_projection_mode(["agent-ops"]), "rooted")
+        self.assertEqual(runtime_policy.active_projection_mode(["autofix"]), "flat")
+        self.assertEqual(runtime_policy.active_projection_mode(["agent-ops", "autofix"]), "mixed")
+        self.assertTrue(runtime_policy.is_default_visible_skill_name("agent-ops"))
+        self.assertTrue(runtime_policy.is_default_visible_skill_name("autofix"))
+        self.assertFalse(runtime_policy.is_default_visible_skill_name("hidden-latent-skill"))
+        mixed_report = runtime_policy.runtime_surface_report(["agent-ops", "autofix"])
+        self.assertEqual(mixed_report.projection_mode, "mixed")
+        self.assertFalse(mixed_report.is_valid_projection)
+        self.assertEqual(mixed_report.extra_first_level_names, ["autofix"])
+        self.assertEqual(
+            runtime_policy.rooted_runtime_name_drift(["agent-ops", "unexpected-skill"]),
+            (
+                ["unexpected-skill"],
+                sorted(set(runtime_policy.ROOT_SKILL_SETS) - {"agent-ops"}),
+            ),
+        )
+
+    def test_skill_discovery_visibility_predicate_uses_runtime_surface_policy(self) -> None:
+        """Assert visibility policy can be tested without running full discovery."""
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            plugin_router = repo_root / "Plugins" / "cache" / "local" / "plugin" / "skills" / "plugin-router"
+            plugin_lane = repo_root / "Plugins" / "cache" / "local" / "plugin" / "skills" / "code-review"
+            project_skill = repo_root / ".agents" / "skills" / "agent-ops"
+            hidden_skill = repo_root / ".agents" / "skills" / "not-a-default"
+            for path in (plugin_router, plugin_lane, project_skill, hidden_skill):
+                path.mkdir(parents=True, exist_ok=True)
+
+            with mock.patch.object(skill_discovery, "REPO_ROOT", repo_root):
+                self.assertTrue(skill_discovery.is_skill_visible("agent-ops", project_skill, "default"))
+                self.assertFalse(skill_discovery.is_skill_visible("not-a-default", hidden_skill, "default"))
+                self.assertFalse(skill_discovery.is_skill_visible("plugin-router", plugin_router, "default"))
+                self.assertFalse(skill_discovery.is_skill_visible("code-review", plugin_lane, "default"))
+                self.assertTrue(skill_discovery.is_skill_visible("plugin-router", plugin_router, "advanced"))
+                self.assertTrue(skill_discovery.is_skill_visible("code-review", plugin_lane, "advanced"))
+
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_missing_them(self) -> None:
         """
         Ensure advanced discovery can merge plugin lanes when flat projection is missing them.
@@ -653,6 +748,126 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         advanced_names = sorted(entry.name for entry in advanced_entries)
         self.assertEqual(default_names, [])
         self.assertEqual(advanced_names, ["code-review", "coderabbit"])
+
+    def test_skill_discovery_advanced_includes_local_plugin_cache_skills(self) -> None:
+        """Ensure operator catalogue discovery includes installed OpenAI plugin cache skills."""
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            flat_root = repo_root / ".agents" / "skills"
+            cache_skill_root = (
+                repo_root
+                / "Plugins"
+                / "cache"
+                / "openai-curated"
+                / "build-web-apps"
+                / "version"
+                / "skills"
+            )
+            local_cache_skill_root = (
+                repo_root
+                / "Plugins"
+                / "cache"
+                / "agent-skills-local"
+                / "skill-factory"
+                / "version"
+                / "skills"
+            )
+            browser_cache_skill_root = (
+                repo_root
+                / "Plugins"
+                / "cache"
+                / "openai-bundled"
+                / "browser-use"
+                / "version"
+                / "skills"
+            )
+            browser_source_skill_root = repo_root / "Plugins" / "browser-use" / "skills"
+
+            write_text(
+                flat_root / "agent-ops" / "SKILL.md",
+                """
+                ---
+                name: agent-ops
+                description: "root router"
+                ---
+                # agent-ops
+                """,
+            )
+            write_text(
+                cache_skill_root / "frontend-app-builder" / "SKILL.md",
+                """
+                ---
+                name: frontend-app-builder
+                description: "Build frontend apps from the local plugin cache."
+                ---
+                # frontend-app-builder
+                """,
+            )
+            write_text(
+                cache_skill_root.parent / "fixtures" / "example" / "skills" / "fixture-only" / "SKILL.md",
+                """
+                ---
+                name: fixture-only
+                description: "Fixture skill should not be catalogued."
+                ---
+                # fixture-only
+                """,
+            )
+            write_text(
+                local_cache_skill_root / "skill-factory-router" / "SKILL.md",
+                """
+                ---
+                name: skill-factory-router
+                description: "Local cache mirror should not shadow canonical plugin sources."
+                ---
+                # skill-factory-router
+                """,
+            )
+            write_text(
+                browser_cache_skill_root / "browser" / "SKILL.md",
+                """
+                ---
+                name: browser
+                description: "Cache mirror should not shadow canonical plugin source."
+                ---
+                # browser
+                """,
+            )
+            write_text(
+                browser_source_skill_root / "browser" / "SKILL.md",
+                """
+                ---
+                name: browser
+                description: "Canonical browser plugin source."
+                ---
+                # browser
+                """,
+            )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", flat_root),
+            ):
+                default_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="default",
+                )
+                advanced_entries = skill_discovery.discover_skill_entries(
+                    source="auto",
+                    visibility="advanced",
+                )
+
+        self.assertEqual(sorted(entry.name for entry in default_entries), ["agent-ops"])
+        self.assertEqual(
+            sorted(entry.name for entry in advanced_entries),
+            ["agent-ops", "frontend-app-builder", "skill-factory-router"],
+        )
+        local_router_entry = next(entry for entry in advanced_entries if entry.name == "skill-factory-router")
+        self.assertEqual(
+            local_router_entry.source_dir.relative_to(repo_root).as_posix(),
+            "Plugins/cache/agent-skills-local/skill-factory/version/skills/skill-factory-router",
+        )
 
     def test_skill_discovery_auto_advanced_includes_repo_non_default_skills(self) -> None:
         """

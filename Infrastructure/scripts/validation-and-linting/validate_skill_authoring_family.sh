@@ -102,6 +102,30 @@ else
   python_cmd_display="python3"
 fi
 
+preserved_context_dir="Plugins/harness-engineering/fixtures/preserved-context"
+legacy_context_alias="Plugins/harness-engineering/fixtures/skill-archive"
+echo "[family-gate] validating Harness Engineering preserved-context alias"
+if [[ ! -d "$preserved_context_dir" ]]; then
+  echo "[family-gate] ERROR: missing canonical preserved context dir: $preserved_context_dir" >&2
+  exit 1
+fi
+if [[ ! -L "$legacy_context_alias" ]]; then
+  echo "[family-gate] ERROR: legacy context alias must be a symlink: $legacy_context_alias" >&2
+  exit 1
+fi
+"${python_cmd[@]}" - "$preserved_context_dir" "$legacy_context_alias" <<'PY'
+from pathlib import Path
+import sys
+
+canonical = Path(sys.argv[1])
+alias = Path(sys.argv[2])
+if canonical.resolve() != alias.resolve():
+    raise SystemExit(
+        f"[family-gate] ERROR: {alias} resolves to {alias.resolve()}, expected {canonical.resolve()}"
+    )
+PY
+echo "[family-gate] Harness Engineering preserved-context alias passed"
+
 skill_dirs=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
@@ -138,6 +162,7 @@ he_work_skill="Plugins/harness-engineering/skills/team_automation/he-work/SKILL.
 he_tdd_skill="Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md"
 ce_shared_approval_doc="Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 ce_shared_approval_ref="../shared/references/approval-flow.md"
+ce_shared_approval_repo_ref="repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 
 # ---------------------------------------------------------------------------
 # Runner selection — override via SKILL_FAMILY_RUNNER (default: codex)
@@ -272,8 +297,8 @@ for skill_doc in "$he_work_skill" "$he_tdd_skill"; do
     exit 1
   fi
 
-  if ! grep -Fq "$ce_shared_approval_ref" "$skill_doc"; then
-    echo "[family-gate] ERROR: $skill_doc must reference $ce_shared_approval_ref"
+  if ! grep -Fq "$ce_shared_approval_ref" "$skill_doc" && ! grep -Fq "$ce_shared_approval_repo_ref" "$skill_doc"; then
+    echo "[family-gate] ERROR: $skill_doc must reference $ce_shared_approval_ref or $ce_shared_approval_repo_ref"
     exit 1
   fi
 
@@ -299,8 +324,8 @@ from pathlib import Path
 import yaml
 
 paths = [
-    Path("Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/skill-archive/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
     Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
     Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
 ]

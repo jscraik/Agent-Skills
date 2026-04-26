@@ -13,21 +13,24 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - `library_api_reference`: 3
 - `product_verification`: 4
 - `data_fetch_analysis`: 4
-- `team_automation`: 36
+- `team_automation`: 35
 - `scaffolding_templates`: 19
 - `code_quality_review`: 25
 - `ci_cd_deployment`: 1
 - `runbook`: 11
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 107
+- `total_tagged`: 106
 
 ## Validation Notes
 
+- Regeneration command:
+  - `python3 Infrastructure/scripts/lifecycle-and-sync/skill_scan.py write-skill-type-index --output Docs/skills-by-type.md`
 - Source scope: `Skills Plugins/harness-engineering Plugins/plugin-factory Plugins/skill-factory`.
 - Companion mode: sandbox-safe (no protected runtime path mutations).
 - Validation command:
   - `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`
+  - `bash Infrastructure/scripts/validation-and-linting/check-doc-style.sh --changed`
 
 ## Canonical Values
 
@@ -92,7 +95,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter.
 - plugin-factory-router (Plugins/plugin-factory/skills)
 - plugin-router (Plugins/plugin-factory/skills/team_automation)
 - production-deployment (Skills/agent-ops)
-- release-notes (Skills/content-publishing)
 - skill-factory-router (Plugins/skill-factory/skills)
 - skill-pr-delivery (Skills/agent-ops)
 - slides (Skills/content-publishing)

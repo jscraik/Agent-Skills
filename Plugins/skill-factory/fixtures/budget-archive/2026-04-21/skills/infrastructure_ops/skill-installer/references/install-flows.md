@@ -46,6 +46,7 @@ After installing a skill, tell the user: `Restart Codex to pick up new skills.`
 - "Show me curated skills I can install right now, then install `linear`."
 - "Check whether `skills/.experimental` exists, then list it if available."
 - "Install this private repo skill from `https://github.com/acme/private-repo/tree/main/skills/my-skill`."
+- "Repair runtime visibility for this already-installed skill and tell me whether Codex needs a restart."
 
 ## Command examples
 

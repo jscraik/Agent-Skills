@@ -1,0 +1,439 @@
+{
+  "status": "success",
+  "trace_id": "37068e52-435d-49e5-899d-bfabc21c33fc",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills budget --json",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "runtime_budget": {
+      "advanced_visible_count": 118,
+      "advanced_visible_warn": 60,
+      "advisories": [
+        {
+          "code": "ADVANCED_SKILL_VISIBILITY_HIGH",
+          "message": "advanced skill count 118 exceeds informational threshold 60"
+        }
+      ],
+      "budget_status": "pass",
+      "catalog_default_count": 0,
+      "catalog_default_skill_names": [],
+      "default_visible_count": 10,
+      "default_visible_max": 30,
+      "default_visible_skill_names": [],
+      "duplicate_default_names": [],
+      "effective_default_policy_skill_names": [
+        "agents-md",
+        "autofix",
+        "autoresearch",
+        "bootstrap",
+        "codex-agent-creator",
+        "codex-automation-architect",
+        "codex-hooks-builder",
+        "coding-harness",
+        "context7",
+        "docs-expert",
+        "fix-mise",
+        "gh-workflow",
+        "improve-codebase-architecture",
+        "npm-release",
+        "pnpm-manager",
+        "project-brain",
+        "simplify",
+        "skill-pr-delivery",
+        "triage",
+        "ubiquitous-language",
+        "verification-before-completion"
+      ],
+      "estimated_description_tokens": 1615,
+      "estimated_description_words": 1211,
+      "first_level_bridge_skills": [],
+      "first_level_default_count": 10,
+      "first_level_default_entries": [
+        {
+          "category": ".agents/skills",
+          "name": "agent-ops",
+          "path": ".agents/skills/agent-ops"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "backend-platform",
+          "path": ".agents/skills/backend-platform"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "content-publishing",
+          "path": ".agents/skills/content-publishing"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "frontend-ui",
+          "path": ".agents/skills/frontend-ui"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "harness-engineering",
+          "path": ".agents/skills/harness-engineering"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "mobile-native",
+          "path": ".agents/skills/mobile-native"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "plugin-factory",
+          "path": ".agents/skills/plugin-factory"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "product-strategy",
+          "path": ".agents/skills/product-strategy"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "security-ops",
+          "path": ".agents/skills/security-ops"
+        },
+        {
+          "category": ".agents/skills",
+          "name": "skill-factory",
+          "path": ".agents/skills/skill-factory"
+        }
+      ],
+      "hidden_system_count": 6,
+      "hidden_system_entries": [
+        {
+          "category": ".agents/skills/.system",
+          "name": "imagegen",
+          "path": ".agents/skills/.system/imagegen"
+        },
+        {
+          "category": ".agents/skills/.system",
+          "name": "openai-docs",
+          "path": ".agents/skills/.system/openai-docs"
+        },
+        {
+          "category": ".agents/skills/.system",
+          "name": "plugin-creator",
+          "path": ".agents/skills/.system/plugin-creator"
+        },
+        {
+          "category": ".agents/skills/.system",
+          "name": "plugin-installer",
+          "path": ".agents/skills/.system/plugin-installer"
+        },
+        {
+          "category": ".agents/skills/.system",
+          "name": "skill-creator",
+          "path": ".agents/skills/.system/skill-creator"
+        },
+        {
+          "category": ".agents/skills/.system",
+          "name": "skill-installer",
+          "path": ".agents/skills/.system/skill-installer"
+        }
+      ],
+      "largest_descriptions": [
+        {
+          "description": "Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.",
+          "description_words": 83,
+          "name": "imagegen",
+          "path": "skills-system/imagegen"
+        },
+        {
+          "description": "Build or update a shared project vocabulary, DDD-style glossary, and prompt translation map from the current conversation, project docs, and relevant session evidence. Use when terminology is fuzzy, the user wants consistent naming, asks what to call something, wants agents to interpret their wording consistently, mentions glossary, domain model, DDD, ubiquitous language, naming, vocabulary, terminology, or says they do not know the technical term.",
+          "description_words": 64,
+          "name": "ubiquitous-language",
+          "path": "Skills/agent-ops/ubiquitous-language"
+        },
+        {
+          "description": "Analyze and implement repository-grounded design-system work (tokens, typography, iconography, spacing, styles, aliases, and theme variables) for this monorepo. Use when requests involve UI styling systems or token-layer changes; don’t use for backend/MCP-only tasks with no UI impact. Outputs: evidence-backed analysis or changes with canonical file references, layer impact, and validation commands. Success: work aligns to Brand→Alias→Mapped rules and passes design-system checks.",
+          "description_words": 61,
+          "name": "design-system",
+          "path": "Skills/frontend-ui/design-system"
+        },
+        {
+          "description": "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.",
+          "description_words": 56,
+          "name": "openai-docs",
+          "path": "skills-system/openai-docs"
+        },
+        {
+          "description": "Design or implement production-ready frontend UI components and screens with strong visual direction, layout rhythm, spacing hierarchy, accessibility, and reusable structure. Use when the user wants standard UI build or redesign work, including fixing crowded or structurally weak layouts, not design-system governance or post-direction polish only.",
+          "description_words": 46,
+          "name": "frontend-ui-design",
+          "path": "Skills/frontend-ui/frontend-ui-design"
+        },
+        {
+          "description": "Analyze Harness Engineering lifecycle state, plan the correct stage routing, and capture verified solved problems into durable docs/solutions knowledge. Use when the user asks to start or resume from the correct stage, or to document a verified fix as reusable team guidance.",
+          "description_words": 42,
+          "name": "he-compound",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-compound"
+        },
+        {
+          "description": "Capture a completed Codex workflow as a reusable SKILL.md package by analyzing session context plus optional session-collector evidence, interviewing the user with structured prompts, and writing a validated skill artifact. Use when the user asks to skillify or operationalize a repeatable process.",
+          "description_words": 42,
+          "name": "skillify",
+          "path": "Plugins/skill-factory/skills/scaffolding_templates/skillify"
+        },
+        {
+          "description": "Review codebase architecture to find deeper module boundaries, sharper context language, and Linear-backed decision notes. Use when users ask to improve architecture, consolidate shallow modules, design better interfaces, improve testability, or make a repo easier for humans and agents to navigate.",
+          "description_words": 41,
+          "name": "improve-codebase-architecture",
+          "path": "Skills/agent-ops/improve-codebase-architecture"
+        },
+        {
+          "description": "Ship a Codex skill change from source edits through sync, audit, inspector review, commit, push, and PR evidence. Use when adding, hardening, skillifying, or making a skill available and the user wants the work delivered to a pull request.",
+          "description_words": 39,
+          "name": "skill-pr-delivery",
+          "path": "Skills/agent-ops/skill-pr-delivery"
+        },
+        {
+          "description": "Generate self-contained HTML explainers for systems, diffs, plans, or data with clearer visual presentation than plain text. Use when the user wants a diagram or visual technical explainer, or when a large ASCII table would be hard to scan.",
+          "description_words": 39,
+          "name": "visual-explainer",
+          "path": "Skills/content-publishing/visual-explainer"
+        }
+      ],
+      "plugin_runtime_entries": [
+        {
+          "category": "Plugins/browser-use/skills",
+          "name": "browser",
+          "path": "Plugins/browser-use/skills/browser",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-brainstorm",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-brainstorm",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/code_quality_review",
+          "name": "he-code-review",
+          "path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-compound",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-compound",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-compound-refresh",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-compound-refresh",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-deepen-plan",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-deepen-plan",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-deepen-spec",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-deepen-spec",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-fix-bugs",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-fix-bugs",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-ideate",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-ideate",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-improve",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-improve",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-plan",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-plan",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-prune-branches",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-prune-branches",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-refine",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-refine",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/code_quality_review",
+          "name": "he-reliability-review",
+          "path": "Plugins/harness-engineering/skills/code_quality_review/he-reliability-review",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills",
+          "name": "he-router",
+          "path": "Plugins/harness-engineering/skills/he-router",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-spec",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-spec",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-tdd",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-tdd",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/code_quality_review",
+          "name": "he-technical-review",
+          "path": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/harness-engineering/skills/team_automation",
+          "name": "he-work",
+          "path": "Plugins/harness-engineering/skills/team_automation/he-work",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/plugin-factory/skills/code_quality_review",
+          "name": "plugin-builder",
+          "path": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/plugin-factory/skills/scaffolding_templates",
+          "name": "plugin-creator",
+          "path": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/plugin-factory/skills",
+          "name": "plugin-factory-router",
+          "path": "Plugins/plugin-factory/skills/plugin-factory-router",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/plugin-factory/skills/infrastructure_ops",
+          "name": "plugin-installer",
+          "path": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/plugin-factory/skills/team_automation",
+          "name": "plugin-router",
+          "path": "Plugins/plugin-factory/skills/team_automation/plugin-router",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/skill-factory/skills/code_quality_review",
+          "name": "skill-builder",
+          "path": "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/skill-factory/skills/scaffolding_templates",
+          "name": "skill-creator",
+          "path": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/skill-factory/skills",
+          "name": "skill-factory-router",
+          "path": "Plugins/skill-factory/skills/skill-factory-router",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/skill-factory/skills/infrastructure_ops",
+          "name": "skill-installer",
+          "path": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/skill-factory/skills/data_fetch_analysis",
+          "name": "skill-refactor",
+          "path": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor",
+          "scope": "local-plugin"
+        },
+        {
+          "category": "Plugins/skill-factory/skills/scaffolding_templates",
+          "name": "skillify",
+          "path": "Plugins/skill-factory/skills/scaffolding_templates/skillify",
+          "scope": "local-plugin"
+        }
+      ],
+      "policy_default_skill_names": [
+        "agents-md",
+        "autofix",
+        "autoresearch",
+        "bootstrap",
+        "codex-agent-creator",
+        "codex-automation-architect",
+        "codex-hooks-builder",
+        "coding-harness",
+        "context7",
+        "docs-expert",
+        "fix-mise",
+        "gh-workflow",
+        "improve-codebase-architecture",
+        "npm-release",
+        "pnpm-manager",
+        "project-brain",
+        "simplify",
+        "skill-pr-delivery",
+        "triage",
+        "ubiquitous-language",
+        "verification-before-completion"
+      ],
+      "policy_identity": "146a6f20347f3958",
+      "primary_runtime_entries": [],
+      "projection_mode": "rooted",
+      "root_skill_set_count": 10,
+      "scope_counts": {
+        "external": 0,
+        "global": 77,
+        "local-plugin": 30,
+        "primary-runtime": 0,
+        "project": 0,
+        "system": 2,
+        "unknown": 0
+      },
+      "shadowed_entries": [],
+      "status": "pass",
+      "suppressed_entries": [],
+      "system_bridge_skills": [
+        "imagegen",
+        "openai-docs",
+        "plugin-creator",
+        "plugin-installer",
+        "skill-creator",
+        "skill-installer"
+      ],
+      "unmapped_skill_names": [],
+      "unresolved_scope_collisions": [],
+      "violations": []
+    }
+  },
+  "telemetry": {
+    "latency_ms": 150
+  },
+  "errors": []
+}

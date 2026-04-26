@@ -5,7 +5,7 @@ Correlate explicit skill/tool failure signals across Codex/Codex/Kimi sources.
 Design goals:
 - Stdlib-only
 - Explicit failure signals only (avoid broad keyword noise)
-- De-duplicated evidence
+- Deduplicated evidence
 - Redacted snippets
 """
 

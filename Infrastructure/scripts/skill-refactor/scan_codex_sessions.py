@@ -63,7 +63,7 @@ _LOOKS_LIKE_SEARCH_RESULTS_RE = re.compile(
     re.I,
 )
 
-# Heuristic: ignore known shell/heredoc failures from ad-hoc analyzer commands.
+# Heuristic: filter known shell/heredoc failures from ad-hoc analyzer commands.
 # Example:
 #   zsh:2: z0: parameter not set
 #   IndexError: no such group
