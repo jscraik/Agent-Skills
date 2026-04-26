@@ -164,6 +164,33 @@ release_sync_lock() {
   fi
 }
 
+start_watchdog() {
+  python3 - "$timeout_seconds" "$$" <<'PY' &
+import os
+import signal
+import sys
+import time
+
+timeout_seconds = int(sys.argv[1])
+parent_pid = int(sys.argv[2])
+time.sleep(timeout_seconds)
+print(f"[ERROR] sync_skills timed out after {timeout_seconds}s", file=sys.stderr, flush=True)
+try:
+    os.kill(parent_pid, signal.SIGTERM)
+except ProcessLookupError:
+    pass
+PY
+  watchdog_pid="$!"
+}
+
+stop_watchdog() {
+  if [[ -n "$watchdog_pid" ]]; then
+    kill "$watchdog_pid" 2>/dev/null || true
+    wait "$watchdog_pid" 2>/dev/null || true
+    watchdog_pid=""
+  fi
+}
+
 projection_args=(--format shell)
 if [ -n "$projection_mode_cli" ]; then
   projection_args+=(--mode "$projection_mode_cli")
@@ -211,16 +238,22 @@ for line in sys.stdin:
   exit 2
 fi
 # Keep the shell entrypoint as a compatibility wrapper while the projection-aware
-# ask implementation owns runtime mutation for both flat and rooted surfaces.
-if [[ "$dry_run" == "1" || "$sync_scope" == "user" || "$sync_scope" == "workspace" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+# ask implementation owns dry-run previews and rooted runtime mutation. Flat
+# workspace/user non-dry-run sync remains on the legacy shell path below.
+if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
   ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
   if [[ "$dry_run" == "1" ]]; then
     ask_sync_args+=(--dry-run)
   fi
+  cleanup_delegated_sync() {
+    stop_watchdog
+    release_sync_lock
+  }
   if [[ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
     acquire_sync_lock
-    trap release_sync_lock EXIT
   fi
+  trap cleanup_delegated_sync EXIT
+  start_watchdog
   python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
   exit $?
 fi
@@ -233,23 +266,6 @@ if [ -z "$selection_policy_shell" ]; then
   exit 1
 fi
 eval "$selection_policy_shell"
-
-start_watchdog() {
-  (
-    sleep "$timeout_seconds"
-    echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2
-    kill -TERM "$$" 2>/dev/null || true
-  ) &
-  watchdog_pid="$!"
-}
-
-stop_watchdog() {
-  if [[ -n "$watchdog_pid" ]]; then
-    kill "$watchdog_pid" 2>/dev/null || true
-    wait "$watchdog_pid" 2>/dev/null || true
-    watchdog_pid=""
-  fi
-}
 
 acquire_sync_lock
 start_watchdog

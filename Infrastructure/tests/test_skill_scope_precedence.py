@@ -122,6 +122,15 @@ class TestSkillScopePrecedence(unittest.TestCase):
             {violation["code"] for violation in report["violations"]},
         )
 
+    def test_partial_rooted_runtime_does_not_switch_projection_modes(self) -> None:
+        partial_root = next(iter(verify_runtime_budget.ROOT_SKILL_SETS))
+        self._write_skill(f".agents/skills/{partial_root}", f"{partial_root} root skill set.")
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["projection_mode"], "flat")
+
 
 if __name__ == "__main__":
     unittest.main()

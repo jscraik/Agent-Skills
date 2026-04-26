@@ -224,7 +224,7 @@ def _first_level_skill_names() -> list[str]:
 
 
 def _active_projection_mode(first_level_names: set[str]) -> str:
-    if first_level_names & ROOT_SKILL_SETS:
+    if ROOT_SKILL_SETS <= first_level_names:
         return "rooted"
     return DEFAULT_PROJECTION_MODE
 

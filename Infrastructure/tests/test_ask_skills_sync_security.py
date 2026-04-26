@@ -75,6 +75,21 @@ class TestAskSkillsSyncSecurity(TestCase):
             result.data["logs"],
         )
 
+    def test_sync_skills_user_scope_relinks_managed_runtime_directories(self) -> None:
+        managed_skills = self.fake_home / ".agents" / "skills"
+        managed_skills.mkdir(parents=True)
+        (managed_skills / "stale.md").write_text("stale\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(managed_skills.is_symlink())
+        self.assertFalse((managed_skills / "stale.md").exists())
+
     def test_sync_skills_projection_env_reaches_engine(self) -> None:
         with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
             result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=True)

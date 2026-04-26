@@ -263,6 +263,18 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
     task_text = task.lower()
     row_ids = {str(row.get("id")) for row in rows}
 
+    if skill_set == "plugin-factory":
+        internal_plugin_lanes = {"plugin-builder", "plugin-router"}
+        if task_tokens := tokenize(task):
+            if internal_plugin_lanes & task_tokens:
+                router_row = row_by_id(rows, "plugin-factory-router")
+                if router_row:
+                    return {
+                        "row": router_row,
+                        "confidence": 0.9,
+                        "reason": "matched deterministic plugin-factory rule 'internal-lane-mention'",
+                    }
+
     direct_mentions = [row_id for row_id in sorted(row_ids, key=len, reverse=True) if row_id in task_text]
     if len(direct_mentions) == 1:
         row = row_by_id(rows, direct_mentions[0])
@@ -308,8 +320,8 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
             (
                 "skillify",
                 "skillify-workflow",
-                {"skillify", "operationalize", "operationalise", "capture"},
-                {"workflow", "process", "session", "repeatable"},
+                {"skillify", "operationalize", "operationalise", "capture", "turn", "convert"},
+                {"workflow", "process", "session", "repeatable", "skill", "skills"},
             ),
             (
                 "skill-creator",

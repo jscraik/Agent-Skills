@@ -25,9 +25,17 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
             script = script_file.read()
 
-        self.assertIn('"$sync_scope" == "user"', script)
-        self.assertIn('"$sync_scope" == "workspace"', script)
         self.assertIn("ask_sync_args=(skills sync", script)
+        self.assertIn('[[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]', script)
+        self.assertIn("start_watchdog", script)
+
+    def test_shell_entrypoint_keeps_flat_legacy_path_reachable(self) -> None:
+        with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
+            script = script_file.read()
+
+        delegated_block = script.split("ask_sync_args=(skills sync", 1)[0]
+        self.assertNotIn('"$sync_scope" == "user"', delegated_block)
+        self.assertNotIn('"$sync_scope" == "workspace"', delegated_block)
 
     def test_rooted_projection_delegates_to_ask_engine_in_dry_run(self) -> None:
         result = _run_sync_script(["--workspace", "--projection", "rooted", "--dry-run"])

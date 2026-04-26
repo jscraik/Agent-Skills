@@ -11,9 +11,11 @@ SOURCE_PATHS = {
     "plugin-creator": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
     "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
     "plugin-installer": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
+    "plugin-router": "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
     "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
+    "skillify": "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
 }
 
 
@@ -108,6 +110,20 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "plugin-installer")
         self.assertIn("install-plugin", payload["candidates"][0]["reason"])
 
+    def test_plugin_factory_internal_lane_mentions_route_to_router(self) -> None:
+        payload = self._route(
+            "plugin-factory",
+            "should I use plugin-builder or plugin-router for this package?",
+            [
+                _row("plugin-builder", "Harden and validate plugin packages."),
+                _row("plugin-factory-router", "Route plugin work."),
+                _row("plugin-router", "Route plugin tasks."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "plugin-factory-router")
+        self.assertIn("internal-lane-mention", payload["candidates"][0]["reason"])
+
     def test_skill_factory_create_routes_to_creator(self) -> None:
         payload = self._route(
             "skill-factory",
@@ -120,6 +136,20 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         )
 
         self.assertEqual(payload["selected"]["id"], "skill-creator")
+
+    def test_skill_factory_workflow_to_skill_routes_to_skillify(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "turn this session workflow into a reusable skill",
+            [
+                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Route skill work."),
+                _row("skillify", "Turn repeated workflows into skills."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skillify")
+        self.assertIn("skillify-workflow", payload["candidates"][0]["reason"])
 
     def test_manifest_with_missing_source_path_returns_invalid(self) -> None:
         payload = self._route(

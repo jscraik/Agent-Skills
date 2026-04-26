@@ -1185,27 +1185,33 @@ def goal_skills(
     )
     return result
 
-def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
+def _create_symlink(source: Path, target: Path, dry_run: bool = False, *, replace_existing: bool = False) -> str:
     """
     Create or update a filesystem symbolic link at `target` that points to `source`.
 
-    Ensures `target.parent` exists before creating the link. Existing non-symlink paths are preserved so user-owned directories like `~/plugins` are not deleted during relink.
+    Ensures `target.parent` exists before creating the link. Existing non-symlink paths are preserved by default so user-owned directories like `~/plugins` are not deleted during relink.
 
     Parameters:
         source (Path): Destination path that the symlink should reference.
         target (Path): Filesystem path where the symlink will be created or updated.
         dry_run (bool): If True, do not perform filesystem mutations; only simulate the action.
+        replace_existing (bool): If True, replace an existing non-symlink target before creating the symlink.
 
     Returns:
         action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>", "Updated symlink: <target> -> <source>", or "Skipped existing non-symlink path: <target>".
     """
-    if target.exists() and not target.is_symlink():
+    if target.exists() and not target.is_symlink() and not replace_existing:
         return f"Skipped existing non-symlink path: {target}"
     action = "Created" if not target.exists() else "Updated"
     if not dry_run:
         target.parent.mkdir(parents=True, exist_ok=True)
         if target.is_symlink():
             target.unlink()
+        elif target.exists():
+            if target.is_dir():
+                shutil.rmtree(target)
+            else:
+                target.unlink()
         target.symlink_to(source)
     return f"{action} symlink: {target} -> {source}"
 
@@ -1387,15 +1393,15 @@ def _append_user_runtime_relinks(
     home = Path.home()
     plugins_dir = repo_root / "Plugins"
     targets = [
-        (skills_dir, home / ".agents" / "skills"),
-        (skills_dir, home / ".codex" / "skills"),
-        (repo_root, home / ".agents" / "agent-skills"),
-        (plugins_dir, home / ".agents" / "plugins"),
-        (plugins_dir, home / "plugins"),
+        (skills_dir, home / ".agents" / "skills", True),
+        (skills_dir, home / ".codex" / "skills", True),
+        (repo_root, home / ".agents" / "agent-skills", True),
+        (plugins_dir, home / ".agents" / "plugins", True),
+        (plugins_dir, home / "plugins", False),
     ]
-    for src, dst in targets:
+    for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
-        logs.append(_create_symlink(src, dst, dry_run))
+        logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
 
 
 def _sync_rooted_projection(
