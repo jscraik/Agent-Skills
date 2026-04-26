@@ -138,7 +138,6 @@ def payload() -> dict[str, Any]:
     Returns:
         payload (dict[str, Any]): Mapping with the following keys:
             - "policy_version": str
-            - "projection_mode_choices": list[str]
             - "root_skill_set_names": list[str]
             - "repo_scan_roots": list[str]
             - "plugin_skill_root_glob": str
@@ -151,7 +150,6 @@ def payload() -> dict[str, Any]:
     """
     return {
         "policy_version": POLICY_VERSION,
-        "projection_mode_choices": list(PROJECTION_MODE_CHOICES),
         "root_skill_set_names": list(ROOT_SKILL_SET_NAMES),
         "repo_scan_roots": list(REPO_SCAN_ROOTS),
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,

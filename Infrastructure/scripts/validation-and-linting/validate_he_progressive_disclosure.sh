@@ -102,6 +102,7 @@ collect_unified_diff() {
 append_candidate() {
   local -n candidate_list="$1"
   local candidate="$2"
+  [[ -r "$candidate" ]] || return 0
   candidate_list+=("$candidate")
 
   if [[ ! -L "$candidate" ]]; then
@@ -121,7 +122,13 @@ append_candidate() {
   fi
 
   resolved_dir="$(cd -P -- "$(dirname -- "$resolved")" && pwd -P)" || return 0
-  candidate_list+=("${resolved_dir#"$REPO_ROOT"/}/$(basename -- "$resolved")")
+  resolved="${resolved_dir}/$(basename -- "$resolved")"
+  if [[ "$resolved" == "$REPO_ROOT" ]]; then
+    candidate_list+=(".")
+    return 0
+  fi
+  [[ "$resolved" == "$REPO_ROOT/"* ]] || return 0
+  candidate_list+=("${resolved#"$REPO_ROOT"/}")
 }
 
 has_context_move_evidence() {

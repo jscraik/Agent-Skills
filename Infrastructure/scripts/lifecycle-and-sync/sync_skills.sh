@@ -186,7 +186,23 @@ if python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engi
   eval "$projection_policy_shell"
 else
   # Extract SYNC_SKILLS_PROJECTION_ERROR_MESSAGE from projection engine output
-  error_message="$(echo "$projection_policy_shell" | grep -E '^SYNC_SKILLS_PROJECTION_ERROR_MESSAGE=' | sed -E 's/^SYNC_SKILLS_PROJECTION_ERROR_MESSAGE=//; s/^"//; s/"$//')"
+  error_message="$(
+    printf '%s\n' "$projection_policy_shell" | python3 -c '
+import shlex
+import sys
+
+for line in sys.stdin:
+    if not line.startswith("SYNC_SKILLS_PROJECTION_ERROR_MESSAGE="):
+        continue
+    rhs = line.split("=", 1)[1].strip()
+    try:
+        tokens = shlex.split(rhs, posix=True)
+        print(tokens[0] if tokens else "")
+    except ValueError:
+        print(rhs.strip("\"'\''"))
+    break
+'
+  )"
   if [ -n "$error_message" ]; then
     echo "$error_message" >&2
   else
