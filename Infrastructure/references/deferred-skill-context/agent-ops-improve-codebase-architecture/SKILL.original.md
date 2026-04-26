@@ -115,7 +115,7 @@ Minimum rules:
 
 ## Linear Decision Capture
 
-For Jamie's projects, Linear replaces ADRs as the default durable decision memory.
+When Linear is available, it replaces ADRs as the default durable decision memory.
 
 Record a decision in Linear only when all three are true:
 

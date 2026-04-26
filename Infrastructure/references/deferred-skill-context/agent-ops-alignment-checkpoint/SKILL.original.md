@@ -89,10 +89,9 @@ Then:
 
 STASIS_RECORD format:
 - `STASIS_RECORD`
-- `timestamp: <ISO-8601 local time>`
+- `timestamp: <ISO-8601 datetime with timezone, e.g., 2026-04-26T14:30:00-07:00>`
 - `verbatim_request:`
 - `<paste the user request exactly as written>`
-
 ### 1) Produce the structured extraction (required)
 
 Output a JSON object in a `json` code fence with EXACTLY these keys:
@@ -134,7 +133,7 @@ Then STOP. Do not continue into implementation or tool usage.
 
 ## Validation
 
-Fail fast checks (if any fail, STOP and fix the first failure):
+Fail-fast checks (if any fail, STOP and fix the first failure):
 - Did I avoid all tool calls before approval?
 - Did I output the JSON extraction with EXACTLY the 3 required keys?
 - Did I present 3 options (minimal/balanced/comprehensive)?
