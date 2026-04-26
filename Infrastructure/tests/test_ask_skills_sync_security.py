@@ -93,6 +93,60 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
 
+    def test_sync_skills_rooted_prunes_unowned_skillset_files(self) -> None:
+        stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
+        stale_file.parent.mkdir(parents=True)
+        stale_file.write_text("{}\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(stale_file.exists())
+        self.assertTrue(
+            any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
+            result.data["plan"],
+        )
+
+    def test_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
+        with mock.patch.object(Path, "home", return_value=self.fake_home):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="user",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("ROOTED_WORKSPACE", result.data["plan"]["warnings"][0])
+        self.assertFalse((self.fake_home / ".agents" / "skills").exists())
+
+    def test_sync_skills_rooted_user_scope_relinks_after_workspace_validation(self) -> None:
+        workspace_result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+        self.assertEqual(workspace_result.status, "success")
+
+        with mock.patch.object(Path, "home", return_value=self.fake_home):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="user",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
+        self.assertEqual(result.data["projection_mode"], "rooted")
+
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
         system_skills_dir = self.repo_root / "skills-system"

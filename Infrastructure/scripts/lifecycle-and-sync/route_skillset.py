@@ -249,6 +249,114 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
     return None
 
 
+def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Apply deterministic factory lane routing before generic token scoring."""
+    task_text = task.lower()
+    row_ids = {str(row.get("id")) for row in rows}
+
+    direct_mentions = [row_id for row_id in sorted(row_ids, key=len, reverse=True) if row_id in task_text]
+    if len(direct_mentions) == 1:
+        row = row_by_id(rows, direct_mentions[0])
+        if row:
+            return {
+                "row": row,
+                "confidence": 1.0,
+                "reason": f"matched deterministic {skill_set} rule 'direct-lane-invocation'",
+            }
+    if len(direct_mentions) > 1:
+        router_id = "plugin-factory-router" if skill_set == "plugin-factory" else "skill-factory-router"
+        row = row_by_id(rows, router_id)
+        if row:
+            return {
+                "row": row,
+                "confidence": 0.9,
+                "reason": f"matched deterministic {skill_set} rule 'multi-lane-ambiguity'",
+            }
+
+    task_tokens = tokenize(task)
+    rules = {
+        "plugin-factory": [
+            (
+                "plugin-creator",
+                "create-plugin",
+                {"create", "new", "scaffold", "generate", "make", "starter", "template"},
+                {"plugin", "plugins"},
+            ),
+            (
+                "plugin-installer",
+                "install-plugin",
+                {"install", "add", "sync", "marketplace"},
+                {"plugin", "plugins"},
+            ),
+            (
+                "plugin-builder",
+                "harden-plugin",
+                {"harden", "validate", "audit", "release", "package", "convert", "build"},
+                {"plugin", "plugins"},
+            ),
+        ],
+        "skill-factory": [
+            (
+                "skillify",
+                "skillify-workflow",
+                {"skillify", "operationalize", "operationalise", "capture"},
+                {"workflow", "process", "session", "repeatable"},
+            ),
+            (
+                "skill-creator",
+                "create-skill",
+                {"create", "new", "scaffold", "generate", "make", "draft"},
+                {"skill", "skills"},
+            ),
+            (
+                "skill-installer",
+                "install-skill",
+                {"install", "add", "sync", "github", "curated"},
+                {"skill", "skills"},
+            ),
+            (
+                "skill-refactor",
+                "refactor-skill",
+                {"refactor", "simplify", "merge", "fold", "prune", "coverage", "session"},
+                {"skill", "skills"},
+            ),
+            (
+                "skill-builder",
+                "harden-skill",
+                {"harden", "validate", "audit", "release", "package", "eval", "benchmark"},
+                {"skill", "skills"},
+            ),
+        ],
+    }
+
+    matched = []
+    for route_id, rule_name, action_tokens, noun_tokens in rules.get(skill_set, []):
+        if route_id not in row_ids:
+            continue
+        if task_tokens & action_tokens and task_tokens & noun_tokens:
+            matched.append((route_id, rule_name))
+
+    if len(matched) == 1:
+        route_id, rule_name = matched[0]
+        row = row_by_id(rows, route_id)
+        if row:
+            return {
+                "row": row,
+                "confidence": 0.95,
+                "reason": f"matched deterministic {skill_set} rule '{rule_name}'",
+            }
+    if len(matched) > 1:
+        router_id = "plugin-factory-router" if skill_set == "plugin-factory" else "skill-factory-router"
+        row = row_by_id(rows, router_id)
+        if row:
+            return {
+                "row": row,
+                "confidence": 0.9,
+                "reason": f"matched deterministic {skill_set} rule 'multi-intent-factory-task'",
+            }
+    return None
+
+
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
     try:
@@ -276,7 +384,11 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "candidates": [],
             "operator_action": "Generate manifests before routing." if error_status == "manifest_missing" else "Choose a valid root skill set.",
         }
-    override = harness_engineering_override(task, rows) if skill_set == "harness-engineering" else None
+    override = None
+    if skill_set == "harness-engineering":
+        override = harness_engineering_override(task, rows)
+    elif skill_set in {"plugin-factory", "skill-factory"}:
+        override = factory_override(skill_set, task, rows)
     if override:
         selected_row = override["row"]
         selected_confidence = float(override["confidence"])

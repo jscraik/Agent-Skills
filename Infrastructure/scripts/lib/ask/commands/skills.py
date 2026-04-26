@@ -27,6 +27,7 @@ from projection_engine import (  # noqa: E402
 )
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
 from generate_skillset_manifests import build_manifest_report, write_manifests  # noqa: E402
+from rooted_projection_runtime import prune_unowned_skillset_files, validate_workspace_runtime  # noqa: E402
 from ask.catalog_parity import compute_catalog_parity  # noqa: E402
 from ask.selection_contract import (  # noqa: E402
     EligibleCandidate,
@@ -1396,6 +1397,9 @@ def _sync_rooted_projection(
             )]
         logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
+        for log in prune_unowned_skillset_files(repo_root / ".skillsets", dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
 
     try:
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
@@ -1511,6 +1515,22 @@ def sync_skills(
 
     if projection_decision.projection_mode == "rooted":
         if scope == "user":
+            violations = validate_workspace_runtime(skills_dir)
+            plan["violations"] = violations
+            if violations:
+                plan["validation_status"] = "fail"
+                plan["warnings"].extend(str(violation.get("code", violation)) for violation in violations)
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Rooted workspace validation failed before user relink.",
+                    fix_suggestion="Run `bin/ask skills sync --scope workspace --projection rooted` before user relink.",
+                ))
+                result.data["plan"] = plan
+                result.data["logs"] = logs
+                result.data["policy_identity"] = get_policy_identity()
+                result.data["projection_mode"] = projection_decision.projection_mode
+                return result
             _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
             plan["validation_status"] = "pass"
             plan["mutation_counts"] = {
