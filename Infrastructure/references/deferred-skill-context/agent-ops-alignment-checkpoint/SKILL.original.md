@@ -134,7 +134,7 @@ Then STOP. Do not continue into implementation or tool usage.
 
 ## Validation
 
-Fail fast checks (if any fail, STOP and fix the first failure):
+Fail-fast checks (if any fail, STOP and fix the first failure):
 - Did I avoid all tool calls before approval?
 - Did I output the JSON extraction with EXACTLY the 3 required keys?
 - Did I present 3 options (minimal/balanced/comprehensive)?
