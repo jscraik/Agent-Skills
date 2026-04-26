@@ -9,7 +9,7 @@
 
 ## Canonical runtime script
 
-- Report generator: `Skills/agent-ops/insight-report/scripts/run_insight_report.py`
+- Report generator: `Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py`
 
 ## Primary outputs
 

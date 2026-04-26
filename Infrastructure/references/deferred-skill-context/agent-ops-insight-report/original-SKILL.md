@@ -72,7 +72,7 @@ The report includes:
 ## Workflow
 
 ```bash
-python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --days 7
+python3 Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py --days 7
 ```
 
 Process:
@@ -89,13 +89,13 @@ Process:
 Use `--prepare-only` when this live Codex session should write the insight JSON manually instead of invoking `codex exec`:
 
 ```bash
-python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --prepare-only --no-open
+python3 Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py --prepare-only --no-open
 ```
 
 Use `--render-only` after editing or regenerating `insights.generated.json`:
 
 ```bash
-python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-only --no-open
+python3 Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py --render-only --no-open
 ```
 
 ## Codex Browser Launch
@@ -202,7 +202,7 @@ Open `INSIGHT_PROMPT.md`, ask Codex to repair the JSON shape, save `insights.gen
 **Standard weekly review with browser launch:**
 
 ```bash
-python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --days 7
+python3 Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py --days 7
 ```
 
 After the runner prints `REPORT_URL=file://...`, open that URL in the Codex in-app browser and mention the local path in the summary.
@@ -210,18 +210,18 @@ After the runner prints `REPORT_URL=file://...`, open that URL in the Codex in-a
 **Prepare artifacts for this Codex conversation to write:**
 
 ```bash
-python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --prepare-only --no-open
+python3 Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py --prepare-only --no-open
 ```
 
 **Render after Codex-written JSON exists:**
 
 ```bash
-python3 Skills/agent-ops/insight-report/scripts/run_insight_report.py --render-only --no-open
+python3 Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py --render-only --no-open
 ```
 
 ## References
 
-- Generator: `Skills/agent-ops/insight-report/scripts/run_insight_report.py`
+- Generator: `Infrastructure/references/deferred-skill-context/agent-ops-insight-report/scripts/run_insight_report.py`
 - Configuration: `references/configuration.md`
 - Writer contract: `references/codex-writer.md`
 - Report format: `references/report-format.md`

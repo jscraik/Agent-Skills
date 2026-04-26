@@ -599,11 +599,12 @@ def write_json(path, value):
     """Write JSON with private-by-default permissions."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=False), encoding="utf-8")
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     try:
-        path.chmod(0o600)
-    except OSError:
-        pass
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            json.dump(value, f, indent=2, ensure_ascii=False)
+    except Exception:
+        raise
 
 
 def read_json(path):
@@ -804,6 +805,12 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
 def validate_insights(insights):
     """Return writer-contract validation errors for generated insight JSON."""
     errors = []
+
+    # Validate schema_version first
+    metadata = insights.get("metadata")
+    if not isinstance(metadata, dict) or metadata.get("schema_version") != "codex-insights.v1":
+        errors.append("metadata.schema_version must be 'codex-insights.v1'")
+
     required_sections = {
         "metadata": ("schema_version", "writer_provider", "generated_at", "confidence", "limitations"),
         "at_a_glance": ("whats_working", "whats_hindering", "quick_wins", "ambitious_workflows"),
@@ -1246,9 +1253,9 @@ def generate_html_report(data, insights):
     fun_html = ""
     if fun_ending and fun_ending.get('headline'):
         fun_html = f'<div class="fun-ending"><div class="fun-headline">"{escape_html(fun_ending["headline"])}"</div>'
-    if fun_ending.get("detail"):
-        fun_html += f'<div class="fun-detail">{escape_html(fun_ending.get("detail", ""))}</div>'
-    fun_html += '</div>'
+        if fun_ending.get("detail"):
+            fun_html += f'<div class="fun-detail">{escape_html(fun_ending.get("detail", ""))}</div>'
+        fun_html += '</div>'
     
     multi = data.get('parallel_codex', {})
     if multi.get('overlap_events', 0) == 0:
@@ -1621,12 +1628,16 @@ def main():
         evidence = build_evidence_bundle(data, sessions_for_evidence, args)
         prompt = build_codex_prompt(evidence)
         write_json(args.evidence_out, evidence)
-        Path(args.prompt_out).parent.mkdir(parents=True, exist_ok=True)
-        Path(args.prompt_out).write_text(prompt, encoding="utf-8")
+
+        # Write prompt with secure permissions
+        prompt_path = Path(args.prompt_out)
+        prompt_path.parent.mkdir(parents=True, exist_ok=True)
+        fd = os.open(prompt_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
         try:
-            Path(args.prompt_out).chmod(0o600)
-        except OSError:
-            pass
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                f.write(prompt)
+        except Exception:
+            raise
 
         print(f"\nCodex evidence ready: {args.evidence_out}")
         print(f"Codex prompt ready: {args.prompt_out}")
