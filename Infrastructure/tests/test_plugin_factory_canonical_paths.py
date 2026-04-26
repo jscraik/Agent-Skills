@@ -177,6 +177,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
                 text=True,
                 capture_output=True,
                 check=False,
+                timeout=120,
             )
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

@@ -58,6 +58,16 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("Invalid sync scope: elsewhere", result.stderr)
         self.assertNotIn("Projection mode 'rooted' is parsed", result.stderr)
 
+    def test_user_scope_reaches_legacy_shell_path(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_home:
+            result = _run_sync_script(
+                ["--user", "--dry-run"],
+                env={"HOME": tmp_home},
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("user", result.stdout.lower())
+
 
 if __name__ == "__main__":
     unittest.main()
