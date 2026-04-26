@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -246,6 +247,45 @@ def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, A
     return rows
 
 
+def _is_generated_command_handle_dir(path: Path) -> bool:
+    skill_file = path / "SKILL.md"
+    if not skill_file.is_file():
+        return False
+    try:
+        content = skill_file.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return "Generated command handle for a child skill under the" in content
+
+
+def _prune_obsolete_command_handle_dirs(
+    *,
+    root: Path,
+    expected_dirs: set[Path],
+    dry_run: bool,
+) -> list[dict[str, str]]:
+    skills_dir = root / ".agents" / "skills"
+    if not skills_dir.is_dir():
+        return []
+
+    deletes: list[dict[str, str]] = []
+    for path in sorted(skills_dir.iterdir(), key=lambda item: item.name):
+        if path in expected_dirs:
+            continue
+        if not path.is_dir() or path.is_symlink():
+            continue
+        if not _is_generated_command_handle_dir(path):
+            continue
+        row = {
+            "path": path.relative_to(root).as_posix(),
+            "reason": "obsolete_generated_command_handle",
+        }
+        deletes.append(row)
+        if not dry_run:
+            shutil.rmtree(path)
+    return deletes
+
+
 def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
     """Build command-visible skill handles from the canonical rooted manifest report."""
     root = repo_root_path or repo_root()
@@ -480,6 +520,12 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
         for row in rows
         for violation in row.get("violations", [])
     ]
+    expected_dirs = {
+        root / ".agents" / "skills" / row["handle"]
+        for row in rows
+        if row["kind"] == "skill_command_handle"
+    }
+    deletes = _prune_obsolete_command_handle_dirs(root=root, expected_dirs=expected_dirs, dry_run=dry_run)
     if not dry_run and not violations:
         for row in rows:
             path = root / row["path"]
@@ -492,6 +538,7 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
         "command_handle_count": len({row["handle"] for row in rows if row["kind"] == "skill_command_handle"}),
         "write_count": len(rows),
         "writes": [{key: value for key, value in row.items() if key != "content"} for row in rows],
+        "deletes": deletes,
         "violations": violations,
     }
 

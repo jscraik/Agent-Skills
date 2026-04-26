@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -142,6 +143,28 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
                 ".agents/skills/he-heartbeat/SKILL.md",
                 ".agents/skills/he-heartbeat/agents/openai.yaml",
             },
+        )
+
+    def test_command_handle_write_prunes_obsolete_generated_handles(self) -> None:
+        stale = self.temp_dir / ".agents" / "skills" / "old-handle"
+        stale.mkdir(parents=True)
+        (stale / "SKILL.md").write_text(
+            "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
+            encoding="utf-8",
+        )
+        manual = self.temp_dir / ".agents" / "skills" / "manual-skill"
+        manual.mkdir()
+        (manual / "SKILL.md").write_text("# Manual Skill\n", encoding="utf-8")
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[]):
+            payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertFalse(stale.exists())
+        self.assertTrue(manual.is_dir())
+        self.assertEqual(
+            payload["deletes"],
+            [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
         )
 
     def test_command_handle_check_detects_missing_runtime_handle(self) -> None:
