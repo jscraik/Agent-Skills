@@ -43,7 +43,7 @@ metadata:
 
 ## When to use
 - Design or review standard product UI systems and components.
-- Specify accessible screens, flows, states, and design-system changes.
+- Specify accessible screens, flows, states, and screen-level token usage within the existing design system.
 - Plan or patch production UI for React, Apps SDK widgets, or Tauri web UI when the work is standard product design rather than experimental creative coding.
 - Adapt an existing interface across mobile, tablet, desktop, print, or email contexts while keeping behavior and information architecture coherent.
 - Shape visually led landing pages, websites, prototypes, or demos when art direction matters but the result still needs production-ready hierarchy and accessibility.

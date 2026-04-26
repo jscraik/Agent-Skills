@@ -53,8 +53,8 @@ risks:
   - silent fallback away from CLI can hide retrieval-quality or auth failures
 rollback_procedure: >
   If contract or eval updates regress routing or validation behavior, restore the previous
-  known-good files under product/docs/context7/Infrastructure/references/ from git and rerun:
-  `bin/ask skills audit product/docs/context7 --level strict --robot` plus the family
+  known-good files under Infrastructure/references/deferred-skill-context/agent-ops-context7/ from git and rerun:
+  `./bin/ask skills audit Infrastructure/references/deferred-skill-context/agent-ops-context7 --level strict --robot` plus the family
   benchmark validator command. Re-apply only the minimal failing section.
 observability: >
   Track health via strict skill audit output, family benchmark validation output, and live

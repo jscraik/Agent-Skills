@@ -2,11 +2,19 @@ purpose: >
   Define expected behavior and outputs for this skill.
 schema_version: 1.0
 triggers:
-  - user requests the capability described in this skill
+  - user requests production UI screen or component design
+  - user asks to fix crowded layout, hierarchy, spacing, or state coverage
 inputs:
-  - user request details
+  - target surface and stack
+  - user goal, critical task path, and constraints
+  - existing token, component, and layout conventions
+  - accessibility, responsive, and state-coverage definition of done
 outputs:
-  - primary response or artifact
+  - UI brief and scoped file or handoff plan
+  - visual thesis, content plan, and interaction thesis for visually led surfaces
+  - component or screen plan with states and accessibility behavior
+  - token-referenced implementation guidance
+  - verification checklist for accessibility, responsiveness, and state completeness
 non_goals:
   - out-of-scope work
 risks:

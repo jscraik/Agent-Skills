@@ -85,7 +85,7 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - Skip already-answered rounds.
 - Stop when repo scope, instruction chain, contradiction risks, and preferred linked-doc layout are clear enough to write safely.
 - Before implementation, summarize confirmed facts, assumptions, and the approval checkpoint.
-- Use `Infrastructure/references/discovery-interview.md` for reusable round templates.
+- Use `references/discovery-interview.md` for reusable round templates.
 
 ## Response format
 
@@ -99,7 +99,7 @@ Run discovery for underspecified AGENTS creation or refactor requests.
 - For the confirmation round, start with `## Skill Summary:`.
 - In the confirmation round, include `Assumptions:` when any remain and end with one simple confirmation question such as `Does this capture it well enough for me to build?`.
 - Keep the confirmation round compact as well: summarize only the current AGENTS update shape, list assumptions only when needed, and end with the single confirmation question.
-- For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Deliverables`, and `## Required inputs`.
+- For out-of-scope responses, keep the compact structure expected by the evals: `## When to use`, `## Outputs`, and `## Inputs`.
 
 ## AGENTS.md Template Guidance
 
@@ -202,7 +202,7 @@ If command truth, path ownership, or instruction precedence cannot be verified, 
 
 ## Project-tailored repo baseline
 
-- Use `Infrastructure/references/project-tailored-agents-baseline.md` when a user wants a reusable AGENTS operating baseline adapted to each repository.
+- Use `references/project-tailored-agents-baseline.md` when a user wants a reusable AGENTS operating baseline adapted to each repository.
 - Treat the baseline as a section menu, not a verbatim template. Verify each section before insertion.
 - Keep `Repository rules` grounded in the actual repo preflight, supported flag set, and repo-root workflow.
 - Keep `Stack detection` grounded in observed root manifests and documented override behavior.
@@ -257,7 +257,7 @@ Do not overload either level. The agent sees all merged AGENTS files. Keep each 
 
 ## Mandatory workflow snippet
 
-1. Explore project first, then invoke skill.
+1. In implementation mode, explore the project after the discovery question has established scope, then invoke the skill.
 2. IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any React, Tauri, Apps-SDK-ui, Tailwind, Vite, Storybook + Chat Widget tasks.
 3. Add a Table of Contents for docs.
 
@@ -278,7 +278,7 @@ Do not overload either level. The agent sees all merged AGENTS files. Keep each 
 
 ## Resource map
 
-- References: `Infrastructure/references/contract.yaml`, `Infrastructure/references/discovery-interview.md`, `Infrastructure/references/evals.yaml`, `Infrastructure/references/folded-legacy-modes-core60.md`, `Infrastructure/references/official-codex-agents-guidance.md`, `Infrastructure/references/project-tailored-agents-baseline.md`, `Infrastructure/references/shared-guidance-propagation.md`, `Infrastructure/references/task-profile.json`
+- References: `references/contract.yaml.original`, `references/discovery-interview.md`, `references/evals.yaml.original`, `references/folded-legacy-modes-core60.md`, `references/official-codex-agents-guidance.md`, `references/project-tailored-agents-baseline.md`, `references/shared-guidance-propagation.md`, `references/task-profile.json.original`
 
 ## See Also
 

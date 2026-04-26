@@ -17,6 +17,8 @@ inputs:
 outputs:
   - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv
   - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/journal.md
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/run.json
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/iteration_journal.jsonl
   - final findings summary with validation evidence
 
 observability: >
@@ -43,23 +45,27 @@ required_output:
   scope:
     type: array
     items: string
-  iteration:
-    id: integer
-    hypothesis: string
-    decision:
-      enum: [keep, discard, blocked]
-    score: number
-    status:
-      enum: [pass, fail, blocked]
-  evidence:
+  iterations:
     type: array
     items:
       type: object
       fields:
-        command: string
-        outcome:
+        id: integer
+        hypothesis: string
+        decision:
+          enum: [keep, discard, blocked]
+        score: number
+        status:
           enum: [pass, fail, blocked]
-        note: string
+        evidence:
+          type: array
+          items:
+            type: object
+            fields:
+              command: string
+              outcome:
+                enum: [pass, fail, blocked]
+              note: string
   summary:
     kept: integer
     discarded: integer

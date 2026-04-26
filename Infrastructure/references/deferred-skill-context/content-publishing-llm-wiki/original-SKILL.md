@@ -131,7 +131,7 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
    - Create follow-up questions and source-acquisition suggestions.
    - Append a lint event to `log.md` with parseable heading format: `## [YYYY-MM-DD] lint | focus`.
 
-Detailed guidance: `Infrastructure/references/llm-wiki-pattern.md` and `Infrastructure/references/llm-wiki-v2-production-notes.md`.
+Detailed guidance: `references/llm-wiki-pattern.md` and `references/llm-wiki-v2-production-notes.md`.
 
 ## Validation
 
@@ -177,7 +177,6 @@ Detailed guidance: `Infrastructure/references/llm-wiki-pattern.md` and `Infrastr
 
 ## References and assets
 
-- Pattern primer and operating model: `Infrastructure/references/llm-wiki-pattern.md`
-- Machine-checkable contract: `Infrastructure/references/contract.yaml`
-- Behavioral eval coverage: `Infrastructure/references/evals.yaml`
+- Pattern primer and operating model: `references/llm-wiki-pattern.md`
+- Production notes: `references/llm-wiki-v2-production-notes.md`
 - OpenAI Apps metadata: `agents/openai.yaml`

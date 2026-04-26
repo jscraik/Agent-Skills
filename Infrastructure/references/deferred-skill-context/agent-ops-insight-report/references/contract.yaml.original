@@ -23,9 +23,10 @@ inputs:
 outputs:
   - "insight-evidence.json"
   - "INSIGHT_PROMPT.md"
-  - "insights.generated.json with metadata.schema_version = codex-insights.v1"
-  - "report.html"
-  - "REPORT_URL=file://... line for Codex browser launch"
+  - "full_run: insights.generated.json with metadata.schema_version = codex-insights.v1"
+  - "full_run: report.html"
+  - "full_run: REPORT_URL=file://... line for Codex browser launch"
+  - "prepare_only: render command guidance instead of generated report artifacts"
   - "explicit confidence and missing-data disclosures in metadata.limitations"
 
 required_response_sections:

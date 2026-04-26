@@ -148,33 +148,33 @@ harness health --auto-fix --dry-run --json
 Canonical skill maintenance gates after edits:
 
 ```bash
-bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
-bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn
-python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate
-python3 Infrastructure/scripts/validation-and-linting/check-see-also.py . --changed-files Skills/coding-harness/SKILL.md
-python3 Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0
-bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh
-bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
-python3 Skills/skill-builder/Infrastructure/scripts/skill_gate.py Skills/coding-harness --require-fail-fast --require-security-evals
-python3 Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py Skills/coding-harness --eval-mode release --runner codex --capture-jsonl --timeout-profile codex-heavy --profile d --codex-fallback-profile ''
+./bin/ask skills audit Skills/coding-harness --level strict --robot
+./bin/ask repo validate --robot
+./bin/ask repo validate --robot
+./bin/ask repo validate --robot
+./bin/ask repo validate --robot
+./bin/ask skills sync --scope workspace --projection rooted --robot
+./bin/ask repo validate --robot
+./bin/ask skills audit Skills/coding-harness --level strict --robot
+./bin/ask skills audit Skills/coding-harness --level strict --robot''
 ```
 
 Fail fast on the first blocking gate, fix the specific issue, rerun that gate, and only then continue to broader validation.
 
 ## References
-- `Infrastructure/references/agent-install-guide.md`
+- `references/agent-install-guide.md`
   Read when: you need the human-readable install, update, and CI migration sequence with rollback.
-- `Infrastructure/references/agent-install.json`
+- `references/agent-install.json`
   Read when: you need machine-readable phases, commands, or scaffolded file lists.
-- `Infrastructure/references/setup-and-commands.md`
+- `references/setup-and-commands.md`
   Read when: you need the wider command map, lifecycle commands, or CI secret wiring details.
-- `Infrastructure/references/structured-json-output.md`
+- `references/structured-json-output.md`
   Read when: you need the `GateResult` schema, `jq` extraction patterns, or `health --auto-fix` usage.
-- `Infrastructure/references/contract.yaml`
+- `references/contract.yaml`
   Read when: you need the machine-checkable input/output contract for this skill.
-- `Infrastructure/references/evals.yaml`
+- `references/evals.yaml`
   Read when: you need trigger coverage, adversarial cases, or release-eval inputs.
-- `Infrastructure/references/plan.md`
+- `references/plan.md`
   Read when: you need preserved implementation context from the packaged-skill work rather than the operator-facing wrapper alone.
 - `agents/openai.yaml`
   Read when: you need the display metadata used by external skill packaging surfaces.
@@ -208,7 +208,7 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 - Symptom: `harness init --ci circleci` fails with a path-resolution error. Cause: the current CLI interprets `circleci` like a target directory in that flow. Do instead: run `harness init --dry-run` and then `harness init`. Check: rerun `harness init --dry-run` and confirm the scaffold plan renders normally.
 - Symptom: an agent treats `harness init --update` as the normal way to update an existing harness repo. Cause: older summaries collapsed the upgrade lane into the re-scaffold lane. Do instead: run `harness init --check-updates`, then `harness upgrade --dry-run`, then `harness upgrade`; use `harness init --update` only when tracked baseline files are missing and need re-scaffolding. Check: the final plan should distinguish routine upgrade from re-scaffold explicitly.
 - Symptom: a legacy repo reports that `.harness/restore-manifest.json` is missing `ciProvider`. Cause: the repo was scaffolded before that metadata became mandatory for the update lane. Do instead: rerun `harness init --check-updates`, `harness upgrade --dry-run`, or `harness init --update` and let current harness repair the manifest automatically when the active provider can be inferred. Check: verify the manifest now includes `ciProvider` and the upgrade lane proceeds.
-- Symptom: CI migration guidance looks right but rollback is missing. Cause: older summaries often stop after `commit`. Do instead: preserve the full snapshot-based sequence including `abort --snapshot <snapshot-id>`. Check: confirm preview, apply, verify, commit, and abort all appear in both `SKILL.md` and `Infrastructure/references/agent-install-guide.md`.
+- Symptom: CI migration guidance looks right but rollback is missing. Cause: older summaries often stop after `commit`. Do instead: preserve the full snapshot-based sequence including `abort --snapshot <snapshot-id>`. Check: confirm preview, apply, verify, commit, and abort all appear in both `SKILL.md` and `references/agent-install-guide.md`.
 - Symptom: an agent claims repo setup is complete after only local checks. Cause: remote gates such as CodeRabbit verification were skipped because auth was missing. Do instead: report the local pass separately from auth-blocked remote checks. Check: the final summary should say exactly which checks were skipped and why.
 - Symptom: `.harness/memory/LEARNINGS.md` guidance is applied to a repo without `.harness/`. Cause: the memory layer is repo-specific, not universal. Do instead: skip creation when `.harness/` is absent. Check: only read or append the repo memory file when the harness directory exists.
 - Symptom: `run_skill_evals.py` fails early with `Unsupported parameter: 'reasoning.summary'` under a Spark-oriented Codex profile. Cause: the active profile/model does not support the runner's default reasoning setting. Do instead: pin the eval run to `--profile d --codex-fallback-profile ''`. Check: the release run should emit normal case artifacts and a populated `scorecard.json`.

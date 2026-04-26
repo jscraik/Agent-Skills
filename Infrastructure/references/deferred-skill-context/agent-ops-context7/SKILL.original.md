@@ -28,7 +28,7 @@ Retrieve current external library documentation via Context7 so implementation g
 - For docs lookup: library or product name, implementation question, optional version constraints.
 - For skill wizard: requested action (`search|install|list|remove|suggest|info|generate|setup|login|whoami|logout`) and target scope.
 - For secure CLI execution: prefer `op run --env-file ~/.codex/.env -- ctx7 ...`.
-- For exact flag mapping and command forms, use `Infrastructure/references/context7-skill-wizard.md`.
+- For exact flag mapping and command forms, use `references/context7-skill-wizard.md`.
 
 ## Deliverables
 
@@ -70,7 +70,7 @@ Retrieve current external library documentation via Context7 so implementation g
 3. Include setup/auth flows when requested:
    - `ctx7 setup`, `ctx7 login`, `ctx7 whoami`, `ctx7 logout`
 4. Include verification commands (`ctx7 skills list ...`) and restart guidance.
-5. For option/flag uncertainty, use `Infrastructure/references/context7-skill-wizard.md` rather than guessing.
+5. For option/flag uncertainty, use `references/context7-skill-wizard.md` rather than guessing.
 
 ## Failure mode
 
@@ -85,7 +85,7 @@ Retrieve current external library documentation via Context7 so implementation g
 - Treat network access as limited to the Context7 documentation service and returned library metadata.
 - Network allowlist for `Infrastructure/scripts/context7.py`: only `context7.com` and `api.context7.com` over HTTPS.
 - Prefer focused excerpts over full-document dumps.
-- Do not invent `ctx7` options that are not listed in `Infrastructure/references/context7-skill-wizard.md`.
+- Do not invent `ctx7` options that are not listed in `references/context7-skill-wizard.md`.
 
 ## Validation
 
@@ -95,9 +95,9 @@ Retrieve current external library documentation via Context7 so implementation g
 - Cap retrieval attempts per user question:
   - max 3 `library` resolution attempts
   - max 3 `docs` retrieval attempts
-- For wizard requests, confirm command/flag correctness against `Infrastructure/references/context7-skill-wizard.md`.
+- For wizard requests, confirm command/flag correctness against `references/context7-skill-wizard.md`.
 - For `skills install`, enforce repository format `/owner/repo`.
-- See `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` for required outputs and eval cases.
+- See `references/contract.yaml` and `references/evals.yaml` for required outputs and eval cases.
 - For schema-bound outputs, include `schema_version` in the response contract.
 
 ## Examples
@@ -129,11 +129,11 @@ Retrieve current external library documentation via Context7 so implementation g
 
 ## References and assets
 
-- Open the execution contract: `Infrastructure/references/contract.yaml`
-- Open eval coverage and adversarial cases: `Infrastructure/references/evals.yaml`
-- Open Context7 CLI wizard command map and options: `Infrastructure/references/context7-skill-wizard.md`
-- Open extended strategy and fallback decision notes: `Infrastructure/references/decision-guidance.md`
-- Task profile for graph/runtime metadata: `Infrastructure/references/task-profile.json`
+- Open the execution contract: `references/contract.yaml`
+- Open eval coverage and adversarial cases: `references/evals.yaml`
+- Open Context7 CLI wizard command map and options: `references/context7-skill-wizard.md`
+- Open extended strategy and fallback decision notes: `references/decision-guidance.md`
+- Task profile for graph/runtime metadata: `references/task-profile.json`
 - Local helper script: `Infrastructure/scripts/context7.py`
 - Skill visual asset: `assets/context7.png`
 - OpenAI Apps metadata and icons: `agents/openai.yaml`, `agents/assets/icon-small.png`, `agents/assets/icon-large.png`

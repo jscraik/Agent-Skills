@@ -11,6 +11,8 @@ cases:
     acceptance:
       - type: skill_selected
         expected_skill: "frontend-design"
+      - type: regex
+        value: "(?i)(routing owner|owner skill|visual thesis|content plan|interaction plan)"
 
   - id: trigger-broad-dashboard-direction
     name: trigger broad dashboard direction
@@ -21,6 +23,8 @@ cases:
     acceptance:
       - type: skill_selected
         expected_skill: "frontend-design"
+      - type: regex
+        value: "(?i)(routing owner|owner skill|visual thesis|content plan|interaction plan)"
 
   - id: trigger-general-admin-panel
     name: trigger general admin panel design
@@ -31,6 +35,8 @@ cases:
     acceptance:
       - type: skill_selected
         expected_skill: "frontend-design"
+      - type: regex
+        value: "(?i)(routing owner|owner skill|visual thesis|content plan|interaction plan)"
 
   - id: trigger-quality-framing
     name: trigger quality framing

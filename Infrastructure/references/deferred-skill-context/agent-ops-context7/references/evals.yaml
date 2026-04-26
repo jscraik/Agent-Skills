@@ -139,6 +139,8 @@ cases:
         value: "(?i)(react|effect cleanup)"
       - type: regex
         value: "(?i)(version|scope|constraint)"
+      - type: regex
+        value: "(?i)(source_basis|context7|retrieved|docs-backed|library id)"
     realistic: true
 
   - id: edge-setup-mode-selection

@@ -17,11 +17,6 @@ metadata:
 - Required tradeoff axis (time, quality, risk, release posture).
 - Known unknowns that must remain explicit.
 
-## Deliverables
-- Single-question (or few-question) decision log with options and assumptions.
-- Clear approval gate before execution handoff.
-- Compact synthesis for the next execution skill.
-
 ## Failure mode
 - If request is already implementation-ready, recommend handoff to execution/plan skill instead of additional discovery.
 - If the user declines follow-up questions, run with explicit assumptions and mark risk as open.
@@ -37,7 +32,7 @@ metadata:
 
 ### 3) Handoff
 - Produce an approval-ready summary and stop at the decision gate.
-- Keep route-critical guidance in this file and place expanded interview mechanics in `Infrastructure/references/interview-playbook.md`.
+- Keep route-critical guidance in this file and place expanded interview mechanics in `references/interview-playbook.md`.
 
 ## Deliverables
 - A compact interview log with:
@@ -77,11 +72,8 @@ metadata:
 - Vary depth by context: keep the first pass to 1-2 highest-impact questions, then offer a focused add-on round only if assumptions remain unresolved.
 
 ## References
-- Output contract: `Infrastructure/references/contract.yaml`.
-- Evaluation and pressure cases: `Infrastructure/references/evals.yaml`.
-- Task profile context: `Infrastructure/references/task-profile.json`.
-- Folded legacy modes: `Infrastructure/references/folded-legacy-modes-core60.md`.
-- Deep interview runbook and branch templates: `Infrastructure/references/interview-playbook.md`.
+- Folded legacy modes: `references/folded-legacy-modes-core60.md`.
+- Deep interview runbook and branch templates: `references/interview-playbook.md`.
 - Include visual trace data from `assets/interview-me.png` when helpful for onboarding.
 
 ## Gotchas

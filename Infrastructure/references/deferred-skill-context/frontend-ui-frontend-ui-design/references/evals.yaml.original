@@ -7,10 +7,8 @@ cases:
     should_trigger: true
     prompt: "This dashboard layout feels crowded and flat. Can you help improve spacing rhythm, visual hierarchy, and alignment without changing the stack?"
     acceptance:
-      - type: contains
-        value: "## Outputs"
       - type: regex
-        value: "(spacing|hierarchy|rhythm|alignment)"
+        value: "(?is)^\\s*##\\s*Inputs\\b.*^\\s*##\\s*Outputs\\b.*(spacing|hierarchy|rhythm|alignment)"
 
   - name: layout-audit-structure
     category: happy
@@ -25,22 +23,22 @@ cases:
     should_trigger: true
     prompt: "Can you build a production-ready account settings screen with clear hierarchy and reusable components?"
     acceptance:
-      - type: contains
-        value: "## Outputs"
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*^\\s*##\\s*Outputs\\b"
   - name: edge-case
     category: edge
     should_trigger: true
     prompt: "Can you help redesign this page? I have not shared target users, platform constraints, or acceptance criteria yet."
     acceptance:
-      - type: contains
-        value: "## Inputs"
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*(target users|platform constraints|acceptance criteria)"
   - name: adaptation-path
     category: happy
     should_trigger: true
     prompt: "Adapt this desktop dashboard for mobile and tablet while keeping the same core tasks."
     acceptance:
-      - type: contains
-        value: "## Outputs"
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*^\\s*##\\s*Outputs\\b.*(mobile|tablet|adaptation)"
   - name: failure-mode
     category: edge
     should_trigger: true

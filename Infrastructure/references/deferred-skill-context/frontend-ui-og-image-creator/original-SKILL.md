@@ -94,12 +94,12 @@ Generate route-aware social preview images that feel native to the product inste
 - "Set up a repeatable workflow that regenerates OG images for article pages from metadata."
 
 ## References
-- Contract: `Infrastructure/references/contract.yaml`
-- Evals: `Infrastructure/references/evals.yaml`
-- Best practices: `Infrastructure/references/best-practices.md`
-- Framework workflows: `Infrastructure/references/framework-workflows.md`
-- OG specs: `Infrastructure/references/og-specifications.md`
-- Scripts: `Infrastructure/scripts/analyze_codebase.py`, `Infrastructure/scripts/generate_og_images.py`
+- Contract: `references/contract.yaml.original`
+- Evals: `references/evals.yaml.original`
+- Best practices: `references/best-practices.md`
+- Framework workflows: `references/framework-workflows.md`
+- OG specs: `references/og-specifications.md`
+- Scripts: `scripts/analyze_codebase.py`, `scripts/generate_og_images.py`
 - README: `README.md`
 - Asset preview: `assets/og-image-creator.png`
 
