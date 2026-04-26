@@ -16,6 +16,7 @@ if str(LIFECYCLE_DIR) not in sys.path:
 
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
+from command_surface import build_skill_handles  # type: ignore  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
 
 # codex-primary-runtime is an active runtime projection directory, not a rooted
@@ -83,6 +84,15 @@ def first_level_runtime_entries() -> list[str]:
     )
 
 
+def generated_command_stub_names() -> set[str]:
+    """Return command handles intentionally projected as first-level stubs."""
+    return {
+        handle.handle
+        for handle in build_skill_handles()
+        if handle.kind == "skill" and handle.stub_path and handle.handle not in ROOT_SKILL_SET_NAMES
+    }
+
+
 def validate_written_manifest_provenance(
     *,
     skillsets_dir: Optional[Path] = None,
@@ -97,6 +107,7 @@ def validate_written_manifest_provenance(
         Path(".skillsets") / skill_set / "manifest.jsonl"
         for skill_set in ROOT_SKILL_SET_NAMES
     }
+    allowed_manifest_paths.add(Path(".skillsets") / "command-surface.json")
     for path in sorted(skillsets_dir.rglob("*")):
         if path.is_dir():
             continue
@@ -113,6 +124,23 @@ def validate_written_manifest_provenance(
                 "path": rel_path.as_posix(),
                 "message": ".skillsets may contain only generated <root>/manifest.jsonl files",
             })
+            continue
+        if rel_path == Path(".skillsets") / "command-surface.json":
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                violations.append({
+                    "code": "INVALID_COMMAND_SURFACE_JSON",
+                    "path": rel_path.as_posix(),
+                    "message": str(exc),
+                })
+                continue
+            if not isinstance(payload, dict) or not isinstance(payload.get("handles"), list):
+                violations.append({
+                    "code": "INVALID_COMMAND_SURFACE_SHAPE",
+                    "path": rel_path.as_posix(),
+                    "message": "command-surface.json must contain a handles array",
+                })
             continue
         expected_skill_set = rel_path.parts[1]
         for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
@@ -262,7 +290,8 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
         violations.append({"code": "ROUTER_CANDIDATE_BUDGET_TOO_HIGH"})
     if projection_mode == "rooted":
         allowed = ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS
-        latent_first_level = [name for name in runtime_entries if name not in allowed]
+        command_stubs = generated_command_stub_names()
+        latent_first_level = [name for name in runtime_entries if name not in allowed and name not in command_stubs]
         if latent_first_level:
             violations.append({
                 "code": "LATENT_SKILLS_EXPOSED_FIRST_LEVEL",
@@ -286,6 +315,7 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
         "root_count": root_report["root_count"],
         "root_description_words_total": total_description_words,
         "runtime_entries": runtime_entries,
+        "generated_command_stub_names": sorted(generated_command_stub_names()) if projection_mode == "rooted" else [],
         "manifest_count": manifest_report["manifest_count"],
         "module_count": manifest_report["module_count"],
         "unmapped_count": len(manifest_report["unmapped"]),

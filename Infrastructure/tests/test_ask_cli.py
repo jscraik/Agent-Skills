@@ -111,6 +111,54 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(surface["status"], "pass")
         self.assertGreater(surface["handle_count"], 0)
 
+    def test_skills_handles_projection_dry_run_contract(self):
+        """Verify ask can preview the generated command-surface projection."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "handles",
+            "--write-projection",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        write = output["data"]["command_surface_projection_write"]
+        self.assertEqual(write["status"], "pass")
+        self.assertTrue(write["dry_run"])
+        self.assertEqual(write["path"], ".skillsets/command-surface.json")
+
+    def test_skills_handles_stub_dry_run_contract(self):
+        """Verify ask can preview generated runtime command stubs."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "handles",
+            "--write-stubs",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        write = output["data"]["command_stub_write"]
+        self.assertEqual(write["status"], "pass")
+        self.assertTrue(write["dry_run"])
+        self.assertGreater(write["stub_count"], 0)
+        paths = {row["path"] for row in write["writes"] if row["handle"] == "he-heartbeat"}
+        self.assertEqual(
+            paths,
+            {
+                ".agents/skills/he-heartbeat/SKILL.md",
+                ".agents/skills/he-heartbeat/agents/openai.yaml",
+            },
+        )
+
     def test_skills_resolve_json_contract(self):
         """Verify ask skills resolve returns a latent source path for a command handle."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--json"]
@@ -123,6 +171,22 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(resolution["handle"], "he-heartbeat")
         self.assertEqual(resolution["command_visibility"], "target")
         self.assertEqual(resolution["invoke_via"], "harness-engineering")
+
+    def test_skills_proof_json_contract(self):
+        """Verify ask skills proof separates resolver, stub, and runtime-link gates."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertTrue(result.stdout.strip(), result.stderr)
+        output = json.loads(result.stdout)
+        proof = output["data"]["proof"]
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v1")
+        self.assertEqual(proof["handle"], "he-heartbeat")
+        self.assertIn("resolver", proof["gates"])
+        self.assertIn("generated_stub_check", proof["gates"])
+        self.assertIn("workspace_stub_exists", proof["gates"])
+        self.assertIn("codex_user_link", proof["gates"])
+        self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
 
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""

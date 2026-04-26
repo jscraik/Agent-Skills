@@ -71,6 +71,58 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(payload["invoke_via"], "harness-engineering")
         self.assertTrue(payload["source_path"].endswith("/he-heartbeat/SKILL.md"))
 
+    def test_command_surface_projection_is_generated_from_rooted_manifests(self) -> None:
+        payload = command_surface.command_surface_projection(repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["generated_from"], "rooted_manifests")
+        self.assertEqual(payload["projection_path"], ".skillsets/command-surface.json")
+        self.assertGreater(payload["generated_stub_count"], 0)
+
+    def test_command_surface_renders_thin_runtime_stub(self) -> None:
+        payload = command_surface.resolve_skill_handle("he-heartbeat", repo_root_path=REPO_ROOT)
+        handle = command_surface.CommandHandle(
+            handle=payload["handle"],
+            kind=payload["kind"],
+            command_visibility=payload["command_visibility"],
+            runtime_visibility=payload["runtime_visibility"],
+            source_path=payload["source_path"],
+            stub_path=payload["stub_path"],
+            owner=payload["owner"],
+            description=payload["description"],
+            invoke_via=payload["invoke_via"],
+            level=payload["level"],
+            provenance=payload["provenance"],
+        )
+
+        stub = command_surface.render_skill_handle_stub(handle)
+
+        self.assertIn("Thin command handle", stub)
+        self.assertIn("./bin/ask skills resolve he-heartbeat --json", stub)
+        self.assertNotIn("## Procedure", stub)
+        self.assertFalse(command_surface._validate_stub_payload(handle, stub))
+
+    def test_command_stub_dry_run_projects_he_heartbeat_without_writing(self) -> None:
+        payload = command_surface.write_command_stubs(repo_root_path=REPO_ROOT, dry_run=True)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertGreater(payload["stub_count"], 0)
+        paths = {row["path"] for row in payload["writes"] if row["handle"] == "he-heartbeat"}
+        self.assertEqual(
+            paths,
+            {
+                ".agents/skills/he-heartbeat/SKILL.md",
+                ".agents/skills/he-heartbeat/agents/openai.yaml",
+            },
+        )
+
+    def test_command_stub_check_detects_missing_runtime_stub(self) -> None:
+        payload = command_surface.check_command_stubs(repo_root_path=self.temp_dir)
+
+        self.assertEqual(payload["status"], "fail")
+        codes = {violation["code"] for violation in payload["violations"]}
+        self.assertIn("COMMAND_STUB_MISSING", codes)
+
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
         payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)
 

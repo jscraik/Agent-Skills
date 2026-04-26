@@ -64,7 +64,7 @@ ROOT_SKILL_SET_METADATA: dict[str, dict[str, str]] = {
         "exclusions": "web frontend work, backend-only changes, product strategy, and generic repo operations",
     },
     "skill-factory": {
-        "description": "Route skill creation, auditing, installation, refactoring, and skill lifecycle work while preserving local plugin browseability.",
+        "description": "Use when creating, auditing, installing, refactoring, or governing Codex skills while preserving local plugin browseability.",
         "scope": "skill creation, skill audits, skill installation, skill lifecycle governance, and skill refactors",
         "exclusions": "ordinary product implementation, plugin package authoring, and general repo maintenance unless skill-specific",
     },

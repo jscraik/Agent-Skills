@@ -26,9 +26,12 @@ from projection_engine import (  # noqa: E402
     normalize_projection_mode,
 )
 from command_surface import (  # noqa: E402
+    check_command_stubs,
     handles_report,
     resolve_reviewer_handle,
     resolve_skill_handle,
+    write_command_stubs,
+    write_command_surface_projection,
 )
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
 from generate_skillset_manifests import build_manifest_report, write_manifests  # noqa: E402
@@ -457,7 +460,15 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
     return result
 
 
-def skills_handles(repo_root: Path, check: bool = False, include_handles: bool = True) -> CallResult:
+def skills_handles(
+    repo_root: Path,
+    check: bool = False,
+    include_handles: bool = True,
+    write_projection: bool = False,
+    write_stubs: bool = False,
+    check_stubs: bool = False,
+    dry_run: bool = False,
+) -> CallResult:
     """Return or validate the rooted command-handle surface."""
     result = CallResult()
     result.metadata["command"] = "skills handles"
@@ -466,6 +477,18 @@ def skills_handles(repo_root: Path, check: bool = False, include_handles: bool =
     result.data["handles"] = report["handles"]
     result.data["violations"] = report["violations"]
     result.data["policy_identity"] = report["policy_identity"]
+    if write_projection:
+        result.data["command_surface_projection_write"] = write_command_surface_projection(
+            repo_root_path=repo_root,
+            dry_run=dry_run,
+        )
+    if write_stubs:
+        result.data["command_stub_write"] = write_command_stubs(
+            repo_root_path=repo_root,
+            dry_run=dry_run,
+        )
+    if check_stubs:
+        result.data["command_stub_check"] = check_command_stubs(repo_root_path=repo_root)
     if check and report["status"] != "pass":
         result.status = "error"
         result.errors.append(
@@ -475,6 +498,21 @@ def skills_handles(repo_root: Path, check: bool = False, include_handles: bool =
                 fix_suggestion="Inspect data.violations, fix command-handle metadata, and rerun `ask skills handles --check --json`.",
             )
         )
+    for key, message in (
+        ("command_surface_projection_write", "Command-surface projection write failed."),
+        ("command_stub_write", "Command-stub generation failed."),
+        ("command_stub_check", "Command-stub validation failed."),
+    ):
+        payload = result.data.get(key)
+        if payload and payload.get("status") != "pass":
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=message,
+                    fix_suggestion="Inspect data.violations and data.command_stub_write.violations, then fix handle metadata or stub budgets.",
+                )
+            )
     return result
 
 
@@ -491,6 +529,87 @@ def skills_resolve(repo_root: Path, handle: str) -> CallResult:
                 code="ERR_VALIDATION",
                 message=f"Could not resolve skill handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
                 fix_suggestion=payload.get("operator_action"),
+            )
+        )
+    return result
+
+
+def skills_proof(repo_root: Path, handle: str) -> CallResult:
+    """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
+    result = CallResult()
+    result.metadata["command"] = "skills proof"
+    resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
+    normalized = resolution.get("handle", handle.lstrip("$"))
+    stub_check = check_command_stubs(repo_root_path=repo_root)
+    workspace_stub = repo_root / str(resolution.get("stub_path", ""))
+    user_codex_stub = Path.home() / ".codex" / "skills" / str(normalized) / "SKILL.md"
+    user_agents_stub = Path.home() / ".agents" / "skills" / str(normalized) / "SKILL.md"
+    codex_skills = Path.home() / ".codex" / "skills"
+    agents_skills = Path.home() / ".agents" / "skills"
+    expected_runtime = repo_root / ".agents" / "skills"
+
+    def _link_payload(path: Path) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "path": str(path),
+            "exists": path.exists(),
+            "is_symlink": path.is_symlink(),
+        }
+        if path.is_symlink():
+            payload["target"] = str(path.resolve())
+            payload["points_to_workspace_runtime"] = path.resolve() == expected_runtime.resolve()
+        else:
+            payload["target"] = None
+            payload["points_to_workspace_runtime"] = False
+        return payload
+
+    gates = {
+        "resolver": resolution.get("status") == "ok",
+        "generated_stub_check": stub_check.get("status") == "pass",
+        "workspace_stub_exists": workspace_stub.is_file(),
+        "codex_user_link": codex_skills.is_symlink() and codex_skills.resolve() == expected_runtime.resolve(),
+        "agents_user_link": agents_skills.is_symlink() and agents_skills.resolve() == expected_runtime.resolve(),
+        "codex_user_stub_exists": user_codex_stub.is_file(),
+        "agents_user_stub_exists": user_agents_stub.is_file(),
+    }
+    proof = {
+        "schema_version": "command-handle-proof.v1",
+        "handle": normalized,
+        "status": "pass" if all(gates.values()) else "fail",
+        "gates": gates,
+        "resolution": resolution,
+        "stub_check": {
+            key: value
+            for key, value in stub_check.items()
+            if key != "violations" or value
+        },
+        "workspace_runtime": {
+            "path": str(expected_runtime),
+            "stub_path": str(workspace_stub),
+            "stub_exists": workspace_stub.is_file(),
+        },
+        "user_runtime_links": {
+            "codex_skills": _link_payload(codex_skills),
+            "agents_skills": _link_payload(agents_skills),
+        },
+        "user_runtime_stubs": {
+            "codex_stub": str(user_codex_stub),
+            "codex_stub_exists": user_codex_stub.is_file(),
+            "agents_stub": str(user_agents_stub),
+            "agents_stub_exists": user_agents_stub.is_file(),
+        },
+        "live_codex_invocation": {
+            "status": "manual_session_gate",
+            "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+        },
+    }
+    result.data["proof"] = proof
+    if proof["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Command handle proof failed for '{normalized}'.",
+                fix_suggestion="Run `./bin/ask skills sync --scope workspace --projection rooted`, then `./bin/ask skills sync --scope user --projection rooted`, and rerun proof.",
             )
         )
     return result
@@ -1436,16 +1555,31 @@ def _sync_rooted_projection(
     """Generate the rooted runtime projection and latent manifests."""
     root_report = build_roots(skills_dir)
     manifest_report = build_manifest_report(repo_root / ".skillsets")
+    command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=True)
+    command_stub_write = write_command_stubs(repo_root_path=repo_root, dry_run=True)
     plan["root_skill_sets"] = _public_root_report(root_report)
     plan["skillset_manifests"] = _public_manifest_report(manifest_report)
+    plan["command_surface"] = command_surface_write
+    plan["command_stubs"] = {
+        key: value
+        for key, value in command_stub_write.items()
+        if key != "writes"
+    }
     plan["unmapped_entries"] = root_report.get("unmapped", [])
 
     violations = [
         *root_report.get("violations", []),
         *manifest_report.get("violations", []),
+        *command_surface_write.get("violations", []),
+        *command_stub_write.get("violations", []),
     ]
     plan["violations"] = violations
-    if root_report.get("status") != "pass" or manifest_report.get("status") != "pass":
+    if (
+        root_report.get("status") != "pass"
+        or manifest_report.get("status") != "pass"
+        or command_surface_write.get("status") != "pass"
+        or command_stub_write.get("status") != "pass"
+    ):
         plan["validation_status"] = "fail"
         plan["warnings"].extend([str(violation.get("code", violation)) for violation in violations])
         return False, [ErrorObject(
@@ -1462,6 +1596,8 @@ def _sync_rooted_projection(
         plan["writes"].append(root["path"])
     for manifest in manifest_report.get("manifests", []):
         plan["writes"].append(manifest["path"])
+    plan["writes"].append(command_surface_write["path"])
+    plan["writes"].extend(row["path"] for row in command_stub_write.get("writes", []))
 
     if dry_run:
         logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
@@ -1472,6 +1608,8 @@ def _sync_rooted_projection(
         try:
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
+            command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=False)
+            command_stub_write = write_command_stubs(repo_root_path=repo_root, dry_run=False)
             prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
         except (OSError, ValueError) as exc:
             plan["validation_status"] = "fail"
@@ -1483,6 +1621,11 @@ def _sync_rooted_projection(
             )]
         logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
+        logs.append(f"Wrote command-surface projection: {command_surface_write['path']}")
+        logs.append(
+            "Wrote command runtime stubs: "
+            f"{command_stub_write['stub_count']} stubs ({command_stub_write['write_count']} files)"
+        )
         for log in prune_logs:
             plan["deletes"].append(log)
             logs.append(log)
@@ -1601,7 +1744,7 @@ def sync_skills(
 
     if projection_decision.projection_mode == "rooted":
         if scope == "user":
-            violations = validate_workspace_runtime(skills_dir)
+            violations = validate_workspace_runtime(skills_dir, repo_root_path=repo_root)
             plan["violations"] = violations
             if violations:
                 plan["validation_status"] = "fail"

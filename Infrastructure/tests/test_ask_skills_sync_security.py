@@ -130,11 +130,18 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "rooted")
         self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
+        self.assertTrue((self.repo_root / ".skillsets" / "command-surface.json").is_file())
+        self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "SKILL.md").is_file())
+        self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "agents" / "openai.yaml").is_file())
+        self.assertEqual(result.data["plan"]["command_stubs"]["status"], "pass")
 
     def test_sync_skills_rooted_prunes_unowned_skillset_files(self) -> None:
         stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
         stale_file.parent.mkdir(parents=True)
         stale_file.write_text("{}\n", encoding="utf-8")
+        command_surface = self.repo_root / ".skillsets" / "command-surface.json"
+        command_surface.parent.mkdir(parents=True, exist_ok=True)
+        command_surface.write_text("{}\n", encoding="utf-8")
 
         result = skills_commands.sync_skills(
             self.repo_root,
@@ -145,6 +152,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertFalse(stale_file.exists())
+        self.assertTrue(command_surface.exists())
         self.assertTrue(
             any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
             result.data["plan"],
@@ -220,6 +228,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
         self.assertTrue((self.fake_home / "plugins").is_symlink())

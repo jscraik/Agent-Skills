@@ -86,7 +86,7 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
     manifest_path = skillsets_dir / skill_set / "manifest.jsonl"
     if not manifest_path.is_file():
         return [], "manifest_missing"
-    source_root = skillsets_dir.parent
+    source_roots = [skillsets_dir.parent, repo_root()]
     rows: list[dict[str, Any]] = []
     for line_no, line in enumerate(manifest_path.read_text(encoding="utf-8").splitlines(), start=1):
         if not line.strip():
@@ -107,7 +107,7 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
             raise ValueError(
                 f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'source_path' must be a repo-relative path"
             )
-        if not (source_root / source_path).is_file():
+        if not any((source_root / source_path).is_file() for source_root in source_roots):
             raise ValueError(
                 f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path {row['source_path']!r} does not exist"
             )
