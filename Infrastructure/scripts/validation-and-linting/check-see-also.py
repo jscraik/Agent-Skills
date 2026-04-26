@@ -11,7 +11,7 @@ Usage:
 Exit 0 = OK
 Exit 1 = one or more new SKILL.md files are missing adequate See Also entries
 """
-import pathlib, re, sys, os
+import pathlib, re, sys, os, subprocess
 
 ROOT           = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
 MIN_ENTRIES    = int(os.environ.get("SEE_ALSO_MIN", "2"))
@@ -32,6 +32,8 @@ CANONICAL_PREFIXES = (
 if CHANGED_FLAG in sys.argv:
     idx          = sys.argv.index(CHANGED_FLAG)
     changed_files = sys.argv[idx + 1:]
+
+_ADDED_SKILL_FILES: set[str] | None = None
 
 TOPIC_MAPS = {
     "frontend-ui", "backend-platform", "agent-ops",
@@ -74,6 +76,31 @@ def _is_real_skill(path: pathlib.Path) -> bool:
         return False
     return True
 
+
+def _added_skill_files_in_pr() -> set[str]:
+    """
+    Return SKILL.md paths added in the current PR diff range (origin/main...HEAD).
+
+    This gate is documented as applying to new skills only.
+    """
+    global _ADDED_SKILL_FILES
+    if _ADDED_SKILL_FILES is not None:
+        return _ADDED_SKILL_FILES
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--name-only", "--diff-filter=A", "origin/main...HEAD"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        # If git metadata is unavailable, keep historical behavior rather than
+        # hard-failing validation.
+        _ADDED_SKILL_FILES = set()
+        return _ADDED_SKILL_FILES
+    _ADDED_SKILL_FILES = {line.strip() for line in output.splitlines() if line.strip().endswith("SKILL.md")}
+    return _ADDED_SKILL_FILES
+
 if not changed_files:
     # Audit mode — scan all, report skills with too-few entries
     poor: list[tuple[str, int]] = []
@@ -104,6 +131,10 @@ for f in changed_files:
     if not p.exists():
         continue   # deleted file — skip (hub-stability catches protected deletions)
     if not _is_real_skill(p):
+        continue
+    rel = p.as_posix()
+    added_skill_files = _added_skill_files_in_pr()
+    if added_skill_files and rel not in added_skill_files:
         continue
     skill  = p.relative_to(ROOT).parent.as_posix()
     n      = see_also_count(p)
