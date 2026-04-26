@@ -108,7 +108,7 @@ Use a focused file-based todo triage workflow that sits between finding generati
   - Keep the item pending when user intent, evidence, or dependencies are not strong enough for approval.
 
 ## Routing map
-- Read [`Infrastructure/references/overlap-matrix.md`](Infrastructure/references/overlap-matrix.md) before widening this skill's trigger wording.
+- Read [`Infrastructure/references/overlap-matrix.md`](/Infrastructure/references/overlap-matrix.md) before widening this skill's trigger wording.
 - Use [`he-code-review`](/Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md) to generate findings and initial pending todo artifacts.
 - Use [`he-work`](/Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md) once approved items are `ready`.
 - Use [`gh-workflow`](/Skills/agent-ops/gh-workflow/SKILL.md) for team tracker triage and issue updates.
@@ -164,6 +164,7 @@ Use a focused file-based todo triage workflow that sits between finding generati
 - If candidate items are too underspecified to approve safely, keep them pending and say exactly what is missing.
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[ce-work]] | Execute the approved work once triage decisions are made |

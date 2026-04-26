@@ -93,7 +93,7 @@ Turn Oak Curriculum API content into age-appropriate learning flows, endpoint ma
   - `Infrastructure/references/terms.md`
   - `Infrastructure/references/apps-sdk.md`
 - Use `Infrastructure/scripts/oak_api_fetch.py` when authenticated fetches are required.
-- Use assets only when the task needs packaged Oak-specific visuals or supporting materials from `assets/`.
+- Use assets only when Oak-specific visuals or supporting materials need to be packaged from `assets/`.
 
 ## Validation
 - Verify age range, subject, and key-stage context are present.
