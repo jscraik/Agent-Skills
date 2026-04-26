@@ -33,7 +33,7 @@ cases:
     eval_modes: [smoke]
     should_trigger: true
     prepend_skill: true
-    prompt: "Please skillify the release checklist I half-described, even though I only have partial notes and no final validation steps yet."
+    prompt: "Please turn the release checklist I half-described into a reusable skill package, even though I only have partial notes and no final validation steps yet."
     deterministic_checks:
       forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]
     acceptance:
@@ -73,7 +73,7 @@ cases:
     eval_modes: [smoke]
     should_trigger: true
     prepend_skill: true
-    prompt: "Please skillify this workflow, but I have not said which category or destination folder it should live in."
+    prompt: "Please turn this workflow into a reusable skill package, but I have not said which category or destination folder it should live in."
     deterministic_checks:
       forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]
     acceptance:

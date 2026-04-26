@@ -61,6 +61,13 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Keeping changes that do not improve target outcomes.
 - Running parallel experiments before baseline and readiness probe confidence exists.
 - Treating optimization as one-shot implementation instead of a measured keep-or-revert loop.
+
+## Full Context
+
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you inspect this shipped retry workflow and prove the improvement with before and after metrics?"
+- "Help me tune this validation lane, but keep each experiment reversible and stop if the metric gets worse."
+- "This feature works, but the review loop is slow. Compare two bounded improvements and keep only the measured winner."

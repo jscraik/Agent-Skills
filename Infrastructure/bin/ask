@@ -19,6 +19,7 @@ from ask.commands.skills import (
     skills_budget,
     skills_handles,
     skills_resolve,
+    reviewers_resolve,
     route_skills,
     goal_skills,
     sync_skills,
@@ -66,10 +67,11 @@ ERROR_MAP = {
 }
 
 # Valid commands for fuzzy matching
-VALID_TOPICS = ["repo", "skills", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
+VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog", "provider-audit"],
     "skills": ["list", "budget", "handles", "resolve", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
+    "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
     "evals": ["run", "benchmark", "dashboard"],
@@ -92,6 +94,9 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills resolve he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
+    ],
+    "reviewers": [
+        "ask reviewers resolve skillinspector --json",
     ],
     "runtime": [
         "ask runtime surface --json",
@@ -136,6 +141,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "resolve"): [
         "ask skills resolve he-heartbeat --json",
+    ],
+    ("reviewers", "resolve"): [
+        "ask reviewers resolve skillinspector --json",
     ],
     ("runtime", "surface"): [
         "ask runtime surface --json",
@@ -691,6 +699,12 @@ def main():
     skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve a command-visible skill handle", parents=[global_parser])
     skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
 
+    # --- reviewers ---
+    reviewers_parser = subparsers.add_parser("reviewers", help="Reviewer/subagent handle management", parents=[global_parser])
+    reviewers_subparsers = reviewers_parser.add_subparsers(dest="action")
+    reviewers_resolve_parser = reviewers_subparsers.add_parser("resolve", help="Resolve a reviewer/subagent handle", parents=[global_parser])
+    reviewers_resolve_parser.add_argument("handle", help="Reviewer handle to resolve, with or without leading @")
+
     # --- runtime ---
     add_runtime_parser(subparsers, global_parser)
 
@@ -1110,6 +1124,18 @@ def main():
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'skills'",
                 fix_suggestion="Valid actions: list, budget, handles, resolve, route, goal, starter, sync, audit, install, fold, init"
+            ))
+
+    elif args.topic == "reviewers":
+        if args.action == "resolve":
+            result = reviewers_resolve(repo_root, handle=args.handle)
+        else:
+            result.status = "error"
+            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
+            result.errors.append(ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"{action_msg} for topic 'reviewers'",
+                fix_suggestion="Valid actions: resolve"
             ))
 
     elif args.topic == "runtime":

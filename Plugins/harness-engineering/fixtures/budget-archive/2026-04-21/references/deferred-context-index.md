@@ -87,6 +87,8 @@ The session-evidence routing refresh preserved these pre-insertion `he-compound`
 
 The PR 136 main-sync refresh preserved these lines removed from compact runtime and archive entrypoints:
 
+- `Read when: examples or role-routing details are needed, open the archived references for this skill.`
+- `description: Refine Harness Engineering artifacts, plans, specs, or work into clearer next actions. Use when users ask for tightening, simplification, or lifecycle flow repair.`
 - `## Philosophy`
 - `## Subagent Routing`
 - `## Validation`
@@ -118,6 +120,9 @@ The PR 136 main-sync refresh preserved these lines removed from compact runtime 
 - `- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)`
 - `- Subagent routing: `../../../references/subagent-routing.md``
 - `- Use when a spec, brainstorm, bug report, or raw feature description must become a durable implementation plan.`
+
+Read when: examples or role-routing details are needed, open the archived references for this skill.
+description: Refine Harness Engineering artifacts, plans, specs, or work into clearer next actions. Use when users ask for tightening, simplification, or lifecycle flow repair.
 - `- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.`
 - `1. Load archived TDD guidance and choose the first behavior slice.`
 - `1. Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.`

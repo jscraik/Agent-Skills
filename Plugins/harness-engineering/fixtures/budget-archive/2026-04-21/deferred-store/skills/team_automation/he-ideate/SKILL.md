@@ -60,6 +60,13 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Recommending a direction without explicit tradeoff analysis.
 - Critiquing or ranking ideas before the combined candidate list exists.
 - Routing a chosen idea straight to `he-plan` or `he-work`.
+
+## Full Context
+
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you generate three realistic ways to make this release flow less brittle, then rank them by tradeoff?"
+- "Help me explore options for making these plugin skills easier to discover before we write a spec."
+- "What directions are worth considering for this Linear theme after you inspect the repo for existing patterns?"

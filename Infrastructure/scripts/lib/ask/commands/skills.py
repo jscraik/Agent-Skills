@@ -27,6 +27,7 @@ from projection_engine import (  # noqa: E402
 )
 from command_surface import (  # noqa: E402
     handles_report,
+    resolve_reviewer_handle,
     resolve_skill_handle,
 )
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
@@ -489,6 +490,24 @@ def skills_resolve(repo_root: Path, handle: str) -> CallResult:
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Could not resolve skill handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
+                fix_suggestion=payload.get("operator_action"),
+            )
+        )
+    return result
+
+
+def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
+    """Resolve one reviewer/subagent handle from the reviewer namespace."""
+    result = CallResult()
+    result.metadata["command"] = "reviewers resolve"
+    payload = resolve_reviewer_handle(handle)
+    result.data["resolution"] = payload
+    if payload.get("status") != "ok":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Could not resolve reviewer handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
                 fix_suggestion=payload.get("operator_action"),
             )
         )
