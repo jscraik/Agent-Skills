@@ -154,8 +154,8 @@ def find_session_files(days):
     """Find session files from ~/.codex/sessions/ within the lookback period."""
     if not SESSIONS_DIR.exists():
         return []
-    
-    cutoff = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days)
+
+    cutoff = datetime.now(tz=timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days)
     cutoff_timestamp = cutoff.timestamp()
     files_with_mtime = []
     
@@ -634,12 +634,12 @@ def save_session_meta(session_id, meta):
         meta_dir = USAGE_DIR / "session-meta"
         meta_dir.mkdir(parents=True, exist_ok=True)
         cache_path = meta_dir / f"{session_id}.json"
-        with open(cache_path, 'w', encoding="utf-8") as f:
-            json.dump(meta, f, indent=2)
+        fd = os.open(cache_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
         try:
-            cache_path.chmod(0o600)
-        except OSError:
-            pass
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                json.dump(meta, f, indent=2)
+        except Exception:
+            raise
     except OSError:
         return
 

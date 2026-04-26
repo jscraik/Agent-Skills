@@ -1,6 +1,11 @@
 ---
 name: 1password
 description: "Plan, diagnose, and validate 1Password CLI workflows. Use when tasks need op CLI sign-in, secret references, op run, op inject, item reads, env injection, or service-account secret access."
+triggers:
+  - "1password"
+  - "op cli"
+  - "op inject"
+  - "op run"
 metadata:
   skill-type: infrastructure_ops
 ---
