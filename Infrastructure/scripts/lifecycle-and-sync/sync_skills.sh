@@ -1698,6 +1698,136 @@ sync_local_marketplace_cache() {
   done < "$tracked_marketplaces_file"
 }
 
+# sync_versioned_local_marketplace_cache keeps the legacy repository-local
+# cache shape aligned for Codex builds that still inspect
+# <repo>/Plugins/cache/<marketplace>/<plugin>/<version>/skills directly.
+sync_versioned_local_marketplace_cache() {
+  local marketplace_file="$1"
+  local cache_root="$2"
+  local state_dir=""
+  local plugin_rows_file=""
+  local keep_file=""
+  local market_keep_file=""
+  local tracked_markets_file=""
+  local marketplace_name=""
+  local plugin_name=""
+  local source_path=""
+  local source_dir=""
+  local plugin_version=""
+  local market_dir=""
+  local plugin_dir=""
+  local target_dir=""
+  local existing_dir=""
+  local tracked_market_dir=""
+
+  if [ ! -f "$marketplace_file" ]; then
+    echo "[WARN] Marketplace file missing: $marketplace_file (skipping versioned local marketplace cache sync)."
+    return 0
+  fi
+
+  mkdir -p "$cache_root"
+  state_dir="$(mktemp -d)"
+  cleanup_paths+=("$state_dir")
+  plugin_rows_file="$state_dir/versioned_plugin_rows.tsv"
+  keep_file="$state_dir/versioned_cache.keep"
+  market_keep_file="$state_dir/versioned_markets.keep"
+  tracked_markets_file="$state_dir/versioned_markets.txt"
+  : > "$keep_file"
+  : > "$market_keep_file"
+
+  jq -r '
+    def trim: gsub("^\\s+|\\s+$"; "");
+    def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
+    (.name // "agent-skills-local" | tostring | trim) as $default_market
+    | .plugins[]?
+    | select(type == "object")
+    | .name as $name
+    | .source as $source
+    | (.marketplace // $source.marketplace // $default_market | tostring | trim) as $market
+    | select(($name | type) == "string")
+    | select(($source | type) == "object")
+    | select($source.source == "local")
+    | select(($source.path | type) == "string")
+    | ($name | trim) as $clean_name
+    | ($source.path | trim) as $clean_path
+    | select($market | is_safe_identifier)
+    | select($clean_name | is_safe_identifier)
+    | "\($market)\t\($clean_name)\t\($clean_path)"
+  ' "$marketplace_file" > "$plugin_rows_file"
+
+  while IFS=$'\t' read -r marketplace_name plugin_name source_path; do
+    [ -n "$marketplace_name" ] || continue
+    [ -n "$plugin_name" ] || continue
+    [ -n "$source_path" ] || continue
+    if ! is_safe_path_component "$marketplace_name" || ! is_safe_path_component "$plugin_name"; then
+      echo "[WARN] Invalid versioned cache marketplace/plugin identity: $marketplace_name/$plugin_name"
+      continue
+    fi
+
+    source_dir="$(resolve_marketplace_source_dir "$source_path" || true)"
+    if [ -z "$source_dir" ] || [ ! -d "$source_dir" ]; then
+      echo "[WARN] Versioned cache source plugin directory missing for $plugin_name: $source_path"
+      continue
+    fi
+
+    plugin_version="$(jq -r '.version // "0.1.0" | tostring | gsub("^\\s+|\\s+$"; "")' "$source_dir/.codex-plugin/plugin.json" 2>/dev/null || printf '0.1.0')"
+    [ -n "$plugin_version" ] || plugin_version="0.1.0"
+    if ! is_safe_path_component "$plugin_version"; then
+      echo "[WARN] Invalid plugin version in plugin.json for $plugin_name: $plugin_version"
+      continue
+    fi
+
+    market_dir="$cache_root/$marketplace_name"
+    plugin_dir="$market_dir/$plugin_name"
+    target_dir="$plugin_dir/$plugin_version"
+    printf '%s\n' "$market_dir" >> "$market_keep_file"
+    printf '%s\n' "$plugin_dir" >> "$keep_file"
+
+    if [ -L "$plugin_dir" ] || [ -f "$plugin_dir/.codex-plugin/plugin.json" ]; then
+      rm -rf -- "$plugin_dir"
+    elif [ -e "$plugin_dir" ] && [ ! -d "$plugin_dir" ]; then
+      rm -f -- "$plugin_dir"
+    fi
+
+    mkdir -p "$target_dir"
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -aL --delete --force \
+        --exclude '.git' \
+        --exclude 'node_modules' \
+        --exclude '__pycache__' \
+        --exclude '.DS_Store' \
+        "$source_dir/" "$target_dir/"
+    else
+      rm -rf -- "$target_dir"
+      mkdir -p "$target_dir"
+      cp -RL "$source_dir"/. "$target_dir"/
+      rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
+      find "$target_dir" -name '.DS_Store' -type f -delete
+    fi
+
+    normalize_plugin_copy "$target_dir" "versioned-cache"
+    while IFS= read -r existing_dir; do
+      [ -n "$existing_dir" ] || continue
+      [ "$existing_dir" = "$target_dir" ] && continue
+      rm -rf -- "$existing_dir"
+      echo "[OK] Removed stale versioned local cache variant: $existing_dir"
+    done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -type d -print)
+  done < "$plugin_rows_file"
+
+  sort -u "$market_keep_file" > "$tracked_markets_file"
+  while IFS= read -r tracked_market_dir; do
+    [ -n "$tracked_market_dir" ] || continue
+    [ -d "$tracked_market_dir" ] || continue
+    while IFS= read -r existing_dir; do
+      [ -n "$existing_dir" ] || continue
+      if ! grep -Fqx "$existing_dir" "$keep_file"; then
+        rm -rf -- "$existing_dir"
+        echo "[OK] Removed stale versioned local cache plugin dir: $existing_dir"
+      fi
+    done < <(find "$tracked_market_dir" -mindepth 1 -maxdepth 1 -type d -print)
+  done < "$tracked_markets_file"
+}
+
 # sync_repo_cache_snapshots_to_runtime_cache syncs repository plugin cache snapshots from the source directory into the runtime cache directory, ensuring the target exists and replacing its contents.
 sync_repo_cache_snapshots_to_runtime_cache() {
   local source_cache_root="$1"
@@ -1874,10 +2004,10 @@ sync_plugin_cache_projections() {
 sync_repo_cache_snapshots_to_runtime_cache "$plugins_dir/cache" "$runtime_cache_root"
 sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$runtime_cache_root"
 materialize_plugin_cache_roots "$runtime_cache_root"
-cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"
 cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"
 sync_plugin_cache_projections
+sync_versioned_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
 # On case-insensitive filesystems (e.g. default macOS), "skills" aliases
 # "Skills"; forcing a lowercase symlink would replace the canonical tracked
 # Skills/ tree and can introduce symlink loops.

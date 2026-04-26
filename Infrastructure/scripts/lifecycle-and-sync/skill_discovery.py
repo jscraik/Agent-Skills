@@ -17,6 +17,7 @@ from selection_policy import (
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
     PLUGIN_SKILL_ROOT_GLOB as POLICY_PLUGIN_SKILL_ROOT_GLOB,
     REPO_SCAN_ROOTS as POLICY_REPO_SCAN_ROOTS,
+    ROOT_SKILL_SET_NAMES as POLICY_ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES as POLICY_SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
@@ -37,6 +38,8 @@ HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 DEFAULT_VISIBLE_FLAT_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
+PLUGIN_CACHE_SKILL_ROOT_GLOB = "./Plugins/cache/*/*/*/skills"
+ROOT_SKILL_SET_NAMES = set(POLICY_ROOT_SKILL_SET_NAMES)
 USER_SKILL_SCOPE_PRECEDENCE = {
     "global": 10,
     "local-plugin": 20,
@@ -198,7 +201,7 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
     dirs: List[Path] = []
     seen_roots: set[str] = set()
     plugin_patterns: set[str] = set()
-    for raw_pattern in POLICY_PLUGIN_SKILL_ROOT_GLOB.split():
+    for raw_pattern in (*POLICY_PLUGIN_SKILL_ROOT_GLOB.split(), PLUGIN_CACHE_SKILL_ROOT_GLOB):
         if not raw_pattern:
             continue
         plugin_patterns.add(raw_pattern)
@@ -217,12 +220,51 @@ def _iter_plugin_skill_dirs() -> Iterable[Path]:
             seen_roots.add(plugin_root_key)
             if not plugin_root.is_dir():
                 continue
+            cache_rel = _cache_plugin_source_root(plugin_root)
+            if cache_rel and any(
+                (REPO_ROOT / root_name / cache_rel / "skills").is_dir()
+                for root_name in ("Plugins", "plugins")
+            ):
+                continue
             for skill_md in sorted(plugin_root.rglob("SKILL.md")):
                 rel_parts = skill_md.relative_to(plugin_root).parts
                 if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
                     continue
                 dirs.append(skill_md.parent)
     return dirs
+
+
+def _cache_plugin_source_root(plugin_root: Path) -> str | None:
+    """
+    Return the plugin name for cache roots shaped like Plugins/cache/<family>/<plugin>/<version>/skills.
+
+    Cache copies should not compete with canonical local plugin sources under
+    Plugins/<plugin>/skills. They are included only when no canonical source
+    exists for that plugin name.
+    """
+    try:
+        rel_parts = plugin_root.relative_to(REPO_ROOT).parts
+    except ValueError:
+        return None
+    if len(rel_parts) >= 6 and rel_parts[0] in {"Plugins", "plugins"} and rel_parts[1] == "cache" and rel_parts[-1] == "skills":
+        return rel_parts[3]
+    return None
+
+
+def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
+    """Return whether a discovered skill belongs on the requested catalog surface."""
+    if visibility == "advanced":
+        return name not in HIDDEN_FLAT_SKILL_NAMES
+    plugin_owned = _is_plugin_owned_skill_dir(source_dir)
+    if name in HIDDEN_FLAT_SKILL_NAMES:
+        return False
+    if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in ROOT_SKILL_SET_NAMES:
+        return False
+    if plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
+        return False
+    if plugin_owned and name in PLUGIN_HIDDEN_LANE_SKILL_NAMES:
+        return False
+    return True
 
 
 def _iter_system_lane_skill_dirs() -> List[Path]:
@@ -498,18 +540,7 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         name = skill_dir.name.strip() or source_dir.name
         if not name or name in seen:
             continue
-        plugin_owned = _is_plugin_owned_skill_dir(source_dir)
-        if name in HIDDEN_FLAT_SKILL_NAMES:
-            continue
-        if visibility != "advanced" and name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES:
-            continue
-        if visibility != "advanced" and plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
-            continue
-        if (
-            visibility != "advanced"
-            and plugin_owned
-            and name in PLUGIN_HIDDEN_LANE_SKILL_NAMES
-        ):
+        if not is_skill_visible(name, source_dir, visibility):
             continue
 
         try:

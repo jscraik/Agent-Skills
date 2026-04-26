@@ -266,7 +266,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     # Bridge skills are intentionally not expected in default first-level discovery.
     # They can exist in policy metadata while remaining routed through the hidden
     # `.system` lane and are validated separately via BRIDGE_SKILLS_EXPOSED_FIRST_LEVEL.
-    expected_default = policy_default - BRIDGE_SKILLS
+    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) - BRIDGE_SKILLS
     default_names = {entry.name for entry in default_entries}
     catalog_names = {entry.name for entry in catalog_entries}
     extra_default = sorted(default_names - expected_default)
