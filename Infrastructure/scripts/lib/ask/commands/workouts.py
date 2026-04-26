@@ -212,10 +212,7 @@ def _timed_out_process(exc: subprocess.TimeoutExpired) -> subprocess.CompletedPr
     """
     stderr = _timeout_text(exc.stderr)
     timeout_note = f"Command timed out after {exc.timeout} seconds"
-    if stderr:
-        stderr = f"{stderr}\n{timeout_note}"
-    else:
-        stderr = timeout_note
+    stderr = f"{stderr}\n{timeout_note}" if stderr else timeout_note
     return subprocess.CompletedProcess(
         args=exc.cmd,
         returncode=124,

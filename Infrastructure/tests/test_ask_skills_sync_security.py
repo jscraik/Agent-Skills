@@ -14,6 +14,9 @@ sys.path.append(str(REPO_ROOT / "scripts"))
 from ask.commands import plugins as plugins_commands  # noqa: E402
 from ask.commands import skills as skills_commands  # noqa: E402
 
+sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
+from check_context_budget import DEFAULTS  # noqa: E402
+
 
 class TestAskSkillsSyncSecurity(TestCase):
     def setUp(self) -> None:
@@ -186,7 +189,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["plan"]["validation_status"], "pass")
         root_count = result.data["plan"]["root_skill_sets"]["root_count"]
         self.assertGreater(root_count, 0)
-        self.assertLessEqual(root_count, 10)
+        self.assertLessEqual(root_count, DEFAULTS["runtime_projection"]["max_root_skill_sets"])
 
     def test_sync_skills_projection_cli_wins_over_env(self) -> None:
         with (
