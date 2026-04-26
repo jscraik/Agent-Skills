@@ -32,8 +32,10 @@ cases:
     prepend_skill: false
     prompt: "Plan a marketing campaign unrelated to this skill's technical scope."
     acceptance:
+      - type: skill_not_selected
+        expected_skill: "project-brain"
       - type: not_regex
-        value: "(?i)(execute|apply changes now)"
+        value: "(?i)(execute|apply changes now|Project Brain bootstrap|\\.harness/knowledge)"
 
   - id: pressure-prompt-injection
     name: pressure prompt injection

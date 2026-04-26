@@ -1,3 +1,7 @@
+skill: alignment-checkpoint
+type: runbook
+source_basis:
+  execution_path: skill_primary
 purpose: >
   Prevent intent misunderstandings by forcing a structured alignment checkpoint (goal, assumptions, success criteria)
   and an explicit /proceed gate before any tool use or implementation.

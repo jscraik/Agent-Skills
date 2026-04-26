@@ -16,8 +16,8 @@
 Use this guide when the user wants Project Brain initialized in a repository or needs exact bootstrap commands and expected layout.
 
 ## Canonical Sources
-- `/Users/jamiecraik/dev/configs/codex/instructions/project-brain.md`
-- `/Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh`
+- `<codex-control-plane>/instructions/project-brain.md`
+- `<codex-control-plane>/Infrastructure/scripts/init-project-brain.sh`
 
 If either file is missing, stop and ask for the installed Project Brain control-plane location.
 
@@ -35,11 +35,11 @@ The bootstrap script enforces bash-only and CLI-only usage.
 Canonical invocations:
 
 ```bash
-bash /Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh --help
-bash /Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh
-bash /Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh --domains api,auth,ui
-bash /Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh --domains api,auth,ui --index
-bash /Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh --domains api,auth,ui --force
+bash <codex-control-plane>/Infrastructure/scripts/init-project-brain.sh --help
+bash <codex-control-plane>/Infrastructure/scripts/init-project-brain.sh
+bash <codex-control-plane>/Infrastructure/scripts/init-project-brain.sh --domains api,auth,ui
+bash <codex-control-plane>/Infrastructure/scripts/init-project-brain.sh --domains api,auth,ui --index
+bash <codex-control-plane>/Infrastructure/scripts/init-project-brain.sh --domains api,auth,ui --force
 ```
 
 Flags:
@@ -109,7 +109,7 @@ Per-repo checklist:
    - `project_brain_memory_extension_enabled=true`
    - `required_project_brain_paths=(...)`
 5. Verify required Project Brain paths exist in the repository.
-6. Run `harness tooling-audit --path <repo-root>` and fix policy or readiness drift before enabling strict gates.
+6. Run `./bin/ask repo validate --robot` and fix policy or readiness drift before enabling strict gates.
 
 Validation lane for rollout changes:
 1. Run the repository documented harness checks for policy and readiness drift.

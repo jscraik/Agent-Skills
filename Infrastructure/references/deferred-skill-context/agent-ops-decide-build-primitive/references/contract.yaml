@@ -1,13 +1,28 @@
-purpose: >
-  Define expected behavior and outputs for this skill.
 schema_version: 1.0
+skill: decide-build-primitive
+type: decision-framework
+source_basis:
+  execution_path: skill_primary
+purpose: >
+  Choose whether a requested capability belongs as a SKILL, CUSTOM_PROMPT, AGENT_AUTOMATION, or explicitly justified hybrid.
 triggers:
-  - user requests the capability described in this skill
+  - user asks how to package, automate, or operationalize a Codex capability
+  - user compares skill, prompt, and automation primitives
+  - user needs a durable recommendation with tradeoffs before building
 inputs:
-  - user request details
+  - capability outcome and expected inputs/outputs
+  - invocation style, autonomy, runtime length, and frequency
+  - repo, compliance, portability, telemetry, and operational constraints
 outputs:
-  - primary response or artifact
+  - strict DECISION block with one primary primitive or justified hybrid
+  - primary reason and supporting factors tied to the six decision axes
+  - implementation notes specific to the chosen primitive
+  - missing fact or blocker when the primitive cannot be chosen safely
 non_goals:
-  - out-of-scope work
+  - building the capability before the primitive choice is made
+  - forcing a hybrid because evidence is unclear
+  - recommending unattended automation without operational justification
 risks:
-  - missing inputs; mitigated by clarifying questions
+  - over-packaging; mitigated by choosing the smallest primitive that preserves reliability
+  - unsafe autonomy; mitigated by requiring runtime, budget, logging, and failure-handling evidence
+  - hidden assumptions; mitigated by naming missing facts instead of guessing

@@ -62,7 +62,7 @@ Boundary: this skill executes end-to-end `gh`/git lifecycle operations with post
 - A concise status summary with the current mode, repo, PR or issue context, and next step.
 - Evidence for the action taken, especially after git operations.
 - Clear blocked states with remediation.
-- If requested, a structured status report aligned to `Infrastructure/references/contract.yaml` with `schema_version: 1`.
+- If requested, a structured status report aligned to `references/contract.yaml` with `schema_version: 1`.
 
 ## Constraints
 - Redact secrets, tokens, credentials, and sensitive repository data by default.
@@ -98,10 +98,10 @@ Boundary: this skill executes end-to-end `gh`/git lifecycle operations with post
 - Use `gh help <command>` when command shape is uncertain.
 - Prefer `--body-file` over inline multi-line PR bodies.
 - Reference files:
-  - `Infrastructure/references/contract.yaml`
-  - `Infrastructure/references/evals.yaml`
-  - `Infrastructure/references/folded-legacy-modes-core60.md`
-  - `Infrastructure/references/migration.md`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/folded-legacy-modes-core60.md`
+  - `references/migration.md`
   - `agents/openai.yaml`
 - Use assets only when the task benefits from bundled GitHub workflow support material in `assets/`.
 

@@ -443,7 +443,7 @@ def readme_template(config_dir: Path, hooks_dir: Path) -> str:
         - [Validation](#validation)
 
         ## Overview
-        This hook pack was scaffolded from `Skills/codex-hooks-builder` and
+        This hook pack was scaffolded from the `codex-hooks-builder` skill and
         targets the currently documented Codex command-hook contract.
 
         ## Files

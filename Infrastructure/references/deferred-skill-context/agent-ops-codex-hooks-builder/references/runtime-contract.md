@@ -172,8 +172,8 @@ Cross-runtime compatibility reference:
 - `https://github.com/anthropics/codex-code/blob/main/src/entrypoints/sdk/coreSchemas.ts`
 
 Local operational reference used as a builder-pattern source:
-- `/Users/jamiecraik/dev/configs/codex/hooks/README.md`
-- `/Users/jamiecraik/dev/configs/codex/hooks/hooks.json`
-- `/Users/jamiecraik/dev/configs/codex/hooks/session-start.sh`
-- `/Users/jamiecraik/dev/configs/codex/hooks/user-prompt-submit.sh`
-- `/Users/jamiecraik/dev/configs/codex/hooks/stop-guard.sh`
+- `<codex-control-plane>/hooks/README.md`
+- `<codex-control-plane>/hooks/hooks.json`
+- `<codex-control-plane>/hooks/session-start.sh`
+- `<codex-control-plane>/hooks/user-prompt-submit.sh`
+- `<codex-control-plane>/hooks/stop-guard.sh`

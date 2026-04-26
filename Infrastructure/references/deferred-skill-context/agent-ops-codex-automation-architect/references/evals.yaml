@@ -75,6 +75,8 @@ cases:
     prepend_skill: false
     prompt: "Refactor this React component and improve type safety."
     acceptance:
+      - type: skill_not_selected
+        expected_skill: "codex-automation-architect"
       - type: regex
         value: "(?i)(share.*component|file path|typescript)"
 

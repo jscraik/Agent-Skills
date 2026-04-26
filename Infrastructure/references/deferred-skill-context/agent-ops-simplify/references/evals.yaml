@@ -75,7 +75,9 @@ cases:
     prompt: "When you clean up this patch, please include the exact validation commands you ran and call out anything you skipped with the reason."
     acceptance:
       - type: regex
-        value: "(?i)(validation commands|pass|fail|blocked|skipped findings\\s*[:\\-\\(]\\s*\\S+)"
+        value: "(?i)(schema_version|execution_mode|diff_source|files_reviewed|validation:|validation commands|pass|fail|blocked|skipped findings\\s*[:\\-\\(]\\s*\\S+)"
+      - type: regex
+        value: "(?i)(handoff|summary|actions:|risk_note|next_step)"
 
   - id: simplify-refactor-long-function
     name: refactor long function in changed diff

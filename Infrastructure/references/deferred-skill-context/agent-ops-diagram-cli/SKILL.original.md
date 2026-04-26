@@ -61,7 +61,7 @@ Required:
 
 Optional:
 - Focus area (`--focus <module>` or narrowed `--patterns`).
-- Output root (`.diagram` for CI-style artifacts or `Infrastructure/artifacts/diagrams` for local runs).
+- Output root (`.diagram` for CI-style artifacts or `Infrastructure/artifacts/diagrams` for local runs). Use the provided output root consistently in every command and artifact reference; default to `.diagram` when the user does not specify one.
 - Rule config path for architecture tests (`.architecture.yml`).
 
 ## Deliverables
@@ -89,7 +89,8 @@ If `analyze`, diagram generation, manifest validation, or context-pack refresh f
 2. **Analyze structure first**
    - Run:
      ```bash
-     npx --yes @brainwav/diagram analyze . --json > Infrastructure/artifacts/diagrams/analyze.json
+     mkdir -p <output-root>
+     npx --yes @brainwav/diagram analyze . --json > <output-root>/analyze.json
      ```
    - Summarize file count, dependency count, and dominant directories before generating visuals.
 
@@ -119,7 +120,7 @@ If `analyze`, diagram generation, manifest validation, or context-pack refresh f
      ```
 
 6. **Explain the project clearly**
-   - Use `Infrastructure/references/project-understanding-playbook.md` to produce a concise architecture brief from generated artifacts.
+   - Use `references/project-understanding-playbook.md` to produce a concise architecture brief from generated artifacts.
 
 ## Validation
 
@@ -160,9 +161,9 @@ Minimum checks:
 
 ## References
 
-- `Infrastructure/references/project-understanding-playbook.md`
-- `Infrastructure/references/contract.yaml`
-- `Infrastructure/references/evals.yaml`
+- `references/project-understanding-playbook.md`
+- `references/contract.yaml`
+- `references/evals.yaml`
 - `assets/architecture-brief-template.md`
 - [@brainwav/diagram on npm](https://www.npmjs.com/package/@brainwav/diagram)
 - [diagram-cli repository](https://github.com/jscraik/diagram-cli)
@@ -191,7 +192,7 @@ Minimum checks:
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 Skills/skill-builder/Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with the repo-local feedback recorder when available. If no recorder exists, report the feedback as non-persisted instead of inventing a path.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 

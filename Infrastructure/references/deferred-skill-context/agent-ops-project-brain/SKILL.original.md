@@ -40,16 +40,16 @@ Collect these inputs before acting:
 - Whether the user wants indexing attempted after bootstrap
 
 Canonical sources for this skill:
-- `/Users/jamiecraik/dev/configs/codex/instructions/project-brain.md`
-- `/Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh`
+- `<codex-control-plane>/instructions/project-brain.md`
+- `<codex-control-plane>/Infrastructure/scripts/init-project-brain.sh`
 
-If either source is missing, stop and ask the user where the Project Brain control plane is installed.
+Resolve `<codex-control-plane>` from the active Codex config repository or user-provided control-plane path. If either source is missing, stop and ask the user where the Project Brain control plane is installed.
 
 ## Workflow
 1. Inspect the repository root and confirm whether `.harness/` already exists.
 2. Read the canonical instruction and bootstrap script before suggesting or running commands.
 3. If setup is requested and `.harness/` is missing, run:
-   `bash /Users/jamiecraik/dev/configs/codex/Infrastructure/scripts/init-project-brain.sh [--domains ...] [--index]`
+   `bash <codex-control-plane>/Infrastructure/scripts/init-project-brain.sh [--domains ...] [--index]`
 4. Use `--domains` only when the user requests specific domains. Otherwise use script defaults (`api,ui`).
 5. Never source the bootstrap script and never swap `bash` for `sh`. The script is CLI-only.
 6. If `.harness/` exists, do not overwrite by default. Use `--force` only when the user explicitly requests rebuild and prior state has been reviewed or backed up.
@@ -57,8 +57,8 @@ If either source is missing, stop and ask the user where the Project Brain contr
    - `.harness/knowledge/INDEX.md` domain focus
    - `.harness/quality/criteria.md` project checks
    - `.harness/memory/LEARNINGS.md` first repo-specific learning
-8. If the repository is harness-managed and enforces Project Brain via contract/tooling audit, apply the rollout lane in [Harness-Managed Rollout Depth](#harness-managed-rollout-depth) and [Setup and Bootstrap](./Infrastructure/references/setup-and-bootstrap.md).
-9. For ongoing operation, follow [Operating Routine](./Infrastructure/references/operating-routine.md).
+8. If the repository is harness-managed and enforces Project Brain via contract/tooling audit, apply the rollout lane in [Harness-Managed Rollout Depth](#harness-managed-rollout-depth) and [Setup and Bootstrap](./references/setup-and-bootstrap.md).
+9. For ongoing operation, follow [Operating Routine](./references/operating-routine.md).
 10. In handoff, report what initialized, what skipped, and whether indexing was attempted, skipped, or warned.
 
 ## Harness-Managed Rollout Depth
@@ -67,8 +67,8 @@ Read when the target repository enforces Project Brain using repo-local harness 
 - If the target repository has opted into Project Brain enforcement, verify `Infrastructure/harness.contract.json` uses the active memory contract keys (`memoryPolicy`, `memoryMaintenancePolicy`, `memoryEvalPolicy`) with repo-accurate required paths.
 - If the repo readiness scripts expose Project Brain gates, confirm those checks and required paths stay aligned before enabling strict enforcement.
 - Keep policy and scaffold updates together; do not enable strict enforcement before both are aligned.
-- Run `harness tooling-audit --path <repo-root>` before enabling strict gates so policy drift and readiness-script drift fail early.
-- Validate with each repository's documented harness verification commands (at minimum `harness tooling-audit --path <repo-root>` plus the repository fast verify gate).
+- Run `./bin/ask repo validate --robot` before enabling strict gates so policy drift and readiness-script drift fail early through the repo wrapper.
+- Validate with each repository's documented wrapper commands (at minimum `./bin/ask repo validate --robot` plus the repository fast verify gate).
 - For coding-harness specifically, run `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local scope) and `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (workspace scope).
 - For gradual migration, land contract plus scaffold updates first, then turn on strict enforcement.
 
@@ -129,6 +129,6 @@ Produce:
 - Assuming behavior without evidence from current checks.
 
 ## References
-- [Setup and Bootstrap](./Infrastructure/references/setup-and-bootstrap.md)
-- [Operating Routine](./Infrastructure/references/operating-routine.md)
+- [Setup and Bootstrap](./references/setup-and-bootstrap.md)
+- [Operating Routine](./references/operating-routine.md)
 - `${CODING_HARNESS_ROOT}/Docs/agents/20-project-brain-memory-extension-rollout.md` (set `CODING_HARNESS_ROOT` to your local coding-harness checkout when working in harness-managed repositories)

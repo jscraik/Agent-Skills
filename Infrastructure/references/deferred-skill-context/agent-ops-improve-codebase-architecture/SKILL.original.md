@@ -156,7 +156,7 @@ For a chosen direction, add:
 When authoring or changing this skill, run:
 
 - `./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json`
-- `bash Infrastructure/scripts/lint_progressive_disclosure.sh --mode strict`
+- `./bin/ask repo validate --robot`
 - `git diff --check -- Skills/agent-ops/improve-codebase-architecture`
 
 When using this skill on a project, validate according to the target repo's instructions and report exact pass, fail, or blocked outcomes.

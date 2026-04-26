@@ -37,7 +37,7 @@ Before `Phase 1: Identify Changes`, capture a deterministic baseline:
    - Use PR base commit when available.
    - Fallback to `git merge-base HEAD origin/main` for local cleanup flows.
 2. Record scope artifact:
-   - diff source (`git diff HEAD`),
+   - diff source (`git diff --cached` for staged changes, otherwise `git diff`),
    - baseline commit SHA,
    - changed file list,
    - exclusions (generated files, lock noise, vendored code) with reason.
@@ -147,7 +147,7 @@ Use additive fields in final simplify output when this overlay is active:
 ```yaml
 schema_version: 1
 modern_overlay: "2026"
-diff_source: "git diff HEAD"
+diff_source: "git diff --cached|git diff"
 baseline_commit: "<sha>"
 files_reviewed:
   - path: "<path>"

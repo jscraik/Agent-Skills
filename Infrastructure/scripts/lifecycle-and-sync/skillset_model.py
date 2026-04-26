@@ -49,7 +49,7 @@ ROOT_SKILL_SET_METADATA: dict[str, dict[str, str]] = {
         "exclusions": "direct code implementation, infrastructure operations, security incident response, and visual production work",
     },
     "security-ops": {
-        "description": "Route security review, threat modeling, policy, secrets, and operational security work with bounded specialist loading.",
+        "description": "Review, route, and audit security work. Use when tasks involve threat modeling, secrets, policy, or operational security risk.",
         "scope": "security review, threat modeling, secrets handling, policy, and operational security tasks",
         "exclusions": "ordinary feature implementation, frontend styling, content publishing, and product ideation without security risk",
     },

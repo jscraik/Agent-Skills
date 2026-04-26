@@ -103,8 +103,8 @@ Follow-up expectations:
 - Keep recommendations grounded in the current request rather than generic platform folklore.
 
 ## References
-- `Infrastructure/references/contract.yaml` — purpose, triggers, inputs/outputs, non-goals, risks.
-- `Infrastructure/references/evals.yaml` — evaluation cases to validate triggering and outputs.
+- `references/contract.yaml` — purpose, triggers, inputs/outputs, non-goals, risks.
+- `references/evals.yaml` — evaluation cases to validate triggering and outputs.
 
 ## Validation
 - Verify the chosen primitive actually matches invocation style, autonomy, and operational burden.
@@ -172,7 +172,7 @@ Follow-up expectations:
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 Skills/skill-builder/Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with the repo-local feedback recorder when available. If no recorder exists, report the feedback as non-persisted instead of inventing a path.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 

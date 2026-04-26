@@ -63,7 +63,7 @@ Use this skill when the user asks to quickly stand up a new repo locally, reprod
 - Bootstrapped local repository ready for development (or clear failure report).
 - Concise setup summary (commands executed, detected stack, verification result).
 - Follow-up artifact (`SETUP.md` or `SETUP_FAILED.md`) with reproducible instructions.
-- If requested, a structured status report with `schema_version: 1` aligned to `Infrastructure/references/contract.yaml`.
+- If requested, a structured status report with `schema_version: 1` aligned to `references/contract.yaml`.
 
 ## Failure mode
 If clone, toolchain activation, dependency install, or the first runnable health check fails, stop at that blocker, capture the exact outcome, and leave a documented partial state rather than claiming a successful bootstrap.
@@ -130,7 +130,7 @@ If bootstrap fails:
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 Skills/skill-builder/Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with the repo-local feedback recorder when one exists, for example `python3 Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`. If the recorder is unavailable, report feedback as non-persisted instead of inventing a path.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 

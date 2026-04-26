@@ -13,7 +13,7 @@ triggers:
 inputs:
   - failing command/error output
   - path to repo or directory with mise config
-  - global mise config path (typically `~/.Infrastructure/config/mise/config.toml`)
+  - optional global mise config path (typically `~/.Infrastructure/config/mise/config.toml`) when global repair is requested or implicated
   - optional expected runtime versions
   - explicit permission/confirmation for global toolchain edits when intent is not explicit
 
@@ -22,6 +22,7 @@ outputs:
   - verification evidence from mise checks and retried command
   - global configuration update result and backup metadata when updates are made
   - explicit confirmation requirement and decision log when global edits are requested but ambiguous
+  - stable runtime execution pattern for repeated tasks, such as `mise exec -- <command>` or documented shell activation
   - clear unresolved blocker summary when full recovery is not possible
 
 non_goals:

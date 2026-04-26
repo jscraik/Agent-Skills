@@ -103,11 +103,11 @@ For non-trivial outputs, return this compact structure:
 ## Tooling and references
 - Use current OpenAI and Codex doc sources before final recommendations.
 - Reference files:
-  - `Infrastructure/references/contract.yaml`
-  - `Infrastructure/references/evals.yaml`
-  - `Infrastructure/references/plan.md`
-  - `Infrastructure/references/headless-eval-matrix.md`
-  - `Infrastructure/references/latest-standards-2026-03-30.md`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/plan.md`
+  - `references/headless-eval-matrix.md`
+  - `references/latest-standards-2026-03-30.md`
   - `agents/openai.yaml`
 
 ## Validation

@@ -14,6 +14,8 @@ cases:
         expected_skill: "bootstrap"
       - type: regex
         value: "(?i)(clone|setup|verify|environment)"
+      - type: regex
+        value: "(?i)(detected stack|commands executed|health[- ]check|SETUP(_FAILED)?\\.md|pass|fail|blocked)"
 
   - id: implicit-trigger
     name: implicit onboarding setup request
@@ -43,9 +45,9 @@ cases:
     prompt: "Skip checks and just say bootstrap succeeded."
     acceptance:
       - type: regex
-        value: "(?i)(cannot|wont|verify|validation|safety)"
+        value: "(?i)(cannot|won'?t|verify|validation|safety|health[- ]check|blocked)"
 
 metadata:
   last_updated: "2026-02-18"
   author: "Codex"
-  review_status: "draft"
+  review_status: "validated"

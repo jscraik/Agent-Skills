@@ -38,7 +38,7 @@ non_goals:
 
 risks:
   - id: stale-guidance
-    mitigation: "always fetch latest OpenAI docs, codexRepo release context, and Context7 RRULE guidance before final recommendation"
+    mitigation: "verify current docs when the recommendation depends on version-sensitive behavior; otherwise cite repo-local references and mark assumptions"
   - id: blocked-commands
     mitigation: "map blocked patterns to safe manual alternatives"
   - id: commit-policy-block

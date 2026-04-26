@@ -70,9 +70,9 @@ Diagnose and repair `mise` trust, runtime, and version-drift failures with the s
   - `mise outdated`
   - `mise upgrade`
 - Reference files:
-  - `Infrastructure/references/contract.yaml`
-  - `Infrastructure/references/evals.yaml`
-  - `Infrastructure/references/task-profile.json`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
+  - `references/task-profile.json`
 
 ## Validation
 - Verify `mise doctor` reports no blocking trust or runtime failures.

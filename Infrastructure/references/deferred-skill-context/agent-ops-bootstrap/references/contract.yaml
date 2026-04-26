@@ -18,6 +18,9 @@ outputs:
   - setup result summary (success/failure)
   - documented setup steps and verification notes
   - actionable blocker report when setup fails
+  - detected stack, setup commands, health-check command, and pass/fail/blocked outcome
+  - artifact path for SETUP.md or SETUP_FAILED.md when written
+  - redaction note for logs or copied config values
 
 non_goals:
   - hidden global system mutations without consent

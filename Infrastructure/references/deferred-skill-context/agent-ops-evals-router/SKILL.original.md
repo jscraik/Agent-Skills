@@ -79,9 +79,9 @@ Route evaluation-method work to the smallest trustworthy workflow so users can m
 - Use local files or observability tooling only when the user actually has those artifacts.
 - Prefer concrete deliverables such as labeled traces, calibration tables, or audit findings over generic eval advice.
 - Reference files:
-  - `Infrastructure/references/source-map.md`
-  - `Infrastructure/references/contract.yaml`
-  - `Infrastructure/references/evals.yaml`
+  - `references/source-map.md`
+  - `references/contract.yaml`
+  - `references/evals.yaml`
 
 ## Validation
 - Verify the chosen workflow matches the user’s bottleneck and the evidence actually available.

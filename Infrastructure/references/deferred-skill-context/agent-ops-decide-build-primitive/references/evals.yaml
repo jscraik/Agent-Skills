@@ -1,16 +1,29 @@
+schema_version: "2.0"
+skill_name: "decide-build-primitive"
 cases:
-  - name: happy-path
-    prompt: "Use the decide-build-primitive skill for a typical request."
+  - id: happy-skill-vs-automation
+    name: choose skill vs automation
+    category: happy
+    should_trigger: true
+    prompt: "We use this weekly across repos. Should it be a Codex skill, a custom prompt, or an agent automation?"
     acceptance:
-      - type: contains
-        value: "## Outputs"
-  - name: edge-case
-    prompt: "Handle an edge case for decide-build-primitive without enough inputs."
+      - type: regex
+        value: "(?i)DECISION:\\s*(SKILL|CUSTOM_PROMPT|AGENT_AUTOMATION)"
+      - type: regex
+        value: "(?i)(autonomy|invocation|context|portability|operational burden|supporting factors)"
+  - id: edge-missing-inputs
+    name: missing decision facts
+    category: edge
+    should_trigger: true
+    prompt: "Can you package this thing for me? I have not decided how it should run."
     acceptance:
-      - type: contains
-        value: "## Inputs"
-  - name: failure-mode
-    prompt: "User request is out of scope for decide-build-primitive."
+      - type: regex
+        value: "(?i)(missing|need|clarify|who triggers|how often|autonomous|interactive)"
+  - id: negative-not-packaging
+    name: out of scope implementation request
+    category: negative
+    should_trigger: false
+    prompt: "Fix the failing TypeScript test in this repository."
     acceptance:
-      - type: contains
-        value: "## When to use"
+      - type: skill_not_selected
+        expected_skill: "decide-build-primitive"

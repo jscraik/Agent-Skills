@@ -43,27 +43,27 @@ Use this skill for Biome-first lint/format/check workflows, especially when user
 
 ## Rules
 
-**Start read-only, then escalate**:
+**Start read-only, then escalate only when requested**:
 
 ```bash
-biome lint .
-biome lint --write .
+./bin/ask -- biome lint .
+./bin/ask -- biome lint --write .
 if [ "${ALLOW_UNSAFE_FIXES:-}" = "true" ]; then
-  biome lint --write --unsafe .
+  ./bin/ask -- biome lint --write --unsafe .
 fi
 ```
 
 **Prefer focused rule targeting for noisy codebases**:
 
 ```bash
-biome lint --only=correctness --only=suspicious/noDebugger .
-biome lint --skip=style --skip=complexity/noExcessiveCognitiveComplexity .
+./bin/ask -- biome lint --only=correctness --only=suspicious/noDebugger .
+./bin/ask -- biome lint --skip=style --skip=complexity/noExcessiveCognitiveComplexity .
 ```
 
 **Use CI mode for enforcement**:
 
 ```bash
-npx @biomejs/biome ci
+./bin/ask -- npx @biomejs/biome ci
 ```
 
 **Use explicit suppressions only with reasons**:
@@ -76,7 +76,7 @@ npx @biomejs/biome ci
 
 1. Confirm Biome ownership and requested risk posture.
 2. Run/describe read-only lint path (`biome lint .`).
-3. If remediation is requested, apply safe fixes first (`--write`).
+3. If remediation is requested, preview the read-only diagnostics, then apply safe fixes first (`--write`) only to the scoped repo path.
 4. Use `--unsafe` only if explicitly approved and behavior risk is documented.
 5. For recurring issues, tighten rules (`--only`/`--skip`) or add scoped suppressions with reasons.
 6. Finalize with CI contract command and expected pass criteria.
@@ -89,9 +89,9 @@ npx @biomejs/biome ci
 
 ## Validation
 
-- Baseline: `biome lint .`
-- Safe remediation: `biome lint --write .`
-- Full contract: `npx @biomejs/biome ci`
+- Baseline: `./bin/ask -- biome lint .`
+- Safe remediation: `./bin/ask -- biome lint --write .`
+- Full contract: `./bin/ask -- npx @biomejs/biome ci`
 - Stop at first failing command and report exact failure output.
 
 ## Failure mode

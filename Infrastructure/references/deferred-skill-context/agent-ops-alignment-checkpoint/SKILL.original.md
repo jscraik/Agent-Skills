@@ -142,8 +142,8 @@ Fail fast checks (if any fail, STOP and fix the first failure):
 - If stasis mode triggered: did I include a STASIS_RECORD with the request verbatim?
 
 Skill contract + evals:
-- `Infrastructure/references/contract.yaml` defines purpose/triggers/risks/non-goals.
-- `Infrastructure/references/evals.yaml` contains evaluation prompts + acceptance checks.
+- `references/contract.yaml` defines purpose/triggers/risks/non-goals.
+- `references/evals.yaml` contains evaluation prompts + acceptance checks.
 
 ## Anti-patterns
 
@@ -185,7 +185,7 @@ Assistant: STASIS_RECORD → JSON → options → gate (no tools).
 **Decision feedback protocol (required):**
 - If post-run feedback capture is enabled for this runtime, emit a non-blocking `post_run_feedback` event via `request_user_input` after result delivery.
 - Capture: `decision` (`accepted|partial|rejected|deferred`), `outcome` (`good|neutral|bad|unknown`), and `confidence` (`high|medium|low`).
-- Persist with: `python3 Skills/skill-builder/Infrastructure/scripts/record_skill_feedback.py --skill-path <path/to/SKILL.md> --decision <...> --outcome <...> --confidence <...> --notes "..."`.
+- Persist with the repo-local feedback recorder when available. If no recorder exists, report the feedback as non-persisted instead of inventing a path.
 - The recorder tags `subject` (for example `ui`, `code_review`, `backend`, `security`) for cross-domain quality analytics.
 <!-- /decision-feedback-protocol -->
 

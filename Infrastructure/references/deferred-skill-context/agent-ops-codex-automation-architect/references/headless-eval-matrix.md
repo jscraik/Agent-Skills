@@ -20,8 +20,8 @@ Standardize headless multi-runner evaluation for this skill using `run_skill_eva
 ## Canonical command
 ```bash
 CODEX_EVAL_TIMEOUT_SEC=600 \
-~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/run_skill_evals.py \
-  Skills/codex-automation-architect \
+python3 <skill-factory>/Infrastructure/scripts/run_skill_evals.py \
+  <path-to-codex-automation-architect-skill> \
   --runners codex,codex-kimi,codex-zai,openai \
   --codex-kimi-command ck \
   --codex-zai-command cz \

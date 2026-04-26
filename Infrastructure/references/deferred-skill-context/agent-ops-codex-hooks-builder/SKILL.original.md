@@ -80,8 +80,8 @@ Produce only what the request needs, usually:
 
 For reusable scaffolding inside this repository, use:
 - `Infrastructure/scripts/scaffold_hook_pack.py` to generate the hook pack deterministically;
-- `Infrastructure/references/runtime-contract.md` for supported runtime behavior;
-- `Infrastructure/references/gold-standard-patterns.md` for design choices and hardening guidance.
+- `references/runtime-contract.md` for supported runtime behavior;
+- `references/gold-standard-patterns.md` for design choices and hardening guidance.
 
 ## Example prompts
 - "Can you scaffold a project-local `.codex/hooks.json` with `SessionStart`, `UserPromptSubmit`, and `Stop`, then validate it with `jq`?"
@@ -109,7 +109,7 @@ For reusable scaffolding inside this repository, use:
 - Do run a release-and-schema hook sweep when the user asks for “latest” hook behavior because docs can lag runtime:
   - check latest stable and alpha release notes for hook-related changes;
   - cross-check generated schemas under `codex-rs/hooks/schema/generated`;
-  - prefer scaffold defaults based on release+schema evidence, then document doc-lag deltas in `Infrastructure/references/runtime-contract.md`.
+  - prefer scaffold defaults based on release+schema evidence, then document doc-lag deltas in `references/runtime-contract.md`.
 - Do keep timeout behavior explicit because `timeout` defaults to `600` seconds and `timeoutSec` is an accepted alias.
 - Do prefer short starter timeouts and event-appropriate policy: narrow `PreToolUse` and `PermissionRequest` safety gates may block, while `PostToolUse` feedback hooks should usually warn and continue.
 - Do include short `statusMessage` strings for hooks that can take noticeable time because this makes hook latency visible in the UI.
@@ -123,7 +123,7 @@ For reusable scaffolding inside this repository, use:
 - Do keep `SessionStart` dependency posture fail-open because missing optional tooling should not block the session.
 
 4. Scaffold from the deterministic helper first.
-- Do run `python3 Skills/codex-hooks-builder/Infrastructure/scripts/scaffold_hook_pack.py --target-root <path> --scope <project|user>` because it emits absolute command paths and current starter scripts.
+- Do run `python3 scripts/scaffold_hook_pack.py --target-root <path> --scope <project|user>` from the skill directory because it emits absolute command paths and current starter scripts.
 - Do use the generated three-hook starter pack as the first pass because it already encodes repo-aware startup context, instruction-stack protection, and final-response completeness checks.
 
 5. Customize only after the stable starter exists.
@@ -162,13 +162,13 @@ bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
 ```
 
 ## References
-- `Infrastructure/references/runtime-contract.md`
+- `references/runtime-contract.md`
   Read when: you need exact supported events, fields, matcher behavior, or hook-output caveats.
-- `Infrastructure/references/gold-standard-patterns.md`
+- `references/gold-standard-patterns.md`
   Read when: you are choosing starter behaviors, hardening rules, or scope between user and project installs.
-- `Infrastructure/references/contract.yaml`
+- `references/contract.yaml`
   Read when: you need the machine-checkable output contract for this skill.
-- `Infrastructure/references/evals.yaml`
+- `references/evals.yaml`
   Read when: you are validating trigger coverage and refusal behavior for unsupported hook requests.
 
 ## Variation patterns
@@ -206,7 +206,7 @@ bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh
 - If `hooks.json` includes `type: "prompt"`, `type: "agent"`, or `"async": true`, report that current Codex runtime parses these but skips them, then keep only supported sync command hooks.
 
 ## Gotchas
-- `PreToolUse`, `PermissionRequest`, and `PostToolUse` are currently Bash-focused guardrails, not full enforcement boundaries -> scope these hooks narrowly and document enforcement limits -> confirm with `Infrastructure/references/runtime-contract.md`.
+- `PreToolUse`, `PermissionRequest`, and `PostToolUse` are currently Bash-focused guardrails, not full enforcement boundaries -> scope these hooks narrowly and document enforcement limits -> confirm with `references/runtime-contract.md`.
 - `PreToolUse`, `PermissionRequest`, and `PostToolUse` match on `Bash`, not command intent -> use script-side command classification for commit, push, edit, or scaffold policies -> keep matchers simple and explicit.
 - `PermissionRequest` currently fail-closes on reserved fields (`updatedInput`, `updatedPermissions`, or `interrupt: true`) -> keep `PermissionRequest` outputs narrow (`allow`/`deny` + optional message) -> validate with schema-backed dry runs.
 - Relative hook commands fail from nested working directories -> command execution uses session cwd, not the config folder -> emit absolute script paths in `hooks.json` -> inspect the generated JSON before install.

@@ -108,7 +108,7 @@ next_step: "<recommended follow-up>"
 ### Phase 1: Identify Changes
 
 1. Determine diff source:
-   - If staged changes exist, use `bin/ask -- git diff HEAD`.
+   - If staged changes exist, use `bin/ask -- git diff --cached` and keep staged/unstaged scopes separate.
    - Otherwise, use `bin/ask -- git diff`.
 2. If the diff is empty:
    - Review the most recently modified files mentioned by the user.
