@@ -17,6 +17,7 @@ Checks:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from dataclasses import dataclass
@@ -203,6 +204,51 @@ def check_plugin_runtime_surface(skill_name: str, label: str) -> DiagnosticResul
     )
 
 
+def rooted_manifest_skill_set(skill_dir: Path) -> Optional[str]:
+    """Return the rooted skill set that owns a latent skill, when known."""
+    skill_md = (skill_dir / "SKILL.md").resolve()
+    skillsets_dir = REPO_ROOT / ".skillsets"
+    if not skillsets_dir.is_dir():
+        return None
+
+    for manifest_path in sorted(skillsets_dir.glob("*/manifest.jsonl")):
+        try:
+            lines = manifest_path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            source_path = entry.get("source_path")
+            if not source_path:
+                continue
+            if entry.get("runtime_visibility") != "latent":
+                continue
+            try:
+                source_skill_md = (REPO_ROOT / source_path).resolve()
+            except OSError:
+                continue
+            if source_skill_md == skill_md:
+                return manifest_path.parent.name
+
+    return None
+
+
+def check_rooted_latent_runtime_surface(skill_name: str, skill_set: str, label: str) -> DiagnosticResult:
+    """Skip flat symlink checks for latent skills routed by rooted manifests."""
+    return DiagnosticResult(
+        f"symlink ({label})",
+        "skip",
+        f"Rooted latent skill is routed through .skillsets/{skill_set}/manifest.jsonl "
+        f"and is not expected as a first-level user-runtime symlink: {skill_name}",
+    )
+
+
 def check_skill_index(skill_name: str) -> DiagnosticResult:
     """Check if skill appears in root SKILL.md index."""
     if not SKILL_INDEX.exists():
@@ -303,8 +349,13 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
         results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
         results.append(check_plugin_skill_index(resolved_skill_name))
     else:
-        results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
-        results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+        rooted_skill_set = rooted_manifest_skill_set(skill_dir)
+        if rooted_skill_set:
+            results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "codex"))
+            results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "agents"))
+        else:
+            results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+            results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
         results.append(check_skill_index(resolved_skill_name))
     results.append(check_task_profile(skill_dir))
     results.append(check_lifecycle_readiness(skill_dir))
