@@ -1333,9 +1333,23 @@ def _public_manifest_report(report: dict) -> dict:
     }
 
 
-def _append_user_runtime_relinks(plan: dict, logs: list[str], skills_dir: Path, *, dry_run: bool) -> None:
+def _append_user_runtime_relinks(
+    plan: dict,
+    logs: list[str],
+    repo_root: Path,
+    skills_dir: Path,
+    *,
+    dry_run: bool,
+) -> None:
     home = Path.home()
-    targets = [(skills_dir, home / ".agents" / "skills"), (skills_dir, home / ".codex" / "skills")]
+    plugins_dir = repo_root / "Plugins"
+    targets = [
+        (skills_dir, home / ".agents" / "skills"),
+        (skills_dir, home / ".codex" / "skills"),
+        (repo_root, home / ".agents" / "agent-skills"),
+        (plugins_dir, home / ".agents" / "plugins"),
+        (plugins_dir, home / "plugins"),
+    ]
     for src, dst in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
         logs.append(_create_symlink(src, dst, dry_run))
@@ -1531,7 +1545,7 @@ def sync_skills(
                 result.data["policy_identity"] = get_policy_identity()
                 result.data["projection_mode"] = projection_decision.projection_mode
                 return result
-            _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+            _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
             plan["validation_status"] = "pass"
             plan["mutation_counts"] = {
                 "writes": len(plan["writes"]),
@@ -1620,7 +1634,7 @@ def sync_skills(
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
     elif scope == "user":
-        _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+        _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
     plan["validation_status"] = "pass"
     plan["mutation_counts"] = {
         "writes": len(plan["writes"]),

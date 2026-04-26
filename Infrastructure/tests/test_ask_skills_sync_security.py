@@ -50,6 +50,9 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
+        self.assertTrue((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "flat")
 
     def test_sync_skills_projection_env_reaches_engine(self) -> None:
@@ -145,6 +148,9 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
+        self.assertTrue((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "rooted")
 
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
