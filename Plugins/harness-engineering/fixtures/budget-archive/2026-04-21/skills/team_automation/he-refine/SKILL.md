@@ -1,6 +1,6 @@
 ---
 name: he-refine
-description: Refine Harness Engineering artifacts, plans, specs, or work into clearer next actions. Use when users ask for tightening, simplification, or lifecycle flow repair.
+description: Refine Harness Engineering artifacts, plans, specs, or work into clearer action plans. Use when users ask for tightening, simplification, or lifecycle repair.
 metadata:
   skill-type: team_automation
 ---
@@ -59,6 +59,13 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Iterating without verifying whether user-facing quality improved.
 - Making multiple unrelated fixes in one loop without user confirmation.
 - Treating refinement as a replacement for broader implementation or planning stages.
+
+## Full Context
+
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you inspect this plan, tighten it into clear actions, and remove ambiguity before the work stage?"
+- "Help me refine this UI implementation by running it, checking the page, and fixing one visible gap at a time."
+- "This spec is mostly right but fuzzy. Make the acceptance criteria measurable without expanding scope."

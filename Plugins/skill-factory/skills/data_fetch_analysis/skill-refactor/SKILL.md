@@ -84,6 +84,6 @@ Reference scripts for deterministic evidence extraction:
 
 ## Examples
 
-- "Analyze the last week of Codex sessions and tell me which skills to keep, improve, merge, or retire."
-- "Use skill-refactor to identify the top three recurring skill failures and suggest minimal fixes."
-- "Check the sessions from this branch and tell me whether the repeated release-triage mistakes should become a skillify handoff or a skill-refactor fix."
+- "Can you inspect the last week of Codex sessions and tell me which skills to keep, improve, merge, or retire?"
+- "Help me find the top three recurring skill failures from these run artifacts and suggest minimal fixes."
+- "Check the sessions from this branch and tell me whether the repeated release-triage mistakes need a new reusable skill or a focused fix to an existing one."

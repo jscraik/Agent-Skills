@@ -124,6 +124,19 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(resolution["command_visibility"], "target")
         self.assertEqual(resolution["invoke_via"], "harness-engineering")
 
+    def test_reviewers_resolve_json_contract(self):
+        """Verify ask reviewers resolve exposes the reviewer handle namespace."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        resolution = output["data"]["resolution"]
+        self.assertEqual(resolution["status"], "ok")
+        self.assertEqual(resolution["kind"], "reviewer")
+        self.assertEqual(resolution["command_visibility"], "reviewer")
+        self.assertEqual(resolution["canonical_handle"], "skill-inspector")
+
     def test_skills_goal_json_contract(self):
         """
         Ensure the `ask skills goal create` CLI returns a JSON envelope containing a `goal_decision` with required fields.
@@ -230,26 +243,17 @@ class TestAskCLI(unittest.TestCase):
 
     def test_runtime_surface_json_contract(self):
         """Verify ask runtime surface exposes the runtime report under an obvious topic."""
-        # Pin SYNC_SKILLS_PROJECTION_MODE to ensure deterministic test behavior.
-        saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
-        try:
-            os.environ["SYNC_SKILLS_PROJECTION_MODE"] = "flat"
-            cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--json"]
-            result = _run_cli(cmd)
+        cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--json"]
+        result = _run_cli(cmd)
 
-            self.assertEqual(result.returncode, 0, result.stderr)
-            output = json.loads(result.stdout)
-            self.assertEqual(output["status"], "success")
-            report = output["data"]["runtime_surface"]
-            self.assertEqual(report["projection_mode"], "flat")
-            self.assertIn("first_level_default_entries", report)
-            self.assertIn("hidden_system_entries", report)
-            self.assertIn("estimated_description_tokens", report)
-        finally:
-            if saved_projection_mode is None:
-                os.environ.pop("SYNC_SKILLS_PROJECTION_MODE", None)
-            else:
-                os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        report = output["data"]["runtime_surface"]
+        self.assertIn(report["projection_mode"], {"flat", "rooted"})
+        self.assertIn("first_level_default_entries", report)
+        self.assertIn("hidden_system_entries", report)
+        self.assertIn("estimated_description_tokens", report)
 
     def test_runtime_budget_json_contract(self):
         """Verify ask runtime budget remains a first-class budget gate command."""

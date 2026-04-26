@@ -84,6 +84,13 @@ Use references only when additional edge handling is needed.
 - Ignoring associated worktrees and leaving stale worktree directories behind.
 - Deleting branches one at a time behind separate confirmation prompts.
 - Stopping on the first branch failure without reporting partial results.
+
+## Full Context
+
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you inspect local branches whose remotes are gone and show me the exact deletion batch before removing anything?"
+- "Help me clean stale worktrees and branches in this repo, but ask once before any destructive action."
+- "Review my local branch list and tell me which branches are safe candidates to prune after checking PR status."

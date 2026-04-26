@@ -65,6 +65,13 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 - Recording unresolved incidents as solved knowledge.
 - Creating a duplicate solution doc when a high-overlap artifact should be refreshed.
 - Returning broad "use Harness Engineering" guidance without naming the exact mode and next stage.
+
+## Full Context
+
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you inspect this feature's artifacts, resume from the right Harness Engineering stage, and tell me the next exact action?"
+- "We fixed the same CI failure twice. Capture the solved workflow once and refresh the existing solution if it overlaps."
+- "Help me coordinate brainstorm, spec, plan, work, and review for this Linear issue without skipping the earliest weak stage."

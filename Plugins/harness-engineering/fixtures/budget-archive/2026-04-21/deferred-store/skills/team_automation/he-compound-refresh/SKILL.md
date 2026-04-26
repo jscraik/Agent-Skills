@@ -71,6 +71,13 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Treating age alone as a stale signal.
 - Updating solution prose when the real solution changed materially and should be replaced instead.
 - Turning autonomous mode into silent guesswork.
+
+## Full Context
+
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+
 ## Examples
 
-Read when: examples or role-routing details are needed, open the archived references for this skill.
+- "Can you inspect the compound run state and tell me which docs are stale after this refactor?"
+- "Help me check whether these overlapping solution notes should be kept, updated, consolidated, or archived."
+- "This lifecycle run drifted after CI failed. Re-read the artifacts and report the exact blocker before we continue."
