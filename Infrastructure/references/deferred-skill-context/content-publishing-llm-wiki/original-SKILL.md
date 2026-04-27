@@ -18,8 +18,8 @@ Build and maintain a persistent, LLM-written markdown wiki that compounds knowle
 ## When to use
 
 - Use this skill when the user wants to set up or improve a "persistent wiki" workflow for personal research, team knowledge, course notes, due diligence, or similar long-running analysis.
-- Use this skill when the user wants schema guidance (`AGENTS.md`/`AGENTS.md` conventions), ingest/query/lint routines, or file layout for an LLM-maintained knowledge base.
-- Use this skill when the user wants to convert a pile of documents into a curated, interlinked markdown knowledge system.
+- This skill is appropriate when the user wants schema guidance (`AGENTS.md`/`AGENTS.md` conventions), ingest/query/lint routines, or file layout for an LLM-maintained knowledge base.
+- Choose this skill when the user wants to convert a pile of documents into a curated, interlinked markdown knowledge system.
 - Do not use this skill for one-off Q&A over a small static document set; route to normal summarization/research workflows.
 - Do not use this skill when the user wants vector-database infrastructure first; route to backend/search implementation lanes.
 
