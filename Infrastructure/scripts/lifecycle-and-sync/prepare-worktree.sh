@@ -11,7 +11,7 @@ fi
 # usage prints the help message describing usage and supported options for prepare-worktree.sh.
 usage() {
 	cat <<'USAGE'
-Usage: scripts/prepare-worktree.sh [options]
+Usage: Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh [options]
 
 Prepare a freshly created git worktree for local hooks and pre-push checks.
 

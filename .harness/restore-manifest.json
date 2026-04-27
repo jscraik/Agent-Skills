@@ -87,7 +87,7 @@
       "action": "created"
     },
     {
-      "path": "scripts/prepare-worktree.sh",
+      "path": "Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh",
       "action": "created"
     },
     {

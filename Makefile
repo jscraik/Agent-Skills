@@ -21,7 +21,7 @@ preflight: ## Run repository preflight checks (required local-memory gate by def
 	@bash ./scripts/codex-preflight.sh
 
 worktree-ready: ## Bootstrap a fresh git worktree before first push
-	@bash ./scripts/prepare-worktree.sh
+	@bash ./Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh
 
 verify-work: ## Run canonical repo-local verification wrapper
 	@bash ./scripts/verify-work.sh

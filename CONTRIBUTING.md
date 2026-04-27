@@ -93,7 +93,7 @@ Recommended policy:
 - Keep repo-scoped telemetry and learned overrides under `.harness/memory/`, and global telemetry under `~/.codex/`.
 - Treat `scripts/verify-work.sh` as the canonical repo-facing verification command and keep it wired to repo-local preflight defaults.
 - Treat `scripts/validate-codestyle.sh` as the fail-closed codestyle gate and require exact proof-of-pass in change summaries and PRs.
-- Treat `scripts/prepare-worktree.sh` as required first-push bootstrap for freshly created worktrees so local hooks run with dependencies and canonical hook wiring.
+- Treat `Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh` as required first-push bootstrap for freshly created worktrees so local hooks run with dependencies and canonical hook wiring.
 - Treat `scripts/check-environment.sh` as the local readiness gate for required tooling.
 - Block merge or promotion work when a required CLI is missing rather than silently skipping the corresponding validation lane.
 - For repositories with explicit `ui` / `chatgpt_apps_sdk` capabilities or matching dependency signals, install `@brainwav/design-system-guidance` and treat its absence as a readiness failure.
@@ -109,7 +109,7 @@ Recommended policy:
 - Use `bash scripts/validate-codestyle.sh` before handoff for the fail-closed codestyle bundle.
 - Use `bash scripts/verify-work.sh` for the broader verification bundle.
 - Use `bash scripts/verify-work.sh --fast` for preflight + codestyle fast lane coverage.
-- Before the first push from a fresh worktree, run `bash scripts/prepare-worktree.sh`.
+- Before the first push from a fresh worktree, run `bash Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh`.
 
 ## Repo-local harness wrapper
 
