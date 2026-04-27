@@ -40,6 +40,12 @@ bash Infrastructure/scripts/validate_all.sh --ephemeral
 python3 bin/ask skills sync --scope user --projection rooted --json
 ```
 
+Confirm user projection applied successfully:
+
+```bash
+python3 bin/ask skills sync --scope user --projection rooted --dry-run --json
+```
+
 ## Rollback
 
 Run the full validation gate before rollback while the workspace projection is
