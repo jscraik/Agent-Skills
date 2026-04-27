@@ -27,9 +27,12 @@ def emit(payload: dict[str, Any]) -> int:
 
 
 def infer_repo_from_git() -> str | None:
+    git_path = shutil.which("git")
+    if git_path is None:
+        return None
     try:
         result = subprocess.run(
-            ["git", "config", "--get", "remote.origin.url"],
+            [git_path, "config", "--get", "remote.origin.url"],
             check=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,

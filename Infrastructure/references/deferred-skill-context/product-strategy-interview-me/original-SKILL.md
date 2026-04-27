@@ -22,11 +22,12 @@ metadata:
 - If the user declines follow-up questions, run with explicit assumptions and mark risk as open.
 
 ## Procedure
-### 1) Start with one question
-- Ask only one question with 3-5 clear choices and one recommended default.
-- Keep momentum by choosing the choice that unlocks the next decision quickest.
+### 1) Start with one multiple-choice question
+- Ask only one multiple-choice question (not a binary yes/no) with 3–5 clear options and one recommended default.
+- Keep momentum by choosing the option that unlocks the next decision quickest.
 
 ### 2) Focused follow-up
+- If needed, ask exactly one follow-up question to clarify the user's choice.
 - Ask the next question only when prior answers still block a meaningful decision.
 - Map each answer to a visible decision and assumption entry.
 
