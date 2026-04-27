@@ -31,7 +31,7 @@
     },
     {
       "id": "safety",
-      "label": "Safety/compliance compliance",
+      "label": "Safety compliance",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
