@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed repository of **21 skills** for AI coding agents. Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed repository of **skills** for AI coding agents. Built around the **Agent Skills Kit (`ask`)** CLI.
 
 **What this gives you:**
 
@@ -140,12 +140,12 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                           |
 | ------------------ | ------ | -------------------------------------------------- |
-| agent-ops          | 44     | coding-harness, evals-router, simplify             |
-| frontend-ui        | 15     | react-ui-patterns, shadcn-ui, frontend-ui-design   |
+| agent-ops          | 41     | coding-harness, evals-router, simplify             |
+| frontend-ui        | 13     | react-ui-patterns, shadcn-ui, frontend-ui-design   |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer            |
 | product-strategy   | 4      | architecture-interview, chatgpt-apps, interview-me |
 | security-ops       | 7      | 1password, best-practices, create-auth             |
-| content-publishing | 9      | markdown-converter, spreadsheet, visual-explainer  |
+| content-publishing | 8      | markdown-converter, spreadsheet, visual-explainer  |
 | mobile-native      | 1      | atlas                                               |
 
 ## Repository layout
@@ -171,8 +171,8 @@ agent-skills/
 │   ├── skill-factory/        #   skill-builder, skill-creator, skill-installer, …
 │   ├── plugin-factory/       #   plugin-builder, plugin-creator, plugin-installer
 │   ├── harness-engineering/  #   he-brainstorm, he-plan, he-spec, …
-│   ├── coderabbit/
-│   └── browser-use/
+│   ├── browser-use/
+│   └── cache/
 │
 ├── Infrastructure/
 │   ├── bin/ask               # Canonical CLI implementation entrypoint (internal)
