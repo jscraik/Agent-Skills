@@ -16,7 +16,7 @@ metadata:
 ## When to use
 - User asks to create, update, or troubleshoot a custom subagent file in canonical Codex control-plane paths (`~/dev/configs/codex/agents/<name>/<name>.toml`).
 - User needs global custom-agent installation with explicit developer instructions.
-- User needs constrained global agent runtime settings validation (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
+- User needs to validate constrained global agent runtime settings (`agents.max_threads`, `agents.max_depth`, `agents.job_max_runtime_seconds`).
 - User asks for upgrades from older role-declaration flows to modern standalone custom-agent files.
 
 ## Scope
