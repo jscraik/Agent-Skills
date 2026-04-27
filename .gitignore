@@ -146,3 +146,4 @@ Plugins/cache/
 !.agents/workflows/
 .agents/workflows/*
 !.agents/workflows/**
+.codex/config.toml

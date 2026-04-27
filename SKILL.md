@@ -16,7 +16,7 @@ Do not hand-edit runtime projections.
 
 ## Summary
 - `total_skills`: 21
-- `catalog_source`: repository skill scan
+- `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: 14c1588c6febe0c0
 
