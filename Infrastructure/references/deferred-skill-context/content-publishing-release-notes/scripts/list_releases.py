@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -96,10 +97,16 @@ def normalize_release(release: dict[str, Any], tag_prefix: str) -> dict[str, Any
 
 def fetch_with_gh(owner: str, repo: str, limit: int) -> list[dict[str, Any]] | None:
     gh_bin = os.environ.get("RELEASE_NOTES_GH_BIN", "gh")
+    # Validate the provided binary path; fall back to "gh" if not executable.
+    validated = shutil.which(gh_bin)
+    if validated is None:
+        validated = shutil.which("gh")
+    if validated is None:
+        return None
     path = f"/repos/{owner}/{repo}/releases?per_page={limit}"
     try:
         result = subprocess.run(
-            [gh_bin, "api", path],
+            [validated, "api", path],
             check=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,

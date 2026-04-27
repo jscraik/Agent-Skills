@@ -134,5 +134,5 @@ publish_blockers: []
 - Mode policy: `references/release-note-modes.md`
 - Machine-checkable contract: `/Skills/content-publishing/release-notes/references/contract.yaml`
 - Behavioral eval coverage: `/Skills/content-publishing/release-notes/references/evals.yaml`
-- Lifecycle task profile: `Infrastructure/references/task-profile.json`
+- Lifecycle task profile: `/Skills/content-publishing/release-notes/references/task-profile.json` (canonical source)
 - OpenAI Apps metadata: `agents/openai.yaml`

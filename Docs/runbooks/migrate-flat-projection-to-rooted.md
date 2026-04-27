@@ -3,7 +3,8 @@
 ## Preconditions
 
 - `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
-- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json` passes.
+- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json` passes.  
+  (This validates the current flat baseline before migration; `--projection` defaults to `flat` in `check_context_budget.py`.)
 - At least one workout has a passing scorecard.
 - `.skillsets/**` is generated, provenance-rich, and validated.
 
