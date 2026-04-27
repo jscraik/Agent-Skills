@@ -75,7 +75,11 @@ def _command_visibility_for(row: dict[str, Any]) -> str:
     )
     if explicit:
         value = str(explicit).strip().lower().replace("_", "-")
-        return value if value in COMMAND_VISIBILITY else "none"
+        if value in COMMAND_VISIBILITY:
+            return value
+        # Preserve invalid values so validation can surface INVALID_SKILL_COMMAND_VISIBILITY
+        # instead of silently coercing to "none" and dropping the handle.
+        return value
 
     module_id = str(row.get("id", ""))
     level = str(row.get("level", ""))

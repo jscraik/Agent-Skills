@@ -552,6 +552,12 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     agents_skills = Path.home() / ".agents" / "skills"
     expected_runtime = repo_root / ".agents" / "skills"
 
+    handle_violations = [
+        v for v in handle_check.get("violations", [])
+        if v.get("handle") == normalized
+    ]
+    handle_check_ok = handle_check.get("status") == "pass" or not handle_violations
+
     def _link_payload(path: Path) -> dict[str, object]:
         payload: dict[str, object] = {
             "path": str(path),
@@ -568,7 +574,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
 
     gates = {
         "resolver": resolution.get("status") == "ok",
-        "generated_command_handle_check": handle_check.get("status") == "pass",
+        "generated_command_handle_check": handle_check_ok,
         "workspace_command_handle_exists": workspace_handle.is_file(),
         "codex_user_link": codex_skills.is_symlink() and codex_skills.resolve() == expected_runtime.resolve(),
         "agents_user_link": agents_skills.is_symlink() and agents_skills.resolve() == expected_runtime.resolve(),
@@ -581,7 +587,8 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
         gates["workspace_command_handle_exists"],
     )
     user_runtime_ready = (
-        gates["codex_user_command_handle_exists"] or gates["agents_user_command_handle_exists"]
+        (gates["codex_user_link"] and gates["codex_user_command_handle_exists"])
+        or (gates["agents_user_link"] and gates["agents_user_command_handle_exists"])
     )
     proof = {
         "schema_version": "command-handle-proof.v1",
@@ -595,8 +602,8 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "workspace_command_handle_exists",
             ],
             "user_runtime_any_of": [
-                "codex_user_command_handle_exists",
-                "agents_user_command_handle_exists",
+                "codex_user_link",
+                "agents_user_link",
             ],
         },
         "resolution": resolution,
@@ -1557,7 +1564,7 @@ def _append_user_runtime_relinks(
         (skills_dir, home / ".agents" / "skills", True),
         (skills_dir, home / ".codex" / "skills", True),
         (repo_root, home / ".agents" / "agent-skills", True),
-        (plugins_dir, home / ".agents" / "plugins", False),
+        (plugins_dir, home / ".agents" / "plugins", True),
     ]
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
@@ -1612,7 +1619,10 @@ def _refresh_home_plugin_mirrors(
         "plugins": [],
     }
     plan.setdefault("runtime_plugin_mirrors", []).append(mirror_plan)
-    logs.append(_ensure_real_plugin_mirror_root(home_plugins_dir, plugins_dir, dry_run))
+    root_log = _ensure_real_plugin_mirror_root(home_plugins_dir, plugins_dir, dry_run)
+    logs.append(root_log)
+    if root_log.startswith("Skipped"):
+        return
 
     try:
         _marketplace_path, entries = _load_local_marketplace(repo_root)

@@ -186,7 +186,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("generated_command_handle_check", proof["gates"])
         self.assertIn("workspace_command_handle_exists", proof["gates"])
         self.assertIn("codex_user_link", proof["gates"])
-        self.assertIn("agents_user_command_handle_exists", proof["gate_policy"]["user_runtime_any_of"])
+        self.assertIn("agents_user_link", proof["gate_policy"]["user_runtime_any_of"])
         self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
 
     def test_skills_proof_human_output(self):

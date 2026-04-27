@@ -435,6 +435,7 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertFalse(violations)
 
     def test_context_budget_accepts_nested_canonical_plugin_source_paths(self) -> None:
+        from selection_policy import policy_identity  # noqa: PLC0415
         repo_root = self.temp_dir / "repo"
         skill_path = repo_root / "Plugins" / "sample-org" / "sample-plugin" / "skills" / "sample-skill" / "SKILL.md"
         skill_path.parent.mkdir(parents=True)
@@ -447,7 +448,7 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
             "provenance": {
                 "generator": "test",
                 "projection_mode": "rooted",
-                "policy_identity": "test",
+                "policy_identity": policy_identity(),
                 "source_revision": "test",
                 "source_sha256": check_context_budget.file_hash(skill_path),
             },
@@ -561,6 +562,117 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         )
 
         self.assertIn("SKILLSET_SOURCE_PATH_ESCAPES_REPO", {violation["code"] for violation in violations})
+
+    def test_context_budget_rejects_stale_policy_identity(self) -> None:
+        from selection_policy import policy_identity  # noqa: PLC0415
+        repo_root = self.temp_dir / "repo"
+        skill_path = repo_root / "Skills" / "agent-ops" / "test" / "SKILL.md"
+        skill_path.parent.mkdir(parents=True)
+        skill_path.write_text("# Test skill\n", encoding="utf-8")
+        manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({
+            "skill_set": "agent-ops",
+            "source_path": "Skills/agent-ops/test/SKILL.md",
+            "provenance": {
+                "generator": "test",
+                "projection_mode": "rooted",
+                "policy_identity": "stale-old-identity",
+                "source_revision": "test",
+                "source_sha256": check_context_budget.file_hash(skill_path),
+            },
+        }) + "\n", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=self.temp_dir / ".skillsets",
+            repo_root_path=repo_root,
+        )
+
+        self.assertIn("SKILLSET_POLICY_IDENTITY_STALE", {violation["code"] for violation in violations})
+        stale = [v for v in violations if v["code"] == "SKILLSET_POLICY_IDENTITY_STALE"][0]
+        self.assertEqual(stale["expected"], policy_identity())
+        self.assertEqual(stale["actual"], "stale-old-identity")
+
+    def test_command_visibility_preserves_invalid_values(self) -> None:
+        """Invalid command_visibility values must be preserved for validation instead of coerced to 'none'."""
+        row = {
+            "id": "test-skill",
+            "command_visibility": "typoed-value",
+        }
+        visibility = command_surface._command_visibility_for(row)
+        self.assertEqual(visibility, "typoed-value")
+
+    def test_active_projection_mode_detects_mixed(self) -> None:
+        import verify_runtime_budget  # noqa: PLC0415
+        # All roots present -> rooted
+        self.assertEqual(
+            verify_runtime_budget._active_projection_mode(set(ROOT_SKILL_SET_NAMES)),
+            "rooted",
+        )
+        # No roots present -> flat
+        self.assertEqual(
+            verify_runtime_budget._active_projection_mode({"other"}),
+            "flat",
+        )
+        # Some but not all roots present -> mixed
+        self.assertEqual(
+            verify_runtime_budget._active_projection_mode({ROOT_SKILL_SET_NAMES[0], "other"}),
+            "mixed",
+        )
+
+    def test_skills_proof_requires_user_runtime_link(self) -> None:
+        """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
+        import sys
+        sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+        from ask.commands.skills import skills_proof  # noqa: E402
+
+        repo_root = self.temp_dir / "repo"
+        skills_dir = repo_root / ".agents" / "skills"
+        handle_dir = skills_dir / "he-heartbeat"
+        handle_dir.mkdir(parents=True)
+        (handle_dir / "SKILL.md").write_text("# handle\n", encoding="utf-8")
+
+        # Create stale copied files in user runtime (not symlinks)
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        agents_skills = home / ".agents" / "skills"
+        (codex_skills / "he-heartbeat").mkdir(parents=True)
+        (agents_skills / "he-heartbeat").mkdir(parents=True)
+        (codex_skills / "he-heartbeat" / "SKILL.md").write_text("# stale\n", encoding="utf-8")
+        (agents_skills / "he-heartbeat" / "SKILL.md").write_text("# stale\n", encoding="utf-8")
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat")
+
+        proof = result.data["proof"]
+        self.assertEqual(proof["status"], "fail")
+        self.assertFalse(proof["gates"]["codex_user_link"])
+        self.assertFalse(proof["gates"]["agents_user_link"])
+
+    def test_skills_proof_passes_with_linked_user_runtime(self) -> None:
+        """skills_proof must pass when workspace handle exists and user runtime is symlinked."""
+        import sys
+        sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+        from ask.commands.skills import skills_proof  # noqa: E402
+
+        repo_root = self.temp_dir / "repo"
+        skills_dir = repo_root / ".agents" / "skills"
+        handle_dir = skills_dir / "he-heartbeat"
+        handle_dir.mkdir(parents=True)
+        (handle_dir / "SKILL.md").write_text("# handle\n", encoding="utf-8")
+
+        home = self.temp_dir / "home"
+        agents_skills = home / ".agents" / "skills"
+        agents_skills.parent.mkdir(parents=True)
+        agents_skills.symlink_to(skills_dir)
+        (agents_skills / "he-heartbeat" / "SKILL.md").write_text("# linked\n", encoding="utf-8")
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat")
+
+        proof = result.data["proof"]
+        self.assertTrue(proof["gates"]["agents_user_link"])
+        self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
 
     def test_router_returns_structured_error_for_malformed_manifest(self) -> None:
         manifest = self.temp_dir / ".skillsets" / "agent-ops" / "manifest.jsonl"

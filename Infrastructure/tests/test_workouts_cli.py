@@ -254,6 +254,35 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('"scorecard"', result.stdout)
 
+    def test_load_structured_file_allows_quoted_brackets_without_pyyaml(self) -> None:
+        """Quoted brackets in YAML scalars must not be rejected when PyYAML is unavailable."""
+        yaml_path = self.temp_dir / "test.yaml"
+        yaml_path.write_text('script: "echo [ok]"\nother: \'foo {bar}\'\n', encoding="utf-8")
+
+        with mock.patch.dict("sys.modules", {"yaml": None}):
+            # Force re-import to pick up the ImportError path
+            import importlib
+            import ask.commands.workouts as _workouts
+            importlib.reload(_workouts)
+            loaded = _workouts._load_structured_file(yaml_path)
+
+        self.assertEqual(loaded.get("script"), "echo [ok]")
+        self.assertEqual(loaded.get("other"), "foo {bar}")
+
+    def test_load_structured_file_rejects_unquoted_brackets_without_pyyaml(self) -> None:
+        """Unquoted flow syntax must still be rejected when PyYAML is unavailable."""
+        yaml_path = self.temp_dir / "test.yaml"
+        yaml_path.write_text("items: [a, b]\n", encoding="utf-8")
+
+        with mock.patch.dict("sys.modules", {"yaml": None}):
+            import importlib
+            import ask.commands.workouts as _workouts
+            importlib.reload(_workouts)
+            with self.assertRaises(ValueError) as ctx:
+                _workouts._load_structured_file(yaml_path)
+
+        self.assertIn("flow syntax detected", str(ctx.exception))
+
 
 if __name__ == "__main__":
     unittest.main()

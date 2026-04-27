@@ -245,6 +245,14 @@ def validate_written_manifest_provenance(
                     "line": line_no,
                     "source_path": source_path,
                 })
+            if provenance.get("policy_identity") and provenance.get("policy_identity") != policy_identity():
+                violations.append({
+                    "code": "SKILLSET_POLICY_IDENTITY_STALE",
+                    "path": rel_path.as_posix(),
+                    "line": line_no,
+                    "expected": policy_identity(),
+                    "actual": provenance.get("policy_identity"),
+                })
     return violations
 
 

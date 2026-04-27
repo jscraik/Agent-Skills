@@ -277,8 +277,30 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
         loaded = yaml.safe_load(text)
     except ImportError:
         # When PyYAML is unavailable, reject YAML-specific syntax that the
-        # fallback parser cannot safely validate (flow sequences/objects).
-        if re.search(r"[\[\{]", text):
+        # fallback parser cannot safely validate (flow sequences/objects),
+        # but do not reject brackets that appear inside quoted scalars.
+        def _has_unquoted_bracket(s: str) -> bool:
+            in_single = False
+            in_double = False
+            escaped = False
+            for ch in s:
+                if escaped:
+                    escaped = False
+                    continue
+                if ch == "\\":
+                    escaped = True
+                    continue
+                if ch == '"' and not in_single:
+                    in_double = not in_double
+                    continue
+                if ch == "'" and not in_double:
+                    in_single = not in_single
+                    continue
+                if ch in "[{" and not in_single and not in_double:
+                    return True
+            return False
+
+        if _has_unquoted_bracket(text):
             raise ValueError(
                 f"Invalid YAML in {path}: flow syntax detected but PyYAML is not available"
             )

@@ -236,6 +236,8 @@ def _generated_command_handle_names() -> set[str]:
 def _active_projection_mode(first_level_names: set[str]) -> str:
     if ROOT_SKILL_SETS <= first_level_names:
         return "rooted"
+    if first_level_names & ROOT_SKILL_SETS:
+        return "mixed"
     return DEFAULT_PROJECTION_MODE
 
 
@@ -342,6 +344,15 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
                 "extra": unexpected_first_level,
                 "missing": missing_roots,
             })
+    elif projection_mode == "mixed":
+        missing_roots = sorted(ROOT_SKILL_SETS - first_level)
+        present_roots = sorted(first_level & ROOT_SKILL_SETS)
+        violations.append({
+            "code": "MIXED_PROJECTION_MODE",
+            "message": "runtime contains some but not all root skill sets (interrupted sync)",
+            "present_roots": present_roots,
+            "missing_roots": missing_roots,
+        })
     elif extra_default or missing_default:
         violations.append({
             "code": "DEFAULT_POLICY_NAME_DRIFT",
