@@ -3,7 +3,7 @@
 ## Preconditions
 
 - `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
-- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json` passes.  
+- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json` passes.
   (This validates the current flat baseline before migration; `--projection` defaults to `flat` in `check_context_budget.py`.)
 - At least one workout has a passing scorecard.
 - `.skillsets/**` is generated, provenance-rich, and validated.
@@ -59,7 +59,7 @@ Then rollback to flat projection:
 
 ```bash
 python3 bin/ask skills sync --scope workspace --projection flat --json
-python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
+python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 
 The full gate checks rooted first-level runtime entries, so flat rollback is
