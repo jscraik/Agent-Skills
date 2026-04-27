@@ -234,7 +234,7 @@ When AI tooling support is in scope:
 
 Validation options to run when available and record:
 - `python Infrastructure/scripts/bootstrap_doc_qa.py --repo . --apply --brand-profile repo` for a neutral docs QA baseline.
-- `vale <doc>` after `.vale.ini` is present.
+- Ensure `.vale.ini` is present (bootstrap it if missing), then run `vale <doc>` as a required check.
 - `markdownlint-cli2 <doc> --config <config>` after markdownlint config is present.
 - Link checker if present.
 - `python Infrastructure/scripts/check_readability.py <doc>` if available (default target: 45-70 Flesch Reading Ease).
