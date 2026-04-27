@@ -1514,7 +1514,7 @@ def _is_generated_root_skill_dir(path: Path) -> bool:
     return "skill-type: root-skill-set" in head and "projection-mode: rooted" in head
 
 
-def _prune_generated_root_skill_dirs(target_dir: Path, keep_names: set[str], dry_run: bool = False) -> list[str]:
+def _prune_generated_root_skill_dirs(target_dir: Path, keep_names: set[str], *, dry_run: bool = False) -> list[str]:
     """Remove generated rooted runtime directories that do not belong to the requested projection."""
     logs: list[str] = []
     if not target_dir.exists():
@@ -1681,7 +1681,6 @@ def _refresh_home_plugin_mirrors(
 def _sync_rooted_projection(
     repo_root: Path,
     *,
-    scope: str,
     dry_run: bool,
     plan: dict,
     logs: list[str],
@@ -1744,7 +1743,7 @@ def _sync_rooted_projection(
     else:
         try:
             pre_prune_logs = _prune_first_level_symlinks(skills_dir, keep_names, dry_run)
-            pre_prune_logs.extend(_prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run))
+            pre_prune_logs.extend(_prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run))
             prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
@@ -1776,7 +1775,7 @@ def _sync_rooted_projection(
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
-        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
+        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)
     except OSError as exc:
@@ -1919,7 +1918,6 @@ def sync_skills(
             return result
         ok, errors = _sync_rooted_projection(
             repo_root,
-            scope=scope,
             dry_run=dry_run,
             plan=plan,
             logs=logs,
@@ -1967,7 +1965,7 @@ def sync_skills(
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
-        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
+        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)
         for entry in entries:
