@@ -577,6 +577,290 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
         self.assertEqual(payload["selected"], None)
         self.assertIn("Invalid manifest JSON", payload["error"])
 
+    # ------------------------------------------------------------------
+    # New in this PR: workouts section in context-budget.yaml
+    # ------------------------------------------------------------------
+
+    def test_load_config_returns_workouts_section(self) -> None:
+        """load_config() must expose workouts.max_skill_context_tokens from context-budget.yaml."""
+        config = check_context_budget.load_config()
+
+        self.assertIn("workouts", config)
+        self.assertIn("max_skill_context_tokens", config["workouts"])
+        self.assertEqual(config["workouts"]["max_skill_context_tokens"], 1500)
+
+    def test_load_config_workouts_defaults_apply_when_file_missing(self) -> None:
+        """When no config file exists, workouts defaults are used."""
+        missing = self.temp_dir / "nonexistent-budget.yaml"
+
+        config = check_context_budget.load_config(missing)
+
+        self.assertIn("workouts", config)
+        self.assertEqual(config["workouts"]["max_skill_context_tokens"], 1500)
+
+    def test_load_config_workouts_can_be_overridden(self) -> None:
+        """A YAML file with a custom workouts.max_skill_context_tokens replaces the default."""
+        custom_yaml = self.temp_dir / "budget.yaml"
+        custom_yaml.write_text(
+            "workouts:\n  max_skill_context_tokens: 999\n",
+            encoding="utf-8",
+        )
+
+        config = check_context_budget.load_config(custom_yaml)
+
+        self.assertEqual(config["workouts"]["max_skill_context_tokens"], 999)
+
+    def test_load_config_workouts_default_preserved_when_section_absent(self) -> None:
+        """YAML without a workouts section preserves the default value."""
+        partial_yaml = self.temp_dir / "budget.yaml"
+        partial_yaml.write_text(
+            "routing:\n  max_candidates_returned: 3\n",
+            encoding="utf-8",
+        )
+
+        config = check_context_budget.load_config(partial_yaml)
+
+        self.assertEqual(config["workouts"]["max_skill_context_tokens"], 1500)
+
+    # ------------------------------------------------------------------
+    # New in this PR: command-surface.json allowed in skillsets directory
+    # ------------------------------------------------------------------
+
+    def test_context_budget_accepts_valid_command_surface_json(self) -> None:
+        """command-surface.json with a handles list must not produce violations."""
+        skillsets_dir = self.temp_dir / ".skillsets"
+        surface_path = skillsets_dir / "command-surface.json"
+        surface_path.parent.mkdir(parents=True)
+        surface_path.write_text(
+            json.dumps({"generated_from": "rooted_manifests", "handles": [], "handle_count": 0}),
+            encoding="utf-8",
+        )
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=skillsets_dir,
+            repo_root_path=REPO_ROOT,
+        )
+
+        codes = {v["code"] for v in violations}
+        self.assertNotIn("UNOWNED_SKILLSET_FILE", codes)
+        self.assertNotIn("INVALID_COMMAND_SURFACE_JSON", codes)
+        self.assertNotIn("INVALID_COMMAND_SURFACE_SHAPE", codes)
+
+    def test_context_budget_rejects_invalid_json_in_command_surface(self) -> None:
+        """command-surface.json with malformed JSON must trigger INVALID_COMMAND_SURFACE_JSON."""
+        skillsets_dir = self.temp_dir / ".skillsets"
+        surface_path = skillsets_dir / "command-surface.json"
+        surface_path.parent.mkdir(parents=True)
+        surface_path.write_text("{bad json!!!", encoding="utf-8")
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=skillsets_dir,
+            repo_root_path=REPO_ROOT,
+        )
+
+        codes = {v["code"] for v in violations}
+        self.assertIn("INVALID_COMMAND_SURFACE_JSON", codes)
+
+    def test_context_budget_rejects_command_surface_missing_handles_list(self) -> None:
+        """command-surface.json without a handles array must trigger INVALID_COMMAND_SURFACE_SHAPE."""
+        skillsets_dir = self.temp_dir / ".skillsets"
+        surface_path = skillsets_dir / "command-surface.json"
+        surface_path.parent.mkdir(parents=True)
+        surface_path.write_text(
+            json.dumps({"generated_from": "rooted_manifests", "handle_count": 0}),
+            encoding="utf-8",
+        )
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=skillsets_dir,
+            repo_root_path=REPO_ROOT,
+        )
+
+        codes = {v["code"] for v in violations}
+        self.assertIn("INVALID_COMMAND_SURFACE_SHAPE", codes)
+
+    def test_context_budget_rejects_command_surface_with_non_list_handles(self) -> None:
+        """command-surface.json where handles is not a list must trigger INVALID_COMMAND_SURFACE_SHAPE."""
+        skillsets_dir = self.temp_dir / ".skillsets"
+        surface_path = skillsets_dir / "command-surface.json"
+        surface_path.parent.mkdir(parents=True)
+        surface_path.write_text(
+            json.dumps({"handles": "not-a-list", "handle_count": 0}),
+            encoding="utf-8",
+        )
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=skillsets_dir,
+            repo_root_path=REPO_ROOT,
+        )
+
+        codes = {v["code"] for v in violations}
+        self.assertIn("INVALID_COMMAND_SURFACE_SHAPE", codes)
+
+    def test_context_budget_command_surface_is_not_flagged_as_unowned(self) -> None:
+        """command-surface.json at the canonical path must not appear in UNOWNED_SKILLSET_FILE violations."""
+        skillsets_dir = self.temp_dir / ".skillsets"
+        surface_path = skillsets_dir / "command-surface.json"
+        surface_path.parent.mkdir(parents=True)
+        surface_path.write_text(
+            json.dumps({"generated_from": "rooted_manifests", "handles": [], "handle_count": 0}),
+            encoding="utf-8",
+        )
+
+        violations = check_context_budget.validate_written_manifest_provenance(
+            skillsets_dir=skillsets_dir,
+            repo_root_path=REPO_ROOT,
+        )
+
+        unowned_paths = [v["path"] for v in violations if v["code"] == "UNOWNED_SKILLSET_FILE"]
+        self.assertNotIn(".skillsets/command-surface.json", unowned_paths)
+
+    # ------------------------------------------------------------------
+    # New in this PR: updated policy_identity in committed manifests
+    # ------------------------------------------------------------------
+
+    def test_committed_manifests_use_current_policy_identity(self) -> None:
+        """All rows in every committed manifest.jsonl must carry the current policy identity."""
+        skillsets_dir = REPO_ROOT / ".skillsets"
+        if not skillsets_dir.exists():
+            self.skipTest(".skillsets directory not present")
+
+        from selection_policy import policy_identity  # noqa: PLC0415
+        current_identity = policy_identity()
+
+        for manifest_path in sorted(skillsets_dir.rglob("manifest.jsonl")):
+            lines = manifest_path.read_text(encoding="utf-8").splitlines()
+            for line_no, line in enumerate(lines, start=1):
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                prov = row.get("provenance", {})
+                self.assertEqual(
+                    prov.get("policy_identity"),
+                    current_identity,
+                    f"{manifest_path.relative_to(REPO_ROOT)}:{line_no} — "
+                    f"expected policy_identity {current_identity!r}, "
+                    f"got {prov.get('policy_identity')!r}",
+                )
+
+    def test_committed_manifests_have_rooted_projection_mode(self) -> None:
+        """All rows in committed manifests must have projection_mode == 'rooted'."""
+        skillsets_dir = REPO_ROOT / ".skillsets"
+        if not skillsets_dir.exists():
+            self.skipTest(".skillsets directory not present")
+
+        for manifest_path in sorted(skillsets_dir.rglob("manifest.jsonl")):
+            lines = manifest_path.read_text(encoding="utf-8").splitlines()
+            for line_no, line in enumerate(lines, start=1):
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                prov = row.get("provenance", {})
+                self.assertEqual(
+                    prov.get("projection_mode"),
+                    "rooted",
+                    f"{manifest_path.relative_to(REPO_ROOT)}:{line_no} — "
+                    f"projection_mode must be 'rooted', got {prov.get('projection_mode')!r}",
+                )
+
+    # ------------------------------------------------------------------
+    # New in this PR: command-surface.json committed file structure
+    # ------------------------------------------------------------------
+
+    def test_committed_command_surface_json_has_valid_structure(self) -> None:
+        """The committed .skillsets/command-surface.json must be valid JSON with expected top-level keys."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+
+        self.assertIsInstance(payload, dict)
+        self.assertIn("handles", payload)
+        self.assertIsInstance(payload["handles"], list)
+        self.assertIn("generated_from", payload)
+        self.assertEqual(payload["generated_from"], "rooted_manifests")
+
+    def test_committed_command_surface_handle_count_matches_list_length(self) -> None:
+        """handle_count must equal the number of entries in the handles array."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            payload.get("handle_count"),
+            len(payload["handles"]),
+            "handle_count must equal len(handles)",
+        )
+
+    def test_committed_command_surface_generated_command_handle_count_matches_list_length(self) -> None:
+        """generated_command_handle_count must equal the number of entries in the handles array."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            payload.get("generated_command_handle_count"),
+            len(payload["handles"]),
+            "generated_command_handle_count must equal len(handles)",
+        )
+
+    def test_committed_command_surface_handles_have_required_fields(self) -> None:
+        """Every handle in command-surface.json must have required fields."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+        required_fields = {"handle", "kind", "description", "source_path", "owner", "provenance", "runtime_visibility"}
+
+        for entry in payload["handles"]:
+            missing = required_fields - set(entry.keys())
+            self.assertFalse(
+                missing,
+                f"Handle {entry.get('handle')!r} is missing required fields: {missing}",
+            )
+
+    def test_committed_command_surface_provenance_uses_current_policy_identity(self) -> None:
+        """All handles in command-surface.json must carry the current policy identity."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        from selection_policy import policy_identity  # noqa: PLC0415
+        current_identity = policy_identity()
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+
+        for entry in payload["handles"]:
+            prov = entry.get("provenance", {})
+            self.assertEqual(
+                prov.get("policy_identity"),
+                current_identity,
+                f"Handle {entry.get('handle')!r} has wrong policy_identity: "
+                f"{prov.get('policy_identity')!r}",
+            )
+
+    def test_committed_command_surface_handles_have_no_duplicate_slugs(self) -> None:
+        """No two handles in command-surface.json may share the same normalized handle name."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+        slugs = [entry.get("handle", "").replace("-", "_").lower() for entry in payload["handles"]]
+        seen: set[str] = set()
+        duplicates: list[str] = []
+        for slug in slugs:
+            if slug in seen:
+                duplicates.append(slug)
+            seen.add(slug)
+
+        self.assertFalse(duplicates, f"Duplicate normalized handles found: {duplicates}")
+
 
 if __name__ == "__main__":
     unittest.main()

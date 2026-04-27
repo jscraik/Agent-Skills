@@ -102,6 +102,102 @@ fi
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertNotIn("[codex]", result.stdout)
 
+    # ------------------------------------------------------------------
+    # New in this PR: codex_env_common.sh is sourced in setup/Tools/Mise
+    # ------------------------------------------------------------------
+
+    def test_setup_tools_mise_source_codex_env_common(self) -> None:
+        """setup, Tools, and Mise actions must source codex_env_common.sh inside the git guard."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        tools_command = _action_command(env, "Tools")
+        mise_command = _action_command(env, "Mise")
+
+        for label, command in (("setup", setup_command), ("Tools", tools_command), ("Mise", mise_command)):
+            with self.subTest(action=label):
+                self.assertIn(
+                    'source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"',
+                    command,
+                    f"Action {label!r} must source codex_env_common.sh",
+                )
+
+    def test_setup_tools_mise_call_codex_apply_env(self) -> None:
+        """setup, Tools, and Mise actions must call codex_apply_env after sourcing the script."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        tools_command = _action_command(env, "Tools")
+        mise_command = _action_command(env, "Mise")
+
+        for label, command in (("setup", setup_command), ("Tools", tools_command), ("Mise", mise_command)):
+            with self.subTest(action=label):
+                self.assertIn(
+                    "codex_apply_env",
+                    command,
+                    f"Action {label!r} must call codex_apply_env",
+                )
+
+    def test_codex_env_common_sourced_after_detach_head_helper(self) -> None:
+        """codex_env_common.sh must be sourced *after* detach-head-helper.sh in each guarded action."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        tools_command = _action_command(env, "Tools")
+        mise_command = _action_command(env, "Mise")
+
+        for label, command in (("setup", setup_command), ("Tools", tools_command), ("Mise", mise_command)):
+            with self.subTest(action=label):
+                helper_idx = command.find("detach-head-helper.sh")
+                common_idx = command.find("codex_env_common.sh")
+                self.assertGreater(helper_idx, -1, f"Action {label!r} must source detach-head-helper.sh")
+                self.assertGreater(common_idx, -1, f"Action {label!r} must source codex_env_common.sh")
+                self.assertLess(
+                    helper_idx,
+                    common_idx,
+                    f"Action {label!r}: detach-head-helper.sh must come before codex_env_common.sh",
+                )
+
+    def test_codex_apply_env_called_after_source_in_each_action(self) -> None:
+        """codex_apply_env must be called after the codex_env_common.sh source line in each action."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        tools_command = _action_command(env, "Tools")
+        mise_command = _action_command(env, "Mise")
+
+        for label, command in (("setup", setup_command), ("Tools", tools_command), ("Mise", mise_command)):
+            with self.subTest(action=label):
+                source_idx = command.find("codex_env_common.sh")
+                apply_idx = command.find("codex_apply_env")
+                self.assertGreater(source_idx, -1, f"Action {label!r} must source codex_env_common.sh")
+                self.assertGreater(apply_idx, -1, f"Action {label!r} must call codex_apply_env")
+                self.assertLess(
+                    source_idx,
+                    apply_idx,
+                    f"Action {label!r}: codex_env_common.sh source must precede codex_apply_env call",
+                )
+
+    def test_codex_env_common_path_uses_infrastructure_scripts_codex_preflight(self) -> None:
+        """The sourced codex_env_common.sh path must use the canonical Infrastructure/ prefix."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        tools_command = _action_command(env, "Tools")
+        mise_command = _action_command(env, "Mise")
+
+        canonical_fragment = "Infrastructure/scripts/codex-preflight/codex_env_common.sh"
+        for label, command in (("setup", setup_command), ("Tools", tools_command), ("Mise", mise_command)):
+            with self.subTest(action=label):
+                self.assertIn(
+                    canonical_fragment,
+                    command,
+                    f"Action {label!r} must use canonical codex_env_common.sh path",
+                )
+
+    def test_codex_env_common_file_exists_at_sourced_path(self) -> None:
+        """The codex_env_common.sh script referenced in environment.toml must exist on disk."""
+        codex_env_common = REPO_ROOT / "Infrastructure" / "scripts" / "codex-preflight" / "codex_env_common.sh"
+        self.assertTrue(
+            codex_env_common.exists(),
+            f"codex_env_common.sh not found at expected path: {codex_env_common}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
