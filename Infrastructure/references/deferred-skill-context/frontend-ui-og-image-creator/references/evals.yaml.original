@@ -4,16 +4,24 @@ cases:
     acceptance:
       - type: contains
         value: "## Deliverables"
+      - type: contains
+        value: "OG image"
   - name: edge-case
     prompt: "Handle an edge case for og-image-builder without enough inputs."
     acceptance:
       - type: contains
         value: "## Required inputs"
+      - type: contains
+        value: "could you provide"
   - name: failure-mode
     prompt: "User request is out of scope for og-image-builder."
     acceptance:
       - type: contains
         value: "## When to use"
+      - type: contains
+        value: "out of scope"
+      - type: contains
+        value: "consider using"
   - name: negative-offtopic
     category: negative
     should_trigger: false

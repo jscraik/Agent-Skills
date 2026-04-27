@@ -48,7 +48,7 @@ Create concise, evidence-backed release communication for PRs, changelogs, GitHu
 ## Workflow
 
 1. Classify the mode: PR notes, changelog update, release-history lookup, or npm handoff.
-2. Collect evidence from local git, PR metadata, Linear issue text when available, existing changelog files, and release tags. Use `scripts/list_releases.py` for GitHub release history.
+2. Collect evidence from local git, PR metadata, Linear issue text when available, existing changelog files, and release tags. Use the release-listing script (`list_releases.py`) or your repository's release history tool to gather GitHub release data.
 3. Separate user-visible behavior from internal maintenance before drafting.
 4. Draft notes in the smallest useful form, preserving version, package, and channel facts exactly.
 5. For npm handoff, emit `release-notes-handoff.v1` and call out blockers before `[[npm-release]]` runs.
