@@ -32,7 +32,11 @@ metadata:
 - Desired execution posture when non-default behavior is needed (approval policy, sandbox mode, and network setting).
 - Scope (default `global`; `project` only when explicitly requested):
   - `--scope global`: installs to `~/dev/configs/codex/agents/<name>/<name>.toml` and updates `~/dev/configs/codex/config.toml`
-  - `--scope project`: installs to `${project_root}/.codex/agents/<name>/<name>.toml` and only updates or creates `${project_root}/.codex/config.toml` when runtime limits are supplied or when `--allow-project-config-write` is explicitly provided; otherwise the installer does not mutate project config
+  - `--scope project`: installs to `${project_root}/.codex/agents/<name>/<name>.toml`
+    - Updates or creates `${project_root}/.codex/config.toml` only when:
+      - Runtime limits are supplied, OR
+      - `--allow-project-config-write` is explicitly provided
+    - Otherwise: the installer does not mutate project config
 - Confirmed target custom-agent file path.
 - Optional `nickname_candidates` override for display-friendly spawned-agent labels.
 - Optional runtime limits and approval mode.
