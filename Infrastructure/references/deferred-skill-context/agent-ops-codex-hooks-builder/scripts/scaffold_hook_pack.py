@@ -453,7 +453,8 @@ def readme_template(config_dir: Path, hooks_dir: Path) -> str:
         - [Validation](#validation)
 
         ## Overview
-        This hook pack was scaffolded from the `codex-hooks-builder` skill and
+        This hook pack was scaffolded from the `codex-hooks-builder` skill
+        (`Infrastructure/references/deferred-skill-context/agent-ops-codex-hooks-builder`) and
         targets the currently documented Codex command-hook contract.
 
         ## Files
