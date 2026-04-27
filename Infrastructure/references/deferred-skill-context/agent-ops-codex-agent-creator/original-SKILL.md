@@ -154,10 +154,9 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 - If installation conflicts with existing config, report the exact conflict and request consent before overwrite.
 
 ## References
-- Policy references: `references/role-config-reference.md`, `references/contract.yaml`, `references/evals.yaml`, `references/task-profile.json`, `references/discovery-interview.md`.
 - Upstream alignment snapshot: `references/upstream-alignment-2026-04-14.md`.
-- Scripts: `scripts/write_role_config.sh`, `scripts/install_role.sh`, `scripts/validate_role.sh`.
-- Compatibility and governance notes in `references/task-profile.json`.
+- Optional policy references (not yet present): `references/role-config-reference.md`, `references/contract.yaml`, `references/evals.yaml`, `references/task-profile.json`, `references/discovery-interview.md`.
+- Optional scripts (not yet present): `scripts/write_role_config.sh`, `scripts/install_role.sh`, `scripts/validate_role.sh`.
 
 ## Variation
 - Vary by context-specific custom-agent complexity: keep simple requests minimal, and adapt advanced requests with one constrained extension pass.

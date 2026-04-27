@@ -149,6 +149,7 @@ Canonical skill maintenance gates after edits:
 
 ```bash
 ./bin/ask skills audit Skills/coding-harness --level strict --robot
+./bin/ask docs lint --tool vale
 ./bin/ask repo validate --robot
 ./bin/ask repo validate --robot
 ./bin/ask repo validate --robot

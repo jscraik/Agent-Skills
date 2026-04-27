@@ -128,7 +128,7 @@ repo=$(gh repo view --json name --jq '.name')
 Fetch unresolved root threads with the canonical helper script:
 
 ```bash
-python3 Skills/agent-ops/autofix/scripts/fetch_unresolved_threads.py \
+python3 scripts/fetch_unresolved_threads.py \
   --owner "$owner" \
   --repo "$repo" \
   --pr "$pr_number"
@@ -248,7 +248,8 @@ Use one commit for all applied fixes in this run.
 
 If a consolidated commit was created:
 - Run the scoped validation required by the loaded `AGENTS.md` instructions before push.
-- If validation cannot run, stop in a blocked state with the exact reason and do not present the work as complete.
+- If `AGENTS.md` is absent (per Step 0's "default workflow" branch), apply default validation: run basic linting if a linter is configured (e.g., `eslint`, `ruff`, `pylint`), then run available unit/integration tests (e.g., `npm test`, `pytest`); if no validation tooling exists, exit in a blocked state with reason "No AGENTS.md and no detectable validation tooling; cannot verify safety before push."
+- If validation cannot run for any other reason, stop in a blocked state with the exact reason and do not present the work as complete.
 - Report the command results and any remaining risk before pushing.
 
 ### Step 9: Push Changes
