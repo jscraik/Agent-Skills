@@ -109,7 +109,7 @@ Recommended policy:
 - Use `bash scripts/validate-codestyle.sh` before handoff for the fail-closed codestyle bundle.
 - Use `bash scripts/verify-work.sh` for the broader verification bundle.
 - Use `bash scripts/verify-work.sh --fast` for preflight + codestyle fast lane coverage.
-- Before the first push from a fresh worktree, run `bash scripts/prepare-worktree.sh`.
+- Before the first push from a fresh worktree, run `bash Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh`.
 
 ## Repo-local harness wrapper
 
