@@ -172,7 +172,7 @@ def find_session_files(days):
                     continue
                 day = int(day_dir.name)
                 try:
-                    dir_date = datetime(year, month, day)
+                    dir_date = datetime(year, month, day, tzinfo=timezone.utc)
                     if dir_date < cutoff - timedelta(days=1):
                         continue
                 except ValueError:
@@ -1444,7 +1444,7 @@ def generate_html_report(data, insights):
       </div>
       <div class="chart-card">
         <div class="chart-title">Tool Errors Encountered</div>
-        {tool_errors_html if data.get('tool_error_categories') else f'<p class="empty">{MISSING_TOOL_DATA_MSG}</p>'}
+        {tool_errors_html if 'tool_error_categories' in data else f'<p class="empty">{MISSING_TOOL_DATA_MSG}</p>'}
       </div>
     </div>
 
