@@ -221,6 +221,7 @@ Fail fast on the first blocking gate, fix the specific issue, rerun that gate, a
 - Do not trigger for: "Build a new dashboard for our admin panel."
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[bootstrap]] | Clone and bootstrap a repository before coding-harness setup begins |

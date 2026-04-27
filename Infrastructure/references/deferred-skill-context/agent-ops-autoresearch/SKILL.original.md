@@ -117,6 +117,7 @@ Boundary: this skill owns quality-improvement experiment cycles for `SKILL.md` p
 - If workspace drift appears mid-run, stop immediately, record the blocker in `journal.md`, and request explicit user direction before continuing.
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[skill-creator]] | Create or reshape a single skill package before entering a loop. |

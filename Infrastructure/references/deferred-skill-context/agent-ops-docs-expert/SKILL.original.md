@@ -218,7 +218,7 @@ When AI tooling support is in scope:
 - Full workflow and reader-testing rubric: `Infrastructure/references/DOC_COAUTHORING.md`
 - README structure, templates, and quick reference: `Infrastructure/references/readme-crafting.md` (includes 8 Critical Rules, copy-paste templates, one-page quick reference), `Infrastructure/references/readme-section-templates.md`, `Infrastructure/references/readme-reality-audit.md`
 - Doc-type routing and baseline writing rules: `Infrastructure/references/document-types.md`, `Infrastructure/references/docs-baseline.md`, `Infrastructure/references/openai-doc-writing-principles.md`, `Infrastructure/references/industry-gold-standard-2026.md`, `Infrastructure/references/official-docs-baseline.md`
-- Operational spec and output-contract modes: `Infrastructure/references/operational-workflow-mode.md`, `Infrastructure/references/output-contract-mode.md`, `Infrastructure/references/contract.yaml`, `Infrastructure/references/evals.yaml`
+- Operational spec and output-contract modes: `Infrastructure/references/operational-workflow-mode.md`, `Infrastructure/references/output-contract-mode.md`, `./references/contract.yaml`, `./references/evals.yaml`
 - In-code docs, upkeep, and branding: `Infrastructure/references/code-docs.md`, `Infrastructure/references/CODE_DOC_CHECKLIST.md`, `Infrastructure/references/docs-upkeep-runbook.md`, `Infrastructure/references/BRAND_GUIDELINES.md`, `Infrastructure/references/brand-styling.md`, `assets/CODE_DOC_TEMPLATES.md`
 - Checklists and templates: `Infrastructure/references/CHECKLIST.md`, `assets/DOC_TEMPLATE.md`, `assets/README_TEMPLATE.md`, `assets/AGENTS_TEMPLATE.md`
 
@@ -282,6 +282,7 @@ If validation surfaces durable repo work, create or update a Linear issue in the
 - If the repo context, target audience, or governing source material is unclear, stop, name the ambiguity, and fall back to a scoped docs audit or clarification request instead of rewriting documentation on assumption.
 
 ## See Also
+
 | Skill | When to use |
 |---|---|
 | [[agents-md]] | Refactor or tighten AGENTS.md and related repo instruction routing |

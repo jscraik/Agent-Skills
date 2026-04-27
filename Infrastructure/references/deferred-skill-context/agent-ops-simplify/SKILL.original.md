@@ -21,7 +21,7 @@ Run a focused cleanup pass over changed code to improve reuse, quality, and effi
 - [When to Use](#when-to-use)
 - [Inputs](#inputs)
 - [Execution Modes](#execution-modes)
-- [Outputs](#outputs)
+- [Deliverables](#deliverables)
 - [Workflow](#workflow)
 - [Modern Hardening Overlay (2026)](#modern-hardening-overlay-2026)
 - [Refactor Playbook Overlay](#refactor-playbook-overlay)
