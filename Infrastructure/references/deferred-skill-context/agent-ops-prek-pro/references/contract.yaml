@@ -1,4 +1,4 @@
-schema_version: 1.1
+schema_version: "1.1"
 skill: prek-pro
 type: developer_tooling
 purpose: >-
