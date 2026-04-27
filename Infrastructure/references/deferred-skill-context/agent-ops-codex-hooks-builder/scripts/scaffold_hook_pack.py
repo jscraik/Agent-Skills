@@ -431,6 +431,16 @@ def stop_guard_template() -> str:
 
 
 def readme_template(config_dir: Path, hooks_dir: Path) -> str:
+    """
+    Builds the README markdown text for the generated Codex hook pack.
+    
+    Parameters:
+        config_dir (Path): Directory where the pack's `hooks.json` config will be placed.
+        hooks_dir (Path): Directory where the pack's hook scripts will be placed.
+    
+    Returns:
+        str: Complete README.md content (Markdown) describing the pack, its files, install shape, behaviors, and validation commands with the provided paths embedded.
+    """
     return dedent(
         f"""\
         # Codex Hook Pack

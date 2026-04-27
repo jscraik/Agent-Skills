@@ -132,6 +132,22 @@ OUTCOME_ORDER = [
 
 
 def parse_args():
+    """
+    Parse and validate CLI arguments for generating the Codex insights report.
+    
+    Recognized options include lookback window (--days), output and input file paths (--evidence-out, --prompt-out, --insights-out, --insights-in),
+    mode flags (--prepare-only, --render-only, --no-open), verbosity (-v/--verbose), and limits for sessions and evidence (--max-sessions, --max-evidence-sessions).
+    The function enforces that --prepare-only and --render-only are mutually exclusive.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes:
+            days (int), no_open (bool), verbose (bool), prepare_only (bool), render_only (bool),
+            max_sessions (int), max_evidence_sessions (int),
+            evidence_out (str), prompt_out (str), insights_out (str), insights_in (str).
+    
+    Raises:
+        SystemExit: If argument parsing fails or the mutually exclusive flags are both provided.
+    """
     parser = argparse.ArgumentParser(description="Generate Codex insights report with Codex-authored analysis")
     parser.add_argument("--days", type=int, default=7, help="Lookback window (default: 7)")
     parser.add_argument("--no-open", action="store_true", help="Compatibility flag; the runner never opens the OS browser")
@@ -151,7 +167,15 @@ def parse_args():
 
 
 def find_session_files(days):
-    """Find session files from ~/.codex/sessions/ within the lookback period."""
+    """
+    Locate recent rollout session JSONL files under the sessions directory within the specified lookback window.
+    
+    Parameters:
+        days (int): Number of days to look back from the current UTC date (midnight) to include session files.
+    
+    Returns:
+        List[Path]: Paths to matching rollout-*.jsonl files modified within the lookback window, sorted by modification time (newest first). Returns an empty list if the sessions directory does not exist or no files match.
+    """
     if not SESSIONS_DIR.exists():
         return []
 
@@ -191,7 +215,17 @@ def find_session_files(days):
 
 
 def is_meta_session(events):
-    """Check if this is a meta-session (insights API call that shouldn't be analyzed)."""
+    """
+    Detect whether a session is an internal "insights" meta call that should be excluded from analysis.
+    
+    Scans the initial events for a user message containing the specific instruction used by internal insights requests.
+    
+    Parameters:
+        events (list): Sequence of event dictionaries from a session log.
+    
+    Returns:
+        bool: `True` if the session appears to be an internal insights/meta call, `False` otherwise.
+    """
     for event in events[:10]:
         if event.get('type') == 'event_msg':
             payload = event.get('payload', {})
@@ -203,7 +237,16 @@ def is_meta_session(events):
 
 
 def count_lines_in_diff(old, new):
-    """Count lines added/removed using unified diff."""
+    """
+    Compute the number of lines added and removed between two text versions.
+    
+    Parameters:
+        old (str): Original text content.
+        new (str): Updated text content.
+    
+    Returns:
+        tuple: (added, removed) where `added` is the count of lines present in `new` but not in `old`, and `removed` is the count of lines present in `old` but not in `new`.
+    """
     old_lines = old.split('\n')
     new_lines = new.split('\n')
     diff = list(difflib.unified_diff(old_lines, new_lines, lineterm=''))
@@ -219,7 +262,20 @@ def count_lines_in_diff(old, new):
 
 
 def extract_message_text(content):
-    """Extract visible text from Codex message content blocks."""
+    """
+    Extract visible text from a Codex message content structure.
+    
+    If `content` is a string, it is returned unchanged. If `content` is a list of block
+    dictionaries, any string value under the `text` key in those blocks is concatenated
+    with newline separators. For any other input, an empty string is returned.
+    
+    Parameters:
+        content (str | list): Message content which may be a plain string or a list of
+            block dictionaries containing `text` fields.
+    
+    Returns:
+        str: The extracted visible text.
+    """
     if isinstance(content, str):
         return content
     if not isinstance(content, list):
@@ -236,7 +292,31 @@ def extract_message_text(content):
 
 
 def parse_session_file(file_path):
-    """Parse a Codex session file into structured data."""
+    """
+    Parse a single Codex session JSONL file and extract session-level metrics and a short transcript excerpt.
+    
+    Parameters:
+        file_path (str | pathlib.Path): Path to a rollout-*.jsonl session file.
+    
+    Returns:
+        dict: A mapping containing parsed session metadata and aggregated metrics:
+            - parser_version: parser cache/version marker
+            - session_id, project_path, start_time, timestamp, cwd, cli_version, model_provider, agent_role
+            - user_messages (int), agent_messages (int), agent_responses (int)
+            - tool_calls (dict): normalized tool/function name -> count
+            - errors (int)
+            - tool_error_categories (dict): error category -> count
+            - files_modified (int)
+            - lines_added (int), lines_removed (int)
+            - duration_minutes (float)
+            - first_prompt (str)
+            - message_hours (list[int]): hour-of-day values for user messages
+            - user_message_timestamps (list[str])
+            - user_response_times (list[float]): seconds between assistant response and subsequent user message (filtered)
+            - transcript (str): up to 20 alternating user/assistant excerpt lines
+    
+        None: If the file cannot be read/decoded, the session lacks required session metadata, or the session is identified as a meta/internal session (and should be excluded).
+    """
     events = []
     session_meta = None
     user_messages = []
@@ -473,7 +553,22 @@ def parse_session_file(file_path):
 
 
 def categorize_tool_error(content):
-    """Categorize tool errors based on error message content."""
+    """
+    Map a tool error message to a standardized error category.
+    
+    Parameters:
+        content (str): Error message or output text produced by a tool; non-string values are treated as unknown.
+    
+    Returns:
+        str: One of the following category labels:
+            - "Command Failed" for messages containing "exit code"
+            - "User Rejected" for messages indicating rejection (e.g., "rejected", "doesn't want")
+            - "Edit Failed" for edit-related failures (e.g., "string to replace not found", "no changes")
+            - "File Changed" for concurrent-modification messages (e.g., "modified since read")
+            - "File Too Large" for size-limit errors (e.g., "exceeds maximum", "too large")
+            - "File Not Found" for missing-file errors (e.g., "file not found", "does not exist")
+            - "Other" for any unrecognized or non-string content
+    """
     if not isinstance(content, str):
         return "Other"
     
@@ -494,7 +589,15 @@ def categorize_tool_error(content):
 
 
 def is_substantive_session(session):
-    """Check if session is substantive enough to analyze."""
+    """
+    Determine whether a session contains enough user activity and duration to be considered substantive.
+    
+    Parameters:
+        session (dict): Session summary containing at least `user_messages` (int) and optionally `duration_minutes` (number).
+    
+    Returns:
+        bool: `true` if `session['user_messages']` is 2 or more and `duration_minutes` is at least 1, `false` otherwise.
+    """
     # Require at least 2 user messages and 1+ minute duration
     # to filter out warmup, meta, and accidental micro-sessions.
     if session['user_messages'] < 2:
@@ -506,7 +609,18 @@ def is_substantive_session(session):
 
 
 def detect_parallel_codex_sessions(sessions):
-    """Detect parallel Codex usage via timestamp overlap analysis."""
+    """
+    Detects likely parallel Codex usage by finding user messages from different sessions that occur within a 30-minute window.
+    
+    Parameters:
+        sessions (list): Sequence of session dictionaries. Each session should include a 'session_id' string and a 'user_message_timestamps' iterable of ISO-8601 timestamp strings.
+    
+    Returns:
+        dict: Summary counts with keys:
+            - 'overlap_events' (int): number of detected overlapping session pair events.
+            - 'sessions_involved' (int): number of distinct sessions that participated in any overlap.
+            - 'user_messages_during' (int): count of unique user-message entries recorded as part of overlap events.
+    """
     OVERLAP_WINDOW_MS = 30 * 60000
     
     all_messages = []
@@ -579,7 +693,17 @@ def deduplicate_sessions(sessions):
 
 
 def extract_json_object(text):
-    """Extract the first JSON object from a Codex response."""
+    """
+    Parse and return the first JSON object found in a string.
+    
+    Tries to parse the entire input as JSON; if that fails, searches for the first substring enclosed in `{...}` and attempts to parse that. This returns the parsed value when successful or `None` when no valid JSON object can be extracted.
+    
+    Parameters:
+        text (str): Input text that may contain a JSON object.
+    
+    Returns:
+        The parsed JSON value (typically a dict) if parsing succeeds, or `None` if no valid JSON object is found.
+    """
     if not text:
         return None
     try:
@@ -596,7 +720,15 @@ def extract_json_object(text):
 
 
 def write_json(path, value):
-    """Write JSON with private-by-default permissions."""
+    """
+    Write a JSON-serializable value to a file, creating parent directories and making the file private.
+    
+    The file is created/truncated with permissions 0o600, written as UTF-8 JSON with two-space indentation and without ASCII-escaping non-ASCII characters.
+    
+    Parameters:
+    	path (str | pathlib.Path): Destination file path.
+    	value: JSON-serializable object to write.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
@@ -608,6 +740,18 @@ def write_json(path, value):
 
 
 def read_json(path):
+    """
+    Read a JSON file and return its top-level object as a dict.
+    
+    Parameters:
+        path (str | os.PathLike): Path to the JSON file to read.
+    
+    Returns:
+        dict: Parsed top-level JSON object.
+    
+    Raises:
+        TypeError: If the top-level JSON value is not an object (dict).
+    """
     value = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise TypeError(f"Expected JSON object in {path}")
@@ -615,7 +759,15 @@ def read_json(path):
 
 
 def load_cached_session_meta(session_id):
-    """Load cached session metadata from disk."""
+    """
+    Retrieve cached session metadata if it matches the current parser version.
+    
+    Looks for a JSON file at USAGE_DIR/session-meta/{session_id}.json, parses it, and returns the loaded dictionary only when its "parser_version" equals PARSER_VERSION. Returns None if the file is missing, the version does not match, or an I/O/JSON decoding error occurs.
+    
+    Returns:
+        dict: Cached session metadata when valid.
+        None: When no valid cache is available.
+    """
     try:
         cache_path = USAGE_DIR / "session-meta" / f"{session_id}.json"
         if cache_path.exists():
@@ -629,7 +781,15 @@ def load_cached_session_meta(session_id):
 
 
 def save_session_meta(session_id, meta):
-    """Save session metadata cache to disk with private-by-default permissions."""
+    """
+    Save session metadata to a per-user cache file with owner-only permissions.
+    
+    Writes `meta` as JSON to USAGE_DIR/session-meta/{session_id}.json using file mode 0o600. If creating the cache directory or writing the file fails due to an OSError, the function returns silently (no exception is propagated).
+    
+    Parameters:
+        session_id (str): Identifier used to name the cache file (without extension).
+        meta (dict): JSON-serializable metadata to persist.
+    """
     try:
         meta_dir = USAGE_DIR / "session-meta"
         meta_dir.mkdir(parents=True, exist_ok=True)
@@ -645,7 +805,29 @@ def save_session_meta(session_id, meta):
 
 
 def build_evidence_bundle(data, sessions, args):
-    """Build the evidence bundle Codex uses to write the report."""
+    """
+    Builds a structured evidence bundle used as input to the Codex writer.
+    
+    Creates a JSON-serializable dict containing:
+    - a fixed `schema_version` ("codex-insight-evidence.v1"),
+    - a UTC `generated_at` timestamp (ISO 8601, no microseconds),
+    - advisory `notes` about evidence use,
+    - the full aggregated `data` object,
+    - a compact `metrics` view extracted from `data`,
+    - `session_samples`: up to `args.max_evidence_sessions` session summaries.
+    
+    Parameters:
+        data (dict): Aggregated metrics and metadata produced by collect_session_data().
+        sessions (list[dict]): Ordered session summaries; each entry supplies fields used for sampling.
+        args (argparse.Namespace): CLI arguments; `max_evidence_sessions` controls how many sessions are sampled.
+    
+    Notes on session_samples:
+    - Each sample includes truncated identifiers and fields: `session_id` (first 12 chars), `project_path`, `start_time`, `duration_minutes`, `user_messages`, `assistant_messages`, `tool_calls`, `errors`, `first_prompt`, and `transcript_excerpt`.
+    - `transcript_excerpt` is truncated to 3500 characters to bound prompt size.
+    
+    Returns:
+        dict: The evidence bundle ready to be serialized and written to disk.
+    """
     samples = []
     for session in sessions[:args.max_evidence_sessions]:
         samples.append({
@@ -686,7 +868,15 @@ def build_evidence_bundle(data, sessions, args):
 
 
 def build_codex_prompt(evidence):
-    """Create the prompt passed to Codex for JSON insight writing."""
+    """
+    Builds the full textual prompt sent to the Codex writer, embedding the provided evidence and the required writer instructions/schema.
+    
+    Parameters:
+        evidence (Any): A JSON-serializable evidence bundle to include in the prompt (will be serialized and inlined).
+    
+    Returns:
+        str: The complete prompt text that must be sent to the Codex CLI.
+    """
     evidence_json = json.dumps(evidence, indent=2, ensure_ascii=False)
     return f"""# Codex Insight Report Writer
 
@@ -803,7 +993,15 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
 
 
 def validate_insights(insights):
-    """Return writer-contract validation errors for generated insight JSON."""
+    """
+    Validate a Codex writer insights object against the expected schema, required fields, list shapes, evidence entries, and second-person phrasing rules.
+    
+    Parameters:
+        insights (dict): Parsed insights JSON object to validate.
+    
+    Returns:
+        errors (list[str]): A list of validation error messages; empty if the insights object conforms to the contract.
+    """
     errors = []
 
     # Validate schema_version first
@@ -862,9 +1060,24 @@ def validate_insights(insights):
     }
 
     def has_second_person(value: str) -> bool:
+        """
+        Determine whether the given text uses second-person pronouns.
+        
+        Returns:
+            `True` if `value` contains any of the words "you", "your", "yours", or "yourself" (case-insensitive), `False` otherwise.
+        """
         return bool(re.search(r"\b(you|your|yours|yourself)\b", value, flags=re.IGNORECASE))
 
     def section_payload(name: str) -> dict:
+        """
+        Retrieve a named insights section as a dictionary.
+        
+        Parameters:
+            name (str): The key of the insights section to fetch.
+        
+        Returns:
+            dict: The section value if present and a dict, otherwise an empty dict.
+        """
         payload = insights.get(name)
         return payload if isinstance(payload, dict) else {}
 
@@ -926,6 +1139,17 @@ def validate_insights(insights):
 
 
 def codex_command() -> list[str]:
+    """
+    Resolve the command used to invoke the Codex CLI.
+    
+    Checks the INSIGHTS_CODEX_COMMAND environment variable (split with shell semantics) and falls back to locating a `codex` binary on PATH.
+    
+    Returns:
+        list[str]: The command and its arguments as a list suitable for subprocess execution.
+    
+    Raises:
+        RuntimeError: If no command is configured and `codex` is not found on PATH.
+    """
     configured = os.getenv("INSIGHTS_CODEX_COMMAND", "").strip()
     if configured:
         return shlex.split(configured)
@@ -936,7 +1160,18 @@ def codex_command() -> list[str]:
 
 
 def run_codex_writer(prompt):
-    """Ask Codex CLI to write the insight JSON and return the parsed object."""
+    """
+    Send the prepared prompt to the Codex CLI writer and return the validated insights object.
+    
+    Parameters:
+        prompt (str): The full prompt text to send to the Codex CLI (written to the process's stdin).
+    
+    Returns:
+        dict: The parsed insights JSON object produced by Codex, validated against the expected insights contract.
+    
+    Raises:
+        RuntimeError: If the Codex CLI exits with a non-zero code, fails to produce a JSON object, or the returned JSON fails validation.
+    """
     # Safety: fixed executable and fixed arguments; session evidence is passed on stdin only.
     result = subprocess.run(
         [*codex_command(), "exec", "--sandbox", "read-only"],
@@ -960,17 +1195,67 @@ def run_codex_writer(prompt):
 
 
 def generate_html_report(data, insights):
-    """Generate full-featured HTML report."""
+    """
+    Render a complete single-page HTML report from aggregated session metrics and validated Codex insights.
+    
+    Parameters:
+        data (dict): Aggregated metrics and metadata produced by collect_session_data(). Expected keys used by the template include:
+            - 'period' (dict with 'start' and 'end' ISO timestamps)
+            - 'sessions' (dict with 'total')
+            - 'metrics' (dict with totals like 'total_user_messages', 'total_lines_added', 'total_lines_removed', 'total_files_modified', 'total_tool_errors')
+            - 'tools' (dict with 'counts' mapping tool names to usage counts)
+            - 'user_response_times' (list of response times in seconds)
+            - 'message_hours' (list of hour integers 0-23)
+            - 'parallel_codex' (dict with overlap stats)
+            - optional chart/category fields such as 'goal_categories', 'success', 'outcomes', 'friction', 'satisfaction', and 'tool_error_categories'.
+        insights (dict): Validated Codex-written insights matching the expected schema (e.g., keys like 'at_a_glance', 'project_areas', 'interaction_style', 'what_works', 'friction_analysis', 'prompting_help', 'suggestions', 'on_the_horizon', 'actionable_fixes', 'fun_ending'). Contents are rendered into narrative sections and callouts when present.
+    
+    Returns:
+        html (str): Complete HTML document (UTF-8) as a string containing styles, inline scripts, charts, and the rendered report content.
+    """
     
     def escape_html(text):
+        """
+        Escape special HTML characters in `text` to their corresponding HTML entities.
+        
+        Parameters:
+            text: Value to escape; if falsy, treated as an empty string. The value will be converted to `str` before escaping.
+        
+        Returns:
+            Escaped string where `&`, `<`, `>`, and `"` are replaced with `&amp;`, `&lt;`, `&gt;`, and `&quot;` respectively.
+        """
         text = str(text) if text else ""
         return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
     
     def escape_html_with_bold(text):
+        """
+        Escape HTML in the input and convert Markdown-style double-asterisk bold spans to <strong> tags.
+        
+        Parameters:
+        	text (str): Input string that may contain HTML characters and `**bold**` markers.
+        
+        Returns:
+        	escaped (str): The input with HTML special characters escaped and any `**...**` sequences replaced by `<strong>...</strong>`.
+        """
         escaped = escape_html(text)
         return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped)
     
     def generate_bar_chart(data_dict, color, max_items=6, fixed_order=None, not_available_text="No data"):
+        """
+        Render HTML for a horizontal bar chart from a mapping of labels to counts.
+        
+        Displays up to `max_items` highest-count entries (unless `fixed_order` is provided, in which case entries appear in that order and only labels present with count > 0 are shown). Labels are cleaned by replacing underscores with spaces and title-casing. Each bar row contains a label, a proportional fill (width relative to the largest count), and the raw count. If there are no entries to show or all counts are zero, returns a paragraph element containing `not_available_text`.
+        
+        Parameters:
+            data_dict (dict): Mapping of label -> numeric count.
+            color (str): CSS color used for the bar fill.
+            max_items (int): Maximum number of bars to show when `fixed_order` is not used.
+            fixed_order (Optional[Iterable[str]]): If provided, determines the display order; only keys present in `data_dict` with value > 0 are included.
+            not_available_text (str): Text used when there is no data to display.
+        
+        Returns:
+            str: HTML fragment containing the bar chart rows or a paragraph with `not_available_text` when no data is available.
+        """
         if fixed_order:
             entries = [(k, data_dict.get(k, 0)) for k in fixed_order if k in data_dict and data_dict.get(k, 0) > 0]
         else:
@@ -991,6 +1276,17 @@ def generate_html_report(data, insights):
         return html
     
     def generate_response_time_histogram(times):
+        """
+        Render an HTML fragment showing a histogram of response-time buckets for the given response times.
+        
+        The histogram groups times (in seconds) into these buckets: 2–10s, 10–30s, 30s–1m, 1–2m, 2–5m, 5–15m, and >15m; each row shows the bucket label, a proportional bar, and the count. If no meaningful data is present, returns a small "No response time data" HTML paragraph.
+        
+        Parameters:
+            times (Iterable[float] | list[float]): Sequence of response times in seconds.
+        
+        Returns:
+            str: HTML string containing the histogram rows or '<p class="empty">No response time data</p>' when there is no data to display.
+        """
         if not times:
             return '<p class="empty">No response time data</p>'
         
@@ -1022,6 +1318,17 @@ def generate_html_report(data, insights):
         return html
     
     def generate_time_of_day_chart(hours):
+        """
+        Render a simple HTML bar-chart grouping hour-of-day samples into four labeled periods.
+        
+        Parameters:
+            hours (list[int]): Iterable of hour values (0–23) representing when events occurred.
+        
+        Returns:
+            str: HTML fragment containing either a paragraph indicating no data or a div with four horizontal bars
+            for "Morning (6-12)", "Afternoon (12-18)", "Evening (18-24)", and "Night (0-6)". Each bar shows the count
+            for that period and a proportional fill width relative to the largest period count.
+        """
         if not hours:
             return '<p class="empty">No time data</p>'
         
@@ -1492,7 +1799,30 @@ def generate_html_report(data, insights):
 
 
 def collect_session_data(args):
-    """Collect and analyze Codex session data."""
+    """
+    Aggregate recent Codex session files into a single analysis-ready data dictionary.
+    
+    Finds recent session JSONL files, loads cached session metadata when available, parses new files, deduplicates session branches, filters out low-signal sessions, and aggregates metrics (tool usage, errors, message counts, edit line estimates, timestamps, and response-time samples). Also detects overlapping (parallel) Codex sessions and attaches the list of sessions selected for evidence sampling.
+    
+    Parameters:
+        args (argparse.Namespace): Runtime options with at least the attributes:
+            - days (int): lookback window in days for session files.
+            - max_sessions (int): maximum number of session files to process.
+            - verbose (bool): enable progress logging.
+    
+    Returns:
+        dict: Aggregated data with keys including:
+            - period: {start, end, days} ISO timestamps and lookback.
+            - sessions: {total} number of sessions included.
+            - tools: {counts} map of normalized tool/function usage counts.
+            - metrics: totals for errors, user messages, lines added/removed, files modified, and tool errors.
+            - tool_error_categories: map of categorized tool error counts.
+            - message_hours: list of user message hour-of-day values.
+            - user_response_times: list of per-message response times in seconds.
+            - parallel_codex: results from parallel session detection.
+            - data_quality: "real" when substantive data was found (otherwise handled by _generate_no_data_response).
+            - _sessions_for_evidence: list of session dicts retained for evidence sampling.
+    """
     print("Codex Insights Report")
     print("=" * 40)
     
@@ -1603,6 +1933,21 @@ def collect_session_data(args):
 
 
 def _generate_no_data_response(days):
+    """
+    Generate a standardized data dictionary representing an empty/no-data reporting period.
+    
+    Parameters:
+        days (int): Number of days in the lookback window used to compute the period start.
+    
+    Returns:
+        dict: A complete data structure with zeroed metrics and metadata:
+            - period: start/end ISO timestamps and the provided `days`.
+            - sessions: {"total": 0}
+            - tools: {"counts": {}}
+            - metrics: zeros for error/message/line/file/tool counts.
+            - insights: empty dict.
+            - data_quality: "no_data"
+    """
     return {
         "period": {"start": (datetime.now() - timedelta(days=days)).isoformat(), "end": datetime.now().isoformat(), "days": days},
         "sessions": {"total": 0},
@@ -1614,6 +1959,18 @@ def _generate_no_data_response(days):
 
 
 def main():
+    """
+    CLI entry point that collects and aggregates Codex session data, optionally invokes the Codex writer to produce insights, and writes the HTML report along with evidence, prompt, and insights JSON files.
+    
+    When run in --render-only mode, reads existing evidence and insights JSON and renders the report. When run normally, it:
+    - collects session metrics,
+    - builds and writes an evidence bundle and prompt (written with secure file permissions),
+    - optionally calls the Codex CLI to generate and persist insights unless --prepare-only is set,
+    - renders and writes the final HTML report.
+    
+    Returns:
+        int: Exit code 0 on success.
+    """
     args = parse_args()
     USAGE_DIR.mkdir(parents=True, exist_ok=True)
 
