@@ -1,0 +1,24 @@
+schema_version: "1.0"
+skill: bash-hygiene
+type: runbook
+purpose: >
+  Provide Bash scripting hygiene guidance focused on script structure, strict mode,
+  safe quoting, and interpreter-aware portability checks.
+triggers:
+  - User asks to write or review Bash/shell scripts.
+  - User requests strict mode, quoting, or portability hardening.
+  - User reports shell bugs related to word splitting or interpreter mismatch.
+inputs:
+  - target shebang/interpreter
+  - script context and execution environment
+  - safety constraints and allowed operations
+outputs:
+  - hardened Bash pattern or review guidance
+  - quoting and portability corrections
+  - validation commands and fail-fast checks
+non_goals:
+  - generalized Linux administration guidance unrelated to scripting quality
+  - interpreter-agnostic advice that ignores shebang compatibility
+risks:
+  - unquoted expansions can introduce data loss or command injection risk
+  - portability assumptions can break scripts across environments

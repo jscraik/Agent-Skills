@@ -1,23 +1,12 @@
-schema_version: "1.0"
-skill: "codex-agent-creator"
-type: runbook
-purpose: >
-  Define the expected execution contract for codex-agent-creator so routing, outputs,
-  and validation behavior remain consistent and testable.
-triggers:
-  - User requests work that matches this skill's domain and workflow.
-  - The task needs this skill's specific implementation or review contract.
-inputs:
-  - clear user goal and scope
-  - relevant repository context or target files
-  - constraints, risks, and validation expectations
-outputs:
-  - concrete guidance or edits aligned to the skill scope
-  - explicit validation results and blocker evidence
-  - residual risks or follow-up actions when applicable
-non_goals:
-  - unrelated architectural rewrites
-  - out-of-scope operations without explicit approval
-risks:
-  - missing context can lead to incorrect scope; mitigate with targeted clarification
-  - stale assumptions can cause drift; mitigate with current evidence and checks
+schema_version: 1
+skill: codex-agent-creator
+purpose: "Create or validate Codex custom subagent TOML files. Use this skill when users need agent config, install, or bounded orchestration."
+triggers: ["Use when the user request matches the skill scope."]
+non_goals: ["Route unrelated work away from this skill."]
+inputs: [user_request, target_context, evidence]
+outputs: [result, evidence_summary, validation_status]
+risks: [over_triggering, untrusted_input, validation_drift]
+safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
+validation: [plugin_eval_grade_a, strict_skill_audit]
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

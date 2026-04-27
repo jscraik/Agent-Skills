@@ -1,0 +1,15 @@
+purpose: >
+  Define expected behavior and outputs for this routing skill.
+schema_version: 1.0
+triggers:
+  - user asks for broad frontend design direction and owner selection is ambiguous
+inputs:
+  - user request details
+  - stack and surface context when available
+outputs:
+  - routing-owner decision
+  - visual thesis, content plan, and interaction plan
+non_goals:
+  - direct UI implementation once a narrower owner skill is selected
+risks:
+  - ambiguous scope; mitigated by narrow discovery and single-owner handoff

@@ -29,5 +29,5 @@ Git commit fails during signing with errors like:
 
 ## Related Playbooks
 
-- [Code Scanning Remediation](/Wiki/skill-ops-wiki/wiki/playbooks/code-scanning-remediation.md)
-- [Validation Artifact Consistency](/Wiki/skill-ops-wiki/wiki/playbooks/validation-artifact-consistency.md)
+- [Code Scanning Remediation](../playbooks/code-scanning-remediation.md)
+- [Validation Artifact Consistency](../playbooks/validation-artifact-consistency.md)

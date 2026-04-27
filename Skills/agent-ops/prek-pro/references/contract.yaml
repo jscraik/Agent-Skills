@@ -1,62 +1,32 @@
-schema_version: 1.1
+schema_version: 1
 skill: prek-pro
-type: developer_tooling
-purpose: >-
-  Provide docs-backed guidance for configuring, validating, and troubleshooting
-  prek git-hook workflows in repository-local development environments.
-
+purpose: "Provide docs-backed prek hook guidance that keeps hook config, shims, validation, and migration behavior reproducible."
 triggers:
-  - user asks to update or fix `prek.toml`
-  - user asks to install/repair prek git hook shims
-  - user asks why a configured hook stage is not running
-  - user asks to migrate from pre-commit to prek
-  - user asks for prek cache cleanup or diagnostics
-
-inputs:
-  - repository root and target config path (default `prek.toml`)
-  - requested operation (`install|run|validate|migrate|audit`)
-  - hook scope (all, stage-specific, or hook-id-specific)
-  - exact error output when troubleshooting
-  - risk constraints for destructive operations
-
-outputs:
-  - docs-backed command sequence for the requested operation
-  - minimal config edits with rationale
-  - validation evidence with command outcomes (`pass|fail|blocked`)
-  - explicit assumptions and unresolved risks
-  - schema_version field for structured output responses
-
-output_contract:
-  schema_version: "1.0"
-  required_fields:
-    - guidance
-    - source_basis
-    - validation
-    - schema_version
-  optional_fields:
-    - command_plan
-    - config_changes
-    - assumptions
-    - unresolved_risks
-
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - implementing unrelated CI/CD workflows
-  - editing non-prek tooling unless explicitly requested
-  - running destructive cache cleanups by default
-  - inventing prek flags not supported by current docs
-
+  - "Route unrelated work away from this skill."
+inputs:
+  - "prek.toml path"
+  - "hook failure output"
+  - "runtime manager"
+  - "migration source"
+  - "validation command"
+outputs:
+  - "config guidance or patch"
+  - "shim/install notes"
+  - "failure diagnosis"
+  - "validation evidence"
+  - "remaining blockers"
 risks:
-  - confusing `default_install_hook_types` with hook `stages`
-  - stale command assumptions causing incorrect CLI guidance
-  - broad `--all-files` runs increasing feedback latency
-  - destructive cache operations removing useful local state
-  - reporting success without executed validation evidence
-
-rollback_procedure: >-
-  Restore previous `prek.toml` and rerun `prek validate-config prek.toml`.
-  If new install behavior regressed hooks, run `prek install --overwrite` with
-  prior hook types and retest targeted stages.
-
-observability: >-
-  Track health via strict skill audit, command pass/fail logs, and recurring
-  stage-specific verification outcomes (`pre-commit`, `pre-push`, `commit-msg`).
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

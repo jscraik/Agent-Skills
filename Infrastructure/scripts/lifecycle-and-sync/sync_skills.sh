@@ -10,8 +10,8 @@ lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
 lock_owned=0
 watchdog_pid=""
+timeout_marker="${TMPDIR:-/tmp}/agent-skills-sync-timeout.$$"
 
-# usage prints the command-line usage message and short description for sync_skills.sh.
 usage() {
   cat <<'USAGE'
 Usage:
@@ -24,6 +24,11 @@ USAGE
 while [[ $# -gt 0 ]]; do
   case "${1:-}" in
     --timeout-seconds)
+      if [[ -z "${2:-}" ]] || [[ "${2:-}" == --* ]]; then
+        echo "Missing value for --timeout-seconds" >&2
+        usage
+        exit 2
+      fi
       timeout_seconds="${2:-}"
       shift 2
       ;;
@@ -40,6 +45,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --projection)
+      if [[ -z "${2:-}" ]] || [[ "${2:-}" == --* ]]; then
+        echo "Missing value for --projection" >&2
+        usage
+        exit 2
+      fi
       projection_mode_cli="${2:-}"
       shift 2
       ;;
@@ -68,6 +78,11 @@ if ! [[ "$lock_stale_after_seconds" =~ ^[0-9]+$ ]] || [[ "$lock_stale_after_seco
   exit 2
 fi
 
+# Normalize legacy alias before validation so env vars like SYNC_SKILLS_SCOPE=project-local work.
+if [[ "$sync_scope" == "project-local" ]]; then
+  sync_scope="workspace"
+fi
+
 case "$sync_scope" in
   workspace|user)
     ;;
@@ -85,7 +100,7 @@ else
 fi
 cd "$repo_root"
 
-# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to prevent concurrent sync runs, writes the current PID to $lock_pid_file when successful, and reclaims stale locks (by PID or directory age) before failing.
+# acquire_sync_lock acquires an exclusive filesystem lock at $lock_dir to ensure only one sync run runs at a time, waits briefly for in-progress initialisation, and reclaims stale locks (with PID or based on directory mtime) before failing.
 acquire_sync_lock() {
   local existing_pid=""
   local lock_mtime=""
@@ -148,7 +163,6 @@ acquire_sync_lock() {
   exit 1
 }
 
-# release_sync_lock releases the exclusive sync lock owned by the current process by removing the lock directory and clearing the lock ownership state.
 release_sync_lock() {
   if [[ "$lock_owned" -eq 1 ]]; then
     rm -rf -- "$lock_dir"
@@ -156,33 +170,57 @@ release_sync_lock() {
   fi
 }
 
-# start_watchdog starts a background watchdog that sleeps for $timeout_seconds and, if the timeout elapses, logs an error and sends SIGTERM to the main script; it records the background PID in $watchdog_pid.
 start_watchdog() {
-  trap 'echo "[ERROR] sync_skills timed out after ${timeout_seconds}s" >&2; exit 124' TERM
-  (
-    sleep "$timeout_seconds"
-    kill -TERM "$$" 2>/dev/null || true
-  ) >/dev/null 2>&1 &
+  python3 - "$timeout_seconds" "$$" "$timeout_marker" <<'PY' &
+import os
+import signal
+import sys
+import time
+
+timeout_seconds = int(sys.argv[1])
+parent_pid = int(sys.argv[2])
+timeout_marker = sys.argv[3]
+time.sleep(timeout_seconds)
+with open(timeout_marker, "w", encoding="utf-8") as marker:
+    marker.write("timeout\n")
+print(f"[ERROR] sync_skills timed out after {timeout_seconds}s", file=sys.stderr, flush=True)
+try:
+    os.kill(parent_pid, signal.SIGTERM)
+except ProcessLookupError:
+    pass
+PY
   watchdog_pid="$!"
 }
 
-# stop_watchdog stops the background watchdog timer process (if any) and clears its PID.
 stop_watchdog() {
   if [[ -n "$watchdog_pid" ]]; then
     kill "$watchdog_pid" 2>/dev/null || true
     wait "$watchdog_pid" 2>/dev/null || true
     watchdog_pid=""
   fi
+  rm -f -- "$timeout_marker"
 }
+
+handle_timeout_signal() {
+  if [[ -f "$timeout_marker" ]]; then
+    rm -f -- "$timeout_marker"
+    exit 124
+  fi
+  exit 143
+}
+
+trap handle_timeout_signal TERM
 
 projection_args=(--format shell)
 if [ -n "$projection_mode_cli" ]; then
   projection_args+=(--mode "$projection_mode_cli")
 fi
-if projection_policy_shell="$(
-  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}"
-)"; then
+projection_policy_shell="$(
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}" 2>&1
+)" || true
+if python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}" >/dev/null 2>&1; then
   # Only eval on success; validate output is non-empty and contains safe patterns.
+  projection_policy_shell="$(python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_engine.py" "${projection_args[@]}")"
   if [ -z "$projection_policy_shell" ]; then
     echo "Projection engine returned empty output." >&2
     exit 2
@@ -194,20 +232,48 @@ if projection_policy_shell="$(
   fi
   eval "$projection_policy_shell"
 else
-  echo "${SYNC_SKILLS_PROJECTION_ERROR_MESSAGE:-Invalid projection mode.}" >&2
+  # Extract SYNC_SKILLS_PROJECTION_ERROR_MESSAGE from projection engine output
+  error_message="$(
+    printf '%s\n' "$projection_policy_shell" | python3 -c '
+import shlex
+import sys
+
+for line in sys.stdin:
+    if not line.startswith("SYNC_SKILLS_PROJECTION_ERROR_MESSAGE="):
+        continue
+    rhs = line.split("=", 1)[1].strip()
+    try:
+        tokens = shlex.split(rhs, posix=True)
+        print(tokens[0] if tokens else "")
+    except ValueError:
+        print(rhs.strip("\"'\''"))
+    break
+'
+  )"
+  if [ -n "$error_message" ]; then
+    echo "$error_message" >&2
+  else
+    echo "Invalid projection mode." >&2
+  fi
   exit 2
 fi
-if [[ "$dry_run" == "1" || ( "$sync_scope" != "user" && "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}" != "flat" ) ]]; then
-  ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}")
+# Keep the shell entrypoint as a compatibility wrapper while the projection-aware
+# ask implementation owns dry-run previews and rooted runtime mutation. Flat
+# workspace/user non-dry-run sync remains on the legacy shell path below.
+if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+  ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
   if [[ "$dry_run" == "1" ]]; then
     ask_sync_args+=(--dry-run)
   fi
-  if [[ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-rooted}" != "flat" ]]; then
+  cleanup_delegated_sync() {
+    stop_watchdog
+    release_sync_lock
+  }
+  if [[ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
     acquire_sync_lock
-    trap release_sync_lock EXIT
   fi
+  trap cleanup_delegated_sync EXIT
   start_watchdog
-  trap 'stop_watchdog; release_sync_lock' EXIT
   python3 "$repo_root/bin/ask" "${ask_sync_args[@]}"
   exit $?
 fi
@@ -1045,7 +1111,7 @@ readme_path.write_text(content, encoding="utf-8")
 PY
 generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
-# remove_legacy_symlink removes the symlink at the given path if it exists and prints a confirmation; does nothing if the path is not a symlink.
+# remove_legacy_symlink removes the symlink at the given path if it exists and echoes a confirmation.
 remove_legacy_symlink() {
   local target_dir="$1"
   if [ -L "$target_dir" ]; then
@@ -1686,6 +1752,136 @@ sync_local_marketplace_cache() {
   done < "$tracked_marketplaces_file"
 }
 
+# sync_versioned_local_marketplace_cache keeps the legacy repository-local
+# cache shape aligned for Codex builds that still inspect
+# <repo>/Plugins/cache/<marketplace>/<plugin>/<version>/skills directly.
+sync_versioned_local_marketplace_cache() {
+  local marketplace_file="$1"
+  local cache_root="$2"
+  local state_dir=""
+  local plugin_rows_file=""
+  local keep_file=""
+  local market_keep_file=""
+  local tracked_markets_file=""
+  local marketplace_name=""
+  local plugin_name=""
+  local source_path=""
+  local source_dir=""
+  local plugin_version=""
+  local market_dir=""
+  local plugin_dir=""
+  local target_dir=""
+  local existing_dir=""
+  local tracked_market_dir=""
+
+  if [ ! -f "$marketplace_file" ]; then
+    echo "[WARN] Marketplace file missing: $marketplace_file (skipping versioned local marketplace cache sync)."
+    return 0
+  fi
+
+  mkdir -p "$cache_root"
+  state_dir="$(mktemp -d)"
+  cleanup_paths+=("$state_dir")
+  plugin_rows_file="$state_dir/versioned_plugin_rows.tsv"
+  keep_file="$state_dir/versioned_cache.keep"
+  market_keep_file="$state_dir/versioned_markets.keep"
+  tracked_markets_file="$state_dir/versioned_markets.txt"
+  : > "$keep_file"
+  : > "$market_keep_file"
+
+  jq -r '
+    def trim: gsub("^\\s+|\\s+$"; "");
+    def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
+    (.name // "agent-skills-local" | tostring | trim) as $default_market
+    | .plugins[]?
+    | select(type == "object")
+    | .name as $name
+    | .source as $source
+    | (.marketplace // $source.marketplace // $default_market | tostring | trim) as $market
+    | select(($name | type) == "string")
+    | select(($source | type) == "object")
+    | select($source.source == "local")
+    | select(($source.path | type) == "string")
+    | ($name | trim) as $clean_name
+    | ($source.path | trim) as $clean_path
+    | select($market | is_safe_identifier)
+    | select($clean_name | is_safe_identifier)
+    | "\($market)\t\($clean_name)\t\($clean_path)"
+  ' "$marketplace_file" > "$plugin_rows_file"
+
+  while IFS=$'\t' read -r marketplace_name plugin_name source_path; do
+    [ -n "$marketplace_name" ] || continue
+    [ -n "$plugin_name" ] || continue
+    [ -n "$source_path" ] || continue
+    if ! is_safe_path_component "$marketplace_name" || ! is_safe_path_component "$plugin_name"; then
+      echo "[WARN] Invalid versioned cache marketplace/plugin identity: $marketplace_name/$plugin_name"
+      continue
+    fi
+
+    source_dir="$(resolve_marketplace_source_dir "$source_path" || true)"
+    if [ -z "$source_dir" ] || [ ! -d "$source_dir" ]; then
+      echo "[WARN] Versioned cache source plugin directory missing for $plugin_name: $source_path"
+      continue
+    fi
+
+    plugin_version="$(jq -r '.version // "0.1.0" | tostring | gsub("^\\s+|\\s+$"; "")' "$source_dir/.codex-plugin/plugin.json" 2>/dev/null || printf '0.1.0')"
+    [ -n "$plugin_version" ] || plugin_version="0.1.0"
+    if ! is_safe_path_component "$plugin_version"; then
+      echo "[WARN] Invalid plugin version in plugin.json for $plugin_name: $plugin_version"
+      continue
+    fi
+
+    market_dir="$cache_root/$marketplace_name"
+    plugin_dir="$market_dir/$plugin_name"
+    target_dir="$plugin_dir/$plugin_version"
+    printf '%s\n' "$market_dir" >> "$market_keep_file"
+    printf '%s\n' "$plugin_dir" >> "$keep_file"
+
+    if [ -L "$plugin_dir" ] || [ -f "$plugin_dir/.codex-plugin/plugin.json" ]; then
+      rm -rf -- "$plugin_dir"
+    elif [ -e "$plugin_dir" ] && [ ! -d "$plugin_dir" ]; then
+      rm -f -- "$plugin_dir"
+    fi
+
+    mkdir -p "$target_dir"
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -aL --delete --force \
+        --exclude '.git' \
+        --exclude 'node_modules' \
+        --exclude '__pycache__' \
+        --exclude '.DS_Store' \
+        "$source_dir/" "$target_dir/"
+    else
+      rm -rf -- "$target_dir"
+      mkdir -p "$target_dir"
+      cp -RL "$source_dir"/. "$target_dir"/
+      rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
+      find "$target_dir" -name '.DS_Store' -type f -delete
+    fi
+
+    normalize_plugin_copy "$target_dir" "versioned-cache"
+    while IFS= read -r existing_dir; do
+      [ -n "$existing_dir" ] || continue
+      [ "$existing_dir" = "$target_dir" ] && continue
+      rm -rf -- "$existing_dir"
+      echo "[OK] Removed stale versioned local cache variant: $existing_dir"
+    done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -type d -print)
+  done < "$plugin_rows_file"
+
+  sort -u "$market_keep_file" > "$tracked_markets_file"
+  while IFS= read -r tracked_market_dir; do
+    [ -n "$tracked_market_dir" ] || continue
+    [ -d "$tracked_market_dir" ] || continue
+    while IFS= read -r existing_dir; do
+      [ -n "$existing_dir" ] || continue
+      if ! grep -Fqx "$existing_dir" "$keep_file"; then
+        rm -rf -- "$existing_dir"
+        echo "[OK] Removed stale versioned local cache plugin dir: $existing_dir"
+      fi
+    done < <(find "$tracked_market_dir" -mindepth 1 -maxdepth 1 -type d -print)
+  done < "$tracked_markets_file"
+}
+
 # sync_repo_cache_snapshots_to_runtime_cache syncs repository plugin cache snapshots from the source directory into the runtime cache directory, ensuring the target exists and replacing its contents.
 sync_repo_cache_snapshots_to_runtime_cache() {
   local source_cache_root="$1"
@@ -1862,10 +2058,10 @@ sync_plugin_cache_projections() {
 sync_repo_cache_snapshots_to_runtime_cache "$plugins_dir/cache" "$runtime_cache_root"
 sync_local_marketplace_cache "$plugins_dir/marketplace.json" "$runtime_cache_root"
 materialize_plugin_cache_roots "$runtime_cache_root"
-cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"
 cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"
 sync_plugin_cache_projections
+sync_versioned_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
 # On case-insensitive filesystems (e.g. default macOS), "skills" aliases
 # "Skills"; forcing a lowercase symlink would replace the canonical tracked
 # Skills/ tree and can introduce symlink loops.

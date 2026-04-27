@@ -4,7 +4,7 @@
 
 - Scope: `agent-skills` repository operations, skill authoring, skill sync, and runtime visibility.
 - Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-04-24
+- Last updated: 2026-04-26
 
 ## Canonical Terms
 
@@ -14,7 +14,9 @@
 | **`ask` CLI** | The public command interface at `./bin/ask` that agents must use for repository operations. | helper script, ask wrapper | High |
 | **Canonical Skill Source** | The editable source of a skill under `Skills/<topic-cluster>/<skill-name>/` or a plugin-owned skill path. | runtime skill, synced copy | High |
 | **Runtime Projection** | The generated skill view under `.agents/skills/**` that Codex and agent runtimes consume. | canonical skill, source skill | High |
+| **Generated Command Handle** | A small generated `SKILL.md` under `.agents/skills/<handle>/` that makes `$<handle>` mentionable and resolves to a canonical skill source. It is a pointer, not the real workflow. | command stub, runtime stub, copied skill | High |
 | **User Runtime Links** | The home-directory links `~/.agents/skills` and `~/.codex/skills` that point to the active runtime projection. | user sync, installed skills | High |
+| **Plugin Runtime Mirror** | A real copied plugin tree, such as `~/plugins` or a Codex profile `Plugins/`, refreshed from canonical `~/dev/agent-skills/Plugins` so marketplace paths resolve without aliasing repo source. | plugin symlink, canonical plugin root | High |
 | **Workspace Sync** | The operation `./bin/ask skills sync --scope workspace` that refreshes repo-local runtime projections and the generated root `SKILL.md` index. | sync the repo, update links | High |
 | **User Sync** | The operation `./bin/ask skills sync --scope user` that points user-level runtime skill directories at the current workspace projection. | install skills, make Codex see it | High |
 | **Visible Runtime Surface** | The bounded default skill list exposed by `DEFAULT_VISIBLE_FLAT_SKILL_NAMES` to control always-loaded skill context. | skill list, visible skills | High |
@@ -36,11 +38,14 @@
 | "run the skill" | Execute the skill workflow in the current repo scope and produce its expected artifact. | "Use `$ubiquitous-language` to create or update repo-root `UBIQUITOUS_LANGUAGE.md`, citing source files and validating the output file exists." |
 | "make it available" | Ensure Codex runtime discovery can see a skill, not just that source files exist. | "Add the skill to the default visible runtime surface when appropriate, run workspace and user sync, and verify `./bin/ask skills list --json` includes it." |
 | "check it works" | Produce fresh evidence for the changed surface. | "Run the smallest relevant validation command for the changed skill or sync policy and report exact pass/fail/blocker output." |
+| "update the plugin" | Change the canonical plugin source and refresh materialized runtime mirrors. | "Patch `Plugins/<plugin>`, run the relevant plugin validation, then run `./bin/ask skills sync --scope user --projection rooted` or `./bin/ask plugins sync-local-runtime` so copied plugin mirrors are replaced." |
 
 ## Relationships
 
 - A **Canonical Skill Source** may produce one **Runtime Projection** entry after **Workspace Sync**.
 - A **Runtime Projection** entry becomes available to user-level Codex sessions through **User Runtime Links** after **User Sync**.
+- A **Generated Command Handle** exists only to make a routed skill mentionable, for example `$he-heartbeat`; the real workflow remains in the resolved **Canonical Skill Source**.
+- `~/.agents/plugins` is a live symlink to canonical `Plugins/`, while **Plugin Runtime Mirrors** such as `~/plugins` are real copied directories and must be refreshed after plugin source or marketplace changes.
 - A skill can exist in **Advanced Repo Discovery** while remaining absent from the **Visible Runtime Surface**.
 - The **Visible Runtime Surface** is controlled by `DEFAULT_VISIBLE_FLAT_SKILL_NAMES`, not by the mere presence of a `SKILL.md` file.
 - A **Feature Worktree** can intentionally diverge from the primary checkout; uncommitted skills in the primary checkout are not automatically present in the feature worktree.
@@ -68,6 +73,7 @@
 - "Use it" can mean manually reading a skill's instructions or invoking it through runtime skill discovery. Recommendation: answer both availability paths when a skill was just added.
 - "Worktree" can mean the original dirty checkout or the new feature checkout. Recommendation: name the absolute path when reporting where commands ran.
 - "Make it visible" can mean adding files to source control or adding a skill to **Visible Runtime Surface**. Recommendation: verify with `./bin/ask skills list --json`, not only `find`.
+- "Stub" is overloaded. Recommendation: say **Generated Command Handle** for `$`-mentionable runtime pointers and reserve "stub" for test doubles or temporary executable placeholders.
 
 ## Agent Integration
 

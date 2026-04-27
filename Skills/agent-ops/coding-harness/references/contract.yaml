@@ -1,57 +1,28 @@
-schema_version: "1.2"
-
-purpose: >
-  Install, initialize, update, and verify @brainwav/coding-harness usage in real
-  repositories, while clearly communicating capability boundaries, required checks,
-  and setup requirements.
-
+schema_version: 1
+skill: coding-harness
+purpose: "Operate @brainwav/coding-harness with command-accurate, preview-first validation."
 triggers:
-  - User asks to install, set up, update, or verify coding-harness.
-  - User asks what coding-harness can and cannot do.
-  - User asks to keep Codex environment action blocks aligned with current project scripts.
-
-inputs:
-  - Target repository path.
-  - Global install posture (`npm i -g @brainwav/coding-harness`) for consumer repositories.
-  - Current harness state (new install, existing setup, update required, or broken).
-  - Auth mode for remote checks (token/JWT + owner/repo when applicable).
-  - Execution mode (no-execution guidance vs execution with commands).
-
-outputs:
-  - setup_summary: markdown summary of actions taken and key decisions.
-  - validation_report:
-      schema_version: "1.0"
-      fields:
-        - command
-        - status
-        - evidence
-  - validation_ladder:
-      schema_version: "1.0"
-      fields:
-        - baseline_gate
-        - deep_gate
-        - conditional_checks
-  - capability_boundary_report:
-      schema_version: "1.0"
-      sections:
-        - can_do
-        - cannot_do
-        - requires_user_input
-
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - Building unrelated app/product features.
-  - Performing full security audits outside harness governance scope.
-  - Managing credential generation or long-term secret storage.
-
-guardrails:
-  - Treat `harness --help` as command truth when docs disagree.
-  - Require explicit approval before destructive or high-impact operations.
-  - Redact tokens/secrets in logs and summaries.
-  - Fail fast on first blocking validation gate and report exact remediation.
-  - Do not claim full setup success without command evidence.
-
+  - "Route unrelated work away from this skill."
+inputs:
+  - user_request
+  - target_context
+  - evidence
+outputs:
+  - result
+  - evidence_summary
+  - validation_status
 risks:
-  - Treating stale local docs as source of truth instead of `harness --help` and repo files.
-  - Overwriting user-owned environment configuration.
-  - Misreporting capabilities when remote checks were skipped due to missing auth.
-  - Skipping deep validation (`pnpm test:deep`) when runtime/artifact behavior changed.
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

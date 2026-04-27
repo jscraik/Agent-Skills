@@ -11,10 +11,10 @@ Workout source lives under `.workouts/**`. Runtime evidence lives under
 ## CLI
 
 ```bash
-bin/ask workouts list --robot --json
-bin/ask workouts run agent-ops/verification-before-completion --attempts 5 --robot --json
-bin/ask workouts score agent-ops/verification-before-completion --robot --json
-bin/ask workouts promote agent-ops/verification-before-completion --if-better --dry-run --robot --json
+python3 bin/ask workouts list --json
+python3 bin/ask workouts run agent-ops/verification-before-completion --attempts 5 --json
+python3 bin/ask workouts score agent-ops/verification-before-completion --json
+python3 bin/ask workouts promote agent-ops/verification-before-completion --if-better --dry-run --json
 ```
 
 ## Contract

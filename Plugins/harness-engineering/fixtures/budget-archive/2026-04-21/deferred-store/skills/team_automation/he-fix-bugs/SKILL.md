@@ -49,11 +49,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 1. Parse intake first: symptom report, tracker context, expected behavior, and any prior failed attempts.
 2. If the request is a QA session or conversational report, run QA intake: ask at most 2-3 focused questions, lightly inspect domain language, decide single issue vs breakdown, and file or prepare Linear issue payloads before diagnosis.
 3. Compare issue language with `CONTEXT.md` when present so aliases or domain misunderstandings do not become false bug scope.
-4. Reproduce and stabilize the failing behavior before proposing changes.
-5. Trace backward from the symptom to the point where valid state first became invalid.
-6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
-7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
-8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+4. For runtime, CLI, startup, agent-routing, or session-log failures, collect bounded runtime evidence before reproduction: identify relevant logs/config paths, read only tails or targeted matches, capture `[ERROR]`/`[WARN]` markers, and state when logging began too late to prove the original failure.
+5. Reproduce and stabilize the failing behavior before proposing changes.
+6. Trace backward from the symptom to the point where valid state first became invalid.
+7. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+8. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+9. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
 ## Validation
 
@@ -102,6 +103,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 Read when: issue wording may conflict with `CONTEXT.md` or use a non-canonical project term.
 - QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
 Read when: the user reports bugs conversationally, asks for a QA session, or wants feedback turned into Linear issues.
+- Runtime evidence intake: [./Infrastructure/references/runtime-evidence-intake.md](./Infrastructure/references/runtime-evidence-intake.md)
+Read when: the failure involves logs, startup, CLI/runtime state, agent routing, or debug evidence that may be incomplete.
 Read when: you need full workflow behavior, diagnosis gates, and fix sequencing.
 Read when: you need contracts, eval fixtures, anti-patterns, or tracker-intake details.
 Read when: you need icon/display metadata and invocation policy.

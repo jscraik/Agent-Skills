@@ -32,5 +32,5 @@ git stash drop stash@{0}
 
 ## Related
 
-- [AskForApproval Policy Block](/Wiki/skill-ops-wiki/wiki/failures/askforapproval-policy-bug.md)
-- [Validation Artifact Consistency](/Wiki/skill-ops-wiki/wiki/playbooks/validation-artifact-consistency.md)
+- [AskForApproval Policy Block](../failures/askforapproval-policy-bug.md)
+- [Validation Artifact Consistency](validation-artifact-consistency.md)

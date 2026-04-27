@@ -2,15 +2,16 @@
 
 ## Preconditions
 
-- `bin/ask skills sync --scope workspace --projection rooted --dry-run --json` passes.
-- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json` passes.
+- `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
+- `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json` passes.
+  (This validates the current flat baseline before migration; `--projection` defaults to `flat` in `check_context_budget.py`.)
 - At least one workout has a passing scorecard.
 - `.skillsets/**` is generated, provenance-rich, and validated.
 
 ## Dry Run
 
 ```bash
-bin/ask skills sync --scope workspace --projection rooted --dry-run --json
+python3 bin/ask skills sync --scope workspace --projection rooted --dry-run --json
 ```
 
 Confirm:
@@ -23,7 +24,7 @@ Confirm:
 ## Apply
 
 ```bash
-bin/ask skills sync --scope workspace --projection rooted --json
+python3 bin/ask skills sync --scope workspace --projection rooted --json
 ```
 
 Then validate rooted budget:
@@ -36,19 +37,28 @@ bash Infrastructure/scripts/validate_all.sh --ephemeral
 ## User Relink
 
 ```bash
-bin/ask skills sync --scope user --projection rooted --json
+python3 bin/ask skills sync --scope user --projection rooted --json
 ```
 
-## Full Gate
+Confirm user projection applied successfully:
 
 ```bash
-bin/ask repo validate --ephemeral
+python3 bin/ask skills sync --scope user --projection rooted --dry-run --json
 ```
 
 ## Rollback
 
+Run the full validation gate before rollback while the workspace projection is
+still rooted:
+
 ```bash
-bin/ask skills sync --scope workspace --projection flat --json
+bash Infrastructure/scripts/validate_all.sh --ephemeral
+```
+
+Then rollback to flat projection:
+
+```bash
+python3 bin/ask skills sync --scope workspace --projection flat --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json
 ```
 

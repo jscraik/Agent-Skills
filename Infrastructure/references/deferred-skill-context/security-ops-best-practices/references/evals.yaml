@@ -1,0 +1,15 @@
+schema_version: 1
+cases:
+  - name: config-audit
+    prompt: "Audit a Better Auth config for security gaps and missing settings."
+    acceptance:
+      - "Identifies CSRF/origin risks if present."
+      - "Mentions session storage behavior."
+  - name: plugin-review
+    prompt: "Review provider/plugins and identify missing migrations."
+    acceptance:
+      - "Calls out required CLI migration steps."
+  - name: session-debug
+    prompt: "Debug a session persistence issue with Better Auth."
+    acceptance:
+      - "References cookie cache and storage priority."

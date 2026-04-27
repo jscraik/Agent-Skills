@@ -1,17 +1,33 @@
-purpose: Repository-grounded threat modeling that enumerates trust boundaries, assets,
-  attacker capabilities, abuse paths, and mitigations, and writes a concise Markdown
-  threat model. Trigger only when the user explicitly asks to threat model a codebase
-  or path, enumerate threats/abuse paths, or perform AppSec threat modeling. Do not
-  trigger for general architecture summaries, code review, or non-security design
-  work.
-schema_version: '1.0'
+schema_version: 1
+skill: security-threat-model
+purpose: "Produce actionable, repo-grounded threat models that connect assets, trust boundaries, attacker goals, abuse paths, and mitigations."
 triggers:
-- When requests match security-threat-model scope and intent.
-inputs:
-- user request details
-outputs:
-- structured response or artifacts defined by the skill
+  - "Use when the user request matches the skill scope."
 non_goals:
-- out-of-scope requests outside the skill boundary
+  - "Route unrelated work away from this skill."
+inputs:
+  - "repo root or feature scope"
+  - "architecture evidence"
+  - "deployment and exposure assumptions"
+  - "auth and data sensitivity"
+  - "existing controls"
+outputs:
+  - "asset map"
+  - "trust boundaries"
+  - "attacker goals"
+  - "abuse paths"
+  - "mitigations"
+  - "open assumptions"
 risks:
-- missing context; mitigated by clarifying questions and explicit assumptions
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

@@ -8,16 +8,6 @@ SYNC_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
 
 
 def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -> subprocess.CompletedProcess[str]:
-    """
-    Run the sync skills shell script with the given command-line arguments and optional environment overrides.
-    
-    Parameters:
-        args (list[str]): Command-line arguments to pass to the script (appended after the script path).
-        env (Optional[dict[str, str]]): Environment variables to overlay on the current process environment; provided keys override existing ones.
-    
-    Returns:
-        subprocess.CompletedProcess[str]: The completed process object containing `returncode`, `stdout`, and `stderr`.
-    """
     merged_env = os.environ.copy()
     merged_env.update(env or {})
     return subprocess.run(
@@ -31,18 +21,24 @@ def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -
 
 
 class TestSyncSkillsShellProjection(unittest.TestCase):
-    def test_user_scope_flat_projection_delegates_to_ask_engine(self) -> None:
+    def test_shell_entrypoint_delegates_runtime_mutation_to_ask_engine(self) -> None:
         with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
             script = script_file.read()
 
-        self.assertIn('"$sync_scope" == "user"', script)
+        self.assertIn("ask_sync_args=(skills sync", script)
+        self.assertIn('[[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]', script)
+        self.assertIn("start_watchdog", script)
+        self.assertIn("exit 124", script)
+
+    def test_shell_entrypoint_keeps_flat_legacy_path_reachable(self) -> None:
+        with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
+            script = script_file.read()
+
+        delegated_block = script.split("ask_sync_args=(skills sync", 1)[0]
+        self.assertNotIn('"$sync_scope" == "user"', delegated_block)
+        self.assertNotIn('"$sync_scope" == "workspace"', delegated_block)
 
     def test_rooted_projection_delegates_to_ask_engine_in_dry_run(self) -> None:
-        """
-        Verifies that running the sync script in workspace mode with the 'rooted' projection in dry-run mode delegates to the ask engine.
-        
-        Runs the script with ["--workspace", "--projection", "rooted", "--dry-run"] and asserts the process exits with code 0, that stdout contains "rooted", and that stdout contains the "Dry-run rooted projection" message.
-        """
         result = _run_sync_script(["--workspace", "--projection", "rooted", "--dry-run"])
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -56,16 +52,21 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("rooted", result.stdout)
 
     def test_invalid_scope_fails_before_projection_policy(self) -> None:
-        """
-        Verifies the sync script exits with an invalid-scope error and does not reach projection-policy parsing when SYNC_SKILLS_SCOPE is set to an unsupported value.
-        
-        Asserts that the script returns exit code 2, emits "Invalid sync scope: elsewhere" to stderr, and does not include "Projection mode 'rooted' is parsed" in stderr.
-        """
         result = _run_sync_script(["--projection", "rooted"], env={"SYNC_SKILLS_SCOPE": "elsewhere"})
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("Invalid sync scope: elsewhere", result.stderr)
         self.assertNotIn("Projection mode 'rooted' is parsed", result.stderr)
+
+    def test_user_scope_reaches_legacy_shell_path(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_home:
+            result = _run_sync_script(
+                ["--user", "--dry-run"],
+                env={"HOME": tmp_home},
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("user", result.stdout.lower())
 
 
 if __name__ == "__main__":

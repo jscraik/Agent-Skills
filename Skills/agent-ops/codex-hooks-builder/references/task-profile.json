@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-codex-hooks-builder",
   "scope_skill": "Skills/agent-ops/codex-hooks-builder",
   "scope_profile": "Skills",
-  "rubric_version": "2026-04-09",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -17,21 +17,21 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Current Codex runtime guidance clarity",
-      "threshold": 0.75,
+      "label": "Clarity",
+      "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Concrete hook-pack implementation detail",
-      "threshold": 0.72,
+      "label": "Specificity",
+      "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Supported hook semantics and safe failure posture",
+      "label": "Safety",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -39,13 +39,14 @@
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 45.0,
-    "ai_process_minutes": 15.0,
-    "probability_of_success": 0.8,
-    "rationale": "Codex hook packs touch runtime guardrails and multi-layer execution semantics, so recommendations must stay source-backed and conservative."
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [
+      "learn",
       "guided",
       "execute"
     ],

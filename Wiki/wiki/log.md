@@ -14,6 +14,13 @@
 ## [2026-04-09] triage | LLM Wiki Reference
 
 - Intent: `lesson-learned`
-- Status: `pending`
-- Source: Wiki/skill-ops-wiki/wiki/sources/llm-wiki.md
-- Note: `Wiki/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md`
+- Status: `verified`
+- Source: `Wiki/wiki/sources/llm-wiki.md`
+- Note: `Wiki/wiki/learnings/llm-wiki-reference.md`
+
+## [2026-04-26] lint | LLM Wiki Project Run
+
+- Intent: `wiki-maintenance`
+- Status: `verified`
+- Source: `Skills/content-publishing/llm-wiki/SKILL.md`
+- Result: normalized Skill Ops Wiki links to relative paths, aligned the default linter root with `Wiki/wiki`, and verified `ask wiki lint` passes.

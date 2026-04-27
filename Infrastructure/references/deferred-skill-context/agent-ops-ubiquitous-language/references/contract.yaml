@@ -1,0 +1,47 @@
+schema_version: "1.0"
+
+purpose: >
+  Convert natural user wording, project terminology, and relevant session evidence
+  into a stable shared vocabulary and prompt translation map for future agent work.
+
+triggers:
+  - User asks to create or update a glossary, domain model, DDD language, or ubiquitous language
+  - User says terminology is fuzzy or they do not know the technical term
+  - User wants Codex to interpret recurring plain-language phrases consistently
+  - A project needs canonical names, aliases to avoid, relationships, or flagged ambiguities
+
+inputs:
+  - Current conversation and user phrasing
+  - Existing UBIQUITOUS_LANGUAGE.md when present
+  - Project guidance files and domain docs when relevant
+  - Session or collector logs only when explicitly requested for history-backed vocabulary
+
+outputs:
+  - UBIQUITOUS_LANGUAGE.md at the selected local path
+  - A concise integration update to the nearest active agent instruction surface when one exists
+  - Canonical terms with one-sentence definitions and avoided aliases
+  - Prompt translations from user phrases to agent-actionable wording
+  - Relationships, example dialogue, flagged ambiguities, and open questions
+  - Concise closeout summary with output path, integration surface, and skipped-source notes
+
+non_goals:
+  - Generic programming vocabulary education
+  - Code symbol renaming without a domain-language need
+  - Broad documentation rewrites
+  - New validation or routing infrastructure unless explicitly requested or already natural to the repo
+  - Raw transcript or log extraction
+
+risks:
+  - Sensitive data exposure from logs; mitigated by summarizing evidence and redacting secrets
+  - Overfitted terminology; mitigated by preserving aliases and confidence labels
+  - False precision; mitigated by flagging low-confidence terms and open questions
+
+observability: >
+  Report the output path, agent instruction integration surface, skipped or
+  unavailable sources, and low-confidence canonical terms in the closeout so
+  future agents can understand the evidence behind the vocabulary.
+
+rollback_procedure: >
+  Restore the previous `UBIQUITOUS_LANGUAGE.md` from version control or local
+  history, then rerun the skill with that file as the starting source and preserve
+  rejected term choices under `Flagged ambiguities` when they explain future confusion.

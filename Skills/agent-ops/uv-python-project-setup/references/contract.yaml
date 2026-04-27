@@ -1,23 +1,31 @@
-schema_version: "1.0"
-skill: "uv-python-project-setup"
-type: runbook
-purpose: >
-  Define the expected execution contract for uv-python-project-setup so routing, outputs,
-  and validation behavior remain consistent and testable.
+schema_version: 1
+skill: uv-python-project-setup
+purpose: "Create or repair uv-based Python project setup with reproducible runtime contracts."
 triggers:
-  - User requests work that matches this skill's domain and workflow.
-  - The task needs this skill's specific implementation or review contract.
-inputs:
-  - clear user goal and scope
-  - relevant repository context or target files
-  - constraints, risks, and validation expectations
-outputs:
-  - concrete guidance or edits aligned to the skill scope
-  - explicit validation results and blocker evidence
-  - residual risks or follow-up actions when applicable
+  - "Create, repair, and validate uv Python project setup. Use when initializing Python apps or libraries, managing uv dependencies, virtual environments, or CI-ready uv workflows."
 non_goals:
-  - unrelated architectural rewrites
-  - out-of-scope operations without explicit approval
+  - "Route unrelated work away from this skill."
+inputs:
+  - "project type"
+  - "Python version"
+  - "dependency policy"
+  - "execution context"
+  - "validation command"
+outputs:
+  - "setup plan"
+  - "uv commands"
+  - "dependency notes"
+  - "validation evidence"
 risks:
-  - missing context can lead to incorrect scope; mitigate with targeted clarification
-  - stale assumptions can cause drift; mitigate with current evidence and checks
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

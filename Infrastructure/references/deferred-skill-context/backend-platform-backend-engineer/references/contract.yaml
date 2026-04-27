@@ -1,0 +1,24 @@
+purpose: >
+  Define expected behavior and outputs for the backend-engineer skill.
+schema_version: 1.0
+triggers:
+  - user requests help implementing or safely extending an existing backend
+  - user needs code-level guidance plus verification commands
+  - Cloudflare Workers + Hono is the primary runtime (multi-runtime supported)
+inputs:
+  - change request and target service/module
+  - constraints (auth/compliance/performance/reliability)
+  - acceptance criteria format (Given/When/Then)
+outputs:
+  - intent + 3-7 step plan
+  - patch summary (files + changes)
+  - Given/When/Then acceptance criteria
+  - code-level guidance (snippets/pseudo-diff when helpful)
+  - verification commands with expected outcomes
+  - risks, rollback, and next steps
+non_goals:
+  - greenfield architecture design (route to backend-design)
+  - migrations or deploys without explicit approval
+risks:
+  - missing inputs; mitigated by at most 2 clarifying questions
+  - verification not run; mitigated by explicit "Not run" rationale

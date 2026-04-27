@@ -61,17 +61,6 @@ TOKEN_ALIASES = {
 
 
 def tokenize(text: str) -> set[str]:
-    """
-    Convert input text into a deduplicated set of normalized tokens useful for matching.
-    
-    The function lowercases text, removes common stopwords, strips leading and trailing hyphens, expands token aliases, and includes both whole hyphenated tokens and their individual hyphen-separated parts.
-    
-    Parameters:
-        text (str): Input text to tokenize.
-    
-    Returns:
-        set[str]: A set of normalized token strings extracted from the input.
-    """
     tokens: set[str] = set()
     for token in TOKEN_RE.findall(text.lower()):
         cleaned = token.strip("-")
@@ -88,42 +77,17 @@ def tokenize(text: str) -> set[str]:
 
 
 def normalize_phrase(text: str) -> str:
-    """
-    Normalize a phrase by lowercasing and replacing non-alphanumeric sequences with single spaces.
-    
-    Returns:
-        A normalized string containing only lowercase letters and digits separated by single spaces, with leading and trailing whitespace removed.
-    """
     return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
 
 
 def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> tuple[list[dict[str, Any]], str | None]:
-    """
-    Load and validate the manifest.jsonl for a specified root skill set and return the parsed rows or an error status.
-    
-    Parameters:
-        skill_set (str): Name of the root skill set to load (must be in ROOT_SKILL_SET_NAMES).
-        skillsets_dir (Path): Base directory containing skill set subdirectories (defaults to DEFAULT_SKILLSETS_DIR).
-    
-    Returns:
-        tuple[list[dict[str, Any]], str | None]: A pair where the first element is the list of validated manifest rows (each a dict with required keys: `id`, `description`, `level`, `source_path`, and optional `triggers`), and the second element is an error status string when applicable:
-            - "invalid_skill_set" if `skill_set` is not recognized,
-            - "manifest_missing" if the manifest.jsonl file is not present,
-            - None on successful load.
-    
-    Raises:
-        ValueError: If any manifest line contains invalid JSON, a non-object row, missing/empty required fields, or a malformed `triggers` field.
-    """
     if skill_set not in ROOT_SKILL_SET_NAMES:
         return [], "invalid_skill_set"
     manifest_path = skillsets_dir / skill_set / "manifest.jsonl"
     if not manifest_path.is_file():
         return [], "manifest_missing"
+    source_roots = [skillsets_dir.parent, repo_root()]
     rows: list[dict[str, Any]] = []
-    source_root = skillsets_dir.parent if skillsets_dir.name == ".skillsets" else repo_root()
-    source_roots = [source_root]
-    if source_root.resolve() != repo_root().resolve():
-        source_roots.append(repo_root())
     for line_no, line in enumerate(manifest_path.read_text(encoding="utf-8").splitlines(), start=1):
         if not line.strip():
             continue
@@ -138,51 +102,36 @@ def read_manifest(skill_set: str, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -
                 raise ValueError(
                     f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field {field!r} must be a non-empty string"
                 )
+        source_path = Path(str(row["source_path"]))
+        if source_path.is_absolute() or ".." in source_path.parts:
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'source_path' must be a repo-relative path"
+            )
+        if not any(_source_path_exists_within_root(source_root, source_path) for source_root in source_roots):
+            raise ValueError(
+                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path {row['source_path']!r} does not exist"
+            )
         triggers = row.get("triggers", [])
         if not isinstance(triggers, list) or any(not isinstance(item, str) for item in triggers):
             raise ValueError(
                 f"Invalid manifest row at {rel(manifest_path)}:{line_no}: field 'triggers' must be a list of strings"
             )
-        source_path = Path(row["source_path"])
-        if source_path.is_absolute():
-            raise ValueError(
-                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path must be repository-relative"
-            )
-        found_source = False
-        escaped_source = False
-        for candidate_root in source_roots:
-            source_file = candidate_root / source_path
-            try:
-                source_file.resolve().relative_to(candidate_root.resolve())
-            except ValueError:
-                escaped_source = True
-                continue
-            if source_file.is_file():
-                found_source = True
-                break
-        if escaped_source and not found_source:
-            raise ValueError(
-                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path escapes repo root"
-            )
-        if not found_source:
-            raise ValueError(
-                f"Invalid manifest row at {rel(manifest_path)}:{line_no}: source_path does not exist: {row['source_path']}"
-            )
         rows.append(row)
     return rows, None
 
 
+def _source_path_exists_within_root(source_root: Path, source_path: Path) -> bool:
+    candidate = source_root / source_path
+    if not candidate.is_file():
+        return False
+    try:
+        candidate.resolve().relative_to(source_root.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
+
+
 def score_row(row: dict[str, Any], task: str) -> tuple[float, list[str]]:
-    """
-    Score how well a manifest row matches the given task text.
-    
-    Parameters:
-        row (dict[str, Any]): A manifest row containing at least `id`, `description`, and optional `triggers`.
-        task (str): The task text to match against the row.
-    
-    Returns:
-        tuple[float, list[str]]: A pair (confidence, reasons). `confidence` is a number between 0.0 and 1.0 indicating match strength (rounded to 4 decimals). `reasons` is a short list of human-readable match reasons; when a multi-word trigger or id phrase is found in the task the confidence is `1.0` and the reason lists the matched phrase, otherwise reasons enumerate up to three matched terms.
-    """
     task_phrase = normalize_phrase(task)
     phrase_candidates = [
         normalize_phrase(str(row.get("id", "")).replace("-", " ")),
@@ -212,17 +161,6 @@ def score_row(row: dict[str, Any], task: str) -> tuple[float, list[str]]:
 
 
 def signal_matches(task_text: str, task_tokens: set[str], signal: str) -> bool:
-    """
-    Determine whether a routing signal matches the task text.
-    
-    Parameters:
-        task_text (str): Lowercased task text used for substring checks.
-        task_tokens (set[str]): Tokenized task used for token-subset checks.
-        signal (str): Signal phrase to test.
-    
-    Returns:
-        bool: `True` if `signal` is a non-empty substring of `task_text` or all tokens from `signal` are contained in `task_tokens`, `False` otherwise.
-    """
     signal_text = signal.lower().strip()
     if not signal_text:
         return False
@@ -235,62 +173,26 @@ def signal_matches(task_text: str, task_tokens: set[str], signal: str) -> bool:
 
 
 def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | None:
-    """
-    Finds the first manifest row whose `"id"` equals the given stage identifier.
-    
-    Parameters:
-        rows (list[dict[str, Any]]): Sequence of manifest rows (dictionaries) to search; each row is expected to contain an `"id"` key.
-        stage_id (str): Stage identifier to match against each row's `"id"`.
-    
-    Returns:
-        dict[str, Any] | None: The matched row dictionary if found, `None` otherwise.
-    """
     for row in rows:
         if row.get("id") == stage_id:
             return row
     return None
 
 
-def selected_payload(row: dict[str, Any], confidence: float, rationale: str | None = None) -> dict[str, Any]:
-    """
-    Builds a standardized selection payload for a manifest row.
-    
-    Parameters:
-        row (dict[str, Any]): Manifest row dictionary containing at least `id`, `level`, and `source_path`.
-        confidence (float): Confidence score for the selection (typically 0.0–1.0).
-    
-    Returns:
-        dict[str, Any]: Payload with keys:
-            - `id`: row's `id`
-            - `level`: row's `level`
-            - `source_path`: row's `source_path`
-            - `confidence`: `confidence` rounded to four decimal places
-    """
-    payload = {
+def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
+    return {
         "id": row.get("id"),
         "level": row.get("level"),
         "source_path": row.get("source_path"),
         "confidence": round(confidence, 4),
     }
-    if rationale:
-        payload["rationale"] = rationale
-    return payload
 
 
 def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool:
-    """
-    Detect whether the task text is asking if a stage (or lane) is correct or which stage to use.
-    
-    Parameters:
-    	task_text (str): The task text (expected lowercased) to inspect for correctness-question phrasing.
-    	task_tokens (set[str]): Tokenized words from the task text for phrase/token membership checks.
-    
-    Returns:
-    	bool: `True` if the task appears to ask about stage correctness or which stage to use, `False` otherwise.
-    """
     return (
         re.search(r"\bis\s+he-[a-z0-9-]+\s+(correct|right)\b", task_text) is not None
-        or "whether" in task_tokens
+        or re.search(r"\bwhether\s+(to\s+use\s+)?he-[a-z0-9-]+\s+(is\s+)?(correct|right)\b", task_text) is not None
+        or re.search(r"\bwhether\b.*\b(right|correct|best)\s+stage\b", task_text) is not None
         or "right stage" in task_text
         or "correct stage" in task_text
         or "best stage" in task_text
@@ -303,20 +205,7 @@ def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool
 
 
 def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """
-    Apply harness-engineering deterministic routing rules to select a manifest row for the given task.
-    
-    Parameters:
-        task (str): The task text to evaluate for deterministic routing.
-        rows (list[dict[str, Any]]): List of manifest rows (each must contain an `id`) to consider.
-    
-    Returns:
-        dict[str, Any] | None: If a deterministic rule matches, returns a dict with keys:
-            - `row` (dict): The selected manifest row.
-            - `confidence` (float): Numeric confidence between 0.0 and 1.0.
-            - `reason` (str): Short rationale for the selection.
-        Returns `None` when no deterministic harness-engineering rule applies.
-    """
+    """Apply the HE deterministic stage policy before generic token scoring."""
     routing_map_path = repo_root() / "Plugins/harness-engineering/references/routing-map.json"
     if not routing_map_path.is_file():
         return None
@@ -381,262 +270,142 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
     return None
 
 
-FACTORY_ROUTING_RULES = {
-    "plugin-factory": {
-        "router_id": "plugin-factory-router",
-        "internal_ids": {"plugin-router"},
-        "rules": [
-            {
-                "rule": "plugin-create",
-                "route": "plugin-creator",
-                "signals": [
-                    "create plugin",
-                    "create a new plugin",
-                    "new plugin",
-                    "scaffold plugin",
-                    "plugin scaffold",
-                    "first-pass plugin",
-                    "marketplace entry",
-                    "adopt existing skill",
-                ],
-            },
-            {
-                "rule": "plugin-harden-convert",
-                "route": "plugin-builder",
-                "signals": [
-                    "harden plugin",
-                    "validate plugin",
-                    "convert plugin",
-                    "audit plugin",
-                    "plugin package",
-                    "plugin contract",
-                    "contract validation",
-                    "release plugin",
-                    "plugin release",
-                    "fix plugin warnings",
-                ],
-            },
-            {
-                "rule": "plugin-install",
-                "route": "plugin-installer",
-                "signals": [
-                    "install plugin",
-                    "plugin install",
-                    "plugin visibility",
-                    "repair plugin visibility",
-                    "trusted source",
-                    "quarantine",
-                    "rollback",
-                    "provenance",
-                ],
-            },
-            {
-                "rule": "plugin-router-needed",
-                "route": "plugin-factory-router",
-                "signals": [
-                    "route plugin",
-                    "which plugin lane",
-                    "correct plugin lane",
-                    "plugin routing",
-                    "troubleshoot plugin",
-                    "mixed plugin request",
-                ],
-            },
-        ],
-    },
-    "skill-factory": {
-        "router_id": "skill-factory-router",
-        "internal_ids": set(),
-        "rules": [
-            {
-                "rule": "skill-create",
-                "route": "skill-creator",
-                "signals": [
-                    "create skill",
-                    "create a new skill",
-                    "new skill",
-                    "author skill",
-                    "draft skill",
-                    "reshape draft skill",
-                    "update skill package",
-                ],
-            },
-            {
-                "rule": "skillify-workflow",
-                "route": "skillify",
-                "signals": [
-                    "skillify",
-                    "operationalize workflow",
-                    "convert workflow",
-                    "capture workflow",
-                    "completed workflow",
-                    "session into skill",
-                    "workflow as a reusable skill",
-                    "reusable skill package",
-                ],
-            },
-            {
-                "rule": "skill-harden",
-                "route": "skill-builder",
-                "signals": [
-                    "harden skill",
-                    "audit skill",
-                    "validate skill",
-                    "fix skill warnings",
-                    "benchmark skill",
-                    "release readiness",
-                    "contract readiness",
-                    "skill gate",
-                    "skill-builder",
-                ],
-            },
-            {
-                "rule": "skill-install",
-                "route": "skill-installer",
-                "signals": [
-                    "install skill",
-                    "list installable skills",
-                    "curated skill",
-                    "external skill",
-                    "skill from github",
-                    "runtime visibility",
-                ],
-            },
-            {
-                "rule": "skill-refactor-analysis",
-                "route": "skill-refactor",
-                "signals": [
-                    "skill reliability",
-                    "skill failures",
-                    "coverage gaps",
-                    "merge skills",
-                    "prune skills",
-                    "retire skills",
-                    "improve merge retire",
-                    "compare skills",
-                    "skill-refactor",
-                ],
-            },
-            {
-                "rule": "skill-router-needed",
-                "route": "skill-factory-router",
-                "signals": [
-                    "route skill",
-                    "which skill lane",
-                    "correct skill lane",
-                    "skill routing",
-                    "mixed skill request",
-                ],
-            },
-        ],
-    },
-}
-
-
 def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """
-    Apply deterministic routing rules for factory-style skill sets (for example, "plugin-factory" or "skill-factory") and return a routing decision when a configured rule matches.
-    
-    Parameters:
-        skill_set (str): The name of the factory skill set to evaluate.
-        task (str): The task text to match against configured signals and stage names.
-        rows (list[dict[str, Any]]): Parsed manifest rows for the skill set.
-    
-    Returns:
-        dict[str, Any] | None: A routing decision dictionary with keys:
-            - "row": the selected manifest row (dict),
-            - "confidence": the routing confidence as a float,
-            - "reason": a short string describing which deterministic rule matched;
-        or `None` when no deterministic factory rule applies.
-    """
-    config = FACTORY_ROUTING_RULES.get(skill_set)
-    if not config:
-        return None
-
+    """Apply deterministic factory lane routing before generic token scoring."""
     task_text = task.lower()
-    task_tokens = tokenize(task)
-    stage_ids = {str(row.get("id")) for row in rows}
-    router_id = str(config["router_id"])
-    router_row = row_by_id(rows, router_id)
-    internal_ids = {str(stage_id) for stage_id in config.get("internal_ids", set())}
+    row_ids = {str(row.get("id")) for row in rows}
 
-    mentioned_stages = [stage for stage in stage_ids if normalize_phrase(stage.replace("-", " ")) in normalize_phrase(task)]
-    internal_mentions = sorted(stage for stage in mentioned_stages if stage in internal_ids)
-    public_mentions = sorted(stage for stage in mentioned_stages if stage not in internal_ids)
-    if internal_mentions and router_row:
-        return {
-            "row": router_row,
-            "confidence": 0.9,
-            "reason": f"matched multi-lane {skill_set} rule 'internal-router-root-invocation'",
-        }
-    if len(public_mentions) > 1 and router_row:
-        return {
-            "row": router_row,
-            "confidence": 0.9,
-            "reason": f"matched multi-lane {skill_set} rule 'named-lane-ambiguity'",
-        }
-    if public_mentions:
-        row = row_by_id(rows, public_mentions[0])
+    if skill_set == "plugin-factory":
+        internal_plugin_lanes = {"plugin-builder", "plugin-router"}
+        if task_tokens := tokenize(task):
+            if internal_plugin_lanes & task_tokens:
+                router_row = row_by_id(rows, "plugin-factory-router")
+                if router_row:
+                    return {
+                        "row": router_row,
+                        "confidence": 0.9,
+                        "reason": "matched deterministic plugin-factory rule 'internal-lane-mention'",
+                    }
+
+    direct_mentions = [row_id for row_id in sorted(row_ids, key=len, reverse=True) if row_id in task_text]
+    if len(direct_mentions) == 1:
+        row = row_by_id(rows, direct_mentions[0])
         if row:
             return {
                 "row": row,
                 "confidence": 1.0,
                 "reason": f"matched deterministic {skill_set} rule 'direct-lane-invocation'",
             }
+    if len(direct_mentions) > 1:
+        router_id = "plugin-factory-router" if skill_set == "plugin-factory" else "skill-factory-router"
+        row = row_by_id(rows, router_id)
+        if row:
+            return {
+                "row": row,
+                "confidence": 0.9,
+                "reason": f"matched deterministic {skill_set} rule 'multi-lane-ambiguity'",
+            }
 
-    matched_rules: list[dict[str, Any]] = []
-    for rule in config["rules"]:
-        route = str(rule["route"])
-        signals = [str(signal) for signal in rule.get("signals", []) if isinstance(signal, str)]
-        if not any(signal_matches(task_text, task_tokens, signal) for signal in signals):
+    task_tokens = tokenize(task)
+    rules = {
+        "plugin-factory": [
+            (
+                "plugin-creator",
+                "create-plugin",
+                {"create", "new", "scaffold", "generate", "make", "starter", "template"},
+                {"plugin", "plugins"},
+            ),
+            (
+                "plugin-installer",
+                "install-plugin",
+                {"install", "add", "sync", "marketplace", "repair", "visibility", "visible", "import", "discover", "discovery"},
+                {"plugin", "plugins"},
+            ),
+            (
+                "plugin-builder",
+                "harden-plugin",
+                {"harden", "validate", "audit", "release", "package", "convert", "build"},
+                {"plugin", "plugins"},
+            ),
+        ],
+        "skill-factory": [
+            (
+                "skillify",
+                "skillify-workflow",
+                {"skillify", "operationalize", "operationalise", "capture", "turn", "convert"},
+                {"workflow", "process", "session", "repeatable", "skill", "skills"},
+            ),
+            (
+                "skill-creator",
+                "create-skill",
+                {"create", "new", "scaffold", "generate", "make", "draft"},
+                {"skill", "skills"},
+            ),
+            (
+                "skill-installer",
+                "install-skill",
+                {"install", "add", "sync", "github", "curated"},
+                {"skill", "skills"},
+            ),
+            (
+                "skill-refactor",
+                "refactor-skill",
+                {"refactor", "simplify", "merge", "fold", "prune", "coverage", "session"},
+                {"skill", "skills"},
+            ),
+            (
+                "skill-builder",
+                "harden-skill",
+                {"harden", "validate", "audit", "release", "package", "eval", "benchmark"},
+                {"skill", "skills"},
+            ),
+        ],
+    }
+
+    matched = []
+    for route_id, rule_name, action_tokens, noun_tokens in rules.get(skill_set, []):
+        if route_id not in row_ids:
             continue
-        if route in stage_ids:
-            matched_rules.append(rule)
+        if task_tokens & action_tokens and task_tokens & noun_tokens:
+            matched.append((route_id, rule_name))
 
-    matched_routes = sorted({str(rule["route"]) for rule in matched_rules})
-    if len(matched_routes) > 1 and router_row:
-        return {
-            "row": router_row,
-            "confidence": 0.9,
-            "reason": f"matched multi-lane {skill_set} rule 'mixed-intent-ambiguity'",
-        }
-    if len(matched_routes) == 1:
-        row = row_by_id(rows, matched_routes[0])
+    if len(matched) == 1:
+        route_id, rule_name = matched[0]
+        row = row_by_id(rows, route_id)
         if row:
             return {
                 "row": row,
                 "confidence": 0.95,
-                "reason": f"matched deterministic {skill_set} rule '{matched_rules[0]['rule']}'",
+                "reason": f"matched deterministic {skill_set} rule '{rule_name}'",
             }
-
+    if len(matched) > 1:
+        router_id = "plugin-factory-router" if skill_set == "plugin-factory" else "skill-factory-router"
+        row = row_by_id(rows, router_id)
+        if row:
+            return {
+                "row": row,
+                "confidence": 0.9,
+                "reason": f"matched deterministic {skill_set} rule 'multi-intent-factory-task'",
+            }
     return None
 
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
-    """
-    Route a textual task to a stage within a root skill set and return a structured routing payload.
-    
-    Performs manifest loading, deterministic overrides (harness-engineering and factory rules), and manifest-driven scoring to produce a selection and ranked candidates.
-    
-    Parameters:
-        skill_set (str): Root skill set name to route against (e.g., "harness-engineering", "plugin-factory").
-        task (str): The textual task to route.
-        top_k (int, optional): Maximum number of candidate rows to return (bounded to 1..MAX_TOP_K). Defaults to MAX_TOP_K.
-        skillsets_dir (Path, optional): Root directory containing .skillsets/<skill_set>/manifest.jsonl. Defaults to DEFAULT_SKILLSETS_DIR.
-    
-    Returns:
-        dict: A routing payload with the following keys:
-            - schema_version (int)
-            - status (str): One of "selected", "low_confidence", "no_match", or manifest error codes like "manifest_missing" / "invalid_skill_set".
-            - policy_identity (dict): Policy identity metadata.
-            - skill_set (str): Echo of the requested skill_set.
-            - top_k (int): Bounded top_k actually used.
-            - selected (dict | None): Standardized selected row payload (id, level, source_path, confidence) when a selection is made and confidence meets threshold; otherwise None.
-            - candidates (list[dict]): Ranked candidate entries each with keys `id`, `level`, `confidence`, and `reason`.
-            - operator_action (str | None): Guidance for an operator when human action or clarification is required, otherwise None.
-    """
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
-    rows, error_status = read_manifest(skill_set, skillsets_dir)
+    try:
+        rows, error_status = read_manifest(skill_set, skillsets_dir)
+    except ValueError as exc:
+        return {
+            "schema_version": 1,
+            "status": "manifest_invalid",
+            "policy_identity": policy_identity(),
+            "skill_set": skill_set,
+            "top_k": bounded_top_k,
+            "selected": None,
+            "candidates": [],
+            "error": str(exc),
+            "operator_action": "Repair the skill-set manifest and rerun routing.",
+        }
     if error_status:
         return {
             "schema_version": 1,
@@ -648,8 +417,10 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "candidates": [],
             "operator_action": "Generate manifests before routing." if error_status == "manifest_missing" else "Choose a valid root skill set.",
         }
-    override = harness_engineering_override(task, rows) if skill_set == "harness-engineering" else None
-    if override is None:
+    override = None
+    if skill_set == "harness-engineering":
+        override = harness_engineering_override(task, rows)
+    elif skill_set in {"plugin-factory", "skill-factory"}:
         override = factory_override(skill_set, task, rows)
     if override:
         selected_row = override["row"]
@@ -658,7 +429,6 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             {
                 "id": selected_row.get("id"),
                 "level": selected_row.get("level"),
-                "source_path": selected_row.get("source_path"),
                 "confidence": round(selected_confidence, 4),
                 "reason": override["reason"],
             }
@@ -669,7 +439,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "policy_identity": policy_identity(),
             "skill_set": skill_set,
             "top_k": bounded_top_k,
-            "selected": selected_payload(selected_row, selected_confidence, str(override["reason"])),
+            "selected": selected_payload(selected_row, selected_confidence),
             "candidates": candidates,
             "operator_action": None,
         }
@@ -681,13 +451,12 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
         scored.append((confidence, row, reasons))
     scored.sort(key=lambda item: (-item[0], item[1].get("id", "")))
     candidates = [
-            {
-                "id": row.get("id"),
-                "level": row.get("level"),
-                "source_path": row.get("source_path"),
-                "confidence": round(confidence, 4),
-                "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
-            }
+        {
+            "id": row.get("id"),
+            "level": row.get("level"),
+            "confidence": confidence,
+            "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
+        }
         for confidence, row, reasons in scored[:bounded_top_k]
     ]
     if not candidates:
@@ -701,15 +470,11 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "candidates": [],
             "operator_action": "Ask a clarifying question or choose a documented fallback root skill set.",
         }
-    selected_confidence, selected_row, selected_reasons = scored[0]
+    selected_confidence, selected_row, _reasons = scored[0]
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":
-        selected = selected_payload(
-            selected_row,
-            selected_confidence,
-            "; ".join(selected_reasons) if selected_reasons else "matched manifest metadata",
-        )
+        selected = selected_payload(selected_row, selected_confidence)
     return {
         "schema_version": 1,
         "status": status,
@@ -723,22 +488,6 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
 
 
 def read_task(args: argparse.Namespace) -> str:
-    """
-    Read task text from exactly one of the provided CLI sources.
-    
-    Parameters:
-        args (argparse.Namespace): Parsed CLI namespace exposing one and only one of:
-            - `task` (str | None): inline task text provided via --task.
-            - `task_stdin` (bool): when true, read task text from standard input (--task-stdin).
-            - `task_file` (str | None): path to a UTF-8 file containing the task (--task-file).
-    
-    Returns:
-        str: The task text with leading and trailing whitespace removed.
-    
-    Raises:
-        SystemExit: If none or more than one of the task sources is provided, or if the specified
-        task file does not exist.
-    """
     sources = [bool(args.task), bool(args.task_stdin), bool(args.task_file)]
     if sum(sources) != 1:
         raise SystemExit("Specify exactly one of --task, --task-stdin, or --task-file.")
@@ -755,21 +504,6 @@ def read_task(args: argparse.Namespace) -> str:
 
 
 def main() -> int:
-    """
-    CLI entry point for routing a task to a skill set stage.
-    
-    Parses command-line arguments, reads the task text from one of the supported inputs, invokes the routing logic, and prints either JSON or a brief human-readable result. Supported flags:
-      --skill-set (required): name of the skill set to route against.
-      --task: task text (avoid for sensitive input; use --task-stdin or --task-file).
-      --task-stdin: read task text from standard input.
-      --task-file: read task text from the given file path.
-      --top-k: number of candidate stages to return (bounded by MAX_TOP_K).
-      --skillsets-dir: directory containing .skillsets manifests.
-      --json: output the full payload as formatted JSON.
-    
-    Returns:
-      exit_code (int): 0 when the route status is one of "selected", "low_confidence", or "no_match"; 1 otherwise.
-    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skill-set", required=True)
     parser.add_argument("--task", help="Task text; use --task-stdin or --task-file for sensitive tasks")

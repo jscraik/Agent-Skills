@@ -144,3 +144,7 @@ Summarize what was refined, what remains, and route to next stage:
 | [[he-work]] | Execute larger implementation changes after refinement choices are settled |
 | [[he-code-review]] | Run readiness review before merge |
 
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

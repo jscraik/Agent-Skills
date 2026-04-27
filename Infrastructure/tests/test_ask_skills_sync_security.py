@@ -11,7 +11,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.append(str(REPO_ROOT / "scripts"))
 
+from ask.commands import plugins as plugins_commands  # noqa: E402
 from ask.commands import skills as skills_commands  # noqa: E402
+
+sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
+from check_context_budget import DEFAULTS  # noqa: E402
 
 
 class TestAskSkillsSyncSecurity(TestCase):
@@ -28,27 +32,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         (self.source_dir / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
 
     def tearDown(self) -> None:
-        """
-        Remove the temporary test directory created during setUp.
-        
-        This cleans up self.temp_dir and all its contents by recursively deleting the directory tree; deletion errors are ignored.
-        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-
-    def _sync_rooted_workspace(self) -> None:
-        """
-        Perform a rooted workspace synchronization and assert it completed successfully.
-        
-        This helper calls the skills sync routine with projection set to "rooted" for the test repository
-        and asserts that the resulting status equals "success".
-        """
-        result = skills_commands.sync_skills(
-            self.repo_root,
-            scope="workspace",
-            dry_run=False,
-            projection="rooted",
-        )
-        self.assertEqual(result.status, "success")
 
     def test_sync_dir_copy_rejects_symlink_payload(self) -> None:
         secret = Path(self.temp_dir) / "secret.txt"
@@ -60,14 +44,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertIn("symlink", str(ctx.exception).lower())
 
-    def test_sync_skills_user_scope_defaults_to_rooted_and_writes_runtime_links(self) -> None:
-        """
-        Verifies that syncing with scope='user' defaults to the 'rooted' projection and creates the expected runtime symlinks in the user's home.
-        
-        Runs a rooted workspace sync baseline, then calls sync_skills(...) with scope="user" (and no projection) while mocking discovered skills and the user's home directory. Asserts the operation succeeds, that ~/.agents/skills and ~/.codex/skills are created as symlinks under the mocked home, and that the reported projection_mode is "rooted".
-        """
-        self._sync_rooted_workspace()
-
+    def test_sync_skills_user_scope_writes_codex_and_agents_links(self) -> None:
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
@@ -77,61 +54,212 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
-        self.assertEqual(result.data["projection_mode"], "rooted")
-
-    def test_sync_skills_user_scope_rooted_rejects_invalid_workspace_runtime(self) -> None:
-        """
-        Verifies that syncing with scope="user" and projection="rooted" fails when the workspace runtime contains actual skill directories instead of expected symlinks.
-        
-        Asserts that the sync returns an error with validation code `ERR_VALIDATION`, that the error message mentions "workspace", no user runtime symlink is created under the fake home, and the plan records a violation with code `ROOTED_WORKSPACE_POLICY_NAME_DRIFT`.
-        """
-        flat_skill = self.repo_root / ".agents" / "skills" / "safe-skill"
-        flat_skill.mkdir()
-        (flat_skill / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
-
-        with (
-            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
-            mock.patch.object(Path, "home", return_value=self.fake_home),
-        ):
-            result = skills_commands.sync_skills(
-                self.repo_root,
-                scope="user",
-                dry_run=False,
-                projection="rooted",
-            )
-
-        self.assertEqual(result.status, "error")
-        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-        self.assertIn("workspace", result.errors[0].message.lower())
-        self.assertFalse((self.fake_home / ".agents" / "skills").exists())
-        self.assertIn(
-            "ROOTED_WORKSPACE_POLICY_NAME_DRIFT",
-            {violation["code"] for violation in result.data["plan"]["violations"]},
-        )
-
-    def test_sync_skills_user_scope_explicit_flat_rollback_writes_runtime_links(self) -> None:
-        with (
-            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
-            mock.patch.object(Path, "home", return_value=self.fake_home),
-        ):
-            result = skills_commands.sync_skills(
-                self.repo_root,
-                scope="user",
-                dry_run=False,
-                projection="flat",
-            )
-
-        self.assertEqual(result.status, "success")
-        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
-        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
+        self.assertTrue((self.fake_home / "plugins").is_dir())
+        self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "flat")
 
+    def test_sync_skills_user_scope_preserves_existing_agents_plugins_directory(self) -> None:
+        user_plugins = self.fake_home / ".agents" / "plugins"
+        user_plugins.mkdir(parents=True)
+        (user_plugins / "README.md").write_text("user owned\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_dir())
+        self.assertFalse(user_plugins.is_symlink())
+        self.assertEqual((user_plugins / "README.md").read_text(encoding="utf-8"), "user owned\n")
+        self.assertIn(
+            f"Skipped existing non-symlink path: {user_plugins}",
+            result.data["logs"],
+        )
+
+    def test_sync_skills_user_scope_preserves_existing_plugins_directory(self) -> None:
+        user_plugins = self.fake_home / "plugins"
+        user_plugins.mkdir()
+        (user_plugins / "README.md").write_text("user owned\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_dir())
+        self.assertFalse(user_plugins.is_symlink())
+        self.assertTrue((user_plugins / "README.md").is_file())
+        self.assertIn(
+            f"Ensured plugin mirror directory: {user_plugins}",
+            result.data["logs"],
+        )
+
+    def test_sync_skills_user_scope_replaces_local_plugin_mirror_copies(self) -> None:
+        plugin_source = self.repo_root / "Plugins" / "harness-engineering"
+        plugin_source.mkdir(parents=True)
+        (plugin_source / ".codex-plugin").mkdir()
+        (plugin_source / ".codex-plugin" / "plugin.json").write_text("{}", encoding="utf-8")
+        (plugin_source / "skills").mkdir()
+        (plugin_source / "skills" / "he-heartbeat").mkdir()
+        (plugin_source / "skills" / "he-heartbeat" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
+        (self.repo_root / "Plugins" / "marketplace.json").write_text(
+            '{"plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}\n',
+            encoding="utf-8",
+        )
+        stale_target = self.fake_home / "plugins" / "harness-engineering"
+        stale_target.mkdir(parents=True)
+        (stale_target / "stale.txt").write_text("stale\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse((stale_target / "stale.txt").exists())
+        self.assertEqual((stale_target / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
+        self.assertTrue((stale_target / ".codex-repo-plugin-source").is_file())
+        self.assertTrue(
+            any("Replaced home plugin mirror" in item for item in result.data["logs"]),
+            result.data["logs"],
+        )
+
+    def test_local_plugin_runtime_sync_preserves_non_local_plugin_entries(self) -> None:
+        plugin_source = self.repo_root / "Plugins" / "harness-engineering"
+        plugin_source.mkdir(parents=True)
+        (plugin_source / "skills").mkdir()
+        (plugin_source / "skills" / "he-heartbeat").mkdir()
+        (plugin_source / "skills" / "he-heartbeat" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
+        marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace_path.write_text(
+            '{"plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}\n',
+            encoding="utf-8",
+        )
+        runtime_root = self.fake_home / ".codex" / "Plugins"
+        curated_plugin = runtime_root / "linear"
+        curated_plugin.mkdir(parents=True)
+        (curated_plugin / "marker.txt").write_text("keep\n", encoding="utf-8")
+        stale_local = runtime_root / "harness-engineering"
+        stale_local.mkdir()
+        (stale_local / "stale.txt").write_text("stale\n", encoding="utf-8")
+
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[{"name": "harness-engineering", "path": "./Plugins/harness-engineering"}],
+            dry_run=False,
+        )
+
+        self.assertEqual(report["copied_plugins"], ["harness-engineering"])
+        self.assertEqual(report["removed_entries"], ["harness-engineering"])
+        self.assertTrue((curated_plugin / "marker.txt").is_file())
+        self.assertFalse((stale_local / "stale.txt").exists())
+        self.assertEqual((stale_local / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
+
+    def test_local_plugin_runtime_sync_prunes_stale_marked_plugins(self) -> None:
+        plugin_a = self.repo_root / "Plugins" / "plugin-a"
+        plugin_a.mkdir(parents=True)
+        (plugin_a / "SKILL.md").write_text("plugin-a\n", encoding="utf-8")
+        plugin_b = self.repo_root / "Plugins" / "plugin-b"
+        plugin_b.mkdir(parents=True)
+        (plugin_b / "SKILL.md").write_text("plugin-b\n", encoding="utf-8")
+        marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace_path.write_text(
+            '{"plugins":['
+            '{"name":"plugin-a","source":{"source":"local","path":"./Plugins/plugin-a"}},'
+            '{"name":"plugin-b","source":{"source":"local","path":"./Plugins/plugin-b"}}'
+            ']}\n',
+            encoding="utf-8",
+        )
+        runtime_root = self.fake_home / ".codex" / "Plugins"
+
+        # Initial sync with both plugins
+        plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[
+                {"name": "plugin-a", "path": "./Plugins/plugin-a"},
+                {"name": "plugin-b", "path": "./Plugins/plugin-b"},
+            ],
+            dry_run=False,
+        )
+        self.assertTrue((runtime_root / "plugin-a" / "SKILL.md").is_file())
+        self.assertTrue((runtime_root / "plugin-b" / "SKILL.md").is_file())
+
+        # Update marketplace to remove plugin-b
+        marketplace_path.write_text(
+            '{"plugins":['
+            '{"name":"plugin-a","source":{"source":"local","path":"./Plugins/plugin-a"}}'
+            ']}\n',
+            encoding="utf-8",
+        )
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[{"name": "plugin-a", "path": "./Plugins/plugin-a"}],
+            dry_run=False,
+        )
+
+        self.assertEqual(report["planned_plugins"], ["plugin-a"])
+        self.assertEqual(report["pruned_plugins"], ["plugin-b"])
+        self.assertTrue((runtime_root / "plugin-a" / "SKILL.md").is_file())
+        self.assertFalse((runtime_root / "plugin-b").exists())
+
+    def test_local_plugin_runtime_sync_dry_run_does_not_prune_stale_plugins(self) -> None:
+        plugin_source = self.repo_root / "Plugins" / "plugin-a"
+        plugin_source.mkdir(parents=True)
+        (plugin_source / "SKILL.md").write_text("plugin-a\n", encoding="utf-8")
+        marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace_path.write_text(
+            '{"plugins":['
+            '{"name":"plugin-a","source":{"source":"local","path":"./Plugins/plugin-a"}}'
+            ']}\n',
+            encoding="utf-8",
+        )
+        runtime_root = self.fake_home / ".codex" / "Plugins"
+        stale_plugin = runtime_root / "plugin-b"
+        stale_plugin.mkdir(parents=True)
+        (stale_plugin / ".codex-repo-plugin-source").write_text("/old/path\n", encoding="utf-8")
+        (stale_plugin / "SKILL.md").write_text("stale\n", encoding="utf-8")
+
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=runtime_root,
+            repo_root=self.repo_root,
+            marketplace_path=marketplace_path,
+            marketplace_entries=[{"name": "plugin-a", "path": "./Plugins/plugin-a"}],
+            dry_run=True,
+        )
+
+        self.assertEqual(report["planned_plugins"], ["plugin-a"])
+        self.assertEqual(report["pruned_plugins"], ["plugin-b"])
+        self.assertTrue((stale_plugin / "SKILL.md").is_file())
+
+    def test_sync_skills_user_scope_relinks_managed_runtime_directories(self) -> None:
+        managed_skills = self.fake_home / ".agents" / "skills"
+        managed_skills.mkdir(parents=True)
+        (managed_skills / "stale.md").write_text("stale\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(managed_skills.is_symlink())
+        self.assertFalse((managed_skills / "stale.md").exists())
+
     def test_sync_skills_projection_env_reaches_engine(self) -> None:
-        """
-        Checks that the SYNC_SKILLS_PROJECTION_MODE environment variable is used to select the projection mode and that the chosen projection information and basic validation metrics are exposed by the sync engine.
-        
-        Asserts that the sync result indicates success, that `projection_mode` is "rooted", that `projection.mode_source` is "env", that the plan's `validation_status` is "pass", and that the reported `root_skill_sets.root_count` is greater than 0 and no more than 10.
-        """
         with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
             result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=True)
 
@@ -141,7 +269,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["plan"]["validation_status"], "pass")
         root_count = result.data["plan"]["root_skill_sets"]["root_count"]
         self.assertGreater(root_count, 0)
-        self.assertLessEqual(root_count, 10)
+        self.assertLessEqual(root_count, DEFAULTS["runtime_projection"]["max_root_skill_sets"])
 
     def test_sync_skills_projection_cli_wins_over_env(self) -> None:
         with (
@@ -160,12 +288,6 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection"]["mode_source"], "cli")
 
     def test_sync_skills_rooted_non_dry_run_writes_generated_surface(self) -> None:
-        """
-        Verifies that a non-dry-run rooted workspace sync generates the expected rooted surface artifacts.
-        
-        Asserts the sync completes successfully, reports a "rooted" projection mode, and creates the repository-rooted artifacts:
-        `.agents/skills/<skill>/SKILL.md` and `.skillsets/<skill>/manifest.jsonl`.
-        """
         result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
@@ -177,11 +299,19 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "rooted")
         self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
+        self.assertTrue((self.repo_root / ".skillsets" / "command-surface.json").is_file())
+        self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "SKILL.md").is_file())
+        self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "agents" / "openai.yaml").is_file())
+        self.assertEqual(result.data["plan"]["command_handles"]["status"], "pass")
 
-    def test_sync_skills_rooted_non_dry_run_prunes_unowned_skillset_files(self) -> None:
-        rogue_file = self.repo_root / ".skillsets" / "agent-ops" / "notes.md"
-        rogue_file.parent.mkdir(parents=True)
-        rogue_file.write_text("hand-written file\n", encoding="utf-8")
+    def test_sync_skills_rooted_prunes_flat_symlink_before_command_handle_write(self) -> None:
+        canonical_skill = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
+        canonical_skill.mkdir(parents=True)
+        source_skill_md = canonical_skill / "SKILL.md"
+        source_skill_md.write_text("# Canonical Source\n", encoding="utf-8")
+        runtime_handle = self.repo_root / ".agents" / "skills" / "he-heartbeat"
+        runtime_handle.parent.mkdir(parents=True, exist_ok=True)
+        runtime_handle.symlink_to(canonical_skill)
 
         result = skills_commands.sync_skills(
             self.repo_root,
@@ -191,11 +321,113 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
 
         self.assertEqual(result.status, "success")
-        self.assertFalse(rogue_file.exists())
+        self.assertFalse(runtime_handle.is_symlink())
+        self.assertIn("Generated command handle", (runtime_handle / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(source_skill_md.read_text(encoding="utf-8"), "# Canonical Source\n")
         self.assertTrue(
-            any("notes.md" in delete for delete in result.data["plan"]["deletes"]),
-            "rooted projection should prune unowned .skillsets files",
+            any("Removed stale symlink" in item and "he-heartbeat" in item for item in result.data["logs"]),
+            result.data["logs"],
         )
+
+    def test_sync_skills_rooted_prunes_unowned_skillset_files(self) -> None:
+        stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
+        stale_file.parent.mkdir(parents=True)
+        stale_file.write_text("{}\n", encoding="utf-8")
+        command_surface = self.repo_root / ".skillsets" / "command-surface.json"
+        command_surface.parent.mkdir(parents=True, exist_ok=True)
+        command_surface.write_text("{}\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(stale_file.exists())
+        self.assertTrue(command_surface.exists())
+        self.assertTrue(
+            any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
+            result.data["plan"],
+        )
+
+    def test_sync_skills_rooted_dry_run_reports_unowned_skillset_files(self) -> None:
+        stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
+        stale_file.parent.mkdir(parents=True)
+        stale_file.write_text("{}\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=True,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(stale_file.exists())
+        self.assertTrue(
+            any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
+            result.data["plan"],
+        )
+
+    def test_sync_skills_rooted_reports_skillset_prune_failures(self) -> None:
+        with mock.patch.object(
+            skills_commands,
+            "prune_unowned_skillset_files",
+            side_effect=OSError("permission denied"),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
+        self.assertIn("permission denied", result.errors[0].message)
+        self.assertIn("ROOTED_PROJECTION_WRITE_FAILED", result.data["plan"]["warnings"])
+
+    def test_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
+        with mock.patch.object(Path, "home", return_value=self.fake_home):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="user",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("ROOTED_WORKSPACE", result.data["plan"]["warnings"][0])
+        self.assertFalse((self.fake_home / ".agents" / "skills").exists())
+
+    def test_sync_skills_rooted_user_scope_relinks_after_workspace_validation(self) -> None:
+        workspace_result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+        self.assertEqual(workspace_result.status, "success")
+
+        with mock.patch.object(Path, "home", return_value=self.fake_home):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="user",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
+        self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
+        self.assertTrue((self.fake_home / "plugins").is_dir())
+        self.assertFalse((self.fake_home / "plugins").is_symlink())
+        self.assertEqual(result.data["projection_mode"], "rooted")
 
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
@@ -222,11 +454,6 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertNotIn("imagegen", result.data["plan"]["preserved_bridge_lane_entries"])
 
     def test_sync_skills_projection_does_not_mask_invalid_scope(self) -> None:
-        """
-        Verifies that specifying an invalid scope produces a validation error even when a projection is provided.
-        
-        Asserts that the sync result has an error status and that the first error carries the code `ERR_INVALID_SCOPE`.
-        """
         result = skills_commands.sync_skills(
             self.repo_root,
             scope="unknown",
@@ -238,14 +465,6 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.errors[0].code, "ERR_INVALID_SCOPE")
 
     def test_sync_skills_workspace_prunes_stale_symlinks_only(self) -> None:
-        """
-        Verifies that workspace syncing removes only stale symlinks, preserves real directories, and creates symlinks for discovered skills.
-        
-        After running a workspace sync with a discovered valid skill, the test asserts:
-        - the stale symlink is removed (no longer exists and is not a symlink),
-        - an existing real directory under the runtime skills path is preserved,
-        - a symlink for the discovered valid skill is created under the runtime skills path.
-        """
         skills_dir = self.repo_root / ".agents" / "skills"
         valid_source = self.repo_root / "Skills" / "agent-ops" / "valid-skill"
         valid_source.mkdir(parents=True)
@@ -262,12 +481,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             description="Valid skill.",
         )
         with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[fake_entry]):
-            result = skills_commands.sync_skills(
-                self.repo_root,
-                scope="workspace",
-                dry_run=False,
-                projection="flat",
-            )
+            result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=False)
 
         self.assertEqual(result.status, "success")
         self.assertFalse(stale.exists())
@@ -276,11 +490,6 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((skills_dir / "valid-skill").is_symlink())
 
     def test_sync_skills_workspace_preserves_reserved_system_lane_symlink(self) -> None:
-        """
-        Verify that syncing workspace skills preserves the reserved `.agents/skills/.system` symlink and its target.
-        
-        Creates a `skills-system` directory and sets `.agents/skills/.system` as a symlink to `../../skills-system`, runs `sync_skills` with `scope="workspace"`, and asserts the operation succeeds, `.agents/skills/.system` remains a symlink, and its link target is `"../../skills-system"`.
-        """
         skills_dir = self.repo_root / ".agents" / "skills"
         system_skills_dir = self.repo_root / "skills-system"
         system_skills_dir.mkdir()
@@ -307,8 +516,6 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(os.readlink(system_link), "../../skills-system")
 
     def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
-        self._sync_rooted_workspace()
-
         with (
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
             mock.patch.object(Path, "home", return_value=self.fake_home),
@@ -347,12 +554,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             mock.patch.object(skills_commands, "discover_skill_entries", return_value=[fake_entry]),
             mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[fake_entry]),
         ):
-            result = skills_commands.sync_skills(
-                self.repo_root,
-                scope="workspace",
-                dry_run=False,
-                projection="flat",
-            )
+            result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=False)
 
         self.assertEqual(result.status, "success")
         self.assertTrue((skills_dir / "valid-skill").is_symlink())

@@ -861,12 +861,12 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(sorted(entry.name for entry in default_entries), ["agent-ops"])
         self.assertEqual(
             sorted(entry.name for entry in advanced_entries),
-            ["agent-ops", "browser", "frontend-app-builder"],
+            ["agent-ops", "frontend-app-builder", "skill-factory-router"],
         )
-        browser_entry = next(entry for entry in advanced_entries if entry.name == "browser")
+        local_router_entry = next(entry for entry in advanced_entries if entry.name == "skill-factory-router")
         self.assertEqual(
-            browser_entry.source_dir.relative_to(repo_root).as_posix(),
-            "Plugins/browser-use/skills/browser",
+            local_router_entry.source_dir.relative_to(repo_root).as_posix(),
+            "Plugins/cache/agent-skills-local/skill-factory/version/skills/skill-factory-router",
         )
 
     def test_skill_discovery_auto_advanced_includes_repo_non_default_skills(self) -> None:
@@ -1034,17 +1034,22 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn('normalize_plugin_copy "$1" "runtime"', content)
         self.assertIn('normalize_plugin_copy "$1" "cached"', content)
 
-    def test_sync_script_cleans_legacy_visible_local_cache_roots(self) -> None:
+    def test_sync_script_regenerates_versioned_visible_local_cache_roots(self) -> None:
         """
-        Ensure sync removes legacy visible local cache roots.
+        Ensure sync regenerates versioned visible local cache roots.
 
-        OpenAI-curated plugins should not surface from accidental local cache
-        families under `plugins/cache/local` or the older
-        `plugins/cache/agent-skills-local` path.
+        Some Codex builds still inspect
+        `plugins/cache/agent-skills-local/<plugin>/<version>/skills`, so sync
+        must materialize that cache from the canonical marketplace plugin
+        source rather than deleting it as stale.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
-            'cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/agent-skills-local"',
+            "sync_versioned_local_marketplace_cache()",
+            content,
+        )
+        self.assertIn(
+            'sync_versioned_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"',
             content,
         )
         self.assertIn(

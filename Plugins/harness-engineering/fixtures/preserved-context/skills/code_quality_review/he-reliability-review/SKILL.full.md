@@ -345,3 +345,7 @@ IMPORTANT: Outputs should vary based on the architecture, dependency profile, an
 - "Graceful degradation" in the spec must match what actually happens in the code. Verify, don't assume.
 - Cloud provider SLAs are not your SLOs. Your application reliability compounds on top of infrastructure reliability.
 - Connection pool exhaustion is one of the most common cascading failure triggers. Always check pool sizes and timeouts.
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

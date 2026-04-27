@@ -325,3 +325,7 @@ See `references/he-anti-patterns.md`: raw spec without plan, parallel on overlap
 | [[he-compound]] | Preserve learnings |
 | [[test-browser]] | Browser verification |
 **Topic map:** [[agent-ops]]
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

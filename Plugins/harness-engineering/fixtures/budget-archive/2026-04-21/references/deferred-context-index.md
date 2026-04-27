@@ -85,6 +85,161 @@ The session-evidence routing refresh preserved these pre-insertion `he-compound`
 6. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
 6. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
+The PR 136 main-sync refresh preserved these lines removed from compact runtime and archive entrypoints:
+
+- `Read when: examples or role-routing details are needed, open the archived references for this skill.`
+- `description: Refine Harness Engineering artifacts, plans, specs, or work into clearer next actions. Use when users ask for tightening, simplification, or lifecycle flow repair.`
+- `## Philosophy`
+- `## Subagent Routing`
+- `## Validation`
+- `- Apply the mapped stage policy before spawning helpers.`
+- `- Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)`
+- `- Assets: [./assets](./assets)`
+- `- Assets: `./assets``
+- `- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)`
+- `- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).`
+- `- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.`
+- `- Do not remove important context for budget trimming; move it to references and index it in `../../references/deferred-context-index.md`.`
+- `- Domain model routing: `../../../references/domain-model-routing.md``
+- `- Ensure exactly one selected stage, one next invocation, request evidence, and blocked output when required inputs are missing.`
+- `- Ensure new caller-facing interfaces and domain terms are specified before implementation tasks.`
+- `- Fail fast: stop at first failed gate and do not proceed.`
+- `- For full stage policy, workflow details, and examples, load the archived full guide.`
+- `- If mapped roles are missing, continue inline and tell the user to provision the role with [$codex-agent-creator](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md).`
+- `- If roles are missing, continue inline and route role provisioning to `[[codex-agent-creator]]`.`
+- `- Link Linear decision notes when durable tradeoffs shaped the plan.`
+- `- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)`
+- `- Preserve evidence, safety, and deterministic Harness Engineering routing.`
+- `- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)`
+- `- QA intake routing: `../../../references/qa-intake-routing.md``
+- `- Replanning from scratch when a current plan should be updated.`
+- `- Request, artifacts, repo context, and linked Linear issues.`
+- `- Resolve roles from `~/.codex/agents/manifest.json` before delegation.`
+- `- Routing to execution while the user is still asking for planning.`
+- `- Stay in planning mode when directly invoked.`
+- `- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)`
+- `- Subagent routing: `../../../references/subagent-routing.md``
+- `- Use when a spec, brainstorm, bug report, or raw feature description must become a durable implementation plan.`
+
+Read when: examples or role-routing details are needed, open the archived references for this skill.
+description: Refine Harness Engineering artifacts, plans, specs, or work into clearer next actions. Use when users ask for tightening, simplification, or lifecycle flow repair.
+- `- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.`
+- `1. Load archived TDD guidance and choose the first behavior slice.`
+- `1. Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.`
+- `2. Apply the deterministic decision order in `../../references/deterministic-stage-routing.md` because overlapping requests must route the same way every time.`
+- `2. Resume or deepen a matching current plan instead of duplicating it.`
+- `3. Carry forward problem frame, scope, requirements, and open questions from the authoritative artifact.`
+- `4. Check interface and domain readiness before task decomposition; route to `he-deepen-spec` when contracts or terms are missing.`
+- `4. Reproduce and stabilize the failing behavior before proposing changes.`
+- `5. Put blockers first for Linear QA issue sets, preserve issue links, and keep independent defects parallel.`
+- `5. Trace backward from the symptom to the point where valid state first became invalid.`
+- `6. Research local patterns only when they affect sequencing or risk.`
+- `6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.`
+- `7. Decompose into ordered, verifiable tasks with dependencies, tests, and next-stage handoff.`
+- `7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.`
+- `8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.`
+- `Read `../shared/references/approval-flow.md` before deciding whether to continue, ask a blocker question, or stop for approval.`
+- `Read when: examples or role-routing details are needed, open the archived references for this skill.`
+- `This entrypoint stays concise and keeps full operational context in archived references.`
+- `description: Clarify problem scope, requirements, options, and expected behavior before spec or plan stages. Use when what to build, why it matters, or the right direction is ambiguous.`
+- `description: Create Harness Engineering specs that define behavior, boundaries, acceptance criteria, and Linear decision notes. Use when users ask to turn clarified requirements into a durable contract.`
+- `description: Create or update an execution plan from an approved spec or clarified scope. Use when work needs sequencing, validation gates, and Linear-aware task breakdown before implementation.`
+- `description: Debug Harness Engineering bugs with reproduction evidence and regression coverage. Use when defects are reproducible, QA failures have expected behavior, or bugfix validation is required.`
+- `description: Execute an approved plan, todo list, or tightly scoped spec with traceable progress and validation. Use when Harness Engineering work should be implemented.`
+- `description: Improve an existing Harness Engineering spec with missing behavior, boundaries, domain terms, and acceptance criteria. Use when a user asks to deepen or complete a spec before planning.`
+- `description: Review Harness Engineering diffs, PRs, plans, or implemented work for merge readiness and regression risk. Use when users ask for a go/no-go review.`
+- `description: Review diffs, PRs, specs, plans, or feedback for technical correctness. Use when engineering risks or review-feedback validity must be verified before implementation.`
+- `description: Review reliability risks in diffs, plans, specs, or fixes. Use when failures, retries, concurrency, data integrity, or operational resilience need evidence-backed review.`
+- `description: Route ambiguous Harness Engineering requests to one lifecycle stage. Use when users ask where to start, resume, plan, implement, review, debug, or resolve terminology.`
+
+The `he-heartbeat` routing refresh preserved the prior `he-router` tail steps
+before inserting the recurring-loop route:
+
+- `5. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.`
+- `6. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.`
+- `7. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.`
+- `8. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.`
+
+The `he-heartbeat` prompt-contract refresh preserved the previous fixture
+reference wording before replacing it with package-relative paths:
+
+- `Infrastructure/references/automation-prompt-contract.md`
+- `` `Infrastructure/references/automation-prompt-contract.md` for the full prompt``
+- `template.`
+- ``Read `Infrastructure/references/automation-prompt-contract.md` when writing a``
+- `new heartbeat prompt, reviewing a heartbeat prompt, or repairing a drifted loop.`
+
+```text
+`Infrastructure/references/automation-prompt-contract.md` for the full prompt
+template.
+Read `Infrastructure/references/automation-prompt-contract.md` when writing a
+new heartbeat prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
+```
+
+Exact moved-line preservation for the progressive-disclosure gate:
+
+```text
+## Philosophy
+## Subagent Routing
+## Validation
+- Apply the mapped stage policy before spawning helpers.
+- Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)
+- Assets: [./assets](./assets)
+- Assets: `./assets`
+- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Do not remove important context for budget trimming; move it to references and index it in `../../references/deferred-context-index.md`.
+- Domain model routing: `../../../references/domain-model-routing.md`
+- Ensure exactly one selected stage, one next invocation, request evidence, and blocked output when required inputs are missing.
+- Ensure new caller-facing interfaces and domain terms are specified before implementation tasks.
+- Fail fast: stop at first failed gate and do not proceed.
+- For full stage policy, workflow details, and examples, load the archived full guide.
+- If mapped roles are missing, continue inline and tell the user to provision the role with [$codex-agent-creator](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md).
+- If roles are missing, continue inline and route role provisioning to `[[codex-agent-creator]]`.
+- Link Linear decision notes when durable tradeoffs shaped the plan.
+- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Preserve evidence, safety, and deterministic Harness Engineering routing.
+- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
+- QA intake routing: `../../../references/qa-intake-routing.md`
+- Replanning from scratch when a current plan should be updated.
+- Request, artifacts, repo context, and linked Linear issues.
+- Resolve roles from `~/.codex/agents/manifest.json` before delegation.
+- Routing to execution while the user is still asking for planning.
+- Stay in planning mode when directly invoked.
+- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Subagent routing: `../../../references/subagent-routing.md`
+- Use when a spec, brainstorm, bug report, or raw feature description must become a durable implementation plan.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+1. Load archived TDD guidance and choose the first behavior slice.
+1. Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.
+2. Apply the deterministic decision order in `../../references/deterministic-stage-routing.md` because overlapping requests must route the same way every time.
+2. Resume or deepen a matching current plan instead of duplicating it.
+3. Carry forward problem frame, scope, requirements, and open questions from the authoritative artifact.
+4. Check interface and domain readiness before task decomposition; route to `he-deepen-spec` when contracts or terms are missing.
+4. Reproduce and stabilize the failing behavior before proposing changes.
+5. Put blockers first for Linear QA issue sets, preserve issue links, and keep independent defects parallel.
+5. Trace backward from the symptom to the point where valid state first became invalid.
+6. Research local patterns only when they affect sequencing or risk.
+6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+7. Decompose into ordered, verifiable tasks with dependencies, tests, and next-stage handoff.
+7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+Read `../shared/references/approval-flow.md` before deciding whether to continue, ask a blocker question, or stop for approval.
+Read when: examples or role-routing details are needed, open the archived references for this skill.
+This entrypoint stays concise and keeps full operational context in archived references.
+description: Clarify problem scope, requirements, options, and expected behavior before spec or plan stages. Use when what to build, why it matters, or the right direction is ambiguous.
+description: Create Harness Engineering specs that define behavior, boundaries, acceptance criteria, and Linear decision notes. Use when users ask to turn clarified requirements into a durable contract.
+description: Create or update an execution plan from an approved spec or clarified scope. Use when work needs sequencing, validation gates, and Linear-aware task breakdown before implementation.
+description: Debug Harness Engineering bugs with reproduction evidence and regression coverage. Use when defects are reproducible, QA failures have expected behavior, or bugfix validation is required.
+description: Execute an approved plan, todo list, or tightly scoped spec with traceable progress and validation. Use when Harness Engineering work should be implemented.
+description: Improve an existing Harness Engineering spec with missing behavior, boundaries, domain terms, and acceptance criteria. Use when a user asks to deepen or complete a spec before planning.
+description: Review Harness Engineering diffs, PRs, plans, or implemented work for merge readiness and regression risk. Use when users ask for a go/no-go review.
+description: Review diffs, PRs, specs, plans, or feedback for technical correctness. Use when engineering risks or review-feedback validity must be verified before implementation.
+description: Review reliability risks in diffs, plans, specs, or fixes. Use when failures, retries, concurrency, data integrity, or operational resilience need evidence-backed review.
+description: Route ambiguous Harness Engineering requests to one lifecycle stage. Use when users ask where to start, resume, plan, implement, review, debug, or resolve terminology.
+```
+
 ## Stage Archive Paths
 
 - `he-router`: `skills/he-router/references/*` (active canonical), plus router policy in `references/routing-map.json`.

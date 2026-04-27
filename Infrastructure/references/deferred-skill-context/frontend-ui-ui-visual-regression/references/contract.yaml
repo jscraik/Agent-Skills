@@ -1,0 +1,17 @@
+schema_version: 1.0
+purpose: Review and stabilize UI visual regression workflows across Storybook, Playwright, and Argos.
+triggers:
+  - User asks to investigate visual diffs or snapshot regressions.
+  - Storybook or Argos changes need classification or stabilization.
+inputs:
+  - Diff surface, artifacts, or failing workflow stage.
+  - Repo commands or known snapshot pipeline details.
+outputs:
+  - Diff classification and minimal next-step fix plan.
+  - Evidence-backed summary of build, capture, and review state.
+non_goals:
+  - Creative redesign work unrelated to regression review.
+  - Blind baseline approval without intent verification.
+risks:
+  - Flaky capture conditions can masquerade as UI regressions.
+  - Broken build or story inventory can invalidate diff conclusions.

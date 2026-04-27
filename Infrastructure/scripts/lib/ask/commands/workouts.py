@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -29,13 +30,13 @@ EXPECTED_DECLARED_METRICS = {
 def add_workouts_parser(subparsers: Any, global_parser: Any) -> None:
     """
     Register the `workouts` CLI command group and its subcommands on the provided subparsers object.
-    
+
     Adds a top-level "workouts" parser with subcommands:
     - list: no extra args, lists available workouts
     - run <workout_id> [--attempts N]: executes a workout with an optional attempts bound
     - score <workout_id>: shows the latest scorecard for a workout
     - promote <workout_id> [--if-better] [--dry-run]: validates or records a promotion
-    
+
     Parameters:
         subparsers (Any): The argparse subparsers object returned by ArgumentParser.add_subparsers().
         global_parser (Any): An ArgumentParser instance whose arguments should be inherited by the workouts subparsers.
@@ -57,12 +58,12 @@ def add_workouts_parser(subparsers: Any, global_parser: Any) -> None:
 def dispatch_workouts(repo_root: Path, args: Any) -> CallResult:
     """
     Dispatches 'workouts' subcommands to their corresponding handlers.
-    
+
     Parameters:
         repo_root (Path): Repository root directory used for resolving workout and telemetry paths.
         args (Any): Parsed command-line arguments object that must include `action` and, depending on action,
             `workout_id`, `attempts`, `if_better`, and `dry_run` as applicable.
-    
+
     Returns:
         CallResult: The result produced by the selected handler (`list_workouts`, `run_workout`,
         `score_workout`, or `promote_workout`). If `args.action` is missing or not one of the valid
@@ -110,7 +111,7 @@ def render_workouts_human(args: Any, result: CallResult) -> None:
 def _timestamp() -> str:
     """
     Produce an ISO-8601 UTC timestamp with second precision and a trailing "Z".
-    
+
     Returns:
         timestamp (str): Current UTC time formatted as an ISO-8601 string (e.g. "2026-04-25T12:34:56Z").
     """
@@ -120,10 +121,10 @@ def _timestamp() -> str:
 def _safe_id(value: str) -> str:
     """
     Normalize an identifier string by trimming whitespace, removing leading/trailing slashes, and converting backslashes to forward slashes.
-    
+
     Parameters:
         value (str): Input identifier to normalize.
-    
+
     Returns:
         str: The normalized identifier.
     """
@@ -133,12 +134,12 @@ def _safe_id(value: str) -> str:
 def _safe_filename(value: str) -> str:
     """
     Produce a filename-safe representation of an identifier or path.
-    
+
     Converts the input string into a safe filename by trimming and normalizing path separators, then replacing each forward slash with two underscores.
-    
+
     Parameters:
         value (str): Identifier or path to sanitize.
-    
+
     Returns:
         filename (str): Filename-safe string derived from `value`.
     """
@@ -148,10 +149,10 @@ def _safe_filename(value: str) -> str:
 def _sha256(path: Path) -> str:
     """
     Compute the SHA-256 digest of a file's contents and return it as a hex string.
-    
+
     Parameters:
         path (Path): Path to the file whose bytes will be hashed.
-    
+
     Returns:
         hex_digest (str): Hex-encoded SHA-256 digest of the file contents.
     """
@@ -163,13 +164,13 @@ def _sha256(path: Path) -> str:
 def _declared_metrics(config: dict[str, Any]) -> set[str]:
     """
     Extracts and validates the set of metric names declared in a workout configuration.
-    
+
     Parameters:
         config (dict[str, Any]): The workout configuration mapping, typically loaded from the workout manifest.
-    
+
     Returns:
         set[str]: A set of metric names (trimmed strings) declared by the workout.
-    
+
     Raises:
         ValueError: If `config["constraints"]` exists but is not a mapping, or if the declared metrics are not a list of non-empty strings.
     """
@@ -178,17 +179,17 @@ def _declared_metrics(config: dict[str, Any]) -> set[str]:
         raise ValueError("Workout constraints must be a mapping")
     declared = constraints.get("metrics") or config.get("metrics") or []
     if not isinstance(declared, list) or not all(isinstance(item, str) and item.strip() for item in declared):
-        raise ValueError("Workout constraints.metrics must be a list of non-empty metric names")
+        raise ValueError("Workout metrics must be a list of non-empty metric names")
     return {item.strip() for item in declared}
 
 
 def _timeout_text(value: bytes | str | None) -> str:
     """
     Normalize a bytes/string/None process output into a UTF-8 string safe for display.
-    
+
     Parameters:
         value (bytes | str | None): The raw output value; may be bytes, a string, or None.
-    
+
     Returns:
         str: Decoded UTF-8 string when `value` is bytes (invalid sequences replaced), the original string when `value` is a str, or an empty string when `value` is None.
     """
@@ -202,19 +203,16 @@ def _timeout_text(value: bytes | str | None) -> str:
 def _timed_out_process(exc: subprocess.TimeoutExpired) -> subprocess.CompletedProcess[str]:
     """
     Create a CompletedProcess representing a subprocess that timed out.
-    
+
     Parameters:
         exc (subprocess.TimeoutExpired): The TimeoutExpired exception raised by subprocess.run() / subprocess.Popen that contains the original command, timeout value, and any captured stdout/stderr.
-    
+
     Returns:
         subprocess.CompletedProcess[str]: A CompletedProcess with returncode 124, `args` set from `exc.cmd`, `stdout` populated from the original stdout (converted to text), and `stderr` containing the original stderr text followed by a "Command timed out after N seconds" note.
     """
     stderr = _timeout_text(exc.stderr)
     timeout_note = f"Command timed out after {exc.timeout} seconds"
-    if stderr:
-        stderr = f"{stderr}\n{timeout_note}"
-    else:
-        stderr = timeout_note
+    stderr = f"{stderr}\n{timeout_note}" if stderr else timeout_note
     return subprocess.CompletedProcess(
         args=exc.cmd,
         returncode=124,
@@ -230,13 +228,13 @@ def _run_workout_command(command: list[str], *, repo_root: Path, env: dict[str, 
     # to handle non-zero exit codes ourselves rather than raising CalledProcessError.
     """
     Run a trusted workout command in the repository root with a 60-second timeout.
-    
+
     Parameters:
-    	repo_root (Path): Directory to use as the process working directory.
-    	env (dict[str, str]): Environment variables to pass to the subprocess.
-    
+        repo_root (Path): Directory to use as the process working directory.
+        env (dict[str, str]): Environment variables to pass to the subprocess.
+
     Returns:
-    	(process, timed_out): `process` is a CompletedProcess capturing stdout, stderr, and the exit code; `timed_out` is `True` when the command exceeded the 60-second timeout, `False` otherwise.
+        (process, timed_out): `process` is a CompletedProcess capturing stdout, stderr, and the exit code; `timed_out` is `True` when the command exceeded the 60-second timeout, `False` otherwise.
     """
     try:
         process = subprocess.run(
@@ -256,15 +254,15 @@ def _run_workout_command(command: list[str], *, repo_root: Path, env: dict[str, 
 def _load_structured_file(path: Path) -> dict[str, Any]:
     """
     Load a file containing JSON or YAML and return its top-level mapping.
-    
+
     Attempts to parse the file as JSON first. If JSON parsing fails it will try to parse as YAML using PyYAML when available. If YAML is not available or parsing fails, a limited line/indentation-based fallback parser is applied that supports simple mappings and lists. The function guarantees the returned value is a dict.
-    
+
     Parameters:
         path (Path): Path to the input file to read and parse.
-    
+
     Returns:
         dict[str, Any]: The parsed top-level mapping from the file.
-    
+
     Raises:
         ValueError: If the file cannot be parsed into a mapping or if the parsed top-level value is not a mapping.
     """
@@ -273,19 +271,43 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
         return json.loads(text)
     except json.JSONDecodeError:
         pass
-    yaml_error: BaseException | None = None
     try:
         import yaml  # type: ignore
 
         loaded = yaml.safe_load(text)
-    except ImportError as exc:
-        loaded = {}
-        yaml_error = exc
-    except yaml.YAMLError as exc:
-        loaded = {}
-        yaml_error = exc
+    except ImportError:
+        # When PyYAML is unavailable, reject YAML-specific syntax that the
+        # fallback parser cannot safely validate (flow sequences/objects),
+        # but do not reject brackets that appear inside quoted scalars.
+        def _has_unquoted_bracket(s: str) -> bool:
+            in_single = False
+            in_double = False
+            escaped = False
+            for ch in s:
+                if escaped:
+                    escaped = False
+                    continue
+                if ch == "\\":
+                    escaped = True
+                    continue
+                if ch == '"' and not in_single:
+                    in_double = not in_double
+                    continue
+                if ch == "'" and not in_double:
+                    in_single = not in_single
+                    continue
+                if ch in "[{" and not in_single and not in_double:
+                    return True
+            return False
 
-    if yaml_error is not None:
+        if _has_unquoted_bracket(text):
+            raise ValueError(
+                f"Invalid YAML in {path}: flow syntax detected but PyYAML is not available"
+            )
+    except yaml.YAMLError as exc:
+        raise ValueError(f"Invalid YAML in {path}: {exc}") from exc
+
+    if "loaded" not in locals():
         loaded = {}
         current_key: Optional[str] = None
         current_nested_key: Optional[str] = None
@@ -317,7 +339,7 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
                     loaded[current_key] = []
                 loaded[current_key].append(item)
         if not loaded:
-            raise ValueError(f"Unable to parse {path}: {yaml_error or 'empty mapping'}") from yaml_error
+            raise ValueError(f"Unable to parse {path}: empty mapping")
     if loaded is None:
         loaded = {}
     if not isinstance(loaded, dict):
@@ -325,18 +347,25 @@ def _load_structured_file(path: Path) -> dict[str, Any]:
     return loaded
 
 
+def _int_or_default(value: Any, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _resolve_inside(base_dir: Path, relative_path: str, *, label: str) -> Path:
     """
     Resolve a relative path against a base directory and ensure the resolved path is contained within that base.
-    
+
     Parameters:
         base_dir (Path): The base directory to resolve against.
         relative_path (str): A non-empty, relative file-system path (must not be absolute).
         label (str): Human-readable label used in error messages to identify the path being resolved.
-    
+
     Returns:
         Path: The absolute, resolved target path (guaranteed to be inside `base_dir`).
-    
+
     Raises:
         ValueError: If `relative_path` is empty or absolute, or if the resolved target is not located within `base_dir`.
     """
@@ -354,15 +383,15 @@ def _resolve_inside(base_dir: Path, relative_path: str, *, label: str) -> Path:
 def _resolve_repo_path(repo_root: Path, relative_path: str, *, label: str) -> Path:
     """
     Resolve a repository-relative path under `repo_root` and ensure it does not escape the repository.
-    
+
     Parameters:
         repo_root (Path): Repository root directory.
         relative_path (str): A non-empty path relative to the repository root.
         label (str): Human-readable label used in error messages for this path.
-    
+
     Returns:
         Path: The resolved absolute path within `repo_root`.
-    
+
     Raises:
         ValueError: If `relative_path` is empty or absolute, or if the resolved path is outside `repo_root`.
     """
@@ -380,14 +409,14 @@ def _resolve_repo_path(repo_root: Path, relative_path: str, *, label: str) -> Pa
 def _workout_dir(repo_root: Path, workout_id: str) -> Path:
     """
     Resolve the filesystem path for a workout directory inside the repository.
-    
+
     Parameters:
         repo_root (Path): The repository root directory.
         workout_id (str): The workout identifier; it will be normalized. Must be a non-empty relative id that does not perform upward traversal.
-    
+
     Returns:
         Path: The path repo_root/.workouts/<safe_workout_id>.
-    
+
     Raises:
         ValueError: If the normalized workout id is empty, equals "..", or attempts directory traversal.
     """
@@ -403,18 +432,18 @@ def _workout_dir(repo_root: Path, workout_id: str) -> Path:
 def _load_workout(repo_root: Path, workout_id: str) -> tuple[Path, dict[str, Any]]:
     """
     Load a workout's directory and configuration from the repository.
-    
+
     Parameters:
-    	repo_root (Path): Path to the repository root containing the .workouts directory.
-    	workout_id (str): Identifier of the workout to load.
-    
+        repo_root (Path): Path to the repository root containing the .workouts directory.
+        workout_id (str): Identifier of the workout to load.
+
     Returns:
-    	(tuple[Path, dict[str, Any]]): A tuple where the first element is the workout directory Path
-    	and the second is the workout configuration dict. The configuration will include
-    	`workout_path` and `id` fields set to a sanitized form of `workout_id` if they were absent.
-    
+        (tuple[Path, dict[str, Any]]): A tuple where the first element is the workout directory Path
+        and the second is the workout configuration dict. The configuration will include
+        `workout_path` and `id` fields set to a sanitized form of `workout_id` if they were absent.
+
     Raises:
-    	FileNotFoundError: If the workout's `workout.yaml` file does not exist.
+        FileNotFoundError: If the workout's `workout.yaml` file does not exist.
     """
     directory = _workout_dir(repo_root, workout_id)
     config_path = directory / "workout.yaml"
@@ -429,10 +458,10 @@ def _load_workout(repo_root: Path, workout_id: str) -> tuple[Path, dict[str, Any
 def _telemetry_dir(repo_root: Path) -> Path:
     """
     Resolve the directory used for storing skill telemetry.
-    
+
     Parameters:
         repo_root (Path): Repository root to use when no environment override is provided.
-    
+
     Returns:
         Path: The telemetry directory path — `SKILL_TELEMETRY_DIR` environment variable is used if set to a non-empty value (after trimming); otherwise returns `repo_root/.skill-telemetry`.
     """
@@ -443,11 +472,11 @@ def _telemetry_dir(repo_root: Path) -> Path:
 def _append_jsonl(path: Path, payload: dict[str, Any]) -> None:
     """
     Append a JSON-serialized object as a single newline-delimited record to a file, creating parent directories as needed.
-    
+
     Parameters:
         path (Path): Path to the JSONL file to append to; parent directories will be created.
         payload (dict[str, Any]): Mapping to serialize as a single JSON object on its own line.
-    
+
     Details:
         Serialization uses json.dumps(..., sort_keys=True) with UTF-8 encoding and a trailing newline.
     """
@@ -459,11 +488,11 @@ def _append_jsonl(path: Path, payload: dict[str, Any]) -> None:
 def _estimate_context_tokens(repo_root: Path, source_path: str) -> int:
     """
     Estimate the number of skill-context tokens required by a source file.
-    
+
     Parameters:
         repo_root (Path): Repository root directory used to resolve `source_path`.
         source_path (str): Repository-relative path to the source file. If empty or the file does not exist, the function treats it as absent.
-    
+
     Returns:
         int: Estimated token count derived from the file's word count (returns 0 when `source_path` is empty or the file is missing).
     """
@@ -479,7 +508,7 @@ def _estimate_context_tokens(repo_root: Path, source_path: str) -> int:
 def _empty_score() -> dict[str, Any]:
     """
     Create a score dictionary initialized with zeroed aggregate fields for workout attempts and metrics.
-    
+
     Returns:
         dict: A mapping containing the following keys initialized to 0:
             - "attempts": total number of attempts
@@ -508,14 +537,14 @@ def _empty_score() -> dict[str, Any]:
 def _latest_accepted_amendment(telemetry_dir: Path, workout_id: str) -> dict[str, Any] | None:
     """
     Finds the most recent accepted amendment JSON for a workout.
-    
+
     Searches telemetry_dir/amendments/accepted for files named "<safe_workout_id>-*.json",
     parses them as JSON, and returns the last file (by filename sort) whose content is a JSON object.
-    
+
     Parameters:
         telemetry_dir (Path): Base telemetry directory.
         workout_id (str): Workout identifier (will be converted to a safe filename form).
-    
+
     Returns:
         dict[str, Any] | None: The parsed amendment object if found and valid, otherwise `None`.
     """
@@ -536,16 +565,16 @@ def _latest_accepted_amendment(telemetry_dir: Path, workout_id: str) -> dict[str
 def _record_amendment(telemetry_dir: Path, state: str, workout_id: str, proposal: dict[str, Any]) -> Path:
     """
     Write the given amendment proposal as a JSON file under the telemetry amendments directory and return its path.
-    
+
     The file is written to: <telemetry_dir>/amendments/<state>/<safe-workout-id>-<unix-timestamp>.json.
     Parent directories are created if needed; the JSON is pretty-printed with sorted keys and ends with a newline.
-    
+
     Parameters:
         telemetry_dir (Path): Base telemetry directory.
         state (str): Amendment state subdirectory name (e.g., "proposed", "accepted", "rejected").
         workout_id (str): Workout identifier used to form a safe filename.
         proposal (dict[str, Any]): Amendment payload to serialize as JSON.
-    
+
     Returns:
         Path: The path to the written JSON file.
     """
@@ -558,12 +587,12 @@ def _record_amendment(telemetry_dir: Path, state: str, workout_id: str, proposal
 def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Compute aggregate statistics for a sequence of workout attempts.
-    
+
     Parameters:
         attempts (list[dict[str, Any]]): List of attempt records where each record may contain
             keys like "outcome" (string, e.g. "success"), "wall_clock_seconds" (numeric),
             and "tool_steps" (integer).
-    
+
     Returns:
         dict[str, Any]: Aggregated metrics with keys:
             - "attempts": total number of attempts.
@@ -595,9 +624,9 @@ def _score_attempts(attempts: list[dict[str, Any]]) -> dict[str, Any]:
 def list_workouts(repo_root: Path) -> CallResult:
     """
     List available workouts from the repository's workouts directory.
-    
+
     Scans the repository for workout configuration files and returns a summary list describing each discovered workout and its status.
-    
+
     Returns:
         result (CallResult): A CallResult with `status="success"` and `data` containing:
             - `workouts` (list[dict]): One entry per discovered `workout.yaml` with keys:
@@ -643,12 +672,12 @@ def list_workouts(repo_root: Path) -> CallResult:
 def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallResult:
     """
     Run a workout by executing its seed and verifier tools and produce a scorecard with telemetry.
-    
+
     Runs up to `attempts` executions of the workout's configured seed and verifier inside the repository, records per-attempt telemetry, aggregates attempt results into a scorecard, writes telemetry/scorecard files under the telemetry directory, and returns a summary CallResult.
-    
+
     Parameters:
         attempts (int): Desired number of attempts to execute; the actual number will be bounded by the workout's `max_attempts` configuration.
-    
+
     Returns:
         CallResult: Result object with:
             - status: `"success"` if all attempts succeeded, `"error"` otherwise.
@@ -677,7 +706,7 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
         declared_metrics = _declared_metrics(config)
         if declared_metrics and declared_metrics != EXPECTED_DECLARED_METRICS:
             raise ValueError(
-                "Workout constraints.metrics must exactly match "
+                "Workout metrics must exactly match "
                 f"{', '.join(sorted(EXPECTED_DECLARED_METRICS))}"
             )
         target_source = str(config.get("target_source_path") or "")
@@ -816,13 +845,13 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
 def score_workout(repo_root: Path, workout_id: str) -> CallResult:
     """
     Load the saved scorecard for a given workout and return a CallResult describing success or failure.
-    
+
     On success, `result.status` is "success" and `result.data` contains:
     - `scorecard`: the parsed scorecard dictionary.
     - `scorecard_path`: repository-relative path (when under `repo_root`) or absolute path.
-    
+
     If no scorecard file is found, `result.status` is "error" and `result.errors` contains a validation error suggesting to run the workout. If the scorecard file cannot be read or parsed, `result.status` is "error", `result.errors` contains a validation error, and `result.data` includes `scorecard_path` and `parse_error` with the underlying exception text.
-    
+
     Returns:
         CallResult: Result object populated as described above.
     """
@@ -861,18 +890,18 @@ def score_workout(repo_root: Path, workout_id: str) -> CallResult:
 def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False, dry_run: bool = False) -> CallResult:
     """
     Create and optionally record a promotion amendment for a workout based on its latest scorecard.
-    
+
     Parameters:
         repo_root (Path): Repository root directory used to resolve paths and store telemetry.
         workout_id (str): Identifier of the workout to promote.
         if_better (bool): When True, require the new pass rate to be strictly greater than the previously accepted pass rate for promotion to proceed.
         dry_run (bool): When True, validate promotion and produce a proposal without recording an accepted amendment.
-    
+
     Returns:
         CallResult: Result object containing:
             - On success: status "success" with `data` including `scorecard`, `rollback_validation`, and the `promotion` amendment (and `promotion.promotion_path` when recorded).
             - On rejection or validation failure: status "error" with `errors` describing the problem, `data` including `scorecard`, `rollback_validation`, and the `promotion` object (state "rejected" when applicable).
-    
+
     Notes:
         - The function validates a rollback dry-run (ensuring a quoted git rollback command and that the target file exists) and checks context token budget and pass-rate improvement (when `if_better` is set).
         - If recording is allowed (not `dry_run`) and the promotion is accepted or rejected, an amendment JSON is written into the telemetry amendments directory and its path is included in the returned `promotion`.
@@ -918,10 +947,11 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
         else _empty_score()
     )
     score_after = scorecard.get("metrics", {})
-    max_context_tokens = int(
+    max_context_tokens = _int_or_default(
         scorecard.get("limits", {}).get("max_skill_context_tokens", DEFAULT_MAX_SKILL_CONTEXT_TOKENS)
         if isinstance(scorecard.get("limits"), dict)
-        else DEFAULT_MAX_SKILL_CONTEXT_TOKENS
+        else DEFAULT_MAX_SKILL_CONTEXT_TOKENS,
+        DEFAULT_MAX_SKILL_CONTEXT_TOKENS,
     )
     context_tokens = int(score_after.get("estimated_skill_context_tokens") or 0)
     pass_rate_before = float(score_before.get("pass_rate") or 0)

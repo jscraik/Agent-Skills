@@ -33,15 +33,6 @@ class ProjectionModeError(ValueError):
         requested_mode: str,
         resolved_mode: str | None = None,
     ) -> None:
-        """
-        Initialize the ProjectionModeError with an error code, human-readable message, and the projection mode context.
-        
-        Parameters:
-            code (str): Machine-readable error code identifying the failure reason.
-            message (str): Human-readable explanation of the error.
-            requested_mode (str): The original mode value provided by the caller or environment.
-            resolved_mode (str | None): The canonical resolved mode when available, or None if resolution failed.
-        """
         super().__init__(message)
         self.code = code
         self.message = message
@@ -60,28 +51,12 @@ class ProjectionModeDecision:
     policy_identity: str
     engine: str = ENGINE_NAME
     alias_of: str | None = None
-    mutation_available: bool = True
 
     def to_dict(self) -> dict[str, object]:
-        """
-        Convert the ProjectionModeDecision into a plain dictionary.
-        
-        Returns:
-            A dictionary representation of the dataclass suitable for serialization (keys are the dataclass fields).
-        """
         return asdict(self)
 
 
 def _clean_mode(raw_mode: str) -> str:
-    """
-    Normalize a projection mode token.
-    
-    Parameters:
-        raw_mode (str): Input mode string that may include surrounding whitespace, uppercase letters, or underscores.
-    
-    Returns:
-        cleaned_mode (str): The mode string trimmed of surrounding whitespace, lowercased, with underscores replaced by hyphens.
-    """
     return raw_mode.strip().lower().replace("_", "-")
 
 
@@ -91,27 +66,10 @@ def normalize_projection_mode(
     env: Mapping[str, str] | None = None,
 ) -> ProjectionModeDecision:
     """
-    Resolve and validate the projection mode chosen by the caller and return a canonical decision.
-    
-    When `requested_mode` is provided and non-empty it takes precedence, otherwise the function reads
-    the `SYNC_SKILLS_PROJECTION_MODE` value from `env` (or the process environment if `env` is None),
-    and falls back to the module `DEFAULT_PROJECTION_MODE` if neither is set. The selected value is
-    cleaned, alias-resolved, validated, and returned as a frozen ProjectionModeDecision.
-    
-    Parameters:
-        requested_mode (str | None): Optional raw mode value supplied by the caller (e.g., CLI).
-        env (Mapping[str, str] | None): Optional mapping to read environment values from; if None,
-            the process environment is used.
-    
-    Returns:
-        ProjectionModeDecision: Immutable decision containing the resolved canonical `projection_mode`,
-        the original `requested_mode` (raw string), `mode_source` (`"cli"`, `"env"`, or `"default"`),
-        `default_projection_mode`, `policy_identity`, `engine`, optional `alias_of` if an alias was used,
-        and `mutation_available` which is true only for canonical modes `"flat"` and `"rooted"`.
-    
-    Raises:
-        ProjectionModeError: If the cleaned mode is in a deferred set (code `ERR_DEFERRED_PROJECTION_MODE`)
-            or if the resolved canonical mode is not supported (code `ERR_INVALID_PROJECTION_MODE`).
+    Normalize the requested projection mode.
+
+    Precedence is explicit CLI/request value, then SYNC_SKILLS_PROJECTION_MODE,
+    then the flat default.
     """
     env_values = env if env is not None else os.environ
     raw_requested = (requested_mode or "").strip()
@@ -151,32 +109,7 @@ def normalize_projection_mode(
         mode_source=mode_source,
         default_projection_mode=DEFAULT_PROJECTION_MODE,
         alias_of=alias_of,
-        mutation_available=canonical in {"flat", "rooted"},
         policy_identity=policy_identity(),
-    )
-
-
-def ensure_mutation_supported(decision: ProjectionModeDecision, *, dry_run: bool) -> None:
-    """
-    Abort operation if the resolved projection mode does not permit mutations.
-    
-    Parameters:
-        decision (ProjectionModeDecision): Normalized projection mode decision.
-        dry_run (bool): When True, allow the operation even if mutations are unavailable.
-    
-    Raises:
-        ProjectionModeError: If mutations are unavailable for the resolved mode and `dry_run` is False. The error includes `requested_mode` and `resolved_mode`.
-    """
-    if dry_run or decision.mutation_available:
-        return
-    raise ProjectionModeError(
-        "ERR_PROJECTION_MUTATION_UNAVAILABLE",
-        (
-            f"Projection mode '{decision.projection_mode}' is parsed but mutation is not "
-            "implemented in this phase; use --dry-run or --projection flat."
-        ),
-        requested_mode=decision.requested_mode,
-        resolved_mode=decision.projection_mode,
     )
 
 
@@ -187,18 +120,7 @@ def build_projection_plan_metadata(
     dry_run: bool,
     warnings: list[str] | None = None,
 ) -> dict[str, object]:
-    """
-    Compose shared metadata for a projection plan result.
-    
-    Parameters:
-        decision (ProjectionModeDecision): Normalized projection mode decision to include.
-        scope (str): Identifier for the scope the plan covers (for example, a project, workspace, or path).
-        dry_run (bool): Whether the plan was produced as a dry run.
-        warnings (list[str] | None): Optional list of warning messages; treated as an empty list when omitted.
-    
-    Returns:
-        dict[str, object]: A dictionary containing the fields from `decision.to_dict()`, plus `scope`, `dry_run`, and `warnings` (always a list).
-    """
+    """Return common metadata embedded in sync dry-run and mutation results."""
     return {
         **decision.to_dict(),
         "scope": scope,
@@ -208,34 +130,17 @@ def build_projection_plan_metadata(
 
 
 def _format_shell(decision: ProjectionModeDecision) -> str:
-    """
-    Format a ProjectionModeDecision as newline-separated shell-style KEY=VALUE assignments.
-    
-    Parameters:
-        decision (ProjectionModeDecision): Normalized projection decision whose fields are emitted.
-    
-    Returns:
-        str: Newline-separated lines like `KEY=VALUE` suitable for shell consumption. Values are shell-quoted; `SYNC_SKILLS_PROJECTION_MUTATION_AVAILABLE` is `"1"` when mutation is available and `"0"` otherwise.
-    """
     values = {
         "SYNC_SKILLS_RESOLVED_PROJECTION_MODE": decision.projection_mode,
         "SYNC_SKILLS_REQUESTED_PROJECTION_MODE": decision.requested_mode,
         "SYNC_SKILLS_PROJECTION_MODE_SOURCE": decision.mode_source,
         "SYNC_SKILLS_PROJECTION_ENGINE": decision.engine,
-        "SYNC_SKILLS_PROJECTION_MUTATION_AVAILABLE": "1" if decision.mutation_available else "0",
+        "SYNC_SKILLS_PROJECTION_MUTATION_AVAILABLE": "1",
     }
     return "\n".join(f"{name}={shlex.quote(value)}" for name, value in values.items())
 
 
 def main() -> int:
-    """
-    CLI entrypoint that parses arguments, normalizes the requested projection mode, and emits a result payload.
-    
-    Parses `--mode` and `--format` (json|shell). On successful normalization prints a success payload (JSON or shell-style KEY=VALUE lines). If normalization fails, prints an error payload formatted for the selected output and returns a non-zero exit status.
-    
-    Returns:
-        int: Exit code: `0` on success, `2` if projection mode normalization fails.
-    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", default=None, help="Requested projection mode")
     parser.add_argument("--format", choices=("json", "shell"), default="json")

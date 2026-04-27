@@ -1,0 +1,86 @@
+schema_version: 1
+purpose: >
+  Execute bounded autonomous experiment loops that improve repository skills and
+  plugin packages with validation-backed keep/discard decisions.
+
+triggers:
+  - Requests to autonomously or iteratively improve skills/plugins
+  - Requests for experiment loops with score-based decisions
+  - Requests to run research passes over skill or plugin quality
+
+inputs:
+  - target_paths
+  - run_tag
+  - stop_condition
+  - success_goal
+
+outputs:
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/results.tsv
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/journal.md
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/targets.txt
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/run.json
+  - Infrastructure/artifacts/autoresearch/<run-tag>-<timestamp>/iteration_journal.jsonl
+  - final findings summary with validation evidence
+
+observability: >
+  Track pass/fail/blocked status for every validation command per iteration and
+  record keep/discard rationale in results.tsv plus journal.md.
+
+risks:
+  - Modifying mirrored cache paths instead of canonical sources
+  - Regression from multi-change iterations without clear attribution
+  - Missing evidence due to incomplete logging
+
+modes:
+  - setup
+  - baseline
+  - iterate
+  - summarize
+
+required_output:
+  schema_version: integer
+  run:
+    tag: string
+    path: string
+    stop_condition: string
+  scope:
+    type: array
+    items: string
+  iterations:
+    type: array
+    items:
+      type: object
+      fields:
+        id: integer
+        hypothesis: string
+        decision:
+          enum: [keep, discard, blocked]
+        score: number
+        status:
+          enum: [pass, fail, blocked]
+        evidence:
+          type: array
+          items:
+            type: object
+            fields:
+              command: string
+              outcome:
+                enum: [pass, fail, blocked]
+              note: string
+  summary:
+    kept: integer
+    discarded: integer
+    blocked: integer
+    next_hypotheses:
+      type: array
+      items: string
+
+non_goals:
+  - Generic product feature implementation
+  - Unbounded loops without explicit stop conditions
+  - Editing plugin cache projections directly
+
+rollback_procedure: >
+  Revert the current experiment patch, restore the previous kept commit (or
+  known-good working state), and record the rollback reason in the run journal
+  before proceeding.

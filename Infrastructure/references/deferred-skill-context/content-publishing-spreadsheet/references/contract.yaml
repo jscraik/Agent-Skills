@@ -1,0 +1,22 @@
+schema_version: '1.0'
+purpose: Execute spreadsheet creation, editing, analysis, and formatting workflows with reproducible outputs and explicit validation.
+triggers:
+  - user explicitly requests spreadsheet help
+  - request semantics clearly match spreadsheet creation, editing, analysis, or formatting
+  - a scoped spreadsheet workflow is preferred over generic prose advice
+inputs:
+  - user goal and spreadsheet file context
+  - target paths, output expectations, and formatting constraints
+  - dependency, rendering, and approval boundaries
+outputs:
+  - spreadsheet artifact or blocked result aligned to the request
+  - evidence-backed summary of formulas, formatting, and validation performed
+  - next-step guidance when dependencies or rendering tools are missing
+non_goals:
+  - unrelated data science or web app development tasks
+  - unverifiable claims about recalculation or layout review
+  - unsafe handling of secrets or sensitive workbook data
+risks:
+  - missing dependencies can block execution
+  - formula recalculation may be unavailable in pure openpyxl workflows
+  - formatting regressions can slip through without rendered review

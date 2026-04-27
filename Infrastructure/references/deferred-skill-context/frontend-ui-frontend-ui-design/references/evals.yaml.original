@@ -1,0 +1,92 @@
+schema_version: "2.0"
+skill_name: "frontend-ui-design"
+
+cases:
+  - name: layout-spacing-rhythm-trigger
+    category: happy
+    should_trigger: true
+    prompt: "This dashboard layout feels crowded and flat. Can you help improve spacing rhythm, visual hierarchy, and alignment without changing the stack?"
+    acceptance:
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*^\\s*##\\s*Outputs\\b.*(spacing|hierarchy|rhythm|alignment)"
+
+  - name: layout-audit-structure
+    category: happy
+    should_trigger: true
+    prompt: "Can you audit this page structure? Cards feel repetitive, density is off, and grouping is unclear."
+    acceptance:
+      - type: regex
+        value: "(spacing|hierarchy|rhythm|density)"
+
+  - name: happy-path
+    category: happy
+    should_trigger: true
+    prompt: "Can you build a production-ready account settings screen with clear hierarchy and reusable components?"
+    acceptance:
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*^\\s*##\\s*Outputs\\b"
+  - name: edge-case
+    category: edge
+    should_trigger: true
+    prompt: "Can you help redesign this page? I have not shared target users, platform constraints, or acceptance criteria yet."
+    acceptance:
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*(target users|platform constraints|acceptance criteria)"
+  - name: adaptation-path
+    category: happy
+    should_trigger: true
+    prompt: "Adapt this desktop dashboard for mobile and tablet while keeping the same core tasks."
+    acceptance:
+      - type: regex
+        value: "(?is)^\\s*##\\s*Inputs\\b.*^\\s*##\\s*Outputs\\b.*(mobile|tablet|adaptation)"
+  - name: failure-mode
+    category: edge
+    should_trigger: true
+    prompt: "Please inspect whether this request is out of scope for screen-level UI implementation and route it to the correct owner."
+    acceptance:
+      - type: contains
+        value: "## When to use"
+
+  - name: negative-motion-polish-route-away
+    category: negative
+    should_trigger: false
+    prompt: "Only tune motion polish and interaction timing for an already-designed screen."
+    acceptance:
+      - type: regex
+        value: "(ui-ux-creative-coding|When not to use|post-direction polish)"
+
+  - name: trigger-explicit-implementation-verbs
+    category: happy
+    should_trigger: true
+    prompt: "Can you implement a production-ready billing settings screen with clear CTA hierarchy and responsive layout?"
+    acceptance:
+      - type: regex
+        value: "(build|implement|production-ready|CTA|hierarchy)"
+      - type: contains
+        value: "## Outputs"
+
+  - name: trigger-full-state-coverage-implementation
+    category: happy
+    should_trigger: true
+    prompt: "Please redesign this account screen and specify loading, empty, error, and success states with accessible behavior."
+    acceptance:
+      - type: regex
+        value: "(loading|empty|error|success)"
+      - type: regex
+        value: "(accessib|focus|keyboard)"
+
+  - name: negative-broad-routing-route-away
+    category: negative
+    should_trigger: false
+    prompt: "I need general frontend design help and I am not sure which UI skill should own this."
+    acceptance:
+      - type: regex
+        value: "(frontend-design|broad|ambiguous|route)"
+
+  - name: negative-token-governance-route-away
+    category: negative
+    should_trigger: false
+    prompt: "Update semantic token aliases and mapped theme variables used across multiple products."
+    acceptance:
+      - type: regex
+        value: "(design-system|token|alias|theme)"

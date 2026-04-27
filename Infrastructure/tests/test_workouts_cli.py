@@ -25,20 +25,10 @@ DIAGNOSTIC_WORKOUT_IDS = {
 
 class TestWorkoutsCLI(unittest.TestCase):
     def setUp(self) -> None:
-        """
-        Create a temporary directory for the test and set the telemetry directory path.
-        
-        Creates a filesystem temporary directory with prefix "workouts-cli-" and assigns its Path to self.temp_dir. Sets self.telemetry_dir to the Path of the "telemetry" subdirectory inside that temporary directory.
-        """
         self.temp_dir = Path(tempfile.mkdtemp(prefix="workouts-cli-"))
         self.telemetry_dir = self.temp_dir / "telemetry"
 
     def tearDown(self) -> None:
-        """
-        Remove the temporary test directory and its contents.
-        
-        Deletes the directory at self.temp_dir recursively; any filesystem errors during removal are ignored.
-        """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_list_workouts_finds_fixture(self) -> None:
@@ -47,18 +37,18 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue(DIAGNOSTIC_WORKOUT_IDS.issubset({item["id"] for item in result.data["workouts"]}))
 
+    def test_list_workouts_reports_yaml_syntax_errors(self) -> None:
+        workout_dir = self.temp_dir / ".workouts" / "broken"
+        workout_dir.mkdir(parents=True)
+        (workout_dir / "workout.yaml").write_text("id: [unterminated\n", encoding="utf-8")
+
+        result = workouts.list_workouts(self.temp_dir)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["workouts"][0]["status"], "invalid")
+        self.assertIn("Invalid YAML", result.data["workouts"][0]["error"])
+
     def test_run_score_and_promote_dry_run(self) -> None:
-        """
-        Verifies that running a workout, scoring it, and performing a dry-run promotion produce the expected metrics, telemetry artifacts, and promotion payload.
-        
-        Asserts that:
-        - The run completes successfully and the scorecard metrics report attempts == 2, pass_rate == 1.0, tool_steps == 4, and retries == 1.
-        - A telemetry runs file (`runs.jsonl`) is written to the telemetry directory.
-        - Scoring succeeds.
-        - Promotion (dry run) succeeds, its rollback validation status is "pass", and `promotion.dry_run` is true.
-        - The promotion payload uses schema version "skill-workout-amendment.v1" and includes `previous_hash`, `new_hash`, `score_before`, and `score_after`.
-        - No amendments directory is created for a dry-run promotion.
-        """
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
             run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=2)
             score_result = workouts.score_workout(REPO_ROOT, WORKOUT_ID)
@@ -100,11 +90,6 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(accepted_payload["state"], "accepted")
 
     def test_promote_rejects_and_records_context_budget_regression(self) -> None:
-        """
-        Verifies that promoting a workout that exceeds the skill context budget is rejected and recorded.
-        
-        Runs a workout, modifies its scorecard to simulate a context-budget regression and mark it promotion-ineligible, then attempts promotion (non-dry-run). Asserts the promotion operation errors, includes "context_budget_exceeded" in rejection reasons, sets promotion state to "rejected" with context budget status "fail", and writes exactly one rejected amendment record whose payload state is "rejected".
-        """
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
             run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
             scorecard_path = Path(run_result.data["scorecard_path"])
@@ -124,6 +109,22 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(len(rejected_records), 1)
         rejected_payload = json.loads(rejected_records[0].read_text(encoding="utf-8"))
         self.assertEqual(rejected_payload["state"], "rejected")
+
+    def test_promote_defaults_malformed_context_budget_limit(self) -> None:
+        with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+            scorecard_path = Path(run_result.data["scorecard_path"])
+            scorecard = json.loads(scorecard_path.read_text(encoding="utf-8"))
+            scorecard["limits"]["max_skill_context_tokens"] = "not-an-int"
+            scorecard_path.write_text(json.dumps(scorecard, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            promote_result = workouts.promote_workout(REPO_ROOT, WORKOUT_ID, if_better=True, dry_run=True)
+
+        self.assertEqual(run_result.status, "success")
+        self.assertEqual(promote_result.status, "success")
+        self.assertEqual(
+            promote_result.data["promotion"]["context_budget"]["max_skill_context_tokens"],
+            workouts.DEFAULT_MAX_SKILL_CONTEXT_TOKENS,
+        )
 
     def test_score_workout_reports_corrupted_scorecard(self) -> None:
         with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}):
@@ -152,11 +153,6 @@ class TestWorkoutsCLI(unittest.TestCase):
             self.assertEqual(score_result.status, "success", workout_id)
 
     def test_run_workout_records_subprocess_timeout(self) -> None:
-        """
-        Verifies that run_workout records a subprocess timeout as a failure and surfaces the expected error and scorecard fields.
-        
-        Mocks subprocess.run to raise subprocess.TimeoutExpired and sets SKILL_TELEMETRY_DIR; asserts the returned result has status "error", the first error code is "ERR_VALIDATION", the scorecard pass_rate is 0.0, the first attempt outcome is "failure" with failure_type "timeout", and both seed and verify exit codes are 124.
-        """
         timeout = subprocess.TimeoutExpired(cmd=["bash", "seed.sh"], timeout=60, output="", stderr="")
         with (
             mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
@@ -173,18 +169,73 @@ class TestWorkoutsCLI(unittest.TestCase):
         self.assertEqual(attempt["seed_exit_code"], 124)
         self.assertEqual(attempt["verify_exit_code"], 124)
 
+    def test_run_workout_records_seed_failure(self) -> None:
+        def _mock_run(cmd: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            if any("seed.sh" in part for part in cmd):
+                return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr="seed failed")
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
+            mock.patch.object(workouts.subprocess, "run", side_effect=_mock_run),
+        ):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+
+        self.assertEqual(run_result.status, "error")
+        attempt = run_result.data["attempts"][0]
+        self.assertEqual(attempt["outcome"], "failure")
+        self.assertEqual(attempt["failure_type"], "tool_error")
+        self.assertEqual(attempt["seed_exit_code"], 1)
+        self.assertEqual(attempt["verify_exit_code"], 0)
+
+    def test_run_workout_records_verify_failure(self) -> None:
+        def _mock_run(cmd: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            if any("verify.py" in part for part in cmd):
+                return subprocess.CompletedProcess(args=cmd, returncode=1, stdout="", stderr="verify failed")
+            return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
+            mock.patch.object(workouts.subprocess, "run", side_effect=_mock_run),
+        ):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+
+        self.assertEqual(run_result.status, "error")
+        attempt = run_result.data["attempts"][0]
+        self.assertEqual(attempt["outcome"], "failure")
+        self.assertEqual(attempt["failure_type"], "tool_error")
+        self.assertEqual(attempt["seed_exit_code"], 0)
+        self.assertEqual(attempt["verify_exit_code"], 1)
+
+    def test_run_workout_records_contract_violation(self) -> None:
+        hash_iter = iter(["hash_before", "hash_after"])
+
+        def _mock_sha256(path: Path) -> str:
+            return next(hash_iter)
+
+        with (
+            mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(self.telemetry_dir)}),
+            mock.patch.object(
+                workouts.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr=""),
+            ),
+            mock.patch.object(workouts, "_sha256", side_effect=_mock_sha256),
+        ):
+            run_result = workouts.run_workout(REPO_ROOT, WORKOUT_ID, attempts=1)
+
+        self.assertEqual(run_result.status, "error")
+        attempt = run_result.data["attempts"][0]
+        self.assertEqual(attempt["outcome"], "failure")
+        self.assertEqual(attempt["failure_type"], "contract_violation")
+
     def test_ask_workouts_run_json_contract(self) -> None:
-        """
-        Verifies that running the CLI command `ask workouts run <WORKOUT_ID> --json` exits successfully and emits JSON output containing a `scorecard` entry.
-        
-        This test sets the telemetry directory environment, invokes the CLI, asserts the process exit code is 0, and asserts the captured stdout includes the string `"scorecard"`.
-        """
         env = os.environ.copy()
         env["SKILL_TELEMETRY_DIR"] = str(self.telemetry_dir)
         result = subprocess.run(
             [
-                sys.executable,
-                str(REPO_ROOT / "Infrastructure" / "bin" / "ask"),
+                "python3",
+                "Infrastructure/bin/ask",
                 "workouts",
                 "run",
                 WORKOUT_ID,
@@ -202,6 +253,35 @@ class TestWorkoutsCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('"scorecard"', result.stdout)
+
+    def test_load_structured_file_allows_quoted_brackets_without_pyyaml(self) -> None:
+        """Quoted brackets in YAML scalars must not be rejected when PyYAML is unavailable."""
+        yaml_path = self.temp_dir / "test.yaml"
+        yaml_path.write_text('script: "echo [ok]"\nother: \'foo {bar}\'\n', encoding="utf-8")
+
+        with mock.patch.dict("sys.modules", {"yaml": None}):
+            # Force re-import to pick up the ImportError path
+            import importlib
+            import ask.commands.workouts as _workouts
+            importlib.reload(_workouts)
+            loaded = _workouts._load_structured_file(yaml_path)
+
+        self.assertEqual(loaded.get("script"), "echo [ok]")
+        self.assertEqual(loaded.get("other"), "foo {bar}")
+
+    def test_load_structured_file_rejects_unquoted_brackets_without_pyyaml(self) -> None:
+        """Unquoted flow syntax must still be rejected when PyYAML is unavailable."""
+        yaml_path = self.temp_dir / "test.yaml"
+        yaml_path.write_text("items: [a, b]\n", encoding="utf-8")
+
+        with mock.patch.dict("sys.modules", {"yaml": None}):
+            import importlib
+            import ask.commands.workouts as _workouts
+            importlib.reload(_workouts)
+            with self.assertRaises(ValueError) as ctx:
+                _workouts._load_structured_file(yaml_path)
+
+        self.assertIn("flow syntax detected", str(ctx.exception))
 
 
 if __name__ == "__main__":

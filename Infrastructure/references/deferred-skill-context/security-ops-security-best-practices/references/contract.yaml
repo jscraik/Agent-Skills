@@ -1,0 +1,17 @@
+schema_version: '1.0'
+purpose: Perform supported-language security best-practice reviews and produce secure-by-default guidance or evidence-backed reports.
+triggers:
+- User explicitly requests security best-practices guidance, a security review/report, or secure-by-default coding help.
+- Request scope falls within python, javascript/typescript, or go.
+inputs:
+- target codebase or file scope
+- relevant languages/frameworks
+- desired operating mode (guidance, passive review, or full report)
+outputs:
+- prioritized security guidance, report, or scoped remediation plan
+non_goals:
+- general code review, debugging, or non-security work
+- unsupported-language comprehensive audits
+risks:
+- missing framework context can weaken guidance selection
+- unsupported-language assumptions can overstate confidence

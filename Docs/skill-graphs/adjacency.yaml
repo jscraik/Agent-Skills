@@ -8,360 +8,119 @@
 #     related-skill: "when to use together"
 #
 
-1password:
-  bootstrap: Provision dev environment secrets via 1Password during bootstrap
-  create-auth: Inject credentials into authentication flows via 1Password
-  security-best-practices: Apply secret management best practices alongside 1Password
-agentation:
-  frontend-ui-design: Improve or redesign the frontend surface after the integration
-    path is verified
-  playwright-interactive: Use a persistent Playwright session for iterative local
-    inspection or debugging
-  visual-explainer: Turn the integration state machine or failure path into a visual
-    handoff artifact
 agents-md:
-  codex-agent-creator: Create agent roles that AGENTS.md will reference
-  codex-home-audit: Audit the full Codex home dir after AGENTS.md refactors
-  docs-expert: Apply docs polish and community-health guidance to AGENTS.md
-alignment-checkpoint:
-  brainstorming: Explore approaches once intent is aligned
-  ce-plan: Move from approved intent to an execution-ready plan
-  decide-build-primitive: Decide the right primitive after intent is confirmed
-  he-plan: Produce an execution-ready plan once ambiguity is resolved
-  interview-me: Follow with structured interview to clarify requirements
-architecture-interview:
-  brainstorming: Explore options before the architecture interview
-  diagram-cli: Generate architecture diagrams from ADR decisions
-  he-plan: Produce an execution-ready plan after the architecture is decided
-  security-threat-model: Run a threat model alongside architecture decisions
-  writing-plans: Convert ADR output into an implementation plan
-atlas:
-  llm-wiki: Cross-reference Atlas conversations with a local markdown knowledge base
-  openai-docs: Reference official ChatGPT documentation for Atlas features
-  playwright-interactive: Complement Atlas AppleScript control with browser automation
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+autofix:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 autoresearch:
-  he-code-review: Run an adversarial review pass on the final diff before accepting
-    loop outcomes.
-  plugin-builder: Harden or validate one plugin package outside a research loop.
-  skill-creator: Create or reshape a single skill package before entering a loop.
-backend-engineer:
-  mcp-builder: Build MCP server tools alongside the backend
-  security-best-practices: Apply security hardening to new backend endpoints
-  writing-plans: Plan backend extensions before implementing
-baseline-ui:
-  design-system: Apply design tokens that baseline-ui validates
-  fixing-accessibility: Fix accessibility issues found during baseline-ui checks
-  frontend-ui-design: Implement UI components that baseline-ui governs
-  shadcn-ui: Validate shadcn/ui components against baseline rules
-  ui-visual-regression: Combine with visual regression to catch visual drift
-bash-hygiene:
-  codex-hooks-builder: Harden shell-heavy hook scripts and hook-pack scaffolds with
-    safer defaults
-  he-fix-bugs: Triage shell failures with evidence-first diagnosis before behavioral
-    changes
-  verification-before-completion: Enforce verification routines after Bash script
-    edits before claiming done
-beautiful-mermaid:
-  diagram-cli: Generate .mmd source files before rendering with Beautiful Mermaid
-  docs-expert: Add rendered diagrams to repository documentation
-  slides: Embed high-quality Mermaid renders in slide decks
-  visual-explainer: Embed rendered SVG outputs in HTML explainer pages
-best-practices:
-  1password: Manage secrets found during best practices review
-  create-auth: Apply auth-specific best practices during implementation
-  security-ownership-map: Identify who owns the code being hardened
-  security-threat-model: Run a threat model before applying best practices
-better-icons:
-  design-system: Integrate icon tokens into the design system
-  favicon-generator: Use alongside favicon generation for icon-family consistency
-  frontend-ui-design: Source icons for UI components being designed
-  shadcn-ui: Add Iconify icons to shadcn/ui component projects
-biome-linting:
-  npm-workflow-discipline: Keep npm/pnpm script contracts aligned with Biome gates
-  pnpm-manager: Target Biome checks to changed workspaces before broad runs
-  typescript: Pair lint remediation with type-safety guidance in TS repos
-bootstrap:
-  fix-mise: Repair mise trust issues blocking the bootstrapped environment
-  gh-workflow: Set up GitHub PR workflow after bootstrap
-  verification-before-completion: Verify the bootstrap is working before continuing
-chatgpt-apps:
-  fixing-metadata: Ensure App pages have correct meta and CSP headers
-  mcp-builder: Build the underlying MCP server the Apps SDK connects to
-  oak-api: Integrate Oak curriculum content into ChatGPT App workflows
-  openai-docs: Reference official Apps SDK documentation
-cli-spec:
-  ce-spec: Use when the CLI is a front for a broader system spec
-  docs-expert: Generate user-facing docs from the technical contract
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 codex-agent-creator:
-  agents-md: Update repo instructions to reference or govern the new agent roles
-  codex-automation-architect: Design recurring automations that orchestrate the installed
-    agents
-  decide-build-primitive: Decide whether the capability should be an agent, skill,
-    or automation first
-codex-automation-architect:
-  ce-plan: Plan the automation contract before implementing
-  codex-agent-creator: Create the agent role the automation will run under
-  decide-build-primitive: Confirm automation is the right primitive before building
-  verification-before-completion: Validate automation output before declaring done
-codex-home-audit:
-  agents-md: Refactor AGENTS.md based on audit findings
-  fix-mise: Fix mise trust/runtime issues found during audit
-  insight-report: Generate a usage report to inform audit priorities
-  process-watch: Check process resource usage during a home directory audit
-  skill-refactor: Run a skill health scan alongside the home audit
-  verification-before-completion: Verify fixes before marking the audit complete
-codex-hooks-builder:
-  codex-agent-creator: Create or update agent roles that the hooks should invoke or
-    govern
-  codex-home-audit: Audit an existing Codex home installation for hook drift or unsafe
-    config
-  gh-workflow: Ship and review hook-pack changes through the GitHub lifecycle
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 coding-harness:
-  bootstrap: Clone and bootstrap a repository before coding-harness setup begins
-  circleci-cli: Work on CircleCI-specific pipeline design or migration details beyond
-    the harness wrapper
-  he-fix-bugs: Root-cause failing harness commands or broken repo state before applying
-    fixes
-  verification-before-completion: Add a stronger final verification pass before claiming
-    a repo change is complete
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 context7:
-  backend-engineer: Use Context7 to check API docs during backend work
-  docs-expert: Combine repo documentation context with Context7 library docs
-  mcp-builder: Reference Context7 docs when building MCP tool schemas
-  openai-docs: Use OpenAI docs MCP for OpenAI-specific library content
-create-auth:
-  1password: Inject auth secrets via 1Password CLI
-  mcp-builder: Secure MCP server authentication using Better Auth
-  security-best-practices: Apply secure defaults during auth implementation
-  security-threat-model: Model auth attack surface before implementing
-decide-build-primitive:
-  ce-plan: Use when the capability is CE-scoped and needs concrete stage planning
-  codex-automation-architect: Use after `AGENT_AUTOMATION` decision to design the
-    automation contract
-deep-interview:
-  architecture-interview: Use when deep-interview surfaces a major architectural tradeoff
-    requiring structured review
-  brainstorming: Use before this skill when the topic is still too vague for delta-mode
-    enhancement
-  he-plan: Hand the completed insights to planning for an execution-ready implementation
-    sequence
-  interview-me: Use for fresh requirements discovery; use this skill for deepening
-    existing drafts
-design-system:
-  baseline-ui: Run a UI guardrail pass after token or theme updates
-  frontend-ui-design: Implement component and screen changes after design-system decisions
-    are set
-  shadcn-ui: Apply design-system tokens while integrating shadcn components
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 diagram-cli:
-  agents-md: Add diagram artifacts to AGENTS.md context packs
-  beautiful-mermaid: Convert .mmd outputs to publication-quality SVG/PNG
-  ce-plan: Use architecture diagrams to ground implementation plans
-  docs-expert: Embed diagrams into repository documentation
-  visual-explainer: Render diagram artifacts as a polished HTML explainer
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 docs-expert:
-  agents-md: Refactor or tighten AGENTS.md and related repo instruction routing
-  fixing-metadata: Repair page metadata and SEO surfaces after docs or web content
-    edits
-  markdown-converter: Convert source materials into clean Markdown before docs restructuring
-  visual-explainer: Present a complex system, workflow, or docs audit as a visual
-    artifact
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 elixir-pro:
   he-fix-bugs: Triage distributed process failures with evidence-first diagnosis
   rust-pro: Systems-level concurrency patterns that share OTP-style supervision thinking
-evals-router:
-  he-fix-bugs: When eval pipeline bugs emerge — debug root cause before redesigning
-    the eval
-  he-tdd: For implementation lanes that need RED/GREEN evidence for eval tooling behavior
-  skill-refactor: Analyze session-derived skill quality signals before redesigning
-    eval plans
-  verification-before-completion: Gate "eval is ready" claims with concrete calibration
-    or human-label evidence
-fallback-release:
-  production-deployment: Deploy fallback-built artifacts to production
-  release: Primary release path when CI is healthy
-  verification-before-completion: Validate fallback artifacts before publication
-favicon-generator:
-  design-system: Keep favicon palette consistent with design-system tokens
-  fixing-metadata: Pair with metadata fixes to ensure correct favicon references
-  og-image-builder: Generate OG images alongside favicons for complete brand suite
-fix-mise:
-  bootstrap: Fix mise before retrying the bootstrap
-  codex-home-audit: Address mise issues found during a home directory audit
-  he-fix-bugs: Debug root cause of mis trust or shim failures
-  process-watch: Watch process health while diagnosing mise shim issues
-  verification-before-completion: Confirm mise is healthy after the fix
-fixing-accessibility:
-  baseline-ui: Validate passing accessibility alongside baseline UI checks
-  design-system: Ensure token changes don't reduce colour contrast
-  fixing-metadata: Fix semantic HTML and metadata alongside ARIA fixes
-  frontend-ui-design: Apply accessibility constraints during component design
-  playwright-interactive: Test keyboard and focus behaviour via Playwright
-fixing-metadata:
-  favicon-generator: Add favicon tags alongside other head metadata
-  fixing-accessibility: Fix ARIA and semantic HTML alongside metadata
-  og-image-builder: Generate OG images that the metadata tags will reference
 frontend-design:
-  design-system: Route token, alias, or system-governance work to the dedicated owner
-  frontend-ui-design: Hand off once the request clearly becomes standard UI build
-    or redesign work
-  ui-ux-creative-coding: Route post-direction polish and motion refinement to the
-    narrower owner
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 frontend-ui-design:
-  baseline-ui: Validate components against baseline UI rules after design
-  design-system: Ground component design in the token layer
-  fixing-accessibility: Apply accessibility fixes during component design
-  ui-ux-creative-coding: Add motion and creative polish to designed components
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 gh-workflow:
-  he-fix-bugs: When PR CI failures reveal a code-level bug that needs root-cause investigation
-  orchestrating-subagents: Coordinate bounded reviewer fan-out when one-thread-at-a-time
-    review handling is too slow
-  release: After merging — use to cut the version tag and publish the release
-  verification-before-completion: Gate all merge claims with fresh `gh pr checks`
-    and `git log` evidence
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 go:
   he-fix-bugs: Triage Go runtime errors with evidence-first diagnosis
   rust-pro: Systems programming with similar error-propagation and ownership concerns
+improve-codebase-architecture:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 insight-report:
-  codex-automation-architect: Convert recommendations into automations
-  codex-home-audit: Check Codex setup health
-  skill-refactor: Analyze skill usage
-  visual-explainer: Convert outcomes into visual explainers
+  codex-automation-architect: Convert recommendations into Codex automations
+  skill-refactor: Analyze skill usage and improvement opportunities
+  ubiquitous-language: Extract terminology Jamie can reuse in future prompts
 interview-me:
-  architecture-interview: Structure a concrete architecture choice into a decision
-    record
-  brainstorming: Explore multiple solution directions before narrowing into interview
-    questions
-  deep-interview: Deepen an existing draft doc or spec rather than running a lighter
-    clarifying interview
-  he-plan: Turn the clarified outcome into an execution-ready implementation plan
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 javascript-pro:
   biome-linting: Enforce JavaScript/TypeScript lint and format rules with Biome
   typescript: Typed JavaScript superset when strict contracts and module boundaries
     are needed
 llm-wiki:
-  context7: Pull current external API/library docs to enrich wiki source material.
-  docs-expert: Improve surrounding repository docs and runbooks once the workflow
-    is chosen.
-  project-brain: Operate project memory systems when the ask is broader than a single
-    wiki pattern.
-markdown-converter:
-  docs-expert: Polish converted docs to meet repository quality standards
-  llm-wiki: Feed converted markdown into a persistent knowledge base for analysis
-  spreadsheet: Convert tabular data alongside markdown conversion
-  visual-explainer: Present converted content as a visual HTML page
-mcp-builder:
-  backend-engineer: Add MCP tools to an existing backend service
-  chatgpt-apps: Connect the MCP server to a ChatGPT Apps SDK integration
-  openai-docs: Use official MCP schema docs when designing tool schemas
-  security-best-practices: Apply security hardening to MCP server endpoints
-mise-tooling:
-  fix-mise: Deep-dive broken trust, shim, or runtime-resolution states
-  npm-release: Ensure release commands execute on the intended Node toolchain
-  pnpm-manager: Run workspace commands under the pinned runtime
-npm-release:
-  mise-tooling: Pin runtime/tool versions before release commands
-  npm-workflow-discipline: Enforce deterministic npm install/release contracts
-  pnpm-manager: Coordinate monorepo package prep before npm publish
-npm-workflow-discipline:
-  circleci-cli: Align deterministic npm install and script contracts with CircleCI
-    pipeline behavior
-  coding-harness: Validate and enforce repository quality gates in CI and local workflows
-  release: Apply package and script contract checks during release readiness and cutover
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 oak-api:
-  chatgpt-apps: Build a ChatGPT App that surfaces Oak curriculum content
-  fixing-accessibility: Ensure Oak-powered UI meets accessibility requirements
-  interview-me: Clarify learning requirements before implementing
-  mcp-builder: Expose Oak API as MCP tools for agent workflows
-og-image-builder:
-  favicon-generator: Generate OG images and favicons as a complete brand suite
-  fixing-metadata: Wire generated OG images into correct meta tags
-  imagegen: Use imagegen for non-route-specific image generation
-orchestrating-subagents:
-  ce-work: Execute a plan once the orchestration decision is made and the task is
-    implementation-ready
-  codex-agent-creator: Create or update the agent roles that the orchestration plan
-    needs
-  gh-workflow: Apply bounded parallelism to PR review resolution within the GitHub
-    lifecycle lane
-  using-git-worktrees: Split write-heavy parallel work into isolated worktrees instead
-    of a shared checkout
-playwright-interactive:
-  agentation: Wire Playwright automation into Agentation self-driving
-  fixing-accessibility: Test keyboard navigation and focus via Playwright
-  ui-visual-regression: Capture Playwright screenshots for regression baselines
-pnpm-manager:
-  mise-tooling: Ensure runtime/tool versions are pinned before pnpm execution
-  npm-release: Hand off package publish lanes after workspace validation
-  npm-workflow-discipline: Keep workspace install/publish contracts deterministic
-production-deployment:
-  1password: Inject deployment secrets via 1Password CLI
-  release: Orchestrate the release flow before deployment
-project-brain:
-  codex-home-audit: Pair when the user wants Codex control-plane drift analysis across
-    agents, hooks, skills, and memory surfaces.
-  coding-harness: Use when Project Brain rollout must align with harness contracts,
-    gates, and tooling audits in a managed repository.
-  docs-expert: Use for follow-on documentation hardening after Project Brain bootstrap
-    or rollout changes land.
-react-ui-patterns:
-  baseline-ui: Validate React component patterns against baseline rules
-  design-system: Keep typography, spacing, and icon guidance aligned to canonical
-    token governance
-  frontend-ui-design: Use patterns when refining component structure and UI composition
-  shadcn-ui: Source Radix/shadcn primitives for React pattern implementations
-  ui-ux-creative-coding: Layer motion on top of React pattern scaffolds
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+og-image-creator:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 recon-workbench:
-  he-fix-bugs: Debug confirmed runtime behavior after recon narrows the target surface
-  security-best-practices: Turn recon findings into concrete secure-by-default implementation
-    guidance
-  security-ownership-map: Connect the findings to code ownership and bus-factor risk
-  security-threat-model: Map recon evidence into trust boundaries, abuse paths, and
-    mitigations
-release:
-  ce-plan: Plan the release checklist before executing
-  gh-workflow: Manage the PR and merge lifecycle before cutting a release
-  verification-before-completion: Validate all checks pass before tagging
-remotion:
-  design-system: Keep caption, overlay, and UI-adjacent typography and token usage
-    aligned with system governance
-  imagegen: Generate still images to use as Remotion assets
-  slides: Convert slide decks into Remotion video compositions
-  sora: Compare Remotion (code-driven) with Sora (AI-driven) video
-  video-transcript-downloader: Download reference transcripts before scripting Remotion
-    narration
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+release-notes:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 rust-pro:
   go: Systems programming with similar error-handling and concurrency patterns
   he-fix-bugs: Triage Rust ownership and borrow-checker errors with evidence-first
     diagnosis
-scaffolding-expert:
-  bash-hygiene: Shell-policy and quoting/interpreter hardening
-  context7: External docs grounding for version-sensitive dependencies
-  npm-workflow-discipline: Lockfile discipline and script contract normalization
-  uv-python-project-setup: uv-managed Python project and execution contract setup
-security-best-practices:
-  1password: Findings involving secrets management — use for secure injection patterns
-  create-auth: Security review often surfaces auth issues — use this for implementation
-  security-ownership-map: Find who owns the highest-risk code after identifying findings
-  security-threat-model: Run first to identify trust boundaries and threat model;
-    this skill remediates specific findings
 security-ownership-map:
-  gh-workflow: Create GitHub issues for identified owners
-  recon-workbench: Correlate recon findings with ownership data
-  security-best-practices: Route best-practice remediation to the right owners
-  security-threat-model: Use ownership map to assign threat model mitigations
-security-threat-model:
-  architecture-interview: When the system design is still unclear — clarify before
-    threat modeling
-  recon-workbench: When authorized recon evidence is needed to ground the threat model
-  security-best-practices: Run after threat modeling to get language-specific remediation
-    guidance
-  security-ownership-map: Use to identify which engineers are responsible for the
-    highest-risk code areas
-shadcn-ui:
-  baseline-ui: Validate shadcn/ui component usage against baseline rules
-  design-system: Override shadcn/ui tokens with design-system aliases
-  fixing-accessibility: Fix accessibility issues in shadcn/ui interactive components
-  react-ui-patterns: Apply React composition patterns to shadcn/ui components
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 simplify:
   he-code-review: Run a structured code-review pass to surface and prioritize risk
     findings before fix work
@@ -382,17 +141,6 @@ skill-creator:
 skill-installer:
   skill-creator: Author or repair local skill packages before installation
   skillify: Harden source skills into canonical templates before install/distribution
-slides:
-  beautiful-mermaid: Embed high-quality Mermaid diagrams in slide decks
-  he-plan: Turn an implementation plan into a presentation deck
-  imagegen: Generate illustrative images for slide backgrounds
-  remotion: Animate a slide deck as a Remotion video
-  visual-explainer: Use when a scrollable HTML page is better than slides
-spreadsheet:
-  evals-router: Track evaluation results in a spreadsheet
-  insight-report: Export session data to spreadsheet for analysis
-  markdown-converter: Convert spreadsheet data to markdown for documentation
-  visual-explainer: Present spreadsheet data as a styled HTML table
 swift-development:
   he-fix-bugs: Triage Swift concurrency and actor isolation issues with evidence-first
     diagnosis
@@ -402,60 +150,31 @@ toml:
   he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
   yaml: Schema-aware config review for YAML-based tooling configs
 triage:
-  ce-work: Execute the approved work once triage decisions are made
-  he-fix-bugs: Diagnose unclear or flaky findings before deciding whether they belong
-    in the queue
-  he-work: Execute approved todo items after triage decisions are finalized
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 typescript:
   biome-linting: Enforce TypeScript lint and format rules with Biome
   javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
     need attention
+ubiquitous-language:
+  agents-md: Use when the glossary needs to influence repo-level agent instructions
+    after terminology is stable.
+  docs-expert: Use for broader documentation rewrites after the canonical vocabulary
+    is agreed.
+  verification-before-completion: Pair with prompt translations that turn vague completion
+    language into exact validation evidence.
 ui-ux-creative-coding:
-  baseline-ui: Keep animation timing, typography, and accessibility aligned with the
-    baseline system
-  design-system: Route token, palette, and alias-level system work to the design-system
-    owner
-  frontend-ui-design: Establish the structural UI direction before layering in motion
-    and polish
-  react-ui-patterns: Ground the creative layer in maintainable React composition patterns
-ui-visual-regression:
-  baseline-ui: Run baseline UI checks alongside visual regression
-  design-system: Resolve confirmed token, typography, spacing, or icon drift at the
-    system layer
-  playwright-interactive: Capture deterministic screenshots and traces before classification
-  react-ui-patterns: Catch visual regressions after component composition changes
-uv-python-project-setup:
-  he-tdd: Pair uv-managed environments with behavior-first testing workflows
-  verification-before-completion: Enforce final verification before declaring setup
-    complete
-verification-before-completion:
-  evals-router: Verify LLM eval pipelines pass before claiming eval work is complete
-  gh-workflow: 'Gate PR merges: verification must pass before PR language is used'
-  he-fix-bugs: Run first to find root cause; use this skill to prove the fix worked
-  he-tdd: Write failing tests before fixing; this skill verifies they now pass
-video-transcript-downloader:
-  llm-wiki: Feed transcripts into a persistent markdown knowledge base for summarisation
-  markdown-converter: Convert transcript text to clean markdown
-  youtube-hooks-scripts: Create scripts for videos whose transcripts you've studied
-  youtube-titles-thumbnails: Package videos after reviewing competitor transcripts
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 visual-explainer:
-  beautiful-mermaid: Render Mermaid diagrams as image assets for the explainer
-  design-system: Align the explainer’s token and visual language with the repo’s design
-    system
-  diagram-cli: Generate architecture diagrams and context packs before building the
-    final explainer
-  slides: Use a presentation deck instead of a scrollable HTML explainer when the
-    format fits better
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
 yaml:
   he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
   toml: Schema-aware config review for TOML-based tooling configs
-youtube-hooks-scripts:
-  he-plan: Plan the content series before scripting individual videos
-  llm-wiki: Persist scripts and notes in a queryable markdown knowledge base
-  video-transcript-downloader: Study competitor transcripts before writing hooks
-  youtube-titles-thumbnails: Create titles and thumbnails to pair with the script
-youtube-titles-thumbnails:
-  imagegen: Generate thumbnail concept images
-  video-transcript-downloader: Research competitor videos before writing titles
-  visual-explainer: Present A/B thumbnail options in a visual comparison page
-  youtube-hooks-scripts: Pair with a hook and script for complete video packaging

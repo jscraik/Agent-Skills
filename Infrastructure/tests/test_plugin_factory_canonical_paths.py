@@ -40,14 +40,14 @@ PLUGIN_CREATOR_WORKFLOW = PLUGIN_CREATOR_SKILL.parent / "references" / "workflow
 def _load_module(module_name: str, script_path: Path):
     """
     Load a Python module from a given file path under a specific module name.
-    
+
     Parameters:
         module_name (str): The name to assign to the loaded module.
         script_path (Path): Filesystem path to the Python source file to import.
-    
+
     Returns:
         module: The loaded module object.
-    
+
     Raises:
         RuntimeError: If an import spec or loader cannot be created for the given script_path.
     """
@@ -64,9 +64,9 @@ def _load_module(module_name: str, script_path: Path):
 def _chdir(path: Path):
     """
     Context manager that temporarily changes the process working directory to the given path.
-    
+
     On exit — including when an exception is raised inside the context — the original working directory is restored.
-    
+
     Parameters:
         path (Path): Directory to switch to for the duration of the context.
     """
@@ -84,9 +84,9 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
     ) -> None:
         """
         Assert that a plugin script's path constants remain anchored to the repository root rather than the current working directory.
-        
+
         Verifies that the loaded module's `REPO_ROOT`, `DEFAULT_PLUGIN_PARENT` and `DEFAULT_MARKETPLACE_PATH` resolve to the repository-level locations and that `DEFAULT_PLUGIN_PARENT` is not derived from a temporary CWD created for the test.
-        
+
         Parameters:
         	script_path (Path): Filesystem path to the plugin script to import.
         	module_name (str): Module name to use when loading the script.
@@ -114,7 +114,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
     def test_plugin_builder_defaults_anchor_to_repo_root(self) -> None:
         """
         Verify the plugin builder's default path constants are anchored to the repository root.
-        
+
         Loads the plugin builder script from its file path while the process CWD is a temporary directory and asserts that the module's `REPO_ROOT`, `DEFAULT_PLUGIN_PARENT` and `DEFAULT_MARKETPLACE_PATH` resolve to repository-local paths (not to paths under the temporary CWD).
         """
         self._assert_defaults_anchor_to_repo_root(
@@ -126,7 +126,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
     def test_plugin_creator_skill_uses_repo_local_script_path(self) -> None:
         """
         Verify that the plugin-creator skill document references the workflow and that the workflow contains the repository-local `.pyw` script path for create_basic_plugin.
-        
+
         The test reads the skill and workflow documentation files and asserts that:
         - "references/workflow.md" appears in the skill document.
         - The workflow document includes the repository-local path "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/scripts/create_basic_plugin.pyw".
@@ -177,6 +177,7 @@ class TestPluginFactoryCanonicalPaths(unittest.TestCase):
                 text=True,
                 capture_output=True,
                 check=False,
+                timeout=120,
             )
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

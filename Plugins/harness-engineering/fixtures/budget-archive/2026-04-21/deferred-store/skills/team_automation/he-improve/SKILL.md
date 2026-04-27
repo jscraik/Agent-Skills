@@ -1,6 +1,6 @@
 ---
 name: he-improve
-description: Analyze and improve an existing implementation through metric-driven, bounded iteration loops. Use when the user wants Harness Engineering optimization or tuning rather than one-shot implementation.
+description: Improve existing Harness Engineering implementations or workflows with evidence-backed changes. Use when users ask for targeted enhancement of shipped or drafted work.
 metadata:
   skill-type: team_automation
 ---
@@ -8,11 +8,6 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
-
-## Use
-
-- Use this skill as normal for this Harness Engineering stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -28,18 +23,11 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Inputs
 
-- Baseline behavior, metrics, and current constraints.
-- Candidate improvement hypotheses and acceptable risk bounds.
-- Optimization goal or spec path.
-- Metric mode and rubric needs: `hard`, `judge`, or hybrid gate-plus-judge.
+- Request, artifacts, repo context, and linked Linear issues.
 
 ## Outputs
 
-- Prioritized improvement plan with measurable success criteria.
-- Iteration outcomes and next-step recommendation.
-- Explicit run mode: `fresh` or `resume`.
-- Durable experiment-log path and best-so-far outcome when optimization runs are started.
-- Include `schema_version: 1` when structured output is requested.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
 
 ## Procedure
 
@@ -65,7 +53,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not broaden scope beyond bounded optimization goals.
 - Do not mutate the measurement harness or declared immutable surfaces inside experiment edits.
 - Do not summarize optimization results before they have been durably logged.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
@@ -74,32 +62,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Running parallel experiments before baseline and readiness probe confidence exists.
 - Treating optimization as one-shot implementation instead of a measured keep-or-revert loop.
 
-## Examples
-
-- "When the user asks, `Can you inspect why the build got slower after the refactor and keep only changes that measurably help?`"
-- "Please improve search quality, but validate the winner with a judge-backed loop because raw metrics can be gamed."
-- "Help me resume the last optimization run if the experiment state is still trustworthy; otherwise start clean from a baseline."
-
 ## Full Context
 
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
-Read when: you need full workflow behavior, gating, and deliverable expectations.
-Read when: you need schema contracts, eval cases, donor-parity notes, and prompt templates.
-Read when: you need executable measurement or probe helpers.
-Read when: you need icon/display metadata and invocation policy.
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-Read when: you need canonical stage policy and fallback behavior.
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
 
-## Subagent Routing
+## Examples
 
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, create or install them with [../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) before rerunning delegated coverage.
+- "Can you inspect this shipped retry workflow and prove the improvement with before and after metrics?"
+- "Help me tune this validation lane, but keep each experiment reversible and stop if the metric gets worse."
+- "This feature works, but the review loop is slow. Compare two bounded improvements and keep only the measured winner."

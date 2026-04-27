@@ -10,6 +10,9 @@ if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 
   # shellcheck source=.codex/environments/detach-head-helper.sh
   source "$repo_root/.codex/environments/detach-head-helper.sh"
   codex_attach_detached_head
+  # shellcheck source=Infrastructure/scripts/codex-preflight/codex_env_common.sh
+  source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"
+  codex_apply_env
 fi
 mise trust --yes .mise.toml
 mise install
@@ -26,6 +29,9 @@ if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 
   # shellcheck source=.codex/environments/detach-head-helper.sh
   source "$repo_root/.codex/environments/detach-head-helper.sh"
   codex_attach_detached_head
+  # shellcheck source=Infrastructure/scripts/codex-preflight/codex_env_common.sh
+  source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"
+  codex_apply_env
 fi
 mise trust --yes .mise.toml
 mise install
@@ -103,6 +109,9 @@ if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 
   # shellcheck source=.codex/environments/detach-head-helper.sh
   source "$repo_root/.codex/environments/detach-head-helper.sh"
   codex_attach_detached_head
+  # shellcheck source=Infrastructure/scripts/codex-preflight/codex_env_common.sh
+  source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"
+  codex_apply_env
 fi
 mise trust --yes .mise.toml
 mise install

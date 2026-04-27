@@ -13,11 +13,11 @@
 
 ## Primary outputs
 
-- Output root: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}`
-- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insight-evidence.json`
-- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/INSIGHT_PROMPT.md`
-- Codex-written insights: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/insights.generated.json`
-- HTML report: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/dev/configs/codex/usage-data}/report.html`
+- Output root: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}`
+- Evidence bundle: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/insight-evidence.json`
+- Codex prompt: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/INSIGHT_PROMPT.md`
+- Codex-written insights: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/insights.generated.json`
+- HTML report: `${INSIGHT_REPORT_USAGE_DIR:-$HOME/.codex/usage-data}/report.html`
 
 ## Validation checklist
 

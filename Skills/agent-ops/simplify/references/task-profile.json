@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-simplify",
   "scope_skill": "Skills/agent-ops/simplify",
   "scope_profile": "Skills",
-  "rubric_version": "2026-04-08",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -16,33 +16,33 @@
   },
   "criteria": [
     {
-      "id": "behavior_safety",
-      "label": "Behavior-preserving cleanup",
-      "threshold": 0.85,
+      "id": "clarity",
+      "label": "Clarity",
+      "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
-      "id": "finding_quality",
-      "label": "High-signal reuse quality efficiency findings",
-      "threshold": 0.75,
+      "id": "specificity",
+      "label": "Specificity",
+      "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
-      "id": "execution_discipline",
-      "label": "Fail-fast validation and scoped edits",
-      "threshold": 0.8,
+      "id": "safety",
+      "label": "Safety",
+      "threshold": 0.85,
       "weight": 0.33,
       "critical": true
     }
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 40.0,
-    "ai_process_minutes": 12.0,
-    "probability_of_success": 0.78,
-    "rationale": "Simplify uses parallel specialist review and still needs careful human oversight for behavior-sensitive cleanup edits."
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [

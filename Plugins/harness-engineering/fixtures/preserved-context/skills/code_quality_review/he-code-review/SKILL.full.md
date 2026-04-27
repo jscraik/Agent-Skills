@@ -335,3 +335,7 @@ See `references/he-anti-patterns.md`:
 | [[gh-workflow]] | GitHub merge readiness |
 
 **Topic map:** [[agent-ops]]
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

@@ -2,10 +2,10 @@
 """Tests for the LLM Wiki Reference PR changes.
 
 Covers:
-- Wiki/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md (new file)
-- Wiki/skill-ops-wiki/wiki/sources/llm-wiki.md (new file)
-- Wiki/skill-ops-wiki/wiki/index.md (Sources section + new entries)
-- Wiki/skill-ops-wiki/wiki/log.md (new triage entry)
+- Wiki/wiki/learnings/llm-wiki-reference.md (new file)
+- Wiki/wiki/sources/llm-wiki.md (new file)
+- Wiki/wiki/index.md (Sources section + new entries)
+- Wiki/wiki/log.md (new triage entry)
 
 Uses wiki_lint.py helpers directly to validate both the actual committed files
 and the linter's behaviour against synthetic wiki fixtures.
@@ -22,7 +22,7 @@ from datetime import date
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-WIKI_ROOT = REPO_ROOT / "docs" / "skill-ops-wiki" / "wiki"
+WIKI_ROOT = REPO_ROOT / "Wiki" / "wiki"
 WIKI_LINT_PATH = REPO_ROOT / "scripts" / "validation-and-linting" / "wiki_lint.py"
 
 def _load_wiki_lint_module():
@@ -82,7 +82,7 @@ class TestLlmWikiReferenceFile(unittest.TestCase):
         """
         Initialise the test fixture by loading the LLM Wiki Reference file and parsing its frontmatter.
         
-        Reads Wiki/skill-ops-wiki/wiki/learnings/llm-wiki-reference.md and sets:
+        Reads Wiki/wiki/learnings/llm-wiki-reference.md and sets:
         - self.path: Path to the file.
         - self.text: File contents as a UTF-8 string.
         - self.frontmatter: Parsed YAML frontmatter dictionary (empty dict if none).
@@ -653,9 +653,8 @@ class TestWikiLintOnActualWiki(unittest.TestCase):
 class TestWikiLintSyntheticWiki(unittest.TestCase):
     """Verify lint_wiki correctly validates a synthetic wiki that mirrors the PR additions.
 
-    The actual repo index uses absolute paths (/docs/…) which wiki_lint skips when
-    resolving links.  This synthetic fixture uses relative links (the canonical form
-    expected by the linter) so we can test link integrity end-to-end.
+    The repo index uses relative links, which is the canonical form expected by
+    wiki_lint. This synthetic fixture keeps that behavior covered end-to-end.
     """
 
     def _make_wiki(self, tmp: Path) -> Path:
@@ -885,7 +884,7 @@ class TestReadFrontmatterUnit(unittest.TestCase):
         # to verify that _parse/_read_frontmatter returns a list and preserves content.
         fm = self._parse(
             "---\ntitle: T\ntype: t\nstatus: s\nlast_reviewed: 2026-04-09\nsources:\n"
-            "- /Users/jamiecraik/dev/agent-skills/Wiki/skill-ops-wiki/wiki/sources/llm-wiki.md\n---\n# H\n"
+            "- /Users/jamiecraik/dev/agent-skills/Wiki/wiki/sources/llm-wiki.md\n---\n# H\n"
         )
         sources = fm.get("sources")
         self.assertIsInstance(sources, list)

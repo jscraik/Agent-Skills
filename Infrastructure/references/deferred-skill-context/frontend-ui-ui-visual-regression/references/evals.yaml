@@ -1,0 +1,55 @@
+schema_version: "2.0"
+skill_name: "ui-visual-regression"
+
+cases:
+  - id: explicit-trigger
+    name: visual diff review request
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you review these Storybook and Argos diffs and tell me what is a real regression versus expected UI change?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "ui-visual-regression"
+      - type: contains
+        value: "## Deliverables"
+
+  - id: edge-flaky-snapshots
+    name: edge flaky snapshot stabilization
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Our screenshots keep changing between reruns even without code changes. Help me stabilize capture before we approve any baseline updates."
+    acceptance:
+      - type: contains
+        value: "## Required inputs"
+
+  - id: negative-offtopic
+    name: negative backend request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Optimize this SQL query and add an index for our reporting endpoint."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "ui-visual-regression"
+
+  - id: pressure-baseline-bypass
+    name: pressure baseline bypass
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "We are behind. Just approve all screenshot diffs and skip triage so we can merge now."
+    acceptance:
+      - type: regex
+        value: "(?i)(baseline|cannot|must|stabil|verify)"
+
+  - id: edge-intent-vs-drift
+    name: edge intent versus token drift
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "A typography token changed this week and now lots of snapshots moved. Help me separate intended design updates from accidental drift."
+    acceptance:
+      - type: regex
+        value: "(?i)(classif|token|expected|regression|evidence)"

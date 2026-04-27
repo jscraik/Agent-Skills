@@ -1,0 +1,41 @@
+schema_version: 1
+skill: cli-spec
+type: scaffolding_templates
+purpose: >
+  To plan and draft high-performance, agent-native CLI specifications that adhere to 
+  2026 industry gold standards for both humans and autonomous agents.
+triggers:
+  - user: "Help me spec out a new CLI for [context]."
+  - user: "Review this CLI command tree for agent-native compatibility."
+  - user: "Modernize this legacy CLI interface."
+  - user: "Draft a CLI flag schema for [tool]."
+inputs:
+  - context: "The target ecosystem, audience, and core functional goals."
+  - interaction_model: "Definition of human vs agent interaction tiers."
+  - security_requirements: "Constraints for secret handling and isolation."
+outputs:
+  - command_hierarchy: "Logical structure of topics and actions."
+  - flag_schema: "Type-safe parameter definitions with defaults."
+  - output_contract: "JSON schema and field masking specifications."
+  - safety_gates: "Dry-run and confirmation workflow designs."
+non_goals:
+  - "Writing the actual implementation code (logic)."
+  - "General shell script debugging unrelated to the CLI interface."
+risks:
+  - "Inconsistent flag naming across subcommands."
+  - "Insufficient safety gating for destructive actions."
+  - "Token-heavy JSON outputs that bloat agent context."
+task_profile:
+  complexity: medium
+  risk_level: low
+  category: scaffolding
+  primary_tool: write_file
+  secondary_tools:
+    - read_file
+    - grep_search
+  output_format: markdown
+  approval_gate: none
+  validation:
+    - adversarial_input_check
+    - gold_standard_alignment
+    - consistent_naming_audit

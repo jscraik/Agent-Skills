@@ -17,6 +17,7 @@ Checks:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from dataclasses import dataclass
@@ -26,10 +27,13 @@ from typing import List, Optional
 SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
+if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
+    sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 if str(SCRIPTS_ROOT / "validation-and-linting") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "validation-and-linting"))
 
 from verify_skill_catalog_freshness import analyze_skill_file, canonical_skill_map, discover_skill_files
+from command_surface import resolve_skill_handle
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
@@ -176,6 +180,78 @@ def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir:
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
 
 
+def is_plugin_owned_skill(skill_arg: str, skill_dir: Path) -> bool:
+    """Return whether the audited skill is plugin-owned and not expected in the default runtime index."""
+    candidate = Path(skill_arg).expanduser()
+    paths = [candidate]
+    if not candidate.is_absolute():
+        paths.append(REPO_ROOT / candidate)
+    paths.append(skill_dir)
+
+    for path in paths:
+        try:
+            rel_parts = path.resolve().relative_to(REPO_ROOT).parts
+        except ValueError:
+            continue
+        if rel_parts and rel_parts[0] == "Plugins":
+            return True
+    return False
+
+
+def check_plugin_runtime_surface(skill_name: str, label: str) -> DiagnosticResult:
+    """Skip default-runtime checks for plugin-owned skills."""
+    return DiagnosticResult(
+        f"symlink ({label})",
+        "skip",
+        f"Plugin-owned skill is not expected as a default user-runtime symlink: {skill_name}",
+    )
+
+
+def rooted_manifest_skill_set(skill_dir: Path) -> Optional[str]:
+    """Return the rooted skill set that owns a latent skill, when known."""
+    skill_md = (skill_dir / "SKILL.md").resolve()
+    skillsets_dir = REPO_ROOT / ".skillsets"
+    if not skillsets_dir.is_dir():
+        return None
+
+    for manifest_path in sorted(skillsets_dir.glob("*/manifest.jsonl")):
+        try:
+            lines = manifest_path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            source_path = entry.get("source_path")
+            if not source_path:
+                continue
+            if entry.get("runtime_visibility") != "latent":
+                continue
+            try:
+                source_skill_md = (REPO_ROOT / source_path).resolve()
+            except OSError:
+                continue
+            if source_skill_md == skill_md:
+                return manifest_path.parent.name
+
+    return None
+
+
+def check_rooted_latent_runtime_surface(skill_name: str, skill_set: str, label: str) -> DiagnosticResult:
+    """Skip flat symlink checks for latent skills routed by rooted manifests."""
+    return DiagnosticResult(
+        f"symlink ({label})",
+        "skip",
+        f"Rooted latent skill is routed through .skillsets/{skill_set}/manifest.jsonl "
+        f"and is not expected as a first-level user-runtime symlink: {skill_name}",
+    )
+
+
 def check_skill_index(skill_name: str) -> DiagnosticResult:
     """Check if skill appears in root SKILL.md index."""
     if not SKILL_INDEX.exists():
@@ -191,6 +267,15 @@ def check_skill_index(skill_name: str) -> DiagnosticResult:
             "Not found in SKILL.md index",
             "Run `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` to regenerate the surfaced catalog.",
         )
+
+
+def check_plugin_skill_index(skill_name: str) -> DiagnosticResult:
+    """Skip root index checks for plugin-owned skills outside the default visible catalog."""
+    return DiagnosticResult(
+        "skill index",
+        "skip",
+        f"Plugin-owned skill is not expected in the root default visible skill index: {skill_name}",
+    )
 
 
 def check_task_profile(skill_dir: Path) -> DiagnosticResult:
@@ -222,7 +307,19 @@ def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
     """Check governed lifecycle readiness for a skill."""
     skill_files = discover_skill_files(REPO_ROOT)
     canonical_by_name = canonical_skill_map(skill_files, REPO_ROOT)
-    report = analyze_skill_file(skill_dir / "SKILL.md", REPO_ROOT, canonical_by_name)
+    skill_file = skill_dir / "SKILL.md"
+    try:
+        rel_parts = skill_dir.resolve().relative_to(SKILLS_DIR.resolve()).parts
+    except ValueError:
+        rel_parts = ()
+    if len(rel_parts) == 1:
+        resolution = resolve_skill_handle(rel_parts[0], repo_root_path=REPO_ROOT)
+        source_path = resolution.get("source_path") if resolution.get("status") == "ok" else None
+        if isinstance(source_path, str):
+            source_skill_file = REPO_ROOT / source_path
+            if source_skill_file.is_file():
+                skill_file = source_skill_file
+    report = analyze_skill_file(skill_file, REPO_ROOT, canonical_by_name)
 
     if report.readiness == "blocked":
         return DiagnosticResult(
@@ -261,9 +358,20 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
     results.append(check_nested_git(skill_dir))
     # Skill audits may be invoked with a path argument (for example, utilities/my-skill).
     # Symlink/index checks must always use the canonical skill directory name.
-    results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
-    results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
-    results.append(check_skill_index(resolved_skill_name))
+    plugin_owned = is_plugin_owned_skill(skill_name, skill_dir)
+    if plugin_owned:
+        results.append(check_plugin_runtime_surface(resolved_skill_name, "codex"))
+        results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
+        results.append(check_plugin_skill_index(resolved_skill_name))
+    else:
+        rooted_skill_set = rooted_manifest_skill_set(skill_dir)
+        if rooted_skill_set:
+            results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "codex"))
+            results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "agents"))
+        else:
+            results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+            results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+        results.append(check_skill_index(resolved_skill_name))
     results.append(check_task_profile(skill_dir))
     results.append(check_lifecycle_readiness(skill_dir))
 

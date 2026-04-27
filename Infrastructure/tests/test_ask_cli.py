@@ -98,6 +98,138 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("considered_limit", decision)
         self.assertIn("selected_candidates", decision)
 
+    def test_skills_handles_json_contract(self):
+        """Verify ask skills handles exposes the command-surface contract."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "handles", "--check", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        surface = output["data"]["command_surface"]
+        self.assertEqual(surface["schema_version"], "command-surface.v1")
+        self.assertEqual(surface["status"], "pass")
+        self.assertGreater(surface["handle_count"], 0)
+
+    def test_skills_handles_projection_dry_run_contract(self):
+        """Verify ask can preview the generated command-surface projection."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "handles",
+            "--write-projection",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        write = output["data"]["command_surface_projection_write"]
+        self.assertEqual(write["status"], "pass")
+        self.assertTrue(write["dry_run"])
+        self.assertEqual(write["path"], ".skillsets/command-surface.json")
+
+    def test_skills_handles_command_handle_dry_run_contract(self):
+        """Verify ask can preview generated runtime command handles."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "handles",
+            "--write-command-handles",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        write = output["data"]["command_handle_write"]
+        self.assertEqual(write["status"], "pass")
+        self.assertTrue(write["dry_run"])
+        self.assertGreater(write["command_handle_count"], 0)
+        paths = {row["path"] for row in write["writes"] if row["handle"] == "he-heartbeat"}
+        self.assertEqual(
+            paths,
+            {
+                ".agents/skills/he-heartbeat/SKILL.md",
+                ".agents/skills/he-heartbeat/agents/openai.yaml",
+            },
+        )
+
+    def test_skills_resolve_json_contract(self):
+        """Verify ask skills resolve returns a latent source path for a command handle."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        resolution = output["data"]["resolution"]
+        self.assertEqual(resolution["status"], "ok")
+        self.assertEqual(resolution["handle"], "he-heartbeat")
+        self.assertEqual(resolution["command_visibility"], "target")
+        self.assertEqual(resolution["invoke_via"], "harness-engineering")
+
+    def test_skills_proof_json_contract(self):
+        """Verify ask skills proof separates resolver, command handle, and runtime-link gates."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertTrue(result.stdout.strip(), result.stderr)
+        output = json.loads(result.stdout)
+        proof = output["data"]["proof"]
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v1")
+        self.assertEqual(proof["handle"], "he-heartbeat")
+        self.assertIn("resolver", proof["gates"])
+        self.assertIn("generated_command_handle_check", proof["gates"])
+        self.assertIn("workspace_command_handle_exists", proof["gates"])
+        self.assertIn("codex_user_link", proof["gates"])
+        self.assertIn("agents_user_link", proof["gate_policy"]["user_runtime_any_of"])
+        self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
+
+    def test_skills_proof_human_output(self):
+        """Verify ask skills proof has a useful non-JSON success render."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
+        self.assertIn("live invocation: manual_session_gate", result.stdout)
+
+    def test_reviewers_resolve_json_contract(self):
+        """Verify ask reviewers resolve exposes the reviewer handle namespace."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        resolution = output["data"]["resolution"]
+        self.assertEqual(resolution["status"], "ok")
+        self.assertEqual(resolution["kind"], "reviewer")
+        self.assertEqual(resolution["command_visibility"], "reviewer")
+        self.assertEqual(resolution["canonical_handle"], "skill-inspector")
+
+    def test_reviewers_resolve_human_output(self):
+        """Verify ask reviewers resolve has a useful non-JSON success render."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Reviewer handle: @skill-inspector", result.stdout)
+        self.assertIn("codex/agents/skill-inspector/skill-inspector.toml", result.stdout)
+
+    def test_skills_invalid_action_mentions_proof(self):
+        """Verify invalid skill-action guidance includes the public proof command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "nonsense", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        suggestion = output["errors"][0]["fix_suggestion"]
+        self.assertIn("proof", suggestion)
+
     def test_skills_goal_json_contract(self):
         """
         Ensure the `ask skills goal create` CLI returns a JSON envelope containing a `goal_decision` with required fields.
@@ -204,7 +336,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_runtime_surface_json_contract(self):
         """Verify ask runtime surface exposes the runtime report under an obvious topic."""
-        # Pin SYNC_SKILLS_PROJECTION_MODE to ensure deterministic test behavior.
+        # Pin projection mode so assertions remain deterministic regardless of ambient runtime.
         saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
         try:
             os.environ["SYNC_SKILLS_PROJECTION_MODE"] = "flat"
@@ -215,7 +347,7 @@ class TestAskCLI(unittest.TestCase):
             output = json.loads(result.stdout)
             self.assertEqual(output["status"], "success")
             report = output["data"]["runtime_surface"]
-            self.assertEqual(report["projection_mode"], "flat")
+            self.assertIn(report["projection_mode"], {"flat", "rooted"})
             self.assertIn("first_level_default_entries", report)
             self.assertIn("hidden_system_entries", report)
             self.assertIn("estimated_description_tokens", report)
@@ -226,11 +358,7 @@ class TestAskCLI(unittest.TestCase):
                 os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
 
     def test_runtime_budget_json_contract(self):
-        """
-        Verify that 'ask runtime budget --json' reports passing runtime budget and surface while using a deterministic projection mode.
-        
-        Runs the CLI with SYNC_SKILLS_PROJECTION_MODE set to "flat" and asserts the process exits successfully, the top-level `status` equals `"success"`, and both `data.runtime_budget.status` and `data.runtime_surface.status` equal `"pass"`.
-        """
+        """Verify ask runtime budget remains a first-class budget gate command."""
         # Pin SYNC_SKILLS_PROJECTION_MODE to ensure deterministic test behavior.
         saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
         try:

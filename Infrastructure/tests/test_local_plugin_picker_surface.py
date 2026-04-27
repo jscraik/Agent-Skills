@@ -14,6 +14,7 @@ EXPECTED_PLUGIN_SKILLS = {
         "he-deepen-plan",
         "he-deepen-spec",
         "he-fix-bugs",
+        "he-heartbeat",
         "he-ideate",
         "he-improve",
         "he-plan",
@@ -217,6 +218,45 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.assertFalse(
                 SYSTEM_BRIDGE_SKILL_NAMES & set(discovered),
                 f"{plugin_name} runtime cache should not expose system bridge skills as personal skills",
+            )
+
+    def test_versioned_plugin_cache_exposes_expected_skill_entrypoints(self) -> None:
+        """
+        Verify the local versioned plugin cache contains SKILL.md entrypoints for visible skills.
+
+        Some picker paths still inspect Plugins/cache/agent-skills-local/<plugin>/<version>/skills.
+        This guard keeps that cache aligned with the first-level plugin surface so local plugins do
+        not show metadata-only skill folders.
+        """
+        cache_root = REPO_ROOT / "Plugins" / "cache" / "agent-skills-local"
+        if not cache_root.exists():
+            self.skipTest("versioned local plugin cache has not been generated")
+
+        for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
+            plugin_cache_root = cache_root / plugin_name
+            self.assertTrue(
+                plugin_cache_root.exists(),
+                f"{plugin_name} should expose a versioned local cache root",
+            )
+            version_dirs = [
+                child for child in plugin_cache_root.iterdir()
+                if child.is_dir() and child.name not in {"local"}
+            ]
+            self.assertEqual(
+                1,
+                len(version_dirs),
+                f"{plugin_name} should expose exactly one versioned local cache root",
+            )
+            skills_root = version_dirs[0] / "skills"
+            discovered = {
+                child.name
+                for child in skills_root.iterdir()
+                if child.is_dir() and (child / "SKILL.md").exists()
+            }
+            self.assertEqual(
+                expected_skill_names,
+                discovered,
+                f"{plugin_name} versioned plugin cache picker surface drifted",
             )
 
 

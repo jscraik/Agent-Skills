@@ -323,3 +323,7 @@ User says:
 
 ## Gotchas
 - None yet.
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

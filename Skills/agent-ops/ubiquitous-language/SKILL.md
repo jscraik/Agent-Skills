@@ -22,7 +22,7 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 
 ## Outputs
 
-- A local `UBIQUITOUS_LANGUAGE.md` with canonical terms, aliases, relationships, prompt translations, example dialogue, ambiguities, and open questions.
+- A local `UBIQUITOUS_LANGUAGE.md` with canonical terms, aliases, relationships, prompt translations, example dialogue, ambiguities, and resolved decisions.
 - A small integration patch to the nearest active agent instruction surface, usually `AGENTS.md`, that tells future agents when and how to use `UBIQUITOUS_LANGUAGE.md`.
 - A concise chat summary of the highest-value term choices and prompt translations.
 - Source notes for files or evidence that materially shaped terminology.
@@ -43,12 +43,13 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 6. Extract domain-relevant nouns, verbs, actor names, lifecycle states, workflow names, and repeated user phrases.
 7. Identify synonyms, overloaded words, vague phrases, and places where user wording should map to a more precise operator or technical term.
 8. Choose canonical terms, keeping the user's natural phrase as an alias when it helps agents understand future prompts.
-9. Write or update `UBIQUITOUS_LANGUAGE.md`.
-10. Identify the nearest active agent instruction surface, usually `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/**`, or repo-specific instruction docs.
-11. Add or update a concise "Shared Vocabulary" instruction that points agents to `UBIQUITOUS_LANGUAGE.md` and tells them to use the Prompt Translations table for terse, ambiguous, overloaded, or project-specific user wording.
-12. If no safe agent instruction surface exists, leave the glossary in place and report the missing integration surface instead of creating broad documentation sprawl.
-13. Add validation or routing integration only when the repo already has an obvious validation lane, the user explicitly asks for enforcement, or the glossary is part of a governance change.
-14. Return a concise summary of the main terms, prompt translations, integration surface, and open ambiguities.
+9. If unresolved policy or scope choices remain and they materially affect the glossary output, ask the user explicitly before finalizing, using `request_user_input` when available.
+10. Write or update `UBIQUITOUS_LANGUAGE.md`.
+11. Identify the nearest active agent instruction surface, usually `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/**`, or repo-specific instruction docs.
+12. Add or update a concise "Shared Vocabulary" instruction that points agents to `UBIQUITOUS_LANGUAGE.md` and tells them to use the Prompt Translations table for terse, ambiguous, overloaded, or project-specific user wording.
+13. If no safe agent instruction surface exists, leave the glossary in place and report the missing integration surface instead of creating broad documentation sprawl.
+14. Add validation or routing integration only when the repo already has an obvious validation lane, the user explicitly asks for enforcement, or the glossary is part of a governance change.
+15. Return a concise summary of the main terms, prompt translations, integration surface, and any decisions confirmed with the user.
 
 ## Output Location
 
@@ -64,7 +65,7 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 - Prompt translations from plain English into agent-actionable wording.
 - Relationships and lifecycle rules when they are evident.
 - Example dialogue showing a developer and domain expert using the terms precisely.
-- Flagged ambiguities with a recommended canonical term or a specific open question.
+- Flagged ambiguities with a recommended canonical term, plus explicit user-confirmed decisions when ambiguity changes enforcement or scope.
 
 ## Rules
 
@@ -79,17 +80,18 @@ Do not use this skill for generic code symbol renaming, ordinary copyediting, or
 - Cite source names or file paths when they materially influenced a term.
 - Keep the file useful for future prompts: a teammate should be able to copy a phrase from "Prompt translations" and get a better Codex result.
 - Do not invent validation infrastructure in small or unfamiliar repos unless the user asks for enforcement.
+- Do not silently file unresolved policy decisions under "Open questions" when an explicit user choice is required; ask and record the decision.
 
 ## Validation
 
 - Confirm `UBIQUITOUS_LANGUAGE.md` exists at the selected output path after writing.
 - Confirm the nearest agent instruction surface references `UBIQUITOUS_LANGUAGE.md`, or report why no safe integration surface was updated.
 - Confirm the integration text tells agents to use Prompt Translations for terse or overloaded user phrases.
-- Fail fast: if the output path is unsafe, a mandatory requested source is unavailable, or a requested source would expose secrets, stop and report the blocker instead of proceeding.
+- Fail fast: if the output path is unsafe, a mandatory requested source is unavailable, or a mandatory requested source would expose secrets, stop and report the blocker instead of proceeding.
 - Proceed with available evidence when optional requested sources are missing; list skipped sources in the closeout.
 - Check that every canonical term has a one-sentence definition.
 - Check that `Prompt translations` includes at least one user phrase and one copy-pasteable improved prompt when the source material includes informal wording.
-- Check that ambiguous or overloaded terms are listed under `Flagged ambiguities` or `Open questions`.
+- Check that ambiguous or overloaded terms are listed under `Flagged ambiguities`, and that any material policy/scope decision is either confirmed by the user or marked with an explicit default rationale.
 - Report exact write path and any skipped sources in the closeout.
 
 ## Constraints

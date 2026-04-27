@@ -76,6 +76,15 @@ cd "$repo_root"
 
 python_cmd=(python3)
 python_cmd_display="python3"
+pyyaml_venv_python="$HOME/.venvs/pyyaml/bin/python"
+
+use_pyyaml_venv_python() {
+  [[ -x "$pyyaml_venv_python" ]] || return 1
+  "$pyyaml_venv_python" -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=("$pyyaml_venv_python")
+  python_cmd_display="$pyyaml_venv_python"
+  return 0
+}
 
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
@@ -88,15 +97,22 @@ elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
     python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
     python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
     echo "[family-gate] WARN: Python launcher fallback engaged (mise probe failed); using uv directly"
+  elif use_pyyaml_venv_python; then
+    echo "[family-gate] WARN: Python launcher probes failed; using PyYAML venv fallback"
   else
     echo "[family-gate] WARN: Python launcher probes failed; using python3 fallback"
   fi
 elif command -v uv >/dev/null 2>&1; then
-  python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
-elif [[ -x "$HOME/.venvs/pyyaml/bin/python" ]]; then
-  python_cmd=("$HOME/.venvs/pyyaml/bin/python")
-  python_cmd_display="$HOME/.venvs/pyyaml/bin/python"
+  if uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1; then
+    python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
+    python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+  elif use_pyyaml_venv_python; then
+    echo "[family-gate] WARN: uv Python launcher probe failed; using PyYAML venv fallback"
+  else
+    echo "[family-gate] WARN: uv Python launcher probe failed; using python3 fallback"
+  fi
+elif use_pyyaml_venv_python; then
+  :
 else
   python_cmd=(python3)
   python_cmd_display="python3"

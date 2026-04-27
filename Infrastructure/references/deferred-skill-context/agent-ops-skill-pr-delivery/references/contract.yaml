@@ -1,0 +1,48 @@
+schema_version: "1.0"
+
+purpose: >
+  Deliver Codex skill changes from canonical source edits through runtime sync,
+  reviewer validation, git commit, push, and pull-request evidence.
+
+triggers:
+  - User asks to add, harden, skillify, install, or make a skill available and also asks for PR delivery
+  - Skill package changes require runtime sync or default visibility decisions
+  - User requests skill-inspector, CodeRabbit, CI, or PR validation for a skill change
+  - A completed workflow should become a reusable skill and be shipped on the active branch
+
+inputs:
+  - Target skill name and canonical path when known
+  - Source workflow, existing skill package, or user intent to capture
+  - Runtime visibility decision
+  - Active branch, upstream branch, base branch, and PR number when delivery is in scope
+  - Required reviewer or validation lane
+
+outputs:
+  - Canonical skill package edits
+  - Supporting reference and task-profile files when required by repository validators
+  - Runtime sync evidence for workspace or user scope when requested
+  - Reviewer findings and follow-up resolution notes
+  - Commit SHA, pushed branch, PR URL, and current PR check status
+
+non_goals:
+  - Ordinary coding work unrelated to skills
+  - General prompt coaching without repository changes
+  - Replacing the authoring guidance in skill-creator or Skill Factory
+  - Editing runtime projections as source of truth
+  - Merging the PR unless the user explicitly asks for merge execution
+
+risks:
+  - Runtime surface bloat from unnecessary default-visible skills
+  - Source/projection drift when generated runtime mirrors are edited directly
+  - Reviewer findings lost if mailbox status is treated as evidence
+  - PR readiness claims made before checks finish or fail
+
+observability: >
+  Report the skill path, visibility decision, sync scope, audit results,
+  inspector status, commit SHA, PR URL, and check state so future agents can
+  distinguish authored skill content from delivery evidence.
+
+rollback_procedure: >
+  Revert the skill package commit or restore the prior skill directory from git,
+  rerun workspace and user sync if projections changed, and verify the previous
+  skill list or PR branch state before closing the rollback.

@@ -1,54 +1,32 @@
-schema_version: "1.0"
-
-purpose: >
-  Define expected behavior and outputs for the codex-hooks-builder skill, which
-  scaffolds, upgrades, and validates project-local or user-level Codex hook
-  packs using the current documented runtime contract.
-
+schema_version: 1
+skill: codex-hooks-builder
+purpose: "Build Codex hook packs that match runtime behavior, preserve install boundaries, and pass hook validation gates."
 triggers:
-  - user asks to create or scaffold Codex hooks
-  - user asks to upgrade hooks.json or hook scripts to the latest supported Codex behavior
-  - user asks to audit supported hook events, fields, or blocking behavior
-  - user asks for SessionStart, UserPromptSubmit, Stop, PreToolUse, PermissionRequest, or PostToolUse hooks
-
-inputs:
-  - target_scope
-  - target_root_path
-  - mode
-  - desired_event_set
-  - preserve_or_replace_policy
-
-outputs:
-  - schema_version
-  - hooks.json with absolute command paths
-  - starter hook scripts when scaffolding is requested
-  - validation commands and exact results
-  - refusal or deferral notes for unsupported hook features
-
-required_response_sections:
-  - "When to use"
-  - "Required inputs"
-  - "Deliverables"
-  - "Failure mode"
-
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - generic repo automation unrelated to Codex hooks
-  - plugin packaging
-  - presenting undocumented non-command handlers as currently production-ready
-
+  - "Route unrelated work away from this skill."
+inputs:
+  - "target hook pack"
+  - "install boundary"
+  - "trigger events"
+  - "script runtime"
+  - "validation commands"
+outputs:
+  - "hook pack changes"
+  - "scaffold or audit notes"
+  - "runtime contract"
+  - "validation evidence"
+  - "rollback steps"
 risks:
-  - stale runtime assumptions; mitigated by verifying against released Codex docs before changing contract claims
-  - broken command paths; mitigated by generating absolute paths in hooks.json and validating them
-  - overblocking; mitigated by keeping Stop, UserPromptSubmit, and PermissionRequest deny policies narrow, explainable, and dry-run tested
-  - duplicated hook execution; mitigated by installing into one active config layer by default and calling out double-run risk explicitly
-
-examples:
-  happy_path:
-    input: "Create a project-local gold-standard Codex hook pack for this repo."
-    expected_output: "Scaffold .codex/hooks.json, three starter scripts, README, and validation steps."
-  edge_case:
-    input: "Audit this hooks.json and keep only what is documented as supported."
-    expected_output: "List supported vs unsupported surfaces and propose or apply a safe rewrite."
-  failure_mode:
-    input: "Create prompt hooks and async hooks because I need the newest unreleased behavior."
-    expected_output: "Decline unsupported runtime assumptions and scaffold only stable command hooks."
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

@@ -17,25 +17,29 @@ if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
-from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
-from selection_policy import (  # noqa: E402
-    REPO_SCAN_ROOTS,
-    SYSTEM_BRIDGE_SKILL_NAMES,
+from ask.commands.plugins import (  # noqa: E402
+    _copy_directory_contents,
+    _load_local_marketplace,
+    _materialize_first_level_skill_aliases,
 )
+from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
+from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
     ProjectionModeError,
     build_projection_plan_metadata,
-    ensure_mutation_supported,
     normalize_projection_mode,
+)
+from command_surface import (  # noqa: E402
+    check_command_handles,
+    handles_report,
+    resolve_reviewer_handle,
+    resolve_skill_handle,
+    write_command_handles,
+    write_command_surface_projection,
 )
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
 from generate_skillset_manifests import build_manifest_report, write_manifests  # noqa: E402
-from rooted_projection_runtime import (  # noqa: E402
-    build_user_relink_plan,
-    prune_generated_root_skill_dirs,
-    prune_unowned_skillset_files,
-    validate_workspace_runtime,
-)
+from rooted_projection_runtime import prune_unowned_skillset_files, validate_workspace_runtime  # noqa: E402
 from ask.catalog_parity import compute_catalog_parity  # noqa: E402
 from ask.selection_contract import (  # noqa: E402
     EligibleCandidate,
@@ -458,6 +462,206 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
             )
         )
     return result
+
+
+def skills_handles(
+    repo_root: Path,
+    check: bool = False,
+    include_handles: bool = True,
+    write_projection: bool = False,
+    write_command_handle_files: bool = False,
+    check_command_handle_files: bool = False,
+    dry_run: bool = False,
+) -> CallResult:
+    """Return or validate the rooted command-handle surface."""
+    result = CallResult()
+    result.metadata["command"] = "skills handles"
+    report = handles_report(repo_root_path=repo_root, include_handles=include_handles)
+    result.data["command_surface"] = report
+    result.data["handles"] = report["handles"]
+    result.data["violations"] = report["violations"]
+    result.data["policy_identity"] = report["policy_identity"]
+    if write_projection:
+        result.data["command_surface_projection_write"] = write_command_surface_projection(
+            repo_root_path=repo_root,
+            dry_run=dry_run,
+        )
+    if write_command_handle_files:
+        result.data["command_handle_write"] = write_command_handles(
+            repo_root_path=repo_root,
+            dry_run=dry_run,
+        )
+    if check_command_handle_files:
+        result.data["command_handle_check"] = check_command_handles(repo_root_path=repo_root)
+    if check and report["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Command-handle validation failed.",
+                fix_suggestion="Inspect data.violations, fix command-handle metadata, and rerun `ask skills handles --check --json`.",
+            )
+        )
+    for key, message in (
+        ("command_surface_projection_write", "Command-surface projection write failed."),
+        ("command_handle_write", "Command-handle generation failed."),
+        ("command_handle_check", "Command-handle validation failed."),
+    ):
+        payload = result.data.get(key)
+        if payload and payload.get("status") != "pass":
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=message,
+                    fix_suggestion="Inspect data.violations and data.command_handle_write.violations, then fix handle metadata or command-handle budgets.",
+                )
+            )
+    return result
+
+
+def skills_resolve(repo_root: Path, handle: str) -> CallResult:
+    """Resolve one command-visible skill handle to its latent source module."""
+    result = CallResult()
+    result.metadata["command"] = "skills resolve"
+    payload = resolve_skill_handle(handle, repo_root_path=repo_root)
+    result.data["resolution"] = payload
+    if payload.get("status") != "ok":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Could not resolve skill handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
+                fix_suggestion=payload.get("operator_action"),
+            )
+        )
+    return result
+
+
+def skills_proof(repo_root: Path, handle: str) -> CallResult:
+    """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
+    result = CallResult()
+    result.metadata["command"] = "skills proof"
+    resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
+    normalized = resolution.get("handle", handle.lstrip("$"))
+    handle_check = check_command_handles(repo_root_path=repo_root)
+    workspace_handle = repo_root / str(resolution.get("command_handle_path", ""))
+    user_codex_handle = Path.home() / ".codex" / "skills" / str(normalized) / "SKILL.md"
+    user_agents_handle = Path.home() / ".agents" / "skills" / str(normalized) / "SKILL.md"
+    codex_skills = Path.home() / ".codex" / "skills"
+    agents_skills = Path.home() / ".agents" / "skills"
+    expected_runtime = repo_root / ".agents" / "skills"
+
+    handle_violations = [
+        v for v in handle_check.get("violations", [])
+        if v.get("handle") == normalized
+    ]
+    handle_check_ok = handle_check.get("status") == "pass" or not handle_violations
+
+    def _link_payload(path: Path) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "path": str(path),
+            "exists": path.exists(),
+            "is_symlink": path.is_symlink(),
+        }
+        if path.is_symlink():
+            payload["target"] = str(path.resolve())
+            payload["points_to_workspace_runtime"] = path.resolve() == expected_runtime.resolve()
+        else:
+            payload["target"] = None
+            payload["points_to_workspace_runtime"] = False
+        return payload
+
+    gates = {
+        "resolver": resolution.get("status") == "ok",
+        "generated_command_handle_check": handle_check_ok,
+        "workspace_command_handle_exists": workspace_handle.is_file(),
+        "codex_user_link": codex_skills.is_symlink() and codex_skills.resolve() == expected_runtime.resolve(),
+        "agents_user_link": agents_skills.is_symlink() and agents_skills.resolve() == expected_runtime.resolve(),
+        "codex_user_command_handle_exists": user_codex_handle.is_file(),
+        "agents_user_command_handle_exists": user_agents_handle.is_file(),
+    }
+    core_gates = (
+        gates["resolver"],
+        gates["generated_command_handle_check"],
+        gates["workspace_command_handle_exists"],
+    )
+    user_runtime_ready = (
+        (gates["codex_user_link"] and gates["codex_user_command_handle_exists"])
+        or (gates["agents_user_link"] and gates["agents_user_command_handle_exists"])
+    )
+    proof = {
+        "schema_version": "command-handle-proof.v1",
+        "handle": normalized,
+        "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
+        "gates": gates,
+        "gate_policy": {
+            "required": [
+                "resolver",
+                "generated_command_handle_check",
+                "workspace_command_handle_exists",
+            ],
+            "user_runtime_any_of": [
+                "codex_user_link",
+                "agents_user_link",
+            ],
+        },
+        "resolution": resolution,
+        "command_handle_check": {
+            key: value
+            for key, value in handle_check.items()
+            if key != "violations" or value
+        },
+        "workspace_runtime": {
+            "path": str(expected_runtime),
+            "command_handle_path": str(workspace_handle),
+            "command_handle_exists": workspace_handle.is_file(),
+        },
+        "user_runtime_links": {
+            "codex_skills": _link_payload(codex_skills),
+            "agents_skills": _link_payload(agents_skills),
+        },
+        "user_runtime_command_handles": {
+            "codex_handle": str(user_codex_handle),
+            "codex_handle_exists": user_codex_handle.is_file(),
+            "agents_handle": str(user_agents_handle),
+            "agents_handle_exists": user_agents_handle.is_file(),
+        },
+        "live_codex_invocation": {
+            "status": "manual_session_gate",
+            "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+        },
+    }
+    result.data["proof"] = proof
+    if proof["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Command handle proof failed for '{normalized}'.",
+                fix_suggestion="Run `./bin/ask skills sync --scope workspace --projection rooted`, then `./bin/ask skills sync --scope user --projection rooted`, and rerun proof.",
+            )
+        )
+    return result
+
+
+def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
+    """Resolve one reviewer/subagent handle from the reviewer namespace."""
+    result = CallResult()
+    result.metadata["command"] = "reviewers resolve"
+    payload = resolve_reviewer_handle(handle)
+    result.data["resolution"] = payload
+    if payload.get("status") != "ok":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Could not resolve reviewer handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
+                fix_suggestion=payload.get("operator_action"),
+            )
+        )
+    return result
+
 
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
     """Initializes a new skill scaffold using the repo template logic."""
@@ -1044,7 +1248,6 @@ def route_skills(
     catalog_parity = compute_catalog_parity(
         repo_root,
         strict=False,
-        route_considered_total=len(default_candidates),
     )
 
     decision = build_decision_payload(
@@ -1150,25 +1353,30 @@ def goal_skills(
     )
     return result
 
-def _create_symlink(source: Path, target: Path, dry_run: bool = False) -> str:
+def _create_symlink(source: Path, target: Path, dry_run: bool = False, *, replace_existing: bool = False) -> str:
     """
     Create or update a filesystem symbolic link at `target` that points to `source`.
-    
-    Ensures `target.parent` exists before creating the link. When `dry_run` is True no filesystem changes are made; otherwise the function will replace any existing file, symlink, or directory at `target` with a symlink pointing to `source`.
-    
+
+    Ensures `target.parent` exists before creating the link. Existing non-symlink paths are preserved by default so user-owned directories like `~/plugins` are not deleted during relink.
+
     Parameters:
-    	source (Path): Destination path that the symlink should reference.
-    	target (Path): Filesystem path where the symlink will be created or updated.
-    	dry_run (bool): If True, do not perform filesystem mutations; only simulate the action.
-    
+        source (Path): Destination path that the symlink should reference.
+        target (Path): Filesystem path where the symlink will be created or updated.
+        dry_run (bool): If True, do not perform filesystem mutations; only simulate the action.
+        replace_existing (bool): If True, replace an existing non-symlink target before creating the symlink.
+
     Returns:
-    	action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>" or "Updated symlink: <target> -> <source>".
+        action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>", "Updated symlink: <target> -> <source>", or "Skipped existing non-symlink path: <target>".
     """
+    if target.exists() and not target.is_symlink() and not replace_existing:
+        return f"Skipped existing non-symlink path: {target}"
     action = "Created" if not target.exists() else "Updated"
     if not dry_run:
         target.parent.mkdir(parents=True, exist_ok=True)
-        if target.is_symlink() or target.exists():
-            if target.is_dir() and not target.is_symlink():
+        if target.is_symlink():
+            target.unlink()
+        elif target.exists():
+            if target.is_dir():
                 shutil.rmtree(target)
             else:
                 target.unlink()
@@ -1294,16 +1502,35 @@ def _refresh_system_lane_link(
     return [_create_symlink(Path("../../skills-system"), target_link, dry_run)]
 
 
+def _is_generated_root_skill_dir(path: Path) -> bool:
+    """Return whether a first-level runtime directory was generated by rooted projection."""
+    skill_md = path / "SKILL.md"
+    if not path.is_dir() or path.is_symlink() or not skill_md.is_file():
+        return False
+    try:
+        head = skill_md.read_text(encoding="utf-8", errors="ignore")[:600]
+    except OSError:
+        return False
+    return "skill-type: root-skill-set" in head and "projection-mode: rooted" in head
+
+
+def _prune_generated_root_skill_dirs(target_dir: Path, keep_names: set[str], *, dry_run: bool = False) -> list[str]:
+    """Remove generated rooted runtime directories that do not belong to the requested projection."""
+    logs: list[str] = []
+    if not target_dir.exists():
+        return logs
+    for item in sorted(target_dir.iterdir()):
+        if item.name.startswith(".") or item.name in keep_names:
+            continue
+        if not _is_generated_root_skill_dir(item):
+            continue
+        logs.append(f"Removed generated root skill set: {item}")
+        if not dry_run:
+            shutil.rmtree(item)
+    return logs
+
+
 def _public_root_report(report: dict) -> dict:
-    """
-    Produce a public-safe copy of a root report by omitting the `content` field from each root entry.
-    
-    Parameters:
-    	report (dict): Report mapping that may contain a "roots" key with a list of root entry dicts.
-    
-    Returns:
-    	public_report (dict): A copy of `report` where each dict in `roots` excludes the `content` key.
-    """
     return {
         **report,
         "roots": [
@@ -1314,15 +1541,6 @@ def _public_root_report(report: dict) -> dict:
 
 
 def _public_manifest_report(report: dict) -> dict:
-    """
-    Produce a sanitized manifest report by removing the `rows` field from each manifest entry.
-    
-    Parameters:
-        report (dict): Original manifest report containing a `"manifests"` list of dicts.
-    
-    Returns:
-        dict: A shallow copy of `report` where each dict in `"manifests"` omits the `"rows"` key.
-    """
     return {
         **report,
         "manifests": [
@@ -1332,68 +1550,171 @@ def _public_manifest_report(report: dict) -> dict:
     }
 
 
-def _append_user_runtime_relinks(plan: dict, logs: list[str], skills_dir: Path, *, dry_run: bool) -> None:
+def _append_user_runtime_relinks(
+    plan: dict,
+    logs: list[str],
+    repo_root: Path,
+    skills_dir: Path,
+    *,
+    dry_run: bool,
+) -> None:
+    home = Path.home()
+    plugins_dir = repo_root / "Plugins"
+    targets = [
+        (skills_dir, home / ".agents" / "skills", True),
+        (skills_dir, home / ".codex" / "skills", True),
+        (repo_root, home / ".agents" / "agent-skills", True),
+        (plugins_dir, home / ".agents" / "plugins", True),
+    ]
+    for src, dst, replace_existing in targets:
+        plan["symlinks"].append({"from": str(dst), "to": str(src)})
+        logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
+    _refresh_home_plugin_mirrors(plan, logs, repo_root, home / "plugins", dry_run=dry_run)
+
+
+def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, dry_run: bool) -> str:
+    """Ensure a home plugin mirror root is a real directory, not a repo-backed symlink."""
+    canonical_real = canonical_plugins_dir.resolve()
+    if target.is_symlink():
+        try:
+            link_real = target.resolve()
+        except OSError:
+            link_real = None
+        if link_real == canonical_real or (link_real and canonical_real in link_real.parents):
+            if not dry_run:
+                target.unlink()
+                target.mkdir(parents=True, exist_ok=True)
+            return f"Replaced repo-backed plugin mirror symlink with directory: {target}"
+        return f"Skipped non-repo plugin mirror symlink: {target}"
+    if target.exists() and not target.is_dir():
+        return f"Skipped non-directory plugin mirror path: {target}"
+    if not dry_run:
+        target.mkdir(parents=True, exist_ok=True)
+    return f"Ensured plugin mirror directory: {target}"
+
+
+def _refresh_home_plugin_mirrors(
+    plan: dict,
+    logs: list[str],
+    repo_root: Path,
+    home_plugins_dir: Path,
+    *,
+    dry_run: bool,
+) -> None:
     """
-    Append symlink relinking operations for user-local runtimes to the provided plan and logs.
-    
-    Adds two symlink entries to plan["symlinks"] mapping the repository skills directory to the user's
-    home locations (~/.agents/skills and ~/.codex/skills), and appends the human-readable creation/update
-    messages returned by _create_symlink to logs.
-    
-    Parameters:
-        plan (dict): Mutation plan that will be modified; this function appends dicts of the form
-            {"from": "<user_dest_path>", "to": "<repo_source_path>"} to plan["symlinks"].
-        logs (list[str]): Log list that will be extended with messages describing each planned or performed
-            symlink operation.
-        skills_dir (Path): Absolute or repo-relative path to the repository skills directory to link from.
-        dry_run (bool): If True, no filesystem changes are performed; messages will describe planned actions.
+    Replace managed home plugin mirror copies from canonical Plugins/ sources.
+
+    `~/.agents/plugins` is the live symlink to the canonical source tree. `~/plugins`
+    is a materialized runtime mirror so marketplace paths like `./Plugins/<name>`
+    remain resolvable without aliasing the repo. Every user sync refreshes listed
+    local plugins from `Plugins/marketplace.json`, so plugin edits and updates
+    replace stale runtime copies.
     """
-    for relink in build_user_relink_plan(skills_dir):
-        src = Path(relink["to"])
-        dst = Path(relink["from"])
-        plan["symlinks"].append(relink)
-        logs.append(_create_symlink(src, dst, dry_run))
+    plugins_dir = repo_root / "Plugins"
+    mirror_plan = {
+        "from": str(plugins_dir),
+        "to": str(home_plugins_dir),
+        "mode": "copy-replace",
+        "trigger": "refresh after canonical Plugins/ or Plugins/marketplace.json changes",
+        "plugins": [],
+    }
+    plan.setdefault("runtime_plugin_mirrors", []).append(mirror_plan)
+    root_log = _ensure_real_plugin_mirror_root(home_plugins_dir, plugins_dir, dry_run)
+    logs.append(root_log)
+    if root_log.startswith("Skipped"):
+        return
+
+    try:
+        _marketplace_path, entries = _load_local_marketplace(repo_root)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        logs.append(f"Skipped home plugin mirror refresh: {exc}")
+        return
+
+    marker_name = ".codex-repo-plugin-source"
+    keep_names = {entry["name"] for entry in entries}
+    for entry in entries:
+        plugin_name = entry["name"]
+        relative = entry["path"]
+        source_dir = repo_root / relative.removeprefix("./")
+        target_dir = home_plugins_dir / plugin_name
+        mirror_plan["plugins"].append({
+            "name": plugin_name,
+            "source": str(source_dir),
+            "target": str(target_dir),
+        })
+        if not source_dir.is_dir():
+            logs.append(f"Skipped missing home plugin mirror source: {source_dir}")
+            continue
+        if dry_run:
+            logs.append(f"Would replace home plugin mirror: {target_dir} <- {source_dir}")
+            continue
+        if target_dir.is_symlink() or target_dir.is_file():
+            target_dir.unlink()
+        elif target_dir.exists():
+            shutil.rmtree(target_dir)
+        _copy_directory_contents(source_dir, target_dir)
+        _materialize_first_level_skill_aliases(target_dir)
+        (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
+        logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
+
+    # Prune stale home plugin mirrors that are no longer declared in the marketplace.
+    reserved = {"marketplace.json", "cache"}
+    if home_plugins_dir.is_dir():
+        for child in home_plugins_dir.iterdir():
+            if child.name in keep_names or child.name in reserved:
+                continue
+            if not child.is_dir():
+                continue
+            marker_file = child / marker_name
+            if not marker_file.is_file():
+                continue
+            if dry_run:
+                logs.append(f"Would remove stale home plugin mirror: {child}")
+                continue
+            if child.is_symlink():
+                child.unlink()
+            else:
+                shutil.rmtree(child)
+            logs.append(f"Removed stale home plugin mirror: {child}")
 
 
 def _sync_rooted_projection(
     repo_root: Path,
     *,
-    scope: str,
     dry_run: bool,
     plan: dict,
     logs: list[str],
     skills_dir: Path,
     system_skills_dir: Path,
 ) -> tuple[bool, list[ErrorObject]]:
-    """
-    Builds and applies the rooted runtime projection plan for workspace synchronization.
-    
-    Validates rooted root and manifest reports, prunes stale/generated runtime entries, schedules and (unless `dry_run`) writes rooted root files and skill-set manifests, refreshes the system lane link, and records planned writes/deletes/symlinks in `plan` while appending human-readable messages to `logs`.
-    
-    Parameters:
-        repo_root (Path): Repository root path used to locate `.skillsets` and resolve writes.
-        scope (str): Sync scope (expected to be `"workspace"` for rooted projection).
-        dry_run (bool): If True, perform validation and planning without mutating the filesystem.
-        plan (dict): Mutable synchronization plan; this function appends to `writes`, `deletes`, `symlinks`, `violations`, and `warnings`.
-        logs (list[str]): Mutable list to which human-readable action logs are appended.
-        skills_dir (Path): Path to the runtime skills directory (typically repo_root / ".agents" / "skills").
-        system_skills_dir (Path): Path to the repository-managed system skills directory (typically repo_root / "skills-system").
-    
-    Returns:
-        tuple[bool, list[ErrorObject]]: `True, []` when projection validated and (if not `dry_run`) applied successfully; otherwise `False` and a list containing one or more `ErrorObject` describing the validation or runtime failure.
-    """
+    """Generate the rooted runtime projection and latent manifests."""
     root_report = build_roots(skills_dir)
     manifest_report = build_manifest_report(repo_root / ".skillsets")
+    command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=True)
+    command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=True)
     plan["root_skill_sets"] = _public_root_report(root_report)
     plan["skillset_manifests"] = _public_manifest_report(manifest_report)
+    plan["command_surface"] = command_surface_write
+    plan["command_handles"] = {
+        key: value
+        for key, value in command_handle_write.items()
+        if key != "writes"
+    }
     plan["unmapped_entries"] = root_report.get("unmapped", [])
 
     violations = [
         *root_report.get("violations", []),
         *manifest_report.get("violations", []),
+        *command_surface_write.get("violations", []),
+        *command_handle_write.get("violations", []),
     ]
     plan["violations"] = violations
-    if root_report.get("status") != "pass" or manifest_report.get("status") != "pass":
+    if (
+        root_report.get("status") != "pass"
+        or manifest_report.get("status") != "pass"
+        or command_surface_write.get("status") != "pass"
+        or command_handle_write.get("status") != "pass"
+    ):
         plan["validation_status"] = "fail"
         plan["warnings"].extend([str(violation.get("code", violation)) for violation in violations])
         return False, [ErrorObject(
@@ -1403,16 +1724,58 @@ def _sync_rooted_projection(
         )]
 
     keep_names = {root["name"] for root in root_report.get("roots", [])}
+    keep_names.add("codex-primary-runtime")
     if system_skills_dir.is_dir():
         keep_names.add(".system")
+
+    for root in root_report.get("roots", []):
+        plan["writes"].append(root["path"])
+    for manifest in manifest_report.get("manifests", []):
+        plan["writes"].append(manifest["path"])
+    plan["writes"].append(command_surface_write["path"])
+    plan["writes"].extend(row["path"] for row in command_handle_write.get("writes", []))
+
+    if dry_run:
+        logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
+        for log in prune_unowned_skillset_files(repo_root / ".skillsets", dry_run=True):
+            plan["deletes"].append(log)
+            logs.append(f"Dry-run {log}")
+    else:
+        try:
+            pre_prune_logs = _prune_first_level_symlinks(skills_dir, keep_names, dry_run)
+            pre_prune_logs.extend(_prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run))
+            prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
+            root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
+            manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
+            command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=False)
+            command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=False)
+        except (OSError, ValueError) as exc:
+            plan["validation_status"] = "fail"
+            plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
+            return False, [ErrorObject(
+                code="ERR_RUNTIME",
+                message=f"Rooted projection write failed: {exc}",
+                fix_suggestion="Check filesystem permissions and rerun rooted sync.",
+            )]
+        for log in pre_prune_logs:
+            plan["deletes"].append(log)
+            logs.append(log)
+        logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
+        logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
+        logs.append(f"Wrote command-surface projection: {command_surface_write['path']}")
+        logs.append(
+            "Wrote generated command handles: "
+            f"{command_handle_write['command_handle_count']} handles ({command_handle_write['write_count']} files)"
+        )
+        for log in prune_logs:
+            plan["deletes"].append(log)
+            logs.append(log)
+
     try:
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
-        for log in prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
-            plan["deletes"].append(log)
-            logs.append(log)
-        for log in prune_unowned_skillset_files(repo_root / ".skillsets", dry_run):
+        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)
     except OSError as exc:
@@ -1423,28 +1786,6 @@ def _sync_rooted_projection(
             message=f"Rooted projection could not update {skills_dir}: {exc}",
             fix_suggestion="Check filesystem permissions on .agents/skills or rerun with --dry-run.",
         )]
-
-    for root in root_report.get("roots", []):
-        plan["writes"].append(root["path"])
-    for manifest in manifest_report.get("manifests", []):
-        plan["writes"].append(manifest["path"])
-
-    if dry_run:
-        logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
-    else:
-        try:
-            root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
-            manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
-        except (OSError, ValueError) as exc:
-            plan["validation_status"] = "fail"
-            plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
-            return False, [ErrorObject(
-                code="ERR_RUNTIME",
-                message=f"Rooted projection write failed: {exc}",
-                fix_suggestion="Check filesystem permissions and rerun rooted sync.",
-            )]
-        logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
-        logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
 
     system_lane_logs = _refresh_system_lane_link(skills_dir, system_skills_dir, dry_run)
     if system_lane_logs:
@@ -1470,7 +1811,7 @@ def sync_skills(
         scope (str): Either "workspace" to sync repository-derived views or "user" to populate user-local locations.
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
-            SYNC_SKILLS_PROJECTION_MODE is honored before the rooted default.
+            SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
     
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -1485,13 +1826,11 @@ def sync_skills(
     result = CallResult()
     try:
         projection_decision = normalize_projection_mode(projection)
-        ensure_mutation_supported(projection_decision, dry_run=dry_run)
     except ProjectionModeError as exc:
         resolved_mode = getattr(exc, "resolved_mode", None)
         fix_suggestions = {
             "ERR_INVALID_PROJECTION_MODE": "Choose a supported projection mode such as --projection flat or --projection rooted.",
             "ERR_DEFERRED_PROJECTION_MODE": "Use --projection flat or --projection rooted until the deferred projection mode is available.",
-            "ERR_PROJECTION_MUTATION_UNAVAILABLE": "Use --dry-run for this projection mode, or choose --projection flat or --projection rooted for mutation.",
         }
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -1520,7 +1859,6 @@ def sync_skills(
         "preserved_bridge_lane_entries": [],
         "preserved_system_lane_entries": [],
         "validation_status": "not_run",
-        "ambiguous_entries": [],
         "unmapped_entries": [],
         "violations": [],
         "mutation_counts": {
@@ -1528,7 +1866,6 @@ def sync_skills(
             "deletes": 0,
             "symlinks": 0,
         },
-        "report_path": None,
         "warnings": [],
     }
     logs = []
@@ -1544,29 +1881,23 @@ def sync_skills(
 
     if projection_decision.projection_mode == "rooted":
         if scope == "user":
-            workspace_violations = validate_workspace_runtime(skills_dir)
-            if workspace_violations:
+            violations = validate_workspace_runtime(skills_dir, repo_root_path=repo_root)
+            plan["violations"] = violations
+            if violations:
                 plan["validation_status"] = "fail"
-                plan["violations"].extend(workspace_violations)
-                plan["warnings"].append("ROOTED_WORKSPACE_RUNTIME_INVALID")
+                plan["warnings"].extend(str(violation.get("code", violation)) for violation in violations)
                 result.status = "error"
                 result.errors.append(ErrorObject(
                     code="ERR_VALIDATION",
-                    message="Rooted user sync requires a valid rooted workspace projection before relinking.",
-                    fix_suggestion="Run `ask skills sync --scope workspace --projection rooted` first, then rerun user sync.",
+                    message="Rooted workspace validation failed before user relink.",
+                    fix_suggestion="Run `bin/ask skills sync --scope workspace --projection rooted` before user relink.",
                 ))
                 result.data["plan"] = plan
                 result.data["logs"] = logs
                 result.data["policy_identity"] = get_policy_identity()
                 result.data["projection_mode"] = projection_decision.projection_mode
-                result.data["projection"] = build_projection_plan_metadata(
-                    projection_decision,
-                    scope=scope,
-                    dry_run=dry_run,
-                    warnings=plan["warnings"],
-                )
                 return result
-            _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+            _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
             plan["validation_status"] = "pass"
             plan["mutation_counts"] = {
                 "writes": len(plan["writes"]),
@@ -1587,7 +1918,6 @@ def sync_skills(
             return result
         ok, errors = _sync_rooted_projection(
             repo_root,
-            scope=scope,
             dry_run=dry_run,
             plan=plan,
             logs=logs,
@@ -1608,9 +1938,6 @@ def sync_skills(
                 warnings=plan["warnings"],
             )
             return result
-        projection_logs = _refresh_catalog_projections(repo_root, dry_run)
-        plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
-        logs.extend(projection_logs)
         plan["mutation_counts"] = {
             "writes": len(plan["writes"]),
             "deletes": len(plan["deletes"]),
@@ -1638,7 +1965,7 @@ def sync_skills(
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
-        for log in prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run):
+        for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)
         for entry in entries:
@@ -1658,7 +1985,7 @@ def sync_skills(
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
     elif scope == "user":
-        _append_user_runtime_relinks(plan, logs, skills_dir, dry_run=dry_run)
+        _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
     plan["validation_status"] = "pass"
     plan["mutation_counts"] = {
         "writes": len(plan["writes"]),

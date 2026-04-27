@@ -1,0 +1,26 @@
+skill: alignment-checkpoint
+type: runbook
+source_basis:
+  execution_path: cli_primary
+purpose: >
+  Prevent intent misunderstandings by forcing a structured alignment checkpoint (goal, assumptions, success criteria)
+  and an explicit /proceed gate before any tool use or implementation.
+schema_version: 1.0
+triggers:
+  - User asks for alignment/checkpoint/confirm-first behavior
+  - Request is ambiguous, high-stakes, or error-prone due to missing success criteria
+  - Agent is about to use tools (shell/web/filesystem/MCP) and should pause for explicit approval
+inputs:
+  - The user's request text (canonical)
+  - Any explicit constraints (e.g., do NOT implement, preserve only, time bounds)
+outputs:
+  - JSON extraction with explicit_goal, implicit_assumptions, success_criteria
+  - Formatted alignment summary + 3 approach options (minimal/balanced/comprehensive)
+  - Explicit gate requiring /proceed or /clarify before any tool usage
+  - When stasis triggers: a STASIS_RECORD containing the verbatim request
+non_goals:
+  - Running tools before approval
+  - Implementing, debugging, or editing code without an explicit /proceed
+risks:
+  - Overconfidence via hidden assumptions; mitigated by making assumptions explicit and requiring explicit approval
+  - Sensitive-data leakage; mitigated by redaction guidance and avoiding secret/PII echoing

@@ -27,9 +27,9 @@ This can occur even for safe read-only or local git commands.
 
 - Run affected commands through `script -q /dev/null zsh -lc '<command>'`.
 - Keep the command itself unchanged so logs remain comparable.
-- Record the event in [Change Log](/Wiki/skill-ops-wiki/wiki/log.md).
+- Record the event in [Change Log](../log.md).
 
 ## Related Playbooks
 
-- [Code Scanning Remediation](/Wiki/skill-ops-wiki/wiki/playbooks/code-scanning-remediation.md)
-- [Git Conflict Resolution for Validation Logs](/Wiki/skill-ops-wiki/wiki/playbooks/git-conflict-resolution-validation-logs.md)
+- [Code Scanning Remediation](../playbooks/code-scanning-remediation.md)
+- [Git Conflict Resolution for Validation Logs](../playbooks/git-conflict-resolution-validation-logs.md)

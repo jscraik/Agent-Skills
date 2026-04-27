@@ -1,24 +1,32 @@
-schema_version: "1.0"
+schema_version: 1
 skill: bash-hygiene
-type: runbook
-purpose: >
-  Provide Bash scripting hygiene guidance focused on script structure, strict mode,
-  safe quoting, and interpreter-aware portability checks.
+purpose: "Keep Bash scripts reliable, portable, and safe by applying strict structure, quoting, and validation habits."
 triggers:
-  - User asks to write or review Bash/shell scripts.
-  - User requests strict mode, quoting, or portability hardening.
-  - User reports shell bugs related to word splitting or interpreter mismatch.
-inputs:
-  - target shebang/interpreter
-  - script context and execution environment
-  - safety constraints and allowed operations
-outputs:
-  - hardened Bash pattern or review guidance
-  - quoting and portability corrections
-  - validation commands and fail-fast checks
+  - "Use when the user request matches the skill scope."
 non_goals:
-  - generalized Linux administration guidance unrelated to scripting quality
-  - interpreter-agnostic advice that ignores shebang compatibility
+  - "Route unrelated work away from this skill."
+inputs:
+  - "script path"
+  - "target shell"
+  - "runtime environment"
+  - "expected behavior"
+  - "validation command"
+outputs:
+  - "findings or patch"
+  - "quoting and portability notes"
+  - "validation commands"
+  - "residual risks"
+  - "blockers"
 risks:
-  - unquoted expansions can introduce data loss or command injection risk
-  - portability assumptions can break scripts across environments
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

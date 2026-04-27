@@ -26,6 +26,7 @@ SKIP_DIRS = {
 SKIP_PATH_PREFIXES = {
     ("plugins", "cache"),
     (".agents", "plugins-runtime", "cache"),
+    (".agents", "skills"),
     (".agents", "skills", ".system"),
     (".codex", ".tmp"),
     (".codex", "skills", ".system"),
@@ -281,11 +282,23 @@ def parse_frontmatter(path: Path) -> Dict[str, str]:
         return result
 
     idx = 1
+    parent_key: Optional[str] = None
     while idx < len(lines) and lines[idx].strip() != "---":
         line = lines[idx]
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            idx += 1
+            continue
+        is_indented = line[:1].isspace()
         if ":" in line:
             key, value = line.split(":", 1)
-            result[key.strip()] = value.strip().strip("\"'")
+            clean_key = key.strip()
+            clean_value = value.strip().strip("\"'")
+            if is_indented and parent_key == "metadata":
+                result.setdefault(clean_key, clean_value)
+            elif not is_indented:
+                result[clean_key] = clean_value
+                parent_key = clean_key if clean_value == "" else None
         idx += 1
 
     return result

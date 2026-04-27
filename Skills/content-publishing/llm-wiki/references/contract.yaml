@@ -1,79 +1,12 @@
-schema_version: 1.1
+schema_version: 1
 skill: llm-wiki
-type: knowledge_management
-purpose: >
-  Design and operate a persistent markdown wiki that an LLM continuously maintains
-  through ingest, query, and lint workflows so knowledge compounds over time.
-triggers:
-  - user asks to create a persistent LLM-maintained wiki
-  - user wants ingest/query/lint workflows for long-running knowledge bases
-  - user needs schema guidance for wiki governance in AGENTS.md or AGENTS.md
-  - user wants index/log conventions for markdown knowledge repositories
-inputs:
-  - user domain and outcome (personal research, team wiki, due diligence, etc.)
-  - location and formats of source material
-  - sensitivity profile for source material (public/internal/confidential/highly sensitive)
-  - mixed-media policy (text-only or text-plus-selective-image-review)
-  - preferred wiki repository path and folder conventions
-  - operational constraints (supervision, cadence, citation strictness)
-  - governance documents in scope (AGENTS.md, AGENTS.md, runbooks)
-outputs:
-  - architecture recommendation for raw/wiki/schema layers
-  - ingest/query/lint playbook with explicit steps
-  - starter layout guidance with required index.md/log.md control files
-  - file layout guidance including index/log conventions
-  - append-only parseable log heading convention (## [YYYY-MM-DD] <kind> | <summary>, where <kind> is ingest/query/lint)
-  - privacy-controls plan covering classification, minimization, and redaction
-  - risk and hygiene checklist for contradictions, staleness, and orphan pages
-  - lifecycle model with confidence, supersession, and retention policy when scale demands it
-  - graph/search strategy covering typed relations and hybrid retrieval expectations when scale demands it
-  - automation and quality-governance hooks for ingestion, linting, and contradiction handling when explicitly requested
-output_contract:
-  schema_version: "1.0"
-  required_fields:
-    - schema_version
-    - architecture
-    - workflow
-    - safety_constraints
-    - validation_plan
-    - starter_layout
-    - index_conventions
-    - log_format
-    - log_append_only
-    - log_heading_pattern
-    - privacy_controls
-  optional_fields:
-    - lint_checklist
-    - follow_up_questions
-    - collaboration_scope
-    - crystallization_policy
-    - lifecycle_model
-    - graph_model
-    - search_strategy
-    - automation_hooks
-    - quality_controls
-  conditional_required_fields:
-    advanced_operating_profile_requested:
-      - lifecycle_model
-      - graph_model
-      - search_strategy
-      - automation_hooks
-      - quality_controls
-non_goals:
-  - one-off summarization with no persistent wiki maintenance
-  - implementing full vector retrieval infrastructure by default
-  - editing raw source files as part of wiki maintenance
-risks:
-  - stale claims can persist without regular lint passes
-  - weak provenance if citations are omitted during updates
-  - wiki sprawl from missing index and cross-link hygiene
-  - conflicting claims can silently persist without explicit supersession rules
-  - low-signal memory accumulation without retention and consolidation policy
-  - sensitive data leakage when ingest lacks classification and minimization gates
-rollback_procedure: >
-  If guidance changes introduce confusion or regress strict audits, restore
-  product/docs/llm-wiki/SKILL.md and references files from the previous known-good
-  git state, then rerun quick_validate and ask skills audit strict.
-observability: >
-  Monitor strict skill audit results and check that generated responses always include
-  architecture boundaries, workflow steps, and safety constraints with citation-first behavior.
+purpose: "Create or validate a persistent markdown wiki for LLM-managed knowledge. Use this skill when ingest, query, lint, schema, or governance workflows are needed."
+triggers: ["Use when the user request matches the skill scope."]
+non_goals: ["Route unrelated work away from this skill."]
+inputs: [user_request, target_context, evidence]
+outputs: [result, evidence_summary, validation_status]
+risks: [over_triggering, untrusted_input, validation_drift]
+safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
+validation: [plugin_eval_grade_a, strict_skill_audit]
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

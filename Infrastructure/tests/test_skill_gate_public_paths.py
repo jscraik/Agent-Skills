@@ -27,12 +27,12 @@ SKILL_GATE = (
 def load_skill_gate():
     """
     Load the skill_gate.py module from the SKILL_GATE path and return the imported module.
-    
+
     This imports the module by creating a module spec from the file location, registering the module in sys.modules, executing its code, and returning the resulting module object.
-    
+
     Returns:
         module: The imported module object corresponding to the skill_gate file.
-    
+
     Raises:
         RuntimeError: If a module spec or loader cannot be created for SKILL_GATE.
     """
@@ -52,7 +52,7 @@ class SkillGatePublicPathTests(unittest.TestCase):
     def setUp(self) -> None:
         """
         Load the skill gate module and assign it to self.module for use by test methods.
-        
+
         This is executed before each test method to prepare the test fixture.
         """
         self.module = load_skill_gate()
@@ -60,11 +60,11 @@ class SkillGatePublicPathTests(unittest.TestCase):
     def _doc(self, path: Path, body: str):
         """
         Create a SkillDoc instance representing a skill markdown file for tests.
-        
+
         Parameters:
             path (Path): Filesystem path to assign to the SkillDoc's `path`.
             body (str): Markdown body content to assign to the SkillDoc's `body`.
-        
+
         Returns:
             SkillDoc: An instance with `path` set to `path`, `raw` containing fixed YAML frontmatter plus a placeholder body, `frontmatter` set to {"name": "sample", "description": "test"}, `body` set to `body`, and `fm_start_line` and `fm_end_line` set to 1 and 4 respectively.
         """

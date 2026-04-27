@@ -46,7 +46,7 @@ cases:
     eval_modes: [smoke]
     should_trigger: true
     prepend_skill: true
-    prompt: "Please inspect prior sessions for this repo and tell me whether the repeated Skill Factory routing mistakes should be skillified or folded into skill-refactor."
+    prompt: "Please inspect prior sessions for this repo and tell me whether the repeated Skill Factory routing mistakes need a new reusable workflow or should be folded into the existing refactor-analysis lane."
     deterministic_checks:
       forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]
     acceptance:

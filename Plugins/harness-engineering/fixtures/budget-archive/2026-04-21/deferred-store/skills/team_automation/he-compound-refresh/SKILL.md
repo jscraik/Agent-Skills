@@ -1,6 +1,6 @@
 ---
 name: he-compound-refresh
-description: Use when Harness Engineering needs to review and refresh stale `docs/solutions/` learnings and pattern docs against the current codebase, including overlap consolidation after refactors, migrations, or dependency upgrades.
+description: Analyze and validate compound Harness Engineering run state, blockers, validation status, and Linear context. Use when lifecycle runs drift, gates fail, blockers appear, or compound work needs refresh.
 metadata:
   skill-type: team_automation
 ---
@@ -8,11 +8,6 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
-
-## Use
-
-- Use this skill as normal for this Harness Engineering stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -27,25 +22,19 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Use when overlapping solution docs should be consolidated with explicit evidence.
 - Use when a specific learning or pattern doc is called stale, overlapping, drifted, or superseded.
 
-## Inputs
-
-- Target solution docs, changed code context, and recent validation evidence.
-- Scope constraints for refresh depth and ownership boundaries.
-- Optional mode modifiers such as `mode:autonomous` and the compatibility alias `mode:autofix`.
-
-## Outputs
-
-- Refresh decision with exact files updated or deferred.
-- Consolidation guidance with overlap rationale.
-- One maintenance outcome per processed artifact or overlap cluster: `Keep`, `Update`, `Consolidate`, `Replace`, `Archive`, or `Stale`.
-- Full markdown report with `Applied` and `Recommended` sections when the run changes or proposes changes.
-- Include `schema_version: 1` when structured output is requested.
-
 ## Failure Modes
 
 - If no candidate docs exist under `docs/solutions/`, stop and report that no refresh targets were found.
 - If a scope hint finds no matches, report the miss clearly; in autonomous mode, stop without guessing.
 - If replacement evidence is insufficient, do not invent a successor doc. Mark the artifact stale when possible and report what evidence is missing.
+
+## Inputs
+
+- Request, artifacts, repo context, and linked Linear issues.
+
+## Outputs
+
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
 
 ## Procedure
 
@@ -73,7 +62,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not rewrite unrelated solution areas outside validated scope.
 - Do not ask whether current code drift is "intentional"; this stage matches docs to current repository reality.
 - Do not use external docs when repository evidence is sufficient.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
@@ -83,26 +72,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Updating solution prose when the real solution changed materially and should be replaced instead.
 - Turning autonomous mode into silent guesswork.
 
-## Examples
-
-- "When the user asks to refresh the payment solution docs after a migration and keep only evidence-backed updates."
-- "Please inspect the auth learnings and consolidate any overlap instead of leaving multiple stale answers behind."
-- "Validate a narrow stale-doc pass on `docs/solutions/` and tell me what was applied versus what still needs a person."
-
 ## Full Context
 
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
 
-## Subagent Routing
+## Examples
 
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
+- "Can you inspect the compound run state and tell me which docs are stale after this refactor?"
+- "Help me check whether these overlapping solution notes should be kept, updated, consolidated, or archived."
+- "This lifecycle run drifted after CI failed. Re-read the artifacts and report the exact blocker before we continue."

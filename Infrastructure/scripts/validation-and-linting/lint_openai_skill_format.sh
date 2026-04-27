@@ -104,7 +104,7 @@ while IFS= read -r file; do
           has_name = 1
         } else if (key == "description") {
           has_description = 1
-        } else if (key != "license" && key != "compatibility" && key != "allowed-tools" && key != "metadata") {
+        } else if (key != "license" && key != "compatibility" && key != "allowed-tools" && key != "metadata" && key != "triggers") {
           print "ERR:" NR ":unknown top-level frontmatter key `" key "`"
         }
       }

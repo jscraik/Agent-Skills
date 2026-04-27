@@ -1,0 +1,88 @@
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior for diagnosing and fixing mise trust/runtime setup
+  issues while preserving reproducibility and safety.
+
+triggers:
+  - user reports mise trust errors
+  - commands fail because mise-managed tools are unavailable
+  - user asks to repair local mise configuration
+  - user asks for global mise config upkeep (`~/.Infrastructure/config/mise/config.toml`) while resolving trust/runtime issues
+
+inputs:
+  - failing command invocation that failed, such as `mise trust`, `node --version`, or any mise-managed tool execution
+  - stderr, trace output, or error messages from the failing command; required when available as preferred evidence for reproducible diagnosis
+  - repo or config path
+  - optional global mise config path, typically `~/.Infrastructure/config/mise/config.toml`, when global repair is requested or implicated
+  - optional expected runtime versions
+  - explicit permission for global toolchain edits
+
+outputs:
+  - diagnosed root cause and remediation actions
+  - verification evidence from mise checks and retried command
+  - global configuration update result and backup metadata when updates are made
+  - explicit confirmation requirement and decision log when global edits are requested but ambiguous
+  - stable runtime execution pattern for repeated tasks, such as `mise exec -- <command>` or documented shell activation
+  - clear unresolved blocker summary when full recovery is not possible
+  - residual risk summary for any trust, version, or shell-activation issue that remains after verification
+
+non_goals:
+  - unrelated environment refactors outside mise scope
+  - claiming recovery without rerunning verification commands
+  - unrelated global toolchain policy changes
+  - fetching remote scripts or network payloads as part of trust repair
+  - destructive filesystem cleanup outside the scoped mise configuration path
+
+risks:
+  - over-broad trust actions; mitigated by path-scoped trust steps
+  - sensitive output exposure; mitigated by redaction in logs and summaries
+  - command-injection pressure; mitigated by refusing `curl`, `wget`, `rm -rf`, and `nc` during mise repair
+
+safety_controls:
+  forbidden_commands:
+    - command: "curl"
+    - command: "wget"
+    - command: "nc"
+    - command: "rm"
+      # Reject common dangerous patterns combining recursive and force flags.
+      # This is pattern-based matching, not semantic flag detection.
+      # Patterns cover common forms but may not catch all variations.
+      forbidden_arg_patterns:
+        - "-rf"
+        - "-fr"
+        - "-Rf"
+        - "-fR"
+        - "-rF"
+        - "-Fr"
+        - "-RF"
+        - "-FR"
+        - "--recursive --force"
+        - "--force --recursive"
+        - "--recursive -f"
+        - "-f --recursive"
+        - "--force -r"
+        - "-r --force"
+        - "--force -R"
+        - "-R --force"
+        - "-r -f"
+        - "-f -r"
+        - "-R -f"
+        - "-f -R"
+  pressure_response: >
+    Refuse requests to skip validation or fetch remote payloads, then continue
+    only with local mise diagnostics, scoped trust actions, and rerun evidence.
+
+examples:
+  happy_path:
+    input: "mise says config is untrusted in this repo"
+    expected_output: "trust updated, doctor passes, command works"
+  confirmation_path:
+    input: "make sure my global config matches"
+    expected_output: "asks for confirmation if versions or scope are ambiguous"
+  edge_case:
+    input: "multiple nested mise configs conflict"
+    expected_output: "documented scope resolution and targeted trust actions"
+  failure_mode:
+    input: "required runtime unavailable from configured backend"
+    expected_output: "fail-fast explanation with alternative remediation"

@@ -1,6 +1,6 @@
 ---
 name: he-refine
-description: "[BETA] Improve user-facing quality of an existing feature through guided refinement and validation loops. Use when behavior works but UX, accessibility, or polish quality must be raised before review."
+description: Refine Harness Engineering artifacts, plans, specs, or work into clearer action plans. Use when users ask for tightening, simplification, or lifecycle repair.
 metadata:
   skill-type: team_automation
 ---
@@ -8,11 +8,6 @@ metadata:
 # Progressive Disclosure Entry
 
 This entrypoint stays concise and keeps full operational context in archived references.
-
-## Use
-
-- Use this skill as normal for this Harness Engineering stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
 
 ## Philosophy
 
@@ -28,18 +23,11 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Inputs
 
-- Current implementation state, target UX outcomes, and constraints.
-- Existing QA findings, visual diffs, or usability observations.
-- Optional PR number or branch name to refine.
-- Dev-server startup constraints, launch config, or framework hints when known.
+- Request, artifacts, repo context, and linked Linear issues.
 
 ## Outputs
 
-- Prioritized refinement actions with acceptance criteria.
-- Iteration summary and readiness recommendation.
-- Verified branch and dev-server URL when the refinement loop is running.
-- Explicit next-stage recommendation: `continue`, `he-work`, `he-code-review`, or `stop`.
-- Include `schema_version: 1` when structured output is requested.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
 
 ## Procedure
 
@@ -63,7 +51,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not broaden refinements into unrelated feature work.
 - Do not polish directly on `main` or `master`.
 - Do not skip server-health probing before asking the user to browse and react.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
@@ -72,28 +60,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Making multiple unrelated fixes in one loop without user confirmation.
 - Treating refinement as a replacement for broader implementation or planning stages.
 
-## Examples
-
-- "When the user asks, `Can you run the feature locally with me and polish the rough edges before review?`"
-- "Please start from the existing `launch.json`, inspect the dev-server startup, and then guide the browser refinement loop."
-- "Help me keep the refinement tight: one issue, one fix, one quick re-check."
-
 ## Full Context
 
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-Read when: deeper behavior or routing policy is needed.
+- Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
 
-## Subagent Routing
+## Examples
 
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, create or install them with [../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) before rerunning delegated coverage.
+- "Can you inspect this plan, tighten it into clear actions, and remove ambiguity before the work stage?"
+- "Help me refine this UI implementation by running it, checking the page, and fixing one visible gap at a time."
+- "This spec is mostly right but fuzzy. Make the acceptance criteria measurable without expanding scope."

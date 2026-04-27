@@ -1,0 +1,68 @@
+schema_version: "1.0"
+
+skill_name: "insight-report"
+effective_date: "2026-04-24"
+
+purpose: >
+  Generate repeatable Codex usage insight artifacts from local sessions and
+  telemetry. Codex is the only narrative insight writer; Python only collects
+  evidence, validates JSON shape, and renders HTML.
+
+triggers:
+  - "explicit: run insight report"
+  - "explicit: generate Codex usage analytics"
+  - "implicit: Codex workflow retrospective"
+  - "implicit: prompting help from recent Codex sessions"
+  - "non-trigger: generic coding or prose rewrite"
+
+inputs:
+  - "lookback window (optional; default 7 days)"
+  - "local Codex sessions under ~/.codex/sessions"
+  - "optional local telemetry under ~/.agents/otel-collector"
+
+outputs:
+  - "insight-evidence.json"
+  - "INSIGHT_PROMPT.md"
+  - "full_run: insights.generated.json with metadata.schema_version = codex-insights.v1"
+  - "full_run: report.html"
+  - "full_run: REPORT_URL=file://... line for Codex browser launch"
+  - "prepare_only: insight-evidence.json and INSIGHT_PROMPT.md only (no insights.generated.json, report.html, or REPORT_URL)"
+  - "explicit confidence and missing-data disclosures in metadata.limitations"
+
+required_response_sections:
+  - "When to use"
+  - "Required inputs"
+  - "Deliverables"
+  - "Workflow"
+  - "Validation"
+  - "Codex Writer Contract"
+  - "Codex Browser Launch"
+  - "Failure Modes"
+
+non_goals:
+  - "using any non-Codex writer"
+  - "fabricating metrics or causal claims"
+  - "exposing sensitive content from prompts, tools, or telemetry"
+  - "destructive remediation actions outside report generation"
+  - "claiming browser launch happened when Browser tooling was unavailable"
+
+risks:
+  - id: stale-or-partial-evidence
+    mitigation: "require metadata.limitations and avoid unsupported claims"
+  - id: privacy-leakage
+    mitigation: "keep artifacts local and avoid repeating sensitive strings unless needed"
+  - id: invalid-codex-json
+    mitigation: "validate required top-level sections before rendering"
+  - id: browser-tool-unavailable
+    mitigation: "emit REPORT_URL and disclose launch gap"
+
+examples:
+  happy_path:
+    input: "Generate my weekly Codex insights and open the report."
+    expected_output: "Evidence, Codex-written JSON, HTML report, and Codex browser launch."
+  prepare_only:
+    input: "Prepare the insight prompt but let this session write it."
+    expected_output: "Evidence and prompt files only, with render command guidance."
+  failure_mode:
+    input: "Skip evidence and guess what I should do."
+    expected_output: "Refuse guessing and require evidence generation first."

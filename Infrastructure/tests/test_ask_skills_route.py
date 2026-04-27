@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills import route_skills
+from ask.commands.skills import route_skills  # noqa: E402
 
 
 class _RouterStub:
@@ -303,7 +303,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "chatgpt-apps")
         self.assertEqual(result.data["decision"]["considered_total"], 21)
-        self.assertEqual(mocked_parity.call_args.kwargs["route_considered_total"], 20)
+        self.assertNotIn("route_considered_total", mocked_parity.call_args.kwargs)
         self.assertIn("chatgpt-apps", router_stub.calls[0])
         self.assertIn("code-review", router_stub.calls[0])
 

@@ -1,0 +1,46 @@
+schema_version: "1.0"
+
+purpose: >
+  Define expected behavior for planning and scaffolding ChatGPT Apps SDK
+  implementations with a docs-first MCP server + widget workflow.
+
+triggers:
+  - user asks to build, scaffold, or refactor a ChatGPT Apps SDK app
+  - user asks to design tool schemas, metadata, or widget/server boundaries
+  - user asks for deployment or submission-readiness guidance for ChatGPT apps
+
+inputs:
+  - app use case and user journeys
+  - stack choices (server runtime + widget stack)
+  - deployment and auth constraints
+  - CSP/resource domain requirements
+
+outputs:
+  - selected app archetype and rationale
+  - tool surface plan with schema and annotation guidance
+  - implementation/scaffold guidance for server and widget
+  - validation checklist and local run/testing instructions
+
+required_sections_in_response:
+  - overview
+  - mandatory_docs_first_workflow
+  - build_workflow
+  - output_expectations
+  - validation
+  - constraints
+
+non_goals:
+  - generic non-ChatGPT web app architecture advice
+  - legal/compliance sign-off as final authority
+
+risks:
+  - risk: outdated API guidance causes broken scaffolds
+    mitigation: require openai-docs retrieval before code generation
+  - risk: widget/model context leakage
+    mitigation: keep structuredContent vs _meta boundaries explicit
+  - risk: metadata/CSP mismatches block app review
+    mitigation: include explicit metadata/CSP checklist in validation
+
+sources:
+  - https://developers.openai.com/apps-sdk/
+  - https://developers.openai.com/apps-sdk/reference/

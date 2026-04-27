@@ -1,11 +1,16 @@
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from ask.commands import runtime  # noqa: E402
+from ask.envelope import CallResult, ErrorCode, ErrorObject  # noqa: E402
 from verify_runtime_budget import build_report  # noqa: E402
 
 
@@ -15,7 +20,6 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
 
         required_fields = {
             "projection_mode",
-            "runtime_surface",
             "first_level_default_entries",
             "hidden_system_entries",
             "primary_runtime_entries",
@@ -33,16 +37,10 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
             "suppressed_entries",
         }
         self.assertTrue(required_fields.issubset(report.keys()))
-        self.assertIn(report["projection_mode"], {"flat", "rooted", "mixed"})
+        self.assertIn(report["projection_mode"], {"flat", "rooted"})
         self.assertEqual(report["budget_status"], report["status"])
-        self.assertEqual(report["runtime_surface"]["projection_mode"], report["projection_mode"])
 
     def test_scope_counts_include_known_scope_lanes(self) -> None:
-        """
-        Verify that the report's scope_counts contains expected scope lanes and that each lane's count is an integer.
-        
-        Asserts that the keys "global", "project", "local-plugin", "system", and "primary-runtime" exist in report["scope_counts"] and that each associated value is of type int.
-        """
         report = build_report()
 
         for scope in ("global", "project", "local-plugin", "system", "primary-runtime"):
@@ -58,6 +56,54 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
             self.assertIn("name", payload)
             self.assertIn("path", payload)
             self.assertIn("description_words", payload)
+
+    def test_runtime_surface_reports_budget_status_without_gating(self) -> None:
+        budget_result = CallResult(status="error")
+        budget_result.data["runtime_budget"] = {
+            "status": "fail",
+            "projection_mode": "flat",
+        }
+        budget_result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message="default skill budget exceeded",
+            )
+        )
+
+        with mock.patch.object(runtime, "skills_budget", return_value=budget_result):
+            result = runtime.dispatch_runtime(
+                REPO_ROOT,
+                SimpleNamespace(action="surface", default_max=30),
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.errors, [])
+        self.assertEqual(result.data["runtime_surface_status"], "error")
+        self.assertEqual(result.data["runtime_surface"]["status"], "fail")
+
+    def test_runtime_surface_preserves_non_validation_errors(self) -> None:
+        budget_result = CallResult(status="error")
+        budget_result.data["runtime_budget"] = {
+            "status": "unknown",
+            "projection_mode": "flat",
+        }
+        budget_result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_RUNTIME,
+                message="budget command crashed",
+            )
+        )
+
+        with mock.patch.object(runtime, "skills_budget", return_value=budget_result):
+            result = runtime.dispatch_runtime(
+                REPO_ROOT,
+                SimpleNamespace(action="surface", default_max=30),
+            )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(len(result.errors), 1)
+        self.assertEqual(result.errors[0].code, ErrorCode.ERR_RUNTIME)
+        self.assertEqual(result.data["runtime_surface_status"], "error")
 
 
 if __name__ == "__main__":

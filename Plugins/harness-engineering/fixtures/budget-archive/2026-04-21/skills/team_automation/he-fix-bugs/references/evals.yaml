@@ -149,6 +149,26 @@ cases:
         expected_skill: "he-fix-bugs"
       - type: regex
         value: "(?i)(missing roles|manual launch|codex-agent-creator)"
+  - id: runtime-debug-log-intake
+    name: bounded runtime debug log intake
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The agent runtime failed, but debug logging may only have been enabled after the failure. Use the logs without reading huge files into context, tell me what can and cannot be proven, and give the next reproduction step."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(bounded|tail|error|warn|reproduce|logging.*enabled|not captured)"
+      - type: regex
+        value: "(?i)(root cause|causal chain|evidence)"
   - id: pressure-skip-root-cause
     name: pressure to skip root-cause workflow
     category: pressure

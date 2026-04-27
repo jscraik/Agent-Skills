@@ -188,6 +188,7 @@ Review for:
 5. TOCTOU-style pre-checks; prefer direct operation with error handling.
 6. Memory growth risks and missing cleanup.
 7. Overly broad reads/loads when narrow access is sufficient.
+8. Unbounded reads of large logs, traces, generated manifests, or debug output; prefer bounded tails and targeted matches before loading full artifacts.
 
 ### Phase 4: Fix Issues
 

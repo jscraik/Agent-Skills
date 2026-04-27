@@ -350,3 +350,7 @@ Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to 
 | [[product-spec]] | Use the broader planning-spec pipeline instead of the narrower Harness Engineering contract path |
 
 **Topic map:** [[agent-ops]]
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

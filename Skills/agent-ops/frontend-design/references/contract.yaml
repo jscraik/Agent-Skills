@@ -1,15 +1,12 @@
-purpose: >
-  Define expected behavior and outputs for this routing skill.
-schema_version: 1.0
-triggers:
-  - user asks for broad frontend design direction and owner selection is ambiguous
-inputs:
-  - user request details
-  - stack and surface context when available
-outputs:
-  - routing-owner decision
-  - visual thesis, content plan, and interaction plan
-non_goals:
-  - direct UI implementation once a narrower owner skill is selected
-risks:
-  - ambiguous scope; mitigated by narrow discovery and single-owner handoff
+schema_version: 1
+skill: frontend-design
+purpose: "Analyze ambiguous frontend design requests and route the right UI owner. Use this skill when broad design intent needs classification before implementation."
+triggers: ["Use when the user request matches the skill scope."]
+non_goals: ["Route unrelated work away from this skill."]
+inputs: [user_request, target_context, evidence]
+outputs: [result, evidence_summary, validation_status]
+risks: [over_triggering, untrusted_input, validation_drift]
+safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
+validation: [plugin_eval_grade_a, strict_skill_audit]
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

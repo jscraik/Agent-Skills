@@ -310,3 +310,7 @@ IMPORTANT: Outputs should vary based on the behavior under test, the risk level,
 - A test that breaks when you refactor but behavior hasn't changed was testing implementation, not behavior. Delete it and write a better one.
 - Mock at system boundaries only. If you're mocking your own code, redesign the interface instead.
 - "Just one quick change" outside the loop is how TDD discipline erodes. Stay in the loop.
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

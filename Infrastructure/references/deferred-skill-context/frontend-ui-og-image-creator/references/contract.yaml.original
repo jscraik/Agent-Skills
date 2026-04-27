@@ -1,0 +1,24 @@
+purpose: >
+  Generate route-aware Open Graph images by inspecting a web codebase
+  and rendering assets aligned with existing brand language.
+schema_version: 1.0
+effective_date: 2026-04-24
+triggers:
+  - user requests the capability described in this skill
+  - user asks for route-specific OG image generation or refresh
+inputs:
+  - target repo or page set to inspect
+  - framework context (Next.js, Astro, React Router, etc.)
+  - output preference (static assets, metadata wiring, or both)
+  - branding constraints (logo, typography, page-type distinctions)
+outputs:
+  - generated OG image assets in correct static output location
+  - route map covering pages and visual treatments
+  - metadata wiring notes when requested
+non_goals:
+  - metadata-only tasks without image generation
+  - illustration or marketing design from scratch
+  - replacing metadata patterns wholesale
+risks:
+  - missing repo context; mitigated by stopping before inventing treatments
+  - missing branding assets; mitigated by route discovery before generation

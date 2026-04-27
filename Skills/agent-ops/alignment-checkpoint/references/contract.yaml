@@ -1,22 +1,31 @@
-purpose: >
-  Prevent intent misunderstandings by forcing a structured alignment checkpoint (goal, assumptions, success criteria)
-  and an explicit /proceed gate before any tool use or implementation.
-schema_version: 1.0
+schema_version: 1
+skill: alignment-checkpoint
+purpose: "Create an explicit goal, assumptions, and success-criteria checkpoint before risky or ambiguous work starts."
 triggers:
-  - User asks for alignment/checkpoint/confirm-first behavior
-  - Request is ambiguous, high-stakes, or error-prone due to missing success criteria
-  - Agent is about to use tools (shell/web/filesystem/MCP) and should pause for explicit approval
-inputs:
-  - The user's request text (canonical)
-  - Any explicit constraints (e.g., do NOT implement, preserve only, time bounds)
-outputs:
-  - JSON extraction with explicit_goal, implicit_assumptions, success_criteria
-  - Formatted alignment summary + 3 approach options (minimal/balanced/comprehensive)
-  - Explicit gate requiring /proceed or /clarify before any tool usage
-  - When stasis triggers: a STASIS_RECORD containing the verbatim request
+  - "Create, review, and validate an alignment checkpoint. Use when a request is ambiguous, high-stakes, multi-step, or requires explicit approval before tool use."
 non_goals:
-  - Running tools before approval
-  - Implementing, debugging, or editing code without an explicit /proceed
+  - "Route unrelated work away from this skill."
+inputs:
+  - "user request"
+  - "constraints"
+  - "risk level"
+  - "approval posture"
+outputs:
+  - "goal extraction"
+  - "assumptions"
+  - "success criteria"
+  - "approach options"
+  - "approval gate"
 risks:
-  - Overconfidence via hidden assumptions; mitigated by making assumptions explicit and requiring explicit approval
-  - Sensitive-data leakage; mitigated by redaction guidance and avoiding secret/PII echoing
+  - over_triggering
+  - untrusted_input
+  - validation_drift
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - plugin_eval_grade_a
+  - strict_skill_audit
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

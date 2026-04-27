@@ -136,3 +136,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 | [[he-plan]] | Build the initial implementation plan before optimization |
 | [[he-work]] | Execute validated changes outside optimization loops |
 | [[he-code-review]] | Run readiness review on optimized outcomes |
+
+## Deferred Context Preservation
+
+Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.

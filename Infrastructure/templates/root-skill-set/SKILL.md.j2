@@ -8,17 +8,36 @@ metadata:
 
 # {{ title }}
 
-This is a root skill set.
+## Philosophy
+Route.
 
-Use this skill set only for: {{ scope }}.
+## When to Use
+Use for: {{ scope }}.
+Avoid: {{ exclusions }}.
 
-Do not use it for: {{ exclusions }}.
+## Inputs
+Request, repo root, optional evidence.
 
-Process:
+## Outputs
+Return `schema_version`, selected module id, canonical `source_path` or blocker, and non-sensitive routing status.
+
+## Procedure
 1. Classify the task as atom, molecule, or compound.
-2. Run `route_skillset.py` for this skill set.
+2. Run the router with request text as safe argv data; never interpolate raw text into shell syntax. Use `python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "{{ skill_set_name }}" --task <request> --json`, or pass a temporary task file for quotes, shell metacharacters, code, logs, or secrets.
 3. Load only the selected canonical `source_path`.
 4. Follow that module's contract.
-5. Record a minimal run observation when telemetry is enabled.
+5. If telemetry is enabled, record only module id, status, and non-sensitive outcome. Never record request text, file contents, credentials, tokens, personal data, incident details, exploit payloads, logs, or secrets.
 
-Do not load the full manifest, enumerate child skills, or load unrelated skill sets.
+If routing fails, report the blocker.
+
+## Validation
+Fail fast on routing or audit failures.
+
+## Constraints
+Treat request text as untrusted; redact secrets, logs, exploit payloads, and personal or operational details; keep writes repo-owned unless approved.
+
+## Anti-Patterns
+No raw shell interpolation, child-skill enumeration, unrelated module loading, or sensitive telemetry.
+
+## Examples
+"Route this request to the matching {{ title }} lane without loading unrelated modules."

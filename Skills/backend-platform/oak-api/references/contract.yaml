@@ -1,23 +1,12 @@
-purpose: Turn Oak Curriculum API content into age-appropriate, interactive learning flows and, when requested, Apps SDK implementation guidance.
-triggers:
-  - Oak API endpoints, lessons, units, quizzes, or search queries
-  - Requests to build child-facing learning flows from Oak content
-  - Compliance questions (terms, limits, attribution)
-inputs:
-  - age_range
-  - subject
-  - key_stage_or_year
-  - learning_goals
-  - constraints
-outputs:
-  - step_by_step_learning_flow
-  - oak_endpoint_map
-  - compliance_checklist
-non_goals:
-  - Providing full Oak lesson content verbatim
-  - Giving legal advice beyond summarizing published terms
-  - Replacing educator judgment or safeguarding policies
-risks:
-  - Age-inappropriate content if learner context is missing
-  - Rate limit breaches if bulk queries are proposed
-  - Misattribution or missing OGL attribution
+schema_version: 1
+skill: oak-api
+purpose: "Build safe Oak Curriculum API learning flows. Use this skill when Oak endpoints, curriculum maps, or child-facing Apps SDK guidance are needed."
+triggers: ["Use when the user request matches the skill scope."]
+non_goals: ["Route unrelated work away from this skill."]
+inputs: [user_request, target_context, evidence]
+outputs: [result, evidence_summary, validation_status]
+risks: [over_triggering, untrusted_input, validation_drift]
+safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
+validation: [plugin_eval_grade_a, strict_skill_audit]
+observability: "Report validation commands and outcomes."
+rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

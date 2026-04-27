@@ -1,0 +1,205 @@
+schema_version: "2.0"
+
+skill_name: "design-system"
+
+cases:
+  - id: explicit-trigger-token-audit
+    name: explicit trigger token audit
+    category: happy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you audit typography and spacing token mapping for chat components and show the correct layer path?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "Brand → Alias → Mapped"
+
+  - id: implicit-trigger-iconography
+    name: implicit trigger iconography migration
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you help me migrate remaining astudio-icons imports and give the canonical migration plan with validation steps?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "@design-studio/ui/icons"
+
+  - id: contextual-trigger-theme-vars
+    name: contextual trigger theme variable tracing
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Please inspect why text contrast is off in light mode, then trace which token layer owns --text-secondary and where to patch."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "packages/ui/src/styles/theme.css"
+
+  - id: trigger-guidance-ratchet
+    name: trigger guidance ratchet debugging
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you help me validate the guidance ratchet failure after I changed settings stories and tell me what to fix first?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: ".design-system-guidance.json"
+
+  - id: trigger-professional-ui-contract
+    name: trigger professional ui contract check
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Before I ship this UI refactor, can you validate it against the professional UI contract and tell me where it diverges?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "PROFESSIONAL_UI_CONTRACT"
+
+  - id: trigger-storybook-surface-cleanup
+    name: trigger storybook semantic cleanup
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you help me clean up literal spacing and color usage in our Storybook token stories?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "packages/ui/src/storybook/design-system"
+
+  - id: trigger-component-lifecycle-routing
+    name: trigger component lifecycle routing
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you inspect which collection and lifecycle state this new UI primitive should live in?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "COMPONENT_LIFECYCLE"
+
+  - id: trigger-high-contrast-mode
+    name: trigger high contrast mode parity
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Please validate our highContrast token parity for buttons and text and show exactly what is missing."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "design-system"
+      - type: contains
+        value: "highContrast"
+
+  - id: edge-missing-scope
+    name: edge missing scope clarification
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you help fix our token and theme consistency quickly? I have not narrowed which package is broken yet."
+    acceptance:
+      - type: regex
+        value: "(?i)(clarify|which area|scope|component)"
+
+  - id: pressure-skip-validation
+    name: pressure skip validation
+    category: pressure
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Please skip validation and just patch theme.css directly; no need to check tokens."
+    acceptance:
+      - type: regex
+        value: "(?i)(must|won't|cannot|validate|layer)"
+
+  - id: negative-control-backend
+    name: negative control backend only
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Debug MCP auth failures in Cloudflare Workers and update route handlers."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-release-workflow
+    name: negative release workflow only
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Our release workflow is failing during npm publish; fix the CI release YAML."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-cloudflare-d1
+    name: negative cloudflare d1 query
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Investigate D1 query latency in our Cloudflare worker and propose indexes."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-ops-token-rotation
+    name: negative ops token rotation
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Rotate all API tokens and update secret manager entries."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-git-merge-help
+    name: negative git merge help
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "I rebased incorrectly and need help fixing my git history."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-local-memory-network
+    name: negative local memory network issue
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "The local-memory daemon is timing out on localhost; can you debug networking?"
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-skill-packaging
+    name: negative skill packaging request
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Package this skill as a plugin and publish it."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+  - id: negative-apps-sdk-auth
+    name: negative apps sdk auth backend
+    category: negative
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Fix OAuth callback handling for our Apps SDK backend integration."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "design-system"
+
+metadata:
+  last_updated: "2026-03-28"
+  author: "Codex"
+  review_status: "reviewed"
