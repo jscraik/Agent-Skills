@@ -103,7 +103,7 @@ Run discovery for underspecified custom-agent creation or hardening requests.
 - Skip already-answered rounds.
 - Stop when the custom agent can be built safely with explicit model, reasoning, scope, and instruction constraints.
 - Before implementation, summarize confirmed facts, assumptions, and the approval checkpoint.
-- Use `references/discovery-interview.md` for reusable round templates.
+- Use `references/discovery-interview.md` for reusable round templates if present; otherwise use the inline guidelines above.
 
 ## Validation
 - Validate all inputs before file changes.
