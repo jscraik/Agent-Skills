@@ -20,7 +20,7 @@ HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 COMMAND_VISIBILITY = {"orchestrator", "direct", "target", "reviewer", "none"}
 COMMAND_SURFACE_PATH = Path(".skillsets") / "command-surface.json"
 MAX_COMMAND_HANDLE_DESCRIPTION_WORDS = 14
-MAX_COMMAND_HANDLE_BODY_WORDS = 90
+MAX_COMMAND_HANDLE_BODY_WORDS = 120
 REVIEWER_MANIFEST = Path(os.environ.get("CODEX_AGENTS_MANIFEST", Path.home() / ".codex" / "agents" / "manifest.json"))
 RESERVED_SKILL_HANDLES = {
     "repo",
@@ -150,6 +150,7 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
     """Render a minimal Codex-visible SKILL.md command handle."""
     display_name = _display_name(handle)
     description = f"Explicit command handle for {display_name}. Use only when named as ${handle.handle}."
+    source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
     return "\n".join(
         [
             "---",
@@ -161,11 +162,13 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             "",
             f"Generated command handle for a child skill under the `{handle.owner}` router heading.",
             "The real workflow is not here.",
+            f"Canonical source path: `{source_path}`.",
             "",
             "When invoked:",
-            f"1. Run `./bin/ask skills resolve {handle.handle} --json`.",
-            "2. Load only `source_path` from the result.",
+            f"1. If `./bin/ask` exists, run `./bin/ask skills resolve {handle.handle} --json`.",
+            f"2. If `./bin/ask` is unavailable, load `{source_path}` directly.",
             "3. Follow the loaded module contract.",
+            "4. If the source path is missing, search only the owner skill tree for this exact handle name.",
             "",
             "When used as another skill's target, pass the resolved card to the active orchestrator and wait for orchestration.",
             "",
