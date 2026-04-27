@@ -209,3 +209,10 @@ Fail fast: stop at the first failed gate, do not proceed with cleanup edits, and
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` for benchmark and adversarial prompt cases.
 - Use `references/task-profile.json` for evaluator thresholds.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[simplify]] | Review a proposed cleanup diff for unnecessary complexity, duplication, or avoidable abstraction before final handoff |
+| [[verification-before-completion]] | Confirm completion claims, validation evidence, and remaining blocker status before saying cleanup work is done |
