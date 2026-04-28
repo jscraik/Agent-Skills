@@ -114,7 +114,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             command_handle,
         )
         self.assertNotIn("## Procedure", command_handle)
-        self.assertFalse(command_surface._validate_command_handle_payload(handle, command_handle))
+        self.assertEqual(command_surface._validate_command_handle_payload(handle, command_handle), [])
 
     def test_command_handle_dry_run_projects_he_heartbeat_without_writing(self) -> None:
         payload = command_surface.write_command_handles(repo_root_path=REPO_ROOT, dry_run=True)
