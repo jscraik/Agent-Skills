@@ -160,8 +160,8 @@ Before execution:
 1. `./bin/ask skills resolve unslopify --json` (resolver proof)
 2. `./bin/ask skills handles --check --json` (handle proof)
 3. `./bin/ask skills route unslopify --json` (route proof)
-4. `./bin/ask skills sync --scope workspace --json` (workspace invocation proof)
-5. `./bin/ask skills sync --scope user --json` (user runtime proof, when needed)
+4. `./bin/ask skills sync --scope workspace --projection rooted --json` (workspace invocation proof)
+5. `./bin/ask skills sync --scope user --projection rooted --json` (user runtime proof, when needed)
 
 Use these as separate gating steps. If any step fails, stop and request a fix before proceeding.
 
