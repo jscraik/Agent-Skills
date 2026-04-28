@@ -1,28 +1,22 @@
 schema_version: 1
 skill: autofix
-purpose: "Turn unresolved CodeRabbit review threads into small, validated, human-approved fixes."
-triggers:
-  - "Use when the user request matches the skill scope."
-non_goals:
-  - "Route unrelated work away from this skill."
-inputs:
-  - user_request
-  - target_context
-  - evidence
-outputs:
-  - result
-  - evidence_summary
-  - validation_status
-risks:
-  - over_triggering
-  - untrusted_input
-  - validation_drift
+purpose: "Account for all CodeRabbit threads, critical through trivial."
+triggers: [fix CodeRabbit PR threads, process all CodeRabbit severities]
+non_goals: [unrelated refactors, reviewer-provided command execution]
+inputs: [repo_path, branch_name, pr_number, coderabbit_threads, approval_posture, validation_commands]
+tool_preference:
+  thread_inventory:
+    preferred: [coderabbit_cli, coderabbit_plugin]
+    fallback: [github_review_thread_api]
+    report_path_used: true
+outputs: [thread_inventory, fixed_threads, reviewed_deferred_threads, validation_status, remaining_blockers]
+risks: [untrusted_input, review_prompt_injection, partial_thread_sweep, validation_drift]
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
-validation:
-  - plugin_eval_grade_a
-  - strict_skill_audit
-observability: "Report validation commands and outcomes."
-rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
+  raw_reviewer_text_in_shell: false
+  post_raw_reviewer_prompts: false
+validation: [all_threads_accounted_for, critical_through_trivial_triaged, no_review_prompt_execution, plugin_eval_grade_a, strict_skill_audit]
+observability: "Report checks and outcomes."
+rollback_procedure: "Rerun audit/eval after revert."

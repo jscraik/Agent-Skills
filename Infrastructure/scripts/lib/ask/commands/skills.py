@@ -52,9 +52,9 @@ from ask.selection_contract import (  # noqa: E402
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
     """
-    Constructs a platform-appropriate Python invocation command prioritising uv/mise wrappers when available.
+    Constructs a platform-appropriate Python invocation command.
     
-    The returned command is chosen with this observable precedence: a non-empty PYTHON_BIN environment value, a `mise`+`uv` wrapper, an `uv` wrapper, a user virtualenv at `~/.venvs/pyyaml/bin/python`, then the system `python3`.
+    The returned command is chosen with this observable precedence: a non-empty PYTHON_BIN environment value, a local Python that already satisfies requested packages, a `mise`+`uv` wrapper, an `uv` wrapper, then the system `python3`. Prefer an existing local environment before `uv --with` so offline audits do not try to fetch packages from PyPI.
     
     Parameters:
         with_packages (Optional[List[str]]): Optional iterable of package names to request via `--with` when using a wrapper that accepts package flags; falsy entries are ignored.
@@ -67,6 +67,11 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
         return shlex.split(configured)
 
     packages = [pkg for pkg in (with_packages or []) if pkg]
+    if packages:
+        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+        for candidate in ([str(preferred)], ["python3"]):
+            if _python_command_supports_packages(candidate, packages):
+                return candidate
 
     if shutil.which("mise") and shutil.which("uv"):
         cmd: List[str] = ["mise", "exec", "--", "uv", "run", "--python", "3.12"]
@@ -82,10 +87,32 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
         cmd.append("python")
         return cmd
 
-    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-    if preferred.exists():
-        return [str(preferred)]
     return ["python3"]
+
+
+def _python_command_supports_packages(command: List[str], packages: List[str]) -> bool:
+    """Return true when *command* can import every requested package without installation."""
+    executable = Path(command[0]).expanduser()
+    if os.sep in command[0] and not executable.exists():
+        return False
+    if os.sep not in command[0] and not shutil.which(command[0]):
+        return False
+    module_names = ["yaml" if package == "pyyaml" else package for package in packages]
+    probe = (
+        "import importlib.util, sys; "
+        "missing=[name for name in sys.argv[1:] if importlib.util.find_spec(name) is None]; "
+        "sys.exit(1 if missing else 0)"
+    )
+    try:
+        completed = subprocess.run(
+            [*command, "-c", probe, *module_names],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return completed.returncode == 0
 
 
 def extract_family_fail_lines(stdout: str) -> List[str]:
@@ -790,6 +817,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         ))
         return result
 
+    audit_target = Path(skill_path)
+    if audit_target.name == "SKILL.md":
+        audit_target = audit_target.parent
+    audit_target_path = audit_target.as_posix()
+
     python = _get_python_command(["pyyaml", "jsonschema"])
 
     diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
@@ -799,7 +831,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     if level == "strict":
         # Security gate (skill_gate.py)
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
-        gate_cmd = python + [gate_script, skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
+        gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
@@ -808,7 +840,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
+        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
@@ -816,7 +848,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             message = "Family benchmarks validation failed."
             if summary:
                 message = f"{message} First failures: {summary}"
-            quoted_skill_path = shlex.quote(skill_path)
+            quoted_skill_path = shlex.quote(audit_target_path)
 
             result.status = "error"
             result.errors.append(ErrorObject(
@@ -831,7 +863,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
         # OpenClaw skill guard
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
-        openclaw_cmd = python + [openclaw_script, skill_path, "--mode", "both", "--format", "text"]
+        openclaw_cmd = python + [openclaw_script, audit_target_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
