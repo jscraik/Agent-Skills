@@ -1095,12 +1095,25 @@ import sys
 readme_path = Path(sys.argv[1])
 catalog_count = sys.argv[2]
 content = readme_path.read_text(encoding="utf-8")
-content = re.sub(
+content, replacements = re.subn(
     r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
     f"A governed repository of **{catalog_count} skills** for AI coding agents",
     content,
     count=1,
 )
+if replacements == 0:
+    content, replacements = re.subn(
+        r"A governed repository of AI coding skills\.",
+        f"A governed repository of **{catalog_count} skills** for AI coding agents.",
+        content,
+        count=1,
+    )
+if replacements == 0:
+    content = content.replace(
+        "# Agent Skills\n\n",
+        f"# Agent Skills\n\nA governed repository of **{catalog_count} skills** for AI coding agents.\n\n",
+        1,
+    )
 content = re.sub(
     r"currently expects \*\*\d+\*\* skills",
     f"currently expects **{catalog_count}** skills",
