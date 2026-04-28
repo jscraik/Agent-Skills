@@ -59,6 +59,29 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertIn("search only the owner skill tree", body)
         self.assertEqual(validate_command_handle_payload(handle, body), [])
 
+    def test_generated_handle_uses_unresolved_placeholder_when_source_missing(self) -> None:
+        command_handle = getattr(COMMAND_SURFACE, "CommandHandle")
+        render_skill_command_handle = getattr(COMMAND_SURFACE, "render_skill_command_handle")
+        validate_command_handle_payload = getattr(COMMAND_SURFACE, "_validate_command_handle_payload")
+
+        handle = command_handle(
+            handle="he-work",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=None,
+            command_handle_path=".agents/skills/he-work/SKILL.md",
+            owner="harness-engineering",
+            description="Execute a plan.",
+            invoke_via="harness-engineering",
+            level="atom",
+        )
+
+        body = render_skill_command_handle(handle)
+        self.assertIn("Canonical source path: `UNRESOLVED_SOURCE_PATH`.", body)
+        self.assertIn("search only the owner skill tree", body)
+        self.assertEqual(validate_command_handle_payload(handle, body), [])
+
 
 if __name__ == "__main__":
     unittest.main()

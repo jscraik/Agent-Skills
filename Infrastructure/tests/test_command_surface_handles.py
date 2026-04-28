@@ -277,7 +277,6 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         agents_skills = home / ".agents" / "skills"
         agents_skills.parent.mkdir(parents=True)
         agents_skills.symlink_to(skills_dir)
-        (agents_skills / "he-heartbeat" / "SKILL.md").write_text("# linked\n", encoding="utf-8")
 
         with mock.patch("pathlib.Path.home", return_value=home):
             result = skills_proof(repo_root, "he-heartbeat")
