@@ -168,8 +168,11 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             f"Canonical source path: `{source_path}`.",
             "",
             "When invoked:",
-            f"1. If `./bin/ask` exists, run `./bin/ask skills resolve {handle.handle} --json`.",
-            f"2. If `./bin/ask` is unavailable, load `{source_path}` directly.",
+            (
+                "1. If this is the Agent Skills Kit repo and `./bin/ask` exists, "
+                f"run `./bin/ask skills resolve {handle.handle} --json`."
+            ),
+            f"2. Otherwise, load `{source_path}` directly.",
             "3. Follow the loaded module contract.",
             (
                 "4. If the source path is missing, search only the owner skill tree "
@@ -300,6 +303,18 @@ def _prune_obsolete_command_handle_dirs(
         if not dry_run:
             shutil.rmtree(path)
     return deletes
+
+
+def _write_generated_text(path: Path, content: str) -> None:
+    """Write generated content via same-directory replace to tolerate protected files."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_text(content, encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
 
 
 def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
@@ -531,22 +546,26 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
     root = repo_root_path or repo_root()
     handles = build_skill_handles(repo_root_path=root)
     rows = _command_handle_write_rows(handles)
-    violations = [
+    violations = validate_skill_handles(handles, repo_root_path=root)
+    violations.extend([
         violation
         for row in rows
         for violation in row.get("violations", [])
-    ]
+    ])
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]
         for row in rows
         if row["kind"] == "skill_command_handle"
     }
-    deletes = _prune_obsolete_command_handle_dirs(root=root, expected_dirs=expected_dirs, dry_run=dry_run)
+    deletes = _prune_obsolete_command_handle_dirs(
+        root=root,
+        expected_dirs=expected_dirs,
+        dry_run=dry_run or bool(violations),
+    )
     if not dry_run and not violations:
         for row in rows:
             path = root / row["path"]
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(row["content"], encoding="utf-8")
+            _write_generated_text(path, row["content"])
     return {
         "schema_version": "command-handle-write.v1",
         "status": "pass" if not violations else "fail",
@@ -564,6 +583,16 @@ def check_command_handles(*, repo_root_path: Path | None = None) -> dict[str, An
     root = repo_root_path or repo_root()
     rows = _command_handle_write_rows(build_skill_handles(repo_root_path=root))
     violations: list[dict[str, Any]] = []
+    expected_dirs = {
+        root / ".agents" / "skills" / row["handle"]
+        for row in rows
+        if row["kind"] == "skill_command_handle"
+    }
+    for row in _prune_obsolete_command_handle_dirs(root=root, expected_dirs=expected_dirs, dry_run=True):
+        violations.append({
+            "code": "COMMAND_HANDLE_OBSOLETE",
+            **row,
+        })
     for row in rows:
         path = root / row["path"]
         if not path.exists():

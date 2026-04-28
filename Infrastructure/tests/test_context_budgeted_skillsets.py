@@ -129,6 +129,15 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
 
         self.assertIn("Generated command handle", command_handle)
         self.assertIn("./bin/ask skills resolve he-heartbeat --json", command_handle)
+        self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", command_handle)
+        self.assertIn(
+            "Canonical source path: `Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md`.",
+            command_handle,
+        )
+        self.assertIn(
+            "Otherwise, load `Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md` directly.",
+            command_handle,
+        )
         self.assertNotIn("## Procedure", command_handle)
         self.assertFalse(command_surface._validate_command_handle_payload(handle, command_handle))
 
@@ -168,12 +177,67 @@ class TestContextBudgetedSkillsets(unittest.TestCase):
             [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
         )
 
+    def test_command_handle_write_does_not_prune_when_validation_fails(self) -> None:
+        stale = self.temp_dir / ".agents" / "skills" / "old-handle"
+        stale.mkdir(parents=True)
+        (stale / "SKILL.md").write_text(
+            "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
+            encoding="utf-8",
+        )
+        source_path = "Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        source.write_text("---\nname: he-heartbeat\n---\n# HE Heartbeat\n", encoding="utf-8")
+        handle = command_surface.CommandHandle(
+            handle="he-heartbeat",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/he-heartbeat/SKILL.md",
+            owner="harness-engineering",
+            description="Heartbeat.",
+            invoke_via="harness-engineering",
+        )
+
+        with (
+            mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]),
+            mock.patch.object(
+                command_surface,
+                "_validate_command_handle_payload",
+                return_value=[{"code": "TEST_GENERATED_HANDLE_INVALID", "handle": "he-heartbeat"}],
+            ),
+        ):
+            payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertTrue(stale.exists())
+        self.assertEqual(
+            payload["deletes"],
+            [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
+        )
+
     def test_command_handle_check_detects_missing_runtime_handle(self) -> None:
         payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
 
         self.assertEqual(payload["status"], "fail")
         codes = {violation["code"] for violation in payload["violations"]}
         self.assertIn("COMMAND_HANDLE_MISSING", codes)
+
+    def test_command_handle_check_detects_obsolete_generated_runtime_handle(self) -> None:
+        stale = self.temp_dir / ".agents" / "skills" / "old-handle"
+        stale.mkdir(parents=True)
+        (stale / "SKILL.md").write_text(
+            "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
+            encoding="utf-8",
+        )
+
+        payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
+
+        self.assertEqual(payload["status"], "fail")
+        codes = {violation["code"] for violation in payload["violations"]}
+        self.assertIn("COMMAND_HANDLE_OBSOLETE", codes)
+        self.assertTrue(stale.exists())
 
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
         payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)

@@ -54,8 +54,8 @@ class CommandSurfaceTests(unittest.TestCase):
             "Canonical source path: `Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md`.",
             body,
         )
-        self.assertIn("If `./bin/ask` exists", body)
-        self.assertIn("If `./bin/ask` is unavailable", body)
+        self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", body)
+        self.assertIn("Otherwise, load", body)
         self.assertIn("search only the owner skill tree", body)
         self.assertEqual(validate_command_handle_payload(handle, body), [])
 
