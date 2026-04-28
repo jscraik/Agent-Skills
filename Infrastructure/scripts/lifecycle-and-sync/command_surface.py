@@ -149,7 +149,10 @@ def requires_generated_command_handle(handle: CommandHandle) -> bool:
 def render_skill_command_handle(handle: CommandHandle) -> str:
     """Render a minimal Codex-visible SKILL.md command handle."""
     display_name = _display_name(handle)
-    description = f"Explicit command handle for {display_name}. Use only when named as ${handle.handle}."
+    description = (
+        f"Explicit command handle for {display_name}. "
+        f"Use only when named as ${handle.handle}."
+    )
     source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
     return "\n".join(
         [
@@ -168,7 +171,10 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             f"1. If `./bin/ask` exists, run `./bin/ask skills resolve {handle.handle} --json`.",
             f"2. If `./bin/ask` is unavailable, load `{source_path}` directly.",
             "3. Follow the loaded module contract.",
-            "4. If the source path is missing, search only the owner skill tree for this exact handle name.",
+            (
+                "4. If the source path is missing, search only the owner skill tree "
+                "for this exact handle name."
+            ),
             "",
             "When used as another skill's target, pass the resolved card to the active orchestrator and wait for orchestration.",
             "",
@@ -196,7 +202,10 @@ def render_openai_yaml(handle: CommandHandle) -> str:
 
 def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
-    frontmatter_description = f"Explicit command handle for {_display_name(handle)}. Use only when named as ${handle.handle}."
+    frontmatter_description = (
+        f"Explicit command handle for {_display_name(handle)}. "
+        f"Use only when named as ${handle.handle}."
+    )
     if _word_count(frontmatter_description) > MAX_COMMAND_HANDLE_DESCRIPTION_WORDS:
         violations.append({
             "code": "COMMAND_HANDLE_DESCRIPTION_BUDGET_EXCEEDED",

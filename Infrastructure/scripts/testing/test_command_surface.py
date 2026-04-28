@@ -5,15 +5,16 @@ from __future__ import annotations
 
 import importlib.util
 import sys
-from pathlib import Path
 import unittest
+from pathlib import Path
+from types import ModuleType
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent / "lifecycle-and-sync"
 SCRIPT = SCRIPT_DIR / "command_surface.py"
 
 
-def _load_module():
+def _load_module() -> ModuleType:
     if str(SCRIPT_DIR) not in sys.path:
         sys.path.insert(0, str(SCRIPT_DIR))
     spec = importlib.util.spec_from_file_location("command_surface", SCRIPT)
@@ -25,13 +26,16 @@ def _load_module():
     return module
 
 
-class CommandSurfaceTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.mod = _load_module()
+COMMAND_SURFACE = _load_module()
 
+
+class CommandSurfaceTests(unittest.TestCase):
     def test_generated_handle_includes_portable_source_path_fallback(self) -> None:
-        handle = self.mod.CommandHandle(
+        command_handle = getattr(COMMAND_SURFACE, "CommandHandle")
+        render_skill_command_handle = getattr(COMMAND_SURFACE, "render_skill_command_handle")
+        validate_command_handle_payload = getattr(COMMAND_SURFACE, "_validate_command_handle_payload")
+
+        handle = command_handle(
             handle="he-work",
             kind="skill",
             command_visibility="target",
@@ -44,7 +48,7 @@ class CommandSurfaceTests(unittest.TestCase):
             level="atom",
         )
 
-        body = self.mod.render_skill_command_handle(handle)
+        body = render_skill_command_handle(handle)
 
         self.assertIn(
             "Canonical source path: `Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md`.",
@@ -53,7 +57,7 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertIn("If `./bin/ask` exists", body)
         self.assertIn("If `./bin/ask` is unavailable", body)
         self.assertIn("search only the owner skill tree", body)
-        self.assertEqual(self.mod._validate_command_handle_payload(handle, body), [])
+        self.assertEqual(validate_command_handle_payload(handle, body), [])
 
 
 if __name__ == "__main__":
