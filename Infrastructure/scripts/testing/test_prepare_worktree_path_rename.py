@@ -30,9 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 OLD_PATH = "Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh"
 NEW_PATH = "scripts/prepare-worktree.sh"
 
-PREPARE_WORKTREE_SCRIPT = (
-    REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "prepare-worktree.sh"
-)
+PREPARE_WORKTREE_SCRIPT = REPO_ROOT / "scripts" / "prepare-worktree.sh"
 CHECK_ENV_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "check-environment.sh"
 MAKEFILE = REPO_ROOT / "Makefile"
 RESTORE_MANIFEST = REPO_ROOT / ".harness" / "restore-manifest.json"
@@ -47,13 +45,21 @@ def _bash(snippet: str, env: dict | None = None, cwd: str | None = None) -> subp
     base_env = {k: v for k, v in os.environ.items()}
     if env:
         base_env.update(env)
-    return subprocess.run(
-        ["bash", "-c", snippet],
-        capture_output=True,
-        text=True,
-        env=base_env,
-        cwd=cwd,
-    )
+    try:
+        return subprocess.run(
+            ["bash", "-c", snippet],
+            capture_output=True,
+            text=True,
+            env=base_env,
+            cwd=cwd,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired as e:
+        # Collect any partial output before re-raising
+        partial_stdout = e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
+        partial_stderr = e.stderr.decode() if isinstance(e.stderr, bytes) else (e.stderr or "")
+        msg = f"Command timed out after 30s. Partial output:\nSTDOUT: {partial_stdout}\nSTDERR: {partial_stderr}"
+        raise RuntimeError(msg) from e
 
 
 # ---------------------------------------------------------------------------
@@ -561,8 +567,10 @@ class TestReadmeMdSkillCount(unittest.TestCase):
         content = README_MD.read_text(encoding="utf-8")
         # Only check the line that was modified in this PR: the opening description line
         # containing 'governed repository of ... skills'
+        found_line = False
         for line in content.splitlines():
             if "governed repository of" in line and "skills" in line:
+                found_line = True
                 matches = re.findall(r"\b\d+\s+skills\b", line)
                 self.assertEqual(
                     matches,
@@ -570,6 +578,10 @@ class TestReadmeMdSkillCount(unittest.TestCase):
                     f"Opening description line still contains a hardcoded count: {matches!r} in {line!r}",
                 )
                 break
+        self.assertTrue(
+            found_line,
+            "Expected line containing 'governed repository of' and 'skills' not found in README.md",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -603,11 +615,11 @@ class TestCrossFilePathConsistency(unittest.TestCase):
                 f"{fpath.relative_to(REPO_ROOT)} still contains old path '{OLD_PATH}'",
             )
 
-    def test_prepare_worktree_script_exists_at_old_location(self) -> None:
-        """The script at the old location still exists (it was NOT deleted, just updated in references)."""
+    def test_prepare_worktree_script_exists_at_canonical_location(self) -> None:
+        """The script at the canonical location must exist."""
         self.assertTrue(
             PREPARE_WORKTREE_SCRIPT.exists(),
-            f"prepare-worktree.sh must still exist at {PREPARE_WORKTREE_SCRIPT}",
+            f"prepare-worktree.sh must exist at canonical location {PREPARE_WORKTREE_SCRIPT}",
         )
 
     def test_prepare_worktree_script_is_executable_or_runnable_via_bash(self) -> None:
