@@ -1095,12 +1095,31 @@ import sys
 readme_path = Path(sys.argv[1])
 catalog_count = sys.argv[2]
 content = readme_path.read_text(encoding="utf-8")
-content = re.sub(
+content, replacements = re.subn(
     r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
     f"A governed repository of **{catalog_count} skills** for AI coding agents",
     content,
     count=1,
 )
+if replacements == 0:
+    content, replacements = re.subn(
+        r"A governed repository of AI coding skills\.",
+        f"A governed repository of **{catalog_count} skills** for AI coding agents.",
+        content,
+        count=1,
+    )
+if replacements == 0:
+    content, insertions = re.subn(
+        r"^(# Agent Skills\s*\n\s*)",
+        rf"\1A governed repository of **{catalog_count} skills** for AI coding agents.\n\n",
+        content,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    if insertions == 0:
+        raise SystemExit(
+            "Failed to refresh README governed-repository sentence; expected one of known patterns."
+        )
 content = re.sub(
     r"currently expects \*\*\d+\*\* skills",
     f"currently expects **{catalog_count}** skills",

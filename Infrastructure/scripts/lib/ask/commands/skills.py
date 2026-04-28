@@ -276,9 +276,8 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     """
     entries = [
         entry
-        for entry in discover_catalog_entries()
+        for entry in discover_catalog_entries(source="repo")
         if entry.source_dir.is_relative_to(repo_root)
-        and ".agents" not in entry.source_dir.relative_to(repo_root).parts
     ]
     catalog_count = len(entries)
     logs: list[str] = []
@@ -294,12 +293,19 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     readme_path = repo_root / "README.md"
     if readme_path.exists():
         readme_content = readme_path.read_text(encoding="utf-8")
-        updated_readme = re.sub(
+        updated_readme, replacements = re.subn(
             r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
             f"A governed repository of **{catalog_count} skills** for AI coding agents",
             readme_content,
             count=1,
         )
+        if replacements == 0:
+            updated_readme, replacements = re.subn(
+                r"A governed repository of AI coding skills\.",
+                f"A governed repository of **{catalog_count} skills** for AI coding agents.",
+                updated_readme,
+                count=1,
+            )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
@@ -1564,7 +1570,7 @@ def _append_user_runtime_relinks(
         (skills_dir, home / ".agents" / "skills", True),
         (skills_dir, home / ".codex" / "skills", True),
         (repo_root, home / ".agents" / "agent-skills", True),
-        (plugins_dir, home / ".agents" / "plugins", True),
+        (plugins_dir, home / ".agents" / "plugins", False),
     ]
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
@@ -1938,6 +1944,30 @@ def sync_skills(
                 warnings=plan["warnings"],
             )
             return result
+        try:
+            projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        except OSError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Catalog projection refresh failed: {exc}",
+                    fix_suggestion="Check README.md/SKILL.md write permissions and rerun sync.",
+                )
+            )
+            result.data["plan"] = plan
+            result.data["logs"] = logs
+            result.data["policy_identity"] = get_policy_identity()
+            result.data["projection_mode"] = projection_decision.projection_mode
+            result.data["projection"] = build_projection_plan_metadata(
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                warnings=plan["warnings"],
+            )
+            return result
+        plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
+        logs.extend(projection_logs)
         plan["mutation_counts"] = {
             "writes": len(plan["writes"]),
             "deletes": len(plan["deletes"]),
