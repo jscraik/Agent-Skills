@@ -229,20 +229,26 @@ class TestMakefileWorktreeReadyTarget(unittest.TestCase):
         # Find the worktree-ready block and check it uses bash
         lines = content.splitlines()
         in_target = False
+        found_recipe_line = False
         for line in lines:
             if line.startswith("worktree-ready:"):
                 in_target = True
                 continue
             if in_target:
                 if line.startswith("\t"):
+                    found_recipe_line = True
                     self.assertIn(
                         "bash",
                         line,
                         "worktree-ready must invoke bash to run the script",
                     )
                     break
-                elif line.strip():
+                if line.strip():
                     break  # Next target reached without finding a command
+        self.assertTrue(
+            found_recipe_line,
+            "worktree-ready target is defined but has no recipe line",
+        )
 
     def test_makefile_has_no_old_path(self) -> None:
         """Regression: old path must not appear anywhere in the Makefile."""
@@ -606,8 +612,10 @@ class TestCrossFilePathConsistency(unittest.TestCase):
             CODEOWNERS,
         ]
         for fpath in files_to_check:
-            if not fpath.exists():
-                continue
+            self.assertTrue(
+                fpath.exists(),
+                f"Expected validation target is missing: {fpath.relative_to(REPO_ROOT)}",
+            )
             content = fpath.read_text(encoding="utf-8")
             self.assertNotIn(
                 OLD_PATH,
