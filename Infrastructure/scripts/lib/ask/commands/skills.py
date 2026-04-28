@@ -1944,7 +1944,28 @@ def sync_skills(
                 warnings=plan["warnings"],
             )
             return result
-        projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        try:
+            projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        except OSError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Catalog projection refresh failed: {exc}",
+                    fix_suggestion="Check README.md/SKILL.md write permissions and rerun sync.",
+                )
+            )
+            result.data["plan"] = plan
+            result.data["logs"] = logs
+            result.data["policy_identity"] = get_policy_identity()
+            result.data["projection_mode"] = projection_decision.projection_mode
+            result.data["projection"] = build_projection_plan_metadata(
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                warnings=plan["warnings"],
+            )
+            return result
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
         plan["mutation_counts"] = {

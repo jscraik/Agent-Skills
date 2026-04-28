@@ -1109,11 +1109,17 @@ if replacements == 0:
         count=1,
     )
 if replacements == 0:
-    content = content.replace(
-        "# Agent Skills\n\n",
-        f"# Agent Skills\n\nA governed repository of **{catalog_count} skills** for AI coding agents.\n\n",
-        1,
+    content, insertions = re.subn(
+        r"^(# Agent Skills\s*\n\s*)",
+        rf"\1A governed repository of **{catalog_count} skills** for AI coding agents.\n\n",
+        content,
+        count=1,
+        flags=re.MULTILINE,
     )
+    if insertions == 0:
+        raise SystemExit(
+            "Failed to refresh README governed-repository sentence; expected one of known patterns."
+        )
 content = re.sub(
     r"currently expects \*\*\d+\*\* skills",
     f"currently expects **{catalog_count}** skills",

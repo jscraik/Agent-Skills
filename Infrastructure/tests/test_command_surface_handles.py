@@ -11,11 +11,18 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
 ASK_LIB_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lib"
+_ORIGINAL_SYS_PATH = list(sys.path)
 sys.path.insert(0, str(LIFECYCLE_DIR))
 sys.path.insert(0, str(ASK_LIB_DIR))
 
 import command_surface  # noqa: E402
 from ask.commands.skills import skills_proof  # noqa: E402
+
+
+def tearDownModule() -> None:  # noqa: N802 - unittest module hook
+    sys.path[:] = _ORIGINAL_SYS_PATH
+    sys.modules.pop("command_surface", None)
+    sys.modules.pop("ask.commands.skills", None)
 
 
 class CommandSurfaceTempDirTestCase(unittest.TestCase):
@@ -262,6 +269,11 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
 
         proof = result.data["proof"]
         self.assertEqual(proof["status"], "fail")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["generated_command_handle_check"])
+        self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
+        self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+        self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
 
@@ -282,6 +294,10 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             result = skills_proof(repo_root, "he-heartbeat")
 
         proof = result.data["proof"]
+        self.assertEqual(proof["status"], "pass")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["generated_command_handle_check"])
+        self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
 
