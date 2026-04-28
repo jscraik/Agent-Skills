@@ -186,7 +186,7 @@ If any of these checks fails, do not proceed with execution claims. Report the b
 - Relevant tests/lint/typecheck commands
 - Scope-specific CI/runtime checks for touched files
 
-If any command fails, include the exact failing command, stderr/trace text, and the next safe-step fix before continuing.
+If any command fails, include the exact failing command, a redacted stderr/trace excerpt (enough to diagnose), and the next safe-step fix before continuing.
 Fail fast: stop at the first failed gate, do not proceed with cleanup edits, and rerun the failed gate after fixing the blocker.
 
 ## Anti-Patterns
