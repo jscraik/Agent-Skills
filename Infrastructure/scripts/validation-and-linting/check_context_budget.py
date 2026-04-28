@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=import-outside-toplevel,wrong-import-position,too-many-branches
 """Validate context-budgeted skill-tree projection artifacts."""
 
 from __future__ import annotations
@@ -38,18 +39,44 @@ DEFAULTS = {
 }
 
 
+def _load_simple_yaml_mapping(text: str) -> dict[str, Any]:
+    """Load the simple section/key/value YAML shape used by context-budget."""
+    loaded: dict[str, Any] = {}
+    current_section: str | None = None
+    for line_no, raw_line in enumerate(text.splitlines(), start=1):
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        if not raw_line.startswith(" "):
+            if not line.endswith(":"):
+                raise ValueError(f"Unsupported configuration line {line_no}: {raw_line!r}")
+            current_section = line[:-1].strip()
+            loaded[current_section] = {}
+            continue
+        if current_section is None or ":" not in line:
+            raise ValueError(f"Unsupported configuration line {line_no}: {raw_line!r}")
+        key, raw_value = line.strip().split(":", 1)
+        value = raw_value.strip()
+        loaded[current_section][key.strip()] = int(value) if value.isdigit() else value
+    return loaded
+
+
 def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
     if not path.is_file():
-        return DEFAULTS
+        return json.loads(json.dumps(DEFAULTS))
     try:
         import yaml  # type: ignore
     except ImportError:
-        # PyYAML not installed; return defaults
-        return DEFAULTS
+        yaml = None
 
     try:
-        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except (yaml.YAMLError, UnicodeDecodeError) as exc:
+        config_text = path.read_text(encoding="utf-8")
+        loaded = yaml.safe_load(config_text) if yaml else _load_simple_yaml_mapping(config_text)
+        loaded = loaded or {}
+    except UnicodeDecodeError as exc:
+        # Malformed encoding; re-raise to surface the error
+        raise ValueError(f"Failed to load configuration from {path}: {exc}") from exc
+    except Exception as exc:
         # Malformed YAML or encoding issue; re-raise to surface the error
         raise ValueError(f"Failed to load configuration from {path}: {exc}") from exc
 

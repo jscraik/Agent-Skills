@@ -3,7 +3,7 @@
   "profile_id": "Skills-agent-ops-autofix",
   "scope_skill": "Skills/agent-ops/autofix",
   "scope_profile": "Skills",
-  "rubric_version": "2026-02-26",
+  "rubric_version": "2026-04-28",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
@@ -16,24 +16,24 @@
   },
   "criteria": [
     {
-      "id": "clarity",
-      "label": "Clarity",
-      "threshold": 0.72,
-      "weight": 0.34,
+      "id": "coverage",
+      "label": "Coverage",
+      "threshold": 0.85,
+      "weight": 0.35,
       "critical": true
     },
     {
-      "id": "specificity",
-      "label": "Specificity",
-      "threshold": 0.68,
-      "weight": 0.33,
+      "id": "validation",
+      "label": "Validation",
+      "threshold": 0.8,
+      "weight": 0.3,
       "critical": true
     },
     {
       "id": "safety",
       "label": "Safety",
-      "threshold": 0.85,
-      "weight": 0.33,
+      "threshold": 0.9,
+      "weight": 0.35,
       "critical": true
     }
   ],
@@ -42,11 +42,10 @@
     "human_baseline_minutes": 45,
     "ai_process_minutes": 15,
     "probability_of_success": 0.75,
-    "rationale": "Human oversight for promotion."
+    "rationale": "Human oversight remains required for PR review interpretation, risky edits, and thread resolution."
   },
   "learning_posture": {
     "supported": [
-      "learn",
       "guided",
       "execute"
     ],
