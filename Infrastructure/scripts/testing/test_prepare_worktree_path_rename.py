@@ -113,7 +113,8 @@ class TestPrepareWorktreeUsageText(unittest.TestCase):
     def test_unknown_arg_does_not_show_old_path(self) -> None:
         """Error usage output for unknown arg must NOT contain the old nested path."""
         result = _bash(f'bash "{PREPARE_WORKTREE_SCRIPT}" --unknown-arg-xyz 2>&1')
-        self.assertNotIn(OLD_PATH, result.stdout, "error usage must not reference old path")
+        combined_output = f"{result.stdout}\n{result.stderr}"
+        self.assertNotIn(OLD_PATH, combined_output, "error usage must not reference old path")
 
 
 # ---------------------------------------------------------------------------
