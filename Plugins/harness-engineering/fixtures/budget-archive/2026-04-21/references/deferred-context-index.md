@@ -18,6 +18,8 @@ In this index, archive means preserved deferred context used by active skills, n
   - `references/deterministic-stage-routing.md`
 - Canonical domain-model routing policy remains in:
   - `references/domain-model-routing.md`
+- Canonical session-evidence routing policy remains in:
+  - `references/session-evidence-contract.md`
 - Canonical QA intake routing policy remains in:
   - `references/qa-intake-routing.md`
 - Router role-resolution policy for `he-router` requires checking `~/.codex/agents/manifest.json` and preferring `he-*` mapped roles when available in the stage map.
@@ -45,6 +47,55 @@ The session-evidence routing refresh preserved these pre-insertion `he-compound`
 6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
 7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
 8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
+
+The session-evidence and reliability refresh preserved these compacted entrypoint lines:
+
+This entrypoint stays concise and keeps full operational context in archived references.
+- For full stage policy, workflow details, and examples, load the archived full guide.
+1. Load archived reliability references before analysis.
+4. Produce reliability findings with concrete blast-radius and mitigation guidance.
+5. Route review subagents per policy; if unavailable, continue inline and state manual role options.
+- Refresh durable knowledge from evidence, not intuition.
+- Review individual learnings before derived pattern docs.
+- Prefer no-write `Keep` decisions over churn when a doc is still trustworthy.
+- Use when overlapping solution docs should be consolidated with explicit evidence.
+- Use when a specific learning or pattern doc is called stale, overlapping, drifted, or superseded.
+- If no candidate docs exist under `docs/solutions/`, stop and report that no refresh targets were found.
+- If a scope hint finds no matches, report the miss clearly; in autonomous mode, stop without guessing.
+- If replacement evidence is insufficient, do not invent a successor doc. Mark the artifact stale when possible and report what evidence is missing.
+- Request, artifacts, repo context, and linked Linear issues.
+- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+2. Discover candidate docs under `docs/solutions/`, excluding `README.md` and legacy `_archived/` content.
+3. Match the narrowest successful scope first: directory, frontmatter, filename, then content search.
+4. Investigate individual learnings before dependent pattern docs.
+5. Analyze the document set for overlap, contradictions, and canonical-doc opportunities before leaving duplicates in place.
+6. Classify each artifact or overlap cluster into exactly one maintenance outcome: `Keep`, `Update`, `Consolidate`, `Replace`, `Archive`, or `Stale`.
+7. In autonomous mode, apply unambiguous actions directly and stale-mark ambiguous cases instead of guessing through them.
+8. Finish with a full markdown report covering evidence, actions applied, and recommendations when writes could not be completed.
+- Ensure each refresh claim is backed by current repository evidence.
+- Ensure learnings are reviewed before dependent patterns.
+- Ensure overlap analysis happens before duplicate docs are left in place.
+- Performing broad doc rewrites without evidence-backed stale signals.
+- "Can you inspect the compound run state and tell me which docs are stale after this refactor?"
+3. Select the underlying HE stage that should run on each wake-up. If stage
+4. Build the durable heartbeat prompt using the contract below and the full
+5. Create or describe the automation only when the runtime exposes an automation
+6. Execute the first safe live-state check immediately in the current turn.
+7. Tell the user how the heartbeat will stop or when it will ask for human
+2. Decide whether the target should use direct hard metrics, judge scoring, or hybrid gates plus judge evaluation.
+3. Detect and resolve `fresh` versus `resume` state before running new experiments.
+4. Establish a trusted baseline with the measurement harness and run the parallel-readiness probe before widening execution.
+5. Run bounded iterations with explicit measurement gates and isolated experiment state.
+6. After each experiment, write results to disk immediately, verify the write, and only then report or compare outcomes.
+7. Keep, revise, or discard changes based on measured outcomes and route proven results to the next stage.
+4. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
+5. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
+6. Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
+7. Report completed work, blockers, validation evidence, and the shipping handoff package.
+6. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.
+7. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
+8. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.
+9. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.
 
 2. Map service boundaries and dependency failure paths.
 3. Produce reliability findings with concrete blast-radius and mitigation guidance.

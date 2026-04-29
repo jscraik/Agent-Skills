@@ -2,46 +2,69 @@
 
 Concept docs explain how the system works and why it is shaped this way.
 
-Write concepts for readers who can run commands, but need help understanding the “why” and the tradeoffs.
+Write concepts for readers who can run commands, but need help understanding the "why" and the tradeoffs.
 
 When you describe a workflow, link to the exact script or folder and show a small example.
 
-## What is a Skill?
+## What Is A Skill?
 
-A **skill** is a reusable prompt template that guides AI agent behavior. Each skill lives in a folder with a `SKILL.md` file containing:
+A **skill** is a reusable Markdown workflow that guides AI agent behavior. In
+this repo, the editable source lives in one of two canonical places:
+
+- `Skills/<topic>/<skill>/SKILL.md` for first-party skills.
+- `Plugins/<plugin>/skills/**/SKILL.md` for plugin-owned skills.
+
+Generated runtime copies under `.agents/skills/**` are projections, not source
+of truth.
+
+Each canonical skill folder contains a `SKILL.md` file with frontmatter such as:
 
 ```yaml
 ---
 name: skill-name
 description: What this skill does
 triggers:
-  - “when to use”
+  - "when to use"
 ---
-
 # Skill content in Markdown
 ```
 
-**Skill folder structure:**
+**Canonical skill folder structure:**
+
+```text
+Skills/<topic>/<skill-name>/
+|-- SKILL.md           # Required: skill definition
+|-- Infrastructure/references/        # Optional: supporting docs
+|-- Infrastructure/scripts/           # Optional: helper scripts
+`-- Infrastructure/templates/         # Optional: file templates
 ```
-<category>/<skill-name>/
-├── SKILL.md           # Required: skill definition
-├── Infrastructure/references/        # Optional: supporting docs
-├── Infrastructure/scripts/           # Optional: helper scripts
-└── Infrastructure/templates/         # Optional: file templates
+
+## Runtime Projection
+
+The `.agents/skills/` directory is a generated runtime projection consumed by
+Codex and other agent runtimes. In rooted mode it contains root router skills
+plus generated command handles such as `$he-heartbeat`.
+
+This design:
+
+1. Keeps full workflow bodies in canonical source paths.
+2. Makes important routed skills mentionable through thin `$handle` pointers.
+3. Keeps generated runtime and command-surface metadata reproducible.
+4. Separates resolver proof, projection proof, user sync, and live picker proof.
+
+Use these commands to inspect the live surfaces:
+
+```bash
+python3 bin/ask skills list --json
+python3 bin/ask skills handles --check --json
+python3 bin/ask skills resolve he-heartbeat --json
+python3 bin/ask reviewers resolve skillinspector --json
 ```
 
-## Why Symlinks?
-
-The `/.agents/skills/` directory contains symlinks to all skills. This design:
-
-1. **Avoids duplication** — One canonical copy of each skill
-2. **Enables stable runtime loading** — Codex and repository tooling read from the same location
-3. **Simplifies updates** — Edit once, all tools see the change
-
-The sync script (`Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`) creates symlinks in:
-- `~/.agents/skills`
-- `~/.agents/agent-skills` (repo root)
-- `~/.codex/skills`
+`python3 bin/ask skills sync --scope workspace --projection rooted` refreshes
+repo-local projection files. `python3 bin/ask skills sync --scope user
+--projection rooted` refreshes user runtime links and profile-local plugin
+mirrors.
 
 ## Deprecations and Aliases
 
@@ -70,9 +93,10 @@ The Skill Genome Loop is a nightly process that:
 4. **Gates** all changes behind human approval
 
 **Controls:**
+
 - `rollout-mode.txt`: `off | observe_only | active`
 - `kill-switch.txt`: Emergency stop (file exists = stop)
 
-**See also:** [Skill Genome Loop Runbook](/docs/skill-graphs/runbooks/skill-genome-loop.md)
+**See also:** [Skill Genome Loop Runbook](/Docs/skill-graphs/runbooks/skill-genome-loop.md)
 
-- Back to [Docs index](/docs)
+- Back to [Docs index](/Docs)

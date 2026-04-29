@@ -332,7 +332,7 @@ def cmd_write_skill_type_index(output: Path) -> int:
         for skill_type in ORDERED_TYPES:
             fh.write(f"- `{skill_type}`\n")
         fh.write("\n## Semantic Types\n\n")
-        for skill_type in ORDERED_TYPES:
+        for index, skill_type in enumerate(ORDERED_TYPES):
             fh.write(f"### {title_case(skill_type)}\n\n")
             items = sorted(grouped[skill_type])
             if items:
@@ -340,7 +340,8 @@ def cmd_write_skill_type_index(output: Path) -> int:
                     fh.write(f"- {name} ({category})\n")
             else:
                 fh.write("- _No tagged skills yet._\n")
-            fh.write("\n")
+            if index < len(ORDERED_TYPES) - 1 or invalid:
+                fh.write("\n")
         if invalid:
             fh.write("## Invalid Tags\n\n")
             for name, category, skill_type in sorted(invalid):

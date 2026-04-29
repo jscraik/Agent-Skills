@@ -12,7 +12,7 @@ How `insight-report` asks Codex to write narrative insight from local evidence.
 
 ## Pipeline
 
-1. Python parses local Codex sessions.
+1. Python consumes `~/.agents/session-collector` evidence when available, otherwise parses local Codex sessions.
 2. Python computes deterministic metrics.
 3. Python writes `insight-evidence.json`.
 4. Python writes `INSIGHT_PROMPT.md`.
@@ -28,6 +28,7 @@ How `insight-report` asks Codex to write narrative insight from local evidence.
 - Message timing and response-time data.
 - Parallel Codex session detection.
 - Bounded transcript excerpts for recent sessions.
+- Optional `insight-evidence-extension.json` from session-collector with normalized at-a-glance, friction, prompting-help, limitations, and confidence fields.
 
 The bundle is evidence only. Codex must not invent missing data.
 

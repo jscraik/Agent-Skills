@@ -75,7 +75,7 @@ fi
 eval "$(mise activate bash)"
 export CODEX_APPROVAL_POSTURE="${CODEX_APPROVAL_POSTURE:-require}"
 
-required_mise_tools=("node" "pnpm" "python" "uv" "cargo:prek" "npm:@brainwav/diagram" "npm:@argos-ci/cli" "cosign" "cloudflared" "npm:vitest" "ruff" "npm:eslint" "npm:agent-browser" "npm:agentation" "npm:agentation-mcp" "npm:@mermaid-js/mermaid-cli" "npm:@brainwav/rsearch" "npm:@brainwav/wsearch-cli" "npm:beautiful-mermaid" "npm:markdownlint-cli2" "npm:semver" "npm:wrangler" "semgrep" "trivy" "vale")
+required_mise_tools=("node" "pnpm" "python" "uv" "cargo:prek" "npm:@brainwav/diagram" "npm:@argos-ci/cli" "cosign" "cloudflared" "npm:vitest" "ruff" "pipx:pylint" "npm:eslint" "npm:agent-browser" "npm:agentation" "npm:agentation-mcp" "npm:@mermaid-js/mermaid-cli" "npm:@brainwav/rsearch" "npm:@brainwav/wsearch-cli" "npm:beautiful-mermaid" "npm:markdownlint-cli2" "npm:semver" "npm:wrangler" "semgrep" "trivy" "vale")
 for tool in "${required_mise_tools[@]}"; do
 	tool_pattern="$(printf '%s' "$tool" | sed 's/[][(){}.^$*+?|\\]/\\&/g')"
 	if ! rg -q "^[[:space:]]*(\"${tool_pattern}\"|${tool_pattern})[[:space:]]*=" "$MISE_PATH"; then
@@ -86,7 +86,7 @@ for tool in "${required_mise_tools[@]}"; do
 done
 
 if [[ -f "$TOOLING_DOC_PATH" ]]; then
-	required_tooling_doc_terms=("node" "pnpm" "python" "uv" "make" "rg" "fd" "jq" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "eslint" "agent-browser" "agentation" "mermaid-cli" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
+	required_tooling_doc_terms=("node" "pnpm" "python" "uv" "make" "rg" "fd" "jq" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "pylint" "eslint" "agent-browser" "agentation" "mermaid-cli" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
 	for term in "${required_tooling_doc_terms[@]}"; do
 		if ! rg -qi "(^|[^A-Za-z0-9_-])${term}([^A-Za-z0-9_-]|$)" "$TOOLING_DOC_PATH"; then
 			echo "Error: tooling doc missing expected term '$term': $TOOLING_DOC_PATH"
@@ -99,7 +99,7 @@ else
 	echo "Warning: tooling doc not found at $TOOLING_DOC_PATH; skipping doc sync check."
 fi
 
-	required_bins=("pnpm" "node" "jq" "make" "rg" "fd" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "eslint" "agent-browser" "agentation-mcp" "mmdc" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
+	required_bins=("pnpm" "node" "jq" "make" "rg" "fd" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "pylint" "eslint" "agent-browser" "agentation-mcp" "mmdc" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
 	for bin in "${required_bins[@]}"; do
 		if ! command -v "$bin" >/dev/null 2>&1; then
 			echo "Error: required binary '$bin' is not installed or not on PATH"
@@ -107,7 +107,7 @@ fi
 		fi
 	done
 
-	required_codex_actions=("Tools|tool" "Run|run" "Debug|debug" "Test|test" "Prek|test" "Diagram|tool" "Ralph|debug" "Mise|tool" "Vale|debug" "Argos|test" "Cosign|debug" "Cloudflared|run" "Vitest|test" "Ruff|debug" "ESLint|debug" "Agent Browser|tool" "Agentation|tool" "Mermaid CLI|tool" "MarkdownLint|debug" "Wrangler|run" "1Password|tool" "Beautiful Mermaid|tool" "Auth0|tool" "Semgrep|debug" "Semver|tool" "Trivy|debug" "Gitleaks|debug" "Research|tool" "WSearch|tool")
+	required_codex_actions=("Tools|tool" "Run|run" "Debug|debug" "Test|test" "Prek|test" "Diagram|tool" "Ralph|debug" "Mise|tool" "Vale|debug" "Argos|test" "Cosign|debug" "Cloudflared|run" "Vitest|test" "Ruff|debug" "Pylint|debug" "ESLint|debug" "Agent Browser|tool" "Agentation|tool" "Mermaid CLI|tool" "MarkdownLint|debug" "Wrangler|run" "1Password|tool" "Beautiful Mermaid|tool" "Auth0|tool" "Semgrep|debug" "Semver|tool" "Trivy|debug" "Gitleaks|debug" "Research|tool" "WSearch|tool")
 	for action in "${required_codex_actions[@]}"; do
 		name="${action%%|*}"
 		icon="${action##*|}"
@@ -129,15 +129,34 @@ fi
 		fi
 	done
 
-	required_prek_hooks=("pre-commit|make hooks-pre-commit" "pre-push|make hooks-pre-push")
-	for hook_spec in "${required_prek_hooks[@]}"; do
-		hook_name="${hook_spec%%|*}"
-		hook_command="${hook_spec#*|}"
-		if ! rg -q "^[[:space:]]*${hook_name}[[:space:]]*=[[:space:]]*\\[[[:space:]]*\"${hook_command}\"[[:space:]]*\\][[:space:]]*$" "$PREK_CONFIG_PATH"; then
-			echo "Error: required prek hook '$hook_name' is missing or out of date in $PREK_CONFIG_PATH"
-			exit 1
-		fi
-	done
+	python3 - "$PREK_CONFIG_PATH" <<'PY'
+import sys
+import tomllib
+from pathlib import Path
+
+prek_config = Path(sys.argv[1])
+data = tomllib.loads(prek_config.read_text(encoding="utf-8"))
+required_hooks = {
+    "pre-commit": "make hooks-pre-commit",
+    "pre-push": "make hooks-pre-push",
+}
+found = {}
+for repo in data.get("repos", []):
+    for hook in repo.get("hooks", []):
+        entry = hook.get("entry")
+        for stage in hook.get("stages", []):
+            if stage not in found:
+                found[stage] = []
+            found[stage].append(entry)
+
+for stage, command in required_hooks.items():
+    if command not in found.get(stage, []):
+        print(
+            f"Error: required prek hook '{stage}' is missing or out of date in {prek_config}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+PY
 
 	if [[ -f "$PACKAGE_JSON_PATH" ]]; then
 		required_package_scripts=("codestyle:validate|bash scripts/validate-codestyle.sh" "secrets:staged|bash scripts/check-staged-secrets.sh" "docs:style:changed|bash scripts/check-doc-style.sh" "test:related|bash scripts/check-related-tests.sh" "semgrep:changed|bash scripts/check-semgrep-changed.sh")

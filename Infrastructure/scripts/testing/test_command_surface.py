@@ -8,6 +8,7 @@ import sys
 import unittest
 from pathlib import Path
 from types import ModuleType
+from unittest.mock import patch
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent / "lifecycle-and-sync"
@@ -58,6 +59,52 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertIn("Otherwise, load", body)
         self.assertIn("search only the owner skill tree", body)
         self.assertEqual(validate_command_handle_payload(handle, body), [])
+
+    def test_parse_command_handles_resolves_skills_and_reviewers(self) -> None:
+        parse_command_handles = getattr(COMMAND_SURFACE, "parse_command_handles")
+        original_skill_resolver = getattr(COMMAND_SURFACE, "resolve_skill_handle")
+        original_reviewer_resolver = getattr(COMMAND_SURFACE, "resolve_reviewer_handle")
+
+        def fake_skill_resolver(handle: str, **_: object) -> dict[str, object]:
+            visibilities = {
+                "skill-builder": "orchestrator",
+                "he-heartbeat": "target",
+            }
+            return {
+                "status": "ok",
+                "handle": handle,
+                "kind": "skill",
+                "command_visibility": visibilities[handle],
+            }
+
+        def fake_reviewer_resolver(handle: str, **_: object) -> dict[str, object]:
+            return {
+                "status": "ok",
+                "handle": "skill-inspector",
+                "canonical_handle": "skill-inspector",
+                "kind": "reviewer",
+                "command_visibility": "reviewer",
+            }
+
+        with patch.object(COMMAND_SURFACE, "resolve_skill_handle", fake_skill_resolver), \
+             patch.object(COMMAND_SURFACE, "resolve_reviewer_handle", fake_reviewer_resolver):
+            parsed = parse_command_handles(
+                "use $skill-builder to validate $he-heartbeat with @skillinspector",
+                repo_root_path=Path("."),
+            )
+
+        self.assertEqual(parsed["status"], "pass")
+        self.assertEqual(parsed["reviewer_mentions"][0]["mention"], "skillinspector")
+        self.assertEqual(
+            parsed["mention_counts"],
+            {"skills": 2, "reviewers": 1, "unresolved": 0},
+        )
+        self.assertEqual(parsed["skill_mentions"][0]["role"], "active_orchestrator")
+        self.assertEqual(parsed["skill_mentions"][1]["role"], "target")
+        self.assertEqual(
+            parsed["reviewer_mentions"][0]["resolution"]["canonical_handle"],
+            "skill-inspector",
+        )
 
     def test_generated_handle_uses_unresolved_placeholder_when_source_missing(self) -> None:
         command_handle = getattr(COMMAND_SURFACE, "CommandHandle")

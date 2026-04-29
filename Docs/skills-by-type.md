@@ -23,6 +23,25 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `invalid`: 0
 - `total_tagged`: 109
 
+## Validation Notes
+
+- Source scope: `Skills Plugins/harness-engineering Plugins/plugin-factory Plugins/skill-factory`.
+- Companion mode: sandbox-safe (no protected runtime path mutations).
+- Validation command:
+  - `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`
+
+## Canonical Values
+
+- `library_api_reference`
+- `product_verification`
+- `data_fetch_analysis`
+- `team_automation`
+- `scaffolding_templates`
+- `code_quality_review`
+- `ci_cd_deployment`
+- `runbook`
+- `infrastructure_ops`
+
 ## Semantic Types
 
 ### Library Api Reference
@@ -160,7 +179,3 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `fix-mise` — `Skills/agent-ops`
 - `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
 - `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
-
-## Validation Notes
-
-- No invalid semantic type tags detected.

@@ -11,48 +11,49 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Philosophy
 
-- Refresh durable knowledge from evidence, not intuition.
+- Refresh lifecycle state from evidence, not intuition.
 - Prefer minimal targeted updates over broad speculative rewrites.
-- Review individual learnings before derived pattern docs.
-- Prefer no-write `Keep` decisions over churn when a doc is still trustworthy.
+- Review live branch, PR, Linear, validation, review-thread, and session evidence before choosing the next HE stage.
+- Prefer a blocked or no-write decision over guessing when state is missing.
 
 ## When to use
 
+- Use when a compound Harness Engineering run has drifted after CI, review, Linear, branch, validation, or handoff changes.
+- Use when the user says continue, resume, refresh, re-check, or asks where an active HE workflow is blocked.
+- Use when session evidence shows repeated lifecycle loops that need a refreshed next-stage decision.
 - Use when `docs/solutions/` entries may be stale after refactors, migrations, or dependency changes.
-- Use when overlapping solution docs should be consolidated with explicit evidence.
-- Use when a specific learning or pattern doc is called stale, overlapping, drifted, or superseded.
 
 ## Failure Modes
 
-- If no candidate docs exist under `docs/solutions/`, stop and report that no refresh targets were found.
-- If a scope hint finds no matches, report the miss clearly; in autonomous mode, stop without guessing.
-- If replacement evidence is insufficient, do not invent a successor doc. Mark the artifact stale when possible and report what evidence is missing.
+- If no live target or evidence source exists, stop and report the missing surface instead of continuing from stale chat context.
+- If session evidence is requested but the collector or archive paths are unavailable, report the exact missing path or command failure.
+- If replacement evidence is insufficient, do not invent a next stage or successor doc. Mark the artifact stale when possible and report what evidence is missing.
 
 ## Inputs
 
-- Request, artifacts, repo context, and linked Linear issues.
+- Request, artifacts, repo context, linked Linear issues, branch/PR state, validation output, review-thread state, and optional session evidence.
 
 ## Outputs
 
-- `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
+- `schema_version: 1` when structured; refreshed state, evidence sources, blockers, and next Harness Engineering action.
 
 ## Procedure
 
 1. Resolve mode first. Normalize `mode:autofix` to the same autonomous behavior as `mode:autonomous`.
-2. Discover candidate docs under `docs/solutions/`, excluding `README.md` and legacy `_archived/` content.
-3. Match the narrowest successful scope first: directory, frontmatter, filename, then content search.
-4. Investigate individual learnings before dependent pattern docs.
-5. Analyze the document set for overlap, contradictions, and canonical-doc opportunities before leaving duplicates in place.
-6. Classify each artifact or overlap cluster into exactly one maintenance outcome: `Keep`, `Update`, `Consolidate`, `Replace`, `Archive`, or `Stale`.
-7. In autonomous mode, apply unambiguous actions directly and stale-mark ambiguous cases instead of guessing through them.
-8. Finish with a full markdown report covering evidence, actions applied, and recommendations when writes could not be completed.
+2. Inventory the active lifecycle targets: governing plan/spec, branch, PR, CI checks, review threads, Linear issue, validation commands, and previous handoff notes.
+3. If prior sessions or repeated failures are part of the request, read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md) and prefer `~/.agents/session-collector` before raw archive scans.
+4. Re-run or inspect the smallest safe live-state checks needed to classify the current blocker.
+5. Classify each target into exactly one maintenance outcome: `Continue`, `Review`, `Fix`, `Plan`, `Heartbeat`, `Blocked`, `Done`, `Keep`, `Update`, `Consolidate`, `Replace`, `Archive`, or `Stale`.
+6. Route the next action to one HE stage and explain why earlier stages are not being skipped.
+7. In autonomous mode, apply unambiguous refresh actions directly and stale-mark ambiguous cases instead of guessing through them.
+8. Finish with a markdown report covering evidence, actions applied, blockers, and the exact next HE invocation.
 
 ## Validation
 
-- Ensure each refresh claim is backed by current repository evidence.
+- Ensure each refresh claim is backed by current repository, tracker, review, validation, or session evidence.
+- Ensure session-derived claims cite the collector output, archived path, session index count, or exact sample used.
 - Ensure changed docs stay aligned with active behavior and constraints.
-- Ensure learnings are reviewed before dependent patterns.
-- Ensure overlap analysis happens before duplicate docs are left in place.
+- Ensure active lifecycle drift is resolved before duplicate docs are left in place.
 - Ensure `Update` is not used when the underlying solution changed materially.
 - Fail fast: stop at first failed gate and do not proceed.
 
@@ -60,16 +61,18 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not rewrite unrelated solution areas outside validated scope.
+- Do not continue from stale thread memory when live state or session evidence is available.
 - Do not ask whether current code drift is "intentional"; this stage matches docs to current repository reality.
 - Do not use external docs when repository evidence is sufficient.
 - Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
 
 ## Anti-patterns
 
-- Performing broad doc rewrites without evidence-backed stale signals.
+- Performing broad refreshes without evidence-backed drift signals.
 - Creating conflicting guidance across overlapping solution docs.
 - Treating age alone as a stale signal.
 - Updating solution prose when the real solution changed materially and should be replaced instead.
+- Treating `continue` as permission to skip review, validation, or heartbeat gates.
 - Turning autonomous mode into silent guesswork.
 
 ## Full Context
@@ -78,6 +81,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Examples
 
-- "Can you inspect the compound run state and tell me which docs are stale after this refactor?"
+- "Can you inspect the compound run state and tell me which HE stage should resume after CI and review changed?"
 - "Help me check whether these overlapping solution notes should be kept, updated, consolidated, or archived."
 - "This lifecycle run drifted after CI failed. Re-read the artifacts and report the exact blocker before we continue."
+- "Use archived sessions and the collector to find the repeated blocker in this HE workflow before we continue."

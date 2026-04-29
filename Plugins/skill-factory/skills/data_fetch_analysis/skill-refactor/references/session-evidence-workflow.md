@@ -17,7 +17,7 @@ This workflow folds the useful session-history pattern into `skill-refactor` wit
    - Skill creation: "Which repeated workflow should be captured by `skillify`?"
    - Harness Engineering: "Which past solved evidence helps route or document this lifecycle stage?"
 2. Inventory before extraction when more than one session may matter.
-   - Prefer existing local collectors or deterministic scripts.
+   - Prefer `~/.agents/session-collector` when available; use local deterministic scripts only when the collector cannot cover the requested source.
    - Capture metadata such as platform, session id, timestamp, repo/cwd, branch when available, size, and last activity.
    - Keep absolute file paths in local artifacts only; user-facing summaries should cite artifact labels or redacted basenames unless the user asks for exact local paths.
 3. Select a small deep-dive set.
@@ -32,6 +32,25 @@ This workflow folds the useful session-history pattern into `skill-refactor` wit
    - Prefer one root-cause fix when it explains multiple session symptoms.
    - Separate "improve existing skill" from "skillify a repeated workflow" and "Harness Engineering lifecycle evidence."
 
+## Preferred Collector Run
+
+For broad session scope, create a bundle before deep dives:
+
+```bash
+cd ~/.agents/session-collector
+# Generate unique temp directory per execution
+TEMP_PREFIX=$(mktemp -d -t skill-refactor-evidence-XXXXXX)
+UV_CACHE_DIR="${TEMP_PREFIX}/uv-cache" \
+uv run --python 3.12 python main.py \
+  --days 30 \
+  --max-sessions 500 \
+  --output "${TEMP_PREFIX}/skill-refactor-evidence.json" \
+  --bundle-dir "${TEMP_PREFIX}" \
+  --verbose
+```
+
+Consume `${TEMP_PREFIX}/skill-refactor-evidence.json` for skill-health signals, `${TEMP_PREFIX}/solved-problems.json` for repeated solved workflows, `${TEMP_PREFIX}/index.json` for redacted session labels, and `${TEMP_PREFIX}/redaction-report.json` before producing recommendations. Add explicit `--codex-sessions-dir` values only when the user asks for archived or non-default session roots.
+
 ## Output Shape
 
 Use this concise structure for recommendations:
@@ -40,6 +59,7 @@ Use this concise structure for recommendations:
 schema_version: 1
 mode: session-evidence
 scope: <single-skill|category|full-inventory|workflow-capture>
+collector_bundle: <local bundle path or none>
 evidence:
   - label: <redacted artifact/session label>
     signal: <skeleton|errors|metadata|collector-summary>

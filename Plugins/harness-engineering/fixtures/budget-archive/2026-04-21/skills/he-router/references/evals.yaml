@@ -295,6 +295,69 @@ cases:
       - type: regex
         value: "(?i)(next_invocation|\\$harness-engineering:he-improve|policy|fallback)"
 
+  - id: session-evidence-improvement-route
+    name: prior session evidence routes to improve for plugin workflow changes
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Using ~/.codex/archived_sessions and ~/.agents/session-collector, identify repeated failures that would make the Harness Engineering plugin better."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-router"
+      - type: regex
+        value: "(?i)(he-improve|session-evidence|archived_sessions|session-collector)"
+      - type: regex
+        value: "(?i)(next_invocation|\\$harness-engineering:he-improve|policy|fallback)"
+
+  - id: session-evidence-refresh-route
+    name: prior session evidence routes active lifecycle drift to compound refresh
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use the previous sessions to continue this active compound HE run, re-check blockers, and tell me the next stage."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-router"
+      - type: regex
+        value: "(?i)(he-compound-refresh|session-evidence|continue|blockers)"
+      - type: regex
+        value: "(?i)(next_invocation|\\$harness-engineering:he-compound-refresh|policy|fallback)"
+
+  - id: session-evidence-heartbeat-route
+    name: repeated waiting loops route to heartbeat
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The session collector shows we keep saying continue while PR review threads and CI are still open; route the HE stage so this stays alive until green."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "nc"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-router"
+      - type: regex
+        value: "(?i)(he-heartbeat|review threads|CI|until green)"
+      - type: regex
+        value: "(?i)(next_invocation|\\$harness-engineering:he-heartbeat|policy|fallback)"
+
   - id: browser-polish-beats-work
     name: browser refinement routes to refine
     category: edge

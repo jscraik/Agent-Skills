@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=import-outside-toplevel,wrong-import-position,too-many-branches
 """Validate context-budgeted skill-tree projection artifacts."""
 
 from __future__ import annotations
@@ -11,13 +12,17 @@ from typing import Any, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
+RUNTIME_SEP_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "runtime-separation"
 if str(LIFECYCLE_DIR) not in sys.path:
     sys.path.insert(0, str(LIFECYCLE_DIR))
+if str(RUNTIME_SEP_DIR) not in sys.path:
+    sys.path.insert(0, str(RUNTIME_SEP_DIR))
 
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
 from command_surface import build_skill_handles  # type: ignore  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
+from yaml_compat import load_yaml_mapping  # type: ignore  # noqa: E402
 
 # codex-primary-runtime is an active runtime projection directory, not a rooted
 # policy skill set, but manifest provenance may legitimately point through it.
@@ -40,16 +45,19 @@ DEFAULTS = {
 
 def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
     if not path.is_file():
-        return DEFAULTS
+        return json.loads(json.dumps(DEFAULTS))
     try:
         import yaml  # type: ignore
     except ImportError:
-        # PyYAML not installed; return defaults
-        return DEFAULTS
+        yaml = None
 
     try:
-        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except (yaml.YAMLError, UnicodeDecodeError) as exc:
+        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) if yaml else load_yaml_mapping(path)
+        loaded = loaded or {}
+    except UnicodeDecodeError as exc:
+        # Malformed encoding; re-raise to surface the error
+        raise ValueError(f"Failed to load configuration from {path}: {exc}") from exc
+    except Exception as exc:
         # Malformed YAML or encoding issue; re-raise to surface the error
         raise ValueError(f"Failed to load configuration from {path}: {exc}") from exc
 

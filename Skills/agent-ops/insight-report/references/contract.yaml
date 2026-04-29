@@ -17,16 +17,31 @@ triggers:
 
 inputs:
   - "lookback window (optional; default 7 days)"
-  - "local Codex sessions under ~/.codex/sessions"
+  - "preferred normalized session evidence from ~/.agents/session-collector when available"
+  - "fallback local Codex sessions under ~/.codex/sessions"
   - "optional local telemetry under ~/.agents/otel-collector"
 
 outputs:
   - "insight-evidence.json"
+  - "optional insight-evidence-extension.json from session-collector"
   - "INSIGHT_PROMPT.md"
   - "insights.generated.json with metadata.schema_version = codex-insights.v1"
   - "report.html"
   - "REPORT_URL=file://... line for Codex browser launch"
   - "explicit confidence and missing-data disclosures in metadata.limitations"
+
+observability: >
+  Runner prints generated artifact paths and REPORT_URL. The evidence bundle
+  records session counts, tool counts, error categories, and missing-data
+  limitations. Collector-backed runs cite the session-collector bundle artifact
+  used.
+
+rollback_procedure: >
+  If Codex JSON generation fails, rerun with --prepare-only and repair
+  insights.generated.json manually. If HTML rendering fails after edits, restore
+  the last valid insights.generated.json and rerun --render-only --no-open.
+  Generated report artifacts are local-only and can be deleted without
+  repository rollback.
 
 required_response_sections:
   - "When to use"

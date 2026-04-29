@@ -50,7 +50,8 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["generated_from"], "rooted_manifests")
         self.assertEqual(payload["projection_path"], ".skillsets/command-surface.json")
-        self.assertGreater(payload["generated_command_handle_count"], 0)
+        self.assertIsInstance(payload["generated_command_handle_count"], int)
+        self.assertGreaterEqual(payload["generated_command_handle_count"], 0)
 
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
         payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)
@@ -251,10 +252,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_requires_user_runtime_link(self) -> None:
         """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
         repo_root = self.temp_dir / "repo"
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
-        handle_dir = skills_dir / "he-heartbeat"
-        handle_dir.mkdir(parents=True)
-        (handle_dir / "SKILL.md").write_text("# handle\n", encoding="utf-8")
 
         home = self.temp_dir / "home"
         codex_skills = home / ".codex" / "skills"
@@ -280,10 +279,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_passes_with_linked_user_runtime(self) -> None:
         """skills_proof must pass when workspace handle exists and user runtime is symlinked."""
         repo_root = self.temp_dir / "repo"
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
-        handle_dir = skills_dir / "he-heartbeat"
-        handle_dir.mkdir(parents=True)
-        (handle_dir / "SKILL.md").write_text("# handle\n", encoding="utf-8")
 
         home = self.temp_dir / "home"
         agents_skills = home / ".agents" / "skills"

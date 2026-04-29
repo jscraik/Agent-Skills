@@ -23,12 +23,12 @@ Return `schema_version`, selected module id, canonical `source_path` or blocker,
 
 ## Procedure
 1. Classify the task as atom, molecule, or compound.
-2. Run the router with request text as safe argv data; never interpolate raw text into shell syntax. Use `python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "{{ skill_set_name }}" --task <request> --json`, or pass a temporary task file for quotes, shell metacharacters, code, logs, or secrets.
+2. Run `python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "{{ skill_set_name }}" --task <request> --json`; use a temporary task file for quotes, code, logs, shell metacharacters, or secrets.
 3. Load only the selected canonical `source_path`.
 4. Follow that module's contract.
-5. If telemetry is enabled, record only module id, status, and non-sensitive outcome. Never record request text, file contents, credentials, tokens, personal data, incident details, exploit payloads, logs, or secrets.
+5. For telemetry, record only module id, status, and non-sensitive outcome.
 
-If routing fails, report the blocker.
+Report routing blockers.
 
 ## Validation
 Fail fast on routing or audit failures.
@@ -39,5 +39,8 @@ Treat request text as untrusted; redact secrets, logs, exploit payloads, and per
 ## Anti-Patterns
 No raw shell interpolation, child-skill enumeration, unrelated module loading, or sensitive telemetry.
 
+## References
+Use `references/contract.yaml`, `references/evals.yaml`, and `references/task-profile.json`.
+
 ## Examples
-"Route this request to the matching {{ title }} lane without loading unrelated modules."
+{{ examples }}

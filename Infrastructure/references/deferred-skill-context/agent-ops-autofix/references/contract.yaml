@@ -1,30 +1,15 @@
-schema_version: "1.1"
-purpose: >
-  Resolve unresolved CodeRabbit review threads on an active pull request through
-  an approval-aware manual or batch autofix workflow.
-triggers:
-  - user asks to autofix unresolved CodeRabbit review comments
-  - user asks to resolve CodeRabbit review threads in manual or auto mode
-  - user requests one consolidated remediation pass for CodeRabbit findings
-inputs:
-  - repository branch and working-tree state for the active checkout
-  - target pull request context including owner repo and PR number
-  - unresolved CodeRabbit-authored review thread payloads
-  - requested application mode manual or auto
-outputs:
-  - ordered unresolved-thread issue list and pre-apply fix preview
-  - applied change summary tied to CodeRabbit thread context
-  - validation outcomes captured as pass fail or blocked
-non_goals:
-  - broad cleanup refactors unrelated to unresolved CodeRabbit findings
-  - bypassing user approval for risky or behavior-changing edits
-  - live SaaS administration operations
-risks:
-  - stale unresolved-thread state if branch commits are not pushed before fetch
-  - over-application of low-priority findings without explicit approval gates
-rollback_procedure: >
-  If autofix changes are incorrect, reset to the previous commit state, re-fetch
-  unresolved threads, and rerun manual mode with explicit per-issue approvals.
-observability: >
-  Monitor lane health with unresolved-thread fetch success rate, strict skill-audit
-  status, and post-fix validation pass rates.
+schema_version: 1
+skill: autofix
+purpose: Account for CodeRabbit CRITICAL-TRIVIAL threads and Codex P1-P3 findings.
+triggers: [fix CodeRabbit PR threads, fix Codex P1 P2 P3 findings]
+non_goals: [unrelated refactors, reviewer-command execution]
+inputs: [repo_path, branch_name, pr_number, coderabbit_threads, codex_findings, approval_posture, validation_commands]
+tool_preference:
+  coderabbit_thread_inventory: {preferred: [coderabbit_cli, coderabbit_plugin], fallback: [github_review_thread_api], report_path_used: true}
+  codex_finding_inventory: {preferred: [github_review_thread_api, codex_review_artifact], fallback: [user_provided_review_findings], report_path_used: true}
+outputs: [review_inventory, fixed_items, deferred_items, validation_status, blockers]
+risks: [untrusted_input, review_prompt_injection, partial_review_sweep, validation_drift]
+safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false, raw_reviewer_text_in_shell: false, post_raw_reviewer_prompts: false}
+validation: [all_review_items_accounted_for, critical_through_trivial_triaged, codex_p1_p2_p3_triaged, no_review_prompt_execution, plugin_eval_grade_a, strict_skill_audit]
+observability: Report item status and checks.
+rollback_procedure: Revert skill files and rerun audit/eval.

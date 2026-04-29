@@ -17,6 +17,8 @@ from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skillset_model import repo_root
 
 HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([a-z][a-z0-9-]*)")
+REVIEWER_MENTION_RE = re.compile(r"(?<![\w./-])@([A-Za-z0-9][A-Za-z0-9_-]*)")
 COMMAND_VISIBILITY = {"orchestrator", "direct", "target", "reviewer", "none"}
 COMMAND_SURFACE_PATH = Path(".skillsets") / "command-surface.json"
 MAX_COMMAND_HANDLE_DESCRIPTION_WORDS = 14
@@ -455,7 +457,7 @@ def resolve_skill_handle(handle: str, *, repo_root_path: Path | None = None) -> 
 
 
 def _reviewer_alias_key(handle: str) -> str:
-    return normalize_handle(handle).replace("-", "")
+    return normalize_handle(handle).replace("-", "").replace("_", "")
 
 
 def resolve_reviewer_handle(handle: str, *, manifest_path: Path = REVIEWER_MANIFEST) -> dict[str, Any]:
@@ -480,6 +482,84 @@ def resolve_reviewer_handle(handle: str, *, manifest_path: Path = REVIEWER_MANIF
             "operator_action": "Use the exact reviewer role name from `~/.codex/agents/manifest.json`.",
         }
     return {"status": "ok", **matches[0].to_dict(), "canonical_handle": matches[0].handle}
+
+
+def _mention_rows(pattern: re.Pattern[str], prefix: str, text: str) -> list[dict[str, Any]]:
+    """Return ordered command-handle mention rows without echoing full prompt text."""
+    rows: list[dict[str, Any]] = []
+    for match in pattern.finditer(text):
+        raw_handle = match.group(1)
+        rows.append({
+            "token": f"{prefix}{raw_handle}",
+            "handle": normalize_handle(raw_handle),
+            "start": match.start(),
+            "end": match.end(),
+        })
+    return rows
+
+
+def _skill_role(resolution: dict[str, Any], *, active_orchestrator_seen: bool) -> str:
+    command_visibility = str(resolution.get("command_visibility") or "")
+    if command_visibility == "orchestrator" and not active_orchestrator_seen:
+        return "active_orchestrator"
+    if command_visibility == "orchestrator":
+        return "orchestrator_dependency"
+    if command_visibility == "target":
+        return "target"
+    if command_visibility == "direct":
+        return "direct_skill"
+    return command_visibility or "skill"
+
+
+def parse_command_handles(text: str, *, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Parse $ skill handles and @ reviewer handles from a prompt and resolve each one."""
+    root = repo_root_path or repo_root()
+    skill_mentions = _mention_rows(SKILL_MENTION_RE, "$", text)
+    reviewer_mentions = _mention_rows(REVIEWER_MENTION_RE, "@", text)
+    unresolved: list[dict[str, Any]] = []
+    active_orchestrator_seen = False
+
+    for mention in skill_mentions:
+        resolution = resolve_skill_handle(str(mention["handle"]), repo_root_path=root)
+        role = _skill_role(resolution, active_orchestrator_seen=active_orchestrator_seen)
+        if role == "active_orchestrator":
+            active_orchestrator_seen = True
+        mention["role"] = role
+        mention["resolution"] = resolution
+        if resolution.get("status") != "ok":
+            unresolved.append({
+                "namespace": "skills",
+                "token": mention["token"],
+                "handle": mention["handle"],
+                "error_code": resolution.get("error_code"),
+                "operator_action": resolution.get("operator_action"),
+            })
+
+    for mention in reviewer_mentions:
+        resolution = resolve_reviewer_handle(str(mention["handle"]))
+        mention["role"] = "reviewer"
+        mention["resolution"] = resolution
+        if resolution.get("status") != "ok":
+            unresolved.append({
+                "namespace": "reviewers",
+                "token": mention["token"],
+                "handle": mention["handle"],
+                "error_code": resolution.get("error_code"),
+                "operator_action": resolution.get("operator_action"),
+            })
+
+    return {
+        "schema_version": "command-handle-parse.v1",
+        "status": "pass" if not unresolved else "fail",
+        "skill_mentions": skill_mentions,
+        "reviewer_mentions": reviewer_mentions,
+        "unresolved": unresolved,
+        "mention_counts": {
+            "skills": len(skill_mentions),
+            "reviewers": len(reviewer_mentions),
+            "unresolved": len(unresolved),
+        },
+    }
 
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:

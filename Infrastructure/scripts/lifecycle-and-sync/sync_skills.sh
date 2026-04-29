@@ -1095,6 +1095,26 @@ import sys
 readme_path = Path(sys.argv[1])
 catalog_count = sys.argv[2]
 content = readme_path.read_text(encoding="utf-8")
+current_agent_skills_kit_sentence = (
+    "A governed **Agent Skills Kit** repository for Codex and AI coding agents. "
+    "Author skills once, validate quality, expose `$` command handles, and sync "
+    "routed skills and plugins into runtime projections through the `ask` CLI."
+)
+content, replacements = re.subn(
+    r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\."
+    r" Author skills once, validate quality, expose `\$` command handles, and sync "
+    r"routed skills and plugins into runtime projections through the `ask` CLI\.",
+    current_agent_skills_kit_sentence,
+    content,
+    count=1,
+)
+if replacements == 0:
+    content, replacements = re.subn(
+        r"A governed repository of \*\*skills\*\* for AI coding agents\. Built around the \*\*Agent Skills Kit \(`ask`\)\*\* CLI\.",
+        current_agent_skills_kit_sentence,
+        content,
+        count=1,
+    )
 content, replacements = re.subn(
     r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
     f"A governed repository of **{catalog_count} skills** for AI coding agents",
@@ -1111,7 +1131,7 @@ if replacements == 0:
 if replacements == 0:
     content, insertions = re.subn(
         r"^(# Agent Skills\s*\n\s*)",
-        rf"\1A governed repository of **{catalog_count} skills** for AI coding agents.\n\n",
+        rf"\1{current_agent_skills_kit_sentence}\n\n",
         content,
         count=1,
         flags=re.MULTILINE,

@@ -141,6 +141,22 @@
       ]
     },
     {
+      "priority": 57,
+      "rule": "session-evidence-routing",
+      "route": "he-improve, he-compound-refresh, he-heartbeat, he-work, or he-fix-bugs",
+      "signals": [
+        "previous sessions",
+        "archived sessions",
+        "session collector",
+        "~/.codex/sessions",
+        "~/.codex/archived_sessions",
+        "~/.agents/session-collector",
+        "what keeps failing",
+        "repeated failures",
+        "learn from previous runs"
+      ]
+    },
+    {
       "priority": 60,
       "rule": "deepen-existing-artifact",
       "route": "he-deepen-spec or he-deepen-plan",
@@ -525,19 +541,56 @@
       "output": "durable solution artifact and next-stage routing"
     },
     {
+      "intent": "session-evidence-improvement",
+      "match": [
+        "previous sessions",
+        "archived sessions",
+        "session collector",
+        "~/.codex/sessions",
+        "~/.codex/archived_sessions",
+        "~/.agents/session-collector",
+        "learn from previous runs"
+      ],
+      "skill": "he-improve",
+      "required_inputs": [
+        "session evidence source or permission to gather it",
+        "improvement target such as plugin, workflow, or active run",
+        "validation gate for accepted changes"
+      ],
+      "output": "evidence-backed HE improvement findings and next-stage route"
+    },
+    {
+      "intent": "session-evidence-heartbeat",
+      "match": [
+        "what keeps failing",
+        "repeated HE failures",
+        "sessions show we keep waiting"
+      ],
+      "skill": "he-heartbeat",
+      "required_inputs": [
+        "recurring failure pattern or wait condition",
+        "cadence and stop conditions"
+      ],
+      "output": "durable heartbeat task definition"
+    },
+    {
       "intent": "docs-solutions-maintenance",
       "match": [
         "refresh docs/solutions",
         "stale solution docs",
-        "consolidate overlap"
+        "consolidate overlap",
+        "continue active HE run",
+        "resume compound run",
+        "refresh compound state",
+        "re-check blockers"
       ],
       "skill": "he-compound-refresh",
       "required_inputs": [
-        "refresh scope",
+        "refresh scope or active lifecycle target",
         "mode preference",
         "evidence source paths"
       ],
-      "output": "refresh/consolidation report with evidence"
+      "output": "compound refresh report with evidence, blockers, and next HE invocation"
     }
   ],
   "not_this_plugin": [

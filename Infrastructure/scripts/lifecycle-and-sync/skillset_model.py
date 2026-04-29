@@ -27,7 +27,7 @@ GENERATOR_NAME = "context-budgeted-skillsets.v1"
 ROOT_SKILL_SETS = tuple(ROOT_SKILL_SET_NAMES)
 LEVEL_CHOICES = {"atom", "molecule", "compound", "router", "reference"}
 
-ROOT_SKILL_SET_METADATA: dict[str, dict[str, str]] = {
+ROOT_SKILL_SET_METADATA: dict[str, dict[str, Any]] = {
     "agent-ops": {
         "description": "Route agent operations, repo hygiene, validation, automation, and workflow support without loading individual operational skills by default.",
         "scope": "agent operations, repo workflow, validation, automation, and operator support",
@@ -74,9 +74,14 @@ ROOT_SKILL_SET_METADATA: dict[str, dict[str, str]] = {
         "exclusions": "skill-only authoring, unrelated product code, security reviews, and general content publishing",
     },
     "harness-engineering": {
-        "description": "Route Harness Engineering brainstorm, spec, plan, work, review, and fix stages without exposing every HE lane.",
-        "scope": "Harness Engineering lifecycle stages, execution plans, reviews, implementation lanes, and fix loops",
+        "description": "Route Harness Engineering lifecycle and session-evidence requests when users need brainstorming, planning, implementation, review, fixes, heartbeats, or prior-run improvement.",
+        "scope": "Harness Engineering lifecycle stages, reviews, fixes, heartbeats, and session-evidence improvements",
         "exclusions": "non-HE plugin work, unrelated skill authoring, direct feature work without an HE artifact, and generic docs edits",
+        "examples": [
+            "Can you route this Linear QA issue to the right HE stage?",
+            "Please inspect this PR feedback and route it to the right HE review or fix lane.",
+            "Can you scan archived Codex sessions and session collector data for repeated HE failures?",
+        ],
     },
 }
 
