@@ -31,7 +31,7 @@ triggers:
 
 **Canonical skill folder structure:**
 
-```
+```text
 Skills/<topic>/<skill-name>/
 |-- SKILL.md           # Required: skill definition
 |-- Infrastructure/references/        # Optional: supporting docs

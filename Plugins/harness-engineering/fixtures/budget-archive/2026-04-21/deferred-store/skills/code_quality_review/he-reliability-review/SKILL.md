@@ -79,7 +79,9 @@ Use this skill when the user requests a reliability-focused review of services, 
 5. Produce reliability findings with concrete blast-radius, detection-gap, mitigation, and validation guidance.
 6. Route review subagents per policy; if unavailable, continue inline and state manual role options.
 
+<!-- vale off -->
 ## Context7
+<!-- vale on -->
 
 Use `$context7` when the review depends on current behavior of a named reliability, observability, cloud SDK, queue, telemetry, or resilience library. Do not use external docs for generic reliability principles when local evidence is enough.
 

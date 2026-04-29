@@ -115,7 +115,7 @@ ask graph search X --robot      # -> graph find X
 
 Errors include suggestions and examples:
 
-```
+```text
 ERROR Unknown topic: 'invalid'
 
 Hint: Did you mean 'ask skills'?
