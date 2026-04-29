@@ -11,11 +11,18 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
 ASK_LIB_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lib"
+_ORIGINAL_SYS_PATH = list(sys.path)
 sys.path.insert(0, str(LIFECYCLE_DIR))
 sys.path.insert(0, str(ASK_LIB_DIR))
 
 import command_surface  # noqa: E402
 from ask.commands.skills import skills_proof  # noqa: E402
+
+
+def tearDownModule() -> None:  # noqa: N802 - unittest module hook
+    sys.path[:] = _ORIGINAL_SYS_PATH
+    sys.modules.pop("command_surface", None)
+    sys.modules.pop("ask.commands.skills", None)
 
 
 class CommandSurfaceTempDirTestCase(unittest.TestCase):
@@ -107,7 +114,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             command_handle,
         )
         self.assertNotIn("## Procedure", command_handle)
-        self.assertFalse(command_surface._validate_command_handle_payload(handle, command_handle))
+        self.assertEqual(command_surface._validate_command_handle_payload(handle, command_handle), [])
 
     def test_command_handle_dry_run_projects_he_heartbeat_without_writing(self) -> None:
         payload = command_surface.write_command_handles(repo_root_path=REPO_ROOT, dry_run=True)
@@ -244,10 +251,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_requires_user_runtime_link(self) -> None:
         """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
         repo_root = self.temp_dir / "repo"
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
-        handle_dir = skills_dir / "he-heartbeat"
-        handle_dir.mkdir(parents=True)
-        (handle_dir / "SKILL.md").write_text("# handle\n", encoding="utf-8")
 
         home = self.temp_dir / "home"
         codex_skills = home / ".codex" / "skills"
@@ -262,27 +267,33 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
 
         proof = result.data["proof"]
         self.assertEqual(proof["status"], "fail")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["generated_command_handle_check"])
+        self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
+        self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+        self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
 
     def test_skills_proof_passes_with_linked_user_runtime(self) -> None:
         """skills_proof must pass when workspace handle exists and user runtime is symlinked."""
         repo_root = self.temp_dir / "repo"
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
-        handle_dir = skills_dir / "he-heartbeat"
-        handle_dir.mkdir(parents=True)
-        (handle_dir / "SKILL.md").write_text("# handle\n", encoding="utf-8")
 
         home = self.temp_dir / "home"
         agents_skills = home / ".agents" / "skills"
         agents_skills.parent.mkdir(parents=True)
         agents_skills.symlink_to(skills_dir)
-        (agents_skills / "he-heartbeat" / "SKILL.md").write_text("# linked\n", encoding="utf-8")
 
         with mock.patch("pathlib.Path.home", return_value=home):
             result = skills_proof(repo_root, "he-heartbeat")
 
         proof = result.data["proof"]
+        self.assertEqual(proof["status"], "pass")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["generated_command_handle_check"])
+        self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
 
