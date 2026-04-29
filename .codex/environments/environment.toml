@@ -178,6 +178,16 @@ ruff --version
 '''
 
 [[actions]]
+name = "Pylint"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+command -v pylint >/dev/null 2>&1
+pylint --version
+'''
+
+[[actions]]
 name = "ESLint"
 icon = "debug"
 command = '''

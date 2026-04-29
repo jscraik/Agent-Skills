@@ -54,6 +54,20 @@ cases:
       - {type: contains, value: "workflow"}
       - {type: contains, value: "redact"}
 
+  - id: edge-session-collector-bundle
+    name: session collector bundle intake
+    category: edge
+    eval_modes: [smoke]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use the session-collector bundle in /tmp/skillify-session-evidence to decide whether any workflow should be skillified, but do not copy raw transcripts."
+    deterministic_checks:
+      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]
+    acceptance:
+      - {type: contains, value: "skillify-candidates.json"}
+      - {type: contains, value: "redaction"}
+      - {type: contains, value: "repeatable"}
+
   - id: edge-not-repeatable-yet
     name: not repeatable yet
     category: edge

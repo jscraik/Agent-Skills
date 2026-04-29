@@ -32,6 +32,7 @@ from projection_engine import (  # noqa: E402
 from command_surface import (  # noqa: E402
     check_command_handles,
     handles_report,
+    parse_command_handles,
     resolve_reviewer_handle,
     resolve_skill_handle,
     write_command_handles,
@@ -566,6 +567,24 @@ def skills_resolve(repo_root: Path, handle: str) -> CallResult:
                 code="ERR_VALIDATION",
                 message=f"Could not resolve skill handle '{payload.get('handle', handle)}': {payload.get('error_code')}",
                 fix_suggestion=payload.get("operator_action"),
+            )
+        )
+    return result
+
+
+def skills_parse(repo_root: Path, request_text: str) -> CallResult:
+    """Parse a prompt for $ skill handles and @ reviewer handles, then resolve them."""
+    result = CallResult()
+    result.metadata["command"] = "skills parse"
+    payload = parse_command_handles(request_text, repo_root_path=repo_root)
+    result.data["parse"] = payload
+    if payload.get("status") != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="One or more command handles in the prompt could not be resolved.",
+                fix_suggestion="Inspect data.parse.unresolved, then rerun with valid $ skill and @ reviewer handles.",
             )
         )
     return result

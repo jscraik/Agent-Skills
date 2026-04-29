@@ -41,6 +41,8 @@ Use `he-heartbeat` when the request includes one or more of these signals:
   after the current turn
 - a compound HE run that needs periodic refresh against live branch, tracker, or
   review state
+- a prior-session or session-collector pattern showing repeated PR, CI, review,
+  Linear, validation, or `continue` loops without a durable wake-up
 - a blocked lane where the right next move depends on external state changing
 
 Avoid `he-heartbeat` when:
@@ -74,15 +76,18 @@ Collect or infer:
    action or a generic reminder.
 2. Identify the concrete target, cadence, live-state checks, stop conditions,
    reporting policy, and approval-sensitive operations.
-3. Select the underlying HE stage that should run on each wake-up. If stage
+3. If session evidence is used to justify the heartbeat, read
+   [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
+   and cite the collector output, archive path, index count, or exact sample.
+4. Select the underlying HE stage that should run on each wake-up. If stage
    selection is ambiguous, route through `he-router` before scheduling.
-4. Build the durable heartbeat prompt using the contract below and the full
+5. Build the durable heartbeat prompt using the contract below and the full
    prompt reference.
-5. Create or describe the automation only when the runtime exposes an automation
+6. Create or describe the automation only when the runtime exposes an automation
    tool. If the tool is unavailable, report the exact blocker and provide the
    prompt for manual creation.
-6. Execute the first safe live-state check immediately in the current turn.
-7. Tell the user how the heartbeat will stop or when it will ask for human
+7. Execute the first safe live-state check immediately in the current turn.
+8. Tell the user how the heartbeat will stop or when it will ask for human
    cancellation.
 
 ## Cadence Parsing
@@ -209,6 +214,7 @@ Before claiming a heartbeat is ready:
 - verify the underlying HE stage is named in the prompt
 - verify cadence, stop conditions, and reporting policy are explicit
 - verify the prompt requires fresh live-state reads before action
+- verify session-derived heartbeat decisions cite the evidence source
 - verify destructive actions and auto-merge are gated behind explicit approval
 
 ## Examples
@@ -222,6 +228,9 @@ Before claiming a heartbeat is ready:
 - User says: "Please validate this deploy check every 15m and stop if the same
   health blocker repeats." Select `he-reliability-review`, capture exact failure
   evidence, and stop after the repeated deterministic blocker.
+- User says: "Sessions show we keep saying continue while PR reviews are still
+  open." Select the review-stage heartbeat, cite the session evidence, and stop
+  at review-thread closure, green checks, merged, or blocked.
 
 ## Anti-Patterns
 
@@ -239,3 +248,6 @@ Read `./references/automation-prompt-contract.md` when writing a new heartbeat
 prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
 Use `Plugins/harness-engineering/references/deferred-context-index.md` to locate
 deferred Harness Engineering context before expanding this root skill body.
+Read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
+when prior sessions or collector output justify creating, repairing, or rejecting
+a heartbeat.

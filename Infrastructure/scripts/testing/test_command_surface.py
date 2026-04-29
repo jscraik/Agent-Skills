@@ -59,6 +59,56 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertIn("search only the owner skill tree", body)
         self.assertEqual(validate_command_handle_payload(handle, body), [])
 
+    def test_parse_command_handles_resolves_skills_and_reviewers(self) -> None:
+        parse_command_handles = getattr(COMMAND_SURFACE, "parse_command_handles")
+        original_skill_resolver = getattr(COMMAND_SURFACE, "resolve_skill_handle")
+        original_reviewer_resolver = getattr(COMMAND_SURFACE, "resolve_reviewer_handle")
+
+        def fake_skill_resolver(handle: str, **_: object) -> dict[str, object]:
+            visibilities = {
+                "skill-builder": "orchestrator",
+                "he-heartbeat": "target",
+            }
+            return {
+                "status": "ok",
+                "handle": handle,
+                "kind": "skill",
+                "command_visibility": visibilities[handle],
+            }
+
+        def fake_reviewer_resolver(handle: str, **_: object) -> dict[str, object]:
+            self.assertEqual(handle, "skillinspector")
+            return {
+                "status": "ok",
+                "handle": "skill-inspector",
+                "canonical_handle": "skill-inspector",
+                "kind": "reviewer",
+                "command_visibility": "reviewer",
+            }
+
+        setattr(COMMAND_SURFACE, "resolve_skill_handle", fake_skill_resolver)
+        setattr(COMMAND_SURFACE, "resolve_reviewer_handle", fake_reviewer_resolver)
+        try:
+            parsed = parse_command_handles(
+                "use $skill-builder to validate $he-heartbeat with @skillinspector",
+                repo_root_path=Path("."),
+            )
+        finally:
+            setattr(COMMAND_SURFACE, "resolve_skill_handle", original_skill_resolver)
+            setattr(COMMAND_SURFACE, "resolve_reviewer_handle", original_reviewer_resolver)
+
+        self.assertEqual(parsed["status"], "pass")
+        self.assertEqual(
+            parsed["mention_counts"],
+            {"skills": 2, "reviewers": 1, "unresolved": 0},
+        )
+        self.assertEqual(parsed["skill_mentions"][0]["role"], "active_orchestrator")
+        self.assertEqual(parsed["skill_mentions"][1]["role"], "target")
+        self.assertEqual(
+            parsed["reviewer_mentions"][0]["resolution"]["canonical_handle"],
+            "skill-inspector",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

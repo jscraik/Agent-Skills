@@ -14,6 +14,7 @@ Use this intake to turn session evidence into stable skill behavior without copy
 
 Prefer bounded extracted evidence:
 
+- `~/.agents/session-collector` bundle files when available, especially `skillify-candidates.json`, `index.json`, and `redaction-report.json`
 - user goal and repeated trigger language
 - assistant procedure that actually worked
 - commands or tools that are essential to the workflow
@@ -28,13 +29,30 @@ Avoid:
 - secrets, tokens, account identifiers, or personal content
 - one-off debugging chatter that is not part of the reusable process
 
+## Preferred Collector Run
+
+When the user points to prior sessions but has not supplied a compact handoff, run or request a local session-collector bundle before drafting:
+
+```bash
+cd ~/.agents/session-collector
+UV_CACHE_DIR=/tmp/session-collector-uv-cache \
+uv run --python 3.12 python main.py \
+  --days 30 \
+  --max-sessions 200 \
+  --output /tmp/skillify-session-evidence.json \
+  --bundle-dir /tmp/skillify-session-evidence
+```
+
+Use `/tmp/skillify-session-evidence/skillify-candidates.json` as the primary workflow-candidate input, `/tmp/skillify-session-evidence/index.json` for session labels, and `/tmp/skillify-session-evidence/redaction-report.json` to confirm sensitive content stayed out of reusable skill artifacts. Do not copy the aggregate raw transcript payload into `SKILL.md`.
+
 ## Extraction Handoff
 
 When another skill or collector provides session evidence, ask for or create a compact handoff:
 
 ```text
 schema_version: 1
-source: session-evidence
+source: session-collector
+collector_bundle: <local bundle path>
 workflow_name: <plain-language workflow>
 repeatability: <high|medium|low>
 trigger_phrases:
@@ -47,6 +65,9 @@ validation:
   - <gate>
 failure_boundaries:
   - <condition that should stop or redirect>
+confidence: <high|medium|low>
+limitations:
+  - <missing or weak evidence>
 redactions:
   - <what was removed>
 ```
