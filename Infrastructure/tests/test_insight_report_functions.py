@@ -428,9 +428,9 @@ class TestParseArgs(unittest.TestCase):
         self.assertTrue(args.render_only)
 
     def test_mutually_exclusive_flags_raise_system_exit(self):
-        with patch("sys.argv", ["run_insight_report.py", "--prepare-only", "--render-only"]):
-            with self.assertRaises(SystemExit):
-                _mod.parse_args()
+        with patch("sys.argv", ["run_insight_report.py", "--prepare-only", "--render-only"]), \
+             self.assertRaises(SystemExit):
+            _mod.parse_args()
 
     def test_max_sessions_default(self):
         args = self._parse([])

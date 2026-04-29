@@ -12,6 +12,7 @@ import json
 import re
 import unittest
 from pathlib import Path
+from typing import Any, ClassVar
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -32,7 +33,7 @@ GITIGNORE_PATH = REPO_ROOT / ".gitignore"
 ENVIRONMENT_TOML_PATH = REPO_ROOT / ".codex" / "environments" / "environment.toml"
 
 
-def _load_jsonl(path: Path):
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     """Return a list of parsed JSON objects from a JSONL file."""
     records = []
     with open(path, encoding="utf-8") as fh:
@@ -61,7 +62,7 @@ _REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}", re.IGNORECASE)
 class TestManifestJsonlStructure(unittest.TestCase):
     """Each manifest.jsonl entry must satisfy structural invariants."""
 
-    REQUIRED_FIELDS = [
+    REQUIRED_FIELDS: ClassVar[tuple[str, ...]] = (
         "description",
         "id",
         "level",
@@ -72,7 +73,7 @@ class TestManifestJsonlStructure(unittest.TestCase):
         "skill_set",
         "source_path",
         "triggers",
-    ]
+    )
 
     def _check_manifest(self, path: Path):
         records = _load_jsonl(path)
@@ -333,12 +334,10 @@ class TestEnvironmentToml(unittest.TestCase):
 
     def test_pylint_icon_is_debug(self):
         # The action block uses icon = "debug"
-        # Check that the Pylint block has the debug icon nearby
-        idx = self._content.find("Pylint")
-        self.assertGreater(idx, -1)
-        # The 200 characters after "Pylint" should contain the debug icon
-        surrounding = self._content[idx: idx + 200]
-        self.assertIn("debug", surrounding)
+        # Check that the Pylint entry includes an icon attribute set to debug
+        pattern = r'(?s)Pylint.*?icon\s*=\s*["\']debug["\']'
+        match = re.search(pattern, self._content)
+        self.assertIsNotNone(match, "Pylint entry should have icon='debug'")
 
     def test_pylint_action_uses_strict_mode(self):
         self.assertIn("set -euo pipefail", self._content)

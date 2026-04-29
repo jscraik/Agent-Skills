@@ -17,7 +17,7 @@ from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skillset_model import repo_root
 
 HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([A-Za-z0-9][A-Za-z0-9_-]*)")
+SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([a-z][a-z0-9-]*)")
 REVIEWER_MENTION_RE = re.compile(r"(?<![\w./-])@([A-Za-z0-9][A-Za-z0-9_-]*)")
 COMMAND_VISIBILITY = {"orchestrator", "direct", "target", "reviewer", "none"}
 COMMAND_SURFACE_PATH = Path(".skillsets") / "command-surface.json"

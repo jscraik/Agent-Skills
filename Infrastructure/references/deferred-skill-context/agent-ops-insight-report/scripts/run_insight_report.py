@@ -777,18 +777,18 @@ def load_session_collector_extension():
         SESSION_COLLECTOR_BUNDLE_DIR / "insight-evidence-extension.json",
     ]
     seen = set()
-    for path in candidates:
-        path = Path(path).expanduser()
-        if path in seen:
+    for candidate in candidates:
+        normalized_path = Path(candidate).expanduser()
+        if normalized_path in seen:
             continue
-        seen.add(path)
-        if not path.is_file():
+        seen.add(normalized_path)
+        if not normalized_path.is_file():
             continue
         try:
-            extension = read_json(path)
+            extension = read_json(normalized_path)
         except (OSError, UnicodeError, json.JSONDecodeError, TypeError):
             continue
-        extension["_source_path"] = str(path)
+        extension["_source_path"] = str(normalized_path)
         return extension
     return None
 

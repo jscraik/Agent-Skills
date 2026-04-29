@@ -9,8 +9,10 @@ from typing import Any
 def _strip_comment(line: str) -> str:
     in_quote: str | None = None
     for index, char in enumerate(line):
-        if char in {"'", '"'}:
-            in_quote = None if in_quote == char else char
+        if in_quote is None and char in {"'", '"'}:
+            in_quote = char
+        elif in_quote == char:
+            in_quote = None
         if char == "#" and in_quote is None:
             return line[:index]
     return line
@@ -88,8 +90,10 @@ def _parse_list(tokens: list[tuple[int, str]], index: int, indent: int) -> tuple
             # Check if colon is not inside quotes
             in_quote: str | None = None
             for i, char in enumerate(rest[:colon_idx + 1]):
-                if char in {"'", '"'}:
-                    in_quote = None if in_quote == char else char
+                if in_quote is None and char in {"'", '"'}:
+                    in_quote = char
+                elif in_quote == char:
+                    in_quote = None
                 if i == colon_idx and in_quote is None:
                     # Colon found outside quotes; check if followed by whitespace or end-of-string
                     after_colon = rest[colon_idx + 1:]

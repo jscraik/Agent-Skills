@@ -1380,6 +1380,15 @@ def main():
                     live = proof.get("live_codex_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
+                elif args.topic == "skills" and args.action == "parse":
+                    parsed = result.data.get("parsed", {})
+                    print(f"✅ Parse succeeded: {parsed.get('status', 'ok')}")
+                    counts = parsed.get("mention_counts", {})
+                    print(f"  Skills: {counts.get('skills', 0)}, Reviewers: {counts.get('reviewers', 0)}, Unresolved: {counts.get('unresolved', 0)}")
+                    if parsed.get("skill_mentions"):
+                        print(f"  Skill mentions: {len(parsed['skill_mentions'])}")
+                    if parsed.get("reviewer_mentions"):
+                        print(f"  Reviewer mentions: {len(parsed['reviewer_mentions'])}")
                 elif args.topic == "reviewers" and args.action == "resolve":
                     resolution = result.data.get("resolution", {})
                     handle = resolution.get("canonical_handle") or resolution.get("handle")

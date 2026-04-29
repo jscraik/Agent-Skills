@@ -56,12 +56,12 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Validation
 
-- Ensure each delivered increment has evidence of verification.
-- Ensure deviations from plan are explicit and justified.
+- Verify each delivered increment has evidence of verification.
+- Document deviations from plan with explicit justification.
 - Ensure implementation does not introduce domain-language drift from `CONTEXT.md` or the approved artifact without an explicit update.
-- Ensure session-derived tasks cite their evidence source and are represented in the execution checklist.
-- Ensure the selected execution lane matches the source artifact and risk profile.
-- Ensure contract drift is reflected in the governing artifact before off-plan implementation continues.
+- Confirm session-derived tasks cite their evidence source and are represented in the execution checklist.
+- Verify the selected execution lane matches the source artifact and risk profile.
+- Reflect contract drift in the governing artifact before off-plan implementation continues.
 - Fail fast: stop at first failed gate and do not proceed.
 
 ## Constraints

@@ -179,7 +179,3 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `fix-mise` — `Skills/agent-ops`
 - `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
 - `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
-
-## Validation Notes
-
-- No invalid semantic type tags detected.

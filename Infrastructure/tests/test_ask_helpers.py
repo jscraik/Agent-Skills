@@ -270,35 +270,35 @@ class TestTryFuzzyParse(unittest.TestCase):
     """Tests for the routing/fuzzy-parse logic in try_fuzzy_parse."""
 
     def test_empty_args(self):
-        topic, action, remaining, note = try_fuzzy_parse([])
+        topic, action, _remaining, note = try_fuzzy_parse([])
         self.assertIsNone(topic)
         self.assertIsNone(action)
         self.assertIsNone(note)
 
     def test_only_global_flags(self):
-        topic, action, remaining, note = try_fuzzy_parse(["--json"])
+        topic, action, _remaining, _note = try_fuzzy_parse(["--json"])
         self.assertIsNone(topic)
         self.assertIsNone(action)
 
     def test_valid_topic_action_parsed(self):
-        topic, action, remaining, note = try_fuzzy_parse(["skills", "list"])
+        topic, action, _remaining, _note = try_fuzzy_parse(["skills", "list"])
         self.assertEqual(topic, "skills")
         self.assertEqual(action, "list")
 
     def test_alias_goal_maps_to_skills_goal(self):
-        topic, action, remaining, note = try_fuzzy_parse(["goal", "build a feature"])
+        topic, action, _remaining, _note = try_fuzzy_parse(["goal", "build a feature"])
         self.assertEqual(topic, "skills")
         self.assertEqual(action, "goal")
 
     def test_swapped_order_recovered(self):
         """ask list skills → ask skills list"""
-        topic, action, remaining, note = try_fuzzy_parse(["list", "skills"])
+        topic, action, _remaining, _note = try_fuzzy_parse(["list", "skills"])
         self.assertEqual(topic, "skills")
         self.assertEqual(action, "list")
 
     def test_typo_topic_recovered(self):
         """ask skils list → ask skills list"""
-        topic, action, remaining, note = try_fuzzy_parse(["skils", "list"])
+        topic, action, _remaining, note = try_fuzzy_parse(["skils", "list"])
         self.assertEqual(topic, "skills")
         self.assertIsNotNone(note)
 

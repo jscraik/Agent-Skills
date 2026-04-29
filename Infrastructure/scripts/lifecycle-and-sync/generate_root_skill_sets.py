@@ -311,6 +311,8 @@ def write_roots(report: dict[str, Any], output_dir: Path, *, repo_root_path: Pat
         evals_path = refs_dir / "evals.yaml"
         task_profile_path = refs_dir / "task-profile.json"
         prompt_context_path = refs_dir / "prompt-injection-expected-context.json"
+        # Precompute skill_written for the main target, then invoke write_text_if_changed
+        # for other reference files during list construction to collect write statuses.
         file_writes = [
             (target, root["content"], skill_written),
             (contract_path, root["contract"], write_text_if_changed(contract_path, root["contract"])),

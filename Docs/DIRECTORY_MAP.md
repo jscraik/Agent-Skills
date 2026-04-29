@@ -79,5 +79,5 @@ fd -td -d 2 . Skills
 ls -la SKILL.md README.md Docs/DIRECTORY_MAP.md
 
 # Command-surface health
-python3 bin/ask skills handles --check --json
+python3 ./bin/ask skills handles --check --json
 ```

@@ -23,8 +23,8 @@ uv run --python 3.12 python main.py \
   --output /private/tmp/he-session-collector-30d.json \
   --bundle-dir /private/tmp/he-session-collector-30d \
   --verbose \
-  --codex-sessions-dir /Users/jamiecraik/.codex/archived_sessions \
-  --codex-sessions-dir /Users/jamiecraik/.codex/sessions
+  --codex-sessions-dir ~/.codex/archived_sessions \
+  --codex-sessions-dir ~/.codex/sessions
 ```
 
 Consume `/private/tmp/he-session-collector-30d/harness-engineering-evidence.json` for HE routing signals, `solved-problems.json` for reusable solved patterns, `index.json` for redacted session labels, and `redaction-report.json` before citing evidence in decisions.

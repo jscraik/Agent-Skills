@@ -77,7 +77,7 @@ Collect or infer:
 2. Identify the concrete target, cadence, live-state checks, stop conditions,
    reporting policy, and approval-sensitive operations.
 3. If session evidence is used to justify the heartbeat, read
-   [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
+   [../../../../../../references/session-evidence-contract.md](../../../../../../references/session-evidence-contract.md)
    and cite the collector output, archive path, index count, or exact sample.
 4. Select the underlying HE stage that should run on each wake-up. If stage
    selection is ambiguous, route through `he-router` before scheduling.
@@ -248,6 +248,6 @@ Read `./references/automation-prompt-contract.md` when writing a new heartbeat
 prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
 Use `Plugins/harness-engineering/references/deferred-context-index.md` to locate
 deferred Harness Engineering context before expanding this root skill body.
-Read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
+Read [../../../../../../references/session-evidence-contract.md](../../../../../../references/session-evidence-contract.md)
 when prior sessions or collector output justify creating, repairing, or rejecting
 a heartbeat.

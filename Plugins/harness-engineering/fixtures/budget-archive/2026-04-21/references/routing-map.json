@@ -549,8 +549,6 @@
         "~/.codex/sessions",
         "~/.codex/archived_sessions",
         "~/.agents/session-collector",
-        "what keeps failing",
-        "repeated HE failures",
         "learn from previous runs"
       ],
       "skill": "he-improve",
@@ -560,6 +558,20 @@
         "validation gate for accepted changes"
       ],
       "output": "evidence-backed HE improvement findings and next-stage route"
+    },
+    {
+      "intent": "session-evidence-heartbeat",
+      "match": [
+        "what keeps failing",
+        "repeated HE failures",
+        "sessions show we keep waiting"
+      ],
+      "skill": "he-heartbeat",
+      "required_inputs": [
+        "recurring failure pattern or wait condition",
+        "cadence and stop conditions"
+      ],
+      "output": "durable heartbeat task definition"
     },
     {
       "intent": "docs-solutions-maintenance",

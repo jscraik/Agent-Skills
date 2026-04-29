@@ -8,6 +8,7 @@ import sys
 import unittest
 from pathlib import Path
 from types import ModuleType
+from unittest.mock import patch
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent / "lifecycle-and-sync"
@@ -77,7 +78,6 @@ class CommandSurfaceTests(unittest.TestCase):
             }
 
         def fake_reviewer_resolver(handle: str, **_: object) -> dict[str, object]:
-            self.assertEqual(handle, "skillinspector")
             return {
                 "status": "ok",
                 "handle": "skill-inspector",
@@ -86,18 +86,15 @@ class CommandSurfaceTests(unittest.TestCase):
                 "command_visibility": "reviewer",
             }
 
-        setattr(COMMAND_SURFACE, "resolve_skill_handle", fake_skill_resolver)
-        setattr(COMMAND_SURFACE, "resolve_reviewer_handle", fake_reviewer_resolver)
-        try:
+        with patch.object(COMMAND_SURFACE, "resolve_skill_handle", fake_skill_resolver), \
+             patch.object(COMMAND_SURFACE, "resolve_reviewer_handle", fake_reviewer_resolver):
             parsed = parse_command_handles(
                 "use $skill-builder to validate $he-heartbeat with @skillinspector",
                 repo_root_path=Path("."),
             )
-        finally:
-            setattr(COMMAND_SURFACE, "resolve_skill_handle", original_skill_resolver)
-            setattr(COMMAND_SURFACE, "resolve_reviewer_handle", original_reviewer_resolver)
 
         self.assertEqual(parsed["status"], "pass")
+        self.assertEqual(parsed["reviewer_mentions"][0]["mention"], "skillinspector")
         self.assertEqual(
             parsed["mention_counts"],
             {"skills": 2, "reviewers": 1, "unresolved": 0},

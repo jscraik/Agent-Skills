@@ -145,10 +145,12 @@ for repo in data.get("repos", []):
     for hook in repo.get("hooks", []):
         entry = hook.get("entry")
         for stage in hook.get("stages", []):
-            found[stage] = entry
+            if stage not in found:
+                found[stage] = []
+            found[stage].append(entry)
 
 for stage, command in required_hooks.items():
-    if found.get(stage) != command:
+    if command not in found.get(stage, []):
         print(
             f"Error: required prek hook '{stage}' is missing or out of date in {prek_config}",
             file=sys.stderr,
