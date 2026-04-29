@@ -69,8 +69,20 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
 
     packages = [pkg for pkg in (with_packages or []) if pkg]
     if packages:
-        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-        for candidate in ([str(preferred)], ["python3"]):
+        candidates = []
+        # Prioritize sys.executable first
+        candidates.append([sys.executable])
+        # Include virtualenv python if VIRTUAL_ENV is set
+        venv = os.environ.get("VIRTUAL_ENV")
+        if venv:
+            candidates.append([os.path.join(venv, "bin", "python")])
+        # Include discovered python interpreters
+        for name in ["python3", "python"]:
+            python_path = shutil.which(name)
+            if python_path:
+                candidates.append([python_path])
+
+        for candidate in candidates:
             if _python_command_supports_packages(candidate, packages):
                 return candidate
 

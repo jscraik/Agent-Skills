@@ -585,10 +585,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             category="Skills/agent-ops",
             description="Valid skill description.",
         )
-        with (
-            mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[fake_entry]),
-            mock.patch.object(skills_commands, "_sync_rooted_projection", return_value=(True, [])),
-        ):
+        with mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[fake_entry]):
             result = skills_commands.sync_skills(
                 self.repo_root,
                 scope="workspace",

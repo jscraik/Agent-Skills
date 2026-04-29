@@ -12,13 +12,17 @@ from typing import Any, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
+RUNTIME_SEP_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "runtime-separation"
 if str(LIFECYCLE_DIR) not in sys.path:
     sys.path.insert(0, str(LIFECYCLE_DIR))
+if str(RUNTIME_SEP_DIR) not in sys.path:
+    sys.path.insert(0, str(RUNTIME_SEP_DIR))
 
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
 from command_surface import build_skill_handles  # type: ignore  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
+from yaml_compat import load_yaml_mapping  # type: ignore  # noqa: E402
 
 # codex-primary-runtime is an active runtime projection directory, not a rooted
 # policy skill set, but manifest provenance may legitimately point through it.
@@ -39,28 +43,6 @@ DEFAULTS = {
 }
 
 
-def _load_simple_yaml_mapping(text: str) -> dict[str, Any]:
-    """Load the simple section/key/value YAML shape used by context-budget."""
-    loaded: dict[str, Any] = {}
-    current_section: str | None = None
-    for line_no, raw_line in enumerate(text.splitlines(), start=1):
-        line = raw_line.split("#", 1)[0].rstrip()
-        if not line.strip():
-            continue
-        if not raw_line.startswith(" "):
-            if not line.endswith(":"):
-                raise ValueError(f"Unsupported configuration line {line_no}: {raw_line!r}")
-            current_section = line[:-1].strip()
-            loaded[current_section] = {}
-            continue
-        if current_section is None or ":" not in line:
-            raise ValueError(f"Unsupported configuration line {line_no}: {raw_line!r}")
-        key, raw_value = line.strip().split(":", 1)
-        value = raw_value.strip()
-        loaded[current_section][key.strip()] = int(value) if value.isdigit() else value
-    return loaded
-
-
 def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
     if not path.is_file():
         return json.loads(json.dumps(DEFAULTS))
@@ -70,8 +52,7 @@ def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
         yaml = None
 
     try:
-        config_text = path.read_text(encoding="utf-8")
-        loaded = yaml.safe_load(config_text) if yaml else _load_simple_yaml_mapping(config_text)
+        loaded = yaml.safe_load(path.read_text(encoding="utf-8")) if yaml else load_yaml_mapping(path)
         loaded = loaded or {}
     except UnicodeDecodeError as exc:
         # Malformed encoding; re-raise to surface the error

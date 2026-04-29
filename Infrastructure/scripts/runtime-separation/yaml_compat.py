@@ -81,7 +81,23 @@ def _parse_list(tokens: list[tuple[int, str]], index: int, indent: int) -> tuple
                 value = {}
             items.append(value)
             continue
+        # Check if this is true "key: value" syntax
+        is_key_value = False
         if ":" in rest:
+            colon_idx = rest.index(":")
+            # Check if colon is not inside quotes
+            in_quote: str | None = None
+            for i, char in enumerate(rest[:colon_idx + 1]):
+                if char in {"'", '"'}:
+                    in_quote = None if in_quote == char else char
+                if i == colon_idx and in_quote is None:
+                    # Colon found outside quotes; check if followed by whitespace or end-of-string
+                    after_colon = rest[colon_idx + 1:]
+                    if not after_colon or after_colon[0].isspace():
+                        is_key_value = True
+                    break
+
+        if is_key_value:
             key, value = _parse_key_value(rest)
             item: dict[str, Any] = {}
             if value is None:
