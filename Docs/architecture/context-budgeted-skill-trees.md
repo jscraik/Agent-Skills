@@ -2,22 +2,25 @@
 
 ## Purpose
 
-Context-budgeted skill trees keep the full canonical catalog available without
-exposing every individual skill to the runtime picker.
+Context-budgeted skill trees keep the full canonical skill and plugin source
+available without exposing every full workflow body to the runtime picker.
 
 The model has three layers:
 
 1. Canonical source skills under `Skills/**` and `Plugins/**`.
-2. Generated rooted manifests under `.skillsets/**`.
-3. Runtime projection under `.agents/skills/**`.
+2. Generated rooted manifests and command-surface metadata under `.skillsets/**`.
+3. Runtime projection and generated command handles under `.agents/skills/**`.
 
 ## Projection Modes
 
 `flat` is the default and preserves the existing allowlisted first-level skill
 surface.
 
-`rooted` projects only root skill-set entrypoints. Each root skill routes to a
-single latent module through `Infrastructure/scripts/lifecycle-and-sync/route_skillset.py`.
+`rooted` projects root skill-set entrypoints plus generated command handles for
+command-visible latent modules. Each root skill routes to a single latent module
+through `Infrastructure/scripts/lifecycle-and-sync/route_skillset.py`; each
+generated command handle is a pointer that makes `$<handle>` mentionable without
+duplicating the full workflow body.
 
 `hybrid` is intentionally deferred until it has a named consumer and a failing
 rooted-only acceptance case.
@@ -53,6 +56,30 @@ Each row includes:
 Do not hand-edit `.skillsets/**`. The validator checks ownership, provenance,
 canonical source paths, and stale hashes.
 
+## Command Handles
+
+Command handles are generated from rooted manifest metadata by the command
+surface tooling. They solve a different problem from routing:
+
+- `ask skills resolve <handle> --json` proves the handle maps to exactly one
+  canonical skill source.
+- `.skillsets/command-surface.json` proves the generated command-surface
+  projection is current.
+- `.agents/skills/<handle>/SKILL.md` proves Codex has a small runtime pointer
+  for `$<handle>` mentionability.
+- workspace and user sync prove the pointer reaches the active runtime surface.
+- a live Codex/picker check proves end-to-end mentionability.
+
+Generated command handles must stay thin. They include the owner router, the
+canonical `source_path`, and the resolver command, but they do not contain the
+real workflow.
+
+Reviewer and inspector handles are intentionally separate from skill handles:
+
+```bash
+python3 bin/ask reviewers resolve skillinspector --json
+```
+
 ## Routing
 
 Use the bounded router:
@@ -74,9 +101,12 @@ Run:
 
 ```bash
 python3 bin/ask skills sync --projection rooted --dry-run --json
+python3 bin/ask skills handles --check --json
+python3 bin/ask skills handles --check-command-handles --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
 ```
 
-Rooted validation passes only after rooted manifests exist and first-level latent
-skills are not exposed directly.
+Rooted validation passes only after rooted manifests exist, command handles are
+generated from those manifests, generated handles stay within budget, and
+first-level latent skills are not exposed directly as full workflow bodies.

@@ -12,29 +12,32 @@ Navigation index for the repository root, major directories, and key subdirector
 
 ## Root Overview
 
-| Path                     | Purpose                                             |
-| ------------------------ | --------------------------------------------------- |
-| `/README.md`             | Repository overview, quickstart, and core workflows |
-| `/SKILL.md`              | Generated catalog index of all skills               |
-| `/AGENTS.md`             | Repository-specific operating instructions          |
-| `/DIRECTORY_MAP.md`      | This file (root and subdirectory navigation guide)  |
-| `/Docs/`                 | Contributor and governance documentation            |
-| `/Infrastructure/scripts/`              | Sync, validation, and automation scripts            |
-| `/Infrastructure/templates/`            | Reusable templates for skills and contracts         |
-| `/Infrastructure/scripts/README.md`     | Script index by workflow category                   |
-| `/Docs/agents/README.md` | Agent policy map and quick picks                    |
+| Path                                | Purpose                                             |
+| ----------------------------------- | --------------------------------------------------- |
+| `/README.md`                        | Repository overview, quickstart, and core workflows |
+| `/SKILL.md`                         | Generated visible runtime index                     |
+| `/AGENTS.md`                        | Repository-specific operating instructions          |
+| `/Docs/DIRECTORY_MAP.md`            | This file (root and subdirectory navigation guide)  |
+| `/Docs/`                            | Contributor and governance documentation            |
+| `/Infrastructure/scripts/`          | Sync, validation, and automation scripts            |
+| `/Infrastructure/templates/`        | Reusable templates for skills and contracts         |
+| `/Infrastructure/scripts/README.md` | Script index by workflow category                   |
+| `/Docs/agents/README.md`            | Agent policy map and quick picks                    |
 
 ## Skill Domains
 
-Primary skill categories are organized by topic cluster under `Skills/`:
+Primary first-party skills are organized by topic cluster under `Skills/`.
+Plugin-owned skills live under `Plugins/<plugin>/skills/**`. The generated
+command surface currently exposes 109 `$` handles across first-party and plugin
+sources.
 
-- `/Skills/agent-ops/` — Agent operations, tooling, and general dev skills (41)
-- `/Skills/frontend-ui/` — Frontend UI, design, and browser automation (25)
-- `/Skills/backend-platform/` — Backend, CI, and platform infrastructure (8)
-- `/Skills/product-strategy/` — Product planning, interviews, and research (5)
-- `/Skills/security-ops/` — Security, auth, and recon workflows (4)
-- `/Skills/mobile-native/` — macOS/iOS native apps and process monitoring (3)
-- `/Skills/content-publishing/` — Content conversion and publishing (2)
+- `/Skills/agent-ops/` - Agent operations, tooling, and general dev skills (42)
+- `/Skills/frontend-ui/` - Frontend UI, design, and browser automation (13)
+- `/Skills/backend-platform/` - Backend, CI, and platform infrastructure (4)
+- `/Skills/product-strategy/` - Product planning, interviews, and research (4)
+- `/Skills/security-ops/` - Security, auth, and recon workflows (7)
+- `/Skills/mobile-native/` - macOS/iOS native apps and process monitoring (1)
+- `/Skills/content-publishing/` - Content conversion and publishing (8)
 
 Common subdirectory patterns inside each skill:
 
@@ -45,22 +48,23 @@ Common subdirectory patterns inside each skill:
 
 ## Supporting Systems
 
-| Path                   | Purpose                                           |
-| ---------------------- | ------------------------------------------------- |
-| `/Plugins/`            | Plugin packages and plugin manifests              |
-| `/.agents/skills/`     | Flat runtime skill projection                     |
-| `/brand/`              | Brand assets and visual references                |
-| `/Infrastructure/references/`         | Shared contracts and cross-cutting reference docs |
+| Path                          | Purpose                                           |
+| ----------------------------- | ------------------------------------------------- |
+| `/Plugins/`                   | Plugin packages and plugin manifests              |
+| `/.agents/skills/`            | Generated runtime projection and command handles  |
+| `/.skillsets/`                | Generated rooted manifests and command surface    |
+| `/brand/`                     | Brand assets and visual references                |
+| `/Infrastructure/references/` | Shared contracts and cross-cutting reference docs |
 
 ## Operational Content
 
-| Path          | Purpose                                         |
-| ------------- | ----------------------------------------------- |
+| Path                         | Purpose                                         |
+| ---------------------------- | ----------------------------------------------- |
 | `/Infrastructure/artifacts/` | Generated outputs and validation evidence       |
 | `/Infrastructure/reports/`   | Summaries and report snapshots                  |
-| `/todos/`     | File-based queued work items                    |
+| `/todos/`                    | File-based queued work items                    |
 | `/Infrastructure/storage/`   | Local state artifacts used by workflows         |
-| `/.harness/`  | Harness metadata, plans, and memory scaffolding |
+| `/.harness/`                 | Harness metadata, plans, and memory scaffolding |
 
 ## Quick Navigation Commands
 
@@ -71,6 +75,9 @@ fd -td -d 1 .
 # Skill folders two levels deep
 fd -td -d 2 . Skills
 
-# Generated catalog + docs entrypoints
-ls -la SKILL.md README.md DIRECTORY_MAP.md
+# Generated runtime index + docs entrypoints
+ls -la SKILL.md README.md Docs/DIRECTORY_MAP.md
+
+# Command-surface health
+python3 bin/ask skills handles --check --json
 ```
