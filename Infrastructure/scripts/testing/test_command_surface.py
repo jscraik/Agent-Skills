@@ -31,9 +31,9 @@ COMMAND_SURFACE = _load_module()
 
 class CommandSurfaceTests(unittest.TestCase):
     def test_generated_handle_includes_portable_source_path_fallback(self) -> None:
-        command_handle = getattr(COMMAND_SURFACE, "CommandHandle")
-        render_skill_command_handle = getattr(COMMAND_SURFACE, "render_skill_command_handle")
-        validate_command_handle_payload = getattr(COMMAND_SURFACE, "_validate_command_handle_payload")
+        command_handle = COMMAND_SURFACE.CommandHandle
+        render_skill_command_handle = COMMAND_SURFACE.render_skill_command_handle
+        validate_command_handle_payload = COMMAND_SURFACE._validate_command_handle_payload
 
         handle = command_handle(
             handle="he-work",
