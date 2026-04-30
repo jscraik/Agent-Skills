@@ -1,9 +1,10 @@
 ---
+schema_version: 1
 title: "Symphony Service Specification"
 type: "feat"
 status: "draft"
 date: "2026-04-10"
-origin: "docs/brainstorms/symphony-service-brainstorm.md"
+origin: "docs/brainstorms/2026-04-10-symphony-service-requirements.md"
 risk: "high"
 spec_depth: "full"
 ui_required: false

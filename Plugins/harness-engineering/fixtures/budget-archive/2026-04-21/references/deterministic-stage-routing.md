@@ -25,8 +25,8 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 | Stage | Route when the user says | Do not skip first |
 | --- | --- | --- |
 | `he-ideate` | generate options, find opportunities, explore possible improvements | Known constraints and success signal |
-| `he-brainstorm` | shape ambiguous requirements, clarify product behavior, compare directions | Expected behavior and non-goals |
-| `he-spec` | write the WHAT contract, acceptance criteria, behavior boundaries | Approved direction or enough source context |
+| `he-brainstorm` | shape ambiguous requirements, clarify product behavior, compare directions | Expected behavior and non-goals before default handoff to `he-spec` |
+| `he-spec` | write the WHAT contract, acceptance criteria, behavior boundaries | Approved direction or enough source context before default handoff to `he-plan` |
 | `he-deepen-spec` | harden an existing spec, resolve spec contradiction, fill missing contract detail | Existing spec path or text |
 | `he-plan` | sequence implementation, plan from approved spec, order related Linear issues | Governing spec or equivalent defect scope |
 | `he-deepen-plan` | harden an existing plan, add sequencing/risk/verification gates | Existing plan path or text |

@@ -306,6 +306,8 @@ Keep explicit: what blocks, what's deferred, next stage action.
 - Validate target is actually reviewed
 - Validate no protected-artifact cleanup in output
 - Validate unresolved `P0` or `P1` findings in recommendation
+- Validate actionable human and bot review threads are addressed, disproven, deferred with owner, or blocking before recommending merge
+- Validate security and supply-chain status for PRs that touch code execution, dependencies, CI, publishing, credentials, or permissions
 
 ## Anti-patterns
 See `references/he-anti-patterns.md`:
@@ -322,7 +324,7 @@ See `references/he-anti-patterns.md`:
 - User says: "Review the latest PR, keep the Harness Engineering artifact files out of cleanup chatter, and drop the findings into our `todos/` flow if that convention exists here."
 
 ## References
-- `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
+- `references/review-modes.md`, `references/findings-and-todos.md`, `references/codex-review-flow.md`, `references/contract.yaml`
 - `references/he-anti-patterns.md`, `references/style-and-operating-guidance.md`, `references/sub-agent-map.md`, `references/source-parity.md`
 ## Gotchas
 - `latest` ambiguous; resolve explicitly

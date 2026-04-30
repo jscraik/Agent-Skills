@@ -1,5 +1,5 @@
 interface:
-  display_name: "CE Spec"
+  display_name: "HE Spec"
   short_description: "Turn a brainstorm, feature description, or UI source into a system spec or UI spec that planning can trust."
   icon_small: "../assets/icon-small.png"
   icon_large: "../assets/icon-large.png"

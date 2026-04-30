@@ -43,6 +43,11 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Domain-readiness decision that confirms canonical terms are stable or routes back upstream.
 - Explicit plan route: `fresh`, `resume`, or `deepen`.
 - Plan depth sized to the work: `lightweight`, `standard`, or `deep`.
+- Required artifact frontmatter, including `schema_version`, governing source path, plan route, and plan depth when writing a plan file.
+- Traceability from source requirements, spec `SA` IDs, invariants, or UI `VAC` criteria to plan acceptance items.
+- Stable implementation phase IDs (`P` or `UP`) and acceptance IDs (`AC` or `UAC`) that `he-work` can execute without reinterpreting scope.
+- Execution checkpoints, rollback/recovery notes, and a validation ladder for non-trivial plans.
+- Execution Ledger guidance with exactly one actionable first step ready for handoff.
 - Include `schema_version: 1` when structured output is requested.
 
 ## Procedure
@@ -57,6 +62,11 @@ This entrypoint stays concise and keeps full operational context in archived ref
 8. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
 9. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
 10. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
+11. For source specs with stable `SA` or `VAC` IDs, build a traceability matrix that maps each source acceptance item to one or more plan acceptance items.
+12. For high-risk, multi-phase, CLI/API/plugin/service, persistence, or governance work, add execution checkpoints with stop conditions before downstream units depend on unproven seams.
+13. For each feature-bearing implementation unit, name expected production files, test files, requirements, dependencies, validation intent, completion criteria, and rollback guidance.
+14. Add a validation ladder that starts with focused checks and widens only after the narrow behavior path is proven; include blocked-step reporting when a command cannot run.
+15. Before handoff, verify the plan artifact against the selected mode, initialize the Execution Ledger, and keep exactly one actionable next step ready for `he-work`.
 
 ## Validation
 
@@ -66,6 +76,11 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Ensure any new caller-facing interface needed by the plan is already specified; otherwise stop and route to `he-deepen-spec`.
 - Ensure tasks use canonical domain terms from `CONTEXT.md` when one exists, and link Linear decision notes when durable tradeoffs shaped the plan.
 - Ensure the chosen route (`fresh`, `resume`, or `deepen`) matches the artifact state.
+- Ensure written plan frontmatter includes `schema_version`, route, depth, and governing source links when applicable.
+- Ensure stable `P` / `AC` or `UP` / `UAC` identifiers are present and traceable to source requirements.
+- Ensure implementation units include concrete files, test files, dependencies, exit criteria, rollback guidance, and validation intent when the unit is feature-bearing.
+- Ensure high-risk plans include checkpoints, stop conditions, rollout or recovery notes, and an explicit validation ladder.
+- Ensure the Execution Ledger exists for written plans and has no more than one `in_progress` item.
 - Fail fast: stop at first failed gate and do not proceed.
 
 ## Constraints
@@ -85,6 +100,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Decomposing tasks around ambiguous project terms that should have been resolved upstream.
 - Replanning from scratch when a relevant current plan or requirements doc should be updated in place.
 - Routing directly to execution when the request is still asking for planning.
+- Producing a task list that lacks source traceability, checkpoint gates, rollback notes, or focused-to-broad validation.
 
 ## Examples
 
@@ -95,6 +111,10 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 ## Full Context
 
+- Full plan guide: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/SKILL.full.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/SKILL.full.md)
+- Plan artifact contract: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/plan-artifacts.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/plan-artifacts.md)
+- Verification-first planning: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/verification-first.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/verification-first.md)
+- Production and rollout controls: [repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/production-considerations.md](repo:Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/production-considerations.md)
 - Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
 - Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
 - Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)

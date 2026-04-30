@@ -1,11 +1,14 @@
 ---
-title: Symphony Service Implementation Plan
-type: feat
-status: active
-date: 2026-04-10
-origin: docs/brainstorms/2026-04-10-symphony-requirements.md
-spec: Docs/specs/2026-04-10-symphony-service-spec.md
-ui_spec: docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md
+schema_version: 1
+title: "Symphony Service Implementation Plan"
+type: "feat"
+status: "active"
+date: "2026-04-10"
+origin: "docs/brainstorms/2026-04-10-symphony-requirements.md"
+spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
+ui_spec: "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
+plan_route: "fresh"
+plan_depth: "deep"
 ---
 
 # Symphony Service Implementation Plan
@@ -96,6 +99,7 @@ Current issue execution is manual and inconsistent; this plan defines an auditab
 ## Execution Ledger (Planning Mode)
 
 STEP_ID | status (pending|in_progress|completed) | owner | evidence
+---|---|---|---
 P0-U1 | pending | planning-agent | plan scaffold generated
 
 ## Sources & References

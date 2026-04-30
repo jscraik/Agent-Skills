@@ -176,8 +176,8 @@ STARTER_ARCHETYPES = {
         "docs-expert",
         "context7",
     ),
-    "delivery": ("he-plan", "he-work", "he-review", "gh-workflow", "coding-harness"),
-    "review": ("he-technical-review", "he-review", "security-best-practices"),
+    "delivery": ("he-plan", "he-work", "he-code-review", "gh-workflow", "coding-harness"),
+    "review": ("he-technical-review", "he-code-review", "he-reliability-review", "security-best-practices"),
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
@@ -303,6 +303,42 @@ def _starter_entries(entries: list, archetype: str, limit: int) -> list:
     return selected
 
 
+def _command_handle_owner_index(repo_root: Path) -> dict[str, str]:
+    """Return generated command-handle owners keyed by handle name."""
+    try:
+        report = handles_report(repo_root_path=repo_root, include_handles=True)
+    except Exception:
+        return {}
+    handles = report.get("handles") if isinstance(report, dict) else []
+    if not isinstance(handles, list):
+        return {}
+    owner_by_handle: dict[str, str] = {}
+    for row in handles:
+        if not isinstance(row, dict):
+            continue
+        handle = str(row.get("handle") or "").strip()
+        owner = str(row.get("owner") or "").strip()
+        if handle and owner:
+            owner_by_handle[handle] = owner
+    return owner_by_handle
+
+
+def _entry_matches_category(entry, category_token: str, owner_by_handle: dict[str, str], repo_root: Path) -> bool:
+    """Match a skill-list category against path/category plus generated handle ownership."""
+    searchable = [
+        str(getattr(entry, "category", "")),
+        str(getattr(entry, "name", "")),
+        str(getattr(entry, "description", "")),
+        owner_by_handle.get(str(getattr(entry, "name", "")), ""),
+    ]
+    source_dir = getattr(entry, "source_dir", None)
+    if isinstance(source_dir, Path):
+        searchable.append(source_dir.as_posix())
+        if source_dir.is_relative_to(repo_root):
+            searchable.append(source_dir.relative_to(repo_root).as_posix())
+    return any(category_token in value.lower() for value in searchable if value)
+
+
 def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list[str]:
     """
     Regenerate root catalog projections from the default catalog surface.
@@ -346,6 +382,18 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
                 updated_readme,
                 count=1,
             )
+        updated_readme = re.sub(
+            r"A governed repository of \*\*skills\*\* for AI coding agents",
+            f"A governed repository of **{catalog_count} skills** for AI coding agents",
+            updated_readme,
+            count=1,
+        )
+        updated_readme = re.sub(
+            r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
+            f"A governed **Agent Skills Kit** repository of **{catalog_count} skills** for Codex and AI coding agents",
+            updated_readme,
+            count=1,
+        )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
@@ -392,16 +440,19 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
+    category_token = category.lower().strip() if category else ""
+    discovery_advanced = bool(advanced or category_token)
     entries = [
         entry
-        for entry in discover_catalog_entries(advanced=advanced)
+        for entry in discover_catalog_entries(advanced=discovery_advanced)
         if entry.source_dir.is_relative_to(repo_root)
     ]
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
+    owner_by_handle = _command_handle_owner_index(repo_root) if category_token else {}
     for entry in entries:
-        if category and category.lower() not in entry.category.lower():
+        if category_token and not _entry_matches_category(entry, category_token, owner_by_handle, repo_root):
             continue
         skills_data.append({
             "name": entry.name,
@@ -411,7 +462,7 @@ def list_skills(
         })
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
-    result.data["advanced_mode"] = bool(advanced)
+    result.data["advanced_mode"] = discovery_advanced
     if starter:
         result.data["starter_mode"] = True
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
@@ -1662,6 +1713,140 @@ def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, d
     return f"Ensured plugin mirror directory: {target}"
 
 
+def _prune_command_handle_skill_entries(repo_root: Path, plugin_name: str, plugin_root: Path) -> list[str]:
+    """Remove plugin skill entries that are already exposed by generated command handles."""
+    skills_root = plugin_root / "skills"
+    if not skills_root.is_dir():
+        return []
+    try:
+        report = handles_report(repo_root_path=repo_root, include_handles=True)
+    except Exception:
+        return []
+    handles = report.get("handles") if isinstance(report, dict) else []
+    if not isinstance(handles, list):
+        return []
+
+    logs: list[str] = []
+    for row in handles:
+        if not isinstance(row, dict):
+            continue
+        if row.get("owner") != plugin_name:
+            continue
+        command_handle_path = str(row.get("command_handle_path") or "")
+        if not command_handle_path.startswith(".agents/skills/"):
+            continue
+        handle = str(row.get("handle") or "").strip()
+        if not handle or "/" in handle or ".." in handle:
+            continue
+        targets = [skills_root / handle]
+        targets.extend(
+            skill_md.parent
+            for skill_md in skills_root.rglob("SKILL.md")
+            if skill_md.parent.name == handle
+        )
+        for target in sorted(set(targets)):
+            if not (target.exists() or target.is_symlink()):
+                continue
+            if target.is_symlink() or target.is_file():
+                target.unlink()
+            else:
+                shutil.rmtree(target)
+            logs.append(f"Removed command-handle duplicate plugin skill entry: {target}")
+    return logs
+
+
+def _plugin_version(source_dir: Path) -> str:
+    """Return the declared plugin version, falling back to the local-dev version."""
+    plugin_json = source_dir / ".codex-plugin" / "plugin.json"
+    try:
+        payload = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "0.1.0"
+    version = str(payload.get("version") or "0.1.0").strip()
+    if not version or "/" in version or ".." in version:
+        return "0.1.0"
+    return version
+
+
+def _replace_plugin_cache_copy(repo_root: Path, plugin_name: str, source_dir: Path, target_dir: Path) -> list[str]:
+    """Replace one local plugin cache copy and prune command-handle duplicate entries."""
+    if target_dir.is_symlink() or target_dir.is_file():
+        target_dir.unlink()
+    elif target_dir.exists():
+        shutil.rmtree(target_dir)
+    _copy_directory_contents(source_dir, target_dir)
+    _materialize_first_level_skill_aliases(target_dir)
+    logs = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+    logs.append(f"Replaced local plugin cache: {target_dir} <- {source_dir}")
+    return logs
+
+
+def _refresh_workspace_plugin_caches(
+    plan: dict,
+    logs: list[str],
+    repo_root: Path,
+    *,
+    dry_run: bool,
+) -> None:
+    """Refresh repo-local plugin caches that Codex picker paths may scan."""
+    try:
+        marketplace_path, entries = _load_local_marketplace(repo_root)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        logs.append(f"Skipped workspace plugin cache refresh: {exc}")
+        return
+
+    try:
+        marketplace_name = json.loads(marketplace_path.read_text(encoding="utf-8")).get("name") or "agent-skills-local"
+    except (OSError, json.JSONDecodeError):
+        marketplace_name = "agent-skills-local"
+    marketplace_name = str(marketplace_name).strip() or "agent-skills-local"
+    if "/" in marketplace_name or ".." in marketplace_name:
+        marketplace_name = "agent-skills-local"
+
+    runtime_cache_root = repo_root / ".agents" / "plugins-runtime" / "cache" / marketplace_name
+    versioned_cache_root = repo_root / "Plugins" / "cache" / marketplace_name
+    plan.setdefault("plugin_cache_writes", [])
+
+    keep_plugin_names = {entry["name"] for entry in entries}
+    for entry in entries:
+        plugin_name = entry["name"]
+        if "/" in plugin_name or ".." in plugin_name:
+            logs.append(f"Skipped unsafe plugin cache name: {plugin_name}")
+            continue
+        source_dir = repo_root / entry["path"].removeprefix("./")
+        if not source_dir.is_dir():
+            logs.append(f"Skipped missing plugin cache source: {source_dir}")
+            continue
+        version = _plugin_version(source_dir)
+        runtime_target = runtime_cache_root / plugin_name
+        versioned_target = versioned_cache_root / plugin_name / version
+        plan["plugin_cache_writes"].extend([str(runtime_target), str(versioned_target)])
+        if dry_run:
+            logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
+            logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
+            continue
+        logs.extend(_replace_plugin_cache_copy(repo_root, plugin_name, source_dir, runtime_target))
+        logs.extend(_replace_plugin_cache_copy(repo_root, plugin_name, source_dir, versioned_target))
+        plugin_version_root = versioned_cache_root / plugin_name
+        for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
+            if child == versioned_target or not child.is_dir():
+                continue
+            shutil.rmtree(child)
+            logs.append(f"Removed stale versioned local plugin cache variant: {child}")
+
+    for cache_root in (runtime_cache_root, versioned_cache_root):
+        if not cache_root.is_dir():
+            continue
+        for child in sorted(cache_root.iterdir()):
+            if child.name in keep_plugin_names or not child.is_dir():
+                continue
+            if dry_run:
+                logs.append(f"Would remove stale local plugin cache: {child}")
+                continue
+            shutil.rmtree(child)
+            logs.append(f"Removed stale local plugin cache: {child}")
+
+
 def _refresh_home_plugin_mirrors(
     plan: dict,
     logs: list[str],
@@ -1723,6 +1908,7 @@ def _refresh_home_plugin_mirrors(
             shutil.rmtree(target_dir)
         _copy_directory_contents(source_dir, target_dir)
         _materialize_first_level_skill_aliases(target_dir)
+        logs.extend(_prune_command_handle_skill_entries(repo_root, plugin_name, target_dir))
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
 
@@ -2036,6 +2222,7 @@ def sync_skills(
             "deletes": len(plan["deletes"]),
             "symlinks": len(plan["symlinks"]),
         }
+        _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
         result.data["plan"] = plan
         result.data["logs"] = logs
         result.data["policy_identity"] = get_policy_identity()
@@ -2077,6 +2264,7 @@ def sync_skills(
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
+        _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
     elif scope == "user":
         _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
     plan["validation_status"] = "pass"

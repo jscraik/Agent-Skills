@@ -1,4 +1,4 @@
-# CE Spec Modes
+# HE Spec Modes
 
 Read when: you need to choose between a standard system spec and a dedicated UI spec, or when you need the compatibility rules for UI-spec paths.
 
