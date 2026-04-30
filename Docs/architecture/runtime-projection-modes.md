@@ -12,6 +12,9 @@
 
 - projects only root skill sets;
 - writes latent routing manifests under `.skillsets/**`;
+- writes generated command-surface metadata under `.skillsets/command-surface.json`;
+- writes generated command handles under `.agents/skills/<handle>/` for routed
+  modules that should be `$`-mentionable;
 - keeps atom, molecule, compound, router, and reference modules latent until
   selected.
 
@@ -34,6 +37,26 @@ workspace scope.
 For non-flat projection modes, the legacy shell sync wrapper delegates to the
 same `ask skills sync` engine so projection semantics do not drift by entry
 point.
+
+## Command Handles
+
+Rooted projection separates mentionability from full workflow loading. A
+generated command handle is a small runtime pointer such as
+`.agents/skills/he-heartbeat/SKILL.md`. It lets users write `$he-heartbeat`, but
+the real workflow remains in the resolved canonical source path.
+
+Use the public command surfaces for proof:
+
+```bash
+ask skills resolve he-heartbeat --json
+ask skills handles --check --json
+ask skills handles --check-command-handles --json
+ask reviewers resolve skillinspector --json
+```
+
+Do not treat resolver output alone as proof that a handle is visible in Codex.
+Resolver, generated command-surface projection, generated runtime handle,
+workspace sync, user sync, and live invocation are separate acceptance gates.
 
 ## Reporting
 

@@ -1,13 +1,14 @@
 # Agent Skills
 
-A governed repository of **21 skills** for AI coding agents. Built around the **Agent Skills Kit (`ask`)** CLI.
+A governed **Agent Skills Kit** repository of **21 skills** for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
 **What this gives you:**
 
-- **One place for skills** – Author in Markdown, sync to any runtime
-- **Quality gates** – 28 automated structural, security, and behavioral validation checks
-- **Living skill graph** – Browse skills organized by topic clusters with relationship mapping
-- **Agent-native CLI** – Fuzzy matching, JSON output, trace IDs, helpful errors
+- **Canonical source control** - Author skill and plugin workflows in `Skills/**` and `Plugins/**`, not in generated runtime copies.
+- **Command-visible handles** - Make routed skills mentionable as `$handle` entries without loading full latent workflows into the picker.
+- **Quality gates** - Run structural, security, context-budget, projection, and behavior validation through `ask`.
+- **Agent-native CLI** - Use fuzzy matching, JSON output, trace IDs, helpful errors, and robot mode for automation.
+- **Runtime sync** - Refresh workspace projections, user runtime links, plugin mirrors, and generated command-surface metadata from canonical sources.
 
 ## Quick start
 
@@ -18,12 +19,15 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 
 # See what's available
 ask graph topics
+ask skills list --json
+ask skills handles --json --no-handles
 
 # Validate the repository
 ask repo validate --ephemeral
 
 # Sync to your runtime
-ask skills sync --scope user
+ask skills sync --scope workspace --projection rooted
+ask skills sync --scope user --projection rooted
 ```
 
 ## What you can do
@@ -31,6 +35,18 @@ ask skills sync --scope user
 ### Discover skills
 
 ```bash
+# List the visible runtime surface
+ask skills list
+
+# Check all generated command handles
+ask skills handles --check --json
+
+# Resolve a command-visible skill handle
+ask skills resolve he-heartbeat --json
+
+# Resolve a reviewer/subagent handle
+ask reviewers resolve skillinspector --json
+
 # Search skills
 ask graph find security --tier stable
 
@@ -59,6 +75,9 @@ ask repo validate --ephemeral
 # Report the current runtime surface and context budget
 ask runtime surface --json
 ask runtime budget --json
+
+# Verify generated command handles match rooted manifests
+ask skills handles --check --json
 ```
 
 ### Manage lifecycle
@@ -89,22 +108,22 @@ When intent is clear but syntax is off, use `--robot` (or `-r`):
 
 ```bash
 # These work and get corrected:
-ask skill list --robot          # → skills list
-ask skills ls --robot           # → skills list
-ask graph search X --robot      # → graph find X
+ask skill list --robot          # -> skills list
+ask skills ls --robot           # -> skills list
+ask graph search X --robot      # -> graph find X
 ```
 
 Errors include suggestions and examples:
 
-```
-❌ Unknown topic: 'invalid'
+```text
+ERROR Unknown topic: 'invalid'
 
-💡 Did you mean 'ask skills'?
+Hint: Did you mean 'ask skills'?
    Valid topics: repo, skills, runtime, plugins, evals, graph, mcp, wiki, workouts
 
-📚 Examples:
-   • ask skills list
-   • ask graph find security
+Examples:
+   - ask skills list
+   - ask graph find security
 ```
 
 ## Programmatic usage
@@ -134,53 +153,79 @@ ask repo validate --ephemeral
 }
 ```
 
+## Runtime and command surfaces
+
+This repo separates source, projection, and live runtime visibility:
+
+| Surface                               | Purpose                                                   | Edit Policy            |
+| ------------------------------------- | --------------------------------------------------------- | ---------------------- |
+| `Skills/<topic>/<skill>/SKILL.md`     | Canonical first-party skill source                        | Edit here              |
+| `Plugins/<plugin>/skills/**/SKILL.md` | Canonical plugin-owned skill source                       | Edit here              |
+| `.skillsets/**`                       | Generated rooted manifests and command-surface projection | Regenerate only        |
+| `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
+| `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
+
+`ask skills list --json` reports the current visible runtime surface. In the current rooted projection this is a compact first-level list of root routers plus generated command handles. `ask skills handles --json --no-handles` validates the full command surface; it currently reports 109 generated command handles with no violations.
+
+A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
+
+```bash
+ask skills resolve he-heartbeat --json
+```
+
+Reviewer handles stay outside the skill command surface and resolve through:
+
+```bash
+ask reviewers resolve skillinspector --json
+```
+
 ## Skill graph (manual topic clusters, non-canonical)
 
-This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. For the current surfaced catalog size, run `python3 Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py --count --source catalog --visibility default`.
+This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. For the current visible runtime list, run `ask skills list --json`. For the full generated command-handle surface, run `ask skills handles --json --no-handles`.
 
 | Topic              | Skills | Examples                                           |
 | ------------------ | ------ | -------------------------------------------------- |
-| agent-ops          | 41     | coding-harness, evals-router, simplify             |
+| agent-ops          | 42     | docs-expert, autofix, unslopify, simplify          |
 | frontend-ui        | 13     | react-ui-patterns, shadcn-ui, frontend-ui-design   |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer            |
 | product-strategy   | 4      | architecture-interview, chatgpt-apps, interview-me |
 | security-ops       | 7      | 1password, best-practices, create-auth             |
-| content-publishing | 8      | markdown-converter, spreadsheet, visual-explainer  |
+| content-publishing | 8      | beautiful-mermaid, spreadsheet, visual-explainer   |
 | mobile-native      | 1      | atlas                                              |
 
 ## Repository layout
 
 ```
 agent-skills/
-├── bin/ask                   # Stable public wrapper entry point
-├── scripts/                  # Stable wrapper entry points for canonical scripts
-├── .agents/skills/           # Runtime projection: flat or rooted (read-only)
-├── .skillsets/               # Generated rooted manifests (read-only)
-├── .workouts/                # Canonical skill workout fixtures
-│
-├── Skills/                   # All canonical skills organised by topic cluster
-│   ├── agent-ops/            # 44 skills: coding-harness, evals-router, simplify, …
-│   ├── frontend-ui/          # 15 skills: react-ui-patterns, shadcn-ui, frontend-ui-design, …
-│   ├── backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, …
-│   ├── product-strategy/     #  4 skills: architecture-interview, chatgpt-apps, interview-me, …
-│   ├── security-ops/         #  7 skills: 1password, best-practices, create-auth, …
-│   ├── mobile-native/        #  1 skill: atlas
-│   └── content-publishing/   #  9 skills: markdown-converter, spreadsheet, visual-explainer
-│
-├── Plugins/                  # Plugin packages (skills live inside plugins)
-│   ├── skill-factory/        #   skill-builder, skill-creator, skill-installer, …
-│   ├── plugin-factory/       #   plugin-builder, plugin-creator, plugin-installer
-│   ├── harness-engineering/  #   he-brainstorm, he-plan, he-spec, …
-│   ├── browser-use/
-│   └── cache/
-│
-├── Infrastructure/
-│   ├── bin/ask               # Canonical CLI implementation entrypoint (internal)
-│   ├── scripts/lib/ask/      # CLI implementation
-│   ├── GOVERNANCE/           # Runtime separation & policy
-│   └── ops/metrics/graph/    # Skill relationship data
-├── Docs/                     # Plans, specs, guides, cli-specs
-├── Wiki/                     # Skill Ops Wiki (notes, playbooks, learnings)
+|-- bin/ask                   # Stable public wrapper entry point
+|-- scripts/                  # Stable wrapper entry points for canonical scripts
+|-- .agents/skills/           # Runtime projection: flat or rooted (read-only)
+|-- .skillsets/               # Generated rooted manifests and command surface (read-only)
+|-- .workouts/                # Canonical skill workout fixtures
+|
+|-- Skills/                   # All canonical skills organised by topic cluster
+|   |-- agent-ops/            # 42 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- frontend-ui/          # 13 skills: react-ui-patterns, shadcn-ui, frontend-ui-design, ...
+|   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
+|   |-- product-strategy/     #  4 skills: architecture-interview, chatgpt-apps, interview-me, ...
+|   |-- security-ops/         #  7 skills: 1password, best-practices, create-auth, ...
+|   |-- mobile-native/        #  1 skill: atlas
+|   `-- content-publishing/   #  8 skills: beautiful-mermaid, spreadsheet, visual-explainer
+|
+|-- Plugins/                  # Canonical plugin packages (skills live inside plugins)
+|   |-- skill-factory/        #   skill-builder, skill-creator, skill-installer, ...
+|   |-- plugin-factory/       #   plugin-builder, plugin-creator, plugin-installer
+|   |-- harness-engineering/  #   he-brainstorm, he-plan, he-spec, ...
+|   |-- browser-use/
+|   `-- cache/
+|
+|-- Infrastructure/
+|   |-- bin/ask               # Canonical CLI implementation entrypoint (internal)
+|   |-- scripts/lib/ask/      # CLI implementation
+|   |-- GOVERNANCE/           # Runtime separation & policy
+|   `-- ops/metrics/graph/    # Skill relationship data
+|-- Docs/                     # Plans, specs, guides, cli-specs
+`-- Wiki/                     # Skill Ops Wiki (notes, playbooks, learnings)
 ```
 
 Ownership boundaries:
@@ -190,17 +235,19 @@ Ownership boundaries:
 - Root command wrappers: `bin/**` and `scripts/**` are stable wrappers that forward into `Infrastructure/**`; keep these as real files/directories (not symlinks)
 - `bin/ask` is the only public CLI entrypoint and must remain a thin forwarder to `Infrastructure/bin/ask`.
 - Runtime/projection surfaces: `.agents/**`, `.agents/skills/**`, `.skillsets/**`, `Plugins/cache/**`, `runtime/**` (read-only by policy)
+- Plugin runtime mirrors: copied profile-local plugin trees are refreshed from canonical `Plugins/**`; replace them after plugin source or marketplace changes rather than editing mirrors.
 - Workout evidence: `.skill-telemetry/**` is local runtime output and is ignored by git.
 - Full policy: [Docs/agents/14-path-ownership-boundaries.md](Docs/agents/14-path-ownership-boundaries.md)
 
 ## Documentation
 
-- **[CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md)** – Complete command reference
-- **[Agent Guide](AGENTS.md)** – AI agent workflow patterns
-- **[Skill Index](SKILL.md)** – Current surfaced skill catalog by category
-- **[Context-Budgeted Skill Trees](Docs/architecture/context-budgeted-skill-trees.md)** – Rooted projection and latent routing model
-- **[Skill Workouts](Docs/architecture/skill-workouts.md)** – Workout CLI, telemetry, and scorecard model
-- **[Implementation Review](Docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** – Architecture details
+- **[CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md)** - Complete command reference
+- **[Agent Guide](AGENTS.md)** - AI agent workflow patterns
+- **[Skill Index](SKILL.md)** - Generated visible runtime index
+- **[Runtime Projection Modes](Docs/architecture/runtime-projection-modes.md)** - Flat/rooted projection modes, command handles, and sync scope
+- **[Context-Budgeted Skill Trees](Docs/architecture/context-budgeted-skill-trees.md)** - Rooted projection, generated command handles, and latent routing model
+- **[Skill Workouts](Docs/architecture/skill-workouts.md)** - Workout CLI, telemetry, and scorecard model
+- **[Implementation Review](Docs/cli-specs/2026-04-06-ask-cli-implementation-review.md)** - Architecture details
 
 ## Privacy and Data Handling
 
@@ -209,7 +256,8 @@ This repository stores skill source, docs, and validation artifacts for local-fi
 ## Governance
 
 - **License:** Apache 2.0
-- **Skills catalog:** `python3 Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py --count --source catalog --visibility default`
+- **Visible runtime surface:** `ask skills list --json`
+- **Command surface:** `ask skills handles --json --no-handles`
 - **System skills pin:** `Infrastructure/GOVERNANCE/skills-system-upstream.lock.json` (upstream `openai/skills` `.system` ref `e940b8a86138adf03972802b990a1dfc57fcbf09`)
-- **Validation:** 28 automated checks via `ask repo validate`
+- **Validation:** automated checks via `ask repo validate --ephemeral`
 - **Compatibility:** Codex

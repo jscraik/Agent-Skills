@@ -33,6 +33,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Optional execution posture such as `test-first`, `characterization-first`, or explicit external delegation.
 - Linked upstream artifacts that define scope, invariants, and non-goals.
 - Relevant `CONTEXT.md` when the approved artifact depends on project-specific domain terms.
+- Optional session evidence when prior runs, archived sessions, or session-collector findings define the task.
 
 ## Outputs
 
@@ -47,18 +48,20 @@ This entrypoint stays concise and keeps full operational context in archived ref
 1. Choose the correct execution lane before coding: `plan-led`, `todo-led`, or the narrow `small-spec-direct` path.
 2. Read linked artifacts completely and restate the execution contract: active IDs, invariants, non-goals, validation gates, and explicit scope boundaries.
 3. Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
-4. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
-5. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
-6. Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
-7. Report completed work, blockers, validation evidence, and the shipping handoff package.
+4. If session evidence is part of the request, read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md) and convert each actionable recurrence into an explicit checklist item before editing.
+5. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
+6. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
+7. Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
+8. Report completed work, blockers, validation evidence, and the shipping handoff package.
 
 ## Validation
 
-- Ensure each delivered increment has evidence of verification.
-- Ensure deviations from plan are explicit and justified.
+- Verify each delivered increment has evidence of verification.
+- Document deviations from plan with explicit justification.
 - Ensure implementation does not introduce domain-language drift from `CONTEXT.md` or the approved artifact without an explicit update.
-- Ensure the selected execution lane matches the source artifact and risk profile.
-- Ensure contract drift is reflected in the governing artifact before off-plan implementation continues.
+- Confirm session-derived tasks cite their evidence source and are represented in the execution checklist.
+- Verify the selected execution lane matches the source artifact and risk profile.
+- Reflect contract drift in the governing artifact before off-plan implementation continues.
 - Fail fast: stop at first failed gate and do not proceed.
 
 ## Constraints
@@ -74,6 +77,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Shipping changes without validation evidence.
 - Ignoring plan/spec drift introduced during execution.
+- Treating prior-session evidence as background context instead of converting it into tasks or explicit non-actions.
 - Executing directly from a risky raw spec that should route to planning first.
 - Letting task tracking, artifact status, and real code state diverge during delivery.
 
@@ -82,6 +86,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - "Implement this approved plan and keep the markdown task state aligned with what actually lands."
 - "Work through this todo artifact in small verified slices and tell me where drift appears."
 - "This spec is tiny and low risk. If it really is safe, execute it directly and validate the result."
+- "Use the session-collector findings as the work checklist and fix the repeated HE failure modes."
 
 ## Full Context
 
@@ -93,6 +98,8 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
 - Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
 Read when: execution uncovers domain drift, `CONTEXT.md` mismatch, or Linear issue wording conflict.
+- Session evidence contract: [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
+Read when: execution scope comes from prior sessions, archived sessions, session-collector output, or repeated failure evidence.
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
 

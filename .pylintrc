@@ -1,6 +1,7 @@
 [MASTER]
 ignore=.git,.ruff_cache,.pytest_cache,Plugins/cache,.agents/plugins-runtime
-jobs=0
+init-hook='import sys; sys.path.insert(0, "Infrastructure/scripts/lifecycle-and-sync")'
+jobs=1
 persistent=no
 
 [MESSAGES CONTROL]

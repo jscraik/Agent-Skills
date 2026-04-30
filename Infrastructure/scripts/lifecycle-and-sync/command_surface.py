@@ -17,10 +17,12 @@ from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skillset_model import repo_root
 
 HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([a-z][a-z0-9-]*)")
+REVIEWER_MENTION_RE = re.compile(r"(?<![\w./-])@([A-Za-z0-9][A-Za-z0-9_-]*)")
 COMMAND_VISIBILITY = {"orchestrator", "direct", "target", "reviewer", "none"}
 COMMAND_SURFACE_PATH = Path(".skillsets") / "command-surface.json"
 MAX_COMMAND_HANDLE_DESCRIPTION_WORDS = 14
-MAX_COMMAND_HANDLE_BODY_WORDS = 90
+MAX_COMMAND_HANDLE_BODY_WORDS = 120
 REVIEWER_MANIFEST = Path(os.environ.get("CODEX_AGENTS_MANIFEST", Path.home() / ".codex" / "agents" / "manifest.json"))
 RESERVED_SKILL_HANDLES = {
     "repo",
@@ -149,7 +151,11 @@ def requires_generated_command_handle(handle: CommandHandle) -> bool:
 def render_skill_command_handle(handle: CommandHandle) -> str:
     """Render a minimal Codex-visible SKILL.md command handle."""
     display_name = _display_name(handle)
-    description = f"Explicit command handle for {display_name}. Use only when named as ${handle.handle}."
+    description = (
+        f"Explicit command handle for {display_name}. "
+        f"Use only when named as ${handle.handle}."
+    )
+    source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
     return "\n".join(
         [
             "---",
@@ -161,11 +167,19 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             "",
             f"Generated command handle for a child skill under the `{handle.owner}` router heading.",
             "The real workflow is not here.",
+            f"Canonical source path: `{source_path}`.",
             "",
             "When invoked:",
-            f"1. Run `./bin/ask skills resolve {handle.handle} --json`.",
-            "2. Load only `source_path` from the result.",
+            (
+                "1. If this is the Agent Skills Kit repo and `./bin/ask` exists, "
+                f"run `./bin/ask skills resolve {handle.handle} --json`."
+            ),
+            f"2. Otherwise, load `{source_path}` directly.",
             "3. Follow the loaded module contract.",
+            (
+                "4. If the source path is missing, search only the owner skill tree "
+                "for this exact handle name."
+            ),
             "",
             "When used as another skill's target, pass the resolved card to the active orchestrator and wait for orchestration.",
             "",
@@ -193,7 +207,10 @@ def render_openai_yaml(handle: CommandHandle) -> str:
 
 def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
-    frontmatter_description = f"Explicit command handle for {_display_name(handle)}. Use only when named as ${handle.handle}."
+    frontmatter_description = (
+        f"Explicit command handle for {_display_name(handle)}. "
+        f"Use only when named as ${handle.handle}."
+    )
     if _word_count(frontmatter_description) > MAX_COMMAND_HANDLE_DESCRIPTION_WORDS:
         violations.append({
             "code": "COMMAND_HANDLE_DESCRIPTION_BUDGET_EXCEEDED",
@@ -288,6 +305,18 @@ def _prune_obsolete_command_handle_dirs(
         if not dry_run:
             shutil.rmtree(path)
     return deletes
+
+
+def _write_generated_text(path: Path, content: str) -> None:
+    """Write generated content via same-directory replace to tolerate protected files."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_text(content, encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
 
 
 def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
@@ -428,7 +457,7 @@ def resolve_skill_handle(handle: str, *, repo_root_path: Path | None = None) -> 
 
 
 def _reviewer_alias_key(handle: str) -> str:
-    return normalize_handle(handle).replace("-", "")
+    return normalize_handle(handle).replace("-", "").replace("_", "")
 
 
 def resolve_reviewer_handle(handle: str, *, manifest_path: Path = REVIEWER_MANIFEST) -> dict[str, Any]:
@@ -453,6 +482,84 @@ def resolve_reviewer_handle(handle: str, *, manifest_path: Path = REVIEWER_MANIF
             "operator_action": "Use the exact reviewer role name from `~/.codex/agents/manifest.json`.",
         }
     return {"status": "ok", **matches[0].to_dict(), "canonical_handle": matches[0].handle}
+
+
+def _mention_rows(pattern: re.Pattern[str], prefix: str, text: str) -> list[dict[str, Any]]:
+    """Return ordered command-handle mention rows without echoing full prompt text."""
+    rows: list[dict[str, Any]] = []
+    for match in pattern.finditer(text):
+        raw_handle = match.group(1)
+        rows.append({
+            "token": f"{prefix}{raw_handle}",
+            "handle": normalize_handle(raw_handle),
+            "start": match.start(),
+            "end": match.end(),
+        })
+    return rows
+
+
+def _skill_role(resolution: dict[str, Any], *, active_orchestrator_seen: bool) -> str:
+    command_visibility = str(resolution.get("command_visibility") or "")
+    if command_visibility == "orchestrator" and not active_orchestrator_seen:
+        return "active_orchestrator"
+    if command_visibility == "orchestrator":
+        return "orchestrator_dependency"
+    if command_visibility == "target":
+        return "target"
+    if command_visibility == "direct":
+        return "direct_skill"
+    return command_visibility or "skill"
+
+
+def parse_command_handles(text: str, *, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Parse $ skill handles and @ reviewer handles from a prompt and resolve each one."""
+    root = repo_root_path or repo_root()
+    skill_mentions = _mention_rows(SKILL_MENTION_RE, "$", text)
+    reviewer_mentions = _mention_rows(REVIEWER_MENTION_RE, "@", text)
+    unresolved: list[dict[str, Any]] = []
+    active_orchestrator_seen = False
+
+    for mention in skill_mentions:
+        resolution = resolve_skill_handle(str(mention["handle"]), repo_root_path=root)
+        role = _skill_role(resolution, active_orchestrator_seen=active_orchestrator_seen)
+        if role == "active_orchestrator":
+            active_orchestrator_seen = True
+        mention["role"] = role
+        mention["resolution"] = resolution
+        if resolution.get("status") != "ok":
+            unresolved.append({
+                "namespace": "skills",
+                "token": mention["token"],
+                "handle": mention["handle"],
+                "error_code": resolution.get("error_code"),
+                "operator_action": resolution.get("operator_action"),
+            })
+
+    for mention in reviewer_mentions:
+        resolution = resolve_reviewer_handle(str(mention["handle"]))
+        mention["role"] = "reviewer"
+        mention["resolution"] = resolution
+        if resolution.get("status") != "ok":
+            unresolved.append({
+                "namespace": "reviewers",
+                "token": mention["token"],
+                "handle": mention["handle"],
+                "error_code": resolution.get("error_code"),
+                "operator_action": resolution.get("operator_action"),
+            })
+
+    return {
+        "schema_version": "command-handle-parse.v1",
+        "status": "pass" if not unresolved else "fail",
+        "skill_mentions": skill_mentions,
+        "reviewer_mentions": reviewer_mentions,
+        "unresolved": unresolved,
+        "mention_counts": {
+            "skills": len(skill_mentions),
+            "reviewers": len(reviewer_mentions),
+            "unresolved": len(unresolved),
+        },
+    }
 
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
@@ -519,22 +626,26 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
     root = repo_root_path or repo_root()
     handles = build_skill_handles(repo_root_path=root)
     rows = _command_handle_write_rows(handles)
-    violations = [
+    violations = validate_skill_handles(handles, repo_root_path=root)
+    violations.extend([
         violation
         for row in rows
         for violation in row.get("violations", [])
-    ]
+    ])
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]
         for row in rows
         if row["kind"] == "skill_command_handle"
     }
-    deletes = _prune_obsolete_command_handle_dirs(root=root, expected_dirs=expected_dirs, dry_run=dry_run)
+    deletes = _prune_obsolete_command_handle_dirs(
+        root=root,
+        expected_dirs=expected_dirs,
+        dry_run=dry_run or bool(violations),
+    )
     if not dry_run and not violations:
         for row in rows:
             path = root / row["path"]
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(row["content"], encoding="utf-8")
+            _write_generated_text(path, row["content"])
     return {
         "schema_version": "command-handle-write.v1",
         "status": "pass" if not violations else "fail",
@@ -552,6 +663,16 @@ def check_command_handles(*, repo_root_path: Path | None = None) -> dict[str, An
     root = repo_root_path or repo_root()
     rows = _command_handle_write_rows(build_skill_handles(repo_root_path=root))
     violations: list[dict[str, Any]] = []
+    expected_dirs = {
+        root / ".agents" / "skills" / row["handle"]
+        for row in rows
+        if row["kind"] == "skill_command_handle"
+    }
+    for row in _prune_obsolete_command_handle_dirs(root=root, expected_dirs=expected_dirs, dry_run=True):
+        violations.append({
+            "code": "COMMAND_HANDLE_OBSOLETE",
+            **row,
+        })
     for row in rows:
         path = root / row["path"]
         if not path.exists():

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=too-many-branches,too-many-locals,too-many-statements
 """Validate runtime-separation slice manifest invariants."""
 
 from __future__ import annotations
@@ -8,7 +9,12 @@ import hashlib
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import yaml  # type: ignore
+except ImportError:
+    yaml = None
+
+from yaml_compat import load_yaml_mapping
 
 ALLOWED_ACTIVATION_STATES = {
     "declared",
@@ -72,7 +78,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) if yaml else load_yaml_mapping(path)
     if not isinstance(payload, dict):
         raise ValueError(f"manifest root must be a mapping: {path}")
     return payload

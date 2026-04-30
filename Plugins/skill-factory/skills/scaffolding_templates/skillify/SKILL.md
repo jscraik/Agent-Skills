@@ -25,7 +25,7 @@ Read when: source workflow context comes from prior agent sessions: [session col
 
 ## Required inputs
 
-- Source workflow context (session transcript, notes, or commands used).
+- Source workflow context (session transcript, notes, commands used, or `~/.agents/session-collector` bundle evidence).
 - Target audience and success criteria for the new skill.
 - Destination path and category for where the skill should live.
 
@@ -39,7 +39,7 @@ Read when: source workflow context comes from prior agent sessions: [session col
 ## Procedure
 
 1. Capture the source workflow and confirm intended reuse scope.
-2. If the workflow source is a prior session or repeated agent run, consume bounded extracted evidence rather than raw transcripts.
+2. If the workflow source is a prior session or repeated agent run, prefer `~/.agents/session-collector` bundle evidence and consume bounded extracted evidence rather than raw transcripts.
 3. Extract stable triggers, required inputs, deliverables, and failure boundaries.
 4. Draft `SKILL.md` using the template and include explicit procedure/validation/constraints sections.
 5. Add or update supporting references (contract/evals/task profile) needed for governance gates.
@@ -53,7 +53,7 @@ Reference materials:
 ## Constraints
 
 - Do not codify workflows that are still exploratory or contradictory.
-- Do not inventory all session history inside `skillify`; use `skill-refactor` for broad session evidence and consume only the selected workflow extraction.
+- Do not inventory all session history inside `skillify`; use `skill-refactor` or `~/.agents/session-collector` for broad session evidence and consume only the selected workflow extraction.
 - Do not embed repository secrets, credentials, or private user data in generated skill artifacts.
 - Redact sensitive tokens, secret paths, and account identifiers from examples and references.
 - Keep scope aligned to the requested category and destination.

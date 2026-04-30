@@ -35,8 +35,9 @@ class TestAskSkillsErrors(unittest.TestCase):
         summary = _summarize_family_benchmark_failure(stdout="", stderr="baseline file missing")
         self.assertEqual(summary, "baseline file missing")
 
+    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
-    def test_audit_skill_strict_includes_family_failure_context(self, mock_run):
+    def test_audit_skill_strict_includes_family_failure_context(self, mock_run, _mock_python):
         family_stdout = "\n".join([
             "[family-benchmark] failures:",
             "  - FAIL CONTRACT_SCHEMA [backend/cli-spec] contract issue one",
@@ -63,6 +64,29 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIn("+1 more", error.message)
         self.assertIsNotNone(error.fix_suggestion)
         self.assertIn("data.family_benchmarks", error.fix_suggestion)
+
+    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
+    @patch("ask.commands.skills.subprocess.run")
+    def test_audit_skill_strict_normalizes_skill_file_for_strict_gates(self, mock_run, _mock_python):
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="diagnostics ok", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="security gate ok", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="family ok", stderr=""),
+            subprocess.CompletedProcess(args=[], returncode=0, stdout="openclaw ok", stderr=""),
+        ]
+
+        result = audit_skill(repo_root=repo_root, skill_path="Skills/agent-ops/autofix/SKILL.md", level="strict")
+
+        self.assertEqual(result.status, "success")
+        security_cmd = mock_run.call_args_list[1].args[0]
+        family_cmd = mock_run.call_args_list[2].args[0]
+        openclaw_cmd = mock_run.call_args_list[3].args[0]
+        self.assertIn("Skills/agent-ops/autofix", security_cmd)
+        self.assertIn("Skills/agent-ops/autofix", family_cmd)
+        self.assertIn("Skills/agent-ops/autofix", openclaw_cmd)
+        self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", security_cmd)
+        self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", family_cmd)
+        self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", openclaw_cmd)
 
     @patch("ask.commands.skills.subprocess.run")
     def test_install_skill_skips_validation_flag_when_unsupported(self, mock_run):

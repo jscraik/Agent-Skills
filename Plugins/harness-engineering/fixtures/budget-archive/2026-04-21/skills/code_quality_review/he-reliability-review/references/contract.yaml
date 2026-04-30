@@ -2,51 +2,54 @@ schema_version: 1
 
 purpose: >
   Run the Harness Engineering reliability-review stage so services, APIs,
-  and multi-component systems receive severity-ranked reliability findings
-  with failure-mode analysis, resilience coverage assessment, dependency
-  failure mapping, and SLO readiness evaluation.
+  workers, queues, and multi-component systems receive severity-ranked
+  reliability findings grounded in failure-mode analysis, resilience controls,
+  dependency behavior, observability coverage, and SLO readiness.
 
 triggers:
-  - the user wants a reliability review of a service, API, or system
-  - the user wants failure-mode analysis for an architecture
-  - the user wants resilience-pattern coverage assessed
-  - the user wants to understand cascading-failure risk
-  - the user wants SLO readiness evaluated
-  - he-plan routes to reliability review via production-considerations criteria
-  - QA reports intermittent, timeout, retry, dependency-driven, or high-blast-radius behavior
+  - the user wants a reliability review of a service, API, worker, queue, or system
+  - the user wants failure-mode analysis for architecture or production behavior
+  - the user wants resilience pattern coverage assessed
+  - the user wants cascading-failure or blast-radius risk reviewed
+  - the user wants SLO, SLI, alert, or error-budget readiness evaluated
+  - QA evidence suggests intermittent, dependency-driven, timeout, retry, overload, or production-like failure
 
 inputs:
-  - a review target such as service code, architecture doc, PR with service changes, or infrastructure config
-  - optional QA report with intermittent reproduction or external dependency clues
-  - access to the relevant code, configs, or design documents
-  - enough architectural context to map service boundaries and dependencies
+  - review target such as service code, architecture doc, PR, diff, QA report, incident note, or infrastructure config
+  - code, config, logs, traces, dashboards, or design documents that provide evidence
+  - critical user or system flows, when available
+  - dependency, runtime, deploy, traffic, and operational context, when available
+  - SLO, SLI, error-budget, alert, or runbook expectations, when available
 
 outputs:
-  - severity-ranked reliability findings with failure scenario, blast radius, location, mitigation, and confidence
-  - resilience coverage assessment against the resilience checklist
-  - dependency failure matrix when multiple external dependencies exist
-  - SLO readiness assessment when the target is user-facing
-  - QA reliability classification when the source is intermittent or dependency-driven
+  - severity-ranked reliability findings with evidence, failure scenario, blast radius, mitigation, validation, and confidence
+  - dependency and critical-flow map for non-trivial systems
+  - resilience control assessment covering timeout, retry, backoff, jitter, idempotency, fallback, circuit breaker, bulkhead, rate limit, load shedding, and queue behavior where relevant
+  - observability readiness assessment covering health checks, metrics, traces, logs, alerts, SLI, SLO, and error-budget alignment where relevant
+  - recovery readiness statement covering rollback, degraded mode, runbook, and incident response where relevant
   - explicit no-critical-findings statement when appropriate
-  - schema_version: 1 when the caller requests structured output
+  - "schema_version: 1 when the caller requests structured output"
 
 non_goals:
-  - implementing resilience fixes
-  - performance optimization without reliability context
+  - implementing reliability fixes
+  - performance optimization without reliability impact
   - general code-quality review without reliability focus
-  - planning reliability implementation
+  - security threat modeling beyond reliability-impacting security factors
+  - planning implementation beyond concrete mitigation and validation guidance
 
 risks:
-  - theoretical scenarios without grounding; mitigate with code and architecture evidence
-  - missing cascading paths; mitigate with dependency mapping before analysis
-  - over-engineering recommendations; mitigate with scale-appropriate patterns
-  - assuming cloud guarantees; mitigate with application-level verification
-  - treating reliability symptoms as simple bugs; mitigate with failure-mode classification before remediation guidance
+  - theoretical scenarios without evidence; mitigate with code, config, architecture, or operational evidence
+  - missing cascading paths; mitigate with dependency and critical-flow mapping before severity assignment
+  - over-engineering recommendations; mitigate with scale-appropriate controls and explicit tradeoffs
+  - assuming provider guarantees solve application failure modes; mitigate with application-level recovery checks
+  - retry amplification; mitigate by checking timeout, backoff, jitter, idempotency, retry budget, and load shedding together
 
 observability: >
-  Track stage selection accuracy, fallback frequency when mapped roles are
-  unavailable, and validation pass/fail outcomes for each run.
+  Track audit pass/fail outcomes, eval coverage, routing accuracy, and whether
+  review outputs include evidence, blast radius, detection gaps, mitigation,
+  and validation guidance for critical findings.
 
 rollback_procedure: >
-  Restore the previous contract/evals/task-profile files from git, then rerun
-  strict skill audit and plugin-builder validation before re-promoting.
+  Restore the previous SKILL.md, agents/openai.yaml, and references directory
+  from git, then rerun strict skill audit, route resolution, and catalog parity
+  before re-promoting the skill.

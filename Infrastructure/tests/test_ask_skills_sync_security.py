@@ -530,7 +530,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         readme_path = self.repo_root / "README.md"
         skill_index_path = self.repo_root / "SKILL.md"
         readme_path.write_text(
-            "# Agent Skills\n\nA governed repository of **120 canonical skills** for AI coding agents.\n",
+            "# Agent Skills\n\nA governed repository of AI coding skills. Built around ask.\n",
             encoding="utf-8",
         )
         skill_index_path.write_text(
@@ -558,6 +558,42 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertTrue((skills_dir / "valid-skill").is_symlink())
+        self.assertIn("**1 skills**", readme_path.read_text(encoding="utf-8"))
+        self.assertIn("`total_skills`: 1", skill_index_path.read_text(encoding="utf-8"))
+
+    def test_sync_skills_rooted_workspace_refreshes_catalog_projections(self) -> None:
+        readme_path = self.repo_root / "README.md"
+        skill_index_path = self.repo_root / "SKILL.md"
+        readme_path.write_text(
+            "# Agent Skills\n\nA governed repository of AI coding skills. Built around ask.\n",
+            encoding="utf-8",
+        )
+        skill_index_path.write_text(
+            "# Agent Skills Index\n\n## Summary\n- `total_skills`: 120\n- `policy_identity`: stale\n",
+            encoding="utf-8",
+        )
+        valid_source = self.repo_root / "Skills" / "agent-ops" / "valid-skill"
+        valid_source.mkdir(parents=True)
+        (valid_source / "SKILL.md").write_text(
+            "---\nname: valid-skill\ndescription: Valid skill description.\n---\n",
+            encoding="utf-8",
+        )
+
+        fake_entry = SimpleNamespace(
+            name="valid-skill",
+            source_dir=valid_source,
+            category="Skills/agent-ops",
+            description="Valid skill description.",
+        )
+        with mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[fake_entry]):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "success")
         self.assertIn("**1 skills**", readme_path.read_text(encoding="utf-8"))
         self.assertIn("`total_skills`: 1", skill_index_path.read_text(encoding="utf-8"))
 

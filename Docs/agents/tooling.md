@@ -24,6 +24,7 @@ Repo-local tooling inventory generated from `Docs/agents/tooling.contract.json`.
 | `cloudflared` |
 | `npm:vitest` |
 | `ruff` |
+| `pipx:pylint` |
 | `npm:eslint` |
 | `npm:agent-browser` |
 | `npm:agentation` |
@@ -58,6 +59,7 @@ Repo-local tooling inventory generated from `Docs/agents/tooling.contract.json`.
 | `cloudflared` |
 | `vitest` |
 | `ruff` |
+| `pylint` |
 | `eslint` |
 | `agent-browser` |
 | `agentation-mcp` |
@@ -89,6 +91,7 @@ Repo-local tooling inventory generated from `Docs/agents/tooling.contract.json`.
 | `Cloudflared` | `run` |
 | `Vitest` | `test` |
 | `Ruff` | `debug` |
+| `Pylint` | `debug` |
 | `ESLint` | `debug` |
 | `Agent Browser` | `tool` |
 | `Agentation` | `tool` |

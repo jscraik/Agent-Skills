@@ -32,6 +32,7 @@ from projection_engine import (  # noqa: E402
 from command_surface import (  # noqa: E402
     check_command_handles,
     handles_report,
+    parse_command_handles,
     resolve_reviewer_handle,
     resolve_skill_handle,
     write_command_handles,
@@ -52,9 +53,9 @@ from ask.selection_contract import (  # noqa: E402
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
     """
-    Constructs a platform-appropriate Python invocation command prioritising uv/mise wrappers when available.
+    Constructs a platform-appropriate Python invocation command.
     
-    The returned command is chosen with this observable precedence: a non-empty PYTHON_BIN environment value, a `mise`+`uv` wrapper, an `uv` wrapper, a user virtualenv at `~/.venvs/pyyaml/bin/python`, then the system `python3`.
+    The returned command is chosen with this observable precedence: a non-empty PYTHON_BIN environment value, a local Python that already satisfies requested packages, a `mise`+`uv` wrapper, an `uv` wrapper, then the system `python3`. Prefer an existing local environment before `uv --with` so offline audits do not try to fetch packages from PyPI.
     
     Parameters:
         with_packages (Optional[List[str]]): Optional iterable of package names to request via `--with` when using a wrapper that accepts package flags; falsy entries are ignored.
@@ -67,6 +68,23 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
         return shlex.split(configured)
 
     packages = [pkg for pkg in (with_packages or []) if pkg]
+    if packages:
+        candidates = []
+        # Prioritize sys.executable first
+        candidates.append([sys.executable])
+        # Include virtualenv python if VIRTUAL_ENV is set
+        venv = os.environ.get("VIRTUAL_ENV")
+        if venv:
+            candidates.append([os.path.join(venv, "bin", "python")])
+        # Include discovered python interpreters
+        for name in ["python3", "python"]:
+            python_path = shutil.which(name)
+            if python_path:
+                candidates.append([python_path])
+
+        for candidate in candidates:
+            if _python_command_supports_packages(candidate, packages):
+                return candidate
 
     if shutil.which("mise") and shutil.which("uv"):
         cmd: List[str] = ["mise", "exec", "--", "uv", "run", "--python", "3.12"]
@@ -82,10 +100,32 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
         cmd.append("python")
         return cmd
 
-    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-    if preferred.exists():
-        return [str(preferred)]
     return ["python3"]
+
+
+def _python_command_supports_packages(command: List[str], packages: List[str]) -> bool:
+    """Return true when *command* can import every requested package without installation."""
+    executable = Path(command[0]).expanduser()
+    if os.sep in command[0] and not executable.exists():
+        return False
+    if os.sep not in command[0] and not shutil.which(command[0]):
+        return False
+    module_names = ["yaml" if package == "pyyaml" else package for package in packages]
+    probe = (
+        "import importlib.util, sys; "
+        "missing=[name for name in sys.argv[1:] if importlib.util.find_spec(name) is None]; "
+        "sys.exit(1 if missing else 0)"
+    )
+    try:
+        completed = subprocess.run(
+            [*command, "-c", probe, *module_names],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return completed.returncode == 0
 
 
 def extract_family_fail_lines(stdout: str) -> List[str]:
@@ -312,9 +352,8 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     """
     entries = [
         entry
-        for entry in discover_catalog_entries()
+        for entry in discover_catalog_entries(source="repo")
         if entry.source_dir.is_relative_to(repo_root)
-        and ".agents" not in entry.source_dir.relative_to(repo_root).parts
     ]
     catalog_count = len(entries)
     logs: list[str] = []
@@ -330,12 +369,19 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     readme_path = repo_root / "README.md"
     if readme_path.exists():
         readme_content = readme_path.read_text(encoding="utf-8")
-        updated_readme = re.sub(
+        updated_readme, replacements = re.subn(
             r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
             f"A governed repository of **{catalog_count} skills** for AI coding agents",
             readme_content,
             count=1,
         )
+        if replacements == 0:
+            updated_readme, replacements = re.subn(
+                r"A governed repository of AI coding skills\.",
+                f"A governed repository of **{catalog_count} skills** for AI coding agents.",
+                updated_readme,
+                count=1,
+            )
         updated_readme = re.sub(
             r"A governed repository of \*\*skills\*\* for AI coding agents",
             f"A governed repository of **{catalog_count} skills** for AI coding agents",
@@ -589,6 +635,24 @@ def skills_resolve(repo_root: Path, handle: str) -> CallResult:
     return result
 
 
+def skills_parse(repo_root: Path, request_text: str) -> CallResult:
+    """Parse a prompt for $ skill handles and @ reviewer handles, then resolve them."""
+    result = CallResult()
+    result.metadata["command"] = "skills parse"
+    payload = parse_command_handles(request_text, repo_root_path=repo_root)
+    result.data["parse"] = payload
+    if payload.get("status") != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="One or more command handles in the prompt could not be resolved.",
+                fix_suggestion="Inspect data.parse.unresolved, then rerun with valid $ skill and @ reviewer handles.",
+            )
+        )
+    return result
+
+
 def skills_proof(repo_root: Path, handle: str) -> CallResult:
     """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
     result = CallResult()
@@ -835,6 +899,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         ))
         return result
 
+    audit_target = Path(skill_path)
+    if audit_target.name == "SKILL.md":
+        audit_target = audit_target.parent
+    audit_target_path = audit_target.as_posix()
+
     python = _get_python_command(["pyyaml", "jsonschema"])
 
     diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
@@ -844,7 +913,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     if level == "strict":
         # Security gate (skill_gate.py)
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
-        gate_cmd = python + [gate_script, skill_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
+        gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
@@ -853,7 +922,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             return result
 
         # Family benchmarks validation
-        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", skill_path]
+        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
@@ -861,7 +930,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             message = "Family benchmarks validation failed."
             if summary:
                 message = f"{message} First failures: {summary}"
-            quoted_skill_path = shlex.quote(skill_path)
+            quoted_skill_path = shlex.quote(audit_target_path)
 
             result.status = "error"
             result.errors.append(ErrorObject(
@@ -876,7 +945,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
         # OpenClaw skill guard
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
-        openclaw_cmd = python + [openclaw_script, skill_path, "--mode", "both", "--format", "text"]
+        openclaw_cmd = python + [openclaw_script, audit_target_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
@@ -1615,7 +1684,7 @@ def _append_user_runtime_relinks(
         (skills_dir, home / ".agents" / "skills", True),
         (skills_dir, home / ".codex" / "skills", True),
         (repo_root, home / ".agents" / "agent-skills", True),
-        (plugins_dir, home / ".agents" / "plugins", True),
+        (plugins_dir, home / ".agents" / "plugins", False),
     ]
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
@@ -2124,6 +2193,30 @@ def sync_skills(
                 warnings=plan["warnings"],
             )
             return result
+        try:
+            projection_logs = _refresh_catalog_projections(repo_root, dry_run)
+        except OSError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Catalog projection refresh failed: {exc}",
+                    fix_suggestion="Check README.md/SKILL.md write permissions and rerun sync.",
+                )
+            )
+            result.data["plan"] = plan
+            result.data["logs"] = logs
+            result.data["policy_identity"] = get_policy_identity()
+            result.data["projection_mode"] = projection_decision.projection_mode
+            result.data["projection"] = build_projection_plan_metadata(
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                warnings=plan["warnings"],
+            )
+            return result
+        plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
+        logs.extend(projection_logs)
         plan["mutation_counts"] = {
             "writes": len(plan["writes"]),
             "deletes": len(plan["deletes"]),

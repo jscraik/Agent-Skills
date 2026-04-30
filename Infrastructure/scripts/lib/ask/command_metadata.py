@@ -7,7 +7,22 @@ from typing import Dict, List, Tuple
 VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor-catalog", "provider-audit"],
-    "skills": ["list", "budget", "handles", "resolve", "proof", "route", "goal", "starter", "sync", "audit", "install", "fold", "init"],
+    "skills": [
+        "list",
+        "budget",
+        "handles",
+        "resolve",
+        "parse",
+        "proof",
+        "route",
+        "goal",
+        "starter",
+        "sync",
+        "audit",
+        "install",
+        "fold",
+        "init",
+    ],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -29,6 +44,10 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills budget --json",
         "ask skills handles --check --json",
         "ask skills resolve he-heartbeat --json",
+        (
+            "ask skills parse "
+            "\"use $skill-builder to validate $he-heartbeat with @skillinspector\" --json"
+        ),
         "ask skills proof he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
@@ -79,6 +98,12 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "resolve"): [
         "ask skills resolve he-heartbeat --json",
+    ],
+    ("skills", "parse"): [
+        (
+            "ask skills parse "
+            "\"use $skill-builder to validate $he-heartbeat with @skillinspector\" --json"
+        ),
     ],
     ("skills", "proof"): [
         "ask skills proof he-heartbeat --json",

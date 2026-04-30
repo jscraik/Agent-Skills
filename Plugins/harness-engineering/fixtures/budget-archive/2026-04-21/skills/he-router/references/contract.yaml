@@ -9,6 +9,7 @@ triggers:
   - stage selection is ambiguous across ideation, spec, plan, optimization, implementation, or review
   - user asks where domain-model, ubiquitous-language, `CONTEXT.md`, glossary, terminology, or domain drift work belongs
   - user asks to run a QA session, report bugs conversationally, or turn feedback into Linear issues
+  - user asks to use prior sessions, archived sessions, session-collector output, or repeated failures to improve or resume Harness Engineering work
   - user asks where to resume the Harness Engineering workflow
 
 inputs:
@@ -44,6 +45,7 @@ risks:
   - refine-vs-implement confusion; mitigate by routing browser-first polish loops to `he-refine`
   - debug-vs-implement confusion; mitigate by routing root-cause bug loops to `he-fix-bugs`
   - QA-intake-vs-debug confusion; mitigate by routing clear conversational bug reports to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, and multi-issue sequencing to `he-plan`
+  - session-evidence-vs-implementation confusion; mitigate by routing plugin/workflow improvements to `he-improve`, active lifecycle drift to `he-compound-refresh`, recurring waits to `he-heartbeat`, concrete derived tasks to `he-work`, and bug/root-cause evidence to `he-fix-bugs`
   - branch-hygiene-vs-debug confusion; mitigate by routing stale branch cleanup requests to `he-prune-branches`
   - lifecycle step skipping; mitigate with deterministic precedence for review, diagnosis, TDD, refinement, optimization, and artifact deepening before generic implementation
 

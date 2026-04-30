@@ -1,3 +1,0 @@
-$he-heartbeat
-
-Use $he-heartbeat every 10m on PR 137. Keep checking CI, CodeRabbit, and review threads, and stop once it is green or only waiting on approval.

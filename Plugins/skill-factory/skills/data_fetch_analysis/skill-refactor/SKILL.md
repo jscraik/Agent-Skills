@@ -26,7 +26,7 @@ Read when: session history must be inventoried or extracted before synthesis: [s
 ## Required inputs
 
 - A clear analysis scope (single skill, category, or full inventory).
-- Session evidence sources or local artifacts available for review.
+- Session evidence sources or local artifacts available for review, preferably a `~/.agents/session-collector` bundle for broad session scope.
 - Ranking criteria for severity and impact.
 
 ## Deliverables
@@ -39,8 +39,8 @@ Read when: session history must be inventoried or extracted before synthesis: [s
 ## Procedure
 
 1. Define scope: single skill, lane, or full inventory.
-2. Gather evidence from session logs, skill metadata, and related references.
-3. If the session scope is broad or the user references prior attempts, inventory sessions before selecting deep dives; extract only bounded skeleton/error snippets for selected sessions.
+2. Gather evidence from session-collector bundles, session logs, skill metadata, and related references.
+3. If the session scope is broad or the user references prior attempts, run or consume `~/.agents/session-collector` before selecting deep dives; extract only bounded skeleton/error snippets for selected sessions.
 4. Group failures by root cause (coverage gap, instruction drift, routing mismatch, or quality regression).
 5. Rank recommendations by impact, confidence, and implementation cost.
 6. Return a concise keep/improve/merge/retire action table with evidence anchors.
@@ -48,6 +48,7 @@ Read when: session history must be inventoried or extracted before synthesis: [s
 Reference scripts for deterministic evidence extraction:
 - [scan_codex_sessions.py](./scripts/scan_codex_sessions.py)
 - [correlate_multi_source_skill_failures.py](./scripts/correlate_multi_source_skill_failures.py)
+- Preferred collector root: `~/.agents/session-collector`
 - [session evidence workflow](./references/session-evidence-workflow.md)
 - Assets: [skill-refactor.png](./assets/skill-refactor.png), [icon-small.png](./agents/assets/icon-small.png), [icon-large.png](./agents/assets/icon-large.png)
 

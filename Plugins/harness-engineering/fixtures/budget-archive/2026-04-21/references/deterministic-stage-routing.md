@@ -13,11 +13,12 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 7. **Test-first wins over normal work**: RED/GREEN, TDD, failing test first, or regression-first language routes to `he-tdd`.
 8. **Browser polish wins over normal work**: browser-first iteration, accessibility polish, visual refinement, or dev-server loop language routes to `he-refine`.
 9. **Measured optimization wins over normal work**: benchmark, tune, experiment, parameter search, or measured performance improvement routes to `he-improve`.
-10. **Existing artifact depth wins over new artifacts**: harden/deepen an existing spec routes to `he-deepen-spec`; harden/deepen an existing plan routes to `he-deepen-plan`.
-11. **Lifecycle creation flows forward**: fuzzy idea to `he-ideate` or `he-brainstorm`; completed non-trivial brainstorm to `he-spec`; complete spec to `he-plan`; approved plan to `he-work`. Skip from brainstorm to `he-plan` only when the brainstorm output is already contract-grade, and skip from spec to `he-work` only for tiny, low-risk changes with explicit execution approval.
-12. **QA intake routes by expected-behavior clarity**: conversational bug reports with enough behavior detail route to `he-fix-bugs`; unclear expected behavior routes to `he-brainstorm` or `he-spec`; multiple related Linear issues needing sequencing route to `he-plan`.
-13. **Domain language routes by artifact state**: fuzzy term confusion routes to `he-brainstorm`; first behavior contract routes to `he-spec`; existing spec contradiction routes to `he-deepen-spec`; execution drift routes to `he-work`; review drift routes to a review stage.
-14. **If still ambiguous, ask once**: ask for the missing source artifact or lifecycle state rather than guessing.
+10. **Session evidence routes by intended outcome**: prior sessions, archived sessions, session collector, repeated failures, or "what keeps failing" language routes to `he-improve` for plugin/workflow improvement, `he-compound-refresh` for active lifecycle drift, `he-heartbeat` for recurring waits, `he-work` for concrete derived tasks, or `he-fix-bugs` for root-cause evidence.
+11. **Existing artifact depth wins over new artifacts**: harden/deepen an existing spec routes to `he-deepen-spec`; harden/deepen an existing plan routes to `he-deepen-plan`.
+12. **Lifecycle creation flows forward**: fuzzy idea to `he-ideate` or `he-brainstorm`; stable requirements to `he-spec`; approved spec to `he-plan`; approved plan to `he-work`.
+13. **QA intake routes by expected-behavior clarity**: conversational bug reports with enough behavior detail route to `he-fix-bugs`; unclear expected behavior routes to `he-brainstorm` or `he-spec`; multiple related Linear issues needing sequencing route to `he-plan`.
+14. **Domain language routes by artifact state**: fuzzy term confusion routes to `he-brainstorm`; first behavior contract routes to `he-spec`; existing spec contradiction routes to `he-deepen-spec`; execution drift routes to `he-work`; review drift routes to a review stage.
+15. **If still ambiguous, ask once**: ask for the missing source artifact or lifecycle state rather than guessing.
 
 ## Stage Matrix
 
@@ -32,7 +33,7 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 | `he-work` | implement an approved plan or concrete small change | Plan/spec/todo target and verification gate |
 | `he-tdd` | start with failing test, RED/GREEN, regression-first implementation | Concrete behavior target and test command |
 | `he-fix-bugs` | reproduce, diagnose, root-cause, debug, file QA issues | Reported behavior, expected behavior, repro path |
-| `he-improve` | optimize with measurements, run experiments, tune parameters | Baseline metric and measurement command |
+| `he-improve` | optimize with measurements, run experiments, tune parameters, improve HE from session evidence | Baseline metric, measurement command, or session evidence source |
 | `he-refine` | browser-first polish, visual/accessibility iteration, dev-server loop | Running app target and stop condition |
 | `he-code-review` | broad readiness, PR go/no-go, pre-merge blockers | Review target and acceptance baseline |
 | `he-technical-review` | deep engineering critique, validate review feedback, correctness risk | Diff/spec/plan target and evidence |
@@ -40,7 +41,7 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 | `he-prune-branches` | clean stale local branches/worktrees gone from remote | Repository path and deletion confirmation |
 | `he-heartbeat` | recurring follow-up, monitor, heartbeat, wake-up, until green/merged/done | Concrete target, cadence or default, stop condition |
 | `he-compound` | resume or orchestrate multiple stages when lifecycle state is unclear | Artifact inventory and next-stage decision |
-| `he-compound-refresh` | refresh/consolidate solution docs and durable learnings | Evidence source paths |
+| `he-compound-refresh` | refresh an active compound run, re-check blockers, consolidate solution docs and durable learnings | Live target or evidence source paths |
 
 ## Conflict Examples
 
@@ -52,3 +53,4 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 - "This feels broken but I do not know what should happen" routes to `he-brainstorm`, not Linear filing.
 - "We have three QA issues and one blocks the others" routes to `he-plan`, not a single broad bug fix.
 - "Wake this thread every 10m until PR 137 is green" routes to `he-heartbeat`, which selects `he-code-review` as the wake-up stage.
+- "Use archived sessions and the session collector to find HE improvements" routes to `he-improve`, while "continue the active run from session evidence" routes to `he-compound-refresh`.

@@ -34,10 +34,11 @@ Select exactly one `harness-engineering` stage and return one exact next skill i
 3. Pick exactly one stage using the highest-priority matching rule from `../../references/routing-map.json`; do not merge multiple stages into one response.
 4. Route explicit domain-model, ubiquitous-language, `CONTEXT.md`, glossary, or terminology requests by artifact state: fuzzy idea to `he-brainstorm`, first contract to `he-spec`, existing spec conflict to `he-deepen-spec`, execution drift to `he-work`, review drift to a review stage.
 5. Route recurring follow-up, monitor, heartbeat, loop, `every <interval>`, or `until green/merged/done` requests to `he-heartbeat`; `he-heartbeat` must select the underlying HE work/review/debug stage for each wake-up.
-6. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.
-7. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
-8. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.
-9. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.
+6. Route prior-session, archived-session, session-collector, repeated-failure, or "what keeps failing" requests with [../../references/session-evidence-contract.md](../../references/session-evidence-contract.md): plugin/workflow improvement to `he-improve`, active lifecycle drift to `he-compound-refresh`, recurring waits to `he-heartbeat`, concrete derived tasks to `he-work`, and bug/root-cause evidence to `he-fix-bugs`.
+7. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.
+8. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
+9. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.
+10. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.
 
 ## Philosophy
 
@@ -70,6 +71,7 @@ Select exactly one `harness-engineering` stage and return one exact next skill i
 - "The branch is implemented and has linked Linear QA issues. Route the next stage without skipping review."
 - "This bug needs a failing regression first. Route the next stage deterministically."
 - "Wake this thread every 10m and keep PR checks moving until green or blocked."
+- "Use archived Codex sessions and the session collector to find repeated HE failures and route the improvement work."
 
 ## Validation
 
@@ -92,3 +94,5 @@ Read when: routing could plausibly match more than one lifecycle stage or when s
 Read when: routing domain-model, ubiquitous-language, `CONTEXT.md`, glossary, terminology, or Linear issue wording requests.
 - [../../references/qa-intake-routing.md](../../references/qa-intake-routing.md)
 Read when: routing QA sessions, conversational bug reports, or feedback-to-Linear issue requests.
+- [../../references/session-evidence-contract.md](../../references/session-evidence-contract.md)
+Read when: routing prior-session, archived-session, session-collector, repeated failure, or HE improvement-from-history requests.
