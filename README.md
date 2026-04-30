@@ -146,7 +146,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 | product-strategy   | 4      | architecture-interview, chatgpt-apps, interview-me |
 | security-ops       | 7      | 1password, best-practices, create-auth             |
 | content-publishing | 8      | markdown-converter, spreadsheet, visual-explainer  |
-| mobile-native      | 1      | atlas                                               |
+| mobile-native      | 1      | atlas                                              |
 
 ## Repository layout
 
@@ -184,6 +184,7 @@ agent-skills/
 ```
 
 Ownership boundaries:
+
 - Canonical authoring: `Skills/<topic-cluster>/**` (7 clusters: agent-ops, frontend-ui, backend-platform, product-strategy, security-ops, content-publishing, mobile-native) plus `Plugins/<plugin>/skills/**`
 - Factory mechanics: `Infrastructure/scripts/**`, validation/governance contracts
 - Root command wrappers: `bin/**` and `scripts/**` are stable wrappers that forward into `Infrastructure/**`; keep these as real files/directories (not symlinks)
