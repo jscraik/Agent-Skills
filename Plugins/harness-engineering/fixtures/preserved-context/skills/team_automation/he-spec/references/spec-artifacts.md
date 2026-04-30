@@ -1,4 +1,4 @@
-# CE Spec Artifact Templates
+# HE Spec Artifact Templates
 
 Read when: you are writing the actual spec file and need the canonical section set, frontmatter, or verification checks.
 
@@ -13,11 +13,12 @@ Suggested frontmatter:
 
 ```yaml
 ---
+schema_version: 1
 title: <Spec Title>
 type: feat|fix|refactor
 status: draft
 date: YYYY-MM-DD
-origin: docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md  # if applicable
+origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md  # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
 risk: low|medium|high
 spec_depth: none|lite|full
 ui_required: true|false
@@ -49,12 +50,13 @@ Suggested frontmatter:
 
 ```yaml
 ---
+schema_version: 1
 title: <UI Spec Title>
 type: feat|fix|refactor
 status: draft
 date: YYYY-MM-DD
 parent_spec: Docs/specs/YYYY-MM-DD-<name>-spec.md  # if applicable
-origin: docs/brainstorms/YYYY-MM-DD-<name>-brainstorm.md  # if applicable
+origin: docs/brainstorms/YYYY-MM-DD-<name>-requirements.md  # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
 wcag_level: AA
 ---
 ```
@@ -84,11 +86,11 @@ Run these checks immediately after writing and patch failures before handoff:
 - standard spec:
   - confirm required sections exist
   - confirm `SA` IDs exist in the Acceptance and Test Matrix
-  - confirm frontmatter includes `risk`, `spec_depth`, and `ui_required`
+  - confirm frontmatter includes `schema_version`, `risk`, `spec_depth`, and `ui_required`
 - dedicated UI spec:
   - confirm required sections exist
   - confirm `VAC` IDs exist in Visual Acceptance Criteria
-  - confirm frontmatter includes `wcag_level` and any relevant `parent_spec` or `origin`
+  - confirm frontmatter includes `schema_version`, `wcag_level`, and any relevant `parent_spec` or `origin`
 
 Suggested commands:
 
@@ -97,7 +99,7 @@ rg 'SA[0-9]+' Docs/specs/<filename>.md
 rg 'VAC[0-9]+' docs/ui-specs/<filename>.md
 rg 'Problem Statement|Failure Model|Observability|Acceptance and Test Matrix' Docs/specs/<filename>.md
 rg 'Component Inventory|Interaction States|Accessibility Requirements|Visual Acceptance Criteria' docs/ui-specs/<filename>.md
-rg 'ui_required|spec_depth|risk|wcag_level' <spec-path>
+rg 'schema_version|ui_required|spec_depth|risk|wcag_level' <spec-path>
 ```
 
 ## Notes for full service specs

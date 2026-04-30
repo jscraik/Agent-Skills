@@ -39,16 +39,20 @@ Suggested frontmatter:
 
 ```yaml
 ---
+schema_version: 1
 title: <plan title>
 type: feat|fix|refactor
 status: active
 date: YYYY-MM-DD
-origin: docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md   # if applicable
+origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
 requirements: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md  # if applicable
 spec: Docs/specs/YYYY-MM-DD-<topic>-spec.md                 # if applicable
+source_spec: docs/specs/YYYY-MM-DD-<topic>-spec.md          # compatibility alias if repo uses it
 ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md         # if applicable
 parent_plan: Docs/plans/YYYY-MM-DD-<name>-plan.md           # if applicable
 deepened: YYYY-MM-DD                                        # if applicable
+plan_route: fresh|resume|deepen
+plan_depth: lightweight|standard|deep
 ---
 ```
 
@@ -83,13 +87,17 @@ General-plan rules:
 - every acceptance item carries a stable `AC`-ID prefix
 - every phase has explicit exit criteria
 - every `AC` item maps to a governing spec constraint, brainstorm decision, or invariant
+- specs with stable `SA` IDs include an `SA` to `AC` mapping table
 - every feature-bearing implementation unit names exact file paths and test-file paths
+- high-risk, multi-phase, CLI/API/plugin/service, persistence, or governance work includes execution checkpoints with stop conditions
+- implementation units include rollback guidance when they mutate production behavior, persistent state, generated artifacts, or operator workflows
 - pseudo-code and diagrams are allowed only as directional design guidance, not implementation code
 
 Suggested core template:
 
 ```md
 ---
+schema_version: 1
 title: <plan title>
 type: feat|fix|refactor
 status: active
@@ -98,6 +106,8 @@ origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md
 spec: Docs/specs/YYYY-MM-DD-<topic>-spec.md
 ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md
 deepened: YYYY-MM-DD
+plan_route: fresh|resume|deepen
+plan_depth: lightweight|standard|deep
 ---
 
 # <Plan Title>
@@ -114,6 +124,12 @@ deepened: YYYY-MM-DD
 
 - R1. <requirement or success criterion>
 - R2. <requirement or success criterion>
+
+## Traceability Matrix
+
+| Requirement | Source acceptance IDs | Primary implementation units | Acceptance coverage |
+| --- | --- | --- | --- |
+| R1 | SA1 | P0 | AC1 |
 
 ## Scope Boundaries
 
@@ -180,6 +196,19 @@ deepened: YYYY-MM-DD
 **Verification:**
 - <observable outcome when complete>
 
+**Rollback:**
+- <how to revert or recover this unit safely>
+
+## Execution Checkpoints
+
+### Checkpoint A: <seam or risk proven before downstream work>
+
+**Exit criteria:**
+- <observable proof>
+
+**Stop condition:**
+- <condition that requires replanning or upstream clarification>
+
 ## System-Wide Impact
 
 - **Interaction graph:** <callbacks, middleware, entry points, or cross-surface touchpoints>
@@ -195,6 +224,13 @@ deepened: YYYY-MM-DD
 ## Documentation / Operational Notes
 
 - <docs, rollout, migration, support, or monitoring impacts when relevant>
+
+## Validation Ladder
+
+1. Focused checks for the changed unit.
+2. Integration checks for touched command/API/workflow seams.
+3. Repo-standard validation.
+4. Broader readiness gate only when source/runtime/artifact behavior changed.
 
 ## Execution Ledger (Planning Mode)
 
@@ -294,11 +330,16 @@ Rules:
 
 ## Verification matrix
 For general plans, verify:
+- frontmatter includes `schema_version`, source links, route, and depth
 - every phase has a `P`-ID
 - every acceptance item has an `AC`-ID
 - the requirements trace exists
+- traceability from source requirements or `SA` IDs to `AC` IDs exists when the source has stable IDs
 - the implementation units section exists
 - feature-bearing units include exact test-file paths
+- feature-bearing units include exit criteria, validation intent, and rollback guidance
+- high-risk plans include checkpoints and stop conditions
+- the validation ladder is focused-to-broad and names blocked-step reporting expectations
 - internal references and source links are not obviously broken
 - deferred implementation unknowns are explicit rather than hidden as certainty
 - any High-Level Technical Design section is clearly directional and non-prescriptive

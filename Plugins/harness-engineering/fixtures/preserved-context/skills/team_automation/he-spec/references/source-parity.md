@@ -1,4 +1,4 @@
-# CE Spec Prompt Parity Map
+# HE Spec Prompt Parity Map
 
 Read when: you need to verify that `workflow-spec.md`, `workflow-spec-ui.md`, and `workflow-ui-spec.md` were merged into `he-spec` without losing behavior, or when packaging this skill into another surface.
 

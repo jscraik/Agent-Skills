@@ -14,6 +14,7 @@ Compatibility:
 
 ```yaml
 ---
+schema_version: 1
 title: <requirements title>
 date: YYYY-MM-DD
 status: draft
@@ -30,6 +31,17 @@ complexity: small|medium|large
 
 ## Problem Frame
 [Who is affected, what is changing, and why it matters]
+
+## Pressure Test
+[Why this should be solved now, simplified, deferred, or rejected]
+
+## Approaches Considered
+| Approach | Strengths | Weaknesses | Verdict |
+|---|---|---|---|
+| <option> | <why it helps> | <cost or risk> | <keep/reject/recommended> |
+
+## Recommendation
+[Chosen direction and rationale tied to constraints]
 
 ## Requirements
 **[Group Header]**
@@ -57,9 +69,12 @@ complexity: small|medium|large
 - [Affects R2][Needs research] [Question that likely requires research during planning]
 
 ## Next Steps
-[If `Resolve Before Planning` is empty: `-> /he:plan` or `-> /he:spec`, depending on `spec_required`]
-[If `Resolve Before Planning` is not empty: `-> Resume /he:brainstorm` to resolve blocking questions before planning]
+[If `Resolve Before Planning` is empty and `spec_required` is `lite` or `full`: `Recommended next stage: he-spec`]
+[If `Resolve Before Planning` is empty and `spec_required` is `none`: `Recommended next stage: he-plan` or `he-work`, depending on risk and complexity]
+[If `Resolve Before Planning` is not empty: `Recommended next stage: he-brainstorm` to resolve blocking questions before specification or planning]
 ```
+
+Do not use legacy `ce-spec`, `ce-plan`, or `ce-work` labels in new Harness Engineering requirements artifacts.
 
 ## Visual aids
 

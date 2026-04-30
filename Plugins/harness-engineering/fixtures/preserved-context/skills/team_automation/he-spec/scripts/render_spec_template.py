@@ -16,8 +16,11 @@ from typing import Dict
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
 FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
-if str(FAMILY_SKILLS_DIR) not in sys.path:
-    sys.path.insert(0, str(FAMILY_SKILLS_DIR))
+for candidate in [FAMILY_SKILLS_DIR, *(parent / "skills" for parent in SCRIPT_DIR.parents)]:
+    if (candidate / "_template_utils.py").exists():
+        if str(candidate) not in sys.path:
+            sys.path.insert(0, str(candidate))
+        break
 
 from _template_utils import (  # noqa: E402
     TemplateRenderError,
@@ -25,7 +28,9 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
+    print_diff_lines,
     render_from_path,
+    unified_diff_lines,
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "spec.md.tmpl"
@@ -36,7 +41,7 @@ DEFAULT_CONTEXT: Dict[str, str] = {
     "SPEC_TYPE": "feat",
     "SPEC_STATUS": "draft",
     "SPEC_DATE": "2026-04-10",
-    "SPEC_ORIGIN": "docs/brainstorms/symphony-service-brainstorm.md",
+    "SPEC_ORIGIN": "docs/brainstorms/2026-04-10-symphony-service-requirements.md",
     "SPEC_RISK": "high",
     "SPEC_DEPTH": "full",
     "UI_REQUIRED": "false",

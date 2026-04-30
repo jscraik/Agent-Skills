@@ -42,6 +42,7 @@ def score_skill(query: str, query_tokens: List[str], skill: SkillMeta) -> Tuple[
 
     rationale: List[str] = []
     explicit = skill_name_norm in query.lower() or f"${skill_name_norm}" in query.lower()
+    phrase_match = skill_name_norm.replace("-", " ") in query.lower()
     overlap = len(query_set & skill_tokens)
     overlap_ratio = overlap / max(1, len(query_set))
 
@@ -54,6 +55,10 @@ def score_skill(query: str, query_tokens: List[str], skill: SkillMeta) -> Tuple[
     if explicit:
         score += 1.5
         rationale.append("explicit skill mention")
+
+    if phrase_match and not explicit:
+        score += 0.5
+        rationale.append("skill phrase match")
 
     if overlap > 0:
         score += overlap_ratio

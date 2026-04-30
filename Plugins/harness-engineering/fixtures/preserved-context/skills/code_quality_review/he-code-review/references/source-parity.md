@@ -11,6 +11,7 @@ This package was synthesized from:
 - the active Harness Engineering stage at `Plugins/harness-engineering/skills/code_quality_review/he-code-review/`
 - historical reference: `Infrastructure/config/codex/prompts/workflow-review.md` (not present in this repository snapshot; behavior is preserved through the legacy prompt notes below)
 - the longer legacy review prompt lineage that emphasized broad readiness review, explicit review modes, protected-artifact filtering, todo capture, and optional end-to-end follow-up
+- OpenClaw ClawSweeper prompt references at `https://github.com/openclaw/clawsweeper/tree/5c804ea0936794763ba7e22f107fa78bde919528/prompts`, used to strengthen Codex-style review finding quality, reviewer-thread disposition, and repair/merge preflight rules
 
 ## Preserved behaviors
 - PR, branch, current, latest, and artifact review targets
@@ -32,6 +33,9 @@ This package was synthesized from:
 - report-only and headless modes skipping todo creation and keeping the review boundary explicit
 - optional browser / Xcode verification handoff
 - `P1` findings treated as blocking progression
+- evidence-pack-first review before making findings
+- dedicated PR security and supply-chain pass where the changed surface touches CI, dependencies, publishing, credentials, permissions, or code execution
+- actionable human and bot review threads must be addressed, disproven, deferred with owner, or treated as blocking before merge readiness can be `go`
 
 ## Intentional modernizations
 - kept `he-code-review` distinct from `he-technical-review` instead of letting the broad review stage swallow the focused technical one
@@ -46,6 +50,7 @@ This package was synthesized from:
 - relocated standards and style-layer guidance into `references/style-and-operating-guidance.md` so route-critical behavior stays concise while preserving decision-quality context
 - restored an explicit anti-pattern catalog in `references/he-anti-patterns.md` so SKILL references remain resolvable
 - added deterministic broad-review role mapping in `references/sub-agent-map.md` and aligned risk lanes to explicit specialist agents (`security-reviewer`, `performance-reviewer`, `reliability-reviewer`, `api-contract-reviewer`)
+- added `references/codex-review-flow.md` to preserve OpenClaw-informed review discipline without bloating the runtime `SKILL.md` entrypoint
 
 ## Known constraints
 - The legacy prompt assumed more aggressive fix-oriented follow-up automation than this package makes mandatory. In this skill, write-capable remediation remains a follow-up stage rather than a default part of review mode.

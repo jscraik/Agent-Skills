@@ -5,7 +5,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-EXPECTED_PLUGIN_SKILLS = {
+EXPECTED_SOURCE_PLUGIN_SKILLS = {
     "harness-engineering": {
         "he-brainstorm",
         "he-code-review",
@@ -38,6 +38,12 @@ EXPECTED_PLUGIN_SKILLS = {
         "skill-refactor",
         "skillify",
     },
+}
+
+EXPECTED_CACHE_PLUGIN_SKILLS = {
+    "harness-engineering": set(),
+    "plugin-factory": set(),
+    "skill-factory": set(),
 }
 
 EXPECTED_MARKETPLACE_SOURCE_PATHS = {
@@ -75,7 +81,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         """
         Verify the repository marketplace lists exactly the expected local plugins.
         
-        Reads Plugins/marketplace.json and asserts the set of plugin `name` entries equals EXPECTED_PLUGIN_SKILLS.
+        Reads Plugins/marketplace.json and asserts the set of plugin `name` entries equals EXPECTED_SOURCE_PLUGIN_SKILLS.
         """
         marketplace_path = REPO_ROOT / "Plugins" / "marketplace.json"
         payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
@@ -84,7 +90,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             for item in payload.get("plugins", [])
             if isinstance(item, dict) and isinstance(item.get("name"), str)
         }
-        self.assertEqual(names, set(EXPECTED_PLUGIN_SKILLS))
+        self.assertEqual(names, set(EXPECTED_SOURCE_PLUGIN_SKILLS))
 
     def test_local_marketplace_uses_canonical_agent_skills_identity(self) -> None:
         """
@@ -122,7 +128,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         
         Raises an assertion failure for any plugin whose `skills` field is not exactly "./skills/".
         """
-        for plugin_name in EXPECTED_PLUGIN_SKILLS:
+        for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
             manifest_path = REPO_ROOT / "Plugins" / plugin_name / ".codex-plugin" / "plugin.json"
             payload = json.loads(manifest_path.read_text(encoding="utf-8"))
             self.assertEqual(
@@ -135,9 +141,9 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         """
         Verify each expected local plugin exposes exactly the declared first-level skills.
         
-        For each plugin in EXPECTED_PLUGIN_SKILLS, scan Plugins/<plugin>/skills for immediate subdirectories that contain a SKILL.md file and assert the set of those direct skill names equals the expected set; failures use the message "<plugin> first-level plugin picker surface drifted".
+        For each plugin in EXPECTED_SOURCE_PLUGIN_SKILLS, scan Plugins/<plugin>/skills for immediate subdirectories that contain a SKILL.md file and assert the set of those direct skill names equals the expected set; failures use the message "<plugin> first-level plugin picker surface drifted".
         """
-        for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
+        for plugin_name, expected_skill_names in EXPECTED_SOURCE_PLUGIN_SKILLS.items():
             skills_root = REPO_ROOT / "Plugins" / plugin_name / "skills"
             direct_skill_names = {
                 child.name
@@ -154,9 +160,9 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         """
         Verify each expected first-level skill directory contains an agents/openai.yaml metadata file.
         
-        For each plugin declared in EXPECTED_PLUGIN_SKILLS, the test checks every expected skill (sorted) under Plugins/<plugin>/skills/<skill>/agents/openai.yaml; any missing file paths are collected (relative to REPO_ROOT) and the test fails if the collection is non-empty.
+        For each plugin declared in EXPECTED_SOURCE_PLUGIN_SKILLS, the test checks every expected skill (sorted) under Plugins/<plugin>/skills/<skill>/agents/openai.yaml; any missing file paths are collected (relative to REPO_ROOT) and the test fails if the collection is non-empty.
         """
-        for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
+        for plugin_name, expected_skill_names in EXPECTED_SOURCE_PLUGIN_SKILLS.items():
             skills_root = REPO_ROOT / "Plugins" / plugin_name / "skills"
             missing = []
             for skill_name in sorted(expected_skill_names):
@@ -185,19 +191,20 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} manifest should not advertise hidden system-bridge skills",
             )
 
-    def test_runtime_cache_exposes_one_picker_identity_per_local_plugin_skill(self) -> None:
+    def test_runtime_cache_does_not_duplicate_command_handle_skills(self) -> None:
         """
-        Verify the generated local plugin cache cannot show duplicate picker rows.
+        Verify the generated local plugin cache cannot duplicate command handles.
 
         The Codex picker has historically scanned plugin cache contents more broadly than
         the manifest-declared skills root. This guard fails when the runtime cache contains
-        duplicate skill names inside a plugin, non-visible lanes, or system bridge skills.
+        command-handle-owned skills, duplicate skill names inside a plugin, non-visible lanes,
+        or system bridge skills.
         """
         runtime_root = REPO_ROOT / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local"
         if not runtime_root.exists():
             self.skipTest("local plugin runtime cache has not been generated")
 
-        for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
+        for plugin_name, expected_skill_names in EXPECTED_CACHE_PLUGIN_SKILLS.items():
             plugin_root = runtime_root / plugin_name
             discovered: dict[str, list[str]] = {}
             for skill_md in sorted(plugin_root.rglob("SKILL.md")):
@@ -220,19 +227,19 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} runtime cache should not expose system bridge skills as personal skills",
             )
 
-    def test_versioned_plugin_cache_exposes_expected_skill_entrypoints(self) -> None:
+    def test_versioned_plugin_cache_does_not_duplicate_command_handle_skills(self) -> None:
         """
-        Verify the local versioned plugin cache contains SKILL.md entrypoints for visible skills.
+        Verify the local versioned plugin cache does not expose command-handle-owned skills.
 
         Some picker paths still inspect Plugins/cache/agent-skills-local/<plugin>/<version>/skills.
         This guard keeps that cache aligned with the first-level plugin surface so local plugins do
-        not show metadata-only skill folders.
+        not duplicate the generated `.agents/skills/<handle>` command surface.
         """
         cache_root = REPO_ROOT / "Plugins" / "cache" / "agent-skills-local"
         if not cache_root.exists():
             self.skipTest("versioned local plugin cache has not been generated")
 
-        for plugin_name, expected_skill_names in EXPECTED_PLUGIN_SKILLS.items():
+        for plugin_name, expected_skill_names in EXPECTED_CACHE_PLUGIN_SKILLS.items():
             plugin_cache_root = cache_root / plugin_name
             self.assertTrue(
                 plugin_cache_root.exists(),

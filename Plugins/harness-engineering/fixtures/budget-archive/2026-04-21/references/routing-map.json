@@ -275,7 +275,13 @@
         "constraints",
         "success signals"
       ],
-      "output": "requirements-oriented options with recommendation"
+      "output": "requirements-oriented options with recommendation",
+      "default_next_stage": "he-spec",
+      "next_stage_exceptions": [
+        "continue he-brainstorm when blocking ambiguity remains",
+        "route to he-plan only when the brainstorm output is already contract-grade",
+        "route to he-work only for tiny low-risk changes with explicit execution approval"
+      ]
     },
     {
       "intent": "specification",
@@ -290,7 +296,12 @@
         "scope boundaries",
         "acceptance criteria"
       ],
-      "output": "implementation-grade specification"
+      "output": "implementation-grade specification",
+      "default_next_stage": "he-plan",
+      "next_stage_exceptions": [
+        "route to he-deepen-spec when contract gaps or competing interface shapes remain",
+        "route to he-work only for tiny low-risk specs with explicit execution approval"
+      ]
     },
     {
       "intent": "planning",
@@ -606,7 +617,8 @@
       "conditional_roles": [
         "best-practices-researcher"
       ],
-      "trigger": "delegation requested or external constraints drive requirements"
+      "trigger": "delegation requested or external constraints drive requirements",
+      "default_next_stage": "he-spec"
     },
     "he-spec": {
       "policy": "conditional",
@@ -618,7 +630,8 @@
         "best-practices-researcher",
         "framework-docs-researcher"
       ],
-      "trigger": "delegation requested or standards/framework-sensitive contract"
+      "trigger": "delegation requested or standards/framework-sensitive contract",
+      "default_next_stage": "he-plan"
     },
     "he-deepen-spec": {
       "policy": "conditional",

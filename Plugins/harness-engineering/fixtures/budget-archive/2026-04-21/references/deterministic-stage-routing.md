@@ -14,7 +14,7 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 8. **Browser polish wins over normal work**: browser-first iteration, accessibility polish, visual refinement, or dev-server loop language routes to `he-refine`.
 9. **Measured optimization wins over normal work**: benchmark, tune, experiment, parameter search, or measured performance improvement routes to `he-improve`.
 10. **Existing artifact depth wins over new artifacts**: harden/deepen an existing spec routes to `he-deepen-spec`; harden/deepen an existing plan routes to `he-deepen-plan`.
-11. **Lifecycle creation flows forward**: fuzzy idea to `he-ideate` or `he-brainstorm`; stable requirements to `he-spec`; approved spec to `he-plan`; approved plan to `he-work`.
+11. **Lifecycle creation flows forward**: fuzzy idea to `he-ideate` or `he-brainstorm`; completed non-trivial brainstorm to `he-spec`; complete spec to `he-plan`; approved plan to `he-work`. Skip from brainstorm to `he-plan` only when the brainstorm output is already contract-grade, and skip from spec to `he-work` only for tiny, low-risk changes with explicit execution approval.
 12. **QA intake routes by expected-behavior clarity**: conversational bug reports with enough behavior detail route to `he-fix-bugs`; unclear expected behavior routes to `he-brainstorm` or `he-spec`; multiple related Linear issues needing sequencing route to `he-plan`.
 13. **Domain language routes by artifact state**: fuzzy term confusion routes to `he-brainstorm`; first behavior contract routes to `he-spec`; existing spec contradiction routes to `he-deepen-spec`; execution drift routes to `he-work`; review drift routes to a review stage.
 14. **If still ambiguous, ask once**: ask for the missing source artifact or lifecycle state rather than guessing.
@@ -24,8 +24,8 @@ Use this policy when `he-router` must choose one Harness Engineering stage from 
 | Stage | Route when the user says | Do not skip first |
 | --- | --- | --- |
 | `he-ideate` | generate options, find opportunities, explore possible improvements | Known constraints and success signal |
-| `he-brainstorm` | shape ambiguous requirements, clarify product behavior, compare directions | Expected behavior and non-goals |
-| `he-spec` | write the WHAT contract, acceptance criteria, behavior boundaries | Approved direction or enough source context |
+| `he-brainstorm` | shape ambiguous requirements, clarify product behavior, compare directions | Expected behavior and non-goals before default handoff to `he-spec` |
+| `he-spec` | write the WHAT contract, acceptance criteria, behavior boundaries | Approved direction or enough source context before default handoff to `he-plan` |
 | `he-deepen-spec` | harden an existing spec, resolve spec contradiction, fill missing contract detail | Existing spec path or text |
 | `he-plan` | sequence implementation, plan from approved spec, order related Linear issues | Governing spec or equivalent defect scope |
 | `he-deepen-plan` | harden an existing plan, add sequencing/risk/verification gates | Existing plan path or text |

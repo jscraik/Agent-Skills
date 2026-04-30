@@ -20,11 +20,13 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Keep findings evidence-backed and action-oriented.
 - Resolve review mode and target scope before analysis starts.
 - Keep mutation boundaries explicit: broad review stays read-focused unless the selected mode allows safe auto-fix work.
+- Prefer no finding over a vague one, but keep searching until every concrete blocker in the changed surface is represented.
 
 ## When to use
 
 - Use when package-level readiness, merge risk, or release go/no-go is the core question.
 - Use when merge readiness depends on proving a PR actually satisfies linked Linear QA issues.
+- Use when unresolved Codex, CodeRabbit, Copilot, or other reviewer threads must be synthesized into a merge decision.
 - Route to `he-technical-review` when deep implementation-level correctness analysis is needed.
 
 ## Inputs
@@ -38,33 +40,39 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Severity-ranked readiness findings with exact locations.
 - Explicit go/no-go recommendation with blocking conditions.
 - Resolved target mode (`pr-branch-review` or `artifact-review`) and next action.
+- A security and supply-chain review summary for PRs that touch code execution, dependencies, CI, publishing, credentials, or permissions.
+- Review-thread disposition for actionable human and bot findings: addressed, proven non-actionable, blocked, or still unresolved.
 - Include `schema_version: 1` when structured output is requested.
 
 ## Procedure
 
 1. Resolve the target, target mode, and any `mode:` / `base:` / `plan:` overrides before analysis begins.
 2. Fail fast on conflicting review-mode flags instead of guessing which one wins.
-3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
+3. Build an evidence pack before judging: diff/base, changed files, linked issues, review comments, bot threads, checks, validations, specs/plans, and local ownership/history when available.
 4. Use the smallest reviewer set that still covers readiness risk; always include agent-operability, institutional learnings, and simplicity lenses.
-5. Review for correctness, regression risk, operability, protected-artifact handling, domain-language drift, and release readiness.
-6. When Linear QA issues are linked, confirm the PR satisfies expected behavior, preserves reproduction coverage, and includes validation evidence before recommending `go`.
-7. Deduplicate and rank findings as `P0`, `P1`, `P2`, or `P3`, then emit an explicit recommendation: `go`, `go-with-conditions`, or `no-go`.
-8. Only allow in-skill mutation when the selected mode explicitly permits safe auto-fixes; otherwise stop after the report.
+5. Review for correctness, regression risk, operability, protected-artifact handling, domain-language drift, security/supply-chain exposure, and release readiness.
+6. For each candidate issue, classify it as blocking finding, conditional risk, non-actionable note, or discard. Discard style-only, speculative, duplicate, and protected-artifact cleanup items.
+7. When Linear QA issues are linked, confirm the PR satisfies expected behavior, preserves reproduction coverage, and includes validation evidence before recommending `go`.
+8. Verify every actionable Codex, CodeRabbit, Copilot, or similar reviewer thread is addressed, proven non-actionable, or recorded as a blocker before recommending merge.
+9. Deduplicate and rank findings as `P0`, `P1`, `P2`, or `P3`, then emit an explicit recommendation: `go`, `go-with-conditions`, or `no-go`.
+10. Only allow in-skill mutation when the selected mode explicitly permits safe auto-fixes; otherwise stop after the report.
 
 ## Validation
 
-- Ensure each finding includes severity, location, impact, and minimal remediation.
+- Ensure each finding includes severity, location, evidence, impact, confidence, and minimal remediation.
 - Ensure recommendation is explicit (`go`, `go-with-conditions`, `no-go`).
 - Ensure protected artifact cleanup findings are discarded during synthesis.
 - Ensure changed domain terms, aliases, and relationships either match `CONTEXT.md` or are reported as drift.
 - Ensure linked Linear QA issues are closed by behavior and evidence, not just by code proximity.
-- Ensure unresolved `P0` or `P1` findings block a `go` recommendation.
+- Ensure unresolved `P0` or `P1` findings, unresolved actionable reviewer threads, relevant failing checks, stale conflict state, or missing changed-surface validation block a `go` recommendation.
+- Ensure broad security-sensitive decisions route to `security-ops` or a security reviewer instead of being auto-mutated.
 - Fail fast: stop at first failed gate and do not proceed.
 
 ## Constraints
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not claim readiness without repository evidence.
+- Do not recommend merge from resolver proof, title proximity, or a single search hit; verify behavior through changed files, call paths, tests, comments, and linked artifacts.
 - Do not switch a shared checkout for `mode:report-only` or `mode:headless`; require an isolated checkout/worktree or review the current checkout with an explicit base.
 - Do not ask blocking questions in `mode:report-only` or `mode:headless`.
 - Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
@@ -73,6 +81,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Approving high-risk changes without concrete validation evidence.
 - Collapsing multiple blockers into vague summary text without file references.
+- Reporting vague findings without a reproducible code path or concrete review-thread evidence.
 - Running maximal reviewer fan-out for simple low-risk changes.
 - Missing a new project term or renamed concept that should update `CONTEXT.md`.
 - Flagging `docs/brainstorms/*`, `docs/plans/*.md`, or `docs/solutions/*.md` for cleanup/removal.
@@ -89,12 +98,14 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
 - Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
 - Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
+- Codex-style review flow: [./Infrastructure/references/codex-review-flow.md](./Infrastructure/references/codex-review-flow.md)
 - Compatibility mirror (non-canonical): [./references](./references)
 - Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
 - Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
 - QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
 Read when: a review target changes project terminology, `CONTEXT.md`, or Linear issue meaning.
 Read when: readiness depends on linked Linear QA issues, reproduction steps, or expected-behavior evidence.
+Read when: merge readiness depends on Codex-style review findings, bot review threads, security posture, or repair/merge preflight evidence.
 - Template: [./review-todo.md.tmpl](./review-todo.md.tmpl)
 - Assets: [./assets](./assets)
 - Assets directory marker: `assets/`
