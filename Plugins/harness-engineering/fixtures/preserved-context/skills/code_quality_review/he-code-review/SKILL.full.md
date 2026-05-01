@@ -93,6 +93,7 @@ Non-triggers:
 ## Required inputs
 - Review target: PR, branch, file, or spec/plan path
 - Access to repo/diff/document
+- Linked Linear issue, spec, plan, PR body, or branch identifier when the target is tracked delivery work
 - Optional context from `harness-engineering.local.md`
 - optional review modifiers:
   - `mode:interactive`
@@ -111,6 +112,7 @@ If the target is missing, ask one direct question:
 - deduplicated findings ranked `P0 | P1 | P2 | P3`
 - blockers, unknowns, and protected-artifact filtering results
 - a merge recommendation or document-readiness recommendation
+- a Linear/spec/plan/PR traceability verdict for tracked delivery work
 - suggested next action such as re-run review, fix in `he-work`, deepen the artifact, or proceed
 - when todo follow-up is requested or the repo uses the file-based `todos/` workflow, created todo artifacts that follow the exact `file-todos` convention
 - optional end-to-end follow-up recommendation for browser or Xcode verification
@@ -133,6 +135,7 @@ If target cannot be resolved, stop and report missing input. If request calls fo
 - reviewer coverage matches language, risk, and artifact type
 - `agent-native-reviewer` and `learnings-researcher` are always included
 - cleanup findings for protected artifacts are discarded during synthesis
+- tracked delivery work proves Linear issue, spec/source acceptance IDs, plan units, PR evidence, and validation before a clean `go`
 - findings are deduplicated and ranked `P0 | P1 | P2 | P3`
 - the final report includes a readiness recommendation and next action
 - when structured output is requested, include `schema_version: 1`
@@ -189,6 +192,7 @@ For `artifact-review`: read target fully, read linked artifacts (`origin`, `spec
 
 Evidence rule:
 - start with diff, files, tests, linked artifacts, repo patterns, and local reviewer context
+- for tracked delivery work, include the active Linear issue, PR body, branch key, governing spec/plan, acceptance IDs, and validation evidence in the evidence pack
 - escalate to official docs or Context7 only when a credible finding depends on current external behavior
 
 ### Phase 2: Select reviewer coverage
@@ -216,6 +220,7 @@ For code/package review, look for:
 - correctness bugs and regressions
 - missing validation or missing tests
 - plan/spec adherence gaps
+- missing Linear/spec/plan/PR traceability for tracked work
 - security, persistence, rollout, or operational blind spots
 - agent-accessibility gaps
 - unnecessary complexity
@@ -245,6 +250,14 @@ Deterministic verification per `references/contract-acceptance.md`:
 Scoring: Pass (all ✅) / Conditional (minor gaps) / Fail (critical ❌)
 
 Traceability: Record evidence, test results, waivers.
+
+Tracked work traceability gate:
+- Linear issue is present and matches branch/PR metadata.
+- Governing spec or source acceptance IDs are named.
+- Governing plan units and acceptance IDs are named when a plan exists.
+- PR evidence links back to Linear and the completed acceptance IDs.
+- Validation evidence supports every acceptance ID claimed as complete.
+- Missing traceability is at least `go-with-conditions`; missing issue, missing validation, or mismatched scope is `no-go`.
 
 ### Phase 5: Synthesize findings
 Merge overlapping findings across reviewer lenses.
@@ -334,7 +347,7 @@ See `references/he-anti-patterns.md`:
 | [[agent-native-audit]] | Audit agent-operability vs merge-readiness |
 | [[he-technical-review]] | Severity-ranked engineering issues |
 | [[he-work]] | Execute approved work |
-| [[gh-workflow]] | GitHub merge readiness |
+| GitHub PR workflow | Merge readiness after Linear-linked delivery evidence is complete |
 
 **Topic map:** [[agent-ops]]
 

@@ -209,7 +209,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         """
         Verifies that advanced-only (hidden-lane) skills are added to the total considered set while the router still receives the original default window of skills.
         
-        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `chatgpt-apps`, `considered_total` reflects inclusion of one advanced-only entry (21), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
+        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `docs-expert`, `considered_total` reflects inclusion of one advanced-only entry (21), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
         """
         default_entries = [
             SimpleNamespace(
@@ -220,13 +220,13 @@ class TestAskSkillsRoute(unittest.TestCase):
             )
             for index in range(19)
         ]
-        chatgpt_apps = SimpleNamespace(
-            name="chatgpt-apps",
-            source_dir=REPO_ROOT / "Skills" / "product-strategy" / "chatgpt-apps",
-            category="Skills/product-strategy",
-            description="Build ChatGPT apps.",
+        docs_expert = SimpleNamespace(
+            name="docs-expert",
+            source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+            category="Skills/agent-ops",
+            description="Audit and update repository documentation.",
         )
-        default_entries.append(chatgpt_apps)
+        default_entries.append(docs_expert)
         advanced_entries = list(default_entries) + [
             SimpleNamespace(
                 name="code-review",
@@ -266,8 +266,8 @@ class TestAskSkillsRoute(unittest.TestCase):
         router_stub = _CapturingRouterStub(
             [
                 SimpleNamespace(
-                    skill_name="chatgpt-apps",
-                    skill_path="Skills/product-strategy/chatgpt-apps",
+                    skill_name="docs-expert",
+                    skill_path="Skills/agent-ops/docs-expert",
                     confidence=0.95,
                     rationale=["keyword overlap=2"],
                     risk_tier="low",
@@ -294,17 +294,17 @@ class TestAskSkillsRoute(unittest.TestCase):
                     "ask.commands.skills.compute_catalog_parity",
                     return_value={"drift_detected": False},
                 ) as mocked_parity:
-                    result = route_skills(REPO_ROOT, "build a ChatGPT app", top_k=1, considered_limit=20)
+                    result = route_skills(REPO_ROOT, "audit the README", top_k=1, considered_limit=20)
 
         self.assertEqual(
             mocked_discover.call_args_list,
             [call(), call(advanced=True)],
         )
         self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "chatgpt-apps")
+        self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "docs-expert")
         self.assertEqual(result.data["decision"]["considered_total"], 21)
         self.assertNotIn("route_considered_total", mocked_parity.call_args.kwargs)
-        self.assertIn("chatgpt-apps", router_stub.calls[0])
+        self.assertIn("docs-expert", router_stub.calls[0])
         self.assertIn("code-review", router_stub.calls[0])
 
 

@@ -48,6 +48,12 @@ The session-evidence routing refresh preserved these pre-insertion `he-compound`
 7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
 8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
 
+The router and work-entry compacting pass preserved these previously inline lines:
+
+- `schema_version: 1` when structured output is requested.
+- issue creation/update via `[[gh-workflow]]` or repo tracker
+8. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
+
 The session-evidence and reliability refresh preserved these compacted entrypoint lines:
 
 This entrypoint stays concise and keeps full operational context in archived references.
@@ -320,3 +326,34 @@ description: Route ambiguous Harness Engineering requests to one lifecycle stage
 - Active `SKILL.md` files should remain concise and routing-safe.
 - Context trimmed for token budget must be linked here or in stage-local `references/*`.
 - Do not delete archived context; move and link it.
+
+## PR 145 Progressive Disclosure Additions
+
+- `he-brainstorm` requirements artifact guide: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 48-52 and 66-68 preserve the requirements contract in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/requirements-artifact-guide.md`.
+- `he-brainstorm` workflow details: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 54-69 preserve stage sequencing in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/brainstorm-workflow-details.md`.
+- `he-brainstorm` discovery interview: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 56-64 preserve clarification behavior in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/discovery-interview.md`.
+- `he-brainstorm` document review pass: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 80-88 preserve handoff validation in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/document-review-pass.md`.
+- `he-spec` full spec guide: `deferred-store/skills/team_automation/he-spec/SKILL.md` lines 20 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`.
+- `he-spec` artifact contract: `deferred-store/skills/team_automation/he-spec/SKILL.md` lines 21 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`.
+- `he-spec` mode rules: `deferred-store/skills/team_automation/he-spec/SKILL.md` line 22 points to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-modes.md`.
+- `he-spec` subagent routing: `deferred-store/skills/team_automation/he-spec/SKILL.md` lines 23 and 31-38 point to `references/subagent-routing.md`.
+
+The PR 145 review-fix pass preserved representative removed lines for the changed compact entrypoints:
+
+3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
+2. Clarify objective, constraints, users, non-goals, and unknowns one question at a time.
+automation_status: "<created | needs-user-action | blocked>"
+- Optional related Linear QA issues and their blocker relationships.
+1. Load the archived full guide and references before drafting.
+3. Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
+- `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
+- start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
+- hand the completed spec to `he-plan` when the user wants execution sequencing
+
+## PR 145 Progressive Disclosure Additions
+
+- `he-spec` full spec guide: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 20 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`.
+- `he-spec` artifact contract: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 21 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`.
+- `he-spec` mode rules: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` line 22 points to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-modes.md`.
+- `he-spec` subagent routing: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 23 and 31-38 point to `references/subagent-routing.md`.
+- `he-code-review` preserved full guide: `fixtures/preserved-context/skills/code_quality_review/he-code-review/SKILL.full.md` retains readiness-review routing, modes, acceptance criteria, and review-thread synthesis details for the concise runtime entrypoint.

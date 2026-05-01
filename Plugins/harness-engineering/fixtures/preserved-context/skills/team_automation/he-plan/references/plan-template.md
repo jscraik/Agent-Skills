@@ -5,8 +5,19 @@ type: "feat"
 status: "active"
 date: "2026-04-10"
 origin: "docs/brainstorms/2026-04-10-symphony-requirements.md"
+requirements: "docs/brainstorms/2026-04-10-symphony-requirements.md"
 spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
+source_spec: "docs/specs/2026-04-10-symphony-service-spec.md"
 ui_spec: "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
+linear_project: "JSC"
+linear_issue: "JSC-200"
+linear_parent: "JSC-190"
+linear_children: []
+linear_status: "In Progress"
+linear_comment_required: true
+branch: "feature/JSC-200-symphony-service"
+pr: "pending"
+traceability_required: true
 plan_route: "fresh"
 plan_depth: "deep"
 ---
@@ -21,10 +32,25 @@ Ship a first implementation of Symphony orchestrator behavior with deterministic
 
 Current issue execution is manual and inconsistent; this plan defines an auditable implementation path.
 
+## Linear Work Item Contract
+
+- Linear issue: JSC-200
+- Parent / children: JSC-190 parent, no child issues yet
+- Current Linear status: In Progress
+- Branch: feature/JSC-200-symphony-service
+- PR: pending
+- Linear comment required: true
+
 ## Requirements Trace
 
 - R1. Poll eligible tracker work and dispatch within bounded concurrency.
 - R2. Keep per-issue work isolated and observable.
+
+## Linear / Spec / Plan / PR Traceability
+
+| Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
+| --- | --- | --- | --- | --- | --- |
+| JSC-200 | R1 | SA1 | P0 | AC1 | pending |
 
 ## Scope Boundaries
 
@@ -104,7 +130,10 @@ P0-U1 | pending | planning-agent | plan scaffold generated
 
 ## Sources & References
 
+- Linear issue: JSC-200
 - Origin document: docs/brainstorms/2026-04-10-symphony-requirements.md
+- Spec: Docs/specs/2026-04-10-symphony-service-spec.md
+- Plan: Docs/plans/2026-04-10-feat-symphony-service-plan.md
 - Related code: services/symphony/*
-- Related issues/PRs: JSC-200
+- Related PRs: pending
 - External docs: https://linear.app/developers/graphql

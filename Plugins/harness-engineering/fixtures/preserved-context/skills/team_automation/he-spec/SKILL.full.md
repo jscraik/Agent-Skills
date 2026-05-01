@@ -67,6 +67,7 @@ Non-triggers:
   - a UI source path
   - a clear feature description
 - relevant constraints, success criteria, risks, and linked docs when available
+- active Linear work item for non-trivial tracked work, including parent/child links, blockers, and current status
 - optional platform, design-system, accessibility, performance, or operational context
 
 If the core source is missing, ask one direct question:
@@ -84,6 +85,7 @@ Do not proceed until the user has supplied a usable source.
 - stable acceptance IDs:
   - `SA1`, `SA2`, `SA3` for standard specs
   - `VAC1`, `VAC2`, `VAC3` for dedicated UI specs
+- Linear Work Item Contract fields and acceptance traceability when the spec is tied to tracked delivery work
 - exact parallel research support via `repo-research-analyst`, `learnings-researcher`, and conditional external-research roles when needed
 - next-step guidance into review, UI-spec creation, or planning
 - when a structured status report is requested, include `schema_version: 1`
@@ -107,6 +109,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - dedicated UI specs answer component inventory, states, tokens, accessibility, responsive behavior, and visual correctness clearly enough for UI planning without invention
 - every standard Acceptance and Test Matrix item carries an `SA`-ID
 - every Visual Acceptance Criteria item carries a `VAC`-ID
+- tracked specs map the active Linear issue to every `SA` or `VAC` item that downstream planning must satisfy
 - the artifact path matches the selected mode and repo convention
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
@@ -147,6 +150,7 @@ For `standard-spec`, choose `spec_depth`:
 
 Source resolution order:
 - for standard specs:
+  - active Linear issue from the user request, branch key, existing artifact frontmatter, or tracker context
   - explicit spec path
   - explicit brainstorm path
   - matching recent spec in `Docs/specs/`
@@ -163,6 +167,7 @@ Source resolution order:
 
 Rules:
 - read the selected source thoroughly because every section can affect the contract
+- for non-trivial tracked work, resolve the Linear issue before drafting; if no issue exists, stop and request or create one
 - if a standard spec source references a brainstorm, read that too
 - if the work is raw description only, search for recent matching brainstorms and specs before inventing a contract from scratch
 - if the source already exists as a spec, treat the task as a revision and preserve valid existing structure where possible
@@ -208,6 +213,7 @@ For `standard-spec`, ensure the document answers:
 - Problem Statement
 - Goals
 - Non-Goals
+- Linear Work Item Contract when tracked work is involved
 - System Boundary
 - Core Domain Model
 - Main Flow or Lifecycle
@@ -216,6 +222,7 @@ For `standard-spec`, ensure the document answers:
 - Failure Model and Recovery
 - Observability
 - Acceptance and Test Matrix with stable `SA` IDs
+- Linear issue to acceptance mapping
 - Open Questions
 - Definition of Done
 
@@ -256,6 +263,7 @@ After writing, run exact checks and fix failures before presenting options.
 - confirm required sections are present
 - confirm stable `SA` or `VAC` IDs exist for the selected mode
 - confirm frontmatter includes the expected metadata for that mode
+- confirm tracked specs include Linear issue frontmatter and a Linear-to-acceptance mapping
 - patch failures before presenting options
 
 ### Phase 6: Handoff
@@ -265,7 +273,7 @@ After the spec is written and verified, offer the clearest next-step options tha
 - run `technical-review` if deeper critique is needed
 - run `deepen-spec` when more research depth or edge-case coverage is warranted
 - when `ui_required: true` is set and no companion UI spec exists yet, create the dedicated UI spec before planning
-- proceed to `he-plan` when the contract is ready for execution sequencing
+- proceed to `he-plan` when the contract is ready for execution sequencing, carrying the Linear issue, source acceptance IDs, first planning slice, deferred scope, and tracker update expectations
 
 Recommend a companion UI spec before planning whenever the standard spec identifies meaningful UI contract work that is not yet captured explicitly.
 
@@ -300,7 +308,7 @@ Use judgment on spec depth: simple features need less ceremony, complex systems 
 After writing the spec, offer next-stage options:
 - refine or review the spec further
 - create the companion UI spec when `ui_required: true` and no UI contract exists yet
-- hand the completed spec to `he-plan` when the user wants execution sequencing
+- hand the completed spec to `he-plan` with Linear issue context when the user wants execution sequencing
 
 If the user wants planning next, treat the written spec as the canonical planning source.
 
@@ -309,6 +317,7 @@ If the user wants planning next, treat the written spec as the canonical plannin
 - verify the selected mode matches the source and request, and that the spec uses the most authoritative available source
 - verify standard specs include boundary, lifecycle, failure, observability, and validation
 - verify UI specs include states, accessibility, responsive behavior, telemetry, and `VAC` IDs
+- verify tracked specs include Linear issue frontmatter and acceptance traceability
 - verify `ui_required: true` is set in standard specs when the work clearly requires a companion UI contract
 - report exact failures and the smallest safe fix if a check does not pass
 
@@ -318,6 +327,7 @@ If the user wants planning next, treat the written spec as the canonical plannin
 - inventing design token values, component APIs, or system behavior without source grounding
 - writing a UI-heavy standard spec without surfacing the companion UI-spec need
 - fabricating external references, best practices, or current standards
+- sending tracked work downstream without Linear issue context and acceptance traceability
 - implementing or prototyping during the spec stage
 
 ## Encouraging variation

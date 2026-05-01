@@ -1,89 +1,80 @@
 ---
 name: skillify
-description: Capture a completed Codex workflow as a reusable SKILL.md package by analyzing session context plus optional session-collector evidence, interviewing the user with structured prompts, and writing a validated skill artifact. Use when the user asks to skillify or operationalize a repeatable process.
+description: "WHAT: Convert repeatable Codex workflows into validated SKILL.md packages. WHEN: Use when a completed workflow is ready to become durable skill guidance."
 metadata:
   skill-type: scaffolding_templates
 ---
 
 # Skillify
 
-Convert a completed workflow into a reusable skill package with explicit invoke syntax.
-
-Read when: intake and template details are needed: [skill template](./references/skill-template.md)
-Read when: source workflow context comes from prior agent sessions: [session collector intake](./references/session-collector-intake.md)
+Capture a completed Codex workflow as a reusable skill package with explicit triggers, inputs, outputs, validation, and failure boundaries.
 
 ## Philosophy
 
-- Preserve repeatable behavior, not one-off execution details.
-- Optimize for future operator clarity with minimal ambiguity.
-- Keep generated skills auditable with explicit inputs, outputs, and validation.
+Preserve repeatable behavior, not one-off transcript noise. Generated skills should be clear, auditable, and runnable.
 
-## When to use
+## When To Use
 
-- Use when a workflow has been repeated enough to justify a reusable skill.
-- Use when the user wants a conversation or run converted into durable `SKILL.md` guidance.
+- User asks to skillify, operationalize, or package a repeatable process.
+- A workflow has repeated enough to justify durable skill guidance.
+- Prior session or collector evidence should become a validated skill artifact.
 
 ## Required inputs
 
-- Source workflow context (session transcript, notes, commands used, or `~/.agents/session-collector` bundle evidence).
-- Target audience and success criteria for the new skill.
-- Destination path and category for where the skill should live.
+- Source workflow context: transcript, notes, commands, or session-collector evidence.
+- Target audience, destination path, category, and success criteria.
+- Any required scripts, templates, references, or eval cases.
+
+## Workflow
+
+1. Capture the source workflow and intended reuse scope.
+2. Prefer bounded session-collector evidence over raw transcripts.
+3. Extract stable triggers, prerequisites, inputs, deliverables, and safety boundaries.
+4. Draft `SKILL.md` from the repository template.
+5. Add references, contract, evals, and task profile needed by governance gates.
+6. Run structure and quality validation until clean.
 
 ## Deliverables
 
-- A complete skill package centered on `SKILL.md` with clear invoke syntax.
-- Any required companion files referenced by the skill (scripts, templates, references).
-- Validation notes covering contract and structure checks.
-- Structured output includes `schema_version: 1` when requested or when automation will consume the handoff.
+Return the skill path, package files created or changed, context routes, findings, validations, and any missing inputs. Structured output should include `schema_version: 1`.
 
-## Procedure
+## Safety
 
-1. Capture the source workflow and confirm intended reuse scope.
-2. If the workflow source is a prior session or repeated agent run, prefer `~/.agents/session-collector` bundle evidence and consume bounded extracted evidence rather than raw transcripts.
-3. Extract stable triggers, required inputs, deliverables, and failure boundaries.
-4. Draft `SKILL.md` using the template and include explicit procedure/validation/constraints sections.
-5. Add or update supporting references (contract/evals/task profile) needed for governance gates.
-6. Run the relevant structure checks and iterate until clean.
+- Do not codify exploratory or contradictory workflows.
+- Do not embed secrets, credentials, private user data, or raw transcripts.
+- Keep the first pass to 2-3 focused surfaces unless the user asks for a broader package.
+- Stop if destination, category, or source workflow context is insufficient.
 
-Reference materials:
-- [session-collector-intake](./references/session-collector-intake.md)
-- [skill-template](./references/skill-template.md)
-- Assets: [icon.png](./assets/icon.png), [icon-small.png](./assets/icon-small.png)
+Assets: `assets/icon.png` and `assets/icon-small.png`.
 
-## Constraints
-
-- Do not codify workflows that are still exploratory or contradictory.
-- Do not inventory all session history inside `skillify`; use `skill-refactor` or `~/.agents/session-collector` for broad session evidence and consume only the selected workflow extraction.
-- Do not embed repository secrets, credentials, or private user data in generated skill artifacts.
-- Redact sensitive tokens, secret paths, and account identifiers from examples and references.
-- Keep scope aligned to the requested category and destination.
-- Keep the first pass to 2-3 focused surfaces unless the user explicitly asks for a broader skill package.
-
-## Validation
-
-- Verify trigger text maps to realistic user language.
-- Verify required sections and references exist and are internally consistent.
-- Verify eval cases include happy, edge, and failure behavior.
-- Fail fast: if source workflow context is insufficient, stop and report missing inputs.
-
-## Anti-patterns
+## Anti-Patterns
 
 - Copying raw session transcripts directly into `SKILL.md`.
-- Generating broad triggers that hijack unrelated tasks.
-- Treating template completion as success without running validation gates.
-
-## Failure mode
-
-- If the workflow is too incomplete or inconsistent, stop and report what is missing.
-- If required destination/category cannot be resolved, pause and request explicit routing.
-
-## Gotchas
-
-- Avoid overfitting to a single run; generalize only repeatable steps.
-- Keep prerequisites explicit so the skill is runnable without hidden assumptions.
+- Codifying exploratory or contradictory workflows.
+- Treating template completion as success without validation.
 
 ## Examples
 
-- "Skillify this repeatable release triage process into a reusable lane under `agent-ops`."
-- "Convert yesterday's plugin onboarding workflow into a validated skill package."
-- "Use the extracted session notes from the successful PR cleanup run to create a reusable review-fix skill, but keep the raw transcript out of the skill."
+- "Skillify this release triage workflow into a reusable agent-ops skill."
+- "Convert the successful PR cleanup session into a validated skill package."
+
+## Failure mode
+
+If the workflow is not repeatable, the destination is unclear, or required evidence is missing, stop and report the blocker before creating package files.
+
+## Gotchas
+
+- Do not turn one-off exploration into durable instructions.
+- Keep heavy examples, templates, and collector detail in references.
+
+## Progressive Disclosure
+
+Never drop required context for brevity; move it into references or deferred context and link it here.
+
+- Local contract, evals, and task profile: `references/`
+- Skill template and intake detail: `Infrastructure/references/deferred-skill-context/skill-factory-skillify/references/`
+- Archived full package: `Infrastructure/references/deferred-skill-context/skill-factory-skillify/`
+
+## Validation
+
+Verify trigger text maps to realistic user language, required references exist, evals cover happy/edge/negative/pressure cases, and all repository structure checks pass. Fail fast: stop at the first failed gate and do not proceed until the blocker is fixed.

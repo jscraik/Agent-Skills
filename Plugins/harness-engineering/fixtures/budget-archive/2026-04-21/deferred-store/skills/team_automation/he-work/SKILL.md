@@ -1,113 +1,98 @@
 ---
 name: he-work
-description: "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned."
+description: "Implement approved Harness Engineering work. Use when a plan, todo list, or tiny spec needs traceable delivery and validation."
 metadata:
   skill-type: team_automation
 ---
 
-# Progressive Disclosure Entry
+# he-work Entry
 
-This entrypoint stays concise and keeps full operational context in archived references.
+Use when implementation is expected from an approved plan, todo list, or tightly scoped low-risk spec.
 
-## Use
-
-- Use this skill as normal for this Harness Engineering execution stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
+Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
 
 ## Philosophy
 
-- Execute with traceable progress and verification at every step.
-- Minimize drift between approved plan and delivered behavior.
-- Keep execution state, task state, and governing artifacts synchronized so code never silently becomes the new source of truth.
+- Ship small verified slices.
+- Keep code, artifact state, Linear state, and validation evidence aligned.
 
 ## When to use
 
-- Use when implementation is expected from an approved plan, todo list, or tightly scoped spec.
-- Use when delivery must include validation and explicit blocker reporting.
-- Use when approved work needs to be shipped in small verified slices rather than restated, replanned, or deferred.
+Use `he-work` when the user wants approved Harness Engineering work implemented with traceable progress and validation evidence.
 
-## Inputs
+## Required inputs
 
-- Approved plan/spec/todo artifact and execution scope.
-- Validation requirements, constraints, and risk boundaries.
-- Optional execution posture such as `test-first`, `characterization-first`, or explicit external delegation.
-- Linked upstream artifacts that define scope, invariants, and non-goals.
-- Relevant `CONTEXT.md` when the approved artifact depends on project-specific domain terms.
-- Optional session evidence when prior runs, archived sessions, or session-collector findings define the task.
+- An approved plan, todo list, scoped spec, or explicitly low-risk direct implementation request.
+- Active Linear issue for non-trivial tracked work, plus branch and PR context when available.
+- Governing acceptance IDs, validation commands, invariants, non-goals, and scope boundaries.
 
-## Outputs
+## Deliverables
 
-- Implemented progress summary with completed/blocked items.
-- Validation outcomes and next action.
-- Explicit execution lane: `plan-led`, `todo-led`, or `small-spec-direct`.
-- Shipping handoff summary with drift notes, remaining risks, and follow-up recommendation.
-- Include `schema_version: 1` when structured output is requested.
+- Implemented slices tied to plan/spec/todo IDs.
+- Updated task state and handoff evidence covering validation, deviations, blockers, and PR or pending-PR status.
+- Linear update or explicit blocker when tracker mutation is requested or required.
+
+## Core Contract
+
+- Choose `plan-led`, `todo-led`, or narrow `small-spec-direct` before editing.
+- Read linked artifacts completely and restate active IDs, invariants, non-goals, validation gates, and scope boundaries.
+- Resolve the active Linear work item before coding; stop when non-trivial tracked work has no issue.
+- Keep markdown task state, code state, Linear status/comment state, and validation evidence synchronized.
+- Implement in small verified slices and stop on contract drift, hidden scope, domain drift, or failed gates.
 
 ## Procedure
 
-1. Choose the correct execution lane before coding: `plan-led`, `todo-led`, or the narrow `small-spec-direct` path.
-2. Read linked artifacts completely and restate the execution contract: active IDs, invariants, non-goals, validation gates, and explicit scope boundaries.
-3. Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
-4. If session evidence is part of the request, read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md) and convert each actionable recurrence into an explicit checklist item before editing.
-5. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
-6. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
-7. Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
-8. Report completed work, blockers, validation evidence, and the shipping handoff package.
+1. Choose the execution lane and read the governing artifact.
+2. Resolve Linear, branch, PR, IDs, and validation gates.
+3. Implement one verified slice at a time.
+4. Update handoff evidence and stop on drift or failed gates.
+
+## Traceability
+
+Final handoff must record completed IDs, validation evidence, PR link or pending-PR blocker, and Linear update/comment result. Do not ship tracked work with only a PR link; tie PR evidence back to Linear and the governing plan/spec.
 
 ## Validation
 
-- Verify each delivered increment has evidence of verification.
-- Document deviations from plan with explicit justification.
-- Ensure implementation does not introduce domain-language drift from `CONTEXT.md` or the approved artifact without an explicit update.
-- Confirm session-derived tasks cite their evidence source and are represented in the execution checklist.
-- Verify the selected execution lane matches the source artifact and risk profile.
+- Verify each delivered increment.
+- Document any deviation from plan.
+- Confirm branch, PR, plan/spec, and Linear identifiers align before handoff.
+- For tracked handoff artifacts, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <artifact-path>` before claiming completion.
 - Reflect contract drift in the governing artifact before off-plan implementation continues.
-- Fail fast: stop at first failed gate and do not proceed.
+- Stop at the first failed gate.
 
 ## Constraints
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
-- Do not silently expand scope beyond approved artifacts.
-- Do not let code become the only record of a changed domain decision; update the governing artifact or Linear issue first.
-- Do not treat medium- or high-risk raw specs as directly executable work without planning.
-- Do not mark checklist or phase state complete before validation evidence exists.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not expand scope beyond approved artifacts.
+- Do not claim completion without validation evidence.
 
 ## Anti-patterns
 
-- Shipping changes without validation evidence.
-- Ignoring plan/spec drift introduced during execution.
-- Treating prior-session evidence as background context instead of converting it into tasks or explicit non-actions.
-- Executing directly from a risky raw spec that should route to planning first.
-- Letting task tracking, artifact status, and real code state diverge during delivery.
+- Letting code become the only record of a changed decision.
+- Finishing tracked work without Linear/spec/plan/PR traceability.
+- Marking checklist state complete before validation exists.
 
 ## Examples
 
-- "Implement this approved plan and keep the markdown task state aligned with what actually lands."
-- "Work through this todo artifact in small verified slices and tell me where drift appears."
-- "This spec is tiny and low risk. If it really is safe, execute it directly and validate the result."
-- "Use the session-collector findings as the work checklist and fix the repeated HE failure modes."
+- "Implement this approved plan and keep task state aligned."
+- "Work through this todo artifact in verified slices."
 
-## Full Context
+## Failure mode
 
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Approval flow: [../../shared/references/approval-flow.md](../../shared/references/approval-flow.md)
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
-Read when: execution uncovers domain drift, `CONTEXT.md` mismatch, or Linear issue wording conflict.
-- Session evidence contract: [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
-Read when: execution scope comes from prior sessions, archived sessions, session-collector output, or repeated failure evidence.
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
+If the governing artifact is missing, Linear context is required but absent, or validation cannot prove the delivered slice, stop and report the blocker before continuing.
 
-## Subagent Routing
+## Gotchas
 
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, route to [codex-agent-creator](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) and provide the exact role names to create or install.
+- Do not expand scope beyond approved IDs without updating the governing artifact.
+- Do not claim completion without validation evidence.
+- Keep PR links as delivery evidence tied back to Linear, not a substitute for tracker state.
+
+## References
+
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/SKILL.full.md`
+- Handoff and shipping: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/references/handoff-and-shipping.md`
+- Execution modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/references/execution-modes.md`
+- Approval flow: `repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md`
+- Session evidence contract: `Plugins/harness-engineering/references/session-evidence-contract.md`
+- Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
+- Domain routing: `Plugins/harness-engineering/references/domain-model-routing.md`

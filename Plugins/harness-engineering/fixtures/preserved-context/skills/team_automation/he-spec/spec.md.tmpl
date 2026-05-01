@@ -5,6 +5,12 @@ type: "{{SPEC_TYPE}}"
 status: "{{SPEC_STATUS}}"
 date: "{{SPEC_DATE}}"
 origin: "{{SPEC_ORIGIN}}"
+linear_project: "{{LINEAR_PROJECT}}"
+linear_issue: "{{LINEAR_ISSUE}}"
+linear_parent: "{{LINEAR_PARENT}}"
+linear_children: []
+linear_status: "{{LINEAR_STATUS}}"
+traceability_required: true
 risk: "{{SPEC_RISK}}"
 spec_depth: "{{SPEC_DEPTH}}"
 ui_required: {{UI_REQUIRED}}
@@ -58,6 +64,13 @@ Important boundary:
 - General-purpose workflow engine or distributed job scheduler.
 - Built-in business logic for editing tickets, PRs, or comments.
 - Mandating one approval/sandbox posture for all deployments.
+
+## 2.3 Linear Work Item Contract
+
+- Linear issue: {{LINEAR_ISSUE}}
+- Parent / children: {{LINEAR_PARENT_CHILDREN}}
+- Current Linear status: {{LINEAR_STATUS}}
+- Traceability required: true
 
 ## 3. System Overview
 
@@ -530,6 +543,12 @@ Include pseudocode for:
 ### 17.8 Real Integration Profile (Recommended)
 
 - real tracker smoke checks with valid credentials
+
+## 17.9 Linear Acceptance Traceability
+
+| Linear issue | Source requirement | Acceptance IDs | Planning handoff |
+| --- | --- | --- | --- |
+| {{LINEAR_ISSUE}} | {{LINEAR_SOURCE_REQUIREMENT_1}} | SA1 | {{FIRST_PLAN_SLICE}} |
 
 ## 18. Implementation Checklist (Definition of Done)
 

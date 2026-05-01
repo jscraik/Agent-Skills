@@ -62,6 +62,7 @@ Non-triggers:
 ## Required inputs
 - Plan, UI plan, todo, spec path, or narrow bare work request
 - Linked artifacts (origin, spec, parent_spec, etc.)
+- Active Linear work item or Linear Work Item Contract for non-trivial tracked work
 - Repo conventions from `AGENTS.md`
 - optional execution signals such as `Execution note`, `Execution target: external-delegate`, or explicit user requests for test-first / characterization-first work
 
@@ -113,6 +114,7 @@ Ask one question at a time. Prefer concise single-select choices when natural op
 - linked artifacts are read before task breakdown
 - active work is mapped to plan phases, checklist items, or acceptance IDs when those exist
 - task-tracking state and markdown artifact state stay synchronized during execution
+- branch, PR, Linear issue, governing spec, and plan identifiers stay synchronized during execution
 - execution posture signals such as `test-first`, `characterization-first`, and `external-delegate` are honored where applicable
 - all meaningful code changes are validated with the relevant Infrastructure/tests/checks before handoff
 - any contract drift is reflected in the governing spec/plan before implementation continues
@@ -133,12 +135,15 @@ Source rules:
 - if the input is a bare request, classify it quickly: execute only when it is obviously tiny and low risk, otherwise route upstream before coding
 - if a linked plan, linked spec, linked UI spec, or origin brainstorm exists, read it before execution
 - if the artifact lacks stable phase IDs, checklist items, or acceptance traceability and the work is non-trivial, strengthen the artifact first before implementing
+- if non-trivial tracked work lacks a Linear issue or the artifact has `traceability_required: true` without a Linear Work Item Contract, stop and request or create the Linear issue before implementing
 
 ### Phase 1: Quick start and contract restatement
 Before coding:
 - read the work artifact completely
+- resolve the active Linear issue from supplied issue key, branch name, PR metadata, plan/spec frontmatter, or linked artifact
 - extract:
   - active phase IDs, checklist IDs, acceptance IDs, or verification checkpoints
+  - Linear issue, status, parent/child links, branch, PR target, and Linear comment/update expectations
   - invariants, non-goals, and explicit scope boundaries
   - `Deferred to Implementation` questions
   - `Execution note` signals for each implementation unit
@@ -160,6 +165,7 @@ Then choose the working setup:
 Build a synchronized task list:
 - derive tasks from implementation units, dependencies, files, tests, and verification criteria
 - preserve phase/checklist/acceptance IDs in task text when they exist
+- preserve the Linear issue key in every tracked task title or evidence line where it clarifies ownership
 - carry forward each unit's `Execution note`
 - use the unit's `Verification` field as the primary done signal
 
@@ -209,6 +215,7 @@ Stop and update the governing artifact before continuing if execution reveals:
 - migration or rollout complexity not captured in the plan/spec
 - hidden off-plan scope
 - UI behavior that no longer matches the selected prototype or UI contract
+- Linear status, scope, parent/child relationships, branch, or PR metadata that no longer matches the governing artifact
 
 Never let the code silently become the new source of truth while the plan/spec stays stale.
 
@@ -231,12 +238,14 @@ For UI execution rules, prototype gates, and screenshot expectations, use `refer
 Before final handoff:
 - confirm all intended tasks are complete or explicitly deferred with reasons
 - confirm markdown artifact status matches real execution state
+- confirm Linear issue status/comment state, branch, PR link, spec path, plan path, completed IDs, and validation evidence are mutually consistent
 - update plan/spec status fields when the governing artifact requires it
 - default to full `he-code-review mode:autofix` with `plan:` when available; allow inline self-review only when the narrow Tier 1 conditions in `references/handoff-and-shipping.md` are explicitly satisfied
 - prepare the shipping package:
   - what changed
   - files touched
   - Infrastructure/tests/checks run
+  - Linear issue, Linear update/comment result, branch, PR link, and traceability status
   - completed phase/checklist/acceptance IDs
   - any artifact updates made because of drift
   - remaining risks or deferred follow-up work
@@ -277,7 +286,7 @@ See `references/execution-modes.md` for the exact rules.
 After successful execution:
 - technical review or PR review
 - follow-up `he-work` for remaining units
-- issue creation/update via `[[gh-workflow]]` or repo tracker
+- Linear issue creation/update via the installed Linear workflow, with GitHub PRs linked only as delivery evidence
 - operational rollout verification
 
 Keep artifact path in handoff for traceability.
@@ -302,6 +311,7 @@ See `references/he-anti-patterns.md`: raw spec without plan, parallel on overlap
 ## References
 - [Execution Modes](./references/execution-modes.md)
 - [Execution Workflow](./references/execution-workflow.md)
+- [Approval Flow](../../../shared/references/approval-flow.md)
 - [Sub-Agent Map](./references/sub-agent-map.md)
 - [Style And Operating Guidance](./references/style-and-operating-guidance.md)
 - [UI Execution](./references/ui-execution.md)

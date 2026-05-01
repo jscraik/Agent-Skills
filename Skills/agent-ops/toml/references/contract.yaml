@@ -1,23 +1,15 @@
 schema_version: "1.0"
 skill: "toml"
 type: runbook
-purpose: >
-  Define the expected execution contract for toml so routing, outputs,
-  and validation behavior remain consistent and testable.
+purpose: Schema-safe TOML edits with validation evidence.
 triggers:
-  - User requests work that matches this skill's domain and workflow.
-  - The task needs this skill's specific implementation or review contract.
+  - TOML config creation, review, or fix.
 inputs:
-  - clear user goal and scope
-  - relevant repository context or target files
-  - constraints, risks, and validation expectations
+  - goal, target files, schema/key constraints
 outputs:
-  - concrete guidance or edits aligned to the skill scope
-  - explicit validation results and blocker evidence
-  - residual risks or follow-up actions when applicable
+  - focused TOML edits or guidance
+  - validation result and residual risk
 non_goals:
-  - unrelated architectural rewrites
-  - out-of-scope operations without explicit approval
+  - unrelated rewrites
 risks:
-  - missing context can lead to incorrect scope; mitigate with targeted clarification
-  - stale assumptions can cause drift; mitigate with current evidence and checks
+  - ambiguous schema ownership

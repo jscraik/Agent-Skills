@@ -31,6 +31,12 @@ Verify no drift:
 python3 Plugins/harness-engineering/skills/team_automation/he-plan/Infrastructure/scripts/check_plan_template_drift.py
 ```
 
+Validate tracked-work traceability:
+
+```bash
+python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/<filename>.md
+```
+
 ## General plan template
 Preferred path:
 - `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
@@ -51,6 +57,15 @@ source_spec: docs/specs/YYYY-MM-DD-<topic>-spec.md          # compatibility alia
 ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md         # if applicable
 parent_plan: Docs/plans/YYYY-MM-DD-<name>-plan.md           # if applicable
 deepened: YYYY-MM-DD                                        # if applicable
+linear_project: TEAM|project-slug                           # required for non-trivial tracked work
+linear_issue: ABC-123                                       # required for non-trivial tracked work
+linear_parent: ABC-100                                      # if applicable
+linear_children: []                                         # if applicable
+linear_status: Todo|In Progress|In Review|Done
+linear_comment_required: true
+branch: feature/ABC-123-short-name                          # planned or current branch
+pr: pending                                                 # PR URL/number after created
+traceability_required: true
 plan_route: fresh|resume|deepen
 plan_depth: lightweight|standard|deep
 ---
@@ -59,7 +74,9 @@ plan_depth: lightweight|standard|deep
 Required sections:
 - Overview
 - Problem Frame
+- Linear Work Item Contract
 - Requirements Trace
+- Linear / Spec / Plan / PR Traceability
 - Scope Boundaries
 - Context & Research
 - Key Technical Decisions
@@ -87,6 +104,7 @@ General-plan rules:
 - every acceptance item carries a stable `AC`-ID prefix
 - every phase has explicit exit criteria
 - every `AC` item maps to a governing spec constraint, brainstorm decision, or invariant
+- non-trivial tracked work includes the Linear Work Item Contract and traceability table
 - specs with stable `SA` IDs include an `SA` to `AC` mapping table
 - every feature-bearing implementation unit names exact file paths and test-file paths
 - high-risk, multi-phase, CLI/API/plugin/service, persistence, or governance work includes execution checkpoints with stop conditions
@@ -103,9 +121,20 @@ type: feat|fix|refactor
 status: active
 date: YYYY-MM-DD
 origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md
+requirements: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md
 spec: Docs/specs/YYYY-MM-DD-<topic>-spec.md
+source_spec: docs/specs/YYYY-MM-DD-<topic>-spec.md
 ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md
 deepened: YYYY-MM-DD
+linear_project: <team-or-project>
+linear_issue: <ABC-123>
+linear_parent: <ABC-100-or-none>
+linear_children: []
+linear_status: <Todo|In Progress|In Review|Done>
+linear_comment_required: true
+branch: <planned-or-current-branch>
+pr: pending
+traceability_required: true
 plan_route: fresh|resume|deepen
 plan_depth: lightweight|standard|deep
 ---
@@ -120,16 +149,25 @@ plan_depth: lightweight|standard|deep
 
 <user / business / operational problem and current context>
 
+## Linear Work Item Contract
+
+- Linear issue: <ABC-123 and URL>
+- Parent / children: <parent, children, blockers, or none>
+- Current Linear status: <status>
+- Branch: <planned or current branch>
+- PR: <pending or PR URL/number>
+- Linear comment required: <true|false, plus rationale if false>
+
 ## Requirements Trace
 
 - R1. <requirement or success criterion>
 - R2. <requirement or success criterion>
 
-## Traceability Matrix
+## Linear / Spec / Plan / PR Traceability
 
-| Requirement | Source acceptance IDs | Primary implementation units | Acceptance coverage |
-| --- | --- | --- | --- |
-| R1 | SA1 | P0 | AC1 |
+| Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
+| --- | --- | --- | --- | --- | --- |
+| ABC-123 | R1 | SA1 | P0 | AC1 | pending |
 
 ## Scope Boundaries
 
@@ -238,9 +276,12 @@ STEP_ID | status (pending|in_progress|completed) | owner | evidence
 
 ## Sources & References
 
+- Linear issue: <ABC-123 URL>
 - Origin document: <path>
+- Spec: <path or none>
+- Plan: <this plan path>
 - Related code: <path or symbol>
-- Related issues/PRs: <refs>
+- Related PRs: <pending or refs>
 - External docs: <URLs>
 ```
 
@@ -364,4 +405,4 @@ Offer the clearest next-step options that fit the mode:
 8. Create an issue in the tracker
 
 Stable-skill note:
-- `he-plan` keeps issue mutation out of the planning skill itself; prefer handing off the finished plan to `[[gh-workflow]]` when available, falling back to another installed tracker workflow only when GitHub is not the governing tracker.
+- `he-plan` keeps issue mutation out of the planning skill itself; hand the finished plan to the installed Linear workflow when issue creation or update is requested, and keep GitHub PR links as delivery evidence against the Linear issue.

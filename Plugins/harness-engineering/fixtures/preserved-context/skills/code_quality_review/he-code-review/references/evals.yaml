@@ -118,7 +118,20 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(Linear|expected behavior|repro|go|no-go|conditions)"
+        value: "(?i)(Linear|expected behavior|repro|\\bgo\\b|no-go|conditions)"
+
+  - id: linear-traceability-readiness
+    name: Linear spec plan PR traceability readiness
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this PR before merge. The branch mentions JSC-224, but the PR body does not link the Linear issue, spec, plan, AC IDs, or validation evidence."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)(Linear|spec|plan|AC|validation|go-with-conditions|no-go)"
 
   - id: codex-style-review-thread-readiness
     name: codex style review thread readiness
@@ -131,7 +144,13 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(Codex|CodeRabbit|review thread|security|supply-chain|changed-surface|no-go|go-with-conditions)"
+        value: "(?i)(Codex|CodeRabbit|review thread)"
+      - type: regex
+        value: "(?i)(security|supply-chain)"
+      - type: regex
+        value: "(?i)(changed-surface)"
+      - type: regex
+        value: "(?i)(no-go|go-with-conditions)"
 
   - id: todo-follow-up
     name: todo follow-up lane

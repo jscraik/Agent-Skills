@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed **Agent Skills Kit** repository of **21 skills** for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+A governed **Agent Skills Kit** repository for Codex and AI coding agents: 20 routed/root-level skill surfaces, generated `$` command handles, and a larger latent skill/plugin catalog behind rooted projections. Author skills once, validate quality, expose command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
 **What this gives you:**
 
@@ -185,12 +185,12 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                           |
 | ------------------ | ------ | -------------------------------------------------- |
-| agent-ops          | 42     | docs-expert, autofix, unslopify, simplify          |
-| frontend-ui        | 13     | react-ui-patterns, shadcn-ui, frontend-ui-design   |
+| agent-ops          | 40     | docs-expert, autofix, unslopify, simplify          |
+| frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer            |
-| product-strategy   | 4      | architecture-interview, chatgpt-apps, interview-me |
-| security-ops       | 7      | 1password, best-practices, create-auth             |
-| content-publishing | 8      | beautiful-mermaid, spreadsheet, visual-explainer   |
+| product-strategy   | 3      | architecture-interview, deep-interview, interview-me |
+| security-ops       | 5      | 1password, best-practices, create-auth             |
+| content-publishing | 6      | beautiful-mermaid, llm-wiki, visual-explainer      |
 | mobile-native      | 1      | atlas                                              |
 
 ## Repository layout
@@ -204,13 +204,13 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 42 skills: docs-expert, autofix, unslopify, simplify, ...
-|   |-- frontend-ui/          # 13 skills: react-ui-patterns, shadcn-ui, frontend-ui-design, ...
+|   |-- agent-ops/            # 40 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
-|   |-- product-strategy/     #  4 skills: architecture-interview, chatgpt-apps, interview-me, ...
-|   |-- security-ops/         #  7 skills: 1password, best-practices, create-auth, ...
+|   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me
+|   |-- security-ops/         #  5 skills: 1password, best-practices, create-auth, ...
 |   |-- mobile-native/        #  1 skill: atlas
-|   `-- content-publishing/   #  8 skills: beautiful-mermaid, spreadsheet, visual-explainer
+|   `-- content-publishing/   #  6 skills: beautiful-mermaid, llm-wiki, visual-explainer
 |
 |-- Plugins/                  # Canonical plugin packages (skills live inside plugins)
 |   |-- skill-factory/        #   skill-builder, skill-creator, skill-installer, ...

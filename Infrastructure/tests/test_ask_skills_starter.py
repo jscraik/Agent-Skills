@@ -17,12 +17,12 @@ class TestAskSkillsStarter(unittest.TestCase):
         """
         Verify starter-mode skill listing returns a deterministic, archetype-filtered subset.
         
-        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names are exactly ["he-plan", "he-work", "gh-workflow"] in that order.
+        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names are exactly ["he-plan", "he-work", "coding-harness"] in that order.
         """
         entries = [
             SimpleNamespace(name="he-work", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-work", category="Plugins/harness-engineering/skills", description="he-work"),
             SimpleNamespace(name="he-plan", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan", category="Plugins/harness-engineering/skills", description="he-plan"),
-            SimpleNamespace(name="gh-workflow", source_dir=REPO_ROOT / "github" / "gh-workflow", category="github", description="gh"),
+            SimpleNamespace(name="coding-harness", source_dir=REPO_ROOT / "Skills" / "agent-ops" / "coding-harness", category="Skills/agent-ops", description="harness"),
             SimpleNamespace(name="docs-expert", source_dir=REPO_ROOT / "product" / "docs" / "docs-expert", category="product/docs", description="docs"),
             SimpleNamespace(name="other-skill", source_dir=REPO_ROOT / "utilities" / "other", category="utilities", description="other"),
         ]
@@ -34,7 +34,7 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertTrue(result.data["starter_mode"])
         self.assertEqual(result.data["starter_archetype"], "delivery")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(names, ["he-plan", "he-work", "gh-workflow"])
+        self.assertEqual(names, ["he-plan", "he-work", "coding-harness"])
 
     def test_default_list_hides_coderabbit_lane_skills(self) -> None:
         """

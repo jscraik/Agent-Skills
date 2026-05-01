@@ -19,6 +19,12 @@ type: feat|fix|refactor
 status: draft
 date: YYYY-MM-DD
 origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md  # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
+linear_project: TEAM|project-slug                           # required for non-trivial tracked work
+linear_issue: ABC-123                                       # required for non-trivial tracked work
+linear_parent: ABC-100                                      # if applicable
+linear_children: []                                         # if applicable
+linear_status: Todo|In Progress|In Review|Done
+traceability_required: true
 risk: low|medium|high
 spec_depth: none|lite|full
 ui_required: true|false
@@ -29,6 +35,7 @@ Required sections:
 - Problem Statement
 - Goals
 - Non-Goals
+- Linear Work Item Contract
 - System Boundary
 - Core Domain Model
 - Main Flow / Lifecycle
@@ -37,6 +44,7 @@ Required sections:
 - Failure Model and Recovery
 - Observability
 - Acceptance and Test Matrix
+- Linear Acceptance Traceability
 - Open Questions
 - Definition of Done
 
@@ -44,6 +52,7 @@ Acceptance and Test Matrix rules:
 - every item carries a stable `SA` identifier
 - each item is specific enough for planning to reference directly
 - include operational, failure, and validation checks when relevant
+- tracked specs map every `SA` item to the active Linear issue and any parent/child issue context
 
 ## Dedicated UI spec template
 Suggested frontmatter:
@@ -57,6 +66,12 @@ status: draft
 date: YYYY-MM-DD
 parent_spec: Docs/specs/YYYY-MM-DD-<name>-spec.md  # if applicable
 origin: docs/brainstorms/YYYY-MM-DD-<name>-requirements.md  # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
+linear_project: TEAM|project-slug                           # required for non-trivial tracked work
+linear_issue: ABC-123                                       # required for non-trivial tracked work
+linear_parent: ABC-100                                      # if applicable
+linear_children: []                                         # if applicable
+linear_status: Todo|In Progress|In Review|Done
+traceability_required: true
 wcag_level: AA
 ---
 ```
@@ -86,10 +101,12 @@ Run these checks immediately after writing and patch failures before handoff:
 - standard spec:
   - confirm required sections exist
   - confirm `SA` IDs exist in the Acceptance and Test Matrix
+  - confirm tracked specs include Linear issue frontmatter and a Linear Acceptance Traceability table
   - confirm frontmatter includes `schema_version`, `risk`, `spec_depth`, and `ui_required`
 - dedicated UI spec:
   - confirm required sections exist
   - confirm `VAC` IDs exist in Visual Acceptance Criteria
+  - confirm tracked UI specs include Linear issue frontmatter and a Linear Acceptance Traceability table
   - confirm frontmatter includes `schema_version`, `wcag_level`, and any relevant `parent_spec` or `origin`
 
 Suggested commands:
@@ -100,6 +117,7 @@ rg 'VAC[0-9]+' docs/ui-specs/<filename>.md
 rg 'Problem Statement|Failure Model|Observability|Acceptance and Test Matrix' Docs/specs/<filename>.md
 rg 'Component Inventory|Interaction States|Accessibility Requirements|Visual Acceptance Criteria' docs/ui-specs/<filename>.md
 rg 'schema_version|ui_required|spec_depth|risk|wcag_level' <spec-path>
+python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>
 ```
 
 ## Notes for full service specs

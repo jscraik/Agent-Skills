@@ -80,6 +80,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         follow_symlinks=True,
         excluded_dir_names=(
             "fixtures",
+            "skills",
             "team_automation",
             "code_quality_review",
             "scaffolding_templates",
@@ -96,6 +97,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         follow_symlinks=True,
         excluded_dir_names=(
             "fixtures",
+            "skills",
             "team_automation",
             "code_quality_review",
             "scaffolding_templates",
@@ -112,6 +114,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         follow_symlinks=True,
         excluded_dir_names=(
             "fixtures",
+            "skills",
             "team_automation",
             "code_quality_review",
             "scaffolding_templates",

@@ -22,9 +22,9 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
-    print_diff_lines,
+    print_diff_lines,  # noqa: F401 - re-exported for check_plan_template_drift.py
     render_from_path,
-    unified_diff_lines,
+    unified_diff_lines,  # noqa: F401 - re-exported for check_plan_template_drift.py
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "plan.md.tmpl"
@@ -36,8 +36,18 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "PLAN_STATUS": "active",
     "PLAN_DATE": "2026-04-10",
     "PLAN_ORIGIN": "docs/brainstorms/2026-04-10-symphony-requirements.md",
+    "PLAN_REQUIREMENTS": "docs/brainstorms/2026-04-10-symphony-requirements.md",
     "PLAN_SPEC": "Docs/specs/2026-04-10-symphony-service-spec.md",
+    "PLAN_SOURCE_SPEC": "docs/specs/2026-04-10-symphony-service-spec.md",
     "PLAN_UI_SPEC": "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md",
+    "LINEAR_PROJECT": "JSC",
+    "LINEAR_ISSUE": "JSC-200",
+    "LINEAR_PARENT": "JSC-190",
+    "LINEAR_PARENT_CHILDREN": "JSC-190 parent, no child issues yet",
+    "LINEAR_STATUS": "In Progress",
+    "PLAN_BRANCH": "feature/JSC-200-symphony-service",
+    "PLAN_PATH": "Docs/plans/2026-04-10-feat-symphony-service-plan.md",
+    "SOURCE_ACCEPTANCE_1": "SA1",
     "PLAN_ROUTE": "fresh",
     "PLAN_DEPTH": "deep",
     "OVERVIEW_SUMMARY": "Ship a first implementation of Symphony orchestrator behavior with deterministic retry and workspace safety.",

@@ -71,7 +71,6 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "context7",
     "docs-expert",
     "fix-mise",
-    "gh-workflow",
     "improve-codebase-architecture",
     "npm-release",
     "pnpm-manager",

@@ -1,51 +1,41 @@
 schema_version: 1
 
 purpose: >
-  Run the brainstorm stage of the Harness Engineering workflow so the user clarifies
-  what to build, compares a few viable directions, captures a right-sized requirements
-  document when needed, and decides whether the next step should be spec, planning,
-  or lightweight direct work.
+  Clarify an early Harness Engineering idea, compare viable directions, decide
+  whether a spec is needed, and capture a durable requirements handoff when useful.
 
 triggers:
-  - the user wants to brainstorm a feature, improvement, or product direction before planning
-  - the user wants the Harness Engineering brainstorm stage explicitly
-  - the user needs help deciding whether a spec is required
-  - the user wants a durable brainstorm or requirements artifact written to docs/brainstorms
-  - the request is vague or ambitious enough that scope, behavior, or success criteria still need to be shaped
+  - user asks to brainstorm a feature, improvement, or product direction
+  - user asks for the HE brainstorm stage
+  - scope, behavior, or success criteria are still unclear
+  - a durable brainstorm or requirements artifact is requested
 
 inputs:
-  - a feature idea, problem, or improvement to explore
-  - relevant context, constraints, risks, and success criteria when available
-  - optional repo context and prior artifacts, including existing requirements or legacy brainstorm docs
+  - feature idea, problem, or improvement
+  - relevant constraints, risks, source artifacts, and success criteria
 
 outputs:
-  - a clarified problem frame
-  - a domain-language decision when project-specific terms, aliases, relationships, or ambiguities affect the idea
-  - 2-3 approaches with trade-offs and a recommendation
-  - explicit `spec_required`, `risk_level`, and `complexity` values
-  - exact parallel research support via `repo-research-analyst` and `learnings-researcher` when repo context matters
-  - a requirements document in `docs/brainstorms/*-requirements.md` for new substantial work, with compatibility-safe updates to legacy `*-brainstorm.md` files when resuming
-  - a recommended next workflow stage, and immediate handoff guidance when the runtime supports it
+  - clarified problem frame
+  - 2-3 options with trade-offs and a recommendation
+  - "`spec_required`, `risk_level`, and `complexity`"
+  - domain-language note when terminology affects behavior
+  - requirements artifact path when a durable handoff is created
+  - recommended next HE stage
 
 non_goals:
-  - direct implementation
+  - implementation
   - detailed task sequencing
-  - forcing brainstorm when the request is already clear enough for planning
+  - replacing spec or plan stages when the request is already clear
 
 risks:
-  - over-questioning; mitigate with one-question-at-a-time clarification
-  - ambiguous project language; mitigate by checking `CONTEXT-MAP.md` or `CONTEXT.md`, picking canonical terms, and asking one scenario question at a time
-  - decision sprawl; mitigate by recording hard-to-reverse domain decisions in Linear issue comments instead of ADRs
-  - over-design; mitigate with YAGNI and recommendation-first output
-  - weak product framing; mitigate with a product pressure test before locking in options
-  - weak handoff; mitigate with explicit next-stage guidance and artifact writing
-  - planner/source mismatch; mitigate by defaulting new durable docs to `*-requirements.md`
-  - shallow recommendations without repo context; mitigate with bounded parallel subagent research when relevant
+  - over-questioning; ask one useful question at a time
+  - decision sprawl; record only hard-to-reverse domain decisions
+  - weak handoff; name the next artifact and HE stage explicitly
 
 observability: >
-  Track stage selection accuracy, fallback frequency when mapped roles are
-  unavailable, and validation pass/fail outcomes for each run.
+  Track brainstorm selection accuracy, spec_required decisions, artifact handoff
+  creation, and validation outcomes.
 
 rollback_procedure: >
   Restore the previous contract/evals/task-profile files from git, then rerun
-  strict skill audit and plugin-builder validation before re-promoting.
+  strict skill audit and plugin evaluation.

@@ -25,6 +25,7 @@ from ask.commands.plugins import (  # noqa: E402
 from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
+    ProjectionModeDecision,
     ProjectionModeError,
     build_projection_plan_metadata,
     normalize_projection_mode,
@@ -49,6 +50,19 @@ from ask.selection_contract import (  # noqa: E402
     candidate_id,
     canonical_sort_key,
 )
+
+
+@dataclass
+class PluginCacheRefreshReport:
+    """Mutation report for repo-local plugin cache refreshes."""
+
+    writes: list[str]
+    deletes: list[str]
+    logs: list[str]
+
+
+class PluginCacheRefreshError(RuntimeError):
+    """Raised when command-handle pruning cannot safely complete."""
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -172,12 +186,11 @@ STARTER_ARCHETYPES = {
         "he-plan",
         "he-work",
         "he-technical-review",
-        "gh-workflow",
         "docs-expert",
         "context7",
     ),
-    "delivery": ("he-plan", "he-work", "he-code-review", "gh-workflow", "coding-harness"),
-    "review": ("he-technical-review", "he-code-review", "he-reliability-review", "security-best-practices"),
+    "delivery": ("he-plan", "he-work", "he-code-review", "coding-harness", "docs-expert"),
+    "review": ("he-technical-review", "he-code-review", "he-reliability-review", "autofix"),
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
@@ -307,7 +320,8 @@ def _command_handle_owner_index(repo_root: Path) -> dict[str, str]:
     """Return generated command-handle owners keyed by handle name."""
     try:
         report = handles_report(repo_root_path=repo_root, include_handles=True)
-    except Exception:
+    except Exception as exc:  # noqa: BLE001 - command-surface errors must not break skill listing.
+        print(f"warning: failed to load command-handle owner index: {exc}", file=sys.stderr)
         return {}
     handles = report.get("handles") if isinstance(report, dict) else []
     if not isinstance(handles, list):
@@ -390,7 +404,7 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
         )
         updated_readme = re.sub(
             r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
-            f"A governed **Agent Skills Kit** repository of **{catalog_count} skills** for Codex and AI coding agents",
+            "A governed **Agent Skills Kit** repository for Codex and AI coding agents",
             updated_readme,
             count=1,
         )
@@ -1713,20 +1727,28 @@ def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, d
     return f"Ensured plugin mirror directory: {target}"
 
 
-def _prune_command_handle_skill_entries(repo_root: Path, plugin_name: str, plugin_root: Path) -> list[str]:
+def _prune_command_handle_skill_entries(
+    repo_root: Path,
+    plugin_name: str,
+    plugin_root: Path,
+) -> tuple[list[str], list[str]]:
     """Remove plugin skill entries that are already exposed by generated command handles."""
     skills_root = plugin_root / "skills"
     if not skills_root.is_dir():
-        return []
+        return [], []
     try:
         report = handles_report(repo_root_path=repo_root, include_handles=True)
-    except Exception:
-        return []
+    except Exception as exc:  # noqa: BLE001 - convert command-surface failures into sync errors.
+        raise PluginCacheRefreshError(
+            f"Failed to discover command handles for plugin cache pruning "
+            f"(plugin={plugin_name}, root={plugin_root}): {exc}"
+        ) from exc
     handles = report.get("handles") if isinstance(report, dict) else []
     if not isinstance(handles, list):
-        return []
+        return [], []
 
     logs: list[str] = []
+    deletes: list[str] = []
     for row in handles:
         if not isinstance(row, dict):
             continue
@@ -1751,8 +1773,9 @@ def _prune_command_handle_skill_entries(repo_root: Path, plugin_name: str, plugi
                 target.unlink()
             else:
                 shutil.rmtree(target)
+            deletes.append(str(target))
             logs.append(f"Removed command-handle duplicate plugin skill entry: {target}")
-    return logs
+    return logs, deletes
 
 
 def _plugin_version(source_dir: Path) -> str:
@@ -1768,17 +1791,26 @@ def _plugin_version(source_dir: Path) -> str:
     return version
 
 
-def _replace_plugin_cache_copy(repo_root: Path, plugin_name: str, source_dir: Path, target_dir: Path) -> list[str]:
+def _replace_plugin_cache_copy(
+    repo_root: Path,
+    plugin_name: str,
+    source_dir: Path,
+    target_dir: Path,
+) -> PluginCacheRefreshReport:
     """Replace one local plugin cache copy and prune command-handle duplicate entries."""
+    deletes: list[str] = []
     if target_dir.is_symlink() or target_dir.is_file():
+        deletes.append(str(target_dir))
         target_dir.unlink()
     elif target_dir.exists():
+        deletes.append(str(target_dir))
         shutil.rmtree(target_dir)
     _copy_directory_contents(source_dir, target_dir)
     _materialize_first_level_skill_aliases(target_dir)
-    logs = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+    logs, prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+    deletes.extend(prune_deletes)
     logs.append(f"Replaced local plugin cache: {target_dir} <- {source_dir}")
-    return logs
+    return PluginCacheRefreshReport(writes=[str(target_dir)], deletes=deletes, logs=logs)
 
 
 def _refresh_workspace_plugin_caches(
@@ -1787,13 +1819,13 @@ def _refresh_workspace_plugin_caches(
     repo_root: Path,
     *,
     dry_run: bool,
-) -> None:
+) -> ErrorObject | None:
     """Refresh repo-local plugin caches that Codex picker paths may scan."""
     try:
         marketplace_path, entries = _load_local_marketplace(repo_root)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
         logs.append(f"Skipped workspace plugin cache refresh: {exc}")
-        return
+        return None
 
     try:
         marketplace_name = json.loads(marketplace_path.read_text(encoding="utf-8")).get("name") or "agent-skills-local"
@@ -1806,45 +1838,91 @@ def _refresh_workspace_plugin_caches(
     runtime_cache_root = repo_root / ".agents" / "plugins-runtime" / "cache" / marketplace_name
     versioned_cache_root = repo_root / "Plugins" / "cache" / marketplace_name
     plan.setdefault("plugin_cache_writes", [])
+    plan.setdefault("writes", [])
+    plan.setdefault("deletes", [])
 
     keep_plugin_names = {entry["name"] for entry in entries}
-    for entry in entries:
-        plugin_name = entry["name"]
-        if "/" in plugin_name or ".." in plugin_name:
-            logs.append(f"Skipped unsafe plugin cache name: {plugin_name}")
-            continue
-        source_dir = repo_root / entry["path"].removeprefix("./")
-        if not source_dir.is_dir():
-            logs.append(f"Skipped missing plugin cache source: {source_dir}")
-            continue
-        version = _plugin_version(source_dir)
-        runtime_target = runtime_cache_root / plugin_name
-        versioned_target = versioned_cache_root / plugin_name / version
-        plan["plugin_cache_writes"].extend([str(runtime_target), str(versioned_target)])
-        if dry_run:
-            logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
-            logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
-            continue
-        logs.extend(_replace_plugin_cache_copy(repo_root, plugin_name, source_dir, runtime_target))
-        logs.extend(_replace_plugin_cache_copy(repo_root, plugin_name, source_dir, versioned_target))
-        plugin_version_root = versioned_cache_root / plugin_name
-        for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
-            if child == versioned_target or not child.is_dir():
+    try:
+        for entry in entries:
+            plugin_name = entry["name"]
+            if "/" in plugin_name or ".." in plugin_name:
+                logs.append(f"Skipped unsafe plugin cache name: {plugin_name}")
                 continue
-            shutil.rmtree(child)
-            logs.append(f"Removed stale versioned local plugin cache variant: {child}")
-
-    for cache_root in (runtime_cache_root, versioned_cache_root):
-        if not cache_root.is_dir():
-            continue
-        for child in sorted(cache_root.iterdir()):
-            if child.name in keep_plugin_names or not child.is_dir():
+            source_dir = repo_root / entry["path"].removeprefix("./")
+            if not source_dir.is_dir():
+                logs.append(f"Skipped missing plugin cache source: {source_dir}")
                 continue
+            version = _plugin_version(source_dir)
+            runtime_target = runtime_cache_root / plugin_name
+            versioned_target = versioned_cache_root / plugin_name / version
+            planned_writes = [str(runtime_target), str(versioned_target)]
+            plan["plugin_cache_writes"].extend(planned_writes)
+            plan["writes"].extend(planned_writes)
             if dry_run:
-                logs.append(f"Would remove stale local plugin cache: {child}")
+                logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
+                logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
                 continue
-            shutil.rmtree(child)
-            logs.append(f"Removed stale local plugin cache: {child}")
+            for target in (runtime_target, versioned_target):
+                report = _replace_plugin_cache_copy(repo_root, plugin_name, source_dir, target)
+                logs.extend(report.logs)
+                plan["deletes"].extend(report.deletes)
+            plugin_version_root = versioned_cache_root / plugin_name
+            for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
+                if child == versioned_target or not child.is_dir():
+                    continue
+                plan["deletes"].append(str(child))
+                shutil.rmtree(child)
+                logs.append(f"Removed stale versioned local plugin cache variant: {child}")
+
+        for cache_root in (runtime_cache_root, versioned_cache_root):
+            if not cache_root.is_dir():
+                continue
+            for child in sorted(cache_root.iterdir()):
+                if child.name in keep_plugin_names or not child.is_dir():
+                    continue
+                plan["deletes"].append(str(child))
+                if dry_run:
+                    logs.append(f"Would remove stale local plugin cache: {child}")
+                    continue
+                shutil.rmtree(child)
+                logs.append(f"Removed stale local plugin cache: {child}")
+    except (OSError, ValueError, PluginCacheRefreshError) as exc:
+        return ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Workspace plugin cache refresh failed: {exc}",
+            fix_suggestion="Check local plugin cache permissions and rerun `./bin/ask skills sync --scope workspace --robot --json`.",
+        )
+    return None
+
+
+def _finalize_skill_sync_result(
+    result: CallResult,
+    plan: dict,
+    logs: list[str],
+    projection_decision: ProjectionModeDecision,
+    *,
+    scope: str,
+    dry_run: bool,
+    status: str,
+) -> CallResult:
+    """Populate common sync result data after all mutations have been planned."""
+    plan["mutation_counts"] = {
+        "writes": len(plan["writes"]),
+        "deletes": len(plan["deletes"]),
+        "symlinks": len(plan["symlinks"]),
+    }
+    result.data["plan"] = plan
+    result.data["logs"] = logs
+    result.data["policy_identity"] = get_policy_identity()
+    result.data["projection_mode"] = projection_decision.projection_mode
+    result.data["projection"] = build_projection_plan_metadata(
+        projection_decision,
+        scope=scope,
+        dry_run=dry_run,
+        warnings=plan["warnings"],
+    )
+    result.status = status
+    return result
 
 
 def _refresh_home_plugin_mirrors(
@@ -1908,7 +1986,12 @@ def _refresh_home_plugin_mirrors(
             shutil.rmtree(target_dir)
         _copy_directory_contents(source_dir, target_dir)
         _materialize_first_level_skill_aliases(target_dir)
-        logs.extend(_prune_command_handle_skill_entries(repo_root, plugin_name, target_dir))
+        try:
+            prune_logs, _prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+        except PluginCacheRefreshError as exc:
+            logs.append(f"Failed to prune home plugin mirror command-handle duplicates {target_dir}: {exc}")
+        else:
+            logs.extend(prune_logs)
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
 
@@ -2154,23 +2237,15 @@ def sync_skills(
                 return result
             _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
             plan["validation_status"] = "pass"
-            plan["mutation_counts"] = {
-                "writes": len(plan["writes"]),
-                "deletes": len(plan["deletes"]),
-                "symlinks": len(plan["symlinks"]),
-            }
-            result.data["plan"] = plan
-            result.data["logs"] = logs
-            result.data["policy_identity"] = get_policy_identity()
-            result.data["projection_mode"] = projection_decision.projection_mode
-            result.data["projection"] = build_projection_plan_metadata(
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
                 projection_decision,
                 scope=scope,
                 dry_run=dry_run,
-                warnings=plan["warnings"],
+                status="success",
             )
-            result.status = "success"
-            return result
         ok, errors = _sync_rooted_projection(
             repo_root,
             dry_run=dry_run,
@@ -2217,24 +2292,27 @@ def sync_skills(
             return result
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        plan["mutation_counts"] = {
-            "writes": len(plan["writes"]),
-            "deletes": len(plan["deletes"]),
-            "symlinks": len(plan["symlinks"]),
-        }
-        _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
-        result.data["plan"] = plan
-        result.data["logs"] = logs
-        result.data["policy_identity"] = get_policy_identity()
-        result.data["projection_mode"] = projection_decision.projection_mode
-        result.data["projection"] = build_projection_plan_metadata(
+        cache_error = _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        if cache_error:
+            result.errors.append(cache_error)
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                status="error",
+            )
+        return _finalize_skill_sync_result(
+            result,
+            plan,
+            logs,
             projection_decision,
             scope=scope,
             dry_run=dry_run,
-            warnings=plan["warnings"],
+            status="success",
         )
-        result.status = "success"
-        return result
 
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
@@ -2264,24 +2342,27 @@ def sync_skills(
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        cache_error = _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        if cache_error:
+            result.errors.append(cache_error)
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                status="error",
+            )
     elif scope == "user":
         _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
     plan["validation_status"] = "pass"
-    plan["mutation_counts"] = {
-        "writes": len(plan["writes"]),
-        "deletes": len(plan["deletes"]),
-        "symlinks": len(plan["symlinks"]),
-    }
-    result.data["plan"] = plan
-    result.data["logs"] = logs
-    result.data["policy_identity"] = get_policy_identity()
-    result.data["projection_mode"] = projection_decision.projection_mode
-    result.data["projection"] = build_projection_plan_metadata(
+    return _finalize_skill_sync_result(
+        result,
+        plan,
+        logs,
         projection_decision,
         scope=scope,
         dry_run=dry_run,
-        warnings=plan["warnings"],
+        status="success",
     )
-    result.status = "success"
-    return result

@@ -10,28 +10,44 @@ metadata:
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Procedure](#procedure)
 - [YAML Guidelines](#yaml-guidelines)
 - [Editing Rules](#editing-rules)
-- [Examples](#examples)
+- [Validation](#validation)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
 - [Failure mode](#failure-mode)
 - [Gotchas](#gotchas)
+- [References](#references)
 
 ## When to use
 
-- Use for YAML authoring and review.
-- Use when indentation/schema correctness is critical.
+- Use for YAML authoring, review, or schema-safe fixes.
+- Inputs: target files, consumer tool, required keys, and formatting conventions.
+- Deliver valid YAML with stable indentation, key ordering, and scalar notes.
 
 ## Required inputs
 
-- Target YAML file(s) and consumer tool.
-- Schema expectations and required keys.
-- Formatting constraints from existing conventions.
+- Target YAML file path and consuming tool or schema.
+- Required keys, scalar expectations, and formatting conventions.
+- Validation command or parser expected to consume the file.
 
 ## Deliverables
 
-- Valid YAML updates.
-- Stable indentation and key ordering.
-- Notes on ambiguous scalar handling.
+- Minimal YAML edit preserving meaningful ordering and comments.
+- Validation evidence from parser, schema, or consuming tool.
+- Notes for indentation, scalar coercion, or compatibility risk.
+
+## Philosophy
+
+- Prefer schema truth and low-churn edits over clever rewrites.
+
+## Procedure
+
+1. Confirm the consumer schema and current key paths.
+2. Make the smallest compatible edit.
+3. Validate before closeout.
 
 ## YAML Guidelines
 
@@ -46,23 +62,23 @@ metadata:
 - Preserve key order when downstream tooling expects logical ordering.
 - Avoid mixing flow style with block style in the same section.
 
-## Examples
+## Validation
 
-```yaml
-version: "1"
-services:
-  api:
-    image: ghcr.io/example/api:latest
-    environment:
-      LOG_LEVEL: "info"
-      FEATURE_FLAG: "false"
-    ports:
-      - "3000:3000"
-```
+- Run the relevant parser/schema/tool checks for touched files.
+- Fail fast: stop at the first failed gate and report exact blocker evidence.
+
+## Constraints
+
+- If schema compatibility is uncertain, stop and confirm constraints.
+- Redact secrets and do not run destructive or network commands unless explicitly approved.
+
+## Anti-patterns
+
+- Reindenting unrelated sections, changing scalar meaning, or skipping validation.
 
 ## Failure mode
 
-- If schema compatibility is uncertain, stop and confirm constraints.
+If the consuming schema, scalar expectations, or validation command cannot be identified, stop and report the missing contract before editing.
 
 ## Gotchas
 
@@ -77,37 +93,6 @@ services:
 
 **Topic map:** [[agent-ops]]
 
+## References
 
-## Philosophy
-
-- Optimize for clear, verifiable outcomes with the minimum necessary changes.
-- Keep guidance deterministic so repeated runs produce consistent decisions.
-
-## Procedure
-
-1. Confirm scope, constraints, and required inputs before edits.
-2. Apply focused changes tied directly to the requested outcome.
-3. Re-run the highest-signal validations and capture concrete evidence.
-
-## Validation
-
-- Run the relevant local checks for touched files and workflow contracts.
-- Fail fast: stop at the first blocking validation failure and report exact evidence.
-- Re-run checks after fixes and record residual risk if any remains.
-
-## Constraints
-
-- Redact secrets, tokens, credentials, and sensitive data by default.
-- Do not expand scope beyond the request unless explicitly asked.
-- Prefer safe, reversible edits over broad refactors.
-
-## Anti-patterns
-
-- Skipping validation after making changes.
-- Applying broad refactors to solve narrow issues.
-- Assuming behavior without evidence from current checks.
-
-## References and assets
-
-- Open deep guidance: `Infrastructure/references/deep-guidance.md`
-- Read when: the task needs advanced edge cases, migration-safe patterns, or runtime-specific nuance beyond the core checklist.
+- Deep guidance: `references/deep-guidance.md`

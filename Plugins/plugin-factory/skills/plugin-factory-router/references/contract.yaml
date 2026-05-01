@@ -1,0 +1,12 @@
+schema_version: 1
+skill: plugin-factory-router
+purpose: Route broad plugin-factory requests to exactly one plugin lane before execution.
+triggers: [plugin_routing, plugin_creation, plugin_building, plugin_installation, plugin_review]
+non_goals: [installing_plugins, executing_untrusted_code, broad_plugin_refactors]
+inputs: [user_request, optional_repo_path, optional_plugin_url, constraints]
+outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
+risks: [untrusted_plugin_content, over_routing, unsafe_installation]
+safety: {untrusted_inputs: true, redact_secrets: true, execute_code: false}
+validation: [strict_skill_audit, plugin_eval_grade_a]
+observability: "Report selected lane, evidence, missing input, and validation outcome."
+rollback_procedure: "Restore router SKILL.md and references from git, then rerun strict audit and Plugin Eval."

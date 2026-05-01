@@ -1,7 +1,7 @@
 {
-  "generated_command_handle_count": 109,
+  "generated_command_handle_count": 99,
   "generated_from": "rooted_manifests",
-  "handle_count": 109,
+  "handle_count": 99,
   "handles": [
     {
       "command_handle_path": ".agents/skills/1password/SKILL.md",
@@ -13,9 +13,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "c5ecb180da9bf87d0c9b34cbcd95c90990b1c39b0f51bf7a7bf6b0766efb9f5b"
       },
       "runtime_visibility": "latent",
@@ -32,9 +32,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "199b94d66240cee10cba5080b3ef740ff1f8e15f465281f8acd4b899d99313d8"
       },
       "runtime_visibility": "latent",
@@ -51,9 +51,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "5f65f1932212e5321803157434dac15f7a4458e49e2801efbcb087bbbae26d2f"
       },
       "runtime_visibility": "latent",
@@ -70,9 +70,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "45ad1e393171053f4b8720a65e4f0b9a26acc1f5bc7d70b580e1af3b130326f1"
       },
       "runtime_visibility": "latent",
@@ -89,9 +89,9 @@
       "owner": "product-strategy",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "701bf8ddfe8c63979a1710780034f088532bdaa76063e6faef38fb8d0a984260"
       },
       "runtime_visibility": "latent",
@@ -108,9 +108,9 @@
       "owner": "mobile-native",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "4abbc2b83b50edf8a9f7d25d747efdd55a36736e4d1cb65ff73cce19000aa0f5"
       },
       "runtime_visibility": "latent",
@@ -127,9 +127,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "c604148b93acc0c937404788bebde7f00bdbf686aa7e10f6a41c1ff9c3352b83"
       },
       "runtime_visibility": "latent",
@@ -146,9 +146,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "579ff8b786e4c8fc31b1014ebbfc6593d672274f01f875ce204bac3693bf988a"
       },
       "runtime_visibility": "latent",
@@ -165,9 +165,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "ec24c60966c77f11d7f790d8f14ecf230357da8076875014a072a92c3f7f8bbc"
       },
       "runtime_visibility": "latent",
@@ -184,9 +184,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "9ccd0b5e3b0f4a40fc8a830c83bcdef8d84ff79e84bac9fe312b9b37d6fc05b7"
       },
       "runtime_visibility": "latent",
@@ -203,9 +203,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "802d76762ef00104d179d5d888625d39b9167d23545f404a369b1936c57cba78"
       },
       "runtime_visibility": "latent",
@@ -222,9 +222,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "f61596d6b82cbda710f1f15610553eec08753f0b9932fe1ff471c13150df0ad7"
       },
       "runtime_visibility": "latent",
@@ -241,9 +241,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "2d498d85b95b6a67751b6146d614e6026d75b7a8cd24754e1839273316d8a392"
       },
       "runtime_visibility": "latent",
@@ -260,9 +260,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "b2f17b3e9228203d7cf69d15dd77f15e05238bcc3694c0b80cdd462ff35f0f22"
       },
       "runtime_visibility": "latent",
@@ -278,9 +278,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "16f562ca095daf7afdfe5dcdc20149859fc0dedb1253635ee663c2981e3d493b"
       },
       "runtime_visibility": "latent",
@@ -297,32 +297,13 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "17d3430c36faa0fd192695d100d5def8aca1f5f18406e2cf524e813d5c89593a"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/bootstrap/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/chatgpt-apps/SKILL.md",
-      "command_visibility": "target",
-      "description": "Build, validate, and troubleshoot ChatGPT Apps SDK products when MCP tools, widget UI, bridge wiring, CSP, or domain setup is in scope.",
-      "handle": "chatgpt-apps",
-      "invoke_via": "product-strategy",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "product-strategy",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "5cfac8bea291cf1f8c3886f83e7dda4188019dbcfe40f372f81c86b0feb56315"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/product-strategy/chatgpt-apps/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/cli-spec/SKILL.md",
@@ -335,9 +316,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "40efd979dff784e5eccb49b94ace4467016d508c6ccdd2ebc8fc4638d978b16f"
       },
       "runtime_visibility": "latent",
@@ -354,9 +335,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "54ddbcb4225a9511e8f8f5727bc949dc0a43308ee25eb8d8b887df4abe5649f7"
       },
       "runtime_visibility": "latent",
@@ -372,9 +353,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "ef00a7bad127c908b2a67e314a78cc7fb98dc4383a8d63d8566753a7c4f4539f"
       },
       "runtime_visibility": "latent",
@@ -391,9 +372,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "a51941df9d1340133f0567a9081b0b9e9192a24ece9b521eb6f9b4143ee1f9d0"
       },
       "runtime_visibility": "latent",
@@ -410,9 +391,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "0be726037da8d3419e9fbb73f4f5546113c2093490d26e95b8420ba22014baac"
       },
       "runtime_visibility": "latent",
@@ -429,9 +410,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "f6dd43b80716aa527a6667a31eb546a729571bbda60d8317916e5d0538591dc7"
       },
       "runtime_visibility": "latent",
@@ -448,9 +429,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "2b4c65c4e6a116d3a002dd19d895bc2ba88aff04c01650861389797366a1b280"
       },
       "runtime_visibility": "latent",
@@ -466,9 +447,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "f399e4786f69159c82957416a11d4496675b38f7ce6d516f8f6d40c0f8ae9055"
       },
       "runtime_visibility": "latent",
@@ -485,9 +466,9 @@
       "owner": "product-strategy",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "cff0bcbedaf1d82c78dc8a7b42d41d78ef81ff64bfb165b7478928232d38f431"
       },
       "runtime_visibility": "latent",
@@ -504,9 +485,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "49c9a21d79aa9dc3a369b07e97d76b4077dd72b4b5982edae80a0feac3182e77"
       },
       "runtime_visibility": "latent",
@@ -523,9 +504,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "915337a7908853da12d6ad425c2ca8a679d220e8bc309e78b4354057dd26b76e"
       },
       "runtime_visibility": "latent",
@@ -542,9 +523,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "f9f619b5828f702f5ed798923da137ed87b101c9879c1ed4fd21589352435f72"
       },
       "runtime_visibility": "latent",
@@ -561,9 +542,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "e2ac15365a682efcaa88010cc1b80b29ceb92fcb3e27e88141fbc2b773711a26"
       },
       "runtime_visibility": "latent",
@@ -579,9 +560,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "758c67dc8559181f0930f60710332c57c146591c033b3ec128b74dc9f0ea7d15"
       },
       "runtime_visibility": "latent",
@@ -598,9 +579,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "371908c6ee583d6de45659af9cf221bb360edbca6ed09631ee62df6321b025a6"
       },
       "runtime_visibility": "latent",
@@ -617,9 +598,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "80cf4787e2f3df0aa445b393544ffbf4a1a449fe4ffbd26e369d06b8481d6559"
       },
       "runtime_visibility": "latent",
@@ -636,9 +617,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "4221b81eac687519529e59820eb4855f32d1670451e366bd5ed2406d4d9d45b9"
       },
       "runtime_visibility": "latent",
@@ -655,9 +636,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "1361d581ca449f7b5174943f8d2963cf925cf964d843194917a4c4ec4adc155f"
       },
       "runtime_visibility": "latent",
@@ -674,31 +655,13 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "30b53872707eb704ea62f9de535a3e8a4abaea17df535723df866e61889d1c9d"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/frontend-ui/frontend-ui-design/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/gh-workflow/SKILL.md",
-      "command_visibility": "orchestrator",
-      "description": "Operate GitHub issue, PR, review, CI, and merge workflows through gh when repository state must be advanced, reconciled, or verified with live evidence.",
-      "handle": "gh-workflow",
-      "kind": "skill",
-      "level": "compound",
-      "owner": "agent-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "a23fb03c4fa66ccf6a2863552eccd7832a0612110501adef0a564ff17ab1f033"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/agent-ops/gh-workflow/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/go/SKILL.md",
@@ -711,9 +674,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "3670d35a3c56a5d23bf703ab0cc9fb11a46f517f3f8d1accf1f2e0e1ab7451dc"
       },
       "runtime_visibility": "latent",
@@ -730,9 +693,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "21419b13c1c6418ee1a269577e7cf1ce9332f9b99e486988176b25842454d106"
       },
       "runtime_visibility": "latent",
@@ -748,10 +711,10 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "49cac70929b064b2af58c27eeef32af4f601f95724c37c9a2bcc3efbb82d48b8"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "05659a3e2b82b8268d7a2f7035b8b1ce278e636c4dfccc91803cdb80648d157b"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md"
@@ -766,9 +729,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "778c8beba69b19511a40cb8a16bc52c5a835ecbcb4f346bc3ce62202c4e0971f"
       },
       "runtime_visibility": "latent",
@@ -784,9 +747,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "5624c7e0db893fd4086ce75e2e9f6f2eca59f2f3367efd3896efadb4bc05baaf"
       },
       "runtime_visibility": "latent",
@@ -803,9 +766,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "3d7fbc4b0e5a0795422482b0e5afc5103ac366c653e1225f81085b27c86c769a"
       },
       "runtime_visibility": "latent",
@@ -821,9 +784,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "04088556962bd90c38c2ead28eda927f99785996964d77c6d728298fcdb8e366"
       },
       "runtime_visibility": "latent",
@@ -840,9 +803,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "0ed0a5cb4a1ddb5a89579402be8dc96f903124ebaa85b8f64549b45eff50143f"
       },
       "runtime_visibility": "latent",
@@ -859,10 +822,10 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "55ab0805b5e83c1c29f21dae4a325cc536e6d92e1c23e9ee2b16d5f1aecede81"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "29a7b2e639ecd006f2664371be4d4a6830a9873b449a750b41b55ea064cc5b4d"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md"
@@ -878,9 +841,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "a649fab01738c838ef4fcde8a72b431284d07b7b08801cf165b99de1d8845ce9"
       },
       "runtime_visibility": "latent",
@@ -896,9 +859,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "5ce253577fed18a4ee3de13b64e5b002c315794ff137102a56b89a51ee3e41c1"
       },
       "runtime_visibility": "latent",
@@ -915,10 +878,10 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "65f695ac87a5851079a1a4e795303e3597ec73d8f2de167a01c5ebb3f13a5b41"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "bf8d656a28b362cfc3147b6aaa2dec7e35aab93ad9251ffbb8427fe0f0eda825"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/team_automation/he-plan/SKILL.md"
@@ -934,9 +897,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "10a19da1c6ae377a7a4cac71dc5954f3c57d71777666ef732c2214b9bd82bcbc"
       },
       "runtime_visibility": "latent",
@@ -952,9 +915,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "53cbbdced13be6e782d069b6146cd3625c952d7b3463cbcc5304924917082d53"
       },
       "runtime_visibility": "latent",
@@ -971,9 +934,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "c2d85e34b43384455ba3e1a46ccb6dfe8618c5dcfa020d186154060ec257c77e"
       },
       "runtime_visibility": "latent",
@@ -982,17 +945,17 @@
     {
       "command_handle_path": ".agents/skills/he-router/SKILL.md",
       "command_visibility": "orchestrator",
-      "description": "Route ambiguous Harness Engineering requests to one lifecycle stage when users ask where to start, resume, plan, implement, review, debug, schedule a heartbeat, or resolve domain terminology.",
+      "description": "Choose the Harness Engineering lifecycle stage for ambiguous requests. Use when the user is unsure whether to spec, plan, work, review, debug, or schedule follow-up.",
       "handle": "he-router",
       "kind": "skill",
       "level": "router",
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "7b1db2b705ae0ec61234d6e3b133d6e2bae938137cdb06b67e3fe7729abb5c5d"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "72057f25028e06f7d282676fb93ce41a2c82cef51ec52e9a09c8ceace9d7023b"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/he-router/SKILL.md"
@@ -1000,7 +963,7 @@
     {
       "command_handle_path": ".agents/skills/he-spec/SKILL.md",
       "command_visibility": "target",
-      "description": "Own the Harness Engineering spec stage by turning a brainstorm, existing spec, UI source, or feature description into an implementation-grade contract. Use when the user wants the WHAT-before-planning artifact, not a broader product-planning pipeline.",
+      "description": "Write Harness Engineering specs before planning. Use when a feature, QA report, Linear issue, or UI source needs a clear WHAT contract.",
       "handle": "he-spec",
       "invoke_via": "harness-engineering",
       "kind": "skill",
@@ -1008,10 +971,10 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "a28eb07220551e855ca283d81e935af3490a1d49cdc8dbc5b3a9abf1dc51321a"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "d85d9b129657b8911f19e3fb3ea636dde4703b07ad39076442379d78a22d98ce"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/team_automation/he-spec/SKILL.md"
@@ -1027,9 +990,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "bbeec336fdc0d3ed36cac3add84a675fdd9a7fb4504e191021441471768411ac"
       },
       "runtime_visibility": "latent",
@@ -1046,9 +1009,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "e8821023305e68b5daad9ec6751b6ebb5df10e70a0bd4c5da01787de68c47b58"
       },
       "runtime_visibility": "latent",
@@ -1057,7 +1020,7 @@
     {
       "command_handle_path": ".agents/skills/he-work/SKILL.md",
       "command_visibility": "target",
-      "description": "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned.",
+      "description": "Implement approved Harness Engineering work. Use when a plan, todo list, or tiny spec needs traceable delivery and validation.",
       "handle": "he-work",
       "invoke_via": "harness-engineering",
       "kind": "skill",
@@ -1065,10 +1028,10 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "0b1c3087874281c654cd1f843529c711fa48eabcb6a8915294533cc0d4a44481"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "f8ee173fc682adebc4e06c70366d372f6572559d40a0bfcc77a087e5f8cda3c3"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md"
@@ -1084,9 +1047,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "e6ae640b4ec62ab3f35b037bcbd707d4d23b579144e9f79c5844ed684682fd19"
       },
       "runtime_visibility": "latent",
@@ -1094,18 +1057,19 @@
     },
     {
       "command_handle_path": ".agents/skills/insight-report/SKILL.md",
-      "command_visibility": "orchestrator",
-      "description": "WHAT: Generate Codex-authored HTML insights from local Codex sessions and telemetry. WHEN: Use when the user asks for Codex usage analytics, workflow patterns, session summaries, prompting help, or recommendations for improving how they use Codex.",
+      "command_visibility": "target",
+      "description": "WHAT: Generate local Codex usage reports. WHEN: Use when users ask for usage analytics, weekly insights, session summaries, telemetry patterns, or prompting help.",
       "handle": "insight-report",
+      "invoke_via": "agent-ops",
       "kind": "skill",
-      "level": "compound",
+      "level": "atom",
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "5f816032904c50b22f4387e583e1871d2210fb9d94da3653f55e656fc2045939"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "4cf64329a86b3a885c8d271cbb5572f37f4e31a299b5532b61a396e995f593bc"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/insight-report/SKILL.md"
@@ -1121,9 +1085,9 @@
       "owner": "product-strategy",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "93ce2d2cebff874a8fef514afc7e8a2aedfb9eaa550d7a4eee2f948a432571a8"
       },
       "runtime_visibility": "latent",
@@ -1140,9 +1104,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "875bba0a46ee504e75ca92cb38fef3d2dcfa583c282f757c66b460d874378655"
       },
       "runtime_visibility": "latent",
@@ -1158,9 +1122,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "943d427db7df692a4e078f43eddd081763e943c16538858906cf3948763bb55c"
       },
       "runtime_visibility": "latent",
@@ -1177,9 +1141,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "7c24cec705480b8282c9ca5774e6ed237700da0bc207d7ac5b91d41d2e6c1fa6"
       },
       "runtime_visibility": "latent",
@@ -1195,9 +1159,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "b456eb131c07d70093444da1024482257e0098d7ee5d6cff88d7b934b0fa9920"
       },
       "runtime_visibility": "latent",
@@ -1214,9 +1178,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "9cd49fdc616c48b5b8ca1aca6327ab834bb205a4a498e2c7657c83396f35271d"
       },
       "runtime_visibility": "latent",
@@ -1232,32 +1196,13 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "89e428587818e88b2a5ff50c3bbd1cf1e254b18f314abf11f02abab618511b42"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/frontend-ui/og-image-creator/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/playwright-interactive/SKILL.md",
-      "command_visibility": "target",
-      "description": "Validate and debug local web or Electron interfaces with a persistent Playwright session when iterative UI automation, visual QA, or browser inspection is needed.",
-      "handle": "playwright-interactive",
-      "invoke_via": "frontend-ui",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "frontend-ui",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "a3cc117272902657a409b848fe3ead54c5d163d42bab383034c3209ebc1eae4f"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/frontend-ui/playwright-interactive/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/plugin-builder/SKILL.md",
@@ -1269,9 +1214,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "eb49ceb82259ac1b9ff6f026bdf913769e91b956a176b15616fc2577024cad35"
       },
       "runtime_visibility": "latent",
@@ -1288,9 +1233,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "09315ba21aec1dc6f05b7787718caf45e7a76412866277ea4ff5bd35b2bfa77b"
       },
       "runtime_visibility": "latent",
@@ -1299,17 +1244,17 @@
     {
       "command_handle_path": ".agents/skills/plugin-factory-router/SKILL.md",
       "command_visibility": "orchestrator",
-      "description": "Front-door entrypoint for plugin-factory. Use when a plugin task needs lane routing.",
+      "description": "WHAT: Route plugin-factory requests to the right lane. WHEN: Use when plugin creation, building, installation, review, or routing is broad, mixed, or under-specified.",
       "handle": "plugin-factory-router",
       "kind": "skill",
       "level": "router",
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "d6cb4bbfa71170d0c66bd14bc562c12aceb6e5f46a7d1da8abd4720eb8b068c2"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "2217622bc49fc3a7c2199d5c366c57e20ac4b7783a6ad3f3e099e8a968d9c508"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md"
@@ -1325,9 +1270,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "2d6ba5493981cb9fffffdb141864ec8cdf5d41292977b766583fa3d16647abb9"
       },
       "runtime_visibility": "latent",
@@ -1343,9 +1288,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "53b0da268ab7baccb3f842b9006cc31ecdc6067738fa753b1d6c6c6ff9b681d0"
       },
       "runtime_visibility": "latent",
@@ -1362,9 +1307,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "cc97dbab77263a9c09487697ebcdf5acc5d7d95d31ab2ef257f1c5da1a9cf8a8"
       },
       "runtime_visibility": "latent",
@@ -1381,9 +1326,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "d7c1c0e73af244913659f0a5bd340464160fe5885e4326ded490139c734069a6"
       },
       "runtime_visibility": "latent",
@@ -1400,9 +1345,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "6a12adb8a18bbb53726979797794d885eba66c7bf745b80d3c902bce227264e7"
       },
       "runtime_visibility": "latent",
@@ -1419,32 +1364,13 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "5127a2575bdfb46e53055c43a65e608e55b7d3aba15e0e019c2aef2d5dc14846"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/project-brain/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/react-ui-patterns/SKILL.md",
-      "command_visibility": "target",
-      "description": "Create and review React UI composition patterns when TypeScript, Tailwind, routing, state, or component structure needs maintainable implementation guidance.",
-      "handle": "react-ui-patterns",
-      "invoke_via": "frontend-ui",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "frontend-ui",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "a37370aeaca4d6243432d7771a3742c466368d53837695a902cbb031919b9c0e"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/frontend-ui/react-ui-patterns/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/recon-workbench/SKILL.md",
@@ -1456,9 +1382,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "74dc39b141de790cad611f85cef6d877f968538f7f59207d5fafc9e1381f45a6"
       },
       "runtime_visibility": "latent",
@@ -1475,9 +1401,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "8e0f5b39d2957fdb00f3e4c3258f3d9174e6dba033aa0a807b1d00cdfd66af3f"
       },
       "runtime_visibility": "latent",
@@ -1494,32 +1420,13 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "b63f8cf902c545d5d147ae2ef2a26c1cba5ed6889a99fd5179ed160e09efa7d4"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/rust-pro/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/security-best-practices/SKILL.md",
-      "command_visibility": "target",
-      "description": "Audit and review code or architecture against security best practices when users need secure-by-default guidance for a specific language or framework.",
-      "handle": "security-best-practices",
-      "invoke_via": "security-ops",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "security-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "688a14e9920a457eef627d688daa767fe0182488a9a2856af955f1dd41e48022"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/security-ops/security-best-practices/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/security-ownership-map/SKILL.md",
@@ -1532,56 +1439,18 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "92297d9a7749533ce5f0ad212ff1a93d0d1f92286d43bb61dc783576d2abe263"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/security-ops/security-ownership-map/SKILL.md"
     },
     {
-      "command_handle_path": ".agents/skills/security-threat-model/SKILL.md",
-      "command_visibility": "target",
-      "description": "Analyze and validate repository-grounded threat models when assets, trust boundaries, attackers, abuse paths, and mitigations need AppSec review.",
-      "handle": "security-threat-model",
-      "invoke_via": "security-ops",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "security-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "c269e3002395e645b0e1d7849cae31141e9a8e9c559381ab4cadfaf39b7aa4dd"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/security-ops/security-threat-model/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/shadcn-ui/SKILL.md",
-      "command_visibility": "target",
-      "description": "Create, adapt, and validate shadcn/ui components when projects need registry setup, component installation, styling, or troubleshooting guidance.",
-      "handle": "shadcn-ui",
-      "invoke_via": "frontend-ui",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "frontend-ui",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "d9d62e0a38d802b1e7da4abbeaa24008057f4e51b8b36f7fc66c471646eada9d"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/frontend-ui/shadcn-ui/SKILL.md"
-    },
-    {
       "command_handle_path": ".agents/skills/simplify/SKILL.md",
       "command_visibility": "target",
-      "description": "Review changed code for reuse, quality, efficiency, and behavior-preserving refactor polish. This skill should be used when users request post-implementation simplification or pre-merge maintainability cleanup on an existing diff.",
+      "description": "WHAT: Review changed code for behavior-preserving simplification. WHEN: Use when a diff needs reuse, quality, efficiency, duplication, naming, or maintainability cleanup before merge.",
       "handle": "simplify",
       "invoke_via": "agent-ops",
       "kind": "skill",
@@ -1589,10 +1458,10 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "b53c757410768b349b4fc17468c1c15141a1fdfaa8e6707e5328efd5280b1add"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "5a4c316cdd1be05044adf044293574676b7042c05283d1dcc7e983bda1538800"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/simplify/SKILL.md"
@@ -1607,9 +1476,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "84be7b31b5922eb68538b0a1a0f69db52b235b44411ca39d3cdf1b56ef1df85d"
       },
       "runtime_visibility": "latent",
@@ -1626,9 +1495,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "5c34b6a1bdd1f825feaab0292184ee7d5c82776ab07bed4538526e6d6e28c4d6"
       },
       "runtime_visibility": "latent",
@@ -1644,9 +1513,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "22215d26b12900eb30d808f0a6fd79498a5f2a25ec35d30d777648798c838a9b"
       },
       "runtime_visibility": "latent",
@@ -1663,9 +1532,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "d87e4c27b639eb9ebbd07f854b35cf09d5e996742ebfd5100f1091822d1116af"
       },
       "runtime_visibility": "latent",
@@ -1682,9 +1551,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "7e068f7d2dee3b22df859b4f6ed63d6ebd057a2158cdb9c5a8d714b6432c75e2"
       },
       "runtime_visibility": "latent",
@@ -1693,7 +1562,7 @@
     {
       "command_handle_path": ".agents/skills/skill-refactor/SKILL.md",
       "command_visibility": "target",
-      "description": "Scan Codex session history for skill failures, usage patterns, and coverage gaps. Use when the user wants daily skill-health monitoring or evidence-backed recommendations about installing, improving, merging, or pruning skills.",
+      "description": "WHAT: Analyze skill reliability from Codex session evidence. WHEN: Use when skill failures, routing gaps, quality regressions, or keep-improve-merge-retire decisions need evidence.",
       "handle": "skill-refactor",
       "invoke_via": "skill-factory",
       "kind": "skill",
@@ -1701,10 +1570,10 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "46ef4a4ea02c61528a746566ed27b794e34dcee05c726a119886e7f4dca8bb42"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "004f1b9dd8a49037e0f0985d1992f28adaea3c67b1634b42b20a0ee113096346"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md"
@@ -1712,76 +1581,20 @@
     {
       "command_handle_path": ".agents/skills/skillify/SKILL.md",
       "command_visibility": "orchestrator",
-      "description": "Capture a completed Codex workflow as a reusable SKILL.md package by analyzing session context plus optional session-collector evidence, interviewing the user with structured prompts, and writing a validated skill artifact. Use when the user asks to skillify or operationalize a repeatable process.",
+      "description": "WHAT: Convert repeatable Codex workflows into validated SKILL.md packages. WHEN: Use when a completed workflow is ready to become durable skill guidance.",
       "handle": "skillify",
       "kind": "skill",
       "level": "compound",
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "2597a9d2fc66c16d262c80c0dff1741fcf8474306f10fc15223b8869e2804985"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "685129ea8661600c7d81f58c4acbbb958fa4843cfc760d3a2d50e9db9d4341e9"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/slides/SKILL.md",
-      "command_visibility": "target",
-      "description": "Create, edit, validate, and debug PowerPoint-compatible slide decks. Use when the user needs .pptx output, deck recreation, slide editing, overflow checks, font checks, or evidence-backed visual review.",
-      "handle": "slides",
-      "invoke_via": "content-publishing",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "content-publishing",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "9c3de664fd68e21ccadf0d0df343fe21ad6994fb2089ec16adfff7ae08bcd905"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/content-publishing/slides/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/spreadsheet/SKILL.md",
-      "command_visibility": "orchestrator",
-      "description": "Create, edit, analyze, and validate spreadsheets with formula-aware workflows. Use when the user needs .xlsx, .csv, or .tsv work with formulas, formatting, charts, analysis, or recalculation evidence.",
-      "handle": "spreadsheet",
-      "kind": "skill",
-      "level": "compound",
-      "owner": "content-publishing",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "d050e00d7405c14dc8bad82a57e0b7426bfeac2575a1ac83b676e039827a23b8"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/content-publishing/spreadsheet/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/swift-development/SKILL.md",
-      "command_visibility": "target",
-      "description": "Create and review Swift code with modern concurrency, performance tuning, and idiomatic language patterns. Use when building or debugging Swift application logic.",
-      "handle": "swift-development",
-      "invoke_via": "agent-ops",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "agent-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
-        "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "3d7f66b3799468d4caaa0ff0df21c71696311d251135f993e7457103e0295e9b"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "Skills/agent-ops/swift-development/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/toml/SKILL.md",
@@ -1794,10 +1607,10 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "7e6321ddab8708478ee41461fb10b153c7a8ce830106195c9e26805a6ff60574"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "d753276e3c327256fdd238fa8d3b54f56b71a446e981e5f178f1d6387217bef8"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/toml/SKILL.md"
@@ -1813,9 +1626,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "3e782c49a4c0507ea971ba32d7537d8a71d46a5466ccc101efb4167212a5097f"
       },
       "runtime_visibility": "latent",
@@ -1832,9 +1645,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "8d75fdb799f59b1761c5275a52e20ce6cb60072a0479147bda5a063c9d918b43"
       },
       "runtime_visibility": "latent",
@@ -1843,18 +1656,18 @@
     {
       "command_handle_path": ".agents/skills/ubiquitous-language/SKILL.md",
       "command_visibility": "target",
-      "description": "Build or update a shared project vocabulary, DDD-style glossary, and prompt translation map from the current conversation, project docs, and relevant session evidence. Use when terminology is fuzzy, the user wants consistent naming, asks what to call something, wants agents to interpret their wording consistently, mentions glossary, domain model, DDD, ubiquitous language, naming, vocabulary, terminology, or says they do not know the technical term.",
+      "description": "Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.",
       "handle": "ubiquitous-language",
       "invoke_via": "agent-ops",
       "kind": "skill",
-      "level": "reference",
+      "level": "atom",
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "18959ad7d67e1128508707c873fd992d9bdefa3f81052776d503e5c29761657a"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "dd2d1dd3c3a5d027eee2c095606b143243d3e7106f95d32202778821692f12fd"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/ubiquitous-language/SKILL.md"
@@ -1870,9 +1683,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "e2f80d66507f07b2e71fe2600aaa8ca0ed9897cf340eda0f3783b64859c7a078"
       },
       "runtime_visibility": "latent",
@@ -1889,9 +1702,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "ed0aae2dee45faa8439726122107c7f50f663af3c2de89429fb71901684de5a4"
       },
       "runtime_visibility": "latent",
@@ -1900,7 +1713,7 @@
     {
       "command_handle_path": ".agents/skills/unslopify/SKILL.md",
       "command_visibility": "target",
-      "description": "Use when you need focused cleanup audits, safe removals, scoped quality-risk reductions, and evidence-backed cleanup plans before touching code.",
+      "description": "WHAT: Run focused cleanup audits and safe removal planning. WHEN: Use when stale-code checks, dead exports, quality-risk reduction, or scoped cleanup evidence are needed.",
       "handle": "unslopify",
       "invoke_via": "agent-ops",
       "kind": "skill",
@@ -1908,10 +1721,10 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "cf1625161fea13cf8e7aafac4ce8d8008d6b6f3dfed037cc792a4677c53fd896"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "4cddede0157275f5d7b1ee1c639878c3fd40589263460f221f2025c9a3e6ec82"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/unslopify/SKILL.md"
@@ -1926,9 +1739,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "489d6270b69982cfe2ca6baa4f6a2fe466107a8512ce392a4c5218ffbf66233a"
       },
       "runtime_visibility": "latent",
@@ -1944,9 +1757,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "18f5adbf5e9f8077a476c9655a5b769ea7be0af306c2d35b48cc21a87d9abd22"
       },
       "runtime_visibility": "latent",
@@ -1963,9 +1776,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "266782660267f26d0881798beb3d7556f0a10ce2342c71d03e9cec7e2c454e6a"
       },
       "runtime_visibility": "latent",
@@ -1982,9 +1795,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "add11e1f4d87fd2d05b51b9d7f6b80ca4a4dd52d736d2c5af5512745ad646dc1"
       },
       "runtime_visibility": "latent",
@@ -2001,9 +1814,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "0a113b4fb05b115eebd4b20f3b65c9f123ddadc46ed5b4bb6f15c9580188a30b"
       },
       "runtime_visibility": "latent",
@@ -2019,10 +1832,10 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
-        "source_sha256": "acc40fe1f33a5103aeb84f43faf2e79aa11c230eb5a9d484f756834c2566b146"
+        "source_revision": "4e9ad7067",
+        "source_sha256": "7b8b26a81ab54515e160979937fc435e4b9c7ab92191ab8c04c10d969c5b00f7"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/yaml/SKILL.md"
@@ -2038,9 +1851,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "14c1588c6febe0c0",
+        "policy_identity": "166729505b5a4a37",
         "projection_mode": "rooted",
-        "source_revision": "311c3a604",
+        "source_revision": "4e9ad7067",
         "source_sha256": "a700e631c02271abeceb9d171a6d09625a53674b2bcfe1ba230a718536fbaf16"
       },
       "runtime_visibility": "latent",
@@ -2054,7 +1867,7 @@
     "Generated command handles are written only for handles absent from rooted runtime projection.",
     "Reviewer handles are intentionally kept outside the skill command surface."
   ],
-  "policy_identity": "14c1588c6febe0c0",
+  "policy_identity": "166729505b5a4a37",
   "projection_path": ".skillsets/command-surface.json",
   "schema_version": "command-surface.v1",
   "status": "pass",

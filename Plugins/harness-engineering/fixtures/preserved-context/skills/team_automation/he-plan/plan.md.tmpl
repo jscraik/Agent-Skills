@@ -5,8 +5,19 @@ type: "{{PLAN_TYPE}}"
 status: "{{PLAN_STATUS}}"
 date: "{{PLAN_DATE}}"
 origin: "{{PLAN_ORIGIN}}"
+requirements: "{{PLAN_REQUIREMENTS}}"
 spec: "{{PLAN_SPEC}}"
+source_spec: "{{PLAN_SOURCE_SPEC}}"
 ui_spec: "{{PLAN_UI_SPEC}}"
+linear_project: "{{LINEAR_PROJECT}}"
+linear_issue: "{{LINEAR_ISSUE}}"
+linear_parent: "{{LINEAR_PARENT}}"
+linear_children: []
+linear_status: "{{LINEAR_STATUS}}"
+linear_comment_required: true
+branch: "{{PLAN_BRANCH}}"
+pr: "pending"
+traceability_required: true
 plan_route: "{{PLAN_ROUTE}}"
 plan_depth: "{{PLAN_DEPTH}}"
 ---
@@ -21,10 +32,25 @@ plan_depth: "{{PLAN_DEPTH}}"
 
 {{PROBLEM_FRAME}}
 
+## Linear Work Item Contract
+
+- Linear issue: {{LINEAR_ISSUE}}
+- Parent / children: {{LINEAR_PARENT_CHILDREN}}
+- Current Linear status: {{LINEAR_STATUS}}
+- Branch: {{PLAN_BRANCH}}
+- PR: pending
+- Linear comment required: true
+
 ## Requirements Trace
 
 - R1. {{REQ_1}}
 - R2. {{REQ_2}}
+
+## Linear / Spec / Plan / PR Traceability
+
+| Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
+| --- | --- | --- | --- | --- | --- |
+| {{LINEAR_ISSUE}} | R1 | {{SOURCE_ACCEPTANCE_1}} | P0 | AC1 | pending |
 
 ## Scope Boundaries
 
@@ -104,7 +130,10 @@ P0-U1 | pending | {{OWNER}} | {{INITIAL_EVIDENCE}}
 
 ## Sources & References
 
+- Linear issue: {{LINEAR_ISSUE}}
 - Origin document: {{SOURCE_ORIGIN}}
+- Spec: {{PLAN_SPEC}}
+- Plan: {{PLAN_PATH}}
 - Related code: {{SOURCE_CODE}}
-- Related issues/PRs: {{SOURCE_ISSUES}}
+- Related PRs: pending
 - External docs: {{SOURCE_EXTERNAL}}

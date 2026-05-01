@@ -206,6 +206,10 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
 
         for plugin_name, expected_skill_names in EXPECTED_CACHE_PLUGIN_SKILLS.items():
             plugin_root = runtime_root / plugin_name
+            self.assertTrue(
+                plugin_root.is_dir(),
+                f"{plugin_name} should expose a runtime plugin cache root",
+            )
             discovered: dict[str, list[str]] = {}
             for skill_md in sorted(plugin_root.rglob("SKILL.md")):
                 rel = skill_md.relative_to(plugin_root).as_posix()
@@ -255,6 +259,10 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} should expose exactly one versioned local cache root",
             )
             skills_root = version_dirs[0] / "skills"
+            self.assertTrue(
+                skills_root.is_dir(),
+                f"{plugin_name} should expose a versioned local cache skills root",
+            )
             discovered = {
                 child.name
                 for child in skills_root.iterdir()

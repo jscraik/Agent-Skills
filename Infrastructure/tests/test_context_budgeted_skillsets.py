@@ -184,7 +184,7 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
                             "id": "specific-stage",
                             "description": "Use for branch review readiness",
                             "level": "atom",
-                            "source_path": "Skills/agent-ops/gh-workflow/SKILL.md",
+                            "source_path": "Skills/agent-ops/docs-expert/SKILL.md",
                             "triggers": ["branch review readiness"],
                         }
                     ),

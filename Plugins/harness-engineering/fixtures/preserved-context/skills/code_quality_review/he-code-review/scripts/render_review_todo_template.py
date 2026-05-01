@@ -5,14 +5,16 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
 FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
-if str(FAMILY_SKILLS_DIR) not in sys.path:
-    sys.path.insert(0, str(FAMILY_SKILLS_DIR))
+for candidate in [FAMILY_SKILLS_DIR, *(parent / "skills" for parent in SCRIPT_DIR.parents)]:
+    if (candidate / "_template_utils.py").exists():
+        if str(candidate) not in sys.path:
+            sys.path.insert(0, str(candidate))
+        break
 
 from _template_utils import (  # noqa: E402
     TemplateRenderError,
@@ -20,7 +22,9 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
+    print_diff_lines,  # noqa: F401 - re-exported for check_review_todo_template_drift.py
     render_from_path,
+    unified_diff_lines,  # noqa: F401 - re-exported for check_review_todo_template_drift.py
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "review-todo.md.tmpl"
@@ -31,7 +35,7 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "TODO_PRIORITY": "P2",
     "TODO_ID": "003",
     "TODO_TAG": "quality",
-    "TODO_DEPENDENCY": "",
+    "TODO_DEPENDENCY": "none",
     "TODO_TITLE": "stabilize-orchestrator-state-reconciliation",
     "PROBLEM_STATEMENT": "Reconciliation can leave stale running entries after worker failures, causing duplicate or blocked dispatch.",
     "FINDING_1": "Retry queue entries are created without clearing stale running metadata in one failure path.",
@@ -55,7 +59,7 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "AC_1": "No stale running entry remains after abnormal worker exit.",
     "AC_2": "Retry scheduling and slot math remain consistent under terminal transitions.",
     "AC_3": "Regression tests cover both failure and terminal reconciliation paths.",
-    "TODO_DATE": date.today().isoformat(),
+    "TODO_DATE": "2026-04-10",
     "REVIEWER": "he-code-review",
     "WORK_LOG_NOTE": "Initial triage complete; ready for implementation planning.",
 }

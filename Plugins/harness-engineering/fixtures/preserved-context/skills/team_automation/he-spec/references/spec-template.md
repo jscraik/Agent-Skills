@@ -5,6 +5,12 @@ type: "feat"
 status: "draft"
 date: "2026-04-10"
 origin: "docs/brainstorms/2026-04-10-symphony-service-requirements.md"
+linear_project: "JSC"
+linear_issue: "JSC-200"
+linear_parent: "JSC-190"
+linear_children: []
+linear_status: "In Progress"
+traceability_required: true
 risk: "high"
 spec_depth: "full"
 ui_required: false
@@ -58,6 +64,13 @@ Important boundary:
 - General-purpose workflow engine or distributed job scheduler.
 - Built-in business logic for editing tickets, PRs, or comments.
 - Mandating one approval/sandbox posture for all deployments.
+
+## 2.3 Linear Work Item Contract
+
+- Linear issue: JSC-200
+- Parent / children: JSC-190 parent, no child issues yet
+- Current Linear status: In Progress
+- Traceability required: true
 
 ## 3. System Overview
 
@@ -530,6 +543,12 @@ Include pseudocode for:
 ### 17.8 Real Integration Profile (Recommended)
 
 - real tracker smoke checks with valid credentials
+
+## 17.9 Linear Acceptance Traceability
+
+| Linear issue | Source requirement | Acceptance IDs | Planning handoff |
+| --- | --- | --- | --- |
+| JSC-200 | Poll eligible tracker work and dispatch safely | SA1 | P0 / Orchestrator state and poll loop |
 
 ## 18. Implementation Checklist (Definition of Done)
 
