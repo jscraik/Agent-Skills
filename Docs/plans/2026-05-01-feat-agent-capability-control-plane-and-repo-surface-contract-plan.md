@@ -275,12 +275,12 @@ Before resolving any deferred ownership surface, P0 must document the evidence
 that would falsify each classification. Use this matrix as the minimum decision
 contract:
 
-| Surface | Tentative states | Falsification evidence required before final classification |
-| ------- | ---------------- | ----------------------------------------------------------- |
-| `.skillsets/**` | canonical generated snapshot, reproducible generated output, runtime projection | If a repo command regenerates it from `Skills/**` or plugin sources without manual edits, classify as generated output or generated snapshot; if tests/docs treat exact checked-in content as a fixture contract, classify only the fixture subset as fixture; if production routing reads it as the source of truth with no generator, document the owner before classifying as source/policy. |
-| `.harness/*.db` | runtime state, fixture, accidental tracked file | If the DB is written by runtime commands or local harness execution, classify as runtime state; if tests load a stable fixture DB, move or document it under a fixture path; if no reader or fixture exists, classify as unknown/blocker until owner review. |
-| `skills-system/**` | vendored snapshot, generated mirror, legacy surface | If an update command or upstream plugin source can reproduce it, classify as vendored/generated with update command; if active runtime readers consume it directly, document reader and owner before preserving; if only stale docs mention it, classify as cleanup candidate after reference scan. |
-| `Infrastructure/Infrastructure/**` | accidental nested output, historical artifact, intentional archive | If no active source/runtime reader depends on it, classify as historical artifact or cleanup candidate; if retained, require an allowlist reason that explains the duplicated path shape. |
+| Surface                            | Tentative states                                                                | Falsification evidence required before final classification                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.skillsets/**`                    | canonical generated snapshot, reproducible generated output, runtime projection | If a repo command regenerates it from `Skills/**` or plugin sources without manual edits, classify as generated output or generated snapshot; if tests/docs treat exact checked-in content as a fixture contract, classify only the fixture subset as fixture; if production routing reads it as the source of truth with no generator, document the owner before classifying as source/policy. |
+| `.harness/*.db`                    | runtime state, fixture, accidental tracked file                                 | If the DB is written by runtime commands or local harness execution, classify as runtime state; if tests load a stable fixture DB, move or document it under a fixture path; if no reader or fixture exists, classify as unknown/blocker until owner review.                                                                                                                                    |
+| `skills-system/**`                 | vendored snapshot, generated mirror, legacy surface                             | If an update command or upstream plugin source can reproduce it, classify as vendored/generated with update command; if active runtime readers consume it directly, document reader and owner before preserving; if only stale docs mention it, classify as cleanup candidate after reference scan.                                                                                             |
+| `Infrastructure/Infrastructure/**` | accidental nested output, historical artifact, intentional archive              | If no active source/runtime reader depends on it, classify as historical artifact or cleanup candidate; if retained, require an allowlist reason that explains the duplicated path shape.                                                                                                                                                                                                       |
 
 Unknown ownership is never a deletion signal. It is a blocker until one of the
 decision tests produces evidence and the policy records the outcome.
@@ -346,14 +346,14 @@ Internal `data.*` payload guidance:
       "reason": "nested Infrastructure path is not allowlisted",
       "recommendation": "audit source and either remove, move to fixture, or allowlist with reason"
     }
-  ],
-  "next_command": "./bin/ask repo surface --strict --json"
+  ]
 }
 ```
 
 This shape is directional guidance for the `data` payload only. The canonical
 public output is the standard `ask` envelope defined below. Implementers must not
-return this payload as a top-level JSON object.
+return this payload as a top-level JSON object. `metadata.next_steps` in the
+public envelope is the authoritative machine-readable next-action field.
 
 ## Deepening Addendum
 
@@ -453,14 +453,14 @@ Strict mode behavior:
 
 Strict-mode truth table:
 
-| Finding state | Allowlisted | `--strict` exit | Payload status |
-| ------------- | ----------- | --------------- | -------------- |
-| `status=ok` | not applicable | `0` | `success` |
-| `status=warning` and `blocking=false` | not applicable | `0` | `warning` |
-| `status=unknown` | no | non-zero | `error` |
-| `status=unknown` | yes, with reason | `0` | `warning` |
-| `status=violation` | no | non-zero | `error` |
-| `status=violation` | yes, with reason | `0` | `warning` |
+| Finding state                         | Allowlisted      | `--strict` exit | Payload status |
+| ------------------------------------- | ---------------- | --------------- | -------------- |
+| `status=ok`                           | not applicable   | `0`             | `success`      |
+| `status=warning` and `blocking=false` | not applicable   | `0`             | `warning`      |
+| `status=unknown`                      | no               | non-zero        | `error`        |
+| `status=unknown`                      | yes, with reason | `0`             | `warning`      |
+| `status=violation`                    | no               | non-zero        | `error`        |
+| `status=violation`                    | yes, with reason | `0`             | `warning`      |
 
 ### Implementation Stop Conditions
 
@@ -588,7 +588,8 @@ in parallel if it imports policy constants locally.
 - A fake `.harness/context-compound.db` path is classified as `runtime_state` or
   unresolved ownership according to policy.
 - JSON output includes `classification`, `status`, `code`, `severity`,
-  `blocking`, `allowlist_entry`, `reason`, `recommendation`, and `next_command`.
+  `blocking`, `allowlist_entry`, `reason`, `recommendation`, and
+  `metadata.next_steps`.
 - JSON findings use deterministic ordering and normalized repository-relative
   paths.
 

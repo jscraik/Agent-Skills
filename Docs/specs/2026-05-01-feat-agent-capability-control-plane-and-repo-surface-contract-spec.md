@@ -262,6 +262,10 @@ projection must be reproducible and should not be hand-edited.
 The set of tracked and untracked filesystem paths that a human or agent sees
 while working in the repository.
 
+Normative first-slice scope: P0-P2 inventory classification is tracked-files-only
+using `git ls-files`. Untracked and runtime-state discovery is report-only future
+work until the policy defines ownership rules for those paths.
+
 ### Surface Classification
 
 The policy category assigned to a path:
@@ -322,7 +326,7 @@ Resolved ambiguity:
 - `ask doctor` already appears as an alias shape for `ask repo doctor-catalog`.
   This spec selects namespace-first product commands for implementation:
   `ask repo doctor`, `ask repo onboard`, `ask skills improve`, `ask skills
-  explain`, `ask skills prove`, `ask repo next`, and
+explain`, `ask skills prove`, `ask repo next`, and
   `ask repo closeout --changed`. Top-level aliases are compatibility/product
   follow-ons only after evidence shows they reduce operator friction.
 - `repo bloat` is useful operator language, but the canonical P0-P2 command is
@@ -483,18 +487,8 @@ This spec introduces two caller-facing boundaries:
 
 #### Shape A: `ask repo bloat` Post-P2 Alias Candidate
 
-Call shape:
-
-```bash
-./bin/ask repo bloat --json
-./bin/ask repo bloat --strict
-```
-
-Caller usage example:
-
-```bash
-./bin/ask repo bloat --json
-```
+This shape is not selected for P0-P2 acceptance. It records possible
+human-friendly language for a later alias after `ask repo surface` exists.
 
 What it hides internally:
 
@@ -520,8 +514,11 @@ Call shape:
 
 ```bash
 ./bin/ask repo surface --json
-./bin/ask repo surface --strict
+./bin/ask repo surface --strict --json
 ```
+
+`./bin/ask repo surface --strict` may exist for human output, but all machine
+acceptance and strict-mode automation must use `--strict --json`.
 
 Caller usage example:
 
@@ -551,9 +548,12 @@ Selected contract:
   command-surface confusion.
 - JSON must use policy language: `classification`, `status`, `code`,
   `severity`, `blocking`, `reason`, `recommendation`, `allowlist_entry`, and
-  `next_command`.
+  `metadata.next_steps`.
 - `allowlist_entry` is required and must be either `null` or the matching
   allowlist entry `id`.
+- `metadata.next_steps` is the authoritative machine-readable next-action field.
+  Any human `next command` summary is derived from it and must not conflict with
+  it.
 - Human output may use bloat language, but it must never recommend deletion
   before reference scan and classification.
 
@@ -851,8 +851,8 @@ human prose.
 ## Acceptance and Test Matrix
 
 | ID   | Acceptance Criteria                                                                                                                                                                                               | Verification                                                                                              |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| SA1  | A repo surface ownership policy exists and defines source, fixture, policy, reference, intentional archive, vendored snapshot, generated output, runtime state, historical artifact, and unknown classifications. | `rg 'source|fixture|historical_artifact|runtime_state|unknown' Docs/agents/15-repo-surface-ownership.md` |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------- | ------------------- | ------------- | -------------------------------------------------- |
+| SA1  | A repo surface ownership policy exists and defines source, fixture, policy, reference, intentional archive, vendored snapshot, generated output, runtime state, historical artifact, and unknown classifications. | `rg 'source                                                                                               | fixture | historical_artifact | runtime_state | unknown' Docs/agents/15-repo-surface-ownership.md` |
 | SA2  | A surface inventory command reports tracked files by classification with JSON output.                                                                                                                             | `./bin/ask repo surface --json`                                                                           |
 | SA3  | The inventory command flags tracked generated artifacts under `artifacts/**` and `Infrastructure/artifacts/**` unless they are allowlisted fixtures, summaries, or intentional archives.                          | Add a fixture test and run the inventory command in strict mode                                           |
 | SA4  | The inventory command flags `Infrastructure/Infrastructure/**` unless explicitly allowlisted with a reason.                                                                                                       | Run inventory against the live tree and verify the nested path is reported or absent                      |
@@ -862,7 +862,7 @@ human prose.
 | SA8  | Deferred context remains reachable through indexed references and is not loaded by default.                                                                                                                       | Deferred context index check passes; runtime budget does not count deferred bodies as first-level context |
 | SA9  | `ask repo doctor` provides one human-readable health summary plus JSON-compatible status for repo, sync, runtime budget, handles, surface policy, blockers, and next command.                                     | `./bin/ask repo doctor --json`                                                                            |
 | SA10 | `ask repo onboard` explains the current repo/runtime state and recommends the next useful action without requiring users to read architecture docs first.                                                         | Manual transcript or CLI test fixture for first-run output                                                |
-| SA11 | `ask skills improve "<goal>"` maps a user goal to candidate capabilities, conflict/overlap notes, and validation or sync actions.                                                                                  | CLI fixture with at least one coding-agent improvement goal                                               |
+| SA11 | `ask skills improve "<goal>"` maps a user goal to candidate capabilities, conflict/overlap notes, and validation or sync actions.                                                                                 | CLI fixture with at least one coding-agent improvement goal                                               |
 | SA12 | `ask skills explain <handle>` distinguishes generated command handle, canonical skill source, runtime projection, loaded references, and validation commands.                                                     | CLI fixture for `he-spec` or another generated command handle                                             |
 | SA13 | `ask repo closeout --changed` infers changed canonical files and reports focused validation, generated sync needs, blocker status, and commit readiness.                                                          | CLI fixture on a controlled changed-file set                                                              |
 | SA14 | Runtime surface reporting remains part of closeout and reports default-visible, first-level, advanced-visible, and advisory-threshold status.                                                                     | `./bin/ask runtime budget --json --robot`                                                                 |
@@ -870,10 +870,10 @@ human prose.
 
 ## Linear Acceptance Traceability
 
-| Linear issue | Acceptance IDs                          | Planning handoff                                                                                                                                                                           |
-| ------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| JSC-246      | SA1, SA2, SA3, SA4, SA5                 | First slice: repo surface ownership policy, non-destructive inventory gate, stable JSON output, `ask` route, tests, and live report.                                                       |
-| JSC-246      | SA6, SA7, SA8                           | Follow-on cleanup: reference-scanned historical artifact removal, retired skill debris audit, and deferred context preservation.                                                           |
+| Linear issue | Acceptance IDs                          | Planning handoff                                                                                                                                                                                                                    |
+| ------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JSC-246      | SA1, SA2, SA3, SA4, SA5                 | First slice: repo surface ownership policy, non-destructive inventory gate, stable JSON output, `ask` route, tests, and live report.                                                                                                |
+| JSC-246      | SA6, SA7, SA8                           | Follow-on cleanup: reference-scanned historical artifact removal, retired skill debris audit, and deferred context preservation.                                                                                                    |
 | JSC-246      | SA9, SA10, SA11, SA12, SA13, SA14, SA15 | Product golden paths: `ask repo doctor`, `ask repo onboard`, `ask skills improve`, `ask skills explain`, `ask skills prove`, `ask repo next --json`, `ask repo closeout --changed`, and outcome-oriented README/start-here framing. |
 
 ## Planning-Ready First Slice
