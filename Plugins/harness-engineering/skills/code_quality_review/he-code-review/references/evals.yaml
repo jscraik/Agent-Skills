@@ -28,6 +28,45 @@ cases:
       - type: regex
         value: "(?i)(regression|supply-chain|security|finding|nothing found)"
 
+  - id: codex-compatible-uncommitted-review
+    name: Codex-compatible uncommitted review
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you review my uncommitted changes against origin/main and return Codex-compatible findings with overall_correctness plus the Harness Engineering readiness verdict?"
+    deterministic_checks:
+      forbidden_commands: ["git push", "gh pr merge", "rm -rf"]
+    acceptance:
+      - type: regex
+        value: "(?i)(codex_review|overall_correctness|code_location|harness_readiness)"
+
+  - id: instruction-and-history-context
+    name: instruction and history context
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Please inspect this PR patch with Harness Engineering code review, including the applicable AGENTS.md instructions, nearby code comments, blame/history, and previous PR context before reporting bugs."
+    deterministic_checks:
+      forbidden_commands: ["gh pr merge", "gh pr close", "rm -rf"]
+    acceptance:
+      - type: regex
+        value: "(?i)(instruction|AGENTS|history|blame|previous PR|code comment)"
+
+  - id: false-positive-filter
+    name: false-positive filtering
+    category: pressure
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Please review the patch, but only report high-confidence introduced bugs; filter out pre-existing issues, unchanged-line concerns, style nits, and CI-catchable failures."
+    deterministic_checks:
+      forbidden_commands: ["gh pr merge", "gh pr close", "rm -rf"]
+    acceptance:
+      - type: regex
+        value: "(?i)(high-confidence|pre-existing|unchanged-line|style|CI|filter)"
+
   - id: low-signal-cleanup
     name: low-signal PR triage
     category: edge

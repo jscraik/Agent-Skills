@@ -1,23 +1,29 @@
 schema_version: 1
 
 purpose: >
-  Run the Harness Engineering code-review stage for package-level readiness,
-  traceability, and go/no-go synthesis.
+  Run the Harness Engineering code-review stage for Codex-compatible introduced
+  bug findings plus package-level readiness, traceability, and go/no-go
+  synthesis.
 
 triggers:
   - the user wants a broad PR or branch review before merge
+  - the user wants Codex-compatible review of uncommitted changes, a base diff, a commit, or a PR patch
   - the user wants a package-level review rather than only a narrow technical critique
   - merge readiness depends on proving a PR satisfies linked Linear QA issues
   - merge readiness depends on resolving Codex, CodeRabbit, Copilot, or other reviewer threads
 
 inputs:
-  - a review target such as PR, branch, current diff, latest PR, file path, spec path, plan path, or solution path
+  - a review target such as PR, branch, current diff, uncommitted changes, commit, latest PR, file path, spec path, plan path, or solution path
+  - intended Codex-compatible mode such as uncommitted, base, commit, custom prompt, or PR patch
   - relevant diff, files, or artifact
+  - applicable local instruction files for the repo root and touched paths
   - linked Linear/spec/plan, acceptance IDs, review threads, checks, and validation when available
   - optional mode modifiers such as report-only, autofix, headless, base:<ref>, or plan:<path>
 
 outputs:
   - selected review mode and post-review policy
+  - codex_review findings, overall_correctness, overall_explanation, and overall_confidence_score
+  - harness_readiness verdict, traceability states, validation state, review-thread state, and next action
   - severity-ranked readiness findings
   - go, go-with-conditions, or no-go recommendation
   - traceability assessment
@@ -33,6 +39,7 @@ risks:
   - wrong target/base; mitigate with explicit target resolution
   - stale claims; mitigate with repo-first evidence
   - false readiness; mitigate with traceability
+  - false-positive code findings; mitigate with eligibility checks, independent lenses, history/context verification, and high-confidence filtering
   - unresolved review threads; mitigate by classifying each as addressed, disproven, deferred, or blocking
   - security or supply-chain regressions; mitigate with a dedicated PR security pass
 

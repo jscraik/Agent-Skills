@@ -15,7 +15,7 @@ def test_he_code_review_uses_harness_engineering_naming_only():
         *sorted((SKILL_DIR / "references").glob("*.md")),
         ROOT / "Infrastructure/references/harness-engineering/he-code-review-doctrine.md",
     ]
-    forbidden = ("ClawSweeper", "OpenClaw", "ClawHub", "Projectclawsweeper")
+    forbidden = ("ClawSweeper", "OpenClaw", "ClawHub", "Projectclawsweeper", "Claude", "Haiku", "Sonnet")
 
     for path in checked:
         text = read(path)
@@ -46,5 +46,11 @@ def test_he_code_review_retains_core_traceability_and_review_rules():
     assert "likely owners without blame" in doctrine
     assert "supply-chain" in doctrine
     assert "idempotency key" in doctrine
+    assert "codex_review.findings[]" in doctrine
+    assert "overall_correctness" in doctrine
+    assert "Multi-Lens Review And False-Positive Filter" in doctrine
+    assert "Codex-compatible findings must be tight" in skill_text
+    assert "Review Lenses" in index
+    assert "Codex-compatible review" in index
     assert "Do not recommend or approve a fix before explaining the likely cause" in doctrine
     assert "Root Cause Before Fix Claims" not in index

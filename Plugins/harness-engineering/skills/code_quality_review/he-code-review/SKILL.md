@@ -21,12 +21,10 @@ Use `he-code-review` for package-level readiness review of a PR, branch, diff, c
 
 ## Contract
 
-- Treat readiness and code review as evidence problems, not title, branch-name, CI, or resolver-claim problems.
-- Resolve target, base, review mode, local instructions, Linear/spec/plan links, acceptance IDs, CI, review threads, and validation evidence before judging.
-- Build one evidence pack from diff/base, changed files, local instructions, GitHub discussion, review threads, Linear issue, spec, plan, acceptance IDs, checks, validation, and relevant history.
-- For Codex-compatible review, mirror native review semantics: target `uncommitted`, `base`, `commit`, or custom PR/diff review; report only actionable introduced bugs with tight changed-line locations and `overall_correctness`.
-- For Harness readiness, rank only concrete readiness issues as `P0`-`P3`; discard style-only, speculative, duplicate, and protected-artifact cleanup notes.
-- Emit `go`, `go-with-conditions`, or `no-go` with exact evidence and routing to `he-work`, `autofix`, `security-ops`, or GitHub workflow when needed.
+- Resolve target, base, mode, local instructions, Linear/spec/plan links, acceptance IDs, CI, review threads, validation, and relevant history before judging.
+- Use Codex-compatible review for introduced code bugs: `uncommitted`, `base`, `commit`, PR, or custom diff target; tight changed-line findings; `overall_correctness`.
+- Use Harness readiness for delivery state: `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`.
+- Emit concrete `P0`-`P3` readiness findings, `go`/`go-with-conditions`/`no-go`, and routing to `he-work`, `autofix`, `security-ops`, or GitHub workflow when needed.
 
 ## Inputs
 
@@ -36,23 +34,17 @@ Use `he-code-review` for package-level readiness review of a PR, branch, diff, c
 
 ## Procedure
 
-1. Run the eligibility gate before deep review: closed, draft, automated, trivial, already-reviewed, or explicitly no-review items should be reported as ineligible unless the user asks to override.
-2. Select the nearest mode from the local review policy index before doing deeper work.
-3. Resolve target, base, mode, local instruction files, Linear issue, spec, plan, and acceptance IDs.
-4. Read the diff/files/artifacts deeply enough to understand behavior, including surrounding code and changed-file comments.
-5. Apply independent lenses: instruction compliance, introduced obvious bugs, relevant history/blame, previous PR or review context, code-comment invariants, breaking changes, change size, context safety, testing evidence, and security-sensitive surfaces.
-6. Verify each candidate issue against the evidence pack; drop pre-existing, unchanged-line, intentional, nit-only, CI-catchable, generic, or low-confidence findings.
-7. Check reviewer threads, bot comments, CI, validation, Linear/spec/plan traceability, and security-sensitive surfaces.
-8. Emit separate Codex-compatible code review and Harness readiness results.
+1. Run the eligibility gate: closed, draft, automated, trivial, already-reviewed, or no-review targets are ineligible unless overridden.
+2. Select the mode from the Review policy index, then resolve target/base/instructions/tracker/spec/plan evidence.
+3. Read the diff, surrounding code, changed-file comments, history, review context, checks, validation, and traceability evidence.
+4. Apply review lenses from the policy index; verify each candidate and drop pre-existing, unchanged-line, intentional, nit-only, CI-catchable, generic, duplicate, or low-confidence issues.
+5. Emit separate Codex-compatible code review and Harness readiness results.
 
 ## Outputs
 
 - `schema_version: 1`.
-- `codex_review` for introduced code bugs:
-  - `findings[]` with `title`, `body`, `confidence_score`, `priority`, and `code_location.absolute_file_path` plus `code_location.line_range`.
-  - `overall_correctness`: `patch is correct` or `patch is incorrect`.
-  - `overall_explanation` and `overall_confidence_score`.
-- `harness_readiness` for delivery state: `verdict`, `linear_traceability`, `spec_plan_traceability`, `validation_state`, `review_threads`, and `next_action`.
+- `codex_review`: `findings[]`, `overall_correctness`, `overall_explanation`, `overall_confidence_score`.
+- `harness_readiness`: `verdict`, `linear_traceability`, `spec_plan_traceability`, `validation_state`, `review_threads`, `next_action`.
 - Severity-ranked readiness findings with exact file or artifact evidence.
 - Follow-up routing when implementation, security review, validation, or PR management is required.
 
@@ -68,25 +60,20 @@ Do not treat branch names, PR titles, or resolver claims as closure. A clean `go
 
 - Each finding needs severity, exact location, evidence, impact, confidence, and remediation.
 - Codex-compatible findings must be tight, actionable, and anchored to changed lines; use absolute paths when available and line ranges small enough to fix directly.
-- Keep only high-confidence candidate issues after verification. If an issue depends on uncertain intent, previous behavior, or external state, state the limitation rather than inflating severity.
 - Block `go` for unresolved `P0`/`P1`, actionable reviewer threads, relevant failing checks, stale conflicts, missing validation, or missing Linear/spec/plan/PR traceability.
 - For PR evidence artifacts, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <artifact-path>` before returning a `go` verdict.
-- Stop at the first failed required gate; do not proceed past a blocker.
+- Fail fast: stop at the first failed required gate and report the blocker instead of continuing past it.
 - Route broad security-sensitive decisions to `security-ops` or a security reviewer.
 
 ## Constraints
 
-- Redact secrets, credentials, tokens, and sensitive data by default.
-- Do not claim readiness without repository evidence.
-- Keep review-only work read-focused unless the user explicitly requests mutation.
-- Do not comment, close, merge, push, label, or resolve threads unless the user explicitly asks for PR management.
+- Redact secrets and keep review-only work read-focused.
+- Do not comment, close, merge, push, label, resolve threads, or edit unless explicitly asked.
 
 ## Anti-patterns
 
-- Treating passing CI alone as merge readiness.
-- Approving tracked PRs without Linear/spec/plan/PR traceability.
-- Reporting vague findings without concrete code or artifact evidence.
-- Reporting pre-existing, intentional, unchanged-line, style-only, or generic test/documentation concerns as introduced code bugs.
+- Claiming readiness from CI alone, branch names, titles, resolver claims, or vague evidence.
+- Do not report pre-existing, intentional, unchanged-line, style-only, or generic test/documentation concerns as introduced code bugs.
 
 ## Examples
 
@@ -96,10 +83,8 @@ Do not treat branch names, PR titles, or resolver claims as closure. A clean `go
 
 ## Gotchas
 
-- Do not treat passing CI alone as merge readiness.
 - Do not resolve reviewer threads from this skill unless explicitly in an autofix or PR-management mode.
-- Keep security-sensitive or policy-sensitive concerns routed to the appropriate specialist.
-- If the base, target, review scope, or required tracker/spec/plan evidence is missing, stop and request that source instead of giving a false readiness verdict.
+- If base, target, scope, or required tracker/spec/plan evidence is missing, stop instead of giving a false readiness verdict.
 
 ## References
 
