@@ -500,7 +500,7 @@ tasks:
 
 ## Implementation Units
 
-- [ ] **P0 / Unit 1: Surface Ownership Policy**
+- [x] **P0 / Unit 1: Surface Ownership Policy**
 
 **Goal:** Create the reviewable policy contract for repo surface ownership.
 
@@ -950,6 +950,7 @@ marketing-only rewrite.
 | 2026-05-01 | Produced implementation plan.                      | This document.                                                                                                                                                                     |
 | 2026-05-01 | Deepened plan for first-slice execution readiness. | Added first-slice rules, test paths, command envelope, strict-mode behavior, and stop conditions.                                                                                  |
 | 2026-05-01 | Linked planning references back to Linear.         | Added JSC-246 comment `a19bbc38-1d89-4619-82f6-5c887a7a7fdd` with spec and plan paths.                                                                                             |
+| 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                 |
 
 ## Sources & References
 

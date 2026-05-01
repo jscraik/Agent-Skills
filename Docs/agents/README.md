@@ -1,16 +1,19 @@
 # Agent Instruction Map
 
 ## Table of Contents
+
 - [How to use this folder](#how-to-use-this-folder)
 - [Instruction files](#instruction-files)
 - [Quick picks](#quick-picks)
 
 ## How to use this folder
+
 1. Start at repository root `AGENTS.md`.
 2. Use this folder for detailed policy only.
 3. If two docs conflict, escalate before proceeding.
 
 ## Instruction files
+
 - [01-instruction-map](/Docs/agents/01-instruction-map.md)
 - [02-tooling-policy](/Docs/agents/02-tooling-policy.md)
 - [03-local-memory](/Docs/agents/03-local-memory.md)
@@ -26,13 +29,15 @@
 - [12-ci-required-checks](/Docs/agents/12-ci-required-checks.md)
 - [13-workflow-and-safety-guidance](/Docs/agents/13-workflow-and-safety-guidance.md)
 - [14-path-ownership-boundaries](/Docs/agents/14-path-ownership-boundaries.md)
+- [15-repo-surface-ownership](/Docs/agents/15-repo-surface-ownership.md)
 
 ## Quick picks
 
-| Need | Open |
-| --- | --- |
-| Tooling and command policy | [/Docs/agents/02-tooling-policy.md](/Docs/agents/02-tooling-policy.md) |
-| Validation order and checks | [/Docs/agents/04-validation.md](/Docs/agents/04-validation.md) |
-| Security and governance | [/Docs/agents/06-security-and-governance.md](/Docs/agents/06-security-and-governance.md) |
-| Release and risky git controls | [/Docs/agents/08-release-and-change-control.md](/Docs/agents/08-release-and-change-control.md) |
-| Canonical vs runtime edit ownership | [/Docs/agents/14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md) |
+| Need                                              | Open                                                                                           |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Tooling and command policy                        | [/Docs/agents/02-tooling-policy.md](/Docs/agents/02-tooling-policy.md)                         |
+| Validation order and checks                       | [/Docs/agents/04-validation.md](/Docs/agents/04-validation.md)                                 |
+| Security and governance                           | [/Docs/agents/06-security-and-governance.md](/Docs/agents/06-security-and-governance.md)       |
+| Release and risky git controls                    | [/Docs/agents/08-release-and-change-control.md](/Docs/agents/08-release-and-change-control.md) |
+| Canonical vs runtime edit ownership               | [/Docs/agents/14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md)   |
+| Repo surface classification and cleanup ownership | [/Docs/agents/15-repo-surface-ownership.md](/Docs/agents/15-repo-surface-ownership.md)         |
