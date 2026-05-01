@@ -117,6 +117,15 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
     return ["python3"]
 
 
+def _subprocess_env_with_uv_cache() -> dict[str, str]:
+    """Return subprocess environment with a sandbox-safe uv cache default."""
+    env = os.environ.copy()
+    if not env.get("UV_CACHE_DIR"):
+        tmp_root = env.get("TMPDIR") or "/tmp"
+        env["UV_CACHE_DIR"] = str(Path(tmp_root) / "agent-skills-uv-cache")
+    return env
+
+
 def _python_command_supports_packages(command: List[str], packages: List[str]) -> bool:
     """Return true when *command* can import every requested package without installation."""
     executable = Path(command[0]).expanduser()
@@ -136,6 +145,7 @@ def _python_command_supports_packages(command: List[str], packages: List[str]) -
             capture_output=True,
             text=True,
             timeout=5,
+            env=_subprocess_env_with_uv_cache(),
         )
     except (OSError, subprocess.TimeoutExpired):
         return False
@@ -921,14 +931,16 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     python = _get_python_command(["pyyaml", "jsonschema"])
 
     diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
-    diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
+    audit_env = _subprocess_env_with_uv_cache()
+
+    diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
     if level == "strict":
         # Security gate (skill_gate.py)
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
         gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
-        gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
             result.status = "error"
@@ -937,7 +949,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
         # Family benchmarks validation
         family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
-        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
             summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
@@ -960,7 +972,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         # OpenClaw skill guard
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
         openclaw_cmd = python + [openclaw_script, audit_target_path, "--mode", "both", "--format", "text"]
-        openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
             result.status = "error"

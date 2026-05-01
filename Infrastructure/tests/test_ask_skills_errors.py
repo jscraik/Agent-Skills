@@ -9,7 +9,12 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills import audit_skill, install_skill, _summarize_family_benchmark_failure
+from ask.commands.skills import (
+    _subprocess_env_with_uv_cache,
+    _summarize_family_benchmark_failure,
+    audit_skill,
+    install_skill,
+)
 
 
 class TestAskSkillsErrors(unittest.TestCase):
@@ -34,6 +39,18 @@ class TestAskSkillsErrors(unittest.TestCase):
     def test_summarize_family_benchmark_failure_falls_back_to_stderr(self):
         summary = _summarize_family_benchmark_failure(stdout="", stderr="baseline file missing")
         self.assertEqual(summary, "baseline file missing")
+
+    @patch.dict("ask.commands.skills.os.environ", {"TMPDIR": "/tmp/codex-test"}, clear=True)
+    def test_subprocess_env_defaults_uv_cache_to_tmp(self):
+        env = _subprocess_env_with_uv_cache()
+
+        self.assertEqual(env["UV_CACHE_DIR"], "/tmp/codex-test/agent-skills-uv-cache")
+
+    @patch.dict("ask.commands.skills.os.environ", {"UV_CACHE_DIR": "/custom/uv-cache"}, clear=True)
+    def test_subprocess_env_preserves_existing_uv_cache(self):
+        env = _subprocess_env_with_uv_cache()
+
+        self.assertEqual(env["UV_CACHE_DIR"], "/custom/uv-cache")
 
     @patch("ask.commands.skills._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills.subprocess.run")
@@ -78,6 +95,9 @@ class TestAskSkillsErrors(unittest.TestCase):
         result = audit_skill(repo_root=repo_root, skill_path="Skills/agent-ops/autofix/SKILL.md", level="strict")
 
         self.assertEqual(result.status, "success")
+        for call in mock_run.call_args_list:
+            self.assertIn("UV_CACHE_DIR", call.kwargs["env"])
+            self.assertTrue(call.kwargs["env"]["UV_CACHE_DIR"].endswith("agent-skills-uv-cache"))
         security_cmd = mock_run.call_args_list[1].args[0]
         family_cmd = mock_run.call_args_list[2].args[0]
         openclaw_cmd = mock_run.call_args_list[3].args[0]
