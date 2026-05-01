@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents: 20 routed/root-level skill surfaces, generated `$` command handles, and a larger latent skill/plugin catalog behind rooted projections. Author skills once, validate quality, expose command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+A governed **Agent Skills Kit** repository for Codex and AI coding agents: **20 canonical skills** routed through root-level skill surfaces, generated `$` command handles, and a larger latent skill/plugin catalog behind rooted projections. Author skills once, validate quality, expose command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
 **What this gives you:**
 
@@ -183,15 +183,15 @@ ask reviewers resolve skillinspector --json
 
 This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. For the current visible runtime list, run `ask skills list --json`. For the full generated command-handle surface, run `ask skills handles --json --no-handles`.
 
-| Topic              | Skills | Examples                                           |
-| ------------------ | ------ | -------------------------------------------------- |
-| agent-ops          | 40     | docs-expert, autofix, unslopify, simplify          |
+| Topic              | Skills | Examples                                              |
+| ------------------ | ------ | ----------------------------------------------------- |
+| agent-ops          | 40     | docs-expert, autofix, unslopify, simplify             |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
-| backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer            |
-| product-strategy   | 3      | architecture-interview, deep-interview, interview-me |
-| security-ops       | 5      | 1password, best-practices, create-auth             |
-| content-publishing | 6      | beautiful-mermaid, llm-wiki, visual-explainer      |
-| mobile-native      | 1      | atlas                                              |
+| backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
+| product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
+| security-ops       | 5      | 1password, best-practices, create-auth                |
+| content-publishing | 6      | beautiful-mermaid, llm-wiki, visual-explainer         |
+| mobile-native      | 1      | atlas                                                 |
 
 ## Repository layout
 

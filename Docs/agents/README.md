@@ -30,14 +30,16 @@
 - [13-workflow-and-safety-guidance](/Docs/agents/13-workflow-and-safety-guidance.md)
 - [14-path-ownership-boundaries](/Docs/agents/14-path-ownership-boundaries.md)
 - [15-repo-surface-ownership](/Docs/agents/15-repo-surface-ownership.md)
+- [ask product golden path command contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
 
 ## Quick picks
 
-| Need                                              | Open                                                                                           |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Tooling and command policy                        | [/Docs/agents/02-tooling-policy.md](/Docs/agents/02-tooling-policy.md)                         |
-| Validation order and checks                       | [/Docs/agents/04-validation.md](/Docs/agents/04-validation.md)                                 |
-| Security and governance                           | [/Docs/agents/06-security-and-governance.md](/Docs/agents/06-security-and-governance.md)       |
-| Release and risky git controls                    | [/Docs/agents/08-release-and-change-control.md](/Docs/agents/08-release-and-change-control.md) |
-| Canonical vs runtime edit ownership               | [/Docs/agents/14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md)   |
-| Repo surface classification and cleanup ownership | [/Docs/agents/15-repo-surface-ownership.md](/Docs/agents/15-repo-surface-ownership.md)         |
+| Need                                              | Open                                                                                                                               |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Tooling and command policy                        | [/Docs/agents/02-tooling-policy.md](/Docs/agents/02-tooling-policy.md)                                                             |
+| Validation order and checks                       | [/Docs/agents/04-validation.md](/Docs/agents/04-validation.md)                                                                     |
+| Security and governance                           | [/Docs/agents/06-security-and-governance.md](/Docs/agents/06-security-and-governance.md)                                           |
+| Release and risky git controls                    | [/Docs/agents/08-release-and-change-control.md](/Docs/agents/08-release-and-change-control.md)                                     |
+| Canonical vs runtime edit ownership               | [/Docs/agents/14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md)                                       |
+| Repo surface classification and cleanup ownership | [/Docs/agents/15-repo-surface-ownership.md](/Docs/agents/15-repo-surface-ownership.md)                                             |
+| Product command contracts                         | [/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) |

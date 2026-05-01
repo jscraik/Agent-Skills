@@ -124,7 +124,7 @@ before removing historical artifacts or adding broader product golden paths.
 | JSC-246      | R5          | SA5                         | P0, P2     | AC9                          | complete    |
 | JSC-246      | R6          | SA8                         | P0, P2     | AC10                         | complete    |
 | JSC-246      | R7          | SA6, SA7                    | P3         | AC11, AC12                   | complete    |
-| JSC-246      | R8          | SA9, SA10, SA11, SA12, SA13 | P4         | AC13, AC14, AC15, AC16, AC17 | pending     |
+| JSC-246      | R8          | SA9, SA10, SA11, SA12, SA13 | P4         | AC13, AC14, AC15, AC16, AC17 | complete    |
 | JSC-246      | R9          | SA14                        | P4, P5     | AC18                         | pending     |
 | JSC-246      | R10         | SA15                        | P5         | AC19                         | pending     |
 
@@ -741,7 +741,7 @@ direct script invocation.
 - AC12a: No cleanup candidate is marked safe to delete without falsification-pass
   evidence.
 
-- [ ] **P4 / Unit 5: Namespace-First Product Golden Path Contracts**
+- [x] **P4 / Unit 5: Namespace-First Product Golden Path Contracts**
 
 **Goal:** Specify or scaffold the product-facing `ask` workflows without
 premature top-level command expansion.
@@ -942,18 +942,19 @@ marketing-only rewrite.
 
 ## Execution Ledger (Planning Mode)
 
-| Date       | Event                                              | Evidence                                                                                                                                                                           |
-| ---------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-01 | Created JSC-246 Linear issue.                      | Linear URL in work item contract.                                                                                                                                                  |
-| 2026-05-01 | Wrote governing spec.                              | `Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md`                                                                                      |
-| 2026-05-01 | Ran HE traceability lint for the spec.             | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md` |
-| 2026-05-01 | Produced implementation plan.                      | This document.                                                                                                                                                                     |
-| 2026-05-01 | Deepened plan for first-slice execution readiness. | Added first-slice rules, test paths, command envelope, strict-mode behavior, and stop conditions.                                                                                  |
-| 2026-05-01 | Linked planning references back to Linear.         | Added JSC-246 comment `a19bbc38-1d89-4619-82f6-5c887a7a7fdd` with spec and plan paths.                                                                                             |
-| 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                 |
-| 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, allowlist handling, deterministic ordering, and expected strict-mode failure on live policy debt.   |
-| 2026-05-01 | Completed P2 `ask repo surface` route.             | Added the public `ask repo surface` command, strict mode, trace-id coverage, human summary output, and focused CLI envelope tests.                                                 |
-| 2026-05-01 | Completed P3 cleanup preparation.                  | Added `prepare_repo_surface_cleanup.py`, focused tests, ignored generated reports at `artifacts/reports/repo-surface/`, and generated non-destructive reference-scan evidence.     |
+| Date       | Event                                              | Evidence                                                                                                                                                                                                                                                                |
+| ---------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-01 | Created JSC-246 Linear issue.                      | Linear URL in work item contract.                                                                                                                                                                                                                                       |
+| 2026-05-01 | Wrote governing spec.                              | `Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md`                                                                                                                                                                           |
+| 2026-05-01 | Ran HE traceability lint for the spec.             | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md`                                                                                      |
+| 2026-05-01 | Produced implementation plan.                      | This document.                                                                                                                                                                                                                                                          |
+| 2026-05-01 | Deepened plan for first-slice execution readiness. | Added first-slice rules, test paths, command envelope, strict-mode behavior, and stop conditions.                                                                                                                                                                       |
+| 2026-05-01 | Linked planning references back to Linear.         | Added JSC-246 comment `a19bbc38-1d89-4619-82f6-5c887a7a7fdd` with spec and plan paths.                                                                                                                                                                                  |
+| 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                                                                                                      |
+| 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, allowlist handling, deterministic ordering, and expected strict-mode failure on live policy debt.                                                                                        |
+| 2026-05-01 | Completed P2 `ask repo surface` route.             | Added the public `ask repo surface` command, strict mode, trace-id coverage, human summary output, and focused CLI envelope tests.                                                                                                                                      |
+| 2026-05-01 | Completed P3 cleanup preparation.                  | Added `prepare_repo_surface_cleanup.py`, focused tests, ignored generated reports at `artifacts/reports/repo-surface/`, and generated non-destructive reference-scan evidence.                                                                                          |
+| 2026-05-01 | Completed P4 product command contracts.            | Added namespace-first contracts for `ask repo doctor`, `ask repo onboard`, `ask skills improve`, `ask skills explain`, `ask skills prove`, `ask repo next`, and `ask repo closeout`; repaired README catalog count so `ask skills goal` can route after catalog parity. |
 
 ## Sources & References
 
