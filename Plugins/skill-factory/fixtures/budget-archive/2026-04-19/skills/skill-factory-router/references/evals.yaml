@@ -50,12 +50,12 @@ cases:
     eval_modes: [release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Convert this rough skill draft into canonical format and preserve behavior."
+    prompt: "Convert this completed release triage workflow session into durable skill guidance."
     acceptance:
       - type: skill_selected
         expected_skill: "skill-factory-router"
       - type: regex
-        value: "(?i)(skillify|skill-refactor)"
+        value: "(?i)(skillify)"
 
   - id: negative-non-skill-request
     name: non-skill request

@@ -24,6 +24,16 @@ Design, improve, validate, and package high-quality Codex skills.
 - Do not remove important context for budget trimming; move it to `Infrastructure/references/` and signpost it.
 - Treat graph-readiness as source quality, not cleanup work after the fact: add `## See Also`, include a topic-map signpost when graph-visible, and create or preserve `Infrastructure/references/task-profile.json` for in-scope operational skills.
 
+## Resource Boundary
+This active plugin surface is compact and may be reached through symlinks or hardlinks. Verify the referenced `references/` or `scripts/` file exists in the active tree before relying on it.
+
+When operating inside the Agent Skills Kit repository, run repo-root wrappers from the repo root:
+- `./bin/ask skills audit <target-skill-path> --level strict --json`
+- `./bin/ask evals run <target-skill-path> --mode smoke --json`
+- `Infrastructure/bin/plugin-eval analyze <target-plugin-or-skill-path> --format markdown`
+
+When deeper skill-builder policy, examples, or deterministic helpers are needed, prefer the active local `references/` or `scripts/` path. If the compact projection lacks a file, read the archived full package at `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/` and cite the exact reference or script loaded. For exported standalone packages, bundle only the references and scripts actually needed beside `SKILL.md`; do not ship dead local signposts.
+
 ## When to use
 Use this skill when the user asks to:
 - improve an existing skill's routing, workflow, safety, portability, or eval posture;
@@ -96,9 +106,12 @@ Lint and generation expectations: after semantic-tag changes, run sandbox-safe s
 Use this contract for `create` and `improve` mode in this repository.
 
 Source of truth:
-- [Infrastructure/references/governance-contract.md](./references/governance-contract.md)
+- Agent Skills Kit repo gates and wrappers are the active source of truth in this repository.
+- For deep policy, read [references/governance-contract.md](./references/governance-contract.md) when present; otherwise use the matching archived reference under `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/`.
 
 Required gates before completion claim:
+- `./bin/ask skills audit <target-skill-path> --level strict --json`
+- `./bin/ask evals run <target-skill-path> --mode smoke --json` when eval coverage exists
 - `bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict`
 - `bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn`
 - `python3 Infrastructure/scripts/lifecycle-and-sync/gotcha_pipeline.py validate`
@@ -157,16 +170,16 @@ Run discovery for underspecified `create` or `improve` requests.
   - confirmed facts
   - assumptions
   - approval checkpoint
-- Use `Infrastructure/references/discovery-interview.md` for reusable round templates.
+- Use `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/discovery-interview.md` for reusable round templates when the compact prompts are insufficient.
 
 ## Deliverables
 Produce only what the request needs, usually:
 - `SKILL.md`
 - optional `Infrastructure/scripts/`, `Infrastructure/references/`, `assets/`, `workflows/`
 - `agents/openai.yaml` when UI/tool metadata is needed
-- `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` for non-trivial skills
+- `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml`, or the target skill's established `references/contract.yaml` and `references/evals.yaml`, for non-trivial skills
 - `## See Also` plus a topic-map signpost for graph-visible skills in this repository
-- `Infrastructure/references/task-profile.json` for active/in-scope skills that participate in the recursive skill graph
+- `Infrastructure/references/task-profile.json`, or the target skill's established `references/task-profile.json`, for active/in-scope skills that participate in the recursive skill graph
 - preserved reference context with clear signposts when content is being condensed or imported from a richer source
 - validator and analyzer evidence
 - packaged `.skill` when requested
@@ -239,6 +252,7 @@ Use the compact flow below, then follow the linked references for full detail.
 7. Run description optimization before handoff and deliver only when gates are clear or triaged.
 
 Reference files: `Infrastructure/references/governance-contract.md`, `quality-tools.md`, `workflows-and-validation.md`, `iteration-and-testing.md`, and `discovery-interview.md`.
+In this compact plugin projection, load those files from `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/` only when the active package does not include local copies.
 
 ## Execution guardrails
 - Cap iterative fix loops at 3 rounds per failing gate, then publish a blocker report and wait for user direction.
@@ -249,10 +263,10 @@ Reference files: `Infrastructure/references/governance-contract.md`, `quality-to
 - Fail-fast is mandatory: stop at first failing gate, fix, rerun, then continue.
 - Use two passes: `iterative_fail_fast` then `pre-claim_full_sweep`.
 - Use `Infrastructure/references/quality-tools.md` for gate command matrix and strict PI/security expectations.
-- During iteration prefer `run_skill_evals.py --eval-mode smoke`; before promotion or packaging run `--eval-mode release` and keep the generated `release_manifest.json` with the scorecard artifacts.
+- During iteration prefer `./bin/ask evals run <target-skill-path> --mode smoke --json`; before promotion or packaging run release-mode evals when available and keep the generated release evidence with the scorecard artifacts.
 - Treat graph-readiness as part of the default repo gate set for `create` and `improve` work:
   - `python3 Infrastructure/scripts/validation-and-linting/check-see-also.py . --changed-files <skill>/SKILL.md`
-  - `python3 Skills/skill-builder/Infrastructure/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0`
+  - `python3 Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0` when deep graph validation is needed and the archived helper is present
 - When graph-facing skills changed materially, refresh adjacency evidence:
   - `python3 Infrastructure/scripts/skill-graph/build-adjacency-yaml.py`
   - `python3 Infrastructure/scripts/skill-graph/validate-adjacency.py`
@@ -288,6 +302,7 @@ Reference files: `Infrastructure/references/governance-contract.md`, `quality-to
 
 ## Anti-patterns
 - Overfitted routing language -> description only matches one phrasing -> expand to realistic paraphrases and near-neighbor cases, then recheck `Infrastructure/references/evals.yaml`.
+- In compact plugin projections, recheck the target skill's local `references/evals.yaml` when that is the established contract path.
 - Checklist dump in frontmatter -> `description` becomes procedure-heavy and undertriggers -> move process detail to `SKILL.md` or `Infrastructure/references/` and keep frontmatter routing-first.
 - Over-compression during cleanup -> valuable context gets deleted to satisfy disclosure rules -> preserve nuance in `Infrastructure/references/` and make `SKILL.md` a stronger signpost instead of a thinner substitute.
 
