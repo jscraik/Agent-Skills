@@ -117,13 +117,13 @@ before removing historical artifacts or adding broader product golden paths.
 
 | Linear issue | Requirement | Source acceptance IDs       | Plan units | Acceptance IDs               | PR evidence |
 | ------------ | ----------- | --------------------------- | ---------- | ---------------------------- | ----------- |
-| JSC-246      | R1          | SA1                         | P0         | AC1, AC2                     | pending     |
-| JSC-246      | R2          | SA2                         | P1, P2     | AC3, AC4, AC5                | pending     |
-| JSC-246      | R3          | SA3                         | P1, P2     | AC6, AC7                     | pending     |
-| JSC-246      | R4          | SA4                         | P1, P2     | AC8                          | pending     |
-| JSC-246      | R5          | SA5                         | P0, P2     | AC9                          | pending     |
-| JSC-246      | R6          | SA8                         | P0, P2     | AC10                         | pending     |
-| JSC-246      | R7          | SA6, SA7                    | P3         | AC11, AC12                   | pending     |
+| JSC-246      | R1          | SA1                         | P0         | AC1, AC2                     | complete    |
+| JSC-246      | R2          | SA2                         | P1, P2     | AC3, AC4, AC5                | complete    |
+| JSC-246      | R3          | SA3                         | P1, P2     | AC6, AC7                     | complete    |
+| JSC-246      | R4          | SA4                         | P1, P2     | AC8                          | complete    |
+| JSC-246      | R5          | SA5                         | P0, P2     | AC9                          | complete    |
+| JSC-246      | R6          | SA8                         | P0, P2     | AC10                         | complete    |
+| JSC-246      | R7          | SA6, SA7                    | P3         | AC11, AC12                   | complete    |
 | JSC-246      | R8          | SA9, SA10, SA11, SA12, SA13 | P4         | AC13, AC14, AC15, AC16, AC17 | pending     |
 | JSC-246      | R9          | SA14                        | P4, P5     | AC18                         | pending     |
 | JSC-246      | R10         | SA15                        | P5         | AC19                         | pending     |
@@ -682,7 +682,7 @@ direct script invocation.
 - AC10a: First-slice live report evidence has a deterministic generated report
   path and is excluded from tracked retention unless explicitly promoted later.
 
-- [ ] **P3 / Unit 4: Reference-Scanned Cleanup Preparation**
+- [x] **P3 / Unit 4: Reference-Scanned Cleanup Preparation**
 
 **Goal:** Prepare cleanup follow-on work without deleting files prematurely.
 
@@ -953,6 +953,7 @@ marketing-only rewrite.
 | 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                 |
 | 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, allowlist handling, deterministic ordering, and expected strict-mode failure on live policy debt.   |
 | 2026-05-01 | Completed P2 `ask repo surface` route.             | Added the public `ask repo surface` command, strict mode, trace-id coverage, human summary output, and focused CLI envelope tests.                                                 |
+| 2026-05-01 | Completed P3 cleanup preparation.                  | Added `prepare_repo_surface_cleanup.py`, focused tests, ignored generated reports at `artifacts/reports/repo-surface/`, and generated non-destructive reference-scan evidence.     |
 
 ## Sources & References
 
