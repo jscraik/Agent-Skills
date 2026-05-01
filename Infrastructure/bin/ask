@@ -40,7 +40,7 @@ from ask.commands.skills import (
     extract_family_fail_lines,
 )
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
-from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog, provider_audit
+from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog, provider_audit, repo_surface
 from ask.commands.plugins import (
     init_plugin,
     install_plugin,
@@ -514,6 +514,8 @@ def main():
     )
     repo_doctor_catalog_parser.add_argument("--strict", action="store_true", help="Enable strict trend and stamp enforcement")
     repo_subparsers.add_parser("provider-audit", help="Audit active paths for legacy provider drift", parents=[global_parser])
+    repo_surface_parser = repo_subparsers.add_parser("surface", help="Inventory tracked repo surface ownership", parents=[global_parser])
+    repo_surface_parser.add_argument("--strict", action="store_true", help="Exit non-zero when blocking surface findings exist")
 
     # --- skills ---
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
@@ -909,13 +911,15 @@ def main():
             result = doctor_catalog(repo_root, strict=args.strict)
         elif args.action == "provider-audit":
             result = provider_audit(repo_root)
+        elif args.action == "surface":
+            result = repo_surface(repo_root, strict=args.strict)
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'repo'",
-                fix_suggestion="Valid actions: status, validate, check-stability, doctor-catalog, provider-audit"
+                fix_suggestion="Valid actions: status, validate, check-stability, doctor-catalog, provider-audit, surface"
             ))
 
     elif args.topic == "skills":
@@ -1332,6 +1336,15 @@ def main():
                     print(
                         "✅ Provider policy: "
                         f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))"
+                    )
+                elif args.topic == "repo" and args.action == "surface":
+                    report = result.data.get("repo_surface", {})
+                    summary = report.get("summary", {})
+                    print(
+                        "✅ Repo surface: "
+                        f"{summary.get('total_paths', 0)} tracked path(s), "
+                        f"{summary.get('blocking_findings', 0)} blocking finding(s), "
+                        f"status={report.get('status')}"
                     )
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
@@ -1780,10 +1793,18 @@ def main():
                 if args.action == "check-stability" and "errors" in result.data:
                     for e in result.data["errors"]:
                         print(f"   ERROR: {e}")
+                if args.action == "surface" and "repo_surface" in result.data:
+                    summary = result.data["repo_surface"].get("summary", {})
+                    print(
+                        "   Surface summary: "
+                        f"{summary.get('total_paths', 0)} tracked path(s), "
+                        f"{summary.get('blocking_findings', 0)} blocking finding(s)"
+                    )
                 print("\n📚 Repo examples:")
                 print("   ask repo status")
                 print("   ask repo validate --ephemeral")
                 print("   ask repo doctor-catalog --strict")
+                print("   ask repo surface --json")
                 print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
             elif args.topic == "mcp":
                 print("\n📚 MCP examples:")

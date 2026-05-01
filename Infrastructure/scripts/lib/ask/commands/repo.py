@@ -215,6 +215,61 @@ def provider_audit(repo_root: Path) -> CallResult:
     return result
 
 
+def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
+    """Run the repo surface inventory classifier and return its report."""
+    result = CallResult()
+    cmd = [
+        sys.executable,
+        "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
+        "--json",
+    ]
+    if strict:
+        cmd.append("--strict")
+
+    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    parse_ok = True
+    try:
+        report = json.loads(process.stdout)
+    except json.JSONDecodeError:
+        parse_ok = False
+        report = {
+            "status": "error",
+            "raw_stdout": process.stdout,
+            "raw_stderr": process.stderr,
+            "summary": {
+                "total_paths": 0,
+                "blocking_findings": 1,
+            },
+        }
+
+    result.data["repo_surface"] = report
+    result.data["strict"] = strict
+    report_status = report.get("status")
+    result.status = (
+        "success"
+        if process.returncode == 0 and parse_ok and report_status in {"success", "warning"}
+        else "error"
+    )
+    if result.status == "error":
+        blocking = report.get("summary", {}).get("blocking_findings", "unknown")
+        message = f"Repo surface inventory found {blocking} blocking finding(s)."
+        suggestion = (
+            "Review data.repo_surface.findings and classify, allowlist, or cleanup "
+            "intentional exceptions before relying on strict mode."
+        )
+        if not parse_ok:
+            message = "Repo surface inventory emitted invalid JSON."
+            suggestion = "Run the underlying inventory script directly and fix stdout JSON integrity."
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion=suggestion,
+            )
+        )
+    return result
+
+
 def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:
     """
     Validate stability-related changes to SKILL.md files and enforce rules for skills marked `stability: stable`.

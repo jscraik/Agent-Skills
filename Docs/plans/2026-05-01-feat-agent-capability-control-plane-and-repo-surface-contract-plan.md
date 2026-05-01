@@ -622,7 +622,7 @@ direct script invocation.
 - AC8a: First-slice classifier output is explicitly scoped to tracked paths, and
   deferred untracked/runtime discovery remains report-only future work.
 
-- [ ] **P2 / Unit 3: Public `ask repo surface` Route**
+- [x] **P2 / Unit 3: Public `ask repo surface` Route**
 
 **Goal:** Expose the inventory through the stable `ask` command surface.
 
@@ -952,6 +952,7 @@ marketing-only rewrite.
 | 2026-05-01 | Linked planning references back to Linear.         | Added JSC-246 comment `a19bbc38-1d89-4619-82f6-5c887a7a7fdd` with spec and plan paths.                                                                                             |
 | 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                 |
 | 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, allowlist handling, deterministic ordering, and expected strict-mode failure on live policy debt.   |
+| 2026-05-01 | Completed P2 `ask repo surface` route.             | Added the public `ask repo surface` command, strict mode, trace-id coverage, human summary output, and focused CLI envelope tests.                                                 |
 
 ## Sources & References
 
