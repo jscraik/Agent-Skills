@@ -171,6 +171,27 @@ has_context_move_evidence() {
     return 0
   fi
 
+  # Git represents a no-final-newline normalization as one deleted line and the
+  # same line re-added. That is not context removal, so do not require relocation
+  # evidence for content that still exists in the changed skill file.
+  local skill_added_blob missing_removed_line=0
+  skill_added_blob="$(
+    collect_unified_diff "$base_ref" "$skill_path" \
+      | awk '
+          /^--- / || /^\+\+\+ / || /^@@/ {next}
+          /^\+/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}
+        '
+  )"
+  for moved_line in "${removed_lines[@]}"; do
+    if ! printf '%s\n' "$skill_added_blob" | grep -Fqx -- "$moved_line"; then
+      missing_removed_line=1
+      break
+    fi
+  done
+  if (( missing_removed_line == 0 )); then
+    return 0
+  fi
+
   for target in "${candidates[@]}"; do
     read -r added deleted < <(numstat_added_deleted "$base_ref" "$target")
     if (( added <= 0 )); then

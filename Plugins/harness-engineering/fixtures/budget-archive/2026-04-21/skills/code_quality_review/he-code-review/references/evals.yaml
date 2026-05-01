@@ -170,7 +170,13 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(Codex|CodeRabbit|review thread|security|supply-chain|changed-surface|no-go|go-with-conditions)"
+        value: "(?i)(Codex|CodeRabbit|review thread)"
+      - type: regex
+        value: "(?i)(security|supply-chain)"
+      - type: regex
+        value: "(?i)(changed-surface)"
+      - type: regex
+        value: "(?i)(no-go|go-with-conditions)"
 
   - id: todo-follow-up
     name: todo follow-up lane
