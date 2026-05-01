@@ -550,7 +550,7 @@ tasks:
 - AC2: Policy documents unresolved generated/runtime surfaces as explicit
   decision points.
 
-- [ ] **P1 / Unit 2: Non-Destructive Inventory Classifier**
+- [x] **P1 / Unit 2: Non-Destructive Inventory Classifier**
 
 **Goal:** Add a script that classifies tracked paths and reports violations
 without deleting or moving files.
@@ -951,6 +951,7 @@ marketing-only rewrite.
 | 2026-05-01 | Deepened plan for first-slice execution readiness. | Added first-slice rules, test paths, command envelope, strict-mode behavior, and stop conditions.                                                                                  |
 | 2026-05-01 | Linked planning references back to Linear.         | Added JSC-246 comment `a19bbc38-1d89-4619-82f6-5c887a7a7fdd` with spec and plan paths.                                                                                             |
 | 2026-05-01 | Completed P0 surface ownership policy.             | Added `Docs/agents/15-repo-surface-ownership.md`, linked it from `Docs/agents/README.md`, and ran the P0 policy greps plus plan traceability lint.                                 |
+| 2026-05-01 | Completed P1 non-destructive inventory classifier. | Added `check_repo_surface_inventory.py` with focused tests, JSON/human output, allowlist handling, deterministic ordering, and expected strict-mode failure on live policy debt.   |
 
 ## Sources & References
 
