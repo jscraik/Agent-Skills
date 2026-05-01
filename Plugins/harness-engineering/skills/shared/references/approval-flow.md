@@ -1,1 +1,6 @@
-../../../fixtures/budget-archive/2026-04-21/skills/shared/references/approval-flow.md
+# Approval State Alignment
+
+Use this shared protocol before implementation:
+
+- If the governing artifact or user already approved execution scope, continue without re-asking.
+- Ask a focused blocker question only when ambiguity would change scope, interface, architecture, or shipping risk.

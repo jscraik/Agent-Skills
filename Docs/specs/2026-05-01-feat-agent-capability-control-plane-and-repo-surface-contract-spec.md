@@ -320,12 +320,14 @@ Canonical terms for this work:
 Resolved ambiguity:
 
 - `ask doctor` already appears as an alias shape for `ask repo doctor-catalog`.
-  This spec uses `ask doctor` as the product-level health front door. Planning
-  must decide whether that becomes a real top-level command, a grouped command,
-  or a documented alias to repo-specific doctor commands.
-- `repo bloat` is useful operator language, but the underlying contract is a
-  surface inventory. Planning should prefer an implementation that can expose
-  both human-friendly bloat framing and policy-grade classification.
+  This spec selects namespace-first product commands for implementation:
+  `ask repo doctor`, `ask repo onboard`, `ask skills improve`, `ask skills
+  explain`, `ask skills prove`, `ask repo next`, and
+  `ask repo closeout --changed`. Top-level aliases are compatibility/product
+  follow-ons only after evidence shows they reduce operator friction.
+- `repo bloat` is useful operator language, but the canonical P0-P2 command is
+  `ask repo surface`. `ask repo bloat` is a post-P2 alias candidate, not an
+  acceptance command for the first slice.
 - `.skillsets/**`, `.harness/*.db`, and `skills-system/**` remain unresolved
   ownership terms until the first inventory report classifies them from live
   evidence.
@@ -340,8 +342,10 @@ Planning readiness condition:
 
 ### 1. Inventory
 
-The system scans tracked files and selected ignored/generated paths, then
-classifies them by policy category.
+The first slice scans tracked files from `git ls-files` and classifies them by
+policy category. Later report-only discovery may add selected ignored/generated
+paths, but those paths must not influence cleanup decisions until the policy
+adds explicit ownership rules for them.
 
 Required outputs:
 
@@ -389,13 +393,13 @@ The repository runs focused checks for:
 After the filesystem contract is enforced, the CLI should reduce cognitive load
 with stronger task-first workflows:
 
-- `ask doctor`
-- `ask onboard`
-- `ask improve "<goal>"`
-- `ask explain <handle>`
-- `ask prove <skill-or-goal>`
-- `ask next --json`
-- `ask closeout --changed`
+- `ask repo doctor`
+- `ask repo onboard`
+- `ask skills improve "<goal>"`
+- `ask skills explain <handle>`
+- `ask skills prove <skill-or-goal>`
+- `ask repo next --json`
+- `ask repo closeout --changed`
 
 ## Interfaces and Dependencies
 
@@ -454,6 +458,20 @@ The exact filename can change in planning, but it must provide:
 - enough detail for agents to repair or report findings without reading every
   path manually
 
+Allowlist contract:
+
+- Canonical path: `Infrastructure/policy/repo_surface_allowlist.json`.
+- Shape: a JSON object with `schema_version: 1` and an `entries` array.
+- Each entry must include `id`, `match_type`, `pattern`, `classification`,
+  `reason`, `owner`, and `expires` or `review_after`.
+- `match_type` must be one of `exact`, `glob`, or `prefix`; regex matching is
+  excluded from the first slice to keep matching deterministic.
+- Allowlist entries can downgrade a finding from blocking to warning only when
+  the entry classification matches the classifier result and the reason is
+  non-empty.
+- More specific entries win in this order: `exact`, then longest `prefix`, then
+  longest `glob` pattern. Ties sort by `id`.
+
 ## Interface Design Pass
 
 This spec introduces two caller-facing boundaries:
@@ -463,7 +481,7 @@ This spec introduces two caller-facing boundaries:
 
 ### Boundary 1: Surface Inventory Command Shape
 
-#### Shape A: `ask repo bloat`
+#### Shape A: `ask repo bloat` Post-P2 Alias Candidate
 
 Call shape:
 
@@ -528,34 +546,27 @@ Tradeoffs:
 Selected contract:
 
 - Implement the canonical boundary as `ask repo surface`.
-- Provide `ask repo bloat` as a human-friendly alias or submode if planning
-  confirms the command router can support it without command-surface confusion.
-- JSON must use policy language: `classification`, `status`, `reason`,
-  `recommendation`, `allowlist_entry`, and `next_command`.
+- Treat `ask repo bloat` as a post-P2 human-friendly alias candidate only if
+  later planning confirms the command router can support it without
+  command-surface confusion.
+- JSON must use policy language: `classification`, `status`, `code`,
+  `severity`, `blocking`, `reason`, `recommendation`, `allowlist_entry`, and
+  `next_command`.
+- `allowlist_entry` is required and must be either `null` or the matching
+  allowlist entry `id`.
 - Human output may use bloat language, but it must never recommend deletion
   before reference scan and classification.
 
 ### Boundary 2: Product Golden Path Command Shape
 
-#### Shape A: Separate Top-Level Commands
+#### Shape A: Deferred Top-Level Alias Sketch
 
-Call shape:
+This shape is not selected for implementation. It records possible future
+aliases only after namespace-first commands prove lower friction.
 
-```bash
-./bin/ask doctor
-./bin/ask onboard
-./bin/ask improve "<goal>"
-./bin/ask explain <handle>
-./bin/ask prove <skill-or-goal>
-./bin/ask next --json
-./bin/ask closeout --changed
-```
-
-Caller usage example:
-
-```bash
-./bin/ask improve "make my agents better at fixing PR comments"
-```
+Future alias sketch: top-level shortcuts could forward to the selected
+namespace-first commands after P4 proves the alias reduces real friction. The
+first-slice acceptance contract must not depend on any top-level alias.
 
 What it hides internally:
 
@@ -615,7 +626,7 @@ Selected contract:
 - `ask next --json` can be implemented as a cross-namespace recommendation
   endpoint only if it does not duplicate every command's own `next_steps`
   envelope.
-- `ask closeout --changed` should be designed as the agent-native completion
+- `ask repo closeout --changed` should be designed as the agent-native completion
   contract because it spans repo state, changed files, generated sync needs, and
   validation.
 
@@ -662,7 +673,7 @@ Files should not be tracked when they are:
 
 ## Product Golden Paths
 
-### `ask doctor`
+### `ask repo doctor`
 
 One remembered health command for humans and agents.
 
@@ -676,7 +687,7 @@ Expected output:
 - known blockers
 - recommended repair command
 
-### `ask onboard`
+### `ask repo onboard`
 
 Guided first-run flow.
 
@@ -689,7 +700,7 @@ Expected output:
 - missing setup steps
 - recommended next move
 
-### `ask improve "<goal>"`
+### `ask skills improve "<goal>"`
 
 Goal-to-capability workflow.
 
@@ -701,7 +712,7 @@ Expected output:
 - recommended install, audit, routing, or sync action
 - validation command
 
-### `ask explain <handle>`
+### `ask skills explain <handle>`
 
 Human explanation of a generated command handle or canonical skill.
 
@@ -717,7 +728,7 @@ Expected output:
 - overlap/conflict notes
 - example prompts
 
-### `ask prove <skill-or-goal>`
+### `ask skills prove <skill-or-goal>`
 
 Outcome proof workflow.
 
@@ -729,7 +740,7 @@ Expected output:
 - validation status
 - remaining gaps
 
-### `ask closeout --changed`
+### `ask repo closeout --changed`
 
 Agent-native closeout contract.
 
@@ -803,7 +814,7 @@ Failure: new commands and docs improve architecture but increase cognitive load.
 Recovery:
 
 - task-first command grouping
-- `ask doctor` and `ask onboard` as front doors
+- `ask repo doctor` and `ask repo onboard` as front doors
 - runtime budget and first-level surface reporting
 - strict distinction between default and advanced surfaces
 
@@ -840,20 +851,20 @@ human prose.
 ## Acceptance and Test Matrix
 
 | ID   | Acceptance Criteria                                                                                                                                                                                               | Verification                                                                                              |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------- | ------------------- | ------------- | ----------------------------- |
-| SA1  | A repo surface ownership policy exists and defines source, fixture, policy, reference, intentional archive, vendored snapshot, generated output, runtime state, historical artifact, and unknown classifications. | `rg 'source                                                                                               | fixture | historical_artifact | runtime_state | unknown' Docs Infrastructure` |
-| SA2  | A surface inventory command reports tracked files by classification with JSON output.                                                                                                                             | `./bin/ask repo bloat --json` or the final accepted command equivalent                                    |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| SA1  | A repo surface ownership policy exists and defines source, fixture, policy, reference, intentional archive, vendored snapshot, generated output, runtime state, historical artifact, and unknown classifications. | `rg 'source|fixture|historical_artifact|runtime_state|unknown' Docs/agents/15-repo-surface-ownership.md` |
+| SA2  | A surface inventory command reports tracked files by classification with JSON output.                                                                                                                             | `./bin/ask repo surface --json`                                                                           |
 | SA3  | The inventory command flags tracked generated artifacts under `artifacts/**` and `Infrastructure/artifacts/**` unless they are allowlisted fixtures, summaries, or intentional archives.                          | Add a fixture test and run the inventory command in strict mode                                           |
 | SA4  | The inventory command flags `Infrastructure/Infrastructure/**` unless explicitly allowlisted with a reason.                                                                                                       | Run inventory against the live tree and verify the nested path is reported or absent                      |
 | SA5  | `.skillsets/**`, `.harness/*.db`, and `skills-system/**` have explicit ownership decisions before cleanup changes touch them.                                                                                     | Policy doc contains path rows and validation emits no `unknown` classification for those paths            |
 | SA6  | Historical artifact cleanup preserves required fixtures and summaries while removing unreferenced run logs, JSONL event streams, timestamped validation output, and stale generated reports.                      | Reference scan passes; `git ls-files artifacts Infrastructure/artifacts` returns only allowlisted paths   |
 | SA7  | Retired skill debris is cleaned only after active route, deferred context, and docs references are scanned.                                                                                                       | `rg` reference scan for retired skill names is attached to cleanup evidence                               |
 | SA8  | Deferred context remains reachable through indexed references and is not loaded by default.                                                                                                                       | Deferred context index check passes; runtime budget does not count deferred bodies as first-level context |
-| SA9  | `ask doctor` provides one human-readable health summary plus JSON-compatible status for repo, sync, runtime budget, handles, surface policy, blockers, and next command.                                          | `./bin/ask doctor --json` or accepted equivalent                                                          |
-| SA10 | `ask onboard` explains the current repo/runtime state and recommends the next useful action without requiring users to read architecture docs first.                                                              | Manual transcript or CLI test fixture for first-run output                                                |
-| SA11 | `ask improve "<goal>"` maps a user goal to candidate capabilities, conflict/overlap notes, and validation or sync actions.                                                                                        | CLI fixture with at least one coding-agent improvement goal                                               |
-| SA12 | `ask explain <handle>` distinguishes generated command handle, canonical skill source, runtime projection, loaded references, and validation commands.                                                            | CLI fixture for `he-spec` or another generated command handle                                             |
-| SA13 | `ask closeout --changed` infers changed canonical files and reports focused validation, generated sync needs, blocker status, and commit readiness.                                                               | CLI fixture on a controlled changed-file set                                                              |
+| SA9  | `ask repo doctor` provides one human-readable health summary plus JSON-compatible status for repo, sync, runtime budget, handles, surface policy, blockers, and next command.                                     | `./bin/ask repo doctor --json`                                                                            |
+| SA10 | `ask repo onboard` explains the current repo/runtime state and recommends the next useful action without requiring users to read architecture docs first.                                                         | Manual transcript or CLI test fixture for first-run output                                                |
+| SA11 | `ask skills improve "<goal>"` maps a user goal to candidate capabilities, conflict/overlap notes, and validation or sync actions.                                                                                  | CLI fixture with at least one coding-agent improvement goal                                               |
+| SA12 | `ask skills explain <handle>` distinguishes generated command handle, canonical skill source, runtime projection, loaded references, and validation commands.                                                     | CLI fixture for `he-spec` or another generated command handle                                             |
+| SA13 | `ask repo closeout --changed` infers changed canonical files and reports focused validation, generated sync needs, blocker status, and commit readiness.                                                          | CLI fixture on a controlled changed-file set                                                              |
 | SA14 | Runtime surface reporting remains part of closeout and reports default-visible, first-level, advanced-visible, and advisory-threshold status.                                                                     | `./bin/ask runtime budget --json --robot`                                                                 |
 | SA15 | The cleanup and product improvements are presented as an agent capability control plane, not merely as a prompt or skill library.                                                                                 | README or start-here copy includes the product thesis and outcome framing                                 |
 
@@ -863,7 +874,7 @@ human prose.
 | ------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | JSC-246      | SA1, SA2, SA3, SA4, SA5                 | First slice: repo surface ownership policy, non-destructive inventory gate, stable JSON output, `ask` route, tests, and live report.                                                       |
 | JSC-246      | SA6, SA7, SA8                           | Follow-on cleanup: reference-scanned historical artifact removal, retired skill debris audit, and deferred context preservation.                                                           |
-| JSC-246      | SA9, SA10, SA11, SA12, SA13, SA14, SA15 | Product golden paths: `ask doctor`, `ask onboard`, `ask improve`, `ask explain`, `ask prove`, `ask next --json`, `ask closeout --changed`, and outcome-oriented README/start-here framing. |
+| JSC-246      | SA9, SA10, SA11, SA12, SA13, SA14, SA15 | Product golden paths: `ask repo doctor`, `ask repo onboard`, `ask skills improve`, `ask skills explain`, `ask skills prove`, `ask repo next --json`, `ask repo closeout --changed`, and outcome-oriented README/start-here framing. |
 
 ## Planning-Ready First Slice
 
@@ -873,7 +884,7 @@ Implement only:
 
 - repo surface ownership policy
 - inventory script
-- `ask` route for repo bloat/surface reporting
+- `ask` route for `repo surface` reporting
 - JSON schema or stable JSON shape
 - focused tests for classification
 - live report against the current tree
@@ -903,7 +914,7 @@ after that inventory is trusted.
   surface?
 - Which historical artifact summaries are worth retaining as intentional
   archives?
-- What is the minimum outcome proof format for `ask prove`?
+- What is the minimum outcome proof format for `ask skills prove`?
 
 ## Definition of Done
 
@@ -936,6 +947,6 @@ Recommended follow-on plan units:
 1. Remove tracked historical artifacts after reference scan and allowlist policy.
 2. Audit retired skill debris and fix stale active/deferred references.
 3. Resolve generated/runtime ownership for .skillsets, .harness databases, and skills-system.
-4. Add task-first product commands: ask doctor, ask onboard, ask improve, ask explain, ask prove, ask closeout --changed.
+4. Add task-first product commands: ask repo doctor, ask repo onboard, ask skills improve, ask skills explain, ask skills prove, ask repo closeout --changed.
 5. Reframe the README around the agent capability control plane promise and outcome proof.
 ```

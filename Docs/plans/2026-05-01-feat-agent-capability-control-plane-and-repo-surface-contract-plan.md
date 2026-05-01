@@ -35,6 +35,7 @@ plan_depth: deep
 - [Open Questions](#open-questions)
 - [High-Level Technical Design](#high-level-technical-design)
 - [Deepening Addendum](#deepening-addendum)
+- [Task Graph](#task-graph)
 - [Implementation Units](#implementation-units)
 - [Execution Checkpoints](#execution-checkpoints)
 - [System-Wide Impact](#system-wide-impact)
@@ -223,9 +224,13 @@ the script testable and the policy reviewable.
 be classified and documented before any cleanup touches them. Ambiguous
 ownership is a blocker, not a delete signal.
 
-### D5: Product Golden Paths Follow Namespace-First Implementation
+### D5: Future Product Golden Paths Follow Namespace-First Implementation
 
-Use existing command namespaces first:
+These are future command contracts, not current CLI behavior. The current
+`repo` namespace already exposes `status`, `validate`, `check-stability`,
+`doctor-catalog`, and `provider-audit`; P0-P2 must add only `repo surface`.
+
+For later product golden paths, use existing command namespaces first:
 
 ```text
 ask repo doctor
@@ -239,6 +244,10 @@ ask repo closeout
 
 Top-level aliases can follow when they reduce friction without widening the
 default command surface.
+
+`doctor-catalog` remains the current catalog-drift diagnostic until a later
+measured product slice proves that `ask repo doctor` reduces real operator or
+agent decision cost.
 
 ## Open Questions
 
@@ -260,6 +269,37 @@ default command surface.
 - Whether product golden paths should get top-level aliases after namespace-first
   behavior is working.
 
+### Ownership Decision Tests
+
+Before resolving any deferred ownership surface, P0 must document the evidence
+that would falsify each classification. Use this matrix as the minimum decision
+contract:
+
+| Surface | Tentative states | Falsification evidence required before final classification |
+| ------- | ---------------- | ----------------------------------------------------------- |
+| `.skillsets/**` | canonical generated snapshot, reproducible generated output, runtime projection | If a repo command regenerates it from `Skills/**` or plugin sources without manual edits, classify as generated output or generated snapshot; if tests/docs treat exact checked-in content as a fixture contract, classify only the fixture subset as fixture; if production routing reads it as the source of truth with no generator, document the owner before classifying as source/policy. |
+| `.harness/*.db` | runtime state, fixture, accidental tracked file | If the DB is written by runtime commands or local harness execution, classify as runtime state; if tests load a stable fixture DB, move or document it under a fixture path; if no reader or fixture exists, classify as unknown/blocker until owner review. |
+| `skills-system/**` | vendored snapshot, generated mirror, legacy surface | If an update command or upstream plugin source can reproduce it, classify as vendored/generated with update command; if active runtime readers consume it directly, document reader and owner before preserving; if only stale docs mention it, classify as cleanup candidate after reference scan. |
+| `Infrastructure/Infrastructure/**` | accidental nested output, historical artifact, intentional archive | If no active source/runtime reader depends on it, classify as historical artifact or cleanup candidate; if retained, require an allowlist reason that explains the duplicated path shape. |
+
+Unknown ownership is never a deletion signal. It is a blocker until one of the
+decision tests produces evidence and the policy records the outcome.
+
+### Allowlist Contract
+
+P0 must create or document this first-slice allowlist contract:
+
+- Canonical path: `Infrastructure/policy/repo_surface_allowlist.json`.
+- Shape: a JSON object with `schema_version: 1` and an `entries` array.
+- Required entry fields: `id`, `match_type`, `pattern`, `classification`,
+  `reason`, `owner`, and `expires` or `review_after`.
+- Allowed `match_type` values: `exact`, `glob`, and `prefix`. Regex matching is
+  excluded from the first slice.
+- Entries can downgrade a strict blocking finding to a warning only when the
+  entry classification matches the classifier result and `reason` is non-empty.
+- Matching precedence is deterministic: `exact`, then longest `prefix`, then
+  longest `glob` pattern, with ties sorted by `id`.
+
 ## High-Level Technical Design
 
 The first delivery should create one policy document, one classifier, one command
@@ -278,7 +318,7 @@ git tracked files
 The classifier should not know every product decision. It should expose enough
 structured evidence for humans and agents to resolve unknowns safely.
 
-Suggested JSON shape:
+Internal `data.*` payload guidance:
 
 ```json
 {
@@ -299,6 +339,10 @@ Suggested JSON shape:
       "path": "Infrastructure/Infrastructure/artifacts/example.json",
       "classification": "unknown",
       "status": "violation",
+      "code": "nested_infrastructure_path",
+      "severity": "error",
+      "blocking": true,
+      "allowlist_entry": null,
       "reason": "nested Infrastructure path is not allowlisted",
       "recommendation": "audit source and either remove, move to fixture, or allowlist with reason"
     }
@@ -307,7 +351,9 @@ Suggested JSON shape:
 }
 ```
 
-This shape is directional guidance, not a final schema.
+This shape is directional guidance for the `data` payload only. The canonical
+public output is the standard `ask` envelope defined below. Implementers must not
+return this payload as a top-level JSON object.
 
 ## Deepening Addendum
 
@@ -340,7 +386,8 @@ test module. If adjusted, the plan closeout must state the selected path and why
 
 ### Public Command Envelope Contract
 
-`./bin/ask repo surface --json` must return the standard `ask` envelope shape:
+`./bin/ask repo surface --json` must return the standard `ask` envelope shape.
+This is the canonical public contract:
 
 ```json
 {
@@ -348,25 +395,72 @@ test module. If adjusted, the plan closeout must state the selected path and why
   "trace_id": "<uuid-or-provided-trace-id>",
   "metadata": {
     "command": "repo surface --json",
-    "next_steps": []
+    "next_steps": [
+      {
+        "type": "command",
+        "command": "./bin/ask repo surface --strict --json",
+        "rationale": "confirm whether live findings are blocking"
+      }
+    ]
   },
   "data": {
+    "schema_version": 1,
     "summary": {},
     "classifications": {},
     "findings": []
+  },
+  "telemetry": {
+    "latency_ms": 0
   },
   "errors": []
 }
 ```
 
+Compatibility rules:
+
+- `data.schema_version` is required.
+- `metadata.next_steps` is required and must be an array of next safe action
+  objects. Do not substitute an alternate key. Each item must include `type`,
+  `command`, and `rationale`.
+- `findings[*]` must include stable `path`, `classification`, `status`, `code`,
+  `severity`, `blocking`, `allowlist_entry`, `reason`, and `recommendation`
+  fields. `allowlist_entry` is either `null` or the matching allowlist entry
+  `id`.
+- Findings must be sorted deterministically by `blocking` descending, `severity`,
+  then normalized repository-relative `path`, then `code`.
+- Severity rank is fixed as `error`, `warning`, then `info`.
+- Non-deterministic values such as generated trace IDs, timestamps, runtime
+  duration, and environment details must live only under `trace_id`, `metadata`,
+  or `telemetry`.
+- Tests must prove an explicit `--trace-id` value is echoed exactly. Generated
+  trace IDs only need shape validation.
+- Additive fields are allowed within schema version `1`.
+- Breaking field removals, type changes, or semantic changes require a version
+  bump and a migration note in the command contract.
+- For `--json`, stdout must contain JSON only. Human diagnostics, progress, and
+  warnings must go to stderr.
+
 Strict mode behavior:
 
 - `./bin/ask repo surface --strict --json` exits non-zero when policy violations
   are present.
-- The command must still print parseable JSON on strict failure.
+- The command must still print parseable JSON-only stdout on strict failure.
 - Strict failure is not a mutation and must not delete or move files.
 - The `errors` or `findings` payload must identify at least one blocking
   violation and a recommended next action.
+- Blocking findings must carry `blocking: true`, `severity: "error"`, and a
+  stable machine-readable `code`.
+
+Strict-mode truth table:
+
+| Finding state | Allowlisted | `--strict` exit | Payload status |
+| ------------- | ----------- | --------------- | -------------- |
+| `status=ok` | not applicable | `0` | `success` |
+| `status=warning` and `blocking=false` | not applicable | `0` | `warning` |
+| `status=unknown` | no | non-zero | `error` |
+| `status=unknown` | yes, with reason | `0` | `warning` |
+| `status=violation` | no | non-zero | `error` |
+| `status=violation` | yes, with reason | `0` | `warning` |
 
 ### Implementation Stop Conditions
 
@@ -379,6 +473,30 @@ Stop and return to planning if:
 - live repo classification cannot distinguish active source from generated
   evidence for the first-slice policy categories;
 - tests require deleting or rewriting existing artifacts to pass.
+
+## Task Graph
+
+```yaml
+tasks:
+  - id: P0
+    title: "Surface ownership policy"
+    depends_on: []
+  - id: P1
+    title: "Non-destructive inventory classifier"
+    depends_on: [P0]
+  - id: P2
+    title: "Ask repo surface command"
+    depends_on: [P1]
+  - id: P3
+    title: "Cleanup decision backlog"
+    depends_on: [P2]
+  - id: P4
+    title: "Product golden path routing"
+    depends_on: [P2]
+  - id: P5
+    title: "Docs and health reporting"
+    depends_on: [P3, P4]
+```
 
 ## Implementation Units
 
@@ -393,6 +511,7 @@ Stop and return to planning if:
 **Files:**
 
 - Create: `Docs/agents/15-repo-surface-ownership.md`
+- Create if allowlist entries are needed: `Infrastructure/policy/repo_surface_allowlist.json`
 - Modify: `AGENTS.md` or `README.md` only if needed to link the policy front
   door.
 - Test: policy presence should be covered by P1/P2 inventory tests rather than a
@@ -406,6 +525,9 @@ Stop and return to planning if:
   `artifacts/**`, `.skillsets/**`, `.harness/*.db`, `skills-system/**`,
   deferred context, and `Infrastructure/Infrastructure/**`.
 - Include the rule that unknown ownership is a blocker, not a delete signal.
+- Include the ownership decision-test matrix from this plan so unresolved
+  surfaces cannot be classified by assertion alone.
+- Include the allowlist contract and matching precedence from this plan.
 - Include the rule that deferred context is preserved behind indexes.
 
 **Test scenarios:**
@@ -432,6 +554,10 @@ Stop and return to planning if:
 
 **Goal:** Add a script that classifies tracked paths and reports violations
 without deleting or moving files.
+
+Scope: this unit delivers tracked-surface contract v1. It intentionally uses
+`git ls-files` as the inventory universe. Untracked runtime-state discovery is a
+deferred report-only mode and must not be implied by P1 acceptance.
 
 **Requirements:** R2, R3, R4
 
@@ -461,13 +587,23 @@ in parallel if it imports policy constants locally.
 - A fake source path under `Skills/**` is classified as `source`.
 - A fake `.harness/context-compound.db` path is classified as `runtime_state` or
   unresolved ownership according to policy.
-- JSON output includes `classification`, `status`, `reason`, `recommendation`,
-  and `next_command`.
+- JSON output includes `classification`, `status`, `code`, `severity`,
+  `blocking`, `allowlist_entry`, `reason`, `recommendation`, and `next_command`.
+- JSON findings use deterministic ordering and normalized repository-relative
+  paths.
 
 **Verification:**
 
+Implementation-detail checks before the P2 wrapper route exists:
+
 - `python3 -m pytest Infrastructure/scripts/testing/test_repo_surface_inventory.py`
-- Run the classifier against the live repository in report mode.
+- `python3 Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --json`
+- `python3 Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --strict --json`
+  with expected non-zero behavior if the live tracked tree has policy
+  violations. JSON mode must write JSON-only stdout.
+
+After P2 exists, closeout evidence must use `./bin/ask repo surface` rather than
+direct script invocation.
 
 **Rollback:**
 
@@ -482,6 +618,8 @@ in parallel if it imports policy constants locally.
 - AC6: Historical artifact paths are detected.
 - AC7: Generated JSONL/log/run-output paths are reported without deletion.
 - AC8: Nested `Infrastructure/Infrastructure/**` paths are flagged.
+- AC8a: First-slice classifier output is explicitly scoped to tracked paths, and
+  deferred untracked/runtime discovery remains report-only future work.
 
 - [ ] **P2 / Unit 3: Public `ask repo surface` Route**
 
@@ -503,7 +641,11 @@ in parallel if it imports policy constants locally.
 - Add `./bin/ask repo surface --strict --json`.
 - Return the standard ask envelope with `status`, `trace_id`, `metadata`,
   `data`, `telemetry`, and `errors`.
-- Include `next_steps` or equivalent metadata pointing to the next safe command.
+- Populate `data.schema_version` and follow the compatibility rules from the
+  public command envelope contract.
+- Include required `metadata.next_steps` action objects pointing to the next safe
+  command.
+- For `--json`, keep stdout JSON-only and send human diagnostics to stderr.
 - Keep `ask repo bloat` out of the first implementation unless adding it as an
   alias is trivial and covered by tests.
 
@@ -511,6 +653,9 @@ in parallel if it imports policy constants locally.
 
 - `./bin/ask repo surface --json` returns a parseable envelope.
 - `./bin/ask repo surface --strict --json` reports violations consistently.
+- `./bin/ask --trace-id repo-surface-test repo surface --json` returns
+  `trace_id: "repo-surface-test"`.
+- `metadata.next_steps` exists in all JSON outcomes.
 - Robot mode handles clear minor syntax only if existing router policy supports
   it.
 
@@ -519,7 +664,10 @@ in parallel if it imports policy constants locally.
 - `python3 -m pytest Infrastructure/tests/test_ask_repo_surface.py`
 - `./bin/ask repo surface --json`
 - `./bin/ask repo surface --strict --json` with expected non-zero behavior if
-  the live tree has violations.
+  the live tracked tree has violations.
+- `mkdir -p artifacts/reports/repo-surface && ./bin/ask --trace-id repo-surface-first-slice repo surface --json > artifacts/reports/repo-surface/repo-surface-first-slice.json`
+  as generated first-slice evidence. This directory must be ignored/untracked
+  unless a later retention policy explicitly promotes a summary fixture.
 
 **Rollback:**
 
@@ -530,6 +678,8 @@ in parallel if it imports policy constants locally.
 - AC9: Explicit ownership decisions are visible in the command output.
 - AC10: Deferred context is classified as reference or preserved context, not
   treated as deletion-first bloat.
+- AC10a: First-slice live report evidence has a deterministic generated report
+  path and is excluded from tracked retention unless explicitly promoted later.
 
 - [ ] **P3 / Unit 4: Reference-Scanned Cleanup Preparation**
 
@@ -541,8 +691,10 @@ in parallel if it imports policy constants locally.
 
 **Files:**
 
-- Create: a generated report artifact or documentation summary path selected by
-  the implementation after policy confirms where reports belong.
+- Create: generated cleanup preparation reports under
+  `artifacts/reports/repo-surface/`. The directory is generated output and must
+  remain ignored/untracked unless a later retention policy promotes a summary
+  fixture with a reason.
 - Modify: no cleanup deletions in this unit unless it is split into a later
   cleanup PR after review.
 
@@ -556,12 +708,20 @@ in parallel if it imports policy constants locally.
   - unresolved generated/runtime ownership surfaces.
 - For each group, define the required reference scan command and retention
   decision.
-- Record what can be safely deleted in a later PR and what needs ownership
-  resolution first.
+- Record cleanup candidates only after a falsification pass proves:
+  - zero active source references;
+  - zero runtime readers or projection dependencies;
+  - zero deferred-context references unless the material is moved behind an
+    indexed reference;
+  - an explicit owner, allowlist, or retention decision.
+- Record what remains blocked by ownership resolution before any later deletion
+  PR.
 
 **Test scenarios:**
 
 - Report includes candidate groups and required reference scans.
+- Report distinguishes `candidate`, `blocked`, and `safe_to_delete` states.
+- A path can reach `safe_to_delete` only after the falsification pass succeeds.
 - No files are deleted by preparation mode.
 
 **Verification:**
@@ -577,6 +737,8 @@ in parallel if it imports policy constants locally.
 
 - AC11: Historical artifact cleanup has a reference-scanned candidate list.
 - AC12: Retired skill debris cleanup has active/deferred/docs reference evidence.
+- AC12a: No cleanup candidate is marked safe to delete without falsification-pass
+  evidence.
 
 - [ ] **P4 / Unit 5: Namespace-First Product Golden Path Contracts**
 
@@ -609,6 +771,10 @@ ship before the surface report exists.
 - Decide which one should be implemented first. Recommended: `ask repo doctor`
   consumes `repo status`, runtime budget, handles, and surface policy once
   `repo surface` exists.
+- Before implementing any P4 command, capture baseline evidence that current
+  commands fail or slow a real operator/agent task, then define the expected
+  measurable improvement from the new route. If no baseline failure or decision
+  cost is demonstrated, keep the command as documentation only.
 - Keep top-level aliases as a later compatibility/product decision.
 
 **Test scenarios:**
@@ -616,6 +782,8 @@ ship before the surface report exists.
 - Command contract doc lists expected inputs, outputs, and JSON fields.
 - If the first endpoint is implemented, it returns standard ask envelope output.
 - Runtime budget status remains visible in doctor/closeout contracts.
+- A baseline task trace or command transcript justifies the first implemented
+  golden-path endpoint.
 
 **Verification:**
 
@@ -639,6 +807,8 @@ ship before the surface report exists.
 - AC17: `ask repo closeout --changed` contract includes changed files, sync needs,
   focused validation, and commit-readiness signal.
 - AC18: Runtime surface reporting remains visible in health and closeout flows.
+- AC18a: P4 does not add executable command surface without baseline evidence of
+  current-command friction and a measurable improvement target.
 
 - [ ] **P5 / Unit 6: Product Framing and Outcome Proof Documentation**
 
@@ -755,6 +925,8 @@ marketing-only rewrite.
   conflicting `doctor` shape without router tests.
 - Historical artifacts may include useful fixtures. Require allowlist reasons and
   reference scans.
+- P0-P2 are tracked-surface contract v1. Untracked/runtime-state discovery must
+  be added later as report-only behavior before it can influence cleanup.
 
 ## Documentation / Operational Notes
 
@@ -803,12 +975,16 @@ surface inventory classifier, and an `./bin/ask repo surface` route with focused
 tests and a live JSON report. Do not delete tracked artifacts in this slice.
 ```
 
-Required first passing validation ladder:
+Pre-implementation validation:
 
 ```bash
 python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-plan.md
+```
+
+Post-P2 passing validation ladder:
+
+```bash
 ./bin/ask repo surface --json
-./bin/ask runtime budget --json --robot
 ```
 
 Required first diagnostic evidence:
@@ -820,3 +996,9 @@ Required first diagnostic evidence:
 Expected outcome: return success only when the live repository has no surface
 policy violations. If violations exist, return non-zero while preserving the
 standard JSON envelope with violation details and actionable next steps.
+
+Optional P4 contextual evidence, not a P0-P2 acceptance gate:
+
+```bash
+./bin/ask runtime budget --json --robot
+```
