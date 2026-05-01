@@ -23,6 +23,7 @@ inputs:
 outputs:
   - selected review mode and post-review policy
   - codex_review findings, overall_correctness, overall_explanation, and overall_confidence_score
+  - evidence_ladder with completed checks, missing checks, confidence caps applied, and confidence rationale
   - harness_readiness verdict, traceability states, validation state, review-thread state, and next action
   - severity-ranked readiness findings
   - go, go-with-conditions, or no-go recommendation
@@ -40,13 +41,15 @@ risks:
   - stale claims; mitigate with repo-first evidence
   - false readiness; mitigate with traceability
   - false-positive code findings; mitigate with eligibility checks, independent lenses, history/context verification, and high-confidence filtering
+  - inflated confidence; mitigate with evidence ladder caps before emitting overall_confidence_score
   - unresolved review threads; mitigate by classifying each as addressed, disproven, deferred, or blocking
   - security or supply-chain regressions; mitigate with a dedicated PR security pass
 
 observability: >
   Record target, base, verdict, blocker count, traceability status, validation
-  commands, security routing, follow-up owner, and the exact PR, Linear, spec,
-  plan, CI, review-thread, and artifact references used to justify the verdict.
+  commands, security routing, follow-up owner, confidence score, confidence caps,
+  and the exact PR, Linear, spec, plan, CI, review-thread, and artifact
+  references used to justify the verdict.
 
 rollback_procedure: >
   For review-only output, withdraw the verdict and rerun against the corrected

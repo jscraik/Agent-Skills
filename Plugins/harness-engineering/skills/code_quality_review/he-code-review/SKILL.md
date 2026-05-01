@@ -24,6 +24,7 @@ Use `he-code-review` for package-level readiness review of a PR, branch, diff, c
 - Resolve target, base, mode, local instructions, Linear/spec/plan links, acceptance IDs, CI, review threads, validation, and relevant history before judging.
 - Use Codex-compatible review for introduced code bugs: `uncommitted`, `base`, `commit`, PR, or custom diff target; tight changed-line findings; `overall_correctness`.
 - Use Harness readiness for delivery state: `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`.
+- Calibrate `overall_confidence_score` from evidence completeness; target `0.96` only when the 0.96 Evidence Ladder is satisfied.
 - Emit concrete `P0`-`P3` readiness findings, `go`/`go-with-conditions`/`no-go`, and routing to `he-work`, `autofix`, `security-ops`, or GitHub workflow when needed.
 
 ## Inputs
@@ -38,12 +39,13 @@ Use `he-code-review` for package-level readiness review of a PR, branch, diff, c
 2. Select the mode from the Review policy index, then resolve target/base/instructions/tracker/spec/plan evidence.
 3. Read the diff, surrounding code, changed-file comments, history, review context, checks, validation, and traceability evidence.
 4. Apply review lenses from the policy index; verify each candidate and drop pre-existing, unchanged-line, intentional, nit-only, CI-catchable, generic, duplicate, or low-confidence issues.
-5. Emit separate Codex-compatible code review and Harness readiness results.
+5. Apply confidence caps from the policy index, then emit separate Codex-compatible code review and Harness readiness results.
 
 ## Outputs
 
 - `schema_version: 1`.
 - `codex_review`: `findings[]`, `overall_correctness`, `overall_explanation`, `overall_confidence_score`.
+- `evidence_ladder`: completed checks, missing checks, confidence caps applied, and why the final score is realistic.
 - `harness_readiness`: `verdict`, `linear_traceability`, `spec_plan_traceability`, `validation_state`, `review_threads`, `next_action`.
 - Severity-ranked readiness findings with exact file or artifact evidence.
 - Follow-up routing when implementation, security review, validation, or PR management is required.
@@ -61,6 +63,7 @@ Do not treat branch names, PR titles, or resolver claims as closure. A clean `go
 - Each finding needs severity, exact location, evidence, impact, confidence, and remediation.
 - Codex-compatible findings must be tight, actionable, and anchored to changed lines; use absolute paths when available and line ranges small enough to fix directly.
 - Block `go` for unresolved `P0`/`P1`, actionable reviewer threads, relevant failing checks, stale conflicts, missing validation, or missing Linear/spec/plan/PR traceability.
+- Do not return `overall_confidence_score >= 0.96` unless target/base, local diff, changed files, instructions, surrounding code, review-thread state, validation, projection/runtime state when relevant, and unrelated-dirty-work impact are all checked or explicitly not applicable.
 - For PR evidence artifacts, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <artifact-path>` before returning a `go` verdict.
 - Fail fast: stop at the first failed required gate and report the blocker instead of continuing past it.
 - Route broad security-sensitive decisions to `security-ops` or a security reviewer.

@@ -67,6 +67,19 @@ cases:
       - type: regex
         value: "(?i)(high-confidence|pre-existing|unchanged-line|style|CI|filter)"
 
+  - id: confidence-ladder-calibration
+    name: confidence ladder calibration
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Please run Harness Engineering code review on this PR and only return overall_confidence_score 0.96 if you have checked target/base, local diff, instructions, review threads, CI, validation, projection parity, and unrelated dirty work impact."
+    deterministic_checks:
+      forbidden_commands: ["gh pr merge", "gh pr close", "git push", "rm -rf"]
+    acceptance:
+      - type: regex
+        value: "(?i)(evidence_ladder|confidence cap|0\\.96|target/base|review threads|dirty work)"
+
   - id: low-signal-cleanup
     name: low-signal PR triage
     category: edge

@@ -49,6 +49,11 @@ def test_he_code_review_retains_core_traceability_and_review_rules():
     assert "codex_review.findings[]" in doctrine
     assert "overall_correctness" in doctrine
     assert "Multi-Lens Review And False-Positive Filter" in doctrine
+    assert "Confidence Ladder" in doctrine
+    assert "overall_confidence_score: 0.96" in doctrine
+    assert "evidence_ladder" in skill_text
+    assert "Confidence Calibration" in index
+    assert "Cap at `0.90`" in index
     assert "Codex-compatible findings must be tight" in skill_text
     assert "Review Lenses" in index
     assert "Codex-compatible review" in index

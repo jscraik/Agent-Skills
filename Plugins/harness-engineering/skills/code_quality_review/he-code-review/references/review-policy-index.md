@@ -37,6 +37,15 @@ Before deep review, classify closed, draft, automated, trivial, already-reviewed
 - Breaking API, CLI, configuration, serialization, migration, permission, or rollout changes.
 - Change-size, context-safety, focused testing, validation, and security/supply-chain evidence.
 
+## Confidence Calibration
+
+- `0.96` target: target/base resolved, local diff and changed files read, local instructions checked, surrounding code traced, relevant history/review comments inspected, validation and CI/review-thread state checked or marked not applicable, projection/runtime mirrors verified when relevant, unrelated dirty work impact classified, and no unresolved blockers remain.
+- Cap at `0.90` when live PR review threads, CI/check state, or reviewer comments are unknown.
+- Cap at `0.92` when unrelated dirty work touches the same plugin, projection, validation, or runtime surfaces and has not been classified.
+- Cap at `0.94` when static validation passes but no representative runtime or scenario evidence was sampled.
+- Cap at `0.88` when target/base, local instructions, or changed-line ownership cannot be resolved.
+- Never raise confidence by tone. Raise it only by closing evidence gaps and naming any remaining cap.
+
 ## Blocking Conditions
 
 Block `go` or merge for unresolved `P0`/`P1`, actionable threads, relevant failing checks, stale conflicts, missing validation, missing traceability, security/supply-chain concerns, or unrelated churn. Failing checks do not block classification.
@@ -44,6 +53,7 @@ Block `go` or merge for unresolved `P0`/`P1`, actionable threads, relevant faili
 ## Output
 
 - Codex review: `findings[]`, `overall_correctness`, `overall_explanation`, `overall_confidence_score`.
+- Evidence ladder: completed checks, missing checks, confidence caps, and final confidence rationale.
 - Findings: severity, location, evidence, impact, confidence, remediation.
 - Harness readiness: `go`, `go-with-conditions`, or `no-go`.
 - Commit review: changed files, code read, checks run/skipped, limitations, findings or clean report.

@@ -35,6 +35,25 @@ The active `he-code-review` entrypoint now keeps the readiness path compact. The
 - Missing traceability is at least `go-with-conditions`; missing issue, missing validation, or mismatched scope is `no-go`.
 ```
 
+## CI Move Evidence
+
+The authoring-family gate compares shortened HE skill bodies against added reference/index content. These exact removed lines are preserved here so compact runtime entries remain traceable to deferred context:
+
+```text
+# Progressive Disclosure Entry
+This entrypoint stays concise and keeps full operational context in archived references.
+- If the request is already concrete enough for planning or direct execution, keep the interaction brief and recommend the next stage instead of forcing a brainstorm.
+automation_status: "<created | needs-user-action | blocked>"
+description: "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation, contract-drift control, UI execution gates, and optional external delegation. Use when the user wants Harness Engineering work implemented, not just planned."
+- `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
+| [[gh-workflow]] | GitHub merge readiness |
+- start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
+- proceed to `he-plan` when the contract is ready for execution sequencing
+- issue creation/update via `[[gh-workflow]]` or repo tracker
+description: Route ambiguous Harness Engineering requests to one lifecycle stage when users ask where to start, resume, plan, implement, review, debug, schedule a heartbeat, or resolve domain terminology.
+5. Emit separate Codex-compatible code review and Harness readiness results.
+```
+
 ## Preserved Context
 
 Full historical move evidence and exact removed-line preservation live outside the plugin package budget at:

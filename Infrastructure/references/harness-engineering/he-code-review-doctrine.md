@@ -37,6 +37,7 @@ Return a structured result with:
 - `codex_review.findings[]`: `title`, `body`, `confidence_score`, `priority`, and `code_location.absolute_file_path` plus `code_location.line_range`.
 - `codex_review.overall_correctness`: exactly `patch is correct` or `patch is incorrect`.
 - `codex_review.overall_explanation` and `codex_review.overall_confidence_score`.
+- `evidence_ladder`: completed evidence checks, missing evidence checks, confidence caps applied, and final confidence rationale.
 - `harness_readiness`: verdict, Linear traceability, spec/plan traceability, validation state, review-thread state, and next action.
 
 For Codex-compatible findings, use only issues introduced by the target diff. Anchor each finding to a tight range that overlaps changed code. Do not report pre-existing issues, unchanged-line issues, intentional behavior, style-only feedback, praise, generic missing tests, generic documentation requests, or build/typecheck/lint failures that CI already reports unless the user explicitly asks to review those classes.
@@ -69,6 +70,31 @@ Use independent lenses before final synthesis:
 Score each candidate issue before reporting it. Keep only high-confidence, actionable issues with concrete evidence and a likely maintainer fix. When confidence is below the reporting threshold, record it as a limitation or omit it. The review should be boringly trustworthy: fewer real findings beats a long list of maybe-problems.
 
 If the user explicitly asks for PR comments, keep them short, issue-only, and linked to immutable commit line ranges where the platform allows it. Do not batch-post until after final eligibility, duplicate, and false-positive checks.
+
+## Confidence Ladder
+
+Use confidence as an evidence-derived value, not a mood. The default clean local review should land around `0.88` to `0.93`. Raise it only when additional surfaces are actually checked.
+
+To return `overall_confidence_score: 0.96`, prove or explicitly mark not applicable:
+
+- Target/base: exact target, merge base or parent commit, and review mode are resolved.
+- Scope cleanliness: local diff, staged/unstaged/untracked state, and unrelated dirty work impact are classified.
+- Source reading: changed files, surrounding code, changed-file comments, and relevant callers/callees are read enough to validate behavior.
+- Instructions: repo root and touched-path instruction files are checked.
+- History/context: relevant blame/history, previous PRs, review comments, and known constraints are inspected when available.
+- Validation: focused local validators or tests for the touched contract pass, or missing validation is a named cap.
+- Live state: PR state, CI/check state, and review-thread/bot-comment state are checked for PR reviews, or marked not applicable for local/commit-only reviews.
+- Projection/runtime: generated manifests, runtime mirrors, skill handles, or package projections are verified when the change touches those surfaces.
+- Security/supply-chain: security-sensitive surfaces are cleared, routed, or marked not applicable.
+
+Apply caps before choosing the final score:
+
+- Cap at `0.88` when target/base, applicable instructions, or changed-line ownership cannot be resolved.
+- Cap at `0.90` when live PR review threads, CI/check state, or reviewer comments are unknown for a PR review.
+- Cap at `0.92` when unrelated dirty work touches the same plugin, projection, validation, or runtime surfaces and has not been classified.
+- Cap at `0.94` when static validation passes but no representative runtime/scenario evidence was sampled.
+- Cap at `0.96` for a complete evidence-backed review with no unresolved blockers.
+- Use `0.97` or higher only when live PR state, local validation, projection/runtime parity, and a representative scenario run all agree; do not use `1.0` for normal repository work.
 
 ## Provenance And Owners
 
