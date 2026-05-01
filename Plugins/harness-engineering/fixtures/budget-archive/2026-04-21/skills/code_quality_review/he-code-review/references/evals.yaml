@@ -159,25 +159,6 @@ cases:
       - type: regex
         value: "(?i)(no-go|go-with-conditions)"
 
-  - id: codex-style-review-thread-readiness
-    name: codex style review thread readiness
-    category: edge
-    eval_modes: [smoke, release]
-    should_trigger: true
-    prepend_skill: false
-    prompt: "Review this PR before merge. It has Codex and CodeRabbit review threads, a dependency lockfile change, and one failing changed-surface check. Tell me the go/no-go call."
-    acceptance:
-      - type: skill_selected
-        expected_skill: "he-code-review"
-      - type: regex
-        value: "(?i)(Codex|CodeRabbit|review thread)"
-      - type: regex
-        value: "(?i)(security|supply-chain)"
-      - type: regex
-        value: "(?i)(changed-surface)"
-      - type: regex
-        value: "(?i)(no-go|go-with-conditions)"
-
   - id: todo-follow-up
     name: todo follow-up lane
     category: edge

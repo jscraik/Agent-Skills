@@ -13,6 +13,8 @@ metadata:
 
 This workflow produces a readiness assessment. It does **not** implement fixes unless running in `mode:autofix` or `mode:headless` with safe auto-fixes enabled.
 
+Tracked delivery work means work managed through a formal delivery surface such as a Linear issue, governing spec, implementation plan, or pull request, where readiness depends on end-to-end traceability.
+
 ## Table of Contents
 - [Working agreement](#working-agreement)
 - [When to use](#when-to-use)
@@ -93,7 +95,7 @@ Non-triggers:
 ## Required inputs
 - Review target: PR, branch, file, or spec/plan path
 - Access to repo/diff/document
-- Linked Linear issue, spec, plan, PR body, or branch identifier when the target is tracked delivery work
+- Linked Linear issue, governing spec or plan, PR evidence, and validation evidence when the target is tracked delivery work
 - Optional context from `harness-engineering.local.md`
 - optional review modifiers:
   - `mode:interactive`
@@ -257,7 +259,7 @@ Tracked work traceability gate:
 - Governing plan units and acceptance IDs are named when a plan exists.
 - PR evidence links back to Linear and the completed acceptance IDs.
 - Validation evidence supports every acceptance ID claimed as complete.
-- Missing traceability is at least `go-with-conditions`; missing issue, missing validation, or mismatched scope is `no-go`.
+- Incomplete traceability yields `go-with-conditions`; missing issue, missing validation, or mismatched scope yields `no-go`.
 
 ### Phase 5: Synthesize findings
 Merge overlapping findings across reviewer lenses.

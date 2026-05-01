@@ -86,7 +86,7 @@ Fail fast when the selected stage is absent from the routing map, required artif
 
 ## Failure mode
 
-If required evidence is missing, return the missing input and the most likely stage with low confidence.
+If required evidence is missing, return `confidence: blocked` with exactly one `missing_input`; do not guess a stage.
 
 ## Gotchas
 

@@ -23,6 +23,16 @@ The router procedure now resolves folded stage names before applying the older d
 ```text
 2. Apply the deterministic decision order in [deterministic stage routing](../../references/deterministic-stage-routing.md).
 3. Pick exactly one stage from [routing map](../../references/routing-map.json).
+If required evidence is missing, return the missing input and the most likely stage with low confidence.
+```
+
+## Code Review Preserved Context
+
+The active `he-code-review` entrypoint now keeps the readiness path compact. These preserved lines remain here as move evidence:
+
+```text
+- Linked Linear issue, spec, plan, PR body, or branch identifier when the target is tracked delivery work
+- Missing traceability is at least `go-with-conditions`; missing issue, missing validation, or mismatched scope is `no-go`.
 ```
 
 ## Preserved Context

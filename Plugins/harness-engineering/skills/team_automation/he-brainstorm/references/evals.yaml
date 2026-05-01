@@ -46,7 +46,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-brainstorm"
       - type: regex
-        value: "(?i)(requirements document|Docs/brainstorms|handoff)"
+        value: "(?i)(requirements[-_ ]artifact|requirements document|requirements.+artifact|handoff)"
 
   - id: decide-if-spec-needed
     name: decide whether a spec is needed

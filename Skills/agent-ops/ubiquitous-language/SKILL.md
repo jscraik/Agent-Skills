@@ -24,7 +24,7 @@ Do not use for ordinary symbol renaming, generic copyediting, or broad docs rewr
 ## Required inputs
 
 - Current conversation and the user's natural wording.
-- Existing `UBIQUITOUS_LANGUAGE.md` in scope.
+- Existing `UBIQUITOUS_LANGUAGE.md`, if present.
 - Nearby project guidance such as `AGENTS.md`, `README.md`, `docs/**`, `instructions/**`, or handoff files.
 - Session logs only when the user explicitly asks for history-backed vocabulary.
 

@@ -1,0 +1,106 @@
+schema_version: "2.0"
+
+skill_name: "he-fix-bugs"
+
+cases:
+  - id: explicit-debug-trigger
+    name: explicit debug request routes here
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $he-fix-bugs to debug this failing test and fix the root cause."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(root cause|reproduce|evidence|fix)"
+
+  - id: linear-issue-intake
+    name: tracker intake from linear
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Investigate ENG-123 and tell me if the bug still reproduces before changing code."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(linear|ENG-123|issue source)"
+      - type: regex
+        value: "(?i)(confirmed|not_reproduced|partial|blocked)"
+
+  - id: github-issue-intake
+    name: tracker intake from github
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Reproduce GitHub issue #482, diagnose root cause, then propose the minimal fix."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(github|#482|issue)"
+      - type: regex
+        value: "(?i)(root cause|minimal fix|test)"
+
+  - id: diagnosis-only-path
+    name: diagnosis only when user does not authorize edits
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Debug this crash but do not edit files yet. I only want diagnosis and test recommendations."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(diagnosis|recommend|test)"
+      - type: not_regex
+        value: "(?i)(edited|implemented|applied fix)"
+
+  - id: route-implementation-negative
+    name: broad implementation request routes away
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Implement this full approved feature plan across backend and frontend."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(he-work|implementation)"
+
+  - id: missing-manifest-fallback
+    name: manifest missing fallback guidance
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-fix-bugs, but ~/.codex/agents/manifest.json is unavailable."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(manifest|unavailable|manual|fallback)"
+
+  - id: missing-role-fallback
+    name: missing role fallback includes creator route
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-fix-bugs and assume mapped helper roles are missing from the manifest."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-fix-bugs"
+      - type: regex
+        value: "(?i)(missing roles|manual launch|codex-agent-creator)"
+
+metadata:
+  last_updated: "2026-04-20"
+  author: "Codex"
+  review_status: "draft"

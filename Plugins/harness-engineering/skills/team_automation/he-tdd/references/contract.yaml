@@ -1,0 +1,37 @@
+schema_version: 1
+
+purpose: >
+  Run the Harness Engineering test-first execution posture so behavior
+  changes ship with RED→GREEN evidence, vertical tracer bullet slicing,
+  and refactor-safe tests through public interfaces.
+
+triggers:
+  - the user asks for test-first or red-green-refactor execution
+  - he-plan includes an execution note such as test-first
+  - he-work is executing behavior changes that require strict TDD posture
+  - the user asks for failing regression tests before implementation
+
+inputs:
+  - a concrete behavior target (acceptance criterion, bug repro, or plan unit)
+  - repository test command and framework
+  - in-scope files/components for the slice
+  - optional AC/UAC identifiers from he-plan for traceability
+
+outputs:
+  - RED→GREEN evidence per tracer bullet slice
+  - minimal implementation changes that satisfy each slice
+  - regression checks showing no behavior breakage
+  - concise summary of tested behavior and verification evidence
+  - schema_version: 1 when structured status is requested
+
+non_goals:
+  - writing first-pass plans or specs
+  - post-hoc testing after implementation
+  - broad test strategy design outside a concrete behavior target
+  - implementation-first changes without failing-test evidence
+
+risks:
+  - horizontal slicing (all tests then all code); mitigate with strict vertical slice gates
+  - brittle implementation-coupled tests; mitigate with public-interface assertions
+  - unsafe retries or mock misuse; mitigate with boundary-only mocking and idempotency checks
+  - unverified completion claims; mitigate with mandatory RED and GREEN evidence capture
