@@ -23,28 +23,33 @@ Resolution contract:
 - `manual-only`: never auto-spawn; provide explicit role advice.
 
 ## Stage Map
-Compatibility note: `he-compound` and `he-compound-refresh` are legacy Harness Engineering stage aliases retained for routing continuity.
+Compatibility note: folded stage names are preserved as nested context but route through parent stages. See [folded skill context](./folded-skill-context.md).
 
 | Stage | Policy | Baseline roles | Conditional roles (by signal) |
 |---|---|---|---|
 | `he-router` | `manual-only` | `none` | `he-repo-research-analyst`, `he-learnings-researcher` when stage intent is ambiguous |
 | `he-compound` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-session-historian` for deep resume/recovery; `he-spec-flow-analyzer` for artifact trust ambiguity |
-| `he-ideate` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-issue-intelligence-analyst` for issue/theme-heavy ideation |
 | `he-brainstorm` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-best-practices-researcher` when external constraints materially shape requirements |
 | `he-spec` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-best-practices-researcher`, `he-framework-docs-researcher` for standards/framework-sensitive contracts |
-| `he-deepen-spec` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher`, `he-spec-flow-analyzer` | `he-coherence-reviewer`, `he-scope-guardian-reviewer`, `he-product-lens-reviewer`, `he-design-lens-reviewer`, `he-security-lens-reviewer`, `he-reliability-reviewer`, `he-architecture-strategist`, `he-api-contract-reviewer`, `he-data-integrity-guardian`, `he-deployment-verification-agent` |
 | `he-plan` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-best-practices-researcher`, `he-framework-docs-researcher`, `he-spec-flow-analyzer` |
-| `he-deepen-plan` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-feasibility-reviewer`, `he-coherence-reviewer`, `he-scope-guardian-reviewer`, `he-product-lens-reviewer`, `he-design-lens-reviewer`, `he-security-lens-reviewer`, `he-reliability-reviewer`, `he-architecture-strategist`, `he-api-contract-reviewer`, `he-data-integrity-guardian`, `he-deployment-verification-agent` |
 | `he-improve` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `he-best-practices-researcher`, `he-framework-docs-researcher`, `worker`, `he-testing-reviewer`, `he-correctness-reviewer`, `he-performance-reviewer` |
-| `he-refine` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `worker`, `he-testing-reviewer`, `he-correctness-reviewer`, `he-design-implementation-reviewer`, `he-julik-frontend-races-reviewer` |
 | `he-work` | `conditional` | `worker` (isolated slices only) | `he-correctness-reviewer`, `he-testing-reviewer`, `he-security-reviewer`, `he-performance-reviewer`, `he-data-integrity-guardian`, `he-reliability-reviewer`, `he-api-contract-reviewer`, `he-deployment-verification-agent`, `he-design-implementation-reviewer`, `he-julik-frontend-races-reviewer` |
 | `he-fix-bugs` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `worker`, `he-testing-reviewer`, `he-correctness-reviewer`, `he-reliability-reviewer`, `he-performance-reviewer`, `he-security-reviewer` |
-| `he-prune-branches` | `manual-only` | `none` | `he-repo-research-analyst` when repo/worktree topology is ambiguous and delegation is explicitly requested |
-| `he-tdd` | `always` | `he-testing-reviewer`, `he-correctness-reviewer` | `he-security-reviewer`, `he-data-integrity-guardian`, `he-performance-reviewer`, `he-architecture-strategist`, `he-code-simplicity-reviewer` |
 | `he-code-review` | `always` | `he-agent-native-reviewer`, `he-learnings-researcher`, `he-code-simplicity-reviewer` | `he-kieran-rails-reviewer`, `he-kieran-typescript-reviewer`, `he-kieran-python-reviewer`, `he-julik-frontend-races-reviewer`, `he-design-implementation-reviewer`, `he-architecture-strategist`, `he-api-contract-reviewer`, `he-security-reviewer`, `he-performance-reviewer`, `he-data-integrity-guardian`, `he-schema-drift-detector`, `he-reliability-reviewer`, `he-deployment-verification-agent` |
-| `he-technical-review` | `always` | `he-correctness-reviewer`, `he-testing-reviewer`, `he-code-simplicity-reviewer` | `he-kieran-rails-reviewer`, `he-kieran-typescript-reviewer`, `he-kieran-python-reviewer`, `he-security-reviewer`, `he-performance-reviewer`, `he-data-integrity-guardian`, `he-schema-drift-detector`, `he-reliability-reviewer`, `he-deployment-verification-agent`, `he-api-contract-reviewer`, `he-architecture-strategist`, `he-maintainability-reviewer`, `he-julik-frontend-races-reviewer`, `he-spec-flow-analyzer`, `he-feasibility-reviewer`, `he-adversarial-reviewer` |
-| `he-reliability-review` | `always` | `he-reliability-reviewer`, `he-learnings-researcher` | `he-api-contract-reviewer`, `he-security-reviewer`, `he-performance-reviewer`, `he-data-integrity-guardian`, `he-data-migration-expert`, `he-deployment-verification-agent`, `he-architecture-strategist`, `he-adversarial-reviewer` |
-| `he-compound-refresh` | `conditional` | `he-repo-research-analyst`, `he-learnings-researcher` | `worker` for one-at-a-time replacement drafting after explicit delegation approval |
+
+Folded modes inherit the parent stage policy and add their preserved specialist context:
+
+| Folded mode | Parent stage |
+|---|---|
+| `he-ideate` | `he-brainstorm` |
+| `he-deepen-spec` | `he-spec` |
+| `he-deepen-plan` | `he-plan` |
+| `he-refine` | `he-improve` |
+| `he-tdd` | `he-work` |
+| `he-technical-review` | `he-code-review` |
+| `he-reliability-review` | `he-code-review` |
+| `he-compound-refresh` | `he-compound` |
+| `he-prune-branches` | `he-router` with `agent-ops` branch-hygiene handoff |
 
 ## Fallback Contract
 When auto-spawn is unavailable or one or more required roles are missing:

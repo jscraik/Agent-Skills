@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "plugin": "harness-engineering",
-  "naming_note": "he-compound, he-compound-refresh, and he-review are Harness Engineering compatibility aliases retained for routing continuity.",
+  "naming_note": "Visible Harness Engineering stages are compact; folded stage names route through parent stages while preserving their full nested context in references/folded-skill-context.md.",
   "entrypoint": "he-router",
   "deterministic_decision_order": [
     {
@@ -50,12 +50,14 @@
     {
       "priority": 20,
       "rule": "workflow-hygiene",
-      "route": "he-prune-branches",
+      "route": "he-router",
       "signals": [
         "stale branch cleanup",
         "gone remote branches",
         "worktree cleanup"
-      ]
+      ],
+      "mode": "agent-ops-branch-hygiene-handoff",
+      "folded_from": "he-prune-branches"
     },
     {
       "priority": 30,
@@ -72,36 +74,42 @@
     {
       "priority": 35,
       "rule": "deep-review-or-feedback-dispute",
-      "route": "he-technical-review",
+      "route": "he-code-review",
       "signals": [
         "deep technical review",
         "engineering risk",
         "review feedback may be wrong",
         "validate comments"
-      ]
+      ],
+      "mode": "technical-review",
+      "folded_from": "he-technical-review"
     },
     {
       "priority": 36,
       "rule": "reliability-risk-review",
-      "route": "he-reliability-review",
+      "route": "he-code-review",
       "signals": [
         "SLO",
         "failure modes",
         "cascading failure",
         "timeout dependency risk",
         "resilience"
-      ]
+      ],
+      "mode": "reliability-review",
+      "folded_from": "he-reliability-review"
     },
     {
       "priority": 40,
       "rule": "test-first-work",
-      "route": "he-tdd",
+      "route": "he-work",
       "signals": [
         "TDD",
         "RED/GREEN",
         "failing test first",
         "regression first"
-      ]
+      ],
+      "mode": "test-first-execution",
+      "folded_from": "he-tdd"
     },
     {
       "priority": 45,
@@ -119,14 +127,16 @@
     {
       "priority": 50,
       "rule": "browser-refinement",
-      "route": "he-refine",
+      "route": "he-improve",
       "signals": [
         "browser-first",
         "polish",
         "accessibility iteration",
         "dev server loop",
         "visual refinement"
-      ]
+      ],
+      "mode": "browser-or-artifact-refinement",
+      "folded_from": "he-refine"
     },
     {
       "priority": 55,
@@ -143,7 +153,7 @@
     {
       "priority": 57,
       "rule": "session-evidence-routing",
-      "route": "he-improve, he-compound-refresh, he-heartbeat, he-work, or he-fix-bugs",
+      "route": "he-router",
       "signals": [
         "previous sessions",
         "archived sessions",
@@ -154,30 +164,43 @@
         "what keeps failing",
         "repeated failures",
         "learn from previous runs"
-      ]
+      ],
+      "mode": "session-evidence-outcome-selection",
+      "folded_routes": {
+        "he-compound-refresh": "he-compound"
+      }
     },
     {
       "priority": 60,
       "rule": "deepen-existing-artifact",
-      "route": "he-deepen-spec or he-deepen-plan",
+      "route": "he-router",
       "signals": [
         "harden existing spec",
         "deepen existing spec",
         "harden existing plan",
         "deepen existing plan"
-      ]
+      ],
+      "mode": "artifact-depth-selection",
+      "folded_routes": {
+        "he-deepen-spec": "he-spec",
+        "he-deepen-plan": "he-plan"
+      }
     },
     {
       "priority": 70,
       "rule": "forward-lifecycle",
-      "route": "he-ideate -> he-brainstorm -> he-spec -> he-plan -> he-work",
+      "route": "he-router",
       "signals": [
         "fuzzy opportunity",
         "ambiguous requirements",
         "write spec",
         "plan implementation",
         "execute approved plan"
-      ]
+      ],
+      "mode": "forward-lifecycle-selection",
+      "folded_routes": {
+        "he-ideate": "he-brainstorm"
+      }
     },
     {
       "priority": 80,
@@ -207,24 +230,25 @@
     }
   ],
   "stage_invocation_templates": {
-    "he-ideate": "$harness-engineering:he-ideate <request>",
+    "he-ideate": "$harness-engineering:he-brainstorm <request>  # folded option-generation; load references/folded-skill-context.md",
     "he-brainstorm": "$harness-engineering:he-brainstorm <request>",
     "he-spec": "$harness-engineering:he-spec <request>",
-    "he-deepen-spec": "$harness-engineering:he-deepen-spec <artifact>",
+    "he-deepen-spec": "$harness-engineering:he-spec <request>  # folded deepen-existing-spec; load references/folded-skill-context.md",
     "he-plan": "$harness-engineering:he-plan <request>",
-    "he-deepen-plan": "$harness-engineering:he-deepen-plan <artifact>",
+    "he-deepen-plan": "$harness-engineering:he-plan <request>  # folded deepen-existing-plan; load references/folded-skill-context.md",
     "he-work": "$harness-engineering:he-work <plan-or-task>",
-    "he-tdd": "$harness-engineering:he-tdd <behavior-target>",
+    "he-tdd": "$harness-engineering:he-work <request>  # folded test-first-execution; load references/folded-skill-context.md",
     "he-fix-bugs": "$harness-engineering:he-fix-bugs <bug-or-qa-report>",
     "he-improve": "$harness-engineering:he-improve <measurement-goal>",
-    "he-refine": "$harness-engineering:he-refine <browser-target>",
+    "he-refine": "$harness-engineering:he-improve <request>  # folded browser-or-artifact-refinement; load references/folded-skill-context.md",
     "he-code-review": "$harness-engineering:he-code-review <review-target>",
-    "he-technical-review": "$harness-engineering:he-technical-review <review-target>",
-    "he-reliability-review": "$harness-engineering:he-reliability-review <review-target>",
-    "he-prune-branches": "$harness-engineering:he-prune-branches <repo-path>",
+    "he-technical-review": "$harness-engineering:he-code-review <request>  # folded technical-review; load references/folded-skill-context.md",
+    "he-reliability-review": "$harness-engineering:he-code-review <request>  # folded reliability-review; load references/folded-skill-context.md",
+    "he-prune-branches": "$harness-engineering:he-router <request>  # folded agent-ops-branch-hygiene-handoff; load references/folded-skill-context.md",
     "he-heartbeat": "$harness-engineering:he-heartbeat <target-and-cadence>",
     "he-compound": "$harness-engineering:he-compound <request>",
-    "he-compound-refresh": "$harness-engineering:he-compound-refresh <evidence-path>"
+    "he-compound-refresh": "$harness-engineering:he-compound <request>  # folded refresh-or-resume; load references/folded-skill-context.md",
+    "he-router": "$harness-engineering:he-router <request>"
   },
   "routes": [
     {
@@ -270,13 +294,16 @@
         "idea generation",
         "explore options"
       ],
-      "skill": "he-ideate",
+      "skill": "he-brainstorm",
       "required_inputs": [
         "problem statement",
         "constraints",
         "success signals"
       ],
-      "output": "ranked implementation opportunities and recommendation"
+      "output": "ranked implementation opportunities and recommendation",
+      "mode": "option-generation",
+      "folded_from": "he-ideate",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "brainstorm-and-requirements-shaping",
@@ -315,7 +342,7 @@
       "output": "implementation-grade specification",
       "default_next_stage": "he-plan",
       "next_stage_exceptions": [
-        "route to he-deepen-spec when contract gaps or competing interface shapes remain",
+        "route to folded he-deepen-spec mode under he-spec when contract gaps or competing interface shapes remain",
         "route to he-work only for tiny low-risk specs with explicit execution approval"
       ]
     },
@@ -342,13 +369,16 @@
         "harden spec",
         "deepen specification"
       ],
-      "skill": "he-deepen-spec",
+      "skill": "he-spec",
       "required_inputs": [
         "existing spec path",
         "known risk areas",
         "acceptance and failure expectations"
       ],
-      "output": "spec with stronger boundaries, failure handling, and validation detail"
+      "output": "spec with stronger boundaries, failure handling, and validation detail",
+      "mode": "deepen-existing-spec",
+      "folded_from": "he-deepen-spec",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "deepen-plan-artifact",
@@ -357,13 +387,16 @@
         "harden plan",
         "deepen implementation plan"
       ],
-      "skill": "he-deepen-plan",
+      "skill": "he-plan",
       "required_inputs": [
         "existing plan path",
         "sequencing or risk concerns",
         "verification expectations"
       ],
-      "output": "plan with stronger sequencing, risk treatment, and validation gates"
+      "output": "plan with stronger sequencing, risk treatment, and validation gates",
+      "mode": "deepen-existing-plan",
+      "folded_from": "he-deepen-plan",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "iterative-optimization",
@@ -391,13 +424,16 @@
         "start dev server",
         "iterate in browser"
       ],
-      "skill": "he-refine",
+      "skill": "he-improve",
       "required_inputs": [
         "branch or PR context",
         "dev-server startup constraints",
         "refinement goals and stop condition"
       ],
-      "output": "running dev server + iterative refinement loop + next-stage recommendation"
+      "output": "running dev server + iterative refinement loop + next-stage recommendation",
+      "mode": "browser-or-artifact-refinement",
+      "folded_from": "he-refine",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "execution",
@@ -424,13 +460,16 @@
         "start with failing test",
         "red green"
       ],
-      "skill": "he-tdd",
+      "skill": "he-work",
       "required_inputs": [
         "implementation scope",
         "test harness constraints",
         "verification gates"
       ],
-      "output": "test-first execution slices with RED/GREEN evidence"
+      "output": "test-first execution slices with RED/GREEN evidence",
+      "mode": "test-first-execution",
+      "folded_from": "he-tdd",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "debugging-and-bug-fixing",
@@ -477,13 +516,16 @@
         "delete stale branches",
         "clean branches removed from remote"
       ],
-      "skill": "he-prune-branches",
+      "skill": "he-router",
       "required_inputs": [
         "repository path",
         "confirmation to delete discovered branch set",
         "permission to remove associated worktrees"
       ],
-      "output": "gone-branch list + confirmation checkpoint + cleanup report"
+      "output": "gone-branch list + confirmation checkpoint + cleanup report",
+      "mode": "agent-ops-branch-hygiene-handoff",
+      "folded_from": "he-prune-branches",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "readiness-synthesis-review",
@@ -512,12 +554,15 @@
         "validate review feedback",
         "review comments might be wrong"
       ],
-      "skill": "he-technical-review",
+      "skill": "he-code-review",
       "required_inputs": [
         "target diff/files or review-feedback items",
         "spec/plan baseline when available"
       ],
-      "output": "findings-first technical issues with locations plus feedback validation posture"
+      "output": "findings-first technical issues with locations plus feedback validation posture",
+      "mode": "technical-review",
+      "folded_from": "he-technical-review",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "reliability-review",
@@ -528,13 +573,16 @@
         "SLO readiness",
         "cascading failure"
       ],
-      "skill": "he-reliability-review",
+      "skill": "he-code-review",
       "required_inputs": [
         "service/API target",
         "dependency context",
         "failure impact context"
       ],
-      "output": "reliability risks and resilience recommendations"
+      "output": "reliability risks and resilience recommendations",
+      "mode": "reliability-review",
+      "folded_from": "he-reliability-review",
+      "context_reference": "references/folded-skill-context.md"
     },
     {
       "intent": "solved-problem-capture",
@@ -595,13 +643,16 @@
         "refresh compound state",
         "re-check blockers"
       ],
-      "skill": "he-compound-refresh",
+      "skill": "he-compound",
       "required_inputs": [
         "refresh scope or active lifecycle target",
         "mode preference",
         "evidence source paths"
       ],
-      "output": "compound refresh report with evidence, blockers, and next HE invocation"
+      "output": "compound refresh report with evidence, blockers, and next HE invocation",
+      "mode": "refresh-or-resume",
+      "folded_from": "he-compound-refresh",
+      "context_reference": "references/folded-skill-context.md"
     }
   ],
   "not_this_plugin": [
@@ -659,7 +710,10 @@
       "conditional_roles": [
         "issue-intelligence-analyst"
       ],
-      "trigger": "delegation requested or issue-theme-heavy ideation"
+      "trigger": "delegation requested or issue-theme-heavy ideation",
+      "parent_stage": "he-brainstorm",
+      "folded_mode": "option-generation",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-brainstorm": {
       "policy": "conditional",
@@ -705,7 +759,10 @@
         "data-integrity-guardian",
         "deployment-verification-agent"
       ],
-      "trigger": "delegation requested or deep spec weakness/risk signals present"
+      "trigger": "delegation requested or deep spec weakness/risk signals present",
+      "parent_stage": "he-spec",
+      "folded_mode": "deepen-existing-spec",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-plan": {
       "policy": "conditional",
@@ -739,7 +796,10 @@
         "data-integrity-guardian",
         "deployment-verification-agent"
       ],
-      "trigger": "delegation requested or deep plan weakness/risk signals present"
+      "trigger": "delegation requested or deep plan weakness/risk signals present",
+      "parent_stage": "he-plan",
+      "folded_mode": "deepen-existing-plan",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-improve": {
       "policy": "conditional",
@@ -770,7 +830,10 @@
         "design-implementation-reviewer",
         "julik-frontend-races-reviewer"
       ],
-      "trigger": "delegation requested or browser-loop refinement risk/complexity signals present"
+      "trigger": "delegation requested or browser-loop refinement risk/complexity signals present",
+      "parent_stage": "he-improve",
+      "folded_mode": "browser-or-artifact-refinement",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-work": {
       "policy": "conditional",
@@ -828,7 +891,10 @@
       "conditional_roles": [
         "repo-research-analyst"
       ],
-      "trigger": "only when repository/worktree topology is ambiguous and explicit delegation is requested"
+      "trigger": "only when repository/worktree topology is ambiguous and explicit delegation is requested",
+      "parent_stage": "he-router",
+      "folded_mode": "agent-ops-branch-hygiene-handoff",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-tdd": {
       "policy": "always",
@@ -843,7 +909,10 @@
         "architecture-strategist",
         "code-simplicity-reviewer"
       ],
-      "trigger": "risk signal for behavior slice"
+      "trigger": "risk signal for behavior slice",
+      "parent_stage": "he-work",
+      "folded_mode": "test-first-execution",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-code-review": {
       "policy": "always",
@@ -894,7 +963,10 @@
         "feasibility-reviewer",
         "adversarial-reviewer"
       ],
-      "trigger": "language/risk/document signals from review target plus external-feedback dispute signals"
+      "trigger": "language/risk/document signals from review target plus external-feedback dispute signals",
+      "parent_stage": "he-code-review",
+      "folded_mode": "technical-review",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-reliability-review": {
       "policy": "always",
@@ -912,7 +984,10 @@
         "architecture-strategist",
         "adversarial-reviewer"
       ],
-      "trigger": "reliability risk domain signal"
+      "trigger": "reliability risk domain signal",
+      "parent_stage": "he-code-review",
+      "folded_mode": "reliability-review",
+      "context_reference": "references/folded-skill-context.md"
     },
     "he-compound-refresh": {
       "policy": "conditional",
@@ -923,7 +998,10 @@
       "conditional_roles": [
         "worker"
       ],
-      "trigger": "delegation requested for heavy artifact refresh or replacement drafting"
+      "trigger": "delegation requested for heavy artifact refresh or replacement drafting",
+      "parent_stage": "he-compound",
+      "folded_mode": "refresh-or-resume",
+      "context_reference": "references/folded-skill-context.md"
     }
   },
   "subagent_fallback": {

@@ -1,6 +1,6 @@
 # Harness Engineering Plugin
 
-Codex plugin package for the harness-engineering lifecycle. This plugin routes work across HE stages from ideation through implementation and readiness review.
+Codex plugin package for the harness-engineering lifecycle. This plugin routes work across HE stages from requirements shaping through implementation and readiness review. Older stage names remain as compatibility entries, but the router folds them into parent stages and loads preserved context from `references/folded-skill-context.md`.
 
 ## Table of Contents
 - [What This Is](#what-this-is)
@@ -28,6 +28,7 @@ Use `coding-harness` instead when you need:
 ## Included Surfaces
 - `.codex-plugin/plugin.json`
 - `Plugins/harness-engineering/references/routing-map.json`
+- `Plugins/harness-engineering/references/folded-skill-context.md`
 - `skills/`
   - `he-brainstorm`
   - `he-compound`
@@ -69,8 +70,19 @@ Use `he-compound` when the user needs lifecycle orchestration:
 - It routes requests to the right HE stage using `references/routing-map.json`.
 - It outputs a stage decision, required inputs, and next skill invocation.
 
-Call stage skills directly when stage intent is explicit:
-- `he-router`, `he-ideate`, `he-brainstorm`, `he-spec`, `he-deepen-spec`, `he-plan`, `he-deepen-plan`, `he-improve`, `he-fix-bugs`, `he-heartbeat`, `he-prune-branches`, `he-refine`, `he-work`, `he-code-review`, `he-technical-review`, `he-reliability-review`, `he-tdd`, `he-compound`, `he-compound-refresh`.
+Call parent stage skills directly when stage intent is explicit:
+- `he-router`, `he-brainstorm`, `he-spec`, `he-plan`, `he-work`, `he-fix-bugs`, `he-heartbeat`, `he-code-review`, and `he-compound`.
+
+Compatibility stage names still exist in the plugin package for continuity, but route through parents:
+- `he-ideate` -> `he-brainstorm`
+- `he-deepen-spec` -> `he-spec`
+- `he-deepen-plan` -> `he-plan`
+- `he-tdd` -> `he-work`
+- `he-refine` -> `he-improve`
+- `he-technical-review` -> `he-code-review`
+- `he-reliability-review` -> `he-code-review`
+- `he-compound-refresh` -> `he-compound`
+- `he-prune-branches` -> `he-router` handoff to `agent-ops`
 
 ## Subagent Orchestration
 - Canonical mapping: `Plugins/harness-engineering/references/subagent-routing.md`
