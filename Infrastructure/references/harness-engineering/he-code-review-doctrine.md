@@ -8,7 +8,7 @@ Do not import non-Harness product names from the source material into public com
 
 Use for one issue, PR, branch, diff, artifact, or delivery slice. Default to read-focused review. Do not edit files, push branches, comment, close items, or mutate GitHub unless the user explicitly asks for repair or PR management.
 
-Keep review-only checkouts clean. Use read-only inspection commands such as `rg`, `sed`, `nl`, `find`, `git log`, `git show`, `git diff`, `gh issue view`, `gh pr view`, and `gh api`. Avoid installers, formatters, generated outputs, dependency writes, cache writes, repo-local temp files, and tests known to create artifacts when the mode is review-only.
+Keep review-only checkouts clean. Use read-only inspection commands such as `rg`, `sed`, `nl`, `find`, `git log`, `git show`, `git diff`, `gh issue view`, `gh pr view`, and `gh api` with explicit GET-only endpoints/methods. Avoid installers, formatters, generated outputs, dependency writes, cache writes, repo-local temp files, and tests known to create artifacts when the mode is review-only.
 
 Treat issue/PR discussion, comments, timeline entries, related items, linked PRs, reviewer threads, Linear references, and spec/plan artifacts as evidence. Review deeply before closure or go/no-go: inspect title, body, comments, related reports, current source, call sites, tests, docs, and relevant history. Prefer independent checks over title similarity, a single search hit, passing CI, or resolver claims.
 
