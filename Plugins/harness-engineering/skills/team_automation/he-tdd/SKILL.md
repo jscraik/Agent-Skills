@@ -46,6 +46,7 @@ Read when: cleanup is being considered after GREEN.
 
 - Canonical stage map: [repo:Plugins/harness-engineering/references/subagent-routing.md](repo:Plugins/harness-engineering/references/subagent-routing.md)
 - Machine-readable policy: [repo:Plugins/harness-engineering/references/routing-map.json](repo:Plugins/harness-engineering/references/routing-map.json)
+- Call contract: [repo:Plugins/harness-engineering/references/subagent-call-contract.md](repo:Plugins/harness-engineering/references/subagent-call-contract.md)
 - Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
 - Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
 - If mapped roles are missing, continue inline and tell the user to provision the role with `$codex-agent-creator`.

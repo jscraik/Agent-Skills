@@ -1371,11 +1371,11 @@ def _codex_login_status(
     cmd = [*_codex_cli_prefix(codex_bin), "login", "status"]
     env = _codex_env(codex_bin=codex_bin, codex_home=codex_home)
     try:
-        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10)
+        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=120)
     except FileNotFoundError:
         return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
     except sp.TimeoutExpired:
-        return 124, "", "codex login status timed out after 10 seconds."
+        return 124, "", "codex login status timed out after 120 seconds."
     return proc.returncode, proc.stdout or "", proc.stderr or ""
 
 

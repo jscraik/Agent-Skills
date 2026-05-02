@@ -95,4 +95,5 @@ Do not treat branch names, PR titles, or resolver claims as closure. A clean `go
 - Full retained doctrine: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`
 - Skill assets: `Plugins/harness-engineering/skills/code_quality_review/he-code-review/assets/icon-small.png`, `Plugins/harness-engineering/skills/code_quality_review/he-code-review/assets/icon-large.png`
 - Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
+- Subagent call contract: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Domain and QA routing: `Plugins/harness-engineering/references/domain-model-routing.md`, `Plugins/harness-engineering/references/qa-intake-routing.md`

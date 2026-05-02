@@ -35,6 +35,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 1. Load or create the optimization spec and validate metric type, scope, gates, and stopping limits.
 2. If session evidence is requested or supplied, read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md) and classify recurring signals before choosing improvements.
+3. If collector evidence contains `coverage-gap`, `workflow-capture`, `skillify`, or many apparent HE candidates, apply [session evidence skillify triage](../../../references/session-evidence-skillify-triage.md) before proposing new skills or invoking `skill-factory:skillify`.
 3. Decide whether the target should use direct hard metrics, judge scoring, session-recurrence evidence, or hybrid gates plus judge evaluation.
 4. Detect and resolve `fresh` versus `resume` state before running new experiments.
 5. Establish a trusted baseline with the measurement harness, collector output, index counts, or explicit evidence samples before widening execution.
@@ -71,6 +72,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 
 - Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
 - Folded `he-refine` context: [../../../references/folded-skill-context.md](../../../references/folded-skill-context.md)
+- Subagent call contract: [../../../references/subagent-call-contract.md](../../../references/subagent-call-contract.md)
 
 ## Examples
 

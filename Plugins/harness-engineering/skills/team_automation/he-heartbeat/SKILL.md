@@ -333,3 +333,5 @@ deferred Harness Engineering context before expanding this root skill body.
 Read [../../../references/session-evidence-contract.md](../../../references/session-evidence-contract.md)
 when prior sessions or collector output justify creating, repairing, or rejecting
 a heartbeat.
+Read [../../../references/subagent-call-contract.md](../../../references/subagent-call-contract.md)
+before prompting for, recommending, or launching delegated HE coverage.

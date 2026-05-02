@@ -1,99 +1,92 @@
 ---
 name: he-work
-description: "Implement approved Harness Engineering work. Use when a plan, todo list, or tiny spec needs traceable delivery and validation."
+description: "Use when implementing approved Harness Engineering plans, todo lists, or tiny low-risk specs that need traceable slices, validation, Linear, and PR handoff."
 metadata:
   skill-type: team_automation
 ---
 
 # he-work Entry
 
-Use when implementation is expected from an approved plan, todo list, or tightly scoped low-risk spec.
+Use when the user expects implementation from an approved plan, todo list, or tiny low-risk spec. Keep Harness Engineering naming consistent.
 
 Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
 
 ## Philosophy
 
-- Ship small verified slices.
-- Keep code, artifact state, Linear state, and validation evidence aligned.
+Ship verified slices. Keep code, artifacts, Linear, branch/PR, and validation evidence aligned.
 
 ## When to use
 
-Use `he-work` when the user wants approved Harness Engineering work implemented with traceable progress and validation evidence.
+Use for approved implementation work. Route fuzzy ideas to `he-brainstorm`, raw plans to `he-plan`, and medium/high-risk raw specs to planning first.
 
-## Required inputs
+## Inputs
 
-- An approved plan, todo list, scoped spec, or explicitly low-risk direct implementation request.
-- Active Linear issue for non-trivial tracked work, plus branch and PR context when available.
-- Governing acceptance IDs, validation commands, invariants, non-goals, and scope boundaries.
+Approved plan/todo/small spec, Linear key when tracked, acceptance IDs, invariants, non-goals, validation gates, branch/PR context, and execution notes.
 
-## Deliverables
+## Outputs
 
-- Implemented slices tied to plan/spec/todo IDs.
-- Updated task state and handoff evidence covering validation, deviations, blockers, and PR or pending-PR status.
-- Linear update or explicit blocker when tracker mutation is requested or required.
+Implemented slices, synced task state, validation evidence, Linear result or blocker, PR handoff, drift notes, and `schema_version: 1` for structured status when requested.
 
-## Core Contract
+## Contract
 
-- Choose `plan-led`, `todo-led`, narrow `small-spec-direct`, or folded `he-tdd` test-first posture before editing.
-- Read linked artifacts completely and restate active IDs, invariants, non-goals, validation gates, and scope boundaries.
-- Resolve the active Linear work item before coding; stop when non-trivial tracked work has no issue.
-- Keep markdown task state, code state, Linear status/comment state, and validation evidence synchronized.
-- Implement in small verified slices and stop on contract drift, hidden scope, domain drift, or failed gates.
+- Pick the lane before editing: `plan-led`, `todo-led`, folded `he-tdd`, or narrow `small-spec-direct`.
+- Read the governing artifact fully; extract IDs, Linear issue, branch/PR, invariants, non-goals, validation gates, execution notes, and scope.
+- Confirm the artifact is current active truth, not merely the newest dated file.
+- Resolve Linear for non-trivial tracked work; stop if required tracker context is missing.
+- `update_plan` is live checklist only. Durable truth remains the plan/spec/todo.
+- Preserve dirty worktrees and stage only approved-slice files.
+- Stop on contract drift, hidden scope, domain drift, failed gates, or missing traceability.
+
+If the thread is still in Codex Plan Mode, do not mutate files. Inspect repo truth only and explain the execution plan.
 
 ## Procedure
 
-1. Choose the execution lane and read the governing artifact.
-2. Resolve Linear, branch, PR, IDs, and validation gates.
-3. Implement one verified slice at a time.
-4. Update handoff evidence and stop on drift or failed gates.
+1. Explore first, ask second: inspect repo guidance, artifact links, branch/PR/Linear state, and validation commands.
+2. Build a short live checklist from implementation units or todo IDs.
+3. Ship one verified slice at a time; honor `test-first`, `characterization-first`, or `external-delegate` notes.
+4. Broaden validation as risk grows, then run the required review tier.
+5. Update durable artifacts only for real drift or required final status.
 
-## Traceability
-
-Final handoff must record completed IDs, validation evidence, PR link or pending-PR blocker, and Linear update/comment result. Do not ship tracked work with only a PR link; tie PR evidence back to Linear and the governing plan/spec.
+Use external delegation only for bounded implementation units explicitly marked for it. Parent keeps research, contract updates, git, validation, review, and handoff.
 
 ## Validation
 
-- Verify each delivered increment.
-- Document any deviation from plan.
-- Confirm branch, PR, plan/spec, and Linear identifiers align before handoff.
-- For tracked handoff artifacts, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <artifact-path>` before claiming completion.
-- Reflect contract drift in the governing artifact before off-plan implementation continues.
-- Stop at the first failed gate.
+Validate each slice before marking it complete. Stop at the first failed gate; do not proceed until it is fixed or reported as a blocker. For tracked artifacts, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <artifact-path>`.
+
+## Handoff
+
+Final handoff records current active state, changed areas, completed IDs, validation outcomes, Linear result or blocker, spec/plan paths, branch/PR state, drift updates, rollback or monitoring notes, and UI screenshots when relevant.
+
+Default meaningful code changes to `he-code-review mode:autofix` before handoff unless the slice clearly qualifies for inline self-review.
 
 ## Constraints
 
-- Redact secrets, credentials, tokens, and sensitive data by default.
-- Do not expand scope beyond approved artifacts.
-- Do not claim completion without validation evidence.
+Redact secrets. Preserve dirty worktrees. Do not expand approved scope, mutate during Codex Plan Mode, or use unbounded delegation.
 
 ## Anti-patterns
 
-- Letting code become the only record of a changed decision.
-- Finishing tracked work without Linear/spec/plan/PR traceability.
-- Marking checklist state complete before validation exists.
+- Expand scope beyond approved IDs.
+- Mark tasks complete before validation exists.
+- Ask for facts repo inspection can answer.
+- Treat prototype HTML as production unless the real stack is static HTML/CSS/JS.
+- Accept delegate output without parent diff review and validation.
+- Dump secrets or continue past validation/security blockers.
 
 ## Examples
 
-- "Implement this approved plan and keep task state aligned."
-- "Work through this todo artifact in verified slices."
-
-## Failure mode
-
-If the governing artifact is missing, Linear context is required but absent, or validation cannot prove the delivered slice, stop and report the blocker before continuing.
-
-## Gotchas
-
-- Do not expand scope beyond approved IDs without updating the governing artifact.
-- Do not claim completion without validation evidence.
-- Keep PR links as delivery evidence tied back to Linear, not a substitute for tracker state.
+- User says: "Please use $he-work on Docs/plans/2026-05-02-jsc-246-linear-routing.md; implement U1 and U2, validate the traceability lint, and leave JSC-246 ready for PR handoff."
+- User says: "Can you work through Docs/todos/jsc-251-review-cleanup.md in verified slices, preserve my unrelated edits, and only mark tasks complete after validation passes?"
+- User says: "Inspect the JSC-263 plan and use delegate mode only for units tagged Execution target: external-delegate; review the diff yourself before handoff."
+- User says: "Build the account settings UI slice with screenshot evidence, completed VAC IDs, Linear comment result, and rollback notes."
 
 ## References
 
-- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/SKILL.full.md`
-- Handoff and shipping: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/references/handoff-and-shipping.md`
-- Execution modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/references/execution-modes.md`
-- Folded `he-tdd` context: `Plugins/harness-engineering/references/folded-skill-context.md`
+- Work execution contract: `Plugins/harness-engineering/skills/team_automation/he-work/references/work-execution-contract.md`
+- Codex execution lessons: `Plugins/harness-engineering/skills/team_automation/he-work/references/codex-execution-lessons.md`
+- Handoff and shipping: `Plugins/harness-engineering/skills/team_automation/he-work/references/handoff-and-shipping.md`
+- Execution modes: `Plugins/harness-engineering/skills/team_automation/he-work/references/execution-modes.md`
 - Approval flow: `repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md`
+- Folded `he-tdd` context: `Plugins/harness-engineering/references/folded-skill-context.md`
 - Session evidence contract: `Plugins/harness-engineering/references/session-evidence-contract.md`
-- Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
-- Domain routing: `Plugins/harness-engineering/references/domain-model-routing.md`
+- Subagent call contract: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Skill assets: `Plugins/harness-engineering/skills/team_automation/he-work/assets/icon-small.png`, `Plugins/harness-engineering/skills/team_automation/he-work/assets/icon-large.png`

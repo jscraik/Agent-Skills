@@ -64,6 +64,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 ## Full Context
 
 - Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
+- Subagent call contract: [../../../references/subagent-call-contract.md](../../../references/subagent-call-contract.md)
 
 ## Examples
 

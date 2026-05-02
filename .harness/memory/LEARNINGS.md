@@ -115,3 +115,17 @@ Repo-specific agent knowledge base. Append-only.
 **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skill-refactor/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3208018670)
 
 **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skillify/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:325006765)
+
+**2026-05-01 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3330151315)
+
+**2026-05-01 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:79624506)
+
+**2026-05-01 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:429827414)
+
+**2026-05-01 [Codex]:** Bash command 'sed' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2762304617)
+
+**2026-05-01 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2708472663)
+
+**2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2643958404)
+
+**2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3933523635)

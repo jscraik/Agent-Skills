@@ -26,7 +26,7 @@ Do not hand-edit runtime projections.
 
 - `agents-md` — Review or refactor AGENTS.md instruction surfaces with progressive disclosure. Use this skill when repo agent guidance needs routing, dedupe, or contradiction fixes.
 - `autofix` — Review, validate, and fix every current unresolved CodeRabbit thread and Codex P1-P3 finding. Use when PR review feedback needs approved fixes with safety checks and validation evidence.
-- `autoresearch` — Analyze and improve skills or plugins through bounded experiments when the user wants hypothesis-driven research loops with keep, discard, blocked, and validation decisions.
+- `autoresearch` — Analyze and validate bounded autonomous experiment loops with baselines, hypothesis patches, metrics, and keep/discard/block decisions. Use when $autoresearch is named or a repo/skill needs evidence-backed research iterations.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
 - `codex-agent-creator` — Create or validate Codex custom subagent TOML files. Use this skill when users need agent config, install, or bounded orchestration.
 - `codex-automation-architect` — Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.

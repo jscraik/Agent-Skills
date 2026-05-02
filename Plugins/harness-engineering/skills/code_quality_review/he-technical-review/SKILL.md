@@ -96,5 +96,6 @@ Read when: deeper doctrine, templates, or compatibility details are needed.
 
 - Canonical map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
 - Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Call contract: [../../../references/subagent-call-contract.md](../../../references/subagent-call-contract.md)
 - Load stage policy from `routing-map.json` and resolve roles from `~/.codex/agents/manifest.json`.
 - If auto-spawn is unavailable or required roles are missing, continue inline, list manual-launch roles, and route role provisioning to `[[codex-agent-creator]]` ([../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md)).

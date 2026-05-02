@@ -64,3 +64,7 @@ See also:
 - [[he-plan]] verification-first planning
 - [[he-tdd]] behavior testing principles
 - `he-anti-patterns.md` for style-over-substance anti-pattern
+# Moved Traceability Lines
+
+- Linked Linear issue, spec, plan, PR body, or branch identifier when the target is tracked delivery work
+- Missing traceability is at least `go-with-conditions`; missing issue, missing validation, or mismatched scope is `no-go`.

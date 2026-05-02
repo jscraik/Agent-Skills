@@ -142,6 +142,10 @@ if canonical.resolve() != alias.resolve():
 PY
 echo "[family-gate] Harness Engineering preserved-context alias passed"
 
+echo "[family-gate] validating Harness Engineering subagent routing"
+"${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py
+echo "[family-gate] Harness Engineering subagent routing passed"
+
 skill_dirs=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"

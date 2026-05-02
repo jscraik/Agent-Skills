@@ -115,6 +115,7 @@ Read when: you need canonical stage policy and fallback behavior.
 
 - Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
 - Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
+- Call contract: [../../../references/subagent-call-contract.md](../../../references/subagent-call-contract.md)
 - Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
 - Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
 - If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.

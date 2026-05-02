@@ -157,6 +157,18 @@
       ]
     },
     {
+      "priority": 58,
+      "rule": "coverage-gap-to-skillify-triage",
+      "route": "he-improve before skill-factory:skillify",
+      "signals": [
+        "coverage-gap",
+        "workflow-capture",
+        "skillify candidate",
+        "skill-refactor-evidence.json",
+        "skillify-candidates.json"
+      ]
+    },
+    {
       "priority": 60,
       "rule": "deepen-existing-artifact",
       "route": "he-deepen-spec or he-deepen-plan",
@@ -569,6 +581,26 @@
         "validation gate for accepted changes"
       ],
       "output": "evidence-backed HE improvement findings and next-stage route"
+    },
+    {
+      "intent": "coverage-gap-to-skillify-triage",
+      "match": [
+        "coverage-gap",
+        "workflow-capture",
+        "skillify candidate",
+        "skill-refactor-evidence.json",
+        "skillify-candidates.json",
+        "turn session evidence into skills"
+      ],
+      "skill": "he-improve",
+      "required_inputs": [
+        "collector bundle path or explicit evidence artifact paths",
+        "candidate count, session count, and sanitized evidence labels",
+        "existing HE stage or plugin-skill coverage check",
+        "redaction report status",
+        "validation gate for accepted changes"
+      ],
+      "output": "triage decision: update-existing-stage, add-reference-material, add-validation-script, skillify-new-skill, or no-action-noise"
     },
     {
       "intent": "session-evidence-heartbeat",

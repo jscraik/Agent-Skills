@@ -43,6 +43,7 @@ Choose one Harness Engineering lifecycle stage.
 4. Route domain-language conflicts through [domain model routing](../../references/domain-model-routing.md).
 5. Route QA or feedback sessions through [QA intake routing](../../references/qa-intake-routing.md).
 6. Route prior-session or repeated-failure requests through [session evidence contract](../../references/session-evidence-contract.md).
+7. Route coverage-gap and skillify-candidate evidence to `he-improve` for triage before any new skill package is proposed.
 
 ## Output contract
 
@@ -70,6 +71,7 @@ Never drop required context for brevity; move it into references or deferred con
 - Local contract, evals, and task profile: `references/`
 - Shared HE routing references: `Plugins/harness-engineering/references/`
 - Folded stage alias map: `Plugins/harness-engineering/references/folded-skill-context.md`
+- Subagent call contract: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Archived router context: `Infrastructure/references/deferred-skill-context/harness-engineering-he-router/`
 
 ## Validation
@@ -93,3 +95,4 @@ If required evidence is missing, return `confidence: blocked` with exactly one `
 - `review`, `PR`, `go/no-go`, and `failing test` requests are not implementation requests.
 - Linear issue references are routing evidence, not a substitute for artifact checks.
 - Session evidence requests need prior-session or repeated-failure context before choosing a stage.
+- Collector `he-*` path fragments and bundle names are evidence labels, not valid stage invocations, until they match the routing map.

@@ -1,43 +1,52 @@
 schema_version: 1
 
 purpose: >
-  Run the planning stage of the Harness Engineering workflow so the user gets an
-  execution-ready implementation plan with stable IDs, traceability, validation,
-  rollout guidance, and mode-aware UI planning when relevant.
+  Turn approved or sufficiently clear Harness Engineering work into a durable,
+  traceable implementation plan without performing the implementation.
 
 triggers:
-  - the user wants to turn a spec, brainstorm, bug report, or feature description into an implementation plan
-  - the user wants the Harness Engineering planning stage explicitly
-  - the user wants a UI implementation plan or a UI-aware delivery plan
-  - the user needs sequencing, test strategy, acceptance criteria, or rollout guidance before implementation
+  - explicit he-plan invocation
+  - turning a spec, brainstorm, requirements doc, bug report, Linear issue, or feature request into a delivery plan
+  - sequencing related Linear issues or blockers before he-work
+  - creating validation, rollout, rollback, or test strategy for planned delivery
+  - revising a plan while preserving stable IDs and traceability
 
 inputs:
-  - a spec path, brainstorm path, UI spec path, or clear planning source
-  - relevant constraints, success criteria, risks, and linked documents when available
-  - optional framework, design-system, rollout, and testing context
+  - authoritative source artifact or clear direct request
+  - Linear issue and relationship graph for non-trivial tracked work
+  - source acceptance IDs, actors, flows, examples, UI criteria, or invariants when supplied
+  - repo constraints, paths, patterns, validation requirements, and rollout rules
 
 outputs:
-  - a plan-mode choice such as generic-plan, standard-plan, ui-enhanced-plan, or dedicated-ui-plan
-  - a written plan artifact with stable phase and acceptance IDs
-  - exact parallel research support via `repo-research-analyst`, `learnings-researcher`, and conditional external-research roles when needed
-  - explicit validation, rollout, and execution-control guidance
-  - carry-forward treatment of any authoritative requirements doc or existing plan when present
-  - optional directional technical-design sketches only when they materially reduce planning ambiguity
-  - a recommended next workflow stage, including a Linear workflow handoff path when the user wants issue creation or update
+  - mode and depth decision: fresh/resume/deepen plus lightweight/standard/deep
+  - durable plan artifact with stable plan IDs and acceptance IDs
+  - Linear/spec/plan/PR traceability matrix for tracked work
+  - requirements, dependencies, test scenarios, verification outcomes, rollback, and risk notes
+  - explicit classification of assumptions, blockers, and deferred implementation unknowns
+  - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
+
+observability: >
+  Source-to-plan coverage is visible through stable IDs and a traceability
+  matrix; validation commands and blocked gates are recorded in the plan or
+  handoff; assumptions, blockers, and deferred implementation unknowns remain
+  explicit.
+
+rollback_procedure: >
+  Stop before he-work when validation or traceability fails; revise the plan as
+  a complete replacement while preserving stable IDs where possible; route
+  unresolved product blockers back to he-brainstorm or he-spec.
 
 non_goals:
-  - direct implementation
-  - inventing contract-level behavior that belongs in a spec or UI spec
-  - skipping the spec step when the source indicates planning is premature
-  - producing UI prototypes during the planning stage
-  - mutating tracker state directly from the planning skill instead of handing off to a dedicated tracker workflow
+  - implementing code or running mutating commands
+  - replacing he-brainstorm or he-spec when product behavior is unresolved
+  - using update_plan as the durable plan artifact
+  - creating vague task lists without source traceability or test specificity
+  - mutating tracker state directly without invoking the dedicated tracker workflow
 
 risks:
-  - planning from weak inputs; mitigate with authoritative-source selection and one focused blocker question
-  - silently dropping requirements-doc content or prior plan context; mitigate with explicit source carry-forward and validation
-  - inventing behavior; mitigate with spec-first and UI-spec-first rules plus traceability checks
-  - shallow plans without repo grounding; mitigate with bounded parallel subagent research
-  - under-scoping a plan that touches external contract surfaces; mitigate with post-research reclassification from lightweight to standard when env vars, exported APIs, CI, shared types, or external docs are affected
-  - mixing planning with execution-time unknowns; mitigate with deferred-implementation notes and directional-only technical-design guidance
-  - UI ambiguity causing execution churn; mitigate with explicit mode selection, prototype-planning rules, and prototype-to-production mapping
-  - plan/state drift during execution; mitigate with the Execution Ledger and planning-mode handshake
+  - asking user questions that repo inspection could answer; mitigate with explore-first rules
+  - dropping source requirements; mitigate with source coverage validation
+  - plan/state drift; mitigate with stable IDs and complete-replacement revisions
+  - missing Linear traceability; mitigate by requiring active issue resolution for tracked work
+  - weak tests; mitigate with behavior-focused scenarios and mock anti-pattern guidance
+  - over-planning into implementation; mitigate with plan-only boundaries and deferred implementation notes

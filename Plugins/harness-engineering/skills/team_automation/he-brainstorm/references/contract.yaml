@@ -1,24 +1,30 @@
 schema_version: 1
 
 purpose: >
-  Clarify an early Harness Engineering idea, compare viable directions, decide
-  whether a spec is needed, and capture a durable requirements handoff when useful.
+  Clarify early Harness Engineering ideas, compare warranted directions, decide
+  whether a spec is needed, and preserve durable requirements when useful.
 
 triggers:
-  - user asks to brainstorm a feature, improvement, or product direction
+  - user asks to brainstorm, ideate, compare, or sharpen a direction
   - user asks for the HE brainstorm stage
-  - scope, behavior, or success criteria are still unclear
-  - a durable brainstorm or requirements artifact is requested
+  - scope, expected behavior, terminology, or success criteria are unclear
+  - QA feedback is real but expected behavior is not clear enough to file
+  - a durable requirements artifact or handoff is requested
 
 inputs:
-  - feature idea, problem, or improvement
-  - relevant constraints, risks, source artifacts, and success criteria
+  - feature idea, problem, opportunity, or improvement subject
+  - relevant repo, Linear, strategy, spec, plan, transcript, or QA artifacts
+  - constraints, risks, source artifacts, and success criteria
+  - user thinking, rejected ideas, and stakeholder preferences
 
 outputs:
-  - clarified problem frame
-  - 2-3 options with trade-offs and a recommendation
+  - problem frame and success criteria
+  - mode and scope tier
+  - options with tradeoffs, warrants, and recommendation
   - "`spec_required`, `risk_level`, and `complexity`"
+  - pressure-test result: solve now, simplify, defer, reject, or split
   - domain-language note when terminology affects behavior
+  - synthesis checkpoint before artifact writing
   - requirements artifact path when a durable handoff is created
   - recommended next HE stage
 
@@ -26,15 +32,18 @@ non_goals:
   - implementation
   - detailed task sequencing
   - replacing spec or plan stages when the request is already clear
+  - hiding unconfirmed assumptions as requirements
 
 risks:
   - over-questioning; ask one useful question at a time
   - decision sprawl; record only hard-to-reverse domain decisions
-  - weak handoff; name the next artifact and HE stage explicitly
+  - weak handoff; name blockers, next artifact, and HE stage explicitly
+  - generic ideation; require warrants for survivor options
+  - stale evidence; verify repo or Linear claims before using as facts
 
 observability: >
-  Track brainstorm selection accuracy, spec_required decisions, artifact handoff
-  creation, and validation outcomes.
+  Track selection accuracy, scope tier, spec_required decisions, artifact
+  handoffs, and validation outcomes.
 
 rollback_procedure: >
   Restore the previous contract/evals/task-profile files from git, then rerun

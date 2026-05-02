@@ -70,6 +70,7 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 
 - Assets: [icon-small.png](./assets/icon-small.png), [icon-large.png](./assets/icon-large.png)
 - Folded refresh context: [../../../references/folded-skill-context.md](../../../references/folded-skill-context.md)
+- Subagent call contract: [../../../references/subagent-call-contract.md](../../../references/subagent-call-contract.md)
 
 ## Examples
 

@@ -6,6 +6,20 @@ Active Harness Engineering entrypoints and references must be real plugin-owned 
 
 Use this index when a compact stage skill says context was moved for budget reasons.
 
+## Progressive Disclosure Move Evidence
+
+Use this skill as normal for the Harness Engineering brainstorm stage.
+- Use this skill as normal for the Harness Engineering brainstorm stage.
+Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
+Use when requirements, defects, specs, brainstorms, or Linear QA issues need an implementation-ready plan before `he-work`.
+description: Write Harness Engineering specs before planning. Use when a feature, QA report, Linear issue, or UI source needs a clear WHAT contract.
+- Ship small verified slices.
+
+- `he-brainstorm`: Use this skill as normal for the Harness Engineering brainstorm stage.
+- `he-plan`: Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
+- `he-spec`: Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
+- `he-work`: Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
+
 ## Runtime References
 
 - Deterministic stage routing: `references/deterministic-stage-routing.md`
@@ -34,6 +48,37 @@ The active `he-code-review` entrypoint now keeps the readiness path compact. The
 - Linked Linear issue, spec, plan, PR body, or branch identifier when the target is tracked delivery work
 - Missing traceability is at least `go-with-conditions`; missing issue, missing validation, or mismatched scope is `no-go`.
 ```
+
+## Plan Preserved Context
+
+The active `he-plan` entrypoint now keeps Codex plan-mode lessons, synthesis rules, deepening, testing, handoff, and visual planning doctrine in:
+
+- `Plugins/harness-engineering/references/he-plan-doctrine.md`
+- `Plugins/harness-engineering/skills/team_automation/he-plan/references/codex-plan-mode.md`
+- `Plugins/harness-engineering/skills/team_automation/he-plan/references/plan-artifact-contract.md`
+- `Plugins/harness-engineering/skills/team_automation/he-plan/references/planning-depth.md`
+- `Plugins/harness-engineering/skills/team_automation/he-plan/references/deepening-review.md`
+- `Plugins/harness-engineering/skills/team_automation/he-plan/references/test-strategy.md`
+- `Plugins/harness-engineering/skills/team_automation/he-plan/references/visual-communication.md`
+
+## Spec Preserved Context
+
+The active `he-spec` entrypoint now keeps Codex collaboration lessons, session evidence intake, source-parity rules, artifact templates, and autoresearch decisions in:
+
+- `Plugins/harness-engineering/references/he-spec-doctrine.md`
+- `Plugins/harness-engineering/skills/team_automation/he-spec/references/autoresearch-2026-05-02.md`
+- `Plugins/harness-engineering/skills/team_automation/he-spec/references/codex-and-session-evidence.md`
+- `Plugins/harness-engineering/skills/team_automation/he-spec/references/spec-artifact-contract.md`
+- `Plugins/harness-engineering/skills/team_automation/he-spec/references/spec-mode-rules.md`
+
+## Work Preserved Context
+
+The active `he-work` entrypoint now keeps Codex execution lessons, Harness Engineering work-execution patterns, execution mode rules, and handoff requirements in:
+
+- `Plugins/harness-engineering/skills/team_automation/he-work/references/work-execution-contract.md`
+- `Plugins/harness-engineering/skills/team_automation/he-work/references/codex-execution-lessons.md`
+- `Plugins/harness-engineering/skills/team_automation/he-work/references/handoff-and-shipping.md`
+- `Plugins/harness-engineering/skills/team_automation/he-work/references/execution-modes.md`
 
 ## CI Move Evidence
 
