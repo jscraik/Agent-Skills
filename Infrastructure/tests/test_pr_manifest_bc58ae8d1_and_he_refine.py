@@ -35,6 +35,20 @@ _REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}", re.IGNORECASE)
 # ---------------------------------------------------------------------------
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    """
+    Load a JSON Lines (JSONL) file and return its parsed records.
+    
+    Blank or whitespace-only lines are skipped. Each non-empty line is parsed as JSON and appended to the returned list.
+    
+    Parameters:
+        path (Path): Path to the JSONL file to load.
+    
+    Returns:
+        list[dict[str, Any]]: A list of parsed JSON objects, one per non-empty line.
+    
+    Raises:
+        AssertionError: If a line contains invalid JSON; the error message includes the file path and line number.
+    """
     records = []
     with open(path, encoding="utf-8") as fh:
         for lineno, raw in enumerate(fh, start=1):
@@ -51,6 +65,14 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def _load_command_surface() -> dict[str, Any]:
+    """
+    Load and return the parsed JSON contents of the repository's command-surface file.
+    
+    Reads JSON from the path specified by the module-level COMMAND_SURFACE_PATH and returns the decoded object.
+    
+    Returns:
+        dict[str, Any]: The parsed JSON root object from command-surface.json.
+    """
     with open(COMMAND_SURFACE_PATH, encoding="utf-8") as fh:
         return json.load(fh)
 
@@ -87,6 +109,11 @@ class TestManifestRevisionBumpedToBc58ae8d1(unittest.TestCase):
     _HE_REVISION = "085d548bf"
 
     def _assert_revision_updated(self, skillset_name: str):
+        """
+        Assert that every record in the given skillset's manifest uses the expected new source revision.
+        
+        If the manifest file is missing the test is skipped. For each record in the manifest, the function asserts that `provenance.source_revision` equals the module-level `_NEW_REVISION`; each record is checked in a separate subTest keyed by the skillset name and the record `id`.
+        """
         path = SKILLSET_DIR / skillset_name / "manifest.jsonl"
         if not path.exists():
             self.skipTest(f"Manifest not found: {path}")
@@ -102,6 +129,17 @@ class TestManifestRevisionBumpedToBc58ae8d1(unittest.TestCase):
                 )
 
     def _assert_old_revision_absent(self, skillset_name: str):
+        """
+        Assert that no records in the specified skillset's manifest use the old source revision.
+        
+        If the manifest file does not exist the check is skipped. For each record in
+        <skillset>/manifest.jsonl this makes a subtest (keyed by skillset and record id)
+        and asserts that `provenance.source_revision` is not equal to the module-level
+        `_OLD_REVISION`.
+        
+        Parameters:
+        	skillset_name (str): Name of the skillset directory containing `manifest.jsonl`.
+        """
         path = SKILLSET_DIR / skillset_name / "manifest.jsonl"
         if not path.exists():
             return
@@ -161,11 +199,18 @@ class TestManifestRevisionBumpedToBc58ae8d1(unittest.TestCase):
                 )
 
     def test_no_manifest_uses_old_revision(self):
-        """No manifest file should still reference the old revision 5b5889499."""
+        """
+        Assert that no manifest record in any known skillset uses the old source_revision "5b5889499".
+        """
         for skillset_name in self.ALL_MANIFESTS:
             self._assert_old_revision_absent(skillset_name)
 
     def test_all_revisions_are_valid_git_hash_format(self):
+        """
+        Assert that every manifest record's `provenance.source_revision` matches the expected git-hash pattern.
+        
+        Checks each manifest listed in `ALL_MANIFESTS` (skipping missing files) and uses a subtest per record to verify `provenance.source_revision` matches `_REVISION_PATTERN`; fails with a message identifying the invalid revision when a record does not conform.
+        """
         for skillset_name in self.ALL_MANIFESTS:
             path = SKILLSET_DIR / skillset_name / "manifest.jsonl"
             if not path.exists():
@@ -204,6 +249,17 @@ class TestManifestRequiredFields(unittest.TestCase):
     PROVENANCE_FIELDS = ("source_revision", "source_sha256", "generator")
 
     def _check_manifest(self, skillset_name: str):
+        """
+        Validate that the given skillset's manifest.jsonl exists and that each record contains required fields and valid structure.
+        
+        Loads <SKILLSET_DIR>/<skillset_name>/manifest.jsonl, asserts the file is present and contains at least one record, then for each record asserts:
+        - every key listed in self.REQUIRED_FIELDS is present at the top level,
+        - every key listed in self.PROVENANCE_FIELDS is present inside the record's `provenance` object,
+        - `triggers` is a list with at least one element.
+        
+        Parameters:
+            skillset_name (str): Name of the skillset directory under SKILLSET_DIR whose manifest should be checked.
+        """
         path = SKILLSET_DIR / skillset_name / "manifest.jsonl"
         if not path.exists():
             self.skipTest(f"Manifest not found: {path}")
@@ -229,6 +285,9 @@ class TestManifestRequiredFields(unittest.TestCase):
         self._check_manifest("content-publishing")
 
     def test_frontend_ui_structure(self):
+        """
+        Validate that the 'frontend-ui' manifest contains the required top-level fields, required provenance fields, and a non-empty `triggers` list; the test is skipped if the manifest file is missing.
+        """
         self._check_manifest("frontend-ui")
 
     def test_harness_engineering_structure(self):
@@ -241,6 +300,11 @@ class TestManifestRequiredFields(unittest.TestCase):
         self._check_manifest("plugin-factory")
 
     def test_product_strategy_structure(self):
+        """
+        Validate the product-strategy manifest contains required fields and minimal structure.
+        
+        Ensures the `.skillsets/product-strategy/manifest.jsonl` file exists (or skips if missing), contains at least one record, and that each record includes the top-level required fields, the required provenance fields, and a non-empty `triggers` list.
+        """
         self._check_manifest("product-strategy")
 
     def test_security_ops_structure(self):
@@ -256,9 +320,19 @@ class TestManifestRequiredFields(unittest.TestCase):
 
 class TestCommandSurfaceRevisionBump(unittest.TestCase):
     def setUp(self):
+        """
+        Prepare the test fixture by loading the repository's command-surface.json into the test instance.
+        
+        Stores the parsed JSON object from command-surface.json on self._data for use by individual tests.
+        """
         self._data = _load_command_surface()
 
     def test_all_handle_revisions_use_new_hash(self):
+        """
+        Verify that every handle in the loaded command-surface data that specifies a `provenance.source_revision` uses the expected new revision.
+        
+        This test iterates `self._data["handles"]` and for each entry with a non-empty `provenance.source_revision` asserts it equals `_NEW_REVISION`, using a subTest keyed by the handle name for clearer failure reporting.
+        """
         for entry in self._data.get("handles", []):
             prov = entry.get("provenance", {})
             rev = prov.get("source_revision", "")
@@ -272,6 +346,11 @@ class TestCommandSurfaceRevisionBump(unittest.TestCase):
                     )
 
     def test_no_handle_uses_old_revision(self):
+        """
+        Verifies no handle entry in the loaded command-surface data uses the deprecated source revision.
+        
+        For each handle in self._data["handles"], asserts that `provenance.source_revision` is not equal to the old revision constant (`_OLD_REVISION`). Each handle is checked inside a subTest keyed by the handle name to isolate failures.
+        """
         for entry in self._data.get("handles", []):
             prov = entry.get("provenance", {})
             rev = prov.get("source_revision", "")
@@ -283,6 +362,11 @@ class TestCommandSurfaceRevisionBump(unittest.TestCase):
                 )
 
     def test_file_is_valid_json_with_handles_list(self):
+        """
+        Assert that the loaded command-surface data is a JSON object and contains a top-level "handles" key whose value is a list.
+        
+        This verifies the file parsed into a dict and that the required "handles" array is present and properly typed.
+        """
         self.assertIsInstance(self._data, dict)
         self.assertIn("handles", self._data)
         self.assertIsInstance(self._data["handles"], list)
@@ -303,6 +387,9 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
     """Validate the specific structural changes made to the he-refine entry in this PR."""
 
     def setUp(self):
+        """
+        Load command-surface data and set self._he_refine to the first handle entry whose `handle` is "he-refine", or `None` if not found.
+        """
         data = _load_command_surface()
         self._he_refine = next(
             (h for h in data.get("handles", []) if h.get("handle") == "he-refine"),
@@ -310,17 +397,26 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
         )
 
     def test_he_refine_entry_exists(self):
+        """
+        Asserts that the `he-refine` handle exists in the loaded command-surface data.
+        
+        Raises an assertion failure with a clear message if the `he-refine` entry is missing.
+        """
         self.assertIsNotNone(
             self._he_refine,
             "he-refine entry not found in command-surface.json",
         )
 
     def test_he_refine_command_visibility_is_orchestrator(self):
-        """command_visibility was changed from 'target' to 'orchestrator' in this PR."""
+        """
+        Assert the he-refine handle's command_visibility equals "orchestrator".
+        """
         self.assertEqual(self._he_refine.get("command_visibility"), "orchestrator")
 
     def test_he_refine_command_visibility_is_not_target(self):
-        """Old value 'target' should no longer appear."""
+        """
+        Assert that the `he-refine` handle's `command_visibility` is not "target".
+        """
         self.assertNotEqual(self._he_refine.get("command_visibility"), "target")
 
     def test_he_refine_level_is_compound(self):
@@ -328,11 +424,17 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
         self.assertEqual(self._he_refine.get("level"), "compound")
 
     def test_he_refine_level_is_not_molecule(self):
-        """Old level value 'molecule' should not appear."""
+        """
+        Asserts the `he-refine` handle's `level` field is not "molecule".
+        """
         self.assertNotEqual(self._he_refine.get("level"), "molecule")
 
     def test_he_refine_invoke_via_is_removed(self):
-        """invoke_via: 'harness-engineering' was removed from the entry in this PR."""
+        """
+        Asserts that the `he-refine` handle does not include the `invoke_via` key.
+        
+        This verifies the `invoke_via` field (previously set to "harness-engineering") has been removed from the `he-refine` entry.
+        """
         self.assertNotIn("invoke_via", self._he_refine)
 
     def test_he_refine_description_reflects_artifact_refinement(self):
@@ -354,7 +456,9 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
         )
 
     def test_he_refine_description_does_not_mention_dev_server(self):
-        """Old description referenced 'dev-server-backed' - should not appear."""
+        """
+        Asserts the he-refine handle's description does not contain the substring "dev-server-backed".
+        """
         desc = self._he_refine.get("description", "")
         self.assertNotIn(
             "dev-server-backed",
@@ -363,6 +467,11 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
         )
 
     def test_he_refine_source_revision_is_new(self):
+        """
+        Assert the he-refine handle's provenance `source_revision` equals the expected new revision.
+        
+        Fails the test if the handle's `provenance.source_revision` is not equal to `_NEW_REVISION`.
+        """
         rev = self._he_refine.get("provenance", {}).get("source_revision", "")
         self.assertEqual(
             rev,
@@ -371,7 +480,12 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
         )
 
     def test_he_refine_source_sha256_updated(self):
-        """Old sha256 was 9c8b00872f7b10d64d63a5df5652d3fb30731fdb506dddaa5aed5cb58ec897d9."""
+        """
+        Asserts the he-refine handle's provenance.source_sha256 was changed from the previous SHA-256.
+        
+        Checks that the `provenance.source_sha256` for the `he-refine` handle does not equal the prior SHA
+        "9c8b00872f7b10d64d63a5df5652d3fb30731fdb506dddaa5aed5cb58ec897d9".
+        """
         old_sha = "9c8b00872f7b10d64d63a5df5652d3fb30731fdb506dddaa5aed5cb58ec897d9"
         sha = self._he_refine.get("provenance", {}).get("source_sha256", "")
         self.assertNotEqual(
@@ -385,13 +499,18 @@ class TestCommandSurfaceHeRefineEntry(unittest.TestCase):
         self.assertTrue(len(sha) > 0, "he-refine source_sha256 must be non-empty")
 
     def test_he_refine_owner_is_harness_engineering(self):
-        """The owner field should remain harness-engineering despite removing invoke_via."""
+        """Check that the he-refine handle's owner is "harness-engineering"."""
         self.assertEqual(self._he_refine.get("owner"), "harness-engineering")
 
     def test_he_refine_kind_is_skill(self):
         self.assertEqual(self._he_refine.get("kind"), "skill")
 
     def test_he_refine_has_required_provenance_fields(self):
+        """
+        Verify the `he-refine` handle's provenance contains required fields.
+        
+        Asserts that the provenance object includes `source_revision`, `source_sha256`, and `generator`.
+        """
         prov = self._he_refine.get("provenance", {})
         for field in ("source_revision", "source_sha256", "generator"):
             with self.subTest(field=field):

@@ -241,7 +241,20 @@ def provider_audit(repo_root: Path) -> CallResult:
 
 
 def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
-    """Run the repo surface inventory classifier and return its report."""
+    """
+    Produce a surface-inventory report for the repository.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root where the inventory check will run.
+        strict (bool): When true, require strict inventory validation.
+    
+    Returns:
+        CallResult: Result containing:
+            - data["repo_surface"]: parsed inventory report dictionary (or a fallback error report on parse failure).
+            - data["strict"]: the provided `strict` value.
+            - status: "success" when the inventory indicates no blocking failures, otherwise "error".
+            - errors: on failure, one or more ErrorObject entries (code "ERR_VALIDATION") describing the problem and suggested fixes.
+    """
     result = CallResult()
     cmd = [
         sys.executable,

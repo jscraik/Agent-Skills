@@ -228,7 +228,22 @@ def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool
 
 
 def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Apply the HE deterministic stage policy before generic token scoring."""
+    """
+    Apply harness-engineering deterministic routing to the given task and manifest rows.
+    
+    Evaluates deterministic HE policies (explicit HE stage mentions, stage-correctness questions, and rules from Plugins/harness-engineering/references/routing-map.json) and returns a single routing decision when a deterministic override applies.
+    
+    Parameters:
+        task (str): The user task text to evaluate.
+        rows (list[dict[str, Any]]): Parsed manifest rows (each row is a dict from the manifest).
+    
+    Returns:
+        dict[str, Any] | None: A routing decision dict with keys:
+            - "row" (dict): The selected manifest row.
+            - "confidence" (float): Confidence score for the decision (e.g., 1.0, 0.95, 0.9).
+            - "reason" (str): Short explanation of which deterministic rule matched.
+        Returns None if no deterministic HE rule applies or the routing map is missing/invalid.
+    """
     routing_map_path = repo_root() / "Plugins/harness-engineering/references/routing-map.json"
     if not routing_map_path.is_file():
         return None
@@ -427,6 +442,26 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
 
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
+    """
+    Route a task to the best-matching stage within a root skill set.
+    
+    Parameters:
+    	skill_set (str): Root skill set name to route within.
+    	task (str): The user task text to route.
+    	top_k (int): Maximum number of candidate stages to return (bounded to 1..MAX_TOP_K).
+    	skillsets_dir (Path): Directory containing skill-set subfolders.
+    
+    Returns:
+    	payload (dict): A structured routing result with these keys:
+    		- schema_version (int): Payload schema version.
+    		- status (str): One of "selected", "low_confidence", "no_match", or an error status (e.g., "manifest_missing", "manifest_invalid").
+    		- policy_identity (dict): Identifying metadata for the routing policy.
+    		- skill_set (str): Echoed input skill set.
+    		- top_k (int): The bounded top_k used for this routing.
+    		- selected (dict|None): When status is "selected", the chosen stage summary with `id`, `level`, `source_path`, and `confidence`; otherwise None.
+    		- candidates (list[dict]): Ordered list of candidate summaries (each with `id`, `level`, `confidence`, `reason`).
+    		- operator_action (str|None): Suggested next action for an operator when manual intervention or repair is required.
+    """
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
     try:
         rows, error_status = read_manifest(skill_set, skillsets_dir)

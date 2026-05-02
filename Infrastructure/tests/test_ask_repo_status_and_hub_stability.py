@@ -109,7 +109,14 @@ class TestRepoStatus(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 def _write_stable_skill_md(path: Path, with_name: bool = True, with_description: bool = True):
-    """Write a SKILL.md with stability: stable and optional name/description fields."""
+    """
+    Write a SKILL.md file marking the skill as stable, optionally including a name and a description.
+    
+    Parameters:
+        path (Path): Destination path for SKILL.md.
+        with_name (bool): If True, include a `name` field in the front matter.
+        with_description (bool): If True, include a `description` field in the front matter.
+    """
     lines = ["---", "stability: stable"]
     if with_name:
         lines.append("name: my-skill")
@@ -120,7 +127,14 @@ def _write_stable_skill_md(path: Path, with_name: bool = True, with_description:
 
 
 def _write_unstable_skill_md(path: Path):
-    """Write a SKILL.md without stability: stable."""
+    """
+    Create a SKILL.md file at the given path that does not declare stability.
+    
+    The file contains YAML front matter with `name` and `description` and a simple markdown body; it intentionally omits a `stability: stable` field.
+    
+    Parameters:
+        path (Path): Destination file path where the SKILL.md will be written.
+    """
     path.write_text(
         "---\nname: unstable-skill\ndescription: Not marked stable.\n---\n# Unstable Skill\n",
         encoding="utf-8",
@@ -330,8 +344,30 @@ class TestCheckHubStability(unittest.TestCase):
 
 class TestProviderAudit(unittest.TestCase):
     def _make_fake_run(self, returncode: int, stdout: str, stderr: str = ""):
-        """Return a mock for subprocess.run returning a CompletedProcess."""
+        """
+        Create a fake subprocess.run implementation that returns a subprocess.CompletedProcess with the specified returncode, stdout, and stderr.
+        
+        Parameters:
+            returncode (int): The exit code to set on the returned CompletedProcess.
+            stdout (str): The stdout content to set on the returned CompletedProcess.
+            stderr (str): The stderr content to set on the returned CompletedProcess (default: "").
+        
+        Returns:
+            function: A callable compatible with subprocess.run that returns a subprocess.CompletedProcess whose
+            `args` is taken from the first positional argument passed to the callable and whose `returncode`, `stdout`,
+            and `stderr` are set to the provided values.
+        """
         def fake_run(*args, **kwargs):
+            """
+            Create a fake subprocess.CompletedProcess for use in tests.
+            
+            Parameters:
+                *args: Positional arguments passed to the fake run; the first positional argument is used as the CompletedProcess.args value.
+                **kwargs: Ignored.
+            
+            Returns:
+                completed (subprocess.CompletedProcess): A CompletedProcess whose `returncode`, `stdout`, and `stderr` are those captured from the surrounding test context and whose `args` is set to the first positional argument.
+            """
             return subprocess.CompletedProcess(
                 args=args[0],
                 returncode=returncode,

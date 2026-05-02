@@ -173,7 +173,7 @@ if [[ ! -d "$skill_builder_scripts_dir" ]]; then
   exit 1
 fi
 
-# run_skill_builder_script runs a skill-builder Python script from the discovered skill_builder_scripts_dir using the selected python_cmd, forwarding any additional arguments.
+# run_skill_builder_script runs a skill-builder Python script from the discovered skill_builder_scripts_dir using the selected python_cmd and forwards any additional arguments to that script.
 run_skill_builder_script() {
   local script_name="$1"
   shift

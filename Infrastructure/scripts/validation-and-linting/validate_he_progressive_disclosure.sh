@@ -133,6 +133,7 @@ append_candidate() {
   candidate_list+=("${resolved#"$REPO_ROOT"/}")
 }
 
+# has_context_move_evidence determines whether deleted non-empty lines from the given SKILL.md have been relocated into repository reference/index files or still appear in the changed SKILL.md after accepted normalizations, and exits success if relocation evidence is found.
 has_context_move_evidence() {
   local base_ref="$1"
   local skill_path="$2"

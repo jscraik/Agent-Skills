@@ -30,6 +30,11 @@ def test_active_skill_keeps_required_spec_contracts() -> None:
 
 
 def test_plugin_owned_references_are_present_and_indexed() -> None:
+    """
+    Verify plugin-owned reference files exist and are listed in the deferred-context index.
+    
+    Asserts that the doctrine reference file exists at Plugins/harness-engineering/references/he-spec-doctrine.md; for each expected reference under the skill directory, asserts the file exists and that the deferred-context index contains the corresponding plugin-relative path Plugins/harness-engineering/skills/he-spec/{rel}. Finally, asserts the doctrine reference path is present in the index.
+    """
     expected = [
         "references/autoresearch-2026-05-02.md",
         "references/codex-and-session-evidence.md",
