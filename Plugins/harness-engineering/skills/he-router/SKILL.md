@@ -40,9 +40,9 @@ Choose one Harness Engineering lifecycle stage.
 2. Translate folded stage names through [folded skill context](../../references/folded-skill-context.md) before selecting a stage.
 3. Apply the deterministic decision order in [deterministic stage routing](../../references/deterministic-stage-routing.md).
 4. Pick exactly one stage from [routing map](../../references/routing-map.json).
-4. Route domain-language conflicts through [domain model routing](../../references/domain-model-routing.md).
-5. Route QA or feedback sessions through [QA intake routing](../../references/qa-intake-routing.md).
-6. Route prior-session or repeated-failure requests through [session evidence contract](../../references/session-evidence-contract.md).
+5. Route domain-language conflicts through [domain model routing](../../references/domain-model-routing.md).
+6. Route QA or feedback sessions through [QA intake routing](../../references/qa-intake-routing.md).
+7. Route prior-session or repeated-failure requests through [session evidence contract](../../references/session-evidence-contract.md).
 
 ## Output contract
 
