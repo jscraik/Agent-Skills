@@ -25,6 +25,14 @@ outputs:
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
   - "structured status output with schema_version: 1 when requested"
 
+observability: >
+  Report selected mode, checked evidence, solution path, Project Brain status,
+  validation outcomes, and exact blocked follow-up reasons.
+
+rollback_procedure: >
+  Restore previous skill/reference files, rerun strict skill audit and Plugin
+  Eval, and verify no duplicate `docs/solutions/` or `.harness/` route remains.
+
 non_goals:
   - direct product-code implementation inside the compound orchestrator
   - skipping upstream Harness Engineering gates without evidence
