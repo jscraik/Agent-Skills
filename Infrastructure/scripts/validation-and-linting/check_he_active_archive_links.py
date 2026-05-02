@@ -29,7 +29,7 @@ def is_active_surface(path: Path) -> bool:
         relative = path.relative_to(PLUGIN_ROOT)
     except ValueError:
         return False
-    return not relative.parts[:1] == ("fixtures",)
+    return relative.parts[:1] != ("fixtures",)
 
 
 def link_violates(path: Path) -> bool:
