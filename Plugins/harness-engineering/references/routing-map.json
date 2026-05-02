@@ -674,14 +674,10 @@
       "swift-ios-reviewer"
     ],
     "global_non_he_roles": [
-      "arscontexta-knowledge-guide",
-      "arscontexta-pipeline-worker",
       "autoresearch-validator",
       "circleci",
       "coderabbit",
       "design-iterator",
-      "diagram-cli",
-      "figma-design-sync",
       "git-project-triage",
       "guardian_subagent",
       "llm-wiki-validator",
@@ -690,17 +686,21 @@
       "pr-comment-resolver",
       "security-sentinel",
       "skill-inspector",
-      "slack-researcher",
-      "ui-ux-design",
       "web-researcher"
     ],
     "retired_roles": [
       "ankane-readme-writer",
+      "arscontexta-knowledge-guide",
+      "arscontexta-pipeline-worker",
+      "diagram-cli",
       "every-style-editor",
       "explorer",
+      "figma-design-sync",
       "lint",
       "performance-oracle",
-      "reviewer"
+      "reviewer",
+      "slack-researcher",
+      "ui-ux-design"
     ],
     "guidance": "Every he_relevant role present in the manifest must appear in at least one Harness Engineering stage; global_non_he roles remain intentionally outside HE routing; retired roles must not be present in the runtime manifest."
   },

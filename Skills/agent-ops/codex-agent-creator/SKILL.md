@@ -46,7 +46,7 @@ Prefer one valid role file, explicit scope, current Codex schema evidence, and v
 
 Load `references/role-creation-guide.md` when writing fields, wiring discoverability, using session evidence, or designing orchestration lanes.
 
-## Key Checks
+## Role Requirements
 - Required by Jamie's local validator: `name`, `description`, `developer_instructions`, `model`, and `model_reasoning_effort`.
 - Discoverability belongs in `[agents.<name>]` with `description`, optional `config_file`, and optional `nickname_candidates`.
 - Keep role names stable, lowercase, and specific. Do not add a `ce-` prefix unless the user explicitly asks for one.
