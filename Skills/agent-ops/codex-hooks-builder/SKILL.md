@@ -1,6 +1,6 @@
 ---
 name: codex-hooks-builder
-description: Create, audit, and validate Codex hook packs when repo-local or user-level .codex installs need hook runtime files or hook-script hardening.
+description: Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, or repo-local/user-level .codex hook installs.
 metadata:
   skill-type: scaffolding_templates
   lifecycle_state: active
@@ -34,6 +34,8 @@ metadata:
 - trigger events
 - script runtime
 - validation commands
+- current Codex hook runtime docs or schema evidence
+- effective hook sources such as user, project, managed, or plugin-bundled hooks
 
 ## Outputs
 - hook pack changes
@@ -47,6 +49,12 @@ metadata:
 - Start with 2-3 focused surfaces before expanding scope.
 - Confirm repo-local versus user-level ownership before editing.
 - Inspect existing hook config, scripts, and installation path.
+- Check current Codex hook docs, local schema, or runtime evidence before changing event names, matchers, feature flags, or output handling.
+- Model the supported events explicitly: SessionStart, PreToolUse, PermissionRequest, PostToolUse, UserPromptSubmit, and Stop.
+- Prefer the current `[features].hooks` flag while preserving the legacy `codex_hooks` alias when an existing install or validator still depends on it.
+- Account for every active hook source: user `hooks.json`, user `config.toml`, project `.codex` files, managed hook directories, plugin-bundled hooks, and inline `[hooks]` config.
+- Treat matchers as event-specific: tool-name matchers for PreToolUse, PermissionRequest, and PostToolUse; `startup|resume|clear` for SessionStart; ignored matchers for UserPromptSubmit and Stop.
+- Use effective-hook listing or repo validators when available to prove the assembled hook set, not only the edited file.
 - Use scaffold helpers when they fit the requested pack.
 - Keep scripts minimal, deterministic, and explicit about inputs.
 - Run hook validation and any scaffold tests before handoff.

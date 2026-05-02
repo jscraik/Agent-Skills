@@ -30,7 +30,7 @@ Do not hand-edit runtime projections.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
 - `codex-agent-creator` — Use when creating, installing, validating, folding, or troubleshooting Codex custom subagent role TOML and discoverability config.
 - `codex-automation-architect` — Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.
-- `codex-hooks-builder` — Create, audit, and validate Codex hook packs when repo-local or user-level .codex installs need hook runtime files or hook-script hardening.
+- `codex-hooks-builder` — Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, or repo-local/user-level .codex hook installs.
 - `coding-harness` — Install, update, audit, diagnose, and explain @brainwav/coding-harness when repository governance, harness init, CI migration, or action-sync needs live command evidence.
 - `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
 - `docs-expert` — Audit, rewrite, and validate repository documentation when README, runbook, code-doc, config-doc, or public trust-surface claims must match live repo evidence.
