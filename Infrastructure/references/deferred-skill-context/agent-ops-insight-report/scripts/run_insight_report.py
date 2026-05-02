@@ -969,7 +969,8 @@ def summarize_response_times(times):
         }
 
     sorted_times = sorted(clean_times)
-    p90_index = max(0, min(len(sorted_times) - 1, int(len(sorted_times) * 0.9) - 1))
+    # Nearest-rank p90 so small samples still reflect the upper tail.
+    p90_index = max(0, min(len(sorted_times) - 1, (len(sorted_times) * 90 + 99) // 100 - 1))
     bucket_counts = {
         "lt_10s": 0,
         "10s_to_30s": 0,

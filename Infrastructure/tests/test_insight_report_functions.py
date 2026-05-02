@@ -480,6 +480,10 @@ class TestWriterPayloadCompaction(unittest.TestCase):
         self.assertEqual(summary["buckets"]["2m_to_5m"], 1)
         self.assertEqual(summary["buckets"]["gt_15m"], 1)
 
+    def test_summarize_response_times_uses_nearest_rank_p90(self):
+        summary = summarize_response_times([10, 100])
+        self.assertEqual(summary["p90_seconds"], 100.0)
+
     def test_build_codex_writer_payload_omits_raw_arrays_and_compacts_samples(self):
         evidence = {
             "schema_version": "codex-insight-evidence.v1",
