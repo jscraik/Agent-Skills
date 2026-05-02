@@ -373,7 +373,7 @@ Required behavior:
 
 ## First Implementation Candidate
 
-`ask repo doctor` should be implemented first because the baseline evidence
+This command (`ask repo doctor`) should be implemented first because the baseline evidence
 shows current health checks are fragmented across repo, runtime, and surface
 commands.
 
