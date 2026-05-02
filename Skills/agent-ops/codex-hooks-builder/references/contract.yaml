@@ -21,9 +21,9 @@ outputs:
   - "rollback steps"
 runtime_contract:
   feature_keys:
-    current: hooks
+    current: features.hooks
     legacy_alias: codex_hooks
-    requirement: "Prefer hooks and preserve codex_hooks when compatibility validators or installed configs still require it."
+    requirement: "Prefer features.hooks and preserve codex_hooks when compatibility validators or installed configs still require it."
   events:
     - SessionStart
     - PreToolUse
