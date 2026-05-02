@@ -49,8 +49,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-work"
       - type: regex
-        value: "(?i)(JSC-224|Linear|spec|plan|AC|PR|validation)"
-
+        value: "(?is)(?=.*\\bJSC-224\\b)(?=.*\\bLinear\\b)(?=.*\\bspec\\b)(?=.*\\bplan\\b)(?=.*\\bAC(?:\\s*IDs?)?\\b)(?=.*\\bPR\\b)(?=.*\\bvalidation\\b).+"
   - id: todo-led-execution
     name: todo-led execution
     category: edge

@@ -12,7 +12,8 @@ import tempfile
 from pathlib import Path
 
 
-PLUGIN_ROOT = Path("Plugins/harness-engineering")
+# Derive PLUGIN_ROOT as absolute path from repository root.
+PLUGIN_ROOT = Path(__file__).resolve().parents[3] / "Plugins" / "harness-engineering"
 DISALLOWED_ACTIVE_PATHS = (
     Path("tests"),
     Path("skills/_template_utils.py"),
@@ -20,8 +21,14 @@ DISALLOWED_ACTIVE_PATHS = (
 
 
 def path_mentions_budget_archive(path: Path | str) -> bool:
-    text = str(path)
-    return "fixtures/budget-archive" in text or "fixtures\\budget-archive" in text
+    """Check if path contains consecutive components 'fixtures' followed by 'budget-archive'."""
+    path_obj = Path(path)
+    parts = path_obj.parts
+    # Check for consecutive "fixtures" and "budget-archive" components
+    for i in range(len(parts) - 1):
+        if parts[i] == "fixtures" and parts[i + 1] == "budget-archive":
+            return True
+    return False
 
 
 def is_active_surface(path: Path) -> bool:
@@ -29,7 +36,7 @@ def is_active_surface(path: Path) -> bool:
         relative = path.relative_to(PLUGIN_ROOT)
     except ValueError:
         return False
-    return not relative.parts[:1] == ("fixtures",)
+    return relative.parts[:1] != ("fixtures",)
 
 
 def link_violates(path: Path) -> bool:

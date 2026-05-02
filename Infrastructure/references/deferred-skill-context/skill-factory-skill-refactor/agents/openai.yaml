@@ -1,6 +1,6 @@
 interface:
   display_name: Skill Refactor
   short_description: Scan skill failures
-  icon_small: ./assets/icon-small.png
-  icon_large: ./assets/icon-large.png
+  icon_small: ../assets/icon-small.png
+  icon_large: ../assets/icon-large.png
   default_prompt: Scan recent Codex sessions for skill failures.

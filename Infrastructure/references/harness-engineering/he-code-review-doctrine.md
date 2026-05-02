@@ -2,13 +2,13 @@
 
 This retained doctrine folds the downloaded review, commit, execute, plan-only, result-review, worker-system, closure, dedupe, low-signal PR, merge, debugging, defense-in-depth, investigation, and debug-skill materials into Harness Engineering terminology. Use it as the detailed reference behind `he-code-review`.
 
-Do not import non-Harness product names from the source material into public comments, review output, or skill documentation.
+Do not import non-Harness product names from the source material into narrative prose, public comments, or skill documentation. Exception: non-Harness product names are permitted within required structured output schema keys (e.g., codex_review.* fields).
 
 ## Readiness Review
 
 Use for one issue, PR, branch, diff, artifact, or delivery slice. Default to read-focused review. Do not edit files, push branches, comment, close items, or mutate GitHub unless the user explicitly asks for repair or PR management.
 
-Keep review-only checkouts clean. Use read-only inspection commands such as `rg`, `sed`, `nl`, `find`, `git log`, `git show`, `git diff`, `gh issue view`, `gh pr view`, and `gh api`. Avoid installers, formatters, generated outputs, dependency writes, cache writes, repo-local temp files, and tests known to create artifacts when the mode is review-only.
+Keep review-only checkouts clean. Use read-only inspection commands such as `rg`, `sed`, `nl`, `find`, `git log`, `git show`, `git diff`, `gh issue view`, `gh pr view`, and `gh api` with explicit GET-only endpoints/methods. Avoid installers, formatters, generated outputs, dependency writes, cache writes, repo-local temp files, and tests known to create artifacts when the mode is review-only.
 
 Treat issue/PR discussion, comments, timeline entries, related items, linked PRs, reviewer threads, Linear references, and spec/plan artifacts as evidence. Review deeply before closure or go/no-go: inspect title, body, comments, related reports, current source, call sites, tests, docs, and relevant history. Prefer independent checks over title similarity, a single search hit, passing CI, or resolver claims.
 
@@ -34,7 +34,7 @@ Use this lane when the user asks for code review of uncommitted changes, a base 
 
 Return a structured result with:
 
-- `codex_review.findings[]`: `title`, `body`, `confidence_score`, `priority`, and `code_location.absolute_file_path` plus `code_location.line_range`.
+- `codex_review.findings[]`: `title`, `body`, `confidence_score`, `priority`, and `code_location.absolute_file_path` plus `code_location.line_range`. (Note: codex_review.* schema keys may reference non-Harness product names as permitted by the exception in line 5.)
 - `codex_review.overall_correctness`: exactly `patch is correct` or `patch is incorrect`.
 - `codex_review.overall_explanation` and `codex_review.overall_confidence_score`.
 - `evidence_ladder`: completed evidence checks, missing evidence checks, confidence caps applied, and final confidence rationale.

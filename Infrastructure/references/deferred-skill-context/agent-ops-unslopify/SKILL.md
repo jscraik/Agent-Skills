@@ -3,21 +3,6 @@ name: unslopify
 description: Use when you need focused cleanup audits, safe removals, scoped quality-risk reductions, and evidence-backed cleanup plans before touching code.
 metadata:
   skill-type: runbook
-  lifecycle_state: active
-  maturity: validated
-  owner: agent-ops
-  review_cadence: quarterly
-  metadata_source: frontmatter
-  risk: medium
-  projection: latent
-  handles:
-    - unslopify
-    - $unslopify
-  canonical_handle: unslopify
-  runtime_visibility: latent
-  command_visibility: target
-  category: maintenance
-  scope: global
 ---
 
 # Unslopify Mode
@@ -206,9 +191,9 @@ Fail fast: stop at the first failed gate, do not proceed with cleanup edits, and
 ## Progressive Disclosure
 
 - Start here for cleanup routing, safety, workflow, and validation gates.
-- Use `references/contract.yaml` for the machine-readable contract.
-- Use `references/evals.yaml` for benchmark and adversarial prompt cases.
-- Use `references/task-profile.json` for evaluator thresholds.
+- See `references/contract.yaml` for the machine-readable contract.
+- See `references/evals.yaml` for benchmark and adversarial prompt cases.
+- Consult `references/task-profile.json` for evaluator thresholds.
 
 ## See Also
 
