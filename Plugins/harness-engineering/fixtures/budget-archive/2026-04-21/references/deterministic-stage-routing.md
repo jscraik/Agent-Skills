@@ -38,7 +38,7 @@ Folded modes retained in references: `he-ideate -> he-brainstorm`, `he-deepen-sp
 
 ## Conflict Examples
 
-- "Implement this PR review feedback" routes to `he-technical-review` first when feedback correctness is disputed; otherwise route to `he-work`.
+- "Implement this PR review feedback" routes to `he-code-review` in folded `he-technical-review` mode when feedback correctness is disputed; otherwise route to `he-work`.
 - "Fix the failing test by starting with a regression" routes to `he-work` in folded `he-tdd` mode, not generic `he-fix-bugs`.
 - "The branch is implemented, please check it" routes to `he-code-review`, not `he-work`.
 - "Should we use `he-work` or `he-code-review` next?" routes to `he-router`, not whichever stage appears first.

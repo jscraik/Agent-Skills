@@ -144,6 +144,7 @@ has_context_move_evidence() {
   local f
 
   append_candidate candidates "$INDEX_PATH"
+  append_candidate candidates "Plugins/harness-engineering/references/folded-skill-context.md"
 
   if [[ -d "$ref_dir" ]]; then
     while IFS= read -r -d '' f; do

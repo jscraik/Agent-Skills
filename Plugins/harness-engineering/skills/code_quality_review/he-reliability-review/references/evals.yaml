@@ -122,6 +122,8 @@ cases:
         expected_skill: "he-reliability-review"
       - type: regex
         value: "(?i)(untrusted input|critical findings|cannot validate|unable to verify|refuse to|no evidence|validation failed)"
+      - type: regex
+        value: "(?i)(single point of failure|dependency|timeout|circuit breaker|blast radius|degradation)"
 
 metadata:
   last_updated: "2026-04-07"

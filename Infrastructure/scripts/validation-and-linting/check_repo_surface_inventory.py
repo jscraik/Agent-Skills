@@ -286,6 +286,32 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             metadata={"next_steps": ["validate_projection_if_changed"]},
         )
 
+    if _matches_plugin_subpath(normalized, "fixtures"):
+        return _make_finding(
+            normalized,
+            classification="fixture",
+            status="ok",
+            code="plugin_fixture_surface",
+            severity="info",
+            blocking=False,
+            reason="Path is a plugin-owned fixture or archived budget fixture with an explicit consumer.",
+            recommendation="Track only when tests, packaging, or preservation indexes reference it.",
+            metadata={"next_steps": ["keep_consumer_documented"]},
+        )
+
+    if _matches_plugin_subpath(normalized, "references"):
+        return _make_finding(
+            normalized,
+            classification="reference",
+            status="ok",
+            code="plugin_reference_surface",
+            severity="info",
+            blocking=False,
+            reason="Path is plugin-owned reference context loaded through progressive disclosure.",
+            recommendation="Keep indexed from the owning plugin front door.",
+            metadata={"next_steps": ["preserve_index_link_if_changed"]},
+        )
+
     if (
         _starts_with(normalized, "Skills")
         or _matches_plugin_subpath(normalized, "skills")
@@ -560,7 +586,9 @@ def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, A
         counts_by_code[finding.code] = counts_by_code.get(finding.code, 0) + 1
 
     blocking_count = sum(1 for finding in findings if finding.blocking)
-    status = "error" if strict and blocking_count else "success"
+    status = "warning" if blocking_count else "success"
+    if strict and blocking_count:
+        status = "error"
     if status == "success" and any(finding.status == "warning" for finding in findings):
         status = "warning"
 

@@ -1873,6 +1873,15 @@ def _refresh_workspace_plugin_caches(
             if dry_run:
                 logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
                 logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
+                for target in (runtime_target, versioned_target):
+                    if target.exists() or target.is_symlink():
+                        plan["deletes"].append(str(target))
+                plugin_version_root = versioned_cache_root / plugin_name
+                for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
+                    if child == versioned_target or not child.is_dir():
+                        continue
+                    plan["deletes"].append(str(child))
+                    logs.append(f"Would remove stale versioned local plugin cache variant: {child}")
                 continue
             for target in (runtime_target, versioned_target):
                 report = _replace_plugin_cache_copy(repo_root, plugin_name, source_dir, target)

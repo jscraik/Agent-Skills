@@ -143,7 +143,9 @@ PY
 echo "[family-gate] Harness Engineering preserved-context alias passed"
 
 echo "[family-gate] validating Harness Engineering subagent routing"
-"${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py
+he_subagent_manifest="Plugins/harness-engineering/references/subagent-routing-manifest.fixture.json"
+"${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py \
+  --manifest "$he_subagent_manifest"
 echo "[family-gate] Harness Engineering subagent routing passed"
 
 skill_dirs=(

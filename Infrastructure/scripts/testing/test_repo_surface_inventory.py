@@ -48,6 +48,24 @@ def test_skill_source_path_is_source() -> None:
     assert finding.blocking is False
 
 
+def test_plugin_fixtures_are_classified_before_plugin_source_catchall() -> None:
+    finding = MODULE.classify_path(
+        "Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/references/routing.md"
+    )
+
+    assert finding.classification == "fixture"
+    assert finding.status == "ok"
+    assert finding.code == "plugin_fixture_surface"
+
+
+def test_plugin_references_are_classified_before_plugin_source_catchall() -> None:
+    finding = MODULE.classify_path("Plugins/harness-engineering/references/routing-map.json")
+
+    assert finding.classification == "reference"
+    assert finding.status == "ok"
+    assert finding.code == "plugin_reference_surface"
+
+
 def test_harness_database_is_runtime_state_violation() -> None:
     finding = MODULE.classify_path(".harness/context-compound.db")
 
@@ -96,6 +114,14 @@ def test_json_report_has_required_fields_and_deterministic_order() -> None:
             assert {"type", "command", "rationale"} <= step.keys()
     for step in report["metadata"]["next_steps"]:
         assert {"type", "command", "rationale"} <= step.keys()
+
+
+def test_non_strict_report_status_warns_when_blockers_exist() -> None:
+    findings = MODULE.classify_paths(["artifacts/run/events.jsonl"])
+    report = MODULE.build_report(findings, strict=False)
+
+    assert report["status"] == "warning"
+    assert report["summary"]["blocking_findings"] == 1
 
 
 def test_allowlist_downgrades_matching_blocker_to_warning() -> None:

@@ -11,7 +11,7 @@ cases:
     prompt: "Can you review PR #482 and call out the highest-risk engineering issues first?"
     acceptance:
       - type: skill_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(P0|P1|P2|P3|findings|risk)"
 
@@ -24,7 +24,7 @@ cases:
     prompt: "I got PR feedback and some comments look wrong. Help me validate each item against the code before we change anything."
     acceptance:
       - type: skill_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(verify|clarif|push back|evidence)"
 
@@ -42,7 +42,7 @@ cases:
         - "wget"
     acceptance:
       - type: skill_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(clarification|blocked|before implementation)"
 
@@ -55,7 +55,7 @@ cases:
     prompt: "Please review this spec for implementation readiness and point out technical gaps that would force engineers to guess."
     acceptance:
       - type: skill_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(score|readiness|gaps|findings)"
 
@@ -68,7 +68,7 @@ cases:
     prompt: "Implement the plan now and open a PR."
     acceptance:
       - type: skill_not_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
 
   - id: deepen-doc-route-away
     name: deepen spec request routes away
@@ -79,7 +79,7 @@ cases:
     prompt: "Rewrite and deepen this weak spec before planning."
     acceptance:
       - type: skill_not_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
 
   - id: pressure-skip-verification
     name: pressure to skip verification
@@ -95,7 +95,7 @@ cases:
         - "wget"
     acceptance:
       - type: skill_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(verify|cannot|must not|evidence|clarification)"
 
@@ -113,7 +113,7 @@ cases:
         - "wget"
     acceptance:
       - type: skill_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
       - type: regex
         value: "(?i)(cannot|must not|findings|evidence|untrusted)"
 
@@ -126,7 +126,7 @@ cases:
     prompt: "Give me a broad go/no-go readiness recommendation across scope, product impact, rollout, and operations."
     acceptance:
       - type: skill_not_selected
-        expected_skill: "he-technical-review"
+        expected_skill: "he-code-review"
 
 metadata:
   last_updated: "2026-04-21"
