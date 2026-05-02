@@ -99,6 +99,18 @@ description: Route ambiguous Harness Engineering requests to one lifecycle stage
 5. Emit separate Codex-compatible code review and Harness readiness results.
 ```
 
+## Remote Merge Move Evidence
+
+The PR merge on 2026-05-02 normalized active router numbering and preserved a historical he-work fixture wording choice. These exact lines are preserved here so the branch-level progressive-disclosure gate can distinguish mechanical merge cleanup from context loss:
+
+```text
+Use `he-work` when the user wants implementation of approved Harness Engineering work with traceable progress and validation evidence.
+5. Route domain-language conflicts through [domain model routing](../../references/domain-model-routing.md).
+6. Route QA or feedback sessions through [QA intake routing](../../references/qa-intake-routing.md).
+7. Route prior-session or repeated-failure requests through [session evidence contract](../../references/session-evidence-contract.md).
+8. Route coverage-gap and skillify-candidate evidence to `he-improve` for triage before any new skill package is proposed.
+```
+
 ## Preserved Context
 
 Full historical move evidence and exact removed-line preservation live outside the plugin package budget at:
