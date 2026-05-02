@@ -3,6 +3,12 @@
 Keep these longer-form router rules out of the active trigger body while preserving
 the prior operating contract for audit and future restoration.
 
+- Prior compact frontmatter:
+
+```yaml
+description: "Use when ambiguous, mixed, or folded-alias HE requests need the correct stage."
+```
+
 - Choose one Harness Engineering lifecycle stage.
 - Use the user request, artifact state, and Linear evidence as the routing source.
 - Prefer the smallest stage that safely unblocks the user.
