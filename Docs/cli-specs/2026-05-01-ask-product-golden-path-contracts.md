@@ -49,22 +49,6 @@ reduces this multi-command operator path into one stable envelope.
 
 All commands in this document must use the standard `ask` JSON envelope:
 
-```json
-{
-  "status": "success",
-  "trace_id": "uuid",
-  "metadata": {
-    "version": "0.1.0",
-    "command": "repo doctor --json --robot",
-    "next_steps": []
-  },
-  "data": {},
-  "telemetry": {
-    "latency_ms": 0
-  },
-  "errors": []
-}
-```
 
 Every contract must preserve:
 
