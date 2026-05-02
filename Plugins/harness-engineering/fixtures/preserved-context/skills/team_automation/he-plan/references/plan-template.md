@@ -4,11 +4,11 @@ title: "Symphony Service Implementation Plan"
 type: "feat"
 status: "active"
 date: "2026-04-10"
-origin: "docs/brainstorms/2026-04-10-symphony-requirements.md"
-requirements: "docs/brainstorms/2026-04-10-symphony-requirements.md"
+origin: "Docs/brainstorms/2026-04-10-symphony-requirements.md"
+requirements: "Docs/brainstorms/2026-04-10-symphony-requirements.md"
 spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
-source_spec: "docs/specs/2026-04-10-symphony-service-spec.md"
-ui_spec: "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
+source_spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
+ui_spec: "Docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
 linear_project: "JSC"
 linear_issue: "JSC-200"
 linear_parent: "JSC-190"
@@ -51,6 +51,7 @@ Current issue execution is manual and inconsistent; this plan defines an auditab
 | Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 | --- | --- | --- | --- | --- | --- |
 | JSC-200 | R1 | SA1 | P0 | AC1 | pending |
+| JSC-200 | R2 | SA2 | P1 | AC2 | pending |
 
 ## Scope Boundaries
 
@@ -131,7 +132,7 @@ P0-U1 | pending | planning-agent | plan scaffold generated
 ## Sources & References
 
 - Linear issue: JSC-200
-- Origin document: docs/brainstorms/2026-04-10-symphony-requirements.md
+- Origin document: Docs/brainstorms/2026-04-10-symphony-requirements.md
 - Spec: Docs/specs/2026-04-10-symphony-service-spec.md
 - Plan: Docs/plans/2026-04-10-feat-symphony-service-plan.md
 - Related code: services/symphony/*

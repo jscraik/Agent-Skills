@@ -2010,7 +2010,9 @@ def _refresh_home_plugin_mirrors(
         try:
             prune_logs, _prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
         except PluginCacheRefreshError as exc:
-            logs.append(f"Failed to prune home plugin mirror command-handle duplicates {target_dir}: {exc}")
+            raise PluginCacheRefreshError(
+                f"Failed to prune home plugin mirror command-handle duplicates {target_dir}: {exc}"
+            ) from exc
         else:
             logs.extend(prune_logs)
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")

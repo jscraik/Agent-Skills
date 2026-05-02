@@ -971,18 +971,15 @@ marketing-only rewrite.
 
 ## Next Stage Handoff
 
-Recommended first `he-work` handoff:
+Implementation closeout:
 
 ```text
-Before editing code, confirm Linear issue JSC-246 includes the existing spec and
-plan backlink comment.
-
-Implement P0-P2 only: add repo surface ownership policy, a non-destructive
-surface inventory classifier, and an `./bin/ask repo surface` route with focused
-tests and a live JSON report. Do not delete tracked artifacts in this slice.
+P0-P5 are implemented for the repo surface contract slice. Keep follow-up work
+limited to validation hardening, allowlist review, and command UX polish unless a
+new spec amendment expands the accepted scope.
 ```
 
-Pre-implementation validation:
+Closeout validation:
 
 ```bash
 python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-plan.md

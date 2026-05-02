@@ -46,23 +46,23 @@ The session-evidence routing refresh preserved these pre-insertion `he-compound`
 - `7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.`
 - ``8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.``
 
-6. If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
-7. If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
-8. Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
+- Preserved step 6: If helpers are used during learning capture, they return text only; the orchestrator writes the final artifact.
+- Preserved step 7: If overlap with an existing solution is high, refresh the existing doc instead of creating a duplicate.
+- Preserved step 8: Recommend `he-compound-refresh` only when adjacent stale or overlapping docs need selective follow-up beyond the current artifact.
 
 The router and work-entry compacting pass preserved these previously inline lines:
 
 - `schema_version: 1` when structured output is requested.
 - issue creation/update via `[[gh-workflow]]` or repo tracker
-8. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
+- Preserved step 8: Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
 
 The session-evidence and reliability refresh preserved these compacted entrypoint lines:
 
 This entrypoint stays concise and keeps full operational context in archived references.
 - For full stage policy, workflow details, and examples, load the archived full guide.
-1. Load archived reliability references before analysis.
-4. Produce reliability findings with concrete blast-radius and mitigation guidance.
-5. Route review subagents per policy; if unavailable, continue inline and state manual role options.
+- Preserved step 1: Load archived reliability references before analysis.
+- Preserved step 4: Produce reliability findings with concrete blast-radius and mitigation guidance.
+- Preserved step 5: Route review subagents per policy; if unavailable, continue inline and state manual role options.
 - Refresh durable knowledge from evidence, not intuition.
 - Review individual learnings before derived pattern docs.
 - Prefer no-write `Keep` decisions over churn when a doc is still trustworthy.
@@ -73,76 +73,76 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - If replacement evidence is insufficient, do not invent a successor doc. Mark the artifact stale when possible and report what evidence is missing.
 - Request, artifacts, repo context, and linked Linear issues.
 - `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
-2. Discover candidate docs under `docs/solutions/`, excluding `README.md` and legacy `_archived/` content.
-3. Match the narrowest successful scope first: directory, frontmatter, filename, then content search.
-4. Investigate individual learnings before dependent pattern docs.
-5. Analyze the document set for overlap, contradictions, and canonical-doc opportunities before leaving duplicates in place.
-6. Classify each artifact or overlap cluster into exactly one maintenance outcome: `Keep`, `Update`, `Consolidate`, `Replace`, `Archive`, or `Stale`.
-7. In autonomous mode, apply unambiguous actions directly and stale-mark ambiguous cases instead of guessing through them.
-8. Finish with a full markdown report covering evidence, actions applied, and recommendations when writes could not be completed.
+- Preserved step 2: Discover candidate docs under `docs/solutions/`, excluding `README.md` and legacy `_archived/` content.
+- Preserved step 3: Match the narrowest successful scope first: directory, frontmatter, filename, then content search.
+- Preserved step 4: Investigate individual learnings before dependent pattern docs.
+- Preserved step 5: Analyze the document set for overlap, contradictions, and canonical-doc opportunities before leaving duplicates in place.
+- Preserved step 6: Classify each artifact or overlap cluster into exactly one maintenance outcome: `Keep`, `Update`, `Consolidate`, `Replace`, `Archive`, or `Stale`.
+- Preserved step 7: In autonomous mode, apply unambiguous actions directly and stale-mark ambiguous cases instead of guessing through them.
+- Preserved step 8: Finish with a full markdown report covering evidence, actions applied, and recommendations when writes could not be completed.
 - Ensure each refresh claim is backed by current repository evidence.
 - Ensure learnings are reviewed before dependent patterns.
 - Ensure overlap analysis happens before duplicate docs are left in place.
 - Performing broad doc rewrites without evidence-backed stale signals.
 - "Can you inspect the compound run state and tell me which docs are stale after this refactor?"
-3. Select the underlying HE stage that should run on each wake-up. If stage
-4. Build the durable heartbeat prompt using the contract below and the full
-5. Create or describe the automation only when the runtime exposes an automation
-6. Execute the first safe live-state check immediately in the current turn.
-7. Tell the user how the heartbeat will stop or when it will ask for human
-2. Decide whether the target should use direct hard metrics, judge scoring, or hybrid gates plus judge evaluation.
-3. Detect and resolve `fresh` versus `resume` state before running new experiments.
-4. Establish a trusted baseline with the measurement harness and run the parallel-readiness probe before widening execution.
-5. Run bounded iterations with explicit measurement gates and isolated experiment state.
-6. After each experiment, write results to disk immediately, verify the write, and only then report or compare outcomes.
-7. Keep, revise, or discard changes based on measured outcomes and route proven results to the next stage.
-4. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
-5. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
-6. Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
-7. Report completed work, blockers, validation evidence, and the shipping handoff package.
-6. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.
-7. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
-8. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.
-9. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.
+- Preserved step 3: Select the underlying HE stage that should run on each wake-up. If stage
+- Preserved step 4: Build the durable heartbeat prompt using the contract below and the full
+- Preserved step 5: Create or describe the automation only when the runtime exposes an automation
+- Preserved step 6: Execute the first safe live-state check immediately in the current turn.
+- Preserved step 7: Tell the user how the heartbeat will stop or when it will ask for human
+- Preserved step 2: Decide whether the target should use direct hard metrics, judge scoring, or hybrid gates plus judge evaluation.
+- Preserved step 3: Detect and resolve `fresh` versus `resume` state before running new experiments.
+- Preserved step 4: Establish a trusted baseline with the measurement harness and run the parallel-readiness probe before widening execution.
+- Preserved step 5: Run bounded iterations with explicit measurement gates and isolated experiment state.
+- Preserved step 6: After each experiment, write results to disk immediately, verify the write, and only then report or compare outcomes.
+- Preserved step 7: Keep, revise, or discard changes based on measured outcomes and route proven results to the next stage.
+- Preserved step 4: Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
+- Preserved step 5: Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
+- Preserved step 6: Stop and update the governing artifact or linked Linear issue before continuing if execution uncovers contract drift, domain drift, hidden scope, or changed boundaries.
+- Preserved step 7: Report completed work, blockers, validation evidence, and the shipping handoff package.
+- Preserved step 6: Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.
+- Preserved step 7: Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
+- Preserved step 8: Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `recommended_next_step`, and `missing_input` only when blocked.
+- Preserved step 9: If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.
 
-2. Map service boundaries and dependency failure paths.
-3. Produce reliability findings with concrete blast-radius and mitigation guidance.
-4. Route review subagents per policy; if unavailable, continue inline and state manual role options.
-2. Produce a failing test first (RED), then apply the smallest fix (GREEN).
-3. Repeat in vertical slices and preserve traceability to accepted behavior targets.
-4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.
+- Preserved step 2: Map service boundaries and dependency failure paths.
+- Preserved step 3: Produce reliability findings with concrete blast-radius and mitigation guidance.
+- Preserved step 4: Route review subagents per policy; if unavailable, continue inline and state manual role options.
+- Preserved step 2: Produce a failing test first (RED), then apply the smallest fix (GREEN).
+- Preserved step 3: Repeat in vertical slices and preserve traceability to accepted behavior targets.
+- Preserved step 4: Route supporting subagents per policy; if unavailable, continue inline and state manual role options.
 
-2. Deepen interfaces, lifecycle behavior, and failure handling.
-2. Map service boundaries and dependency failure paths.
-2. Produce a failing test first (RED), then apply the smallest fix (GREEN).
-2. Reproduce and stabilize the failing behavior before proposing changes.
-3. Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
-3. For incoming feedback: read, clarify unclear items, verify, then respond technically.
-3. Produce the specification artifact with concrete acceptance criteria.
-3. Produce reliability findings with concrete blast-radius and mitigation guidance.
-3. Repeat in vertical slices and preserve traceability to accepted behavior targets.
-3. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
-3. Return readiness outcome and next stage recommendation.
-3. Trace backward from the symptom to the point where valid state first became invalid.
-4. Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
-4. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
-4. Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
-4. Return findings-first output plus open questions and next action.
-4. Return outputs.
-4. Route research and review roles per routing policy; if unavailable, continue inline and state manual role options.
-4. Route review subagents per policy; if unavailable, continue inline and state manual role options.
-4. Route supporting subagents per policy; if unavailable, continue inline and state manual role options.
-4. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
-5. Capture durable requirements only when the discussion produced decisions worth preserving.
-5. If still ambiguous after one clarification, return blocked with missing input.
-5. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
-5. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
-5. Review for correctness, regression risk, operability, protected-artifact handling, and release readiness.
-5. Stop and update the governing artifact before continuing if execution uncovers contract drift, hidden scope, or changed boundaries.
-6. Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
-6. Report completed work, blockers, validation evidence, and the shipping handoff package.
-6. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
-6. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+- Preserved step 2: Deepen interfaces, lifecycle behavior, and failure handling.
+- Preserved step 2: Map service boundaries and dependency failure paths.
+- Preserved step 2: Produce a failing test first (RED), then apply the smallest fix (GREEN).
+- Preserved step 2: Reproduce and stabilize the failing behavior before proposing changes.
+- Preserved step 3: Build synchronized tasks from the governing artifact and keep task state aligned with markdown artifact state during execution.
+- Preserved step 3: For incoming feedback: read, clarify unclear items, verify, then respond technically.
+- Preserved step 3: Produce the specification artifact with concrete acceptance criteria.
+- Preserved step 3: Produce reliability findings with concrete blast-radius and mitigation guidance.
+- Preserved step 3: Repeat in vertical slices and preserve traceability to accepted behavior targets.
+- Preserved step 3: Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
+- Preserved step 3: Return readiness outcome and next stage recommendation.
+- Preserved step 3: Trace backward from the symptom to the point where valid state first became invalid.
+- Preserved step 4: Generate 2-3 concrete approaches when multiple plausible directions remain, then evaluate tradeoffs and recommend one.
+- Preserved step 4: If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
+- Preserved step 4: Implement in small verified slices, honoring execution posture signals such as `test-first` or `characterization-first`.
+- Preserved step 4: Return findings-first output plus open questions and next action.
+- Preserved step 4: Return outputs.
+- Preserved step 4: Route research and review roles per routing policy; if unavailable, continue inline and state manual role options.
+- Preserved step 4: Route review subagents per policy; if unavailable, continue inline and state manual role options.
+- Preserved step 4: Route supporting subagents per policy; if unavailable, continue inline and state manual role options.
+- Preserved step 4: Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+- Preserved step 5: Capture durable requirements only when the discussion produced decisions worth preserving.
+- Preserved step 5: If still ambiguous after one clarification, return blocked with missing input.
+- Preserved step 5: Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+- Preserved step 5: Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
+- Preserved step 5: Review for correctness, regression risk, operability, protected-artifact handling, and release readiness.
+- Preserved step 5: Stop and update the governing artifact before continuing if execution uncovers contract drift, hidden scope, or changed boundaries.
+- Preserved step 6: Recommend the next Harness Engineering stage and stop instead of drifting into implementation planning.
+- Preserved step 6: Report completed work, blockers, validation evidence, and the shipping handoff package.
+- Preserved step 6: Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
+- Preserved step 6: When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 
 The PR 136 main-sync refresh preserved these lines removed from compact runtime and archive entrypoints:
 
@@ -216,7 +216,7 @@ before inserting the recurring-loop route:
 
 - `5. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.`
 - `6. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.`
-- `7. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.`
+- `7. Return outputs with selected_stage, matched_rule, confidence, rationale, recommended_next_step, and missing_input only when blocked.`
 - `8. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.`
 
 The `he-heartbeat` prompt-contract refresh preserved the previous fixture
@@ -270,20 +270,20 @@ Exact moved-line preservation for the progressive-disclosure gate:
 - Subagent routing: `../../../references/subagent-routing.md`
 - Use when a spec, brainstorm, bug report, or raw feature description must become a durable implementation plan.
 - `schema_version: 1` when structured; result, validation, blockers, and next Harness Engineering action.
-1. Load archived TDD guidance and choose the first behavior slice.
-1. Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.
-2. Apply the deterministic decision order in `../../references/deterministic-stage-routing.md` because overlapping requests must route the same way every time.
-2. Resume or deepen a matching current plan instead of duplicating it.
-3. Carry forward problem frame, scope, requirements, and open questions from the authoritative artifact.
-4. Check interface and domain readiness before task decomposition; route to `he-deepen-spec` when contracts or terms are missing.
-4. Reproduce and stabilize the failing behavior before proposing changes.
-5. Put blockers first for Linear QA issue sets, preserve issue links, and keep independent defects parallel.
-5. Trace backward from the symptom to the point where valid state first became invalid.
-6. Research local patterns only when they affect sequencing or risk.
-6. Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
-7. Decompose into ordered, verifiable tasks with dependencies, tests, and next-stage handoff.
-7. Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
-8. When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
+- Preserved step 1: Load archived TDD guidance and choose the first behavior slice.
+- Preserved step 1: Resolve the best source: existing plan, requirements doc, spec, brainstorm output, Linear issue, or direct request.
+- Preserved step 2: Apply the deterministic decision order in `../../references/deterministic-stage-routing.md` because overlapping requests must route the same way every time.
+- Preserved step 2: Resume or deepen a matching current plan instead of duplicating it.
+- Preserved step 3: Carry forward problem frame, scope, requirements, and open questions from the authoritative artifact.
+- Preserved step 4: Check interface and domain readiness before task decomposition; route to `he-deepen-spec` when contracts or terms are missing.
+- Preserved step 4: Reproduce and stabilize the failing behavior before proposing changes.
+- Preserved step 5: Put blockers first for Linear QA issue sets, preserve issue links, and keep independent defects parallel.
+- Preserved step 5: Trace backward from the symptom to the point where valid state first became invalid.
+- Preserved step 6: Research local patterns only when they affect sequencing or risk.
+- Preserved step 6: Test one hypothesis at a time, and for uncertain links require a prediction that can confirm or falsify the chain.
+- Preserved step 7: Decompose into ordered, verifiable tasks with dependencies, tests, and next-stage handoff.
+- Preserved step 7: Present the root cause, proposed fix scope, and test recommendations before remediation when the request is diagnosis-first or confidence is still settling.
+- Preserved step 8: When remediation is in scope, check workspace safety, prefer failing-test-first validation, apply the minimal fix, and verify no regressions.
 Read `../shared/references/approval-flow.md` before deciding whether to continue, ask a blocker question, or stop for approval.
 Read when: examples or role-routing details are needed, open the archived references for this skill.
 This entrypoint stays concise and keeps full operational context in archived references.
@@ -331,28 +331,28 @@ description: Route ambiguous Harness Engineering requests to one lifecycle stage
 
 ## PR 145 Progressive Disclosure Additions
 
-- `he-brainstorm` requirements artifact guide: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 48-52 and 66-68 preserve the requirements contract in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/requirements-artifact-guide.md`.
-- `he-brainstorm` workflow details: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 54-69 preserve stage sequencing in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/brainstorm-workflow-details.md`.
-- `he-brainstorm` discovery interview: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 56-64 preserve clarification behavior in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/discovery-interview.md`.
-- `he-brainstorm` document review pass: `deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 80-88 preserve handoff validation in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/document-review-pass.md`.
-- `he-spec` full spec guide: `deferred-store/skills/team_automation/he-spec/SKILL.md` lines 20 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`.
-- `he-spec` artifact contract: `deferred-store/skills/team_automation/he-spec/SKILL.md` lines 21 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`.
-- `he-spec` mode rules: `deferred-store/skills/team_automation/he-spec/SKILL.md` line 22 points to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-modes.md`.
-- `he-spec` subagent routing: `deferred-store/skills/team_automation/he-spec/SKILL.md` lines 23 and 31-38 point to `references/subagent-routing.md`.
+- `he-brainstorm` requirements artifact guide: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 48-52 and 66-68 preserve the requirements contract in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/requirements-artifact-guide.md`.
+- `he-brainstorm` workflow details: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 54-69 preserve stage sequencing in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/brainstorm-workflow-details.md`.
+- `he-brainstorm` discovery interview: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 56-64 preserve clarification behavior in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/discovery-interview.md`.
+- `he-brainstorm` document review pass: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-brainstorm/SKILL.md` lines 80-88 preserve handoff validation in `fixtures/preserved-context/skills/team_automation/he-brainstorm/references/document-review-pass.md`.
+- `he-spec` full spec guide: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 20 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`.
+- `he-spec` artifact contract: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 21 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`.
+- `he-spec` mode rules: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` line 22 points to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-modes.md`.
+- `he-spec` subagent routing: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 23 and 31-38 point to `references/subagent-routing.md`.
 
 The PR 145 review-fix pass preserved representative removed lines for the changed compact entrypoints:
 
-3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
-2. Clarify objective, constraints, users, non-goals, and unknowns one question at a time.
+- Preserved step 3: Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
+- Preserved step 2: Clarify objective, constraints, users, non-goals, and unknowns one question at a time.
 automation_status: "<created | needs-user-action | blocked>"
 - Optional related Linear QA issues and their blocker relationships.
-1. Load the archived full guide and references before drafting.
-3. Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
+- Preserved step 1: Load the archived full guide and references before drafting.
+- Preserved step 3: Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
 - `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
 - start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
 - hand the completed spec to `he-plan` when the user wants execution sequencing
 
-## PR 145 Progressive Disclosure Additions
+## PR 145 Review-Fix Preservation Additions
 
 - `he-spec` full spec guide: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 20 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`.
 - `he-spec` artifact contract: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 21 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`.

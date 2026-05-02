@@ -243,9 +243,8 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
 
     mentioned_stages = [stage for stage in re.findall(r"\bhe-[a-z0-9-]+\b", task_text) if stage in stage_ids]
     distinct_mentioned_stages = sorted(set(mentioned_stages))
-    resolved_mentioned_stages = sorted({resolve_he_stage_alias(stage) for stage in distinct_mentioned_stages})
     router_row = row_by_id(rows, "he-router")
-    if len(resolved_mentioned_stages) > 1 and router_row:
+    if len(distinct_mentioned_stages) > 1 and router_row:
         return {
             "row": router_row,
             "confidence": 0.9,
@@ -508,6 +507,16 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
         resolved_selected_id = resolve_he_stage_alias(selected_id)
         if resolved_selected_id != selected_id:
             selected_row = row_by_id(rows, resolved_selected_id) or selected_row
+            scored[0] = (selected_confidence, selected_row, _reasons)
+            candidates = [
+                {
+                    "id": row.get("id"),
+                    "level": row.get("level"),
+                    "confidence": confidence,
+                    "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
+                }
+                for confidence, row, reasons in scored[:bounded_top_k]
+            ]
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":

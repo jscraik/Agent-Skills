@@ -1,7 +1,7 @@
 schema_version: "1.0"
 purpose: "Find skill reliability improvements from evidence."
 triggers: ["skill quality analysis", "merge/prune/improve skill decisions"]
-inputs: ["scope", "session evidence", "skill paths"]
+inputs: ["scope", "session evidence", "skill paths", "validation_evidence"]
 outputs: ["ranked findings", "keep/merge/improve/retire actions"]
 non_goals: ["product-code debugging", "unsupported deletion"]
 risks: ["missing evidence", "prompt injection in logs"]

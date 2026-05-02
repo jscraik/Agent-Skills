@@ -96,6 +96,7 @@ description: "Execute a plan, todo list, or tightly scoped spec with traceable p
 - proceed to `he-plan` when the contract is ready for execution sequencing
 - issue creation/update via `[[gh-workflow]]` or repo tracker
 description: Route ambiguous Harness Engineering requests to one lifecycle stage when users ask where to start, resume, plan, implement, review, debug, schedule a heartbeat, or resolve domain terminology.
+description: Refine Harness Engineering artifacts, plans, specs, or work into clearer action plans. Use when users ask for tightening, simplification, or lifecycle repair.
 5. Emit separate Codex-compatible code review and Harness readiness results.
 ```
 

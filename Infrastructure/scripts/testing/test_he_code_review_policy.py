@@ -19,8 +19,9 @@ def test_he_code_review_uses_harness_engineering_naming_only():
 
     for path in checked:
         text = read(path)
+        lower_text = text.lower()
         for term in forbidden:
-            assert term not in text, f"{term} leaked into {path}"
+            assert term.lower() not in lower_text, f"{term} leaked into {path}"
 
 
 def test_he_code_review_links_deferred_policy_references():

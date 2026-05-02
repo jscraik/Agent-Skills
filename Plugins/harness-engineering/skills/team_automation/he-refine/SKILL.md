@@ -1,6 +1,6 @@
 ---
 name: he-refine
-description: Refine Harness Engineering artifacts, plans, specs, or work into clearer action plans. Use when users ask for tightening, simplification, or lifecycle repair.
+description: Refine a working feature through browser-first, dev-server-backed polish loops. Use when users ask to start the local app, inspect live behavior, tighten UI/UX, or iterate on implementation quality before final review.
 metadata:
   skill-type: team_automation
 ---

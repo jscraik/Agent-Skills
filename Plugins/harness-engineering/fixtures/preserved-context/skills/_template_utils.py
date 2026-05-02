@@ -202,8 +202,8 @@ def unified_diff_lines(
     """
     return list(
         difflib.unified_diff(
-            actual_text.splitlines(),
-            expected_text.splitlines(),
+            actual_text.splitlines(keepends=True),
+            expected_text.splitlines(keepends=True),
             fromfile=str(output_path),
             tofile=f"rendered({template_path})",
             lineterm="",

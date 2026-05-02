@@ -208,10 +208,12 @@ parsed_interval: "<normalized interval or default rationale>"
 selected_stage: "$harness-engineering:<he-stage>"
 target: "<target>"
 automation:
+  name: "<automation name>"
   status: "<created | updated | already-active | blocked | manual-only>"
   id: "<automation id or null>"
   kind: "heartbeat"
   destination: "thread"
+  target_binding: "<current thread | explicit target thread | detached workspace>"
   active: "<true | false>"
   next_expected_wakeup: "<cadence-derived expectation>"
 live_checks:
