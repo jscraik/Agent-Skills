@@ -2,7 +2,7 @@
 name: he-spec
 description: "Use when HE work needs Linear-backed scope, requirements, acceptance, and validation."
 metadata:
-  skill-type: team_automation
+  skill-type: product_verification
 ---
 # Harness Engineering Spec
 ## When to Use
@@ -19,6 +19,9 @@ Fail fast: stop at the first failed gate and do not proceed. Check traceability,
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Constraints
 Redact secrets; do not invent requirements. Do not remove important context for budget trimming; move deep context to references.
+## Examples
+- For `JSC-246`, convert a QA report about the account settings flow into a complete replacement spec section with Linear Acceptance Traceability, acceptance IDs, assumptions, validation, and rollback notes.
+- When a current spec exists but the latest session evidence changes scope, compare current-vs-latest spec status before adding requirements.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

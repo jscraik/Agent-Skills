@@ -227,7 +227,12 @@ def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool
     )
 
 
-def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+def harness_engineering_override(
+    task: str,
+    rows: list[dict[str, Any]],
+    *,
+    routing_map_path: Path | None = None,
+) -> dict[str, Any] | None:
     """
     Apply harness-engineering deterministic routing to the given task and manifest rows.
     
@@ -243,15 +248,15 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
             - "confidence" (float): Confidence score for the decision (e.g., 1.0, 0.95, 0.9).
             - "reason" (str): Short explanation of which deterministic rule matched.
         Returns None if no deterministic HE rule applies. Direct HE stage
-        mentions still route when the optional routing map is missing or invalid.
+        mentions still route when the optional routing map is missing.
     """
-    routing_map_path = repo_root() / "Plugins/harness-engineering/references/routing-map.json"
+    routing_map_path = routing_map_path or repo_root() / "Plugins/harness-engineering/references/routing-map.json"
     routing_map: dict[str, Any] = {}
     try:
         if routing_map_path.is_file():
             routing_map = json.loads(routing_map_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        routing_map = {}
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid Harness Engineering routing map at {routing_map_path}: {exc}") from exc
 
     task_text = task.lower()
     task_tokens = tokenize(task)
@@ -490,10 +495,26 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "operator_action": "Generate manifests before routing." if error_status == "manifest_missing" else "Choose a valid root skill set.",
         }
     override = None
-    if skill_set == "harness-engineering":
-        override = harness_engineering_override(task, rows)
-    elif skill_set in {"plugin-factory", "skill-factory"}:
-        override = factory_override(skill_set, task, rows)
+    try:
+        if skill_set == "harness-engineering":
+            routing_map_path = skillsets_dir.parent / "Plugins/harness-engineering/references/routing-map.json"
+            if not routing_map_path.is_file():
+                routing_map_path = None
+            override = harness_engineering_override(task, rows, routing_map_path=routing_map_path)
+        elif skill_set in {"plugin-factory", "skill-factory"}:
+            override = factory_override(skill_set, task, rows)
+    except ValueError as exc:
+        return {
+            "schema_version": 1,
+            "status": "routing_policy_invalid",
+            "policy_identity": policy_identity(),
+            "skill_set": skill_set,
+            "top_k": bounded_top_k,
+            "selected": None,
+            "candidates": [],
+            "error": str(exc),
+            "operator_action": "Repair the routing policy and rerun routing.",
+        }
     if override:
         selected_row = override["row"]
         selected_confidence = float(override["confidence"])

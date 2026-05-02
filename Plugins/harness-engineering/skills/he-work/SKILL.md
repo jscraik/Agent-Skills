@@ -19,6 +19,9 @@ Fail fast: stop at the first failed gate and do not proceed. Run exact gates for
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Constraints
 Redact secrets; preserve user edits. Do not remove important context for budget trimming; move deep context to references.
+## Examples
+- For `JSC-246`, implement the approved account settings flow plan in delegate mode, keep `update_plan` as the live checklist, and return changed files plus verified slices.
+- For a tiny low-risk fix, capture the current active state, make the smallest traceable edit, run the exact gate, and hand off to `he-code-review mode:autofix` if review findings remain.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

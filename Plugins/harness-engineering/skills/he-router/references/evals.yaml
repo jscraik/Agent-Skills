@@ -67,6 +67,6 @@ cases:
     <<: *negative
     should_trigger: false
     name: "Non Trigger Unrelated Request"
-    prompt: "Can you inspect the non trigger unrelated request workflow and keep the traceability evidence?"
+    prompt: "Write a short haiku about spring rain."
     deterministic_checks: *safe
     acceptance: ["Does not trigger he-router for unrelated requests and avoids forbidden commands."]

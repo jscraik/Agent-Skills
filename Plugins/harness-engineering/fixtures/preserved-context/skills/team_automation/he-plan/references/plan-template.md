@@ -6,7 +6,7 @@ status: "active"
 date: "2026-04-10"
 origin: "docs/brainstorms/2026-04-10-symphony-requirements.md"
 requirements: "docs/brainstorms/2026-04-10-symphony-requirements.md"
-spec: "docs/specs/2026-04-10-symphony-service-spec.md"
+spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
 source_spec: "docs/specs/2026-04-10-symphony-service-spec.md"
 ui_spec: "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
 linear_project: "JSC"
@@ -51,6 +51,7 @@ Current issue execution is manual and inconsistent; this plan defines an auditab
 | Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 | --- | --- | --- | --- | --- | --- |
 | JSC-200 | R1 | SA1 | P0 | AC1 | pending |
+| JSC-200 | R2 | SA2 | P1 | AC2 | pending |
 
 ## Scope Boundaries
 

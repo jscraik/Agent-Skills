@@ -5,7 +5,9 @@ import unittest
 from pathlib import Path
 
 
-ROUTE_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py"
+ROUTE_SCRIPT = str(
+    Path(__file__).resolve().parents[2] / "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py"
+)
 SOURCE_PATHS = {
     "he-brainstorm": "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
     "he-code-review": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
@@ -211,6 +213,44 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "he-router")
         self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_malformed_routing_map_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="route-skillset-") as tmp:
+            fixture_root = Path(tmp)
+            skillsets_dir = fixture_root / ".skillsets"
+            rows = [
+                _row("he-brainstorm", "Shape ambiguous requirements and compare directions."),
+                _row("he-router", "Route Harness Engineering stages."),
+            ]
+            _write_source_files(fixture_root, rows)
+            _write_manifest(skillsets_dir, "harness-engineering", rows)
+            routing_map = fixture_root / "Plugins/harness-engineering/references/routing-map.json"
+            routing_map.parent.mkdir(parents=True)
+            routing_map.write_text("{not-json", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    "python3",
+                    ROUTE_SCRIPT,
+                    "--skill-set",
+                    "harness-engineering",
+                    "--task",
+                    "brainstorm a PR plan",
+                    "--skillsets-dir",
+                    str(skillsets_dir),
+                    "--json",
+                ],
+                cwd=fixture_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "routing_policy_invalid")
+        self.assertIsNone(payload["selected"])
+        self.assertIn("Invalid Harness Engineering routing map", payload["error"])
 
     def test_manifest_with_missing_source_path_returns_invalid(self) -> None:
         payload = self._route(

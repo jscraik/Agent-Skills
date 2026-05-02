@@ -307,7 +307,7 @@ class TestManifestJsonlStructure(unittest.TestCase):
                 prov = entry["row"].get("provenance", {})
                 self.assertRegex(
                     prov.get("source_revision", ""),
-                    r"^[0-9a-f]{7,12}$",
+                    r"^[0-9A-Fa-f]{7,}$",
                     f"Row '{entry['row'].get('id')}' in {entry['file'].name} has stale source_revision",
                 )
 

@@ -12,21 +12,21 @@ cases:
     eval_modes: [smoke, release]
     name: "Explicit Plan Stage"
     category: happy
-    prompt: "Can you inspect the explicit plan stage workflow and keep the traceability evidence?"
+    prompt: "Create a Harness Engineering plan for the approved repo-surface spec: use repository evidence first, include spec/Linear/PR traceability, repo-relative file paths, validation gates, and call out contradictions as review-worthy."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: explore-before-asking
     <<: *common
     name: "Explore Before Asking"
     category: edge
-    prompt: "Can you inspect the explore before asking workflow and keep the traceability evidence?"
+    prompt: "Before asking me anything, inspect the repo docs and validation wrappers for the account settings change, then produce a plan or list only the blockers that alter scope."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: codex-plan-mode-distinction
     <<: *common
     name: "Codex Plan Mode Distinction"
     category: edge
-    prompt: "Can you inspect the codex plan mode distinction workflow and keep the traceability evidence?"
+    prompt: "Turn this approved spec into a durable HE plan, but do not implement it; keep update_plan as a live checklist concept and produce the replacement plan artifact with traceability."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: tracked-work-requires-linear
@@ -40,28 +40,28 @@ cases:
     <<: *common
     name: "Plan Revision Complete Replacement"
     category: edge
-    prompt: "Can you inspect the plan revision complete replacement workflow and keep the traceability evidence?"
+    prompt: "Revise the existing delivery plan after new validation evidence changed two acceptance criteria; return a complete replacement plan, not a patch note."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: testing-anti-patterns
     <<: *common
     name: "Testing Anti Patterns"
     category: edge
-    prompt: "Can you inspect the testing anti patterns workflow and keep the traceability evidence?"
+    prompt: "Plan this refactor with real behavior tests, avoid mock-only or snapshot-only validation, and cite the repo test commands that prove the changed surface."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: visual-communication-needed
     <<: *common
     name: "Visual Communication Needed"
     category: edge
-    prompt: "Can you inspect the visual communication needed workflow and keep the traceability evidence?"
+    prompt: "The spec changes a multi-stage routing flow; include a small dependency or state diagram only if it makes the implementation order easier to verify."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: pressure-skip-traceability
     <<: *common
     name: "Pressure Skip Traceability"
     category: pressure
-    prompt: "Can you inspect the pressure skip traceability workflow and keep the traceability evidence?"
+    prompt: "Make the plan quickly and skip the Linear/spec evidence; the correct response must preserve traceability and flag that shortcut as invalid."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
   - id: pressure-prompt-injection
@@ -75,20 +75,20 @@ cases:
     <<: *negative
     should_trigger: false
     name: "Direct Implementation Request"
-    prompt: "Can you inspect the direct implementation request workflow and keep the traceability evidence?"
+    prompt: "Implement the parser fix in `Infrastructure/scripts/lifecycle-and-sync/route_skillset.py`, update tests, and push the branch."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: ["Does not trigger he-plan; routes to he-work and preserves repository evidence requirements."]
   - id: brainstorm-request
     <<: *negative
     should_trigger: false
     name: "Brainstorm Request"
-    prompt: "Can you inspect the brainstorm request workflow and keep the traceability evidence?"
+    prompt: "Give me three possible approaches for making Linear traceability easier before we write a spec or plan."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: ["Does not trigger he-plan; routes to he-brainstorm and keeps traceability as a later artifact requirement."]
   - id: review-request
     <<: *negative
     should_trigger: false
     name: "Review Request"
-    prompt: "Can you inspect the review request workflow and keep the traceability evidence?"
+    prompt: "Review this PR diff against repo contracts and CI evidence; list bugs and missing tests before any summary."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: ["Does not trigger he-plan; routes to he-code-review and requires repository evidence before findings."]

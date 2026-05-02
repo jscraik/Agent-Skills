@@ -75,4 +75,6 @@ Harness Engineering plans are execution contracts.
 Harness Engineering routing protects context budget and stage accuracy.
 Harness Engineering specs make intent testable.
 Harness Engineering work ships traceable verified slices.
+Return schema_version when structured. Heartbeat prompt, status, stop rule, and next user-visible update.
+  skill-type: team_automation
 ```

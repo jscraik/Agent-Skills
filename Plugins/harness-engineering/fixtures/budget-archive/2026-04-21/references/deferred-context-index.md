@@ -340,12 +340,14 @@ description: Route ambiguous Harness Engineering requests to one lifecycle stage
 
 The PR 145 review-fix pass preserved representative removed lines for the changed compact entrypoints:
 
+```text
 3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
 2. Clarify objective, constraints, users, non-goals, and unknowns one question at a time.
 automation_status: "<created | needs-user-action | blocked>"
 - Optional related Linear QA issues and their blocker relationships.
 1. Load the archived full guide and references before drafting.
 3. Read the relevant `CONTEXT.md` when domain terms govern behavior, and keep implementation names aligned unless the plan explicitly says otherwise.
+```
 - `references/review-modes.md`, `references/findings-and-todos.md`, `references/contract.yaml`
 - start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
 - hand the completed spec to `he-plan` when the user wants execution sequencing

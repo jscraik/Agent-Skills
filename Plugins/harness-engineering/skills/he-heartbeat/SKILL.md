@@ -10,7 +10,7 @@ Use when monitoring, wakeups, until-green loops, or follow-up automation is requ
 ## Inputs
 Target thread/workspace, cadence, stop condition, issue/PR/check links.
 ## Outputs
-Return schema_version when structured. Heartbeat prompt, status, stop rule, and next user-visible update.
+Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
 ## Procedure
 Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations.
 ## Validation

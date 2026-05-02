@@ -15,7 +15,7 @@ The active spine is intentionally small: `he-router`, `he-brainstorm`, `he-spec`
 | `he-deepen-spec` | `he-spec` | deepen existing spec | `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-deepen-spec/` |
 | `he-deepen-plan` | `he-plan` | deepen existing plan | `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-deepen-plan/` |
 | `he-refine` | `he-improve` | refinement loop with browser or artifact evidence | `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-refine/` |
-| `he-compound-refresh` | `he-compound` | refresh, resume, or re-check compound run state | `Plugins/harness-engineering/fixtures/preserved-context/skills/he-compound-refresh/` |
+| `he-compound-refresh` | `he-compound` | refresh, resume, or re-check compound run state | `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-compound-refresh/` |
 | `he-prune-branches` | `he-router` | hand off to `agent-ops` branch hygiene | `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-prune-branches/` |
 | `he-tdd` | `he-work` | test-first execution posture | `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-tdd/` |
 | `he-technical-review` | `he-code-review` | deep technical critique | `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-technical-review/` |
