@@ -56,3 +56,59 @@ def test_he_subagent_routing_validator_rejects_missing_roles(tmp_path: Path) -> 
     assert result.returncode == 1
     assert "maps roles missing from manifest" in result.stderr
     assert "worker" in result.stderr
+
+
+def test_he_subagent_routing_validator_rejects_unmapped_he_relevant_role(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps([{"role": role} for role in [*_mapped_roles(), "web-researcher"]]),
+        encoding="utf-8",
+    )
+
+    routing = json.loads(ROUTING_MAP.read_text(encoding="utf-8"))
+    routing["subagent_inventory_policy"]["he_relevant_roles"].append("web-researcher")
+    patched_routing = tmp_path / "routing-map.json"
+    patched_routing.write_text(json.dumps(routing), encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--manifest",
+            str(manifest),
+            "--routing-map",
+            str(patched_routing),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "HE-relevant manifest roles are not mapped to any stage" in result.stderr
+    assert "web-researcher" in result.stderr
+
+
+def test_he_subagent_routing_validator_rejects_retired_manifest_role(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps([{"role": role} for role in [*_mapped_roles(), "reviewer"]]),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--manifest", str(manifest)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "retired roles are still present in manifest" in result.stderr
+    assert "reviewer" in result.stderr

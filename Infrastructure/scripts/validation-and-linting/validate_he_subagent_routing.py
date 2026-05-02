@@ -81,9 +81,13 @@ def mapped_stage_roles(routing_map: dict[str, Any]) -> dict[str, set[str]]:
 
 
 def validate_roles(
-    mapped_roles_by_stage: dict[str, set[str]], available_roles: set[str]
+    routing_map: dict[str, Any],
+    mapped_roles_by_stage: dict[str, set[str]],
+    available_roles: set[str],
 ) -> list[ValidationError]:
     errors: list[ValidationError] = []
+    mapped_roles = set().union(*mapped_roles_by_stage.values()) if mapped_roles_by_stage else set()
+
     for stage, roles in sorted(mapped_roles_by_stage.items()):
         missing = sorted(roles - available_roles)
         if missing:
@@ -93,6 +97,53 @@ def validate_roles(
                     f"{stage} maps roles missing from manifest: {', '.join(missing)}",
                 )
             )
+
+    inventory_policy = routing_map.get("subagent_inventory_policy")
+    if not isinstance(inventory_policy, dict):
+        errors.append(
+            ValidationError(
+                ROUTING_MAP,
+                "missing subagent_inventory_policy object for HE-relevant role governance",
+            )
+        )
+        return errors
+
+    he_relevant_roles = inventory_policy.get("he_relevant_roles", [])
+    if not isinstance(he_relevant_roles, list) or not all(
+        isinstance(role, str) for role in he_relevant_roles
+    ):
+        errors.append(
+            ValidationError(ROUTING_MAP, "subagent_inventory_policy.he_relevant_roles must be strings")
+        )
+    else:
+        unmapped_relevant = sorted((set(he_relevant_roles) & available_roles) - mapped_roles)
+        if unmapped_relevant:
+            errors.append(
+                ValidationError(
+                    ROUTING_MAP,
+                    "HE-relevant manifest roles are not mapped to any stage: "
+                    + ", ".join(unmapped_relevant),
+                )
+            )
+
+    retired_roles = inventory_policy.get("retired_roles", [])
+    if not isinstance(retired_roles, list) or not all(
+        isinstance(role, str) for role in retired_roles
+    ):
+        errors.append(
+            ValidationError(ROUTING_MAP, "subagent_inventory_policy.retired_roles must be strings")
+        )
+    else:
+        present_retired = sorted(set(retired_roles) & available_roles)
+        if present_retired:
+            errors.append(
+                ValidationError(
+                    ROUTING_MAP,
+                    "retired roles are still present in manifest: "
+                    + ", ".join(present_retired),
+                )
+            )
+
     return errors
 
 
@@ -172,14 +223,20 @@ def main() -> int:
         default=DEFAULT_MANIFEST,
         help="Path to codex agents manifest; defaults to ~/.codex/agents/manifest.json.",
     )
+    parser.add_argument(
+        "--routing-map",
+        type=Path,
+        default=ROUTING_MAP,
+        help="Path to Harness Engineering routing map; defaults to plugin routing-map.json.",
+    )
     args = parser.parse_args()
 
     try:
-        routing_map = load_json(ROUTING_MAP)
+        routing_map = load_json(args.routing_map)
         mapped_roles = mapped_stage_roles(routing_map)
         available_roles = manifest_roles(args.manifest.expanduser())
         errors = [
-            *validate_roles(mapped_roles, available_roles),
+            *validate_roles(routing_map, mapped_roles, available_roles),
             *validate_reference_docs(),
             *validate_stage_entrypoints(),
             *validate_router_fragments(),

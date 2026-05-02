@@ -28,7 +28,7 @@ Do not hand-edit runtime projections.
 - `autofix` — Review, validate, and fix every current unresolved CodeRabbit thread and Codex P1-P3 finding. Use when PR review feedback needs approved fixes with safety checks and validation evidence.
 - `autoresearch` — Analyze and validate bounded autonomous experiment loops with baselines, hypothesis patches, metrics, and keep/discard/block decisions. Use when $autoresearch is named or a repo/skill needs evidence-backed research iterations.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
-- `codex-agent-creator` — Create or validate Codex custom subagent TOML files. Use this skill when users need agent config, install, or bounded orchestration.
+- `codex-agent-creator` — Use when creating, installing, validating, folding, or troubleshooting Codex custom subagent role TOML and discoverability config.
 - `codex-automation-architect` — Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.
 - `codex-hooks-builder` — Create, audit, and validate Codex hook packs when repo-local or user-level .codex installs need hook runtime files or hook-script hardening.
 - `coding-harness` — Install, update, audit, diagnose, and explain @brainwav/coding-harness when repository governance, harness init, CI migration, or action-sync needs live command evidence.

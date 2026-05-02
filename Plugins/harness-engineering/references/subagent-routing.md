@@ -13,6 +13,13 @@ Use `~/.codex/agents/manifest.json` as the runtime availability source for subag
 
 Do not invent or prefer `he-*` role aliases. Stage names use the `he-*` prefix; subagent role names must be the exact canonical role names from `routing-map.json` and must resolve in the runtime manifest before they are launched.
 
+## Inventory Policy
+`subagent_inventory_policy` in `routing-map.json` classifies installed Codex agents:
+
+- `he_relevant_roles` must be mapped to at least one Harness Engineering stage whenever they exist in the manifest.
+- `global_non_he_roles` are intentionally kept outside the Harness Engineering lifecycle because they belong to separate plugin, CI, design, security, or operator workflows.
+- `retired_roles` must not remain in the runtime manifest. If one is needed again, reintroduce it through `[[codex-agent-creator]]` with a concrete stage mapping or explicit global-owner rationale.
+
 ## Resolution Contract
 1. Select exactly one Harness Engineering stage.
 2. Load the selected stage from `subagent_stage_map` in `routing-map.json`.

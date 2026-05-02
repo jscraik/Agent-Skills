@@ -660,6 +660,50 @@
       "reason": "Harness Engineering may produce the implementation or review evidence, but release communication and npm handoff artifacts belong to the content-publishing release-notes pipeline."
     }
   ],
+  "subagent_inventory_policy": {
+    "he_relevant_roles": [
+      "adversarial-document-reviewer",
+      "data-migrations-reviewer",
+      "bug-reproduction-validator",
+      "git-history-analyzer",
+      "pattern-recognition-specialist",
+      "project-standards-reviewer",
+      "previous-comments-reviewer",
+      "cli-agent-readiness-reviewer",
+      "dhh-rails-reviewer",
+      "swift-ios-reviewer"
+    ],
+    "global_non_he_roles": [
+      "arscontexta-knowledge-guide",
+      "arscontexta-pipeline-worker",
+      "autoresearch-validator",
+      "circleci",
+      "coderabbit",
+      "design-iterator",
+      "diagram-cli",
+      "figma-design-sync",
+      "git-project-triage",
+      "guardian_subagent",
+      "llm-wiki-validator",
+      "monitor",
+      "plugin-inspector",
+      "pr-comment-resolver",
+      "security-sentinel",
+      "skill-inspector",
+      "slack-researcher",
+      "ui-ux-design",
+      "web-researcher"
+    ],
+    "retired_roles": [
+      "ankane-readme-writer",
+      "every-style-editor",
+      "explorer",
+      "lint",
+      "performance-oracle",
+      "reviewer"
+    ],
+    "guidance": "Every he_relevant role present in the manifest must appear in at least one Harness Engineering stage; global_non_he roles remain intentionally outside HE routing; retired roles must not be present in the runtime manifest."
+  },
   "subagent_stage_map": {
     "he-router": {
       "policy": "manual-only",
@@ -735,7 +779,8 @@
         "architecture-strategist",
         "api-contract-reviewer",
         "data-integrity-guardian",
-        "deployment-verification-agent"
+        "deployment-verification-agent",
+        "adversarial-document-reviewer"
       ],
       "trigger": "delegation requested or deep spec weakness/risk signals present"
     },
@@ -748,7 +793,8 @@
       "conditional_roles": [
         "best-practices-researcher",
         "framework-docs-researcher",
-        "spec-flow-analyzer"
+        "spec-flow-analyzer",
+        "adversarial-document-reviewer"
       ],
       "trigger": "delegation requested or plan depends on external constraints"
     },
@@ -769,7 +815,8 @@
         "architecture-strategist",
         "api-contract-reviewer",
         "data-integrity-guardian",
-        "deployment-verification-agent"
+        "deployment-verification-agent",
+        "adversarial-document-reviewer"
       ],
       "trigger": "delegation requested or deep plan weakness/risk signals present"
     },
@@ -785,7 +832,8 @@
         "worker",
         "testing-reviewer",
         "correctness-reviewer",
-        "performance-reviewer"
+        "performance-reviewer",
+        "pattern-recognition-specialist"
       ],
       "trigger": "delegation requested or experiment-loop complexity/risk signals present"
     },
@@ -819,7 +867,10 @@
         "api-contract-reviewer",
         "deployment-verification-agent",
         "design-implementation-reviewer",
-        "julik-frontend-races-reviewer"
+        "julik-frontend-races-reviewer",
+        "data-migrations-reviewer",
+        "bug-reproduction-validator",
+        "cli-agent-readiness-reviewer"
       ],
       "trigger": "delegation requested, external-delegate mode, or explicit risk signal"
     },
@@ -835,7 +886,9 @@
         "correctness-reviewer",
         "reliability-reviewer",
         "performance-reviewer",
-        "security-reviewer"
+        "security-reviewer",
+        "bug-reproduction-validator",
+        "git-history-analyzer"
       ],
       "trigger": "delegation requested or bug complexity/risk signals present"
     },
@@ -873,7 +926,8 @@
         "data-integrity-guardian",
         "performance-reviewer",
         "architecture-strategist",
-        "code-simplicity-reviewer"
+        "code-simplicity-reviewer",
+        "bug-reproduction-validator"
       ],
       "trigger": "risk signal for behavior slice"
     },
@@ -897,7 +951,15 @@
         "data-integrity-guardian",
         "schema-drift-detector",
         "reliability-reviewer",
-        "deployment-verification-agent"
+        "deployment-verification-agent",
+        "data-migrations-reviewer",
+        "git-history-analyzer",
+        "previous-comments-reviewer",
+        "project-standards-reviewer",
+        "pattern-recognition-specialist",
+        "cli-agent-readiness-reviewer",
+        "dhh-rails-reviewer",
+        "swift-ios-reviewer"
       ],
       "trigger": "language and risk signals from review target"
     },
@@ -924,7 +986,15 @@
         "julik-frontend-races-reviewer",
         "spec-flow-analyzer",
         "feasibility-reviewer",
-        "adversarial-reviewer"
+        "adversarial-reviewer",
+        "data-migrations-reviewer",
+        "git-history-analyzer",
+        "previous-comments-reviewer",
+        "project-standards-reviewer",
+        "pattern-recognition-specialist",
+        "cli-agent-readiness-reviewer",
+        "dhh-rails-reviewer",
+        "swift-ios-reviewer"
       ],
       "trigger": "language/risk/document signals from review target plus external-feedback dispute signals"
     },
@@ -942,7 +1012,8 @@
         "data-migration-expert",
         "deployment-verification-agent",
         "architecture-strategist",
-        "adversarial-reviewer"
+        "adversarial-reviewer",
+        "data-migrations-reviewer"
       ],
       "trigger": "reliability risk domain signal"
     },
