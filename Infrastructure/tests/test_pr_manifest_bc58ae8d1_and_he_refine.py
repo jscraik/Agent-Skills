@@ -127,7 +127,11 @@ class TestAllManifestsParseable(unittest.TestCase):
         for path in manifest_paths:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
                 records = _load_jsonl(path)
-                self.assertGreater(len(records), 0, f"{path.name} must be non-empty")
+                self.assertGreater(
+                    len(records),
+                    0,
+                    f"{path.relative_to(REPO_ROOT)} should not be empty",
+                )
 
 
 if __name__ == "__main__":

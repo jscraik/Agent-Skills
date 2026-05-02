@@ -1955,13 +1955,16 @@ def _refresh_home_plugin_mirrors(
     dry_run: bool,
 ) -> None:
     """
-    Replace managed home plugin mirror copies from canonical Plugins/ sources.
-
-    `~/.agents/plugins` is the live symlink to the canonical source tree. `~/plugins`
-    is a materialized runtime mirror so marketplace paths like `./Plugins/<name>`
-    remain resolvable without aliasing the repo. Every user sync refreshes listed
-    local plugins from `Plugins/marketplace.json`, so plugin edits and updates
-    replace stale runtime copies.
+    Replace the user's home plugin mirror copies from the repository's canonical Plugins/ sources.
+    
+    When run, ensure the home plugins mirror root is a real directory (not a repository-backed symlink), then for each plugin listed in Plugins/marketplace.json replace the corresponding directory under home_plugins_dir with a copy of the repository source, materialize first-level skill aliases, attempt pruning of duplicate command-handle entries, and write a marker file recording the repository source. In dry-run mode, only record planned actions in logs and the provided plan structure.
+    
+    Parameters:
+        plan (dict): Operation plan that will be mutated with a mirror plan and per-plugin entries.
+        logs (list[str]): Mutable log list to append human-readable action messages.
+        repo_root (Path): Repository root containing the Plugins/ directory and marketplace.json.
+        home_plugins_dir (Path): Target directory under the user's home where plugin mirrors are maintained.
+        dry_run (bool): If True, do not perform filesystem mutations; only record intended actions in logs.
     """
     plugins_dir = repo_root / "Plugins"
     mirror_plan = {
