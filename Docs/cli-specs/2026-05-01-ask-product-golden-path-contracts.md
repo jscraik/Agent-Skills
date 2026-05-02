@@ -36,7 +36,7 @@ Captured on 2026-05-01 against branch
 | `./bin/ask runtime budget --json --robot`                                                                                  | Reports `advanced_visible_count: 162`, advisory threshold `60`, `first_level_default_count: 109`, and `budget_status: pass`. | Runtime surface health is available, but agents must know to call it separately and then interpret large JSON.                                               |
 | `./bin/ask repo surface --json`                                                                                            | Reports `status: warning`, `blocking_findings: 4003`, and tracked-surface classifications.                                   | Surface ownership evidence exists, but it is low-level inventory output and not yet combined with repo health or closeout readiness.                         |
 | `./bin/ask repo --help`                                                                                                    | Exposes `status`, `validate`, `check-stability`, `doctor-catalog`, `provider-audit`, and `surface`.                          | There is no namespace-first health command that composes repo, runtime, handle, and surface signals.                                                         |
-| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `proof`, `handles`, and related primitives.                                                         | Goal and skill explanation primitives exist, but product contracts do not yet define how they map to improve, explain, prove, or closeout workflows.         |
+| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `prove`, `handles`, and related primitives.                                                         | Goal and skill explanation primitives exist, but product contracts do not yet define how they map to improve, explain, prove, or closeout workflows.         |
 | `./bin/ask repo doctor-catalog --json --robot`                                                                             | Returns `decision_status: resolved` after `README.md` exposes canonical count `20`.                                          | Catalog parity is separately diagnosable, but product health still needs to surface this blocker when goal routing or closeout depends on it.                |
 | `./bin/ask skills goal "continue implementing the Agent Skills Kit repo surface control-plane plan" --json --robot`        | Returns `intent_unresolved` with `route_decision_status: unresolved_ambiguity`.                                              | Broad goals can remain too ambiguous even after catalog parity is healthy; product flows need sharper repair prompts and next-command guidance.              |
 | `./bin/ask skills goal "use he-work to implement P4 namespace-first product command contracts for JSC-246" --json --robot` | Resolves `he-work` with confidence `0.938`.                                                                                  | Goal routing works when the user names the workflow and phase, which supports a future `skills improve` contract that asks for narrower context when needed. |
@@ -182,7 +182,7 @@ Required data fields:
       }
     ],
     "required_validation": [
-      "./bin/ask skills proof gh-address-comments --json --robot"
+      "./bin/ask skills prove gh-address-comments --json --robot"
     ],
     "sync_actions": [],
     "next_command": "./bin/ask skills explain gh-address-comments --json --robot"
@@ -192,7 +192,7 @@ Required data fields:
 
 Required behavior:
 
-- Reuse existing `skills goal`, `skills route`, `skills proof`, and graph
+- Reuse existing `skills goal`, `skills route`, `skills prove`, and graph
   primitives rather than inventing a second resolver.
 - Separate candidate skill/plugin capabilities from validation and sync actions.
 - Never install, sync, or delete capabilities without an explicit command step.
@@ -271,7 +271,7 @@ Required data fields:
 
 Required behavior:
 
-- Reuse existing `skills proof` where possible.
+- Reuse existing `skills prove` where possible.
 - Separate reachability from quality evidence.
 - Do not claim outcome proof when only structural proof was run.
 

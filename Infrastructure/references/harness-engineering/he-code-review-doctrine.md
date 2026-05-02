@@ -2,7 +2,7 @@
 
 This retained doctrine folds the downloaded review, commit, execute, plan-only, result-review, worker-system, closure, dedupe, low-signal PR, merge, debugging, defense-in-depth, investigation, and debug-skill materials into Harness Engineering terminology. Use it as the detailed reference behind `he-code-review`.
 
-Do not import non-Harness product names from the source material into public comments, review output, or skill documentation.
+Do not import non-Harness product names from the source material into narrative prose, public comments, or skill documentation. Exception: non-Harness product names are permitted within required structured output schema keys (e.g., codex_review.* fields).
 
 ## Readiness Review
 
@@ -34,7 +34,7 @@ Use this lane when the user asks for code review of uncommitted changes, a base 
 
 Return a structured result with:
 
-- `codex_review.findings[]`: `title`, `body`, `confidence_score`, `priority`, and `code_location.absolute_file_path` plus `code_location.line_range`.
+- `codex_review.findings[]`: `title`, `body`, `confidence_score`, `priority`, and `code_location.absolute_file_path` plus `code_location.line_range`. (Note: codex_review.* schema keys may reference non-Harness product names as permitted by the exception in line 5.)
 - `codex_review.overall_correctness`: exactly `patch is correct` or `patch is incorrect`.
 - `codex_review.overall_explanation` and `codex_review.overall_confidence_score`.
 - `evidence_ladder`: completed evidence checks, missing evidence checks, confidence caps applied, and final confidence rationale.
