@@ -30,9 +30,13 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke") -> CallResult:
         path,
         "--eval-mode", mode
     ]
+    timeout = 300
+    if mode == "smoke":
+        cmd.extend(["--model", "gpt-5.4-mini", "--timeout-sec", "300"])
+        timeout = 600
 
     try:
-        process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=300)
+        process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
         result.data["raw_output"] = process.stdout
         result.data["raw_error"] = process.stderr
 
@@ -45,7 +49,7 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke") -> CallResult:
         result.status = "error"
         result.data["raw_output"] = _as_text(e.stdout)
         result.data["raw_error"] = _as_text(e.stderr)
-        result.errors.append(ErrorObject(code="ERR_RUNTIME", message="Evaluation timed out after 300 seconds."))
+        result.errors.append(ErrorObject(code="ERR_RUNTIME", message=f"Evaluation timed out after {timeout} seconds."))
     except OSError as e:
         result.status = "error"
         result.data["raw_output"] = ""

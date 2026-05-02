@@ -11,16 +11,52 @@ inputs:
   - "trigger events"
   - "script runtime"
   - "validation commands"
+  - "current Codex hook runtime docs or schema evidence"
+  - "effective hook sources: user, project, managed, plugin-bundled, or inline config"
 outputs:
   - "hook pack changes"
   - "scaffold or audit notes"
   - "runtime contract"
   - "validation evidence"
   - "rollback steps"
+runtime_contract:
+  feature_keys:
+    current: hooks
+    legacy_alias: codex_hooks
+    requirement: "Prefer hooks and preserve codex_hooks when compatibility validators or installed configs still require it."
+  events:
+    - SessionStart
+    - PreToolUse
+    - PermissionRequest
+    - PostToolUse
+    - UserPromptSubmit
+    - Stop
+  matcher_rules:
+    tool_name_events:
+      - PreToolUse
+      - PermissionRequest
+      - PostToolUse
+    session_start_sources:
+      - startup
+      - resume
+      - clear
+    ignored_matcher_events:
+      - UserPromptSubmit
+      - Stop
+  hook_sources:
+    - user_hooks_json
+    - user_config_inline_hooks
+    - project_hooks_json
+    - project_config_inline_hooks
+    - managed_hooks_directory
+    - plugin_bundled_hooks
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
+  - duplicate_layer_execution
+  - stale_feature_aliases
+  - unmatched_payload_shape
 safety:
   untrusted_inputs: true
   redact_secrets: true
@@ -28,5 +64,7 @@ safety:
 validation:
   - plugin_eval_grade_a
   - strict_skill_audit
+  - hook_json_validation
+  - effective_hook_listing_when_available
 observability: "Report validation commands and outcomes."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
