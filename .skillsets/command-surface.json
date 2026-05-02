@@ -907,11 +907,12 @@
     },
     {
       "command_handle_path": ".agents/skills/he-refine/SKILL.md",
-      "command_visibility": "orchestrator",
-      "description": "Refine Harness Engineering artifacts, plans, specs, or work into clearer action plans. Use when users ask for tightening, simplification, or lifecycle repair.",
+      "command_visibility": "target",
+      "description": "Refine a working feature through browser-first, dev-server-backed polish loops. Use when users ask to start the local app, inspect live behavior, tighten UI/UX, or iterate on implementation quality before final review.",
       "handle": "he-refine",
+      "invoke_via": "harness-engineering",
       "kind": "skill",
-      "level": "compound",
+      "level": "molecule",
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",

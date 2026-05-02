@@ -7,6 +7,8 @@ from typing import List
 from ask.envelope import CallResult, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 
+SCRIPT_TIMEOUT_SECONDS = 60
+
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """
     Collect basic repository metadata and whether agent skills appear to be synced.
@@ -192,7 +194,30 @@ def provider_audit(repo_root: Path) -> CallResult:
         "Infrastructure/scripts/validation-and-linting/verify_provider_policy.py",
         "--json",
     ]
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        result.data["provider_policy"] = {
+            "status": "fail",
+            "raw_stdout": exc.stdout or "",
+            "raw_stderr": exc.stderr or "",
+        }
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="OpenAI provider policy audit timed out.",
+                fix_suggestion="Run the provider policy script directly, inspect for hangs, and retry.",
+            )
+        )
+        return result
     try:
         report = json.loads(process.stdout)
     except json.JSONDecodeError:

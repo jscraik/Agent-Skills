@@ -37,6 +37,12 @@ Validate tracked-work traceability:
 python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/<filename>.md
 ```
 
+Validate tracked-work traceability:
+
+```bash
+python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/<filename>.md
+```
+
 ## General plan template
 Preferred path:
 - `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
