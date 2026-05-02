@@ -48,3 +48,31 @@ The active `he-work` entrypoint keeps Codex execution lessons, Harness Engineeri
 - Active `SKILL.md` files stay concise and routing-safe.
 - Removed operational prose belongs in stage-local `references/*` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`.
 - `fixtures/preserved-context/**` preserves legacy full-stage guides for audit and migration comparison only.
+
+## Heartbeat Archive Preservation
+
+The budget-archive heartbeat fixture intentionally preserves the removed automation fields:
+
+```yaml
+  name: "<automation name>"
+  target_binding: "<current thread | explicit target thread | detached workspace>"
+```
+
+## Active Entrypoint Rewrite Preservation
+
+Recent active-entrypoint tightening moved these replaced lines out of compact `SKILL.md` files:
+
+```text
+Inspect live state; pick stage order; keep Linear/spec/plan/PR links; refresh Project Brain when ~/dev/coding-harness context changes.
+Return schema_version when structured. schema_version, selected stage, source_path, folded mode, blocker, lifecycle exit status.
+Harness Engineering brainstorming makes ambiguity useful without losing evidence.
+Review policy index, evidence_ladder, and Codex-compatible findings must be tight.
+Harness Engineering compounds coordinate state, not ceremony.
+Harness Engineering fixes explain cause before claiming repair.
+Harness Engineering heartbeats keep live work honest.
+Harness Engineering improvement raises reliability without hiding tradeoffs.
+Harness Engineering plans are execution contracts.
+Harness Engineering routing protects context budget and stage accuracy.
+Harness Engineering specs make intent testable.
+Harness Engineering work ships traceable verified slices.
+```

@@ -343,14 +343,18 @@ from pathlib import Path
 import yaml
 
 paths = [
-    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/he-improve/references/example-hard-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/he-improve/references/example-judge-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/he-improve/references/example-hard-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/he-improve/references/example-judge-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
 ]
+missing = [str(path) for path in paths if not path.exists()]
+if missing:
+    raise SystemExit(
+        "[family-gate] ERROR: missing he-improve example spec yaml fixtures:\n  - "
+        + "\n  - ".join(missing)
+    )
 for path in paths:
-    if not path.exists():
-        continue
     with path.open("r", encoding="utf-8") as handle:
         yaml.safe_load(handle.read())
 print("[family-gate] he-improve example spec yaml fixtures passed")

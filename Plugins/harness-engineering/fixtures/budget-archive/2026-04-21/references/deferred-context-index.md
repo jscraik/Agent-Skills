@@ -54,12 +54,6 @@ The router and work-entry compacting pass preserved these previously inline line
 - issue creation/update via `[[gh-workflow]]` or repo tracker
 - Preserved step 8: Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
 
-The router and work-entry compacting pass preserved these previously inline lines:
-
-- `schema_version: 1` when structured output is requested.
-- issue creation/update via `[[gh-workflow]]` or repo tracker
-8. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
-
 The session-evidence and reliability refresh preserved these compacted entrypoint lines:
 
 This entrypoint stays concise and keeps full operational context in archived references.
@@ -333,7 +327,7 @@ description: Route ambiguous Harness Engineering requests to one lifecycle stage
 - Context trimmed for token budget must be linked here or in stage-local `references/*`.
 - Do not delete archived context; move and link it.
 
-## PR 145 Progressive Disclosure Additions
+## Archive: PR 145 Progressive Disclosure Additions
 
 - `he-brainstorm` requirements artifact guide: `deferred-store/skills/he-brainstorm/SKILL.md` lines 48-52 and 66-68 preserve the requirements contract in `fixtures/preserved-context/skills/he-brainstorm/references/requirements-artifact-guide.md`.
 - `he-brainstorm` workflow details: `deferred-store/skills/he-brainstorm/SKILL.md` lines 54-69 preserve stage sequencing in `fixtures/preserved-context/skills/he-brainstorm/references/brainstorm-workflow-details.md`.

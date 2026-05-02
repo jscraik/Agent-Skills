@@ -5,7 +5,7 @@ Keep Harness Engineering stage routing compact without losing stage-specific con
 
 The folders below remain preserved context. When a request uses a folded name, route to the parent stage and load the listed context only if the parent stage needs extra mode detail before acting.
 
-The active spine is intentionally small: `he-router`, `he-brainstorm`, `he-spec`, `he-plan`, `he-work`, `he-code-review`, `he-fix-bugs`, `he-compound`, and `he-heartbeat`. Folded names are compatibility and mode selectors, not separate default routes.
+The active spine is intentionally small: `he-router`, `he-brainstorm`, `he-spec`, `he-plan`, `he-work`, `he-fix-bugs`, `he-improve`, `he-code-review`, `he-heartbeat`, and `he-compound`. Folded names are compatibility and mode selectors, not separate default routes.
 
 ## Folded Stage Map
 

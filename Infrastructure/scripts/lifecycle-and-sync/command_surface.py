@@ -38,6 +38,12 @@ RESERVED_SKILL_HANDLES = {
     "reviewer",
     "reviewers",
 }
+FOLDED_SKILL_HANDLE_ALIASES = {
+    "he-ideate": "he-brainstorm",
+    "he-refine": "he-improve",
+    "he-technical-review": "he-code-review",
+    "he-reliability-review": "he-code-review",
+}
 
 
 @dataclass(frozen=True)
@@ -435,14 +441,15 @@ def validate_skill_handles(handles: list[CommandHandle], *, repo_root_path: Path
 
 
 def resolve_skill_handle(handle: str, *, repo_root_path: Path | None = None) -> dict[str, Any]:
-    normalized = normalize_handle(handle)
+    requested = normalize_handle(handle)
+    normalized = FOLDED_SKILL_HANDLE_ALIASES.get(requested, requested)
     handles = build_skill_handles(repo_root_path=repo_root_path)
     matches = [item for item in handles if item.handle == normalized]
     if not matches:
         return {
             "status": "error",
             "error_code": "unknown_handle",
-            "handle": normalized,
+            "handle": requested,
             "operator_action": "Run `./bin/ask skills handles --json` to list command-visible skill handles.",
         }
     if len(matches) > 1:
@@ -453,7 +460,11 @@ def resolve_skill_handle(handle: str, *, repo_root_path: Path | None = None) -> 
             "matches": [item.to_dict() for item in matches],
             "operator_action": "Rename or remove duplicate command handles before projection.",
         }
-    return {"status": "ok", **matches[0].to_dict()}
+    payload = {"status": "ok", **matches[0].to_dict()}
+    if requested != normalized:
+        payload["requested_handle"] = requested
+        payload["alias_resolution"] = normalized
+    return payload
 
 
 def _reviewer_alias_key(handle: str) -> str:

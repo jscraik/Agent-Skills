@@ -352,7 +352,7 @@ automation_status: "<created | needs-user-action | blocked>"
 - start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
 - hand the completed spec to `he-plan` when the user wants execution sequencing
 
-## PR 145 Progressive Disclosure Additions
+## PR 145 Progressive Disclosure Additions Continued
 
 - `he-spec` full spec guide: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 20 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`.
 - `he-spec` artifact contract: `fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-spec/SKILL.md` lines 21 and 63 point to `fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`.

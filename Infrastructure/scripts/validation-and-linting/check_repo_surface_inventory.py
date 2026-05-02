@@ -14,7 +14,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_ALLOWLIST = REPO_ROOT / "Infrastructure" / "policy" / "repo_surface_allowlist.json"
+DEFAULT_ALLOWLIST = Path("Infrastructure") / "policy" / "repo_surface_allowlist.json"
 
 SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 

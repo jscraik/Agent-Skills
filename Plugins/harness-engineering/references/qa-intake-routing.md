@@ -57,4 +57,4 @@ Create blockers first so later Linear issues can reference real issue IDs. If bl
 - If the Linear app is disconnected or team/project/priority metadata is missing, stop with `linear_status: linear_blocked` and a complete issue payload.
 - If the issue is already filed and ready for diagnosis, route to `he-fix-bugs`.
 - If multiple Linear issues need sequencing, route to `he-plan`.
-- If a repro should become a failing test first, route to `he-tdd`.
+- If a repro should become a failing test first, route to `he-work` with `test-first` posture.

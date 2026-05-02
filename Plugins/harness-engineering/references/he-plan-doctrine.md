@@ -4,8 +4,9 @@ Retained doctrine for `he-plan`; keep the active skill short and load this only 
 
 ## Sources
 
-- Live `/Users/jamiecraik/dev/codex` and codex-repo MCP: Codex Plan Mode behavior, `update_plan` distinction, proposed-plan rendering, and implementation confirmation flow.
-- Uploaded planning references: universal planning, Synthesis, Deepening, Testing Guidance, Visual Guidance, plan handoff, testing anti-patterns, and plan-document review prompts.
+- `Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md` and `Docs/product/agent-capability-control-plane.md`: command-contract and proof expectations.
+- `Plugins/harness-engineering/references/lifecycle-exit-contract.md`, `linear-tracker-gate.md`, and `subagent-call-contract.md`: HE lifecycle, tracker, and delegation contracts.
+- `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-deepen-plan/` and `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/`: preserved planning doctrine and templates from prior source imports.
 
 ## Codex Plan Mode Lessons
 

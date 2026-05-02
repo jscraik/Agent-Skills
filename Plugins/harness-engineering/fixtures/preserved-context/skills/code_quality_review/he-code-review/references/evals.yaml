@@ -131,7 +131,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(Linear|spec|plan|AC|validation|go-with-conditions|no-go)"
+        value: "(?i)\\b(Linear|specification|spec|test plan|acceptance criteria|ACs|AC|validation|go-with-conditions|no-go)\\b"
 
   - id: codex-style-review-thread-readiness
     name: codex style review thread readiness

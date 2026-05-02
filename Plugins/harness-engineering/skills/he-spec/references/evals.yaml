@@ -126,7 +126,7 @@ cases:
     category: negative
     prompt: "Can you make the implementation plan from the approved spec?"
     deterministic_checks: *safe
-    acceptance: ["Emits schema_version: 1 and Linear Acceptance Traceability."]
+    acceptance: ["Does not trigger he-spec and hands off to the implementation-planning stage."]
   - id: non-trigger-work-request
     <<: *negative
     should_trigger: false
@@ -134,4 +134,4 @@ cases:
     category: negative
     prompt: "Can you implement the approved plan now?"
     deterministic_checks: *safe
-    acceptance: ["Emits schema_version: 1 and Linear Acceptance Traceability."]
+    acceptance: ["Does not trigger he-spec and hands off to the implementation stage."]

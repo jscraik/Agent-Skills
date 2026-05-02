@@ -4,7 +4,7 @@ import re
 import sys
 from pathlib import Path
 from typing import List
-from ask.envelope import CallResult, ErrorObject
+from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 
 SCRIPT_TIMEOUT_SECONDS = 60
@@ -253,7 +253,8 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
             - data["repo_surface"]: parsed inventory report dictionary (or a fallback error report on parse failure).
             - data["strict"]: the provided `strict` value.
             - status: "success" when the inventory indicates no blocking failures, otherwise "error".
-            - errors: on failure, one or more ErrorObject entries (code "ERR_VALIDATION") describing the problem and suggested fixes.
+            - errors: on failure, one or more ErrorObject entries describing the problem and suggested fixes.
+              Inventory failures use "ERR_VALIDATION"; inventory command timeouts use "ERR_TIMEOUT".
     """
     result = CallResult()
     cmd = [
@@ -286,7 +287,7 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
         result.data["strict"] = strict
         result.errors.append(
             ErrorObject(
-                code="ERR_TIMEOUT",
+                code=ErrorCode.ERR_TIMEOUT,
                 message=(
                     "Repo surface inventory timed out after "
                     f"{SCRIPT_TIMEOUT_SECONDS} seconds."

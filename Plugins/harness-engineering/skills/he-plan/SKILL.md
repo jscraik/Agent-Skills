@@ -1,6 +1,6 @@
 ---
 name: he-plan
-description: "Create execution-ready Harness Engineering plans from approved specs or issues. Use when sequencing, risk, validation, and handoff are needed before work."
+description: "Use when approved specs or Linear issues need execution-ready HE plans before work."
 metadata:
   skill-type: team_automation
 ---
@@ -15,16 +15,10 @@ Return schema_version when structured. durable plan, complete replacement plan w
 Explore first, ask second; use update_plan only for live progress; turn scope into ordered implementation units.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check dependencies, tests, rollback, and handoff readiness.
+## Failure mode
+If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Constraints
 Redact secrets; do not mutate files in planning. Do not remove important context for budget trimming; move deep context to references.
-## Anti-patterns
-No vague phases, missing validation, or orphan Linear/spec links.
-## Philosophy
-Harness Engineering plans are execution contracts.
-## Examples
-- User says: "Can you inspect this approved spec and make the implementation plan?"
-- User says: "Please revise the plan as a complete replacement plan."
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
-- Assets: `assets/icon-small.png`, `assets/icon-large.png`

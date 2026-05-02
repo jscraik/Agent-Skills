@@ -57,7 +57,7 @@ The next command contracts are specified in
 - `ask repo onboard`
 - `ask skills improve`
 - `ask skills explain`
-- `ask skills prove`
+- `ask skills proof`
 - `ask repo next`
 - `ask repo closeout`
 

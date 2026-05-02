@@ -281,6 +281,7 @@ done
 
 if (( failures > 0 )); then
   echo "[he-progressive] FAIL: progressive-disclosure contract violations detected"
+  echo "[he-progressive] hint: move preserved lines into stage references, ${INDEX_PATH}, or Plugins/harness-engineering/references/folded-skill-context.md"
   exit 1
 fi
 

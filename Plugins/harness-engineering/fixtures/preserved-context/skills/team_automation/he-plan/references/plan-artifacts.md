@@ -37,12 +37,6 @@ Validate tracked-work traceability:
 python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/<filename>.md
 ```
 
-Validate tracked-work traceability:
-
-```bash
-python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/<filename>.md
-```
-
 ## General plan template
 Preferred path:
 - `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
@@ -174,6 +168,7 @@ plan_depth: lightweight|standard|deep
 | Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 | --- | --- | --- | --- | --- | --- |
 | ABC-123 | R1 | SA1 | P0 | AC1 | pending |
+| ABC-123 | R2 | SA2 | P1 | AC2 | pending |
 
 ## Scope Boundaries
 

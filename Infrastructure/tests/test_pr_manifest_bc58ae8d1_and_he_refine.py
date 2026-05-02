@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SKILLSET_DIR = REPO_ROOT / ".skillsets"
 COMMAND_SURFACE_PATH = SKILLSET_DIR / "command-surface.json"
 
-_REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}", re.IGNORECASE)
+_REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}$", re.IGNORECASE)
 
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -95,10 +95,16 @@ class TestCommandSurfaceProjection(unittest.TestCase):
 
     def test_all_handles_have_required_fields(self) -> None:
         required = ("handle", "description", "kind", "provenance", "source_path")
+        provenance_required = ("source_revision", "source_sha256", "generator")
         for entry in self._data.get("handles", []):
             for field in required:
                 with self.subTest(handle=entry.get("handle", "?"), field=field):
                     self.assertIn(field, entry)
+            provenance = entry.get("provenance")
+            self.assertIsInstance(provenance, dict)
+            for field in provenance_required:
+                with self.subTest(handle=entry.get("handle", "?"), provenance_field=field):
+                    self.assertTrue(provenance.get(field))
 
     def test_harness_engineering_handles_use_active_plugin_paths(self) -> None:
         he_handles = [

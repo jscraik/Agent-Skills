@@ -971,15 +971,18 @@ marketing-only rewrite.
 
 ## Next Stage Handoff
 
-Recommended first `he-work` handoff:
+Recommended `he-work` handoff for a fresh replay branch:
 
 ```text
 Before editing code, confirm Linear issue JSC-246 includes the existing spec and
 plan backlink comment.
 
-Implement P0-P2 only: add repo surface ownership policy, a non-destructive
+If replaying from a clean branch, implement P0-P2 only: add repo surface ownership policy, a non-destructive
 surface inventory classifier, and an `./bin/ask repo surface` route with focused
 tests and a live JSON report. Do not delete tracked artifacts in this slice.
+
+For this branch's current state, treat P0-P5 as completed and run closeout
+validation, review-thread cleanup, and PR readiness reporting only.
 ```
 
 Pre-implementation validation:

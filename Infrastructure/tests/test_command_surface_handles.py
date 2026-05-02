@@ -44,6 +44,23 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertEqual(payload["invoke_via"], "harness-engineering")
         self.assertTrue(payload["source_path"].endswith("/he-heartbeat/SKILL.md"))
 
+    def test_command_surface_resolves_folded_he_aliases(self) -> None:
+        aliases = {
+            "he-ideate": "he-brainstorm",
+            "he-refine": "he-improve",
+            "he-technical-review": "he-code-review",
+            "he-reliability-review": "he-code-review",
+        }
+
+        for alias, canonical in aliases.items():
+            with self.subTest(alias=alias):
+                payload = command_surface.resolve_skill_handle(alias, repo_root_path=REPO_ROOT)
+
+                self.assertEqual(payload["status"], "ok")
+                self.assertEqual(payload["handle"], canonical)
+                self.assertEqual(payload["requested_handle"], alias)
+                self.assertEqual(payload["alias_resolution"], canonical)
+
     def test_command_surface_projection_is_generated_from_rooted_manifests(self) -> None:
         payload = command_surface.command_surface_projection(repo_root_path=REPO_ROOT)
 
@@ -253,7 +270,6 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
         repo_root = self.temp_dir / "repo"
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
-        skills_dir = repo_root / ".agents" / "skills"
 
         home = self.temp_dir / "home"
         codex_skills = home / ".codex" / "skills"

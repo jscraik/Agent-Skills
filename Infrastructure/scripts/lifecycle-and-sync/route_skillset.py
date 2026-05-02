@@ -242,15 +242,16 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
             - "row" (dict): The selected manifest row.
             - "confidence" (float): Confidence score for the decision (e.g., 1.0, 0.95, 0.9).
             - "reason" (str): Short explanation of which deterministic rule matched.
-        Returns None if no deterministic HE rule applies or the routing map is missing/invalid.
+        Returns None if no deterministic HE rule applies. Direct HE stage
+        mentions still route when the optional routing map is missing or invalid.
     """
     routing_map_path = repo_root() / "Plugins/harness-engineering/references/routing-map.json"
-    if not routing_map_path.is_file():
-        return None
+    routing_map: dict[str, Any] = {}
     try:
-        routing_map = json.loads(routing_map_path.read_text(encoding="utf-8"))
+        if routing_map_path.is_file():
+            routing_map = json.loads(routing_map_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
-        return None
+        routing_map = {}
 
     task_text = task.lower()
     task_tokens = tokenize(task)
