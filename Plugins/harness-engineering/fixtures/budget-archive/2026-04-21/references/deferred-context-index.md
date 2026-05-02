@@ -303,23 +303,23 @@ description: Route ambiguous Harness Engineering requests to one lifecycle stage
 - Domain-model workflow: `references/domain-model-routing.md`
 - QA intake workflow: `references/qa-intake-routing.md`
 - Deterministic stage routing: `references/deterministic-stage-routing.md`
-- `he-code-review`: `fixtures/preserved-context/skills/he-code-review/`
+- `he-code-review`: `fixtures/preserved-context/skills/code_quality_review/he-code-review/`
 - `he-reliability-review`: `fixtures/preserved-context/skills/code_quality_review/he-reliability-review/`
 - `he-technical-review`: `fixtures/preserved-context/skills/code_quality_review/he-technical-review/`
-- `he-brainstorm`: `fixtures/preserved-context/skills/he-brainstorm/`
-- `he-compound`: `fixtures/preserved-context/skills/he-compound/`
-- `he-compound-refresh`: `fixtures/preserved-context/skills/he-compound-refresh/`
+- `he-brainstorm`: `fixtures/preserved-context/skills/team_automation/he-brainstorm/`
+- `he-compound`: `fixtures/preserved-context/skills/team_automation/he-compound/`
+- `he-compound-refresh`: `fixtures/preserved-context/skills/team_automation/he-compound-refresh/`
 - `he-deepen-plan`: `fixtures/preserved-context/skills/team_automation/he-deepen-plan/`
 - `he-deepen-spec`: `fixtures/preserved-context/skills/team_automation/he-deepen-spec/`
-- `he-fix-bugs`: `fixtures/preserved-context/skills/he-fix-bugs/`
+- `he-fix-bugs`: `fixtures/preserved-context/skills/team_automation/he-fix-bugs/`
 - `he-ideate`: `fixtures/preserved-context/skills/team_automation/he-ideate/`
-- `he-improve`: `fixtures/preserved-context/skills/he-improve/`
-- `he-plan`: `fixtures/preserved-context/skills/he-plan/`
+- `he-improve`: `fixtures/preserved-context/skills/team_automation/he-improve/`
+- `he-plan`: `fixtures/preserved-context/skills/team_automation/he-plan/`
 - `he-prune-branches`: `fixtures/preserved-context/skills/team_automation/he-prune-branches/`
 - `he-refine`: `fixtures/preserved-context/skills/team_automation/he-refine/`
-- `he-spec`: `fixtures/preserved-context/skills/he-spec/`
+- `he-spec`: `fixtures/preserved-context/skills/team_automation/he-spec/`
 - `he-tdd`: `fixtures/preserved-context/skills/team_automation/he-tdd/`
-- `he-work`: `fixtures/preserved-context/skills/he-work/`
+- `he-work`: `fixtures/preserved-context/skills/team_automation/he-work/`
 
 ## Preservation Contract
 
