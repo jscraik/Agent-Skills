@@ -206,9 +206,9 @@ Fail fast: stop at the first failed gate, do not proceed with cleanup edits, and
 ## Progressive Disclosure
 
 - Start here for cleanup routing, safety, workflow, and validation gates.
-- Use `references/contract.yaml` for the machine-readable contract.
-- Use `references/evals.yaml` for benchmark and adversarial prompt cases.
-- Use `references/task-profile.json` for evaluator thresholds.
+- See `references/contract.yaml` for the machine-readable contract.
+- See `references/evals.yaml` for benchmark and adversarial prompt cases.
+- Consult `references/task-profile.json` for evaluator thresholds.
 
 ## See Also
 
