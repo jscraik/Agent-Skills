@@ -18,7 +18,7 @@ Context preservation: Do not remove important context for budget trimming; move 
 
 ## When to use
 
-Use `he-work` when the user wants approved Harness Engineering work implemented with traceable progress and validation evidence.
+Use `he-work` when the user wants implementation of approved Harness Engineering work with traceable progress and validation evidence.
 
 ## Required inputs
 
