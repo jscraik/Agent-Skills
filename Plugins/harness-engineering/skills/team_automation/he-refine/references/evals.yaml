@@ -1,0 +1,94 @@
+schema_version: "2.0"
+
+skill_name: "he-refine"
+
+cases:
+  - id: explicit-refine-stage
+    name: explicit refine stage request
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $he-refine to start the local dev server and polish this in-progress feature with me."
+    acceptance:
+      - type: regex
+        value: "(?i)(he-refine)"
+      - type: regex
+        value: "(?i)(dev server|localhost|browser|iterate|refine|polish)"
+
+  - id: launch-json-preferred
+    name: launch json startup preference
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I already have .codex/launch.json. Use he-refine and use that config first."
+    acceptance:
+      - type: regex
+        value: "(?i)(read-launch-json|launch\\.json|configuration)"
+      - type: regex
+        value: "(?i)(fallback|detect-project-type|resolve-port)"
+
+  - id: framework-auto-detect
+    name: framework detection fallback path
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "No launch config exists. Use he-refine to auto-detect framework and start the server."
+    acceptance:
+      - type: regex
+        value: "(?i)(detect-project-type|dev-server-(rails|next|vite|nuxt|astro|remix|sveltekit|procfile))"
+      - type: regex
+        value: "(?i)(resolve-package-manager|resolve-port)"
+
+  - id: server-probe-failure-handling
+    name: server probe failure handling
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-refine, but assume localhost never comes up in 30 seconds."
+    acceptance:
+      - type: regex
+        value: "(?i)(last 20 lines|log|doesn't come up|ask.*what to do)"
+
+  - id: route-to-work-when-broad-build
+    name: broad implementation should route to he-work
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Implement this full new feature across backend and frontend and ship it."
+    acceptance:
+      - type: not_regex
+        value: "(?i)(he-refine)"
+      - type: regex
+        value: "(?i)(he-work)"
+
+  - id: missing-manifest-fallback
+    name: manifest unavailable fallback guidance
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-refine, but ~/.codex/agents/manifest.json is unavailable."
+    acceptance:
+      - type: regex
+        value: "(?i)(manifest|unavailable|fallback|manual)"
+
+  - id: missing-role-fallback
+    name: missing mapped role fallback guidance
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Use he-refine; mapped roles are missing from the manifest."
+    acceptance:
+      - type: regex
+        value: "(?i)(missing roles|manual|codex-agent-creator)"
+
+metadata:
+  last_updated: "2026-04-20"
+  author: "Codex"
+  review_status: "draft"

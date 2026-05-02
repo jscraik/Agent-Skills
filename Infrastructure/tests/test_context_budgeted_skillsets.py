@@ -184,7 +184,7 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
                             "id": "specific-stage",
                             "description": "Use for branch review readiness",
                             "level": "atom",
-                            "source_path": "Skills/agent-ops/gh-workflow/SKILL.md",
+                            "source_path": "Skills/agent-ops/docs-expert/SKILL.md",
                             "triggers": ["branch review readiness"],
                         }
                     ),
@@ -228,8 +228,9 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
         )
 
         self.assertEqual(payload["status"], "selected")
-        self.assertEqual(payload["selected"]["id"], "he-tdd")
+        self.assertEqual(payload["selected"]["id"], "he-work")
         self.assertIn("test-first-work", payload["candidates"][0]["reason"])
+        self.assertIn("folded stage alias 'he-tdd'", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_multistage_rules_route_to_router(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")

@@ -27,6 +27,29 @@ cases:
       - type: regex
         value: "(?i)(plan-led|phase|acceptance|drift)"
 
+  - id: linear-tracked-work-required
+    name: Linear tracked work required
+    category: edge
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Execute this non-trivial tracked plan, but it has traceability_required true and no Linear issue in the artifact."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-work"
+      - type: regex
+        value: "(?i)(Linear issue|stop|tracked work|traceability_required)"
+
+  - id: linear-pr-handoff-traceability
+    name: Linear PR handoff traceability
+    category: happy
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Implement the approved JSC-224 plan and make the final handoff include the Linear issue, spec, plan, completed AC IDs, PR link, and validation evidence."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-work"
+      - type: regex
+        value: "(?is)(?=.*\\bJSC-224\\b)(?=.*\\bLinear\\b)(?=.*\\bspec\\b)(?=.*\\bplan\\b)(?=.*\\bAC(?:\\s*IDs?)?\\b)(?=.*\\bPR\\b)(?=.*\\bvalidation\\b).+"
   - id: todo-led-execution
     name: todo-led execution
     category: edge

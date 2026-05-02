@@ -1,12 +1,15 @@
 # Project Brain Integration for he-compound
 
-When `.harness/` directory exists, use dual-write to both `docs/solutions/` and Project Brain.
+When `.harness/` directory exists, keep `docs/solutions/` as the primary
+`he-compound` artifact and run Project Brain sync as an explicit follow-up when
+the user requests it or repo instructions require it.
 
-## Dual Write Flow
+## Follow-Up Flow
 
 1. **Primary write**: `docs/solutions/[category]/[filename].md` (canonical)
-2. **Secondary write**: `.harness/knowledge/{domain}/knowledge.md`
-3. **Memory sync**: Local Memory MCP via `observe()`
+2. **Project Brain follow-up**: `.harness/knowledge/{domain}/knowledge.md`
+3. **Memory sync**: Local Memory MCP via `observe()` when available
+4. **Status report**: `synced`, `not_needed`, or `blocked`
 
 ## Domain Mapping
 
@@ -69,9 +72,9 @@ observe({
 
 ## Anti-Patterns
 
-- **Project Brain Miss**: Writing only to docs/solutions/ when .harness/ exists
+- **Project Brain Miss**: Writing only to chat when durable knowledge is required
 - **Duplicate Entries**: Creating multiple knowledge.md entries without checking
-- **Missing MCP Sync**: Forgetting to sync to Local Memory
+- **Hidden Indexing Failure**: Hiding Local Memory indexing failure inside a successful docs/solutions result
 - **Premature Promotion**: Promoting to rules without 3+ confirmations
 
 ## See Also

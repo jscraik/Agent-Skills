@@ -1,0 +1,57 @@
+schema_version: 1
+
+purpose: >
+  Run the Harness Engineering code-review stage for Codex-compatible introduced
+  bug findings plus package-level readiness, traceability, and go/no-go
+  synthesis.
+
+triggers:
+  - the user wants a broad PR or branch review before merge
+  - the user wants Codex-compatible review of uncommitted changes, a base diff, a commit, or a PR patch
+  - the user wants a package-level review rather than only a narrow technical critique
+  - merge readiness depends on proving a PR satisfies linked Linear QA issues
+  - merge readiness depends on resolving Codex, CodeRabbit, Copilot, or other reviewer threads
+
+inputs:
+  - a review target such as PR, branch, current diff, uncommitted changes, commit, latest PR, file path, spec path, plan path, or solution path
+  - intended Codex-compatible mode such as uncommitted, base, commit, custom prompt, or PR patch
+  - relevant diff, files, or artifact
+  - applicable local instruction files for the repo root and touched paths
+  - linked Linear/spec/plan, acceptance IDs, review threads, checks, and validation when available
+  - optional mode modifiers such as report-only, autofix, headless, base:<ref>, or plan:<path>
+
+outputs:
+  - selected review mode and post-review policy
+  - codex_review findings, overall_correctness, overall_explanation, and overall_confidence_score
+  - evidence_ladder with completed checks, missing checks, confidence caps applied, and confidence rationale
+  - harness_readiness verdict, traceability states, validation state, review-thread state, and next action
+  - severity-ranked readiness findings
+  - go, go-with-conditions, or no-go recommendation
+  - traceability assessment
+  - security and supply-chain status for relevant PRs
+  - review-thread disposition and next action
+
+non_goals:
+  - implementing fixes unless explicitly in repair/autofix mode
+  - using external claims instead of repo evidence when local evidence is sufficient
+  - running concurrent mutating review loops on the same checkout
+
+risks:
+  - wrong target/base; mitigate with explicit target resolution
+  - stale claims; mitigate with repo-first evidence
+  - false readiness; mitigate with traceability
+  - false-positive code findings; mitigate with eligibility checks, independent lenses, history/context verification, and high-confidence filtering
+  - inflated confidence; mitigate with evidence ladder caps before emitting overall_confidence_score
+  - unresolved review threads; mitigate by classifying each as addressed, disproven, deferred, or blocking
+  - security or supply-chain regressions; mitigate with a dedicated PR security pass
+
+observability: >
+  Record target, base, verdict, blocker count, traceability status, validation
+  commands, security routing, follow-up owner, confidence score, confidence caps,
+  and the exact PR, Linear, spec, plan, CI, review-thread, and artifact
+  references used to justify the verdict.
+
+rollback_procedure: >
+  For review-only output, withdraw the verdict and rerun against the corrected
+  target/base/evidence pack. For autofix or PR-management modes, revert the
+  generated change or reopen the blocked review item with evidence.

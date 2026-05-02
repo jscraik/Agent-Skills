@@ -1,1 +1,52 @@
-../../../fixtures/budget-archive/2026-04-21/skills/he-router/references/contract.yaml
+schema_version: 1
+
+purpose: >
+  Route incoming Harness Engineering requests to the correct single lifecycle
+  stage and return one recommended next step.
+
+triggers:
+  - user asks for Harness Engineering help but does not specify a stage
+  - stage selection is ambiguous across ideation, spec, plan, optimization, implementation, or review
+  - user asks where domain-model, ubiquitous-language, `CONTEXT.md`, glossary, terminology, or domain drift work belongs
+  - user asks to run a QA session, report bugs conversationally, or turn feedback into Linear issues
+  - user asks to use prior sessions, archived sessions, session-collector output, or repeated failures to improve or resume Harness Engineering work
+  - user asks where to resume the Harness Engineering workflow
+
+inputs:
+  - user request text
+  - optional artifact paths
+  - optional constraints such as timeline, risk, or rollout sensitivity
+
+outputs:
+  - one selected HE stage
+  - matched deterministic rule
+  - confidence value such as high, medium, or blocked
+  - one-sentence rationale
+  - one recommended next step
+  - missing input when blocked
+
+non_goals:
+  - implementing product code
+  - running multiple HE stages in one router response
+  - replacing `he-compound` lifecycle orchestration when orchestration is needed
+
+risks:
+  - wrong-stage routing; mitigate with explicit rule checks and one blocking clarification when needed
+  - domain-model route confusion; mitigate by routing fuzzy language to `he-brainstorm`, first contract work to `he-spec`, existing spec contradictions to `he-deepen-spec`, execution drift to `he-work`, and review drift to the review stages
+  - stage sprawl; mitigate by enforcing exactly one primary stage
+  - generic handoff text; mitigate by requiring one stage-specific next step
+  - optimize-vs-implement confusion; mitigate by routing measurable experiment loops to `he-improve`
+  - refine-vs-implement confusion; mitigate by routing browser-first polish loops to `he-refine`
+  - debug-vs-implement confusion; mitigate by routing root-cause bug loops to `he-fix-bugs`
+  - QA-intake-vs-debug confusion; mitigate by routing clear conversational bug reports to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, and multi-issue sequencing to `he-plan`
+  - session-evidence-vs-implementation confusion; mitigate by routing plugin/workflow improvements to `he-improve`, active lifecycle drift to `he-compound-refresh`, recurring waits to `he-heartbeat`, concrete derived tasks to `he-work`, and bug/root-cause evidence to `he-fix-bugs`
+  - branch-hygiene-vs-debug confusion; mitigate by routing stale branch cleanup requests to `he-prune-branches`
+  - lifecycle step skipping; mitigate with deterministic precedence for review, diagnosis, TDD, refinement, optimization, and artifact deepening before generic implementation
+
+observability: >
+  Track stage selection accuracy, fallback frequency when mapped roles are
+  unavailable, and validation pass/fail outcomes for each run.
+
+rollback_procedure: >
+  Restore the previous contract/evals/task-profile files from git, then rerun
+  strict skill audit and plugin-builder validation before re-promoting.

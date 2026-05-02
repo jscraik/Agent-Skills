@@ -1,8 +1,8 @@
 schema_version: 1
 
 purpose: >
-  Route incoming Harness Engineering requests to the correct single next stage and return one
-  exact next skill invocation.
+  Route incoming Harness Engineering requests to the correct single lifecycle
+  stage and return one recommended next step.
 
 triggers:
   - user asks for Harness Engineering help but does not specify a stage
@@ -22,14 +22,8 @@ outputs:
   - matched deterministic rule
   - confidence value such as high, medium, or blocked
   - one-sentence rationale
-  - one exact next skill invocation
-  - subagent policy (`always`, `conditional`, or `manual-only`)
-  - mapped roles for the selected stage (baseline + conditional)
-  - stage-map role selection prefers `he-*` aliases before fallback reviewer-name resolution
-  - available roles resolved from `~/.codex/agents/manifest.json` when present
-  - missing mapped roles
-  - fallback guidance when auto-spawn is unavailable
-  - fallback guidance when mapped roles are missing, including `[[codex-agent-creator]]` install/create path
+  - one recommended next step
+  - missing input when blocked
 
 non_goals:
   - implementing product code
@@ -40,7 +34,7 @@ risks:
   - wrong-stage routing; mitigate with explicit rule checks and one blocking clarification when needed
   - domain-model route confusion; mitigate by routing fuzzy language to `he-brainstorm`, first contract work to `he-spec`, existing spec contradictions to `he-deepen-spec`, execution drift to `he-work`, and review drift to the review stages
   - stage sprawl; mitigate by enforcing exactly one primary stage
-  - generic handoff text; mitigate by requiring one exact next skill invocation
+  - generic handoff text; mitigate by requiring one stage-specific next step
   - optimize-vs-implement confusion; mitigate by routing measurable experiment loops to `he-improve`
   - refine-vs-implement confusion; mitigate by routing browser-first polish loops to `he-refine`
   - debug-vs-implement confusion; mitigate by routing root-cause bug loops to `he-fix-bugs`

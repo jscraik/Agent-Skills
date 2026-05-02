@@ -1,14 +1,31 @@
 # Agent Skills
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+Agent Skills Kit is an **agent capability control plane** for Codex and AI
+coding agents.
+
+Teach your coding agents how your work actually works, then prove they
+remembered.
+
+This repository manages **20 canonical skills** routed through root-level skill
+surfaces, generated `$` command handles, and a larger latent skill/plugin
+catalog behind rooted projections. Author a capability once, route it
+intelligently, validate quality, project it safely into runtime, and keep the
+human and agent command surface small enough to use.
 
 **What this gives you:**
 
-- **Canonical source control** - Author skill and plugin workflows in `Skills/**` and `Plugins/**`, not in generated runtime copies.
-- **Command-visible handles** - Make routed skills mentionable as `$handle` entries without loading full latent workflows into the picker.
-- **Quality gates** - Run structural, security, context-budget, projection, and behavior validation through `ask`.
-- **Agent-native CLI** - Use fuzzy matching, JSON output, trace IDs, helpful errors, and robot mode for automation.
-- **Runtime sync** - Refresh workspace projections, user runtime links, plugin mirrors, and generated command-surface metadata from canonical sources.
+- **Remember workflows** - Keep local review, validation, delivery, and
+  operator judgment in canonical skill/plugin source instead of relying on
+  agent memory.
+- **Keep context small** - Expose root routers and generated `$handle` pointers
+  without loading every workflow body into the picker.
+- **Prevent drift** - Separate canonical source from generated manifests,
+  runtime projections, plugin caches, and historical evidence.
+- **Prove quality** - Use `ask` for audits, runtime budget checks, repo surface
+  ownership, workout/eval evidence, and machine-readable closeout.
+
+Start with the product framing and proof contract:
+[Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
 
 ## Quick start
 
@@ -24,6 +41,10 @@ ask skills handles --json --no-handles
 
 # Validate the repository
 ask repo validate --ephemeral
+
+# Inspect repo surface ownership and runtime budget
+ask repo surface --json
+ask runtime budget --json --robot
 
 # Sync to your runtime
 ask skills sync --scope workspace --projection rooted
@@ -179,19 +200,33 @@ Reviewer handles stay outside the skill command surface and resolve through:
 ask reviewers resolve skillinspector --json
 ```
 
+Repo surface ownership is part of the same control-plane contract. Before
+cleanup, projection changes, or runtime ownership decisions, use:
+
+```bash
+ask repo surface --json
+```
+
+The policy for classifying source, fixtures, generated state, runtime state,
+historical artifacts, and unknown ownership lives in
+[Repo Surface Ownership](Docs/agents/15-repo-surface-ownership.md).
+Namespace-first product command contracts for future health, onboarding,
+improvement, explanation, proof, next-action, and closeout flows live in
+[ask Product Golden Path Command Contracts](Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md).
+
 ## Skill graph (manual topic clusters, non-canonical)
 
 This table is a human-oriented grouping for quick navigation and is not used for parity enforcement. For the current visible runtime list, run `ask skills list --json`. For the full generated command-handle surface, run `ask skills handles --json --no-handles`.
 
-| Topic              | Skills | Examples                                           |
-| ------------------ | ------ | -------------------------------------------------- |
-| agent-ops          | 42     | docs-expert, autofix, unslopify, simplify          |
-| frontend-ui        | 13     | react-ui-patterns, shadcn-ui, frontend-ui-design   |
-| backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer            |
-| product-strategy   | 4      | architecture-interview, chatgpt-apps, interview-me |
-| security-ops       | 7      | 1password, best-practices, create-auth             |
-| content-publishing | 8      | beautiful-mermaid, spreadsheet, visual-explainer   |
-| mobile-native      | 1      | atlas                                              |
+| Topic              | Skills | Examples                                              |
+| ------------------ | ------ | ----------------------------------------------------- |
+| agent-ops          | 40     | docs-expert, autofix, unslopify, simplify             |
+| frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
+| backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
+| product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
+| security-ops       | 5      | 1password, best-practices, create-auth                |
+| content-publishing | 6      | beautiful-mermaid, llm-wiki, visual-explainer         |
+| mobile-native      | 1      | atlas                                                 |
 
 ## Repository layout
 
@@ -204,13 +239,13 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 42 skills: docs-expert, autofix, unslopify, simplify, ...
-|   |-- frontend-ui/          # 13 skills: react-ui-patterns, shadcn-ui, frontend-ui-design, ...
+|   |-- agent-ops/            # 40 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
-|   |-- product-strategy/     #  4 skills: architecture-interview, chatgpt-apps, interview-me, ...
-|   |-- security-ops/         #  7 skills: 1password, best-practices, create-auth, ...
+|   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me
+|   |-- security-ops/         #  5 skills: 1password, best-practices, create-auth, ...
 |   |-- mobile-native/        #  1 skill: atlas
-|   `-- content-publishing/   #  8 skills: beautiful-mermaid, spreadsheet, visual-explainer
+|   `-- content-publishing/   #  6 skills: beautiful-mermaid, llm-wiki, visual-explainer
 |
 |-- Plugins/                  # Canonical plugin packages (skills live inside plugins)
 |   |-- skill-factory/        #   skill-builder, skill-creator, skill-installer, ...
@@ -242,6 +277,9 @@ Ownership boundaries:
 ## Documentation
 
 - **[CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md)** - Complete command reference
+- **[Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md)** - Product promise, golden path, and outcome-proof format
+- **[Repo Surface Ownership](Docs/agents/15-repo-surface-ownership.md)** - Source, generated, runtime, artifact, and cleanup ownership policy
+- **[Product Golden Path Command Contracts](Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)** - Namespace-first `ask` contracts for doctor, onboard, improve, explain, prove, next, and closeout
 - **[Agent Guide](AGENTS.md)** - AI agent workflow patterns
 - **[Skill Index](SKILL.md)** - Generated visible runtime index
 - **[Runtime Projection Modes](Docs/architecture/runtime-projection-modes.md)** - Flat/rooted projection modes, command handles, and sync scope

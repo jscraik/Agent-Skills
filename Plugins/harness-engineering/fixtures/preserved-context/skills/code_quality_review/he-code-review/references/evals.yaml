@@ -4,7 +4,7 @@ skill_name: "he-code-review"
 
 cases:
   - id: explicit-review-stage
-    name: explicit ce review stage
+    name: explicit he review stage
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
@@ -94,6 +94,74 @@ cases:
       - type: regex
         value: "(?i)(protected artifact|discard|docs/plans|docs/solutions)"
 
+  - id: domain-drift-readiness
+    name: domain drift readiness finding
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this branch before merge. It renames Customer to Account in code but does not update CONTEXT.md or the linked Linear issue."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)(domain-language drift|CONTEXT\\.md|Linear|go-with-conditions|no-go)"
+
+  - id: linear-qa-closure-readiness
+    name: linked Linear QA closure readiness
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you review this PR before merge and verify it actually closes the linked Linear QA issues?"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)(Linear|expected behavior|repro|\\bgo\\b|no-go|conditions)"
+
+  - id: linear-traceability-readiness
+    name: Linear spec plan PR traceability readiness
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this PR before merge. The branch mentions JSC-224, but the PR body does not link the Linear issue, spec, plan, AC IDs, or validation evidence."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)Linear"
+      - type: regex
+        value: "(?i)spec"
+      - type: regex
+        value: "(?i)plan"
+      - type: regex
+        value: "(?i)(AC|acceptance)"
+      - type: regex
+        value: "(?i)validation"
+      - type: regex
+        value: "(?i)(go-with-conditions|no-go)"
+
+  - id: codex-style-review-thread-readiness
+    name: codex style review thread readiness
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this PR before merge. It has Codex and CodeRabbit review threads, a dependency lockfile change, and one failing changed-surface check. Tell me the go/no-go call."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)(Codex|CodeRabbit|review thread)"
+      - type: regex
+        value: "(?i)(security|supply-chain)"
+      - type: regex
+        value: "(?i)(changed-surface)"
+      - type: regex
+        value: "(?i)(no-go|go-with-conditions)"
+
   - id: todo-follow-up
     name: todo follow-up lane
     category: edge
@@ -166,6 +234,6 @@ cases:
         value: "(?i)(untrusted input|protected artifact|blockers|cannot|validation)"
 
 metadata:
-  last_updated: "2026-03-30"
+  last_updated: "2026-04-30"
   author: "Codex"
   review_status: "draft"

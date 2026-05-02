@@ -105,6 +105,7 @@ Non-triggers:
   - a UI spec path
   - a clear feature, bug, refactor, or improvement description
 - relevant constraints, success criteria, and linked docs
+- active Linear work item for non-trivial tracked work, including parent/child links, blockers, current status, and branch/PR metadata when available
 - optional platform context such as framework, design system, rollout process, and testing stack
 
 If the core planning source is missing, ask one direct question:
@@ -126,6 +127,8 @@ Do not proceed until the user has supplied a usable planning source.
   - `AC1`, `AC2`, `AC3` for general plans
   - `UAC1`, `UAC2`, `UAC3` for dedicated UI plans
 - traceability from each acceptance item back to a governing spec, brainstorm decision, invariant, or UI `VAC` criterion
+- Linear Work Item Contract in the plan frontmatter for tracked work: `linear_project`, `linear_issue`, `linear_parent`, `linear_children`, `linear_status`, `linear_comment_required`, `branch`, `pr`, and `traceability_required`
+- Linear/spec/plan/PR traceability matrix mapping issue -> source acceptance IDs -> implementation units -> acceptance IDs -> PR evidence
 - exact parallel research support via `repo-research-analyst`, `learnings-researcher`, and conditional external-research roles when needed
 - when a structured status report is requested, include `schema_version: 1`
 
@@ -153,6 +156,7 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - every general-plan phase heading carries a `P`-ID and every general-plan checklist item carries an `AC`-ID
 - every dedicated UI plan phase heading carries a `UP`-ID and every UI checklist item carries a `UAC`-ID
 - every acceptance item is traceable to a spec constraint, brainstorm decision, invariant, or `VAC` source
+- tracked work includes a resolved Linear issue and an explicit traceability matrix that can be completed during PR handoff
 - the plan contains explicit phase exit criteria and execution-control guidance
 - if any required check fails, stop at the first failed gate and do not proceed until it is fixed
 
@@ -168,6 +172,7 @@ Mode selection:
 
 Source resolution order:
 - existing plan path or obvious matching recent plan in `Docs/plans/`
+- active Linear issue from the user request, branch key, existing artifact frontmatter, or tracker context
 - matching recent requirements doc in `docs/brainstorms/*-requirements.md`
 - for general planning:
   - explicit spec path
@@ -182,6 +187,12 @@ Source resolution order:
   - raw UI feature description only
 
 Rules: preserve checkboxes when updating; carry forward problem frame and requirements from source docs; treat specs as source of truth; recommend spec stage if required; bootstrap only when no artifacts exist; reclassify questions (product blockers to `he-brainstorm`, technical stay); classify depth as `lightweight | standard | deep`. Increase depth for multi-phase, high-risk, or cross-boundary work.
+
+Linear resolution rules:
+- Linear is the tracker of record for non-trivial tracked work. GitHub PRs are delivery evidence, not the primary tracker.
+- If the request, branch, existing plan, or source artifact identifies a Linear issue, preserve that identifier in frontmatter and the traceability matrix.
+- If non-trivial tracked work has no Linear issue, stop and request or create one before writing the plan.
+- Preserve parent, child, duplicate, blocking, and blocked-by relationships when multiple Linear issues are involved; do not flatten them into one generic reference.
 
 ### Phase 1: Research local context
 Start inline by default.
@@ -213,6 +224,7 @@ If still too ambiguous to sequence safely, ask one focused follow-up question an
 For `generic-plan`, `standard-plan`, and `ui-enhanced-plan`:
 - use the general-plan template from `Infrastructure/references/plan-artifacts.md`
 - keep stable `P` and `AC` IDs, exact file paths, exit criteria, traceability, Execution Ledger
+- include the Linear Work Item Contract and the Linear/spec/plan/PR traceability matrix when `traceability_required: true`
 - name concrete files/modules when known; do not invent system behavior
 - include optional High-Level Technical Design when sketch/pseudocode validates approach
 - make each implementation unit execution-ready: goal, requirements, dependencies, files, approach, patterns, test scenarios, verification
@@ -261,6 +273,7 @@ After writing, run exact checks and fix failures before presenting options.
 
 - use the verification matrix in `Infrastructure/references/plan-artifacts.md`
 - verify production considerations are documented per `Infrastructure/references/production-considerations.md`
+- verify `traceability_required: true` plans have Linear issue, status, branch, pending or actual PR, source acceptance IDs, plan unit IDs, acceptance IDs, and PR evidence columns
 - patch failures before presenting options
 - if the repo has additional plan-graph or structural linting, run it as an extra non-blocking quality check before handoff
 
@@ -278,7 +291,7 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 - review the plan or refine it directly
 - run `he-code-review`, `he-technical-review`, or `he-deepen-plan` when scrutiny is needed
 - generate a companion UI plan when UI work is in scope
-- start `he-work` (with `[[he-tdd]]` posture if TDD) or hand to `[[gh-workflow]]` for issue creation
+- start `he-work` (with `[[he-tdd]]` posture if TDD) from the active Linear issue, or create/update the Linear issue before execution when the plan is not yet tracked
 - recommend the companion UI plan when the work is UI-heavy and not already covered by a dedicated UI artifact
 
 ## Validation
@@ -287,9 +300,10 @@ Before handoff, initialize planning state from the plan's Execution Ledger, keep
 - verify the plan uses the most authoritative available source and preserves any existing requirements doc or prior plan
 - verify the plan does not contradict the governing spec or UI spec, and that product blockers were not silently converted into technical assumptions
 - verify the correct stable IDs and traceable acceptance rationale are present for the chosen mode
+- verify the Linear Work Item Contract is complete for tracked work and that PR evidence is marked `pending` only until a PR exists
 - verify implementation units name exact file and test-file paths when the work is feature-bearing
 - verify optional technical-design sections stay directional, and rollout, rollback, validation, accessibility, and prototype planning are explicit when relevant
-- verify any tracker handoff is framed as a `[[gh-workflow]]` handoff rather than an inline tracker mutation inside `he-plan`
+- verify any tracker handoff treats Linear as the tracker of record and GitHub PRs as linked delivery evidence
 - report exact failures and the smallest safe fix if a check does not pass
 
 ## Anti-patterns

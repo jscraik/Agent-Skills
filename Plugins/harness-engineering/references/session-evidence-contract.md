@@ -1,76 +1,31 @@
 # Session Evidence Contract
 
-Read when: the user asks about prior Codex sessions, archived sessions, session history, `~/.codex/sessions`, `~/.codex/archived_sessions`, `~/.agents/session-collector`, repeated HE failures, or improvements learned from previous runs.
-
-Harness Engineering consumes session evidence to choose and improve lifecycle work. It does not own the raw telemetry pipeline.
-
-## Source Order
+Read when: prior Codex sessions, archived sessions, repeated HE failures, or learned workflow improvements affect routing.
 
 Use the highest-confidence available source first:
 
-1. `~/.agents/session-collector` for normalized recent session evidence.
-2. `~/.codex/archived_sessions` for durable historical recurrence.
-3. `~/.codex/session_index.jsonl` and `~/.codex/history.jsonl` for fast handle and phrase frequency checks.
-4. `~/.codex/sessions` for current live runtime state only.
+1. `~/.agents/session-collector` normalized evidence.
+2. `~/.codex/archived_sessions` historical recurrence.
+3. `~/.codex/session_index.jsonl` and `~/.codex/history.jsonl` phrase checks.
+4. `~/.codex/sessions` current runtime state.
 
-When running the collector in constrained Codex environments, prefer a temp uv cache:
+Interpret collector output conservatively:
 
-```bash
-cd ~/.agents/session-collector
-UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache \
-uv run --python 3.12 python main.py \
-  --days 30 \
-  --output /private/tmp/he-session-collector-30d.json \
-  --bundle-dir /private/tmp/he-session-collector-30d \
-  --verbose \
-  --codex-sessions-dir ~/.codex/archived_sessions \
-  --codex-sessions-dir ~/.codex/sessions
-```
+- Confirm every `selected_he_stage` against `stage_invocation_templates` in [routing map](routing-map.json) before treating it as a stage. Unknown `he-*` tokens remain `unmapped_signal` evidence until a route is added intentionally.
+- Treat broad blocker labels such as `approval_required`, `network`, `missing_file`, `permission`, and `timeout` as context until corroborated by the same command family, repo/plugin family, validation gate, or exact artifact path.
+- Prefer grouped evidence with session count, candidate count, validation gates, and sanitized labels over raw frequency totals.
+- When many rows share the same broad blocker set, classify the improvement as evidence-classifier hygiene unless exact samples prove a product workflow issue.
 
-Consume `/private/tmp/he-session-collector-30d/harness-engineering-evidence.json` for HE routing signals, `solved-problems.json` for reusable solved patterns, `index.json` for redacted session labels, and `redaction-report.json` before citing evidence in decisions.
+Route by intended outcome:
 
-Use raw archive scans only for narrow searches such as a known session id, exact error string, handle name, or issue phrase.
+- Workflow improvement from prior runs -> `he-improve`.
+- Coverage-gap, workflow-capture, or skillify candidate from collector evidence -> `he-improve` first, then [session evidence skillify triage](session-evidence-skillify-triage.md); only invoke `skill-factory:skillify` after triage returns `skillify-new-skill`.
+- Stale compound handoff, repeated gate failure, or unclear resume state -> `he-compound-refresh`.
+- Waiting on PR, CI, review, Linear, deploy, or validation state -> `he-heartbeat`.
+- Concrete implementation derived from evidence -> `he-work`.
+- Correctness or safety validation from evidence -> `he-technical-review`.
+- Reproduction, deterministic error, or root cause -> `he-fix-bugs`.
 
-## Routing Rules
+Treat noncanonical `he-*` text found in collector output as evidence labels until confirmed in the HE routing map. Do not create skills from path fragments, bundle names, or broad blocker words.
 
-Route session-evidence requests by intended outcome:
-
-- Plugin or workflow improvement from previous runs -> `he-improve`.
-- Active compound run drift, stale handoff, repeated gate failure, or unclear resume state -> `he-compound-refresh`.
-- Recurring follow-up until PR, CI, review, Linear, or validation state changes -> `he-heartbeat`.
-- Concrete implementation tasks already derived from evidence -> `he-work`.
-- Correctness, safety, or review-feedback validity from evidence -> `he-technical-review`.
-- Bug reproduction, failing command, deterministic error, or root cause from evidence -> `he-fix-bugs`.
-
-If the user only asks "what did we learn?" or "what keeps failing?", do the evidence pass first and route to the narrowest next HE stage after findings are known.
-
-## Evidence Signals
-
-Classify recurrence into explicit action, not background prose:
-
-- Legacy `ce-*` handle drift or misspellings such as `ce-ttd` -> add router alias, migration, or eval coverage.
-- Repeated `plan`, `fix`, `validate`, `continue`, or "review findings" loops -> strengthen phase boundaries and completion gates.
-- Repeated catalog, routing-map, command-surface, or picker parity failures -> update source/projection/sync validation gates.
-- Review-before-work mistakes -> enforce a reviewer-completion barrier before implementation starts.
-- Unresolved Codex, CodeRabbit, or GitHub review threads -> route to review-thread closure before merge readiness.
-- PR, CI, Linear, deploy, or validation waits -> create or record a heartbeat unless the user explicitly wants a one-off check.
-- `.git` permission, `index.lock`, uv cache, or sandbox permission blockers -> classify as environment blockers with exact failing command evidence.
-
-## Output Contract
-
-When session evidence influences a Harness Engineering decision, include:
-
-```yaml
-schema_version: 1
-evidence_sources:
-  - "<collector bundle artifact or exact path>"
-recurring_signals:
-  - "<signal and count or sample>"
-selected_he_stage: "<he-* stage>"
-actions:
-  - "<actionable change or validation>"
-blocked:
-  - "<blocker with exact command or path>"
-```
-
-Do not claim a recurrence from memory alone. Cite the source path, collector output, index count, or exact sample used.
+When session evidence influences a decision, cite the collector bundle, source path, index count, or exact sample. Do not claim recurrence from memory alone.

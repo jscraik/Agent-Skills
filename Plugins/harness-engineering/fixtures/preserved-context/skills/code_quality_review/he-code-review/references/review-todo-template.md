@@ -2,8 +2,11 @@
 status: pending
 priority: P2
 issue_id: "003"
-tags: [code-review, quality]
-dependencies: []
+tags:
+  - code-review
+  - "quality"
+dependencies:
+  - "none"
 ---
 
 # 003 stabilize-orchestrator-state-reconciliation

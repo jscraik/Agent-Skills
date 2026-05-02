@@ -90,6 +90,81 @@ Collect or infer:
 8. Tell the user how the heartbeat will stop or when it will ask for human
    cancellation.
 
+## Activation Contract
+
+A heartbeat is not active until a runtime automation record exists.
+
+When the runtime exposes an automation tool:
+
+1. Search for an existing matching heartbeat by name, target, prompt, PR, plan,
+   branch, issue, deploy, or thread context.
+2. Prefer updating the existing matching heartbeat over creating a duplicate.
+3. Create or update a `kind=heartbeat` automation attached to the current thread.
+4. Return the automation id, name, status, cadence, destination, and target
+   binding.
+5. Do not describe a heartbeat as created unless automation creation or update
+   succeeded.
+
+If the runtime does not expose an automation tool, or if automation creation
+fails, return `automation.status: blocked` or `automation.status: manual-only`
+with the exact reason and provide the durable prompt for manual creation. Manual
+prompt output is a fallback, not an active heartbeat.
+
+Use this rule when answering whether a heartbeat is working:
+
+```text
+No automation id, no active heartbeat.
+```
+
+## Heartbeat Modes
+
+Classify the heartbeat mode before scheduling. The mode sets the default stage,
+reporting cadence, and stop posture.
+
+| Mode | Use When | Default Stage | Default Reporting |
+| --- | --- | --- | --- |
+| `active_execution` | A plan or implementation lane should keep moving through phases | `he-work` | every wake-up |
+| `review_readiness` | PR checks, mergeability, CodeRabbit, Codex, or approval state may change | `he-code-review` | state-change-only |
+| `blocker_watch` | A known credential, permission, external CI, deploy, or environment blocker may clear | selected stage | blocker changes or repeats |
+| `deploy_watch` | Release, deploy, or service health needs recurring reliability review | `he-reliability-review` | state-change-only |
+| `passive_monitor` | The user wants read-only status monitoring | selected stage | state-change-only |
+
+For `active_execution`, report a concise update on every wake-up that includes
+the live state checked, the selected next unit, actions taken, validation
+outcome, blocker if any, and next expected unit. Do not hide active work behind
+state-change-only reporting.
+
+## Plan Execution Heartbeats
+
+When `heartbeat_mode` is `active_execution` for a plan-led run, include a
+progress cursor in the heartbeat prompt:
+
+- `target_plan`: absolute path to the governing plan.
+- `phase_range`: the approved plan units or checkpoints.
+- `state_source`: plan checklist, implementation evidence, validation evidence,
+  and live git state.
+- `next_step_rule`: choose the first incomplete unit with missing implementation
+  or validation evidence.
+- `completion_gate`: the HE stage or review pass to run after implementation
+  completes.
+
+Each wake-up must keep the plan state synchronized with implementation reality.
+Do not mark a unit complete before validation evidence exists.
+
+## Repair Diagnostics
+
+When the user asks whether a heartbeat is working, inspect the automation
+runtime before answering when a runtime automation tool is available:
+
+1. Confirm whether a matching automation exists.
+2. Confirm `kind=heartbeat`, destination or thread binding, cadence, status, and
+   prompt target.
+3. Report whether it is active, paused, missing, manual-only, or blocked.
+4. If no automation exists, say clearly that only a manual prompt was produced
+   and offer to create the heartbeat.
+5. If the automation exists but is not waking, classify the runtime/tooling
+   blocker with exact evidence.
+
 ## Cadence Parsing
 
 Parse cadence in this order:
@@ -127,16 +202,25 @@ Return a concise structured summary:
 
 ```yaml
 schema_version: 1
+heartbeat_mode: "<active_execution | review_readiness | blocker_watch | deploy_watch | passive_monitor>"
 selected_cadence: "<cadence>"
 parsed_interval: "<normalized interval or default rationale>"
 selected_stage: "$harness-engineering:<he-stage>"
 target: "<target>"
+automation:
+  name: "<automation name>"
+  status: "<created | updated | already-active | blocked | manual-only>"
+  id: "<automation id or null>"
+  kind: "heartbeat"
+  destination: "thread"
+  target_binding: "<current thread | explicit target thread | detached workspace>"
+  active: "<true | false>"
+  next_expected_wakeup: "<cadence-derived expectation>"
 live_checks:
   - "<check>"
 stop_conditions:
   - "<condition>"
 heartbeat_prompt: "<durable prompt payload or path to generated prompt>"
-automation_status: "<created | needs-user-action | blocked>"
 immediate_run: "<pass | fail | blocked | not-run with reason>"
 next_wakeup_behavior: "<what the next wake-up should do>"
 ```

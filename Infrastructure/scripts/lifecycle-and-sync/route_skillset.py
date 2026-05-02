@@ -59,6 +59,20 @@ TOKEN_ALIASES = {
     "verification": "verify",
 }
 
+# Harness Engineering keeps folded stage bodies as preserved context while
+# routing active calls through parent stages.
+HE_FOLDED_STAGE_ALIASES = {
+    "he-compound-refresh": "he-compound",
+    "he-deepen-plan": "he-plan",
+    "he-deepen-spec": "he-spec",
+    "he-ideate": "he-brainstorm",
+    "he-prune-branches": "he-router",
+    "he-refine": "he-improve",
+    "he-reliability-review": "he-code-review",
+    "he-tdd": "he-work",
+    "he-technical-review": "he-code-review",
+}
+
 
 def tokenize(text: str) -> set[str]:
     tokens: set[str] = set()
@@ -179,6 +193,15 @@ def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | Non
     return None
 
 
+def resolve_he_stage_alias(stage_id: str) -> str:
+    return HE_FOLDED_STAGE_ALIASES.get(stage_id, stage_id)
+
+
+def he_row_for_stage(rows: list[dict[str, Any]], stage_id: str) -> tuple[dict[str, Any] | None, str]:
+    resolved_stage_id = resolve_he_stage_alias(stage_id)
+    return row_by_id(rows, resolved_stage_id), resolved_stage_id
+
+
 def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
     return {
         "id": row.get("id"),
@@ -235,14 +258,16 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
         }
     if distinct_mentioned_stages:
         stage_id = distinct_mentioned_stages[0]
-        if stage_id in stage_ids:
-            row = row_by_id(rows, stage_id)
-            if row:
-                return {
-                    "row": row,
-                    "confidence": 1.0,
-                    "reason": "matched deterministic HE rule 'direct-stage-invocation'",
-                }
+        row, resolved_stage_id = he_row_for_stage(rows, stage_id)
+        if row:
+            reason = "matched deterministic HE rule 'direct-stage-invocation'"
+            if resolved_stage_id != stage_id:
+                reason += f" via folded stage alias '{stage_id}'"
+            return {
+                "row": row,
+                "confidence": 1.0,
+                "reason": reason,
+            }
 
     for rule in sorted(routing_map.get("deterministic_decision_order", []), key=lambda item: item.get("priority", 999)):
         route = str(rule.get("route", ""))
@@ -251,13 +276,19 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
             continue
         if not any(signal_matches(task_text, task_tokens, signal) for signal in signals):
             continue
-        if route in stage_ids:
-            row = row_by_id(rows, route)
+        resolved_route = resolve_he_stage_alias(route)
+        if resolved_route in stage_ids:
+            row = row_by_id(rows, resolved_route)
             if row:
+                reason = f"matched deterministic HE rule '{rule.get('rule')}'"
+                if resolved_route != route:
+                    reason += f" via folded stage alias '{route}'"
+                elif rule.get("folded_from"):
+                    reason += f" via folded stage alias '{rule.get('folded_from')}'"
                 return {
                     "row": row,
                     "confidence": 0.95,
-                    "reason": f"matched deterministic HE rule '{rule.get('rule')}'",
+                    "reason": reason,
                 }
         if " or " in route or " -> " in route:
             row = row_by_id(rows, "he-router")
@@ -471,6 +502,21 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "operator_action": "Ask a clarifying question or choose a documented fallback root skill set.",
         }
     selected_confidence, selected_row, _reasons = scored[0]
+    if skill_set == "harness-engineering":
+        selected_id = str(selected_row.get("id", ""))
+        resolved_selected_id = resolve_he_stage_alias(selected_id)
+        if resolved_selected_id != selected_id:
+            selected_row = row_by_id(rows, resolved_selected_id) or selected_row
+            scored[0] = (selected_confidence, selected_row, _reasons)
+            candidates = [
+                {
+                    "id": row.get("id"),
+                    "level": row.get("level"),
+                    "confidence": confidence,
+                    "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
+                }
+                for confidence, row, reasons in scored[:bounded_top_k]
+            ]
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":

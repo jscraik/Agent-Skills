@@ -25,6 +25,7 @@ from ask.commands.plugins import (  # noqa: E402
 from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
+    ProjectionModeDecision,
     ProjectionModeError,
     build_projection_plan_metadata,
     normalize_projection_mode,
@@ -49,6 +50,19 @@ from ask.selection_contract import (  # noqa: E402
     candidate_id,
     canonical_sort_key,
 )
+
+
+@dataclass
+class PluginCacheRefreshReport:
+    """Mutation report for repo-local plugin cache refreshes."""
+
+    writes: list[str]
+    deletes: list[str]
+    logs: list[str]
+
+
+class PluginCacheRefreshError(RuntimeError):
+    """Raised when command-handle pruning cannot safely complete."""
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -103,6 +117,15 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
     return ["python3"]
 
 
+def _subprocess_env_with_uv_cache() -> dict[str, str]:
+    """Return subprocess environment with a sandbox-safe uv cache default."""
+    env = os.environ.copy()
+    if not env.get("UV_CACHE_DIR"):
+        tmp_root = env.get("TMPDIR") or "/tmp"
+        env["UV_CACHE_DIR"] = str(Path(tmp_root) / "agent-skills-uv-cache")
+    return env
+
+
 def _python_command_supports_packages(command: List[str], packages: List[str]) -> bool:
     """Return true when *command* can import every requested package without installation."""
     executable = Path(command[0]).expanduser()
@@ -122,6 +145,7 @@ def _python_command_supports_packages(command: List[str], packages: List[str]) -
             capture_output=True,
             text=True,
             timeout=5,
+            env=_subprocess_env_with_uv_cache(),
         )
     except (OSError, subprocess.TimeoutExpired):
         return False
@@ -172,12 +196,11 @@ STARTER_ARCHETYPES = {
         "he-plan",
         "he-work",
         "he-technical-review",
-        "gh-workflow",
         "docs-expert",
         "context7",
     ),
-    "delivery": ("he-plan", "he-work", "he-review", "gh-workflow", "coding-harness"),
-    "review": ("he-technical-review", "he-review", "security-best-practices"),
+    "delivery": ("he-plan", "he-work", "he-code-review", "coding-harness", "docs-expert"),
+    "review": ("he-technical-review", "he-code-review", "he-reliability-review", "autofix"),
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
@@ -303,6 +326,43 @@ def _starter_entries(entries: list, archetype: str, limit: int) -> list:
     return selected
 
 
+def _command_handle_owner_index(repo_root: Path) -> dict[str, str]:
+    """Return generated command-handle owners keyed by handle name."""
+    try:
+        report = handles_report(repo_root_path=repo_root, include_handles=True)
+    except Exception as exc:  # noqa: BLE001 - command-surface errors must not break skill listing.
+        print(f"warning: failed to load command-handle owner index: {exc}", file=sys.stderr)
+        return {}
+    handles = report.get("handles") if isinstance(report, dict) else []
+    if not isinstance(handles, list):
+        return {}
+    owner_by_handle: dict[str, str] = {}
+    for row in handles:
+        if not isinstance(row, dict):
+            continue
+        handle = str(row.get("handle") or "").strip()
+        owner = str(row.get("owner") or "").strip()
+        if handle and owner:
+            owner_by_handle[handle] = owner
+    return owner_by_handle
+
+
+def _entry_matches_category(entry, category_token: str, owner_by_handle: dict[str, str], repo_root: Path) -> bool:
+    """Match a skill-list category against path/category plus generated handle ownership."""
+    searchable = [
+        str(getattr(entry, "category", "")),
+        str(getattr(entry, "name", "")),
+        str(getattr(entry, "description", "")),
+        owner_by_handle.get(str(getattr(entry, "name", "")), ""),
+    ]
+    source_dir = getattr(entry, "source_dir", None)
+    if isinstance(source_dir, Path):
+        searchable.append(source_dir.as_posix())
+        if source_dir.is_relative_to(repo_root):
+            searchable.append(source_dir.relative_to(repo_root).as_posix())
+    return any(category_token in value.lower() for value in searchable if value)
+
+
 def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list[str]:
     """
     Regenerate root catalog projections from the default catalog surface.
@@ -346,6 +406,18 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
                 updated_readme,
                 count=1,
             )
+        updated_readme = re.sub(
+            r"A governed repository of \*\*skills\*\* for AI coding agents",
+            f"A governed repository of **{catalog_count} skills** for AI coding agents",
+            updated_readme,
+            count=1,
+        )
+        updated_readme = re.sub(
+            r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
+            "A governed **Agent Skills Kit** repository for Codex and AI coding agents",
+            updated_readme,
+            count=1,
+        )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
@@ -392,16 +464,19 @@ def list_skills(
     			- "starter_limit": effective integer limit
     """
     result = CallResult()
+    category_token = category.lower().strip() if category else ""
+    discovery_advanced = bool(advanced or category_token)
     entries = [
         entry
-        for entry in discover_catalog_entries(advanced=advanced)
+        for entry in discover_catalog_entries(advanced=discovery_advanced)
         if entry.source_dir.is_relative_to(repo_root)
     ]
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
+    owner_by_handle = _command_handle_owner_index(repo_root) if category_token else {}
     for entry in entries:
-        if category and category.lower() not in entry.category.lower():
+        if category_token and not _entry_matches_category(entry, category_token, owner_by_handle, repo_root):
             continue
         skills_data.append({
             "name": entry.name,
@@ -411,7 +486,7 @@ def list_skills(
         })
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
-    result.data["advanced_mode"] = bool(advanced)
+    result.data["advanced_mode"] = discovery_advanced
     if starter:
         result.data["starter_mode"] = True
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
@@ -856,14 +931,16 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     python = _get_python_command(["pyyaml", "jsonschema"])
 
     diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
-    diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True)
+    audit_env = _subprocess_env_with_uv_cache()
+
+    diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
     if level == "strict":
         # Security gate (skill_gate.py)
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
         gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
-        gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
         result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
             result.status = "error"
@@ -872,7 +949,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
         # Family benchmarks validation
         family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
-        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
         result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
             summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
@@ -895,7 +972,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         # OpenClaw skill guard
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
         openclaw_cmd = python + [openclaw_script, audit_target_path, "--mode", "both", "--format", "text"]
-        openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True)
+        openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
         result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
             result.status = "error"
@@ -1662,6 +1739,213 @@ def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, d
     return f"Ensured plugin mirror directory: {target}"
 
 
+def _prune_command_handle_skill_entries(
+    repo_root: Path,
+    plugin_name: str,
+    plugin_root: Path,
+) -> tuple[list[str], list[str]]:
+    """Remove plugin skill entries that are already exposed by generated command handles."""
+    skills_root = plugin_root / "skills"
+    if not skills_root.is_dir():
+        return [], []
+    try:
+        report = handles_report(repo_root_path=repo_root, include_handles=True)
+    except Exception as exc:  # noqa: BLE001 - convert command-surface failures into sync errors.
+        raise PluginCacheRefreshError(
+            f"Failed to discover command handles for plugin cache pruning "
+            f"(plugin={plugin_name}, root={plugin_root}): {exc}"
+        ) from exc
+    handles = report.get("handles") if isinstance(report, dict) else []
+    if not isinstance(handles, list):
+        return [], []
+
+    logs: list[str] = []
+    deletes: list[str] = []
+    for row in handles:
+        if not isinstance(row, dict):
+            continue
+        if row.get("owner") != plugin_name:
+            continue
+        command_handle_path = str(row.get("command_handle_path") or "")
+        if not command_handle_path.startswith(".agents/skills/"):
+            continue
+        handle = str(row.get("handle") or "").strip()
+        if not handle or "/" in handle or ".." in handle:
+            continue
+        targets = [skills_root / handle]
+        targets.extend(
+            skill_md.parent
+            for skill_md in skills_root.rglob("SKILL.md")
+            if skill_md.parent.name == handle
+        )
+        for target in sorted(set(targets)):
+            if not (target.exists() or target.is_symlink()):
+                continue
+            if target.is_symlink() or target.is_file():
+                target.unlink()
+            else:
+                shutil.rmtree(target)
+            deletes.append(str(target))
+            logs.append(f"Removed command-handle duplicate plugin skill entry: {target}")
+    return logs, deletes
+
+
+def _plugin_version(source_dir: Path) -> str:
+    """Return the declared plugin version, falling back to the local-dev version."""
+    plugin_json = source_dir / ".codex-plugin" / "plugin.json"
+    try:
+        payload = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "0.1.0"
+    version = str(payload.get("version") or "0.1.0").strip()
+    if not version or "/" in version or ".." in version:
+        return "0.1.0"
+    return version
+
+
+def _replace_plugin_cache_copy(
+    repo_root: Path,
+    plugin_name: str,
+    source_dir: Path,
+    target_dir: Path,
+) -> PluginCacheRefreshReport:
+    """Replace one local plugin cache copy and prune command-handle duplicate entries."""
+    deletes: list[str] = []
+    if target_dir.is_symlink() or target_dir.is_file():
+        deletes.append(str(target_dir))
+        target_dir.unlink()
+    elif target_dir.exists():
+        deletes.append(str(target_dir))
+        shutil.rmtree(target_dir)
+    _copy_directory_contents(source_dir, target_dir)
+    _materialize_first_level_skill_aliases(target_dir)
+    logs, prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+    deletes.extend(prune_deletes)
+    logs.append(f"Replaced local plugin cache: {target_dir} <- {source_dir}")
+    return PluginCacheRefreshReport(writes=[str(target_dir)], deletes=deletes, logs=logs)
+
+
+def _refresh_workspace_plugin_caches(
+    plan: dict,
+    logs: list[str],
+    repo_root: Path,
+    *,
+    dry_run: bool,
+) -> ErrorObject | None:
+    """Refresh repo-local plugin caches that Codex picker paths may scan."""
+    try:
+        marketplace_path, entries = _load_local_marketplace(repo_root)
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        logs.append(f"Skipped workspace plugin cache refresh: {exc}")
+        return None
+
+    try:
+        marketplace_name = json.loads(marketplace_path.read_text(encoding="utf-8")).get("name") or "agent-skills-local"
+    except (OSError, json.JSONDecodeError):
+        marketplace_name = "agent-skills-local"
+    marketplace_name = str(marketplace_name).strip() or "agent-skills-local"
+    if "/" in marketplace_name or ".." in marketplace_name:
+        marketplace_name = "agent-skills-local"
+
+    runtime_cache_root = repo_root / ".agents" / "plugins-runtime" / "cache" / marketplace_name
+    versioned_cache_root = repo_root / "Plugins" / "cache" / marketplace_name
+    plan.setdefault("plugin_cache_writes", [])
+    plan.setdefault("writes", [])
+    plan.setdefault("deletes", [])
+
+    keep_plugin_names = {entry["name"] for entry in entries}
+    try:
+        for entry in entries:
+            plugin_name = entry["name"]
+            if "/" in plugin_name or ".." in plugin_name:
+                logs.append(f"Skipped unsafe plugin cache name: {plugin_name}")
+                continue
+            source_dir = repo_root / entry["path"].removeprefix("./")
+            if not source_dir.is_dir():
+                logs.append(f"Skipped missing plugin cache source: {source_dir}")
+                continue
+            version = _plugin_version(source_dir)
+            runtime_target = runtime_cache_root / plugin_name
+            versioned_target = versioned_cache_root / plugin_name / version
+            planned_writes = [str(runtime_target), str(versioned_target)]
+            plan["plugin_cache_writes"].extend(planned_writes)
+            plan["writes"].extend(planned_writes)
+            if dry_run:
+                logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
+                logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
+                for target in (runtime_target, versioned_target):
+                    if target.exists() or target.is_symlink():
+                        plan["deletes"].append(str(target))
+                plugin_version_root = versioned_cache_root / plugin_name
+                for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
+                    if child == versioned_target or not child.is_dir():
+                        continue
+                    plan["deletes"].append(str(child))
+                    logs.append(f"Would remove stale versioned local plugin cache variant: {child}")
+                continue
+            for target in (runtime_target, versioned_target):
+                report = _replace_plugin_cache_copy(repo_root, plugin_name, source_dir, target)
+                logs.extend(report.logs)
+                plan["deletes"].extend(report.deletes)
+            plugin_version_root = versioned_cache_root / plugin_name
+            for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
+                if child == versioned_target or not child.is_dir():
+                    continue
+                plan["deletes"].append(str(child))
+                shutil.rmtree(child)
+                logs.append(f"Removed stale versioned local plugin cache variant: {child}")
+
+        for cache_root in (runtime_cache_root, versioned_cache_root):
+            if not cache_root.is_dir():
+                continue
+            for child in sorted(cache_root.iterdir()):
+                if child.name in keep_plugin_names or not child.is_dir():
+                    continue
+                plan["deletes"].append(str(child))
+                if dry_run:
+                    logs.append(f"Would remove stale local plugin cache: {child}")
+                    continue
+                shutil.rmtree(child)
+                logs.append(f"Removed stale local plugin cache: {child}")
+    except (OSError, ValueError, PluginCacheRefreshError) as exc:
+        return ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Workspace plugin cache refresh failed: {exc}",
+            fix_suggestion="Check local plugin cache permissions and rerun `./bin/ask skills sync --scope workspace --robot --json`.",
+        )
+    return None
+
+
+def _finalize_skill_sync_result(
+    result: CallResult,
+    plan: dict,
+    logs: list[str],
+    projection_decision: ProjectionModeDecision,
+    *,
+    scope: str,
+    dry_run: bool,
+    status: str,
+) -> CallResult:
+    """Populate common sync result data after all mutations have been planned."""
+    plan["mutation_counts"] = {
+        "writes": len(plan["writes"]),
+        "deletes": len(plan["deletes"]),
+        "symlinks": len(plan["symlinks"]),
+    }
+    result.data["plan"] = plan
+    result.data["logs"] = logs
+    result.data["policy_identity"] = get_policy_identity()
+    result.data["projection_mode"] = projection_decision.projection_mode
+    result.data["projection"] = build_projection_plan_metadata(
+        projection_decision,
+        scope=scope,
+        dry_run=dry_run,
+        warnings=plan["warnings"],
+    )
+    result.status = status
+    return result
+
+
 def _refresh_home_plugin_mirrors(
     plan: dict,
     logs: list[str],
@@ -1723,6 +2007,14 @@ def _refresh_home_plugin_mirrors(
             shutil.rmtree(target_dir)
         _copy_directory_contents(source_dir, target_dir)
         _materialize_first_level_skill_aliases(target_dir)
+        try:
+            prune_logs, _prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+        except PluginCacheRefreshError as exc:
+            raise PluginCacheRefreshError(
+                f"Failed to prune home plugin mirror command-handle duplicates {target_dir}: {exc}"
+            ) from exc
+        else:
+            logs.extend(prune_logs)
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
 
@@ -1968,23 +2260,15 @@ def sync_skills(
                 return result
             _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
             plan["validation_status"] = "pass"
-            plan["mutation_counts"] = {
-                "writes": len(plan["writes"]),
-                "deletes": len(plan["deletes"]),
-                "symlinks": len(plan["symlinks"]),
-            }
-            result.data["plan"] = plan
-            result.data["logs"] = logs
-            result.data["policy_identity"] = get_policy_identity()
-            result.data["projection_mode"] = projection_decision.projection_mode
-            result.data["projection"] = build_projection_plan_metadata(
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
                 projection_decision,
                 scope=scope,
                 dry_run=dry_run,
-                warnings=plan["warnings"],
+                status="success",
             )
-            result.status = "success"
-            return result
         ok, errors = _sync_rooted_projection(
             repo_root,
             dry_run=dry_run,
@@ -2031,23 +2315,27 @@ def sync_skills(
             return result
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        plan["mutation_counts"] = {
-            "writes": len(plan["writes"]),
-            "deletes": len(plan["deletes"]),
-            "symlinks": len(plan["symlinks"]),
-        }
-        result.data["plan"] = plan
-        result.data["logs"] = logs
-        result.data["policy_identity"] = get_policy_identity()
-        result.data["projection_mode"] = projection_decision.projection_mode
-        result.data["projection"] = build_projection_plan_metadata(
+        cache_error = _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        if cache_error:
+            result.errors.append(cache_error)
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                status="error",
+            )
+        return _finalize_skill_sync_result(
+            result,
+            plan,
+            logs,
             projection_decision,
             scope=scope,
             dry_run=dry_run,
-            warnings=plan["warnings"],
+            status="success",
         )
-        result.status = "success"
-        return result
 
     entries = discover_skill_entries(source="repo")
     if scope == "workspace":
@@ -2077,23 +2365,27 @@ def sync_skills(
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
+        cache_error = _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        if cache_error:
+            result.errors.append(cache_error)
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                status="error",
+            )
     elif scope == "user":
         _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
     plan["validation_status"] = "pass"
-    plan["mutation_counts"] = {
-        "writes": len(plan["writes"]),
-        "deletes": len(plan["deletes"]),
-        "symlinks": len(plan["symlinks"]),
-    }
-    result.data["plan"] = plan
-    result.data["logs"] = logs
-    result.data["policy_identity"] = get_policy_identity()
-    result.data["projection_mode"] = projection_decision.projection_mode
-    result.data["projection"] = build_projection_plan_metadata(
+    return _finalize_skill_sync_result(
+        result,
+        plan,
+        logs,
         projection_decision,
         scope=scope,
         dry_run=dry_run,
-        warnings=plan["warnings"],
+        status="success",
     )
-    result.status = "success"
-    return result

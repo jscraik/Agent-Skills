@@ -1,0 +1,45 @@
+schema_version: 1
+
+purpose: >
+  Run the Harness Engineering technical-review stage so diffs, pull requests,
+  specs, plans, and incoming review feedback receive severity-ranked,
+  evidence-backed findings with exact locations and minimal-fix guidance.
+
+triggers:
+  - the user wants a technical review of a PR, branch, diff, file set, spec, or plan
+  - the user asks for engineering risks ranked by severity
+  - the user wants incoming review feedback validated before implementation
+
+inputs:
+  - review target and access to the relevant artifact
+  - optional reviewer feedback items that require verification
+  - stack or risk context for specialist-lens selection
+
+outputs:
+  - schema_version: 1
+  - review_mode
+  - findings
+  - open_questions
+  - next_action
+  - no_critical_findings
+  - feedback_response_plan
+
+non_goals:
+  - implementing fixes during review
+  - broad readiness synthesis better suited to he-code-review
+  - style-only commentary without risk impact
+
+risks:
+  - noisy, low-value findings; mitigate with severity ranking and exact locations
+  - blind implementation of incorrect reviewer feedback; mitigate with explicit verify-before-implement protocol
+  - over-broad fanout; mitigate with smallest specialist set that materially improves confidence
+
+observability: >
+  Track finding counts by severity and review mode, fallback frequency when
+  mapped subagent roles are unavailable, and reviewer-feedback outcomes
+  (`accept`, `clarify`, `push_back_with_evidence`).
+
+rollback_procedure: >
+  Restore the previous contract/evals/task-profile triplet from git when
+  routing or output parsing regresses, then rerun strict audit and
+  plugin-builder validation before re-promoting the rollback.

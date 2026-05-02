@@ -9,6 +9,8 @@ INDEX_PATH='Plugins/harness-engineering/references/deferred-context-index.md'
 INVARIANT_MARKER='Do not remove important context for budget trimming'
 LINK_MARKER='deferred-context-index.md'
 
+python3 Infrastructure/scripts/validation-and-linting/check_he_active_archive_links.py
+
 resolve_base_ref() {
   local base_ref=""
   if git rev-parse --verify '@{upstream}' >/dev/null 2>&1; then
@@ -42,16 +44,16 @@ collect_changed_he_skills() {
   if [[ -n "$base_ref" ]]; then
     while IFS= read -r path; do
       [[ -n "$path" ]] && all_changed+=("$path")
-    done < <(git diff --name-only --diff-filter=ACMR "$base_ref"...HEAD --)
+    done < <(git diff --name-only --diff-filter=ACMRT "$base_ref"...HEAD --)
   fi
 
   while IFS= read -r path; do
     [[ -n "$path" ]] && all_changed+=("$path")
-  done < <(git diff --name-only --diff-filter=ACMR --)
+  done < <(git diff --name-only --diff-filter=ACMRT --)
 
   while IFS= read -r path; do
     [[ -n "$path" ]] && all_changed+=("$path")
-  done < <(git diff --cached --name-only --diff-filter=ACMR --)
+  done < <(git diff --cached --name-only --diff-filter=ACMRT --)
 
   if [[ ${#all_changed[@]} -eq 0 ]]; then
     return 0
@@ -142,6 +144,7 @@ has_context_move_evidence() {
   local f
 
   append_candidate candidates "$INDEX_PATH"
+  append_candidate candidates "Plugins/harness-engineering/references/folded-skill-context.md"
 
   if [[ -d "$ref_dir" ]]; then
     while IFS= read -r -d '' f; do
@@ -168,6 +171,41 @@ has_context_move_evidence() {
       | sort -u
   )
   if [[ ${#removed_lines[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  # Materializing an archived active symlink shows the old link target as a
+  # deleted line. That line is packaging metadata, not skill instruction
+  # context, so it does not need relocation evidence.
+  local context_removed_line=0
+  for moved_line in "${removed_lines[@]}"; do
+    if [[ "$moved_line" != *"fixtures/budget-archive"* ]]; then
+      context_removed_line=1
+      break
+    fi
+  done
+  if (( context_removed_line == 0 )); then
+    return 0
+  fi
+
+  # Git represents a no-final-newline normalization as one deleted line and the
+  # same line re-added. That is not context removal, so do not require relocation
+  # evidence for content that still exists in the changed skill file.
+  local skill_added_blob missing_removed_line=0
+  skill_added_blob="$(
+    collect_unified_diff "$base_ref" "$skill_path" \
+      | awk '
+          /^--- / || /^\+\+\+ / || /^@@/ {next}
+          /^\+/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}
+        '
+  )"
+  for moved_line in "${removed_lines[@]}"; do
+    if ! printf '%s\n' "$skill_added_blob" | grep -Fqx -- "$moved_line"; then
+      missing_removed_line=1
+      break
+    fi
+  done
+  if (( missing_removed_line == 0 )); then
     return 0
   fi
 

@@ -77,6 +77,53 @@ class SkillRouterTests(unittest.TestCase):
             self.assertGreaterEqual(len(candidates), 1)
             self.assertEqual(candidates[0].skill_name, "gh-workflow")
 
+    def test_phrase_match_boosts_dashed_skill_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_skill(
+                root / "harness-engineering",
+                "harness-engineering",
+                "Route Harness Engineering lifecycle and session-evidence requests.",
+            )
+            _write_skill(
+                root / "github" / "gh-address-comments",
+                "gh-address-comments",
+                "Address actionable GitHub pull request review feedback.",
+            )
+
+            skills = discover_skills(root)
+            candidates, _reasons = route(
+                "plan a harness engineering change and then implement it",
+                skills,
+                top_k=2,
+            )
+
+            self.assertGreaterEqual(len(candidates), 1)
+            self.assertEqual(candidates[0].skill_name, "harness-engineering")
+            self.assertIn("skill phrase match", candidates[0].rationale)
+
+    def test_explicit_dashed_skill_handle_is_not_phrase_match(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_skill(
+                root / "harness-engineering",
+                "harness-engineering",
+                "Route Harness Engineering lifecycle and session-evidence requests.",
+            )
+            _write_skill(
+                root / "product" / "brainstorming",
+                "brainstorming",
+                "Explore feature scope and ambiguous product options.",
+            )
+
+            skills = discover_skills(root)
+            candidates, _reasons = route("$harness-engineering now", skills, top_k=2)
+
+            self.assertGreaterEqual(len(candidates), 1)
+            self.assertEqual(candidates[0].skill_name, "harness-engineering")
+            self.assertIn("explicit skill mention", candidates[0].rationale)
+            self.assertNotIn("skill phrase match", candidates[0].rationale)
+
     def test_routing_is_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

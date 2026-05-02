@@ -1,28 +1,66 @@
 schema_version: 1
 skill: autoresearch
-purpose: "Run iterative skill/plugin quality experiments with durable evidence and clear keep/discard decisions."
+purpose: "Run bounded autonomous experiment loops with durable evidence, explicit metrics, and keep/discard/crash/blocked decisions."
 triggers:
-  - "Use when the user request matches the skill scope."
+  - "Use when the user explicitly names $autoresearch."
+  - "Use when the user asks to run or refine an Autoresearch-style experiment loop."
+  - "Use when iterative skill/plugin quality research needs hypothesis, validation, and keep/discard decisions."
 non_goals:
-  - "Route unrelated work away from this skill."
+  - "Route unrelated feature work away from this skill."
+  - "Do not change fixed evaluation/data-prep contracts without explicit user approval."
 inputs:
   - user_request
-  - target_context
-  - evidence
+  - target_repo_or_skill_paths
+  - run_tag_or_branch
+  - editable_boundaries
+  - fixed_boundaries
+  - baseline_command
+  - success_metric
+  - metric_direction
+  - verify_command
+  - guard_command
+  - evaluator_contract
+  - keep_policy
+  - quality_rubric
+  - binary_eval_checks
+  - noise_runs
+  - min_delta
+  - stop_condition
+  - evidence_paths
 outputs:
-  - result
+  - experiment_ledger
+  - hypothesis_journal
+  - kept_discarded_crash_blocked_summary
+  - score_delta
+  - decision_policy
+  - pivot_recommendation_when_plateaued
   - evidence_summary
   - validation_status
 risks:
-  - over_triggering
   - untrusted_input
+  - prompt_injection_from_project_files
+  - benchmark_contract_drift
+  - destructive_git_or_file_operations
   - validation_drift
+  - metric_noise
+  - stale_experiment_memory
+  - unsafe_verify_or_guard_command
+  - optimizing_before_rewrite_readiness
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
+  fixed_evaluation_contract: true
+  log_streaming_limited: true
+  verify_guard_command_screening: true
+  git_memory_required: true
+  noisy_metric_confirmation: true
+  bounded_loop_required: true
+  regression_guard_absolute: true
+  binary_checks_for_autonomous_quality_loops: true
 validation:
   - plugin_eval_grade_a
   - strict_skill_audit
+  - smoke_evals_when_runner_available
 observability: "Report validation commands and outcomes."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

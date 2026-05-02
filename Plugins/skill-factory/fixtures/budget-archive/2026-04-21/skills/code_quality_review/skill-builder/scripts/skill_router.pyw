@@ -37,11 +37,18 @@ def risk_tier(skill: SkillMeta) -> str:
 
 def score_skill(query: str, query_tokens: List[str], skill: SkillMeta) -> Tuple[float, List[str], bool]:
     skill_name_norm = skill.name.lower().replace(":", "-").replace("_", "-")
+    skill_phrase = skill_name_norm.replace("-", " ")
     skill_tokens = set(tokenize(f"{skill.name} {skill.description} {skill.skill_path}"))
     query_set = set(query_tokens)
 
     rationale: List[str] = []
-    explicit = skill_name_norm in query.lower() or f"${skill_name_norm}" in query.lower()
+    lowered_query = query.lower()
+    explicit = bool(
+        re.search(rf"(?<![a-z0-9_\-])\$?{re.escape(skill_name_norm)}(?![a-z0-9_\-])", lowered_query)
+    )
+    phrase_match = bool(
+        re.search(rf"(?<![a-z0-9]){re.escape(skill_phrase)}(?![a-z0-9])", lowered_query)
+    )
     overlap = len(query_set & skill_tokens)
     overlap_ratio = overlap / max(1, len(query_set))
 
@@ -54,6 +61,10 @@ def score_skill(query: str, query_tokens: List[str], skill: SkillMeta) -> Tuple[
     if explicit:
         score += 1.5
         rationale.append("explicit skill mention")
+
+    if phrase_match and not explicit:
+        score += 0.5
+        rationale.append("skill phrase match")
 
     if overlap > 0:
         score += overlap_ratio

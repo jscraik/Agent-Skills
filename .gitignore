@@ -134,6 +134,7 @@ Infrastructure/artifacts/skill-graphs/telemetry/.genome-watermark
 
 Infrastructure/artifacts/policy/
 /artifacts/policy/
+/artifacts/reports/repo-surface/
 
 # Validation evidence policy:
 # - ignore timestamped local run directories by default

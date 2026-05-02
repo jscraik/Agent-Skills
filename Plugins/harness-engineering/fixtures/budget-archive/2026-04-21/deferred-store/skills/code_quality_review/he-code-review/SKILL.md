@@ -5,105 +5,94 @@ metadata:
   skill-type: code_quality_review
 ---
 
-# Progressive Disclosure Entry
+# he-code-review Entry
 
-This entrypoint stays concise and keeps full operational context in archived references.
+Use when package-level readiness, merge risk, release go/no-go, or tracked PR closure is the core question.
 
-## Use
-
-- Use this skill as normal for this Harness Engineering code-review stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
+Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
 
 ## Philosophy
 
-- Prioritize release-risk clarity over commentary volume.
-- Keep findings evidence-backed and action-oriented.
-- Resolve review mode and target scope before analysis starts.
-- Keep mutation boundaries explicit: broad review stays read-focused unless the selected mode allows safe auto-fix work.
+- Prefer concrete blockers over broad commentary.
+- Treat readiness as an evidence problem, not a title or branch-name problem.
 
 ## When to use
 
-- Use when package-level readiness, merge risk, or release go/no-go is the core question.
-- Use when merge readiness depends on proving a PR actually satisfies linked Linear QA issues.
-- Route to `he-technical-review` when deep implementation-level correctness analysis is needed.
+Use `he-code-review` when the user wants a package-level readiness verdict for a PR, branch, diff, or delivery slice.
 
-## Inputs
+## Required inputs
 
-- Review target (PR, branch, diff, plan, or release artifact).
-- Access to changed files, validation logs, and related context.
-- Optional mode modifiers such as `mode:interactive`, `mode:report-only`, `mode:autofix`, `mode:headless`, `base:<ref>`, and `plan:<path>`.
+- PR, branch, diff, commit range, or artifact path under review.
+- Intended base branch, linked Linear issue, spec or plan paths, and acceptance IDs when tracked work is involved.
+- Available CI, reviewer-thread, and validation evidence.
 
-## Outputs
+## Deliverables
 
-- Severity-ranked readiness findings with exact locations.
-- Explicit go/no-go recommendation with blocking conditions.
-- Resolved target mode (`pr-branch-review` or `artifact-review`) and next action.
-- Include `schema_version: 1` when structured output is requested.
+- Severity-ranked readiness findings with exact file or artifact evidence.
+- A `go`, `go-with-conditions`, or `no-go` recommendation.
+- Clear follow-up routing to `he-work`, `autofix`, `security-ops`, or GitHub PR workflow when required.
+
+## Core Contract
+
+- Resolve target, base, mode, and plan/spec links before judging.
+- Build an evidence pack from diff/base, changed files, checks, validations, review threads, Linear issue, branch/PR, spec, plan, and acceptance IDs.
+- Rank only concrete readiness issues as `P0`-`P3`; discard style-only, speculative, duplicate, and protected-artifact cleanup notes.
+- Emit `go`, `go-with-conditions`, or `no-go`.
+- Keep broad review read-focused unless an explicit mode permits safe autofix.
 
 ## Procedure
 
-1. Resolve the target, target mode, and any `mode:` / `base:` / `plan:` overrides before analysis begins.
-2. Fail fast on conflicting review-mode flags instead of guessing which one wins.
-3. Collect repository evidence from the diff, changed files, linked artifacts, validations, and local review context before reaching for external references.
-4. Use the smallest reviewer set that still covers readiness risk; always include agent-operability, institutional learnings, and simplicity lenses.
-5. Review for correctness, regression risk, operability, protected-artifact handling, domain-language drift, and release readiness.
-6. When Linear QA issues are linked, confirm the PR satisfies expected behavior, preserves reproduction coverage, and includes validation evidence before recommending `go`.
-7. Deduplicate and rank findings as `P0`, `P1`, `P2`, or `P3`, then emit an explicit recommendation: `go`, `go-with-conditions`, or `no-go`.
-8. Only allow in-skill mutation when the selected mode explicitly permits safe auto-fixes; otherwise stop after the report.
+1. Resolve target, base, mode, Linear issue, spec, plan, and acceptance IDs.
+2. Build the evidence pack from diff, checks, validation, and review threads.
+3. Rank concrete findings and emit the readiness verdict.
+
+## Linear Readiness
+
+For tracked delivery, verify:
+
+`Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`
+
+Do not treat branch names, PR titles, or resolver claims as closure. A clean `go` requires behavior and validation evidence tied back to Linear and the governing artifacts.
 
 ## Validation
 
-- Ensure each finding includes severity, location, impact, and minimal remediation.
-- Ensure recommendation is explicit (`go`, `go-with-conditions`, `no-go`).
-- Ensure protected artifact cleanup findings are discarded during synthesis.
-- Ensure changed domain terms, aliases, and relationships either match `CONTEXT.md` or are reported as drift.
-- Ensure linked Linear QA issues are closed by behavior and evidence, not just by code proximity.
-- Ensure unresolved `P0` or `P1` findings block a `go` recommendation.
-- Fail fast: stop at first failed gate and do not proceed.
+- Each finding needs severity, exact location, evidence, impact, confidence, and remediation.
+- Block `go` for unresolved `P0`/`P1`, actionable reviewer threads, relevant failing checks, stale conflicts, missing validation, or missing Linear/spec/plan/PR traceability.
+- For PR evidence artifacts, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <artifact-path>` before returning a `go` verdict.
+- Route broad security-sensitive decisions to `security-ops` or a security reviewer.
+- Stop at the first failed gate.
 
 ## Constraints
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not claim readiness without repository evidence.
-- Do not switch a shared checkout for `mode:report-only` or `mode:headless`; require an isolated checkout/worktree or review the current checkout with an explicit base.
-- Do not ask blocking questions in `mode:report-only` or `mode:headless`.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Keep broad reviews read-focused unless an explicit mode permits mutation.
 
 ## Anti-patterns
 
-- Approving high-risk changes without concrete validation evidence.
-- Collapsing multiple blockers into vague summary text without file references.
-- Running maximal reviewer fan-out for simple low-risk changes.
-- Missing a new project term or renamed concept that should update `CONTEXT.md`.
-- Flagging `docs/brainstorms/*`, `docs/plans/*.md`, or `docs/solutions/*.md` for cleanup/removal.
+- Treating CI alone as merge readiness.
+- Approving tracked PRs without Linear/spec/plan/PR traceability.
+- Reporting vague findings without a concrete code or artifact path.
 
 ## Examples
 
-- "When the user asks, `Can you review GitHub PR #482 and tell me whether anything still blocks merge?`"
-- "Please inspect the current branch against `origin/main`, validate the risky changes, and give me the go/no-go call."
-- "Review `Docs/plans/2026-03-23-001-feat-example-plan.md` and tell me whether it is ready for the next workflow stage."
-- "Can you review this PR and verify it actually closes the linked Linear QA issues before we merge?"
+- "Review this PR and verify it closes the linked Linear QA issue."
+- "Check this branch against origin/main and give the go/no-go call."
 
-## Full Context
+## Failure mode
 
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
-- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
-Read when: a review target changes project terminology, `CONTEXT.md`, or Linear issue meaning.
-Read when: readiness depends on linked Linear QA issues, reproduction steps, or expected-behavior evidence.
-- Template: [./review-todo.md.tmpl](./review-todo.md.tmpl)
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
+If the base, target, review scope, or required tracker/spec/plan evidence is missing, stop and request that source instead of giving a false readiness verdict.
 
-## Subagent Routing
+## Gotchas
 
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, route to [codex-agent-creator](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) and provide the exact role names to create or install.
+- Do not treat passing CI alone as merge readiness.
+- Do not resolve reviewer threads from this skill unless explicitly in an autofix or PR-management mode.
+- Keep security-sensitive or policy-sensitive concerns routed to the appropriate specialist.
+
+## References
+
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-code-review/SKILL.full.md`
+- Review flow: `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-code-review/references/codex-review-flow.md`
+- Review modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-code-review/references/review-modes.md`
+- Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
+- Domain and QA routing: `Plugins/harness-engineering/references/domain-model-routing.md`, `Plugins/harness-engineering/references/qa-intake-routing.md`

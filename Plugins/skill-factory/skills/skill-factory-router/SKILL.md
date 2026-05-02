@@ -31,6 +31,7 @@ Route skill lifecycle requests to one primary lane before execution.
 - Selected lane: `skill-creator`, `skill-builder`, `skill-refactor`, `skill-installer`, or `skillify`.
 - One-sentence rationale.
 - Immediate next command or step.
+- For automation, include `schema_version: "1"`, `mode: "route"`, `validation_evidence`, and `blocked_by` when blocked.
 
 ## Procedure
 
@@ -47,6 +48,8 @@ Route skill lifecycle requests to one primary lane before execution.
 4. Harden, audit, validate, benchmark, gate, or fix warnings on an existing skill -> `skill-builder`.
 5. Install, list, import, or verify runtime visibility for external/curated skills -> `skill-installer`.
 6. Analyze skill reliability, failures, coverage gaps, merge/prune/retire options, or portfolio improvement evidence -> `skill-refactor`.
+
+Session-evidence boundary: route completed workflow capture into a new durable skill to `skillify`; route portfolio/session evidence about which existing skills fail, overlap, or should merge/retire to `skill-refactor`.
 
 ## Validation
 

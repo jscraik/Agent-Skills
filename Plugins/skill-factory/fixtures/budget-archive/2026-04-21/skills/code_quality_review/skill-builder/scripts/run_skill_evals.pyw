@@ -995,6 +995,7 @@ def run_codex_exec(
             return 124, "", f"codex exec timed out after {timeout} seconds."
 
         if jsonl_path:
+            jsonl_path.parent.mkdir(parents=True, exist_ok=True)
             jsonl_path.write_text(proc.stdout, encoding="utf-8")
 
         return proc.returncode, proc.stdout, proc.stderr
@@ -1016,7 +1017,7 @@ def run_codex_exec(
     return rc, stdout, stderr, warnings
 
 
-def run_codex_exec(
+def run_alt_codex_exec(
     *,
     workspace_root: Path,
     prompt: str,
@@ -1370,11 +1371,11 @@ def _codex_login_status(
     cmd = [*_codex_cli_prefix(codex_bin), "login", "status"]
     env = _codex_env(codex_bin=codex_bin, codex_home=codex_home)
     try:
-        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10)
+        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=120)
     except FileNotFoundError:
         return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
     except sp.TimeoutExpired:
-        return 124, "", "codex login status timed out after 10 seconds."
+        return 124, "", "codex login status timed out after 120 seconds."
     return proc.returncode, proc.stdout or "", proc.stderr or ""
 
 
@@ -2288,7 +2289,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 elif runner_name == "codex-zai":
                     runner_settings = codex_zai_settings
                     runner_command = codex_zai_command
-                rc, stdout, stderr = run_codex_exec(
+                rc, stdout, stderr = run_alt_codex_exec(
                     workspace_root=workspace_root,
                     prompt=composed_prompt,
                     output_last_message_path=output_path,
@@ -2339,10 +2340,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     fallback_profile=codex_fallback_profile,
                 )
 
+            runner_dir.mkdir(parents=True, exist_ok=True)
             (runner_dir / "stderr.txt").write_text(stderr or "", encoding="utf-8")
             (runner_dir / "stdout.txt").write_text(stdout or "", encoding="utf-8")
 
             output_text = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
+            runner_dir.mkdir(parents=True, exist_ok=True)
             (runner_dir / "final.txt").write_text(output_text, encoding="utf-8")
 
             runner_tier1_failures: List[str] = []

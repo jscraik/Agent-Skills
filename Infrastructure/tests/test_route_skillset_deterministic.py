@@ -7,6 +7,13 @@ from pathlib import Path
 
 ROUTE_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py"
 SOURCE_PATHS = {
+    "he-brainstorm": "Plugins/harness-engineering/skills/team_automation/he-brainstorm/SKILL.md",
+    "he-code-review": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md",
+    "he-ideate": "Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md",
+    "he-router": "Plugins/harness-engineering/skills/he-router/SKILL.md",
+    "he-technical-review": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
+    "he-tdd": "Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md",
+    "he-work": "Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md",
     "plugin-builder": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
     "plugin-creator": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
     "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
@@ -162,6 +169,48 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skillify")
         self.assertIn("skillify-workflow", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_folded_direct_stage_routes_to_parent(self) -> None:
+        payload = self._route(
+            "harness-engineering",
+            "use he-ideate to explore options",
+            [
+                _row("he-brainstorm", "Shape ambiguous requirements and compare directions."),
+                _row("he-ideate", "Generate and compare implementation opportunities."),
+                _row("he-router", "Route Harness Engineering stages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "he-brainstorm")
+        self.assertIn("folded stage alias 'he-ideate'", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_folded_review_stage_routes_to_parent(self) -> None:
+        payload = self._route(
+            "harness-engineering",
+            "run he-technical-review on the PR comments",
+            [
+                _row("he-code-review", "Review PRs for readiness and technical risk."),
+                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-technical-review", "Deep technical review."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "he-code-review")
+        self.assertIn("folded stage alias 'he-technical-review'", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_folded_stage_correctness_still_routes_to_router(self) -> None:
+        payload = self._route(
+            "harness-engineering",
+            "is he-tdd right for this request?",
+            [
+                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-tdd", "Test-first implementation."),
+                _row("he-work", "Implement approved work."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "he-router")
+        self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
 
     def test_manifest_with_missing_source_path_returns_invalid(self) -> None:
         payload = self._route(

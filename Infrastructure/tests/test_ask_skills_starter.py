@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills import list_skills
+from ask.commands.skills import STARTER_ARCHETYPES, list_skills
 
 
 class TestAskSkillsStarter(unittest.TestCase):
@@ -17,12 +17,12 @@ class TestAskSkillsStarter(unittest.TestCase):
         """
         Verify starter-mode skill listing returns a deterministic, archetype-filtered subset.
         
-        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names are exactly ["he-plan", "he-work", "gh-workflow"] in that order.
+        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names are exactly ["he-plan", "he-work", "coding-harness"] in that order.
         """
         entries = [
             SimpleNamespace(name="he-work", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-work", category="Plugins/harness-engineering/skills", description="he-work"),
             SimpleNamespace(name="he-plan", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan", category="Plugins/harness-engineering/skills", description="he-plan"),
-            SimpleNamespace(name="gh-workflow", source_dir=REPO_ROOT / "github" / "gh-workflow", category="github", description="gh"),
+            SimpleNamespace(name="coding-harness", source_dir=REPO_ROOT / "Skills" / "agent-ops" / "coding-harness", category="Skills/agent-ops", description="harness"),
             SimpleNamespace(name="docs-expert", source_dir=REPO_ROOT / "product" / "docs" / "docs-expert", category="product/docs", description="docs"),
             SimpleNamespace(name="other-skill", source_dir=REPO_ROOT / "utilities" / "other", category="utilities", description="other"),
         ]
@@ -34,7 +34,7 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertTrue(result.data["starter_mode"])
         self.assertEqual(result.data["starter_archetype"], "delivery")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(names, ["he-plan", "he-work", "gh-workflow"])
+        self.assertEqual(names, ["he-plan", "he-work", "coding-harness"])
 
     def test_default_list_hides_coderabbit_lane_skills(self) -> None:
         """
@@ -101,6 +101,50 @@ class TestAskSkillsStarter(unittest.TestCase):
         names = [item["name"] for item in result.data["skills"]]
         self.assertEqual(names, ["coderabbit", "code-review"])
         self.assertTrue(result.data.get("advanced_mode"))
+
+    def test_harness_engineering_category_includes_owned_command_handles(self) -> None:
+        entries = [
+            SimpleNamespace(
+                name="harness-engineering",
+                source_dir=REPO_ROOT / ".agents" / "skills" / "harness-engineering",
+                category=".agents/skills",
+                description="Route Harness Engineering work",
+            ),
+            SimpleNamespace(
+                name="he-work",
+                source_dir=REPO_ROOT / ".agents" / "skills" / "he-work",
+                category=".agents/skills",
+                description="Generated command handle",
+            ),
+            SimpleNamespace(
+                name="docs-expert",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                category="Skills/agent-ops",
+                description="Docs skill",
+            ),
+        ]
+        handles_report = {
+            "handles": [
+                {"handle": "harness-engineering", "owner": "harness-engineering"},
+                {"handle": "he-work", "owner": "harness-engineering"},
+            ]
+        }
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries), patch(
+            "ask.commands.skills.handles_report",
+            return_value=handles_report,
+        ):
+            result = list_skills(REPO_ROOT, category="harness-engineering")
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertEqual(names, ["harness-engineering", "he-work"])
+
+    def test_starter_archetypes_do_not_reference_retired_he_review_handle(self) -> None:
+        all_starter_handles = {handle for handles in STARTER_ARCHETYPES.values() for handle in handles}
+        self.assertNotIn("he-review", all_starter_handles)
+        self.assertIn("he-code-review", STARTER_ARCHETYPES["delivery"])
+        self.assertIn("he-code-review", STARTER_ARCHETYPES["review"])
 
 
 if __name__ == "__main__":

@@ -5,113 +5,99 @@ metadata:
   skill-type: team_automation
 ---
 
-# Progressive Disclosure Entry
+# he-plan Entry
 
-This entrypoint stays concise and keeps full operational context in archived references.
+Use when requirements, defects, specs, brainstorms, or Linear QA issues need an implementation-ready plan before `he-work`.
 
-## Use
-
-- Use this skill as normal for the Harness Engineering planning stage.
-- For full stage policy, workflow details, and examples, load the archived full guide.
+Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
 
 ## Philosophy
 
-- Plans should be executable, testable, and constraint-aware.
-- Resolve risk and sequencing ambiguity before coding.
-- Stay in planning mode when directly invoked; ask focused clarifying questions or bootstrap context rather than abandoning the planning workflow.
+- Make plans executable, testable, and traceable.
+- Resolve sequencing risk before coding starts.
 
 ## When to use
 
-- Use when requirements exist and implementation sequencing must be defined.
-- Use before `he-work` when execution tasks and verification strategy are not yet explicit.
-- Use when a spec, brainstorm, bug report, or raw feature description must be turned into a durable implementation plan.
-- Use when multiple related Linear QA issues need dependency ordering, blocker handling, or parallelization decisions.
+Use `he-plan` when the user needs execution sequencing, validation strategy, risk controls, and tracker traceability before implementation.
 
-## Inputs
+## Required inputs
 
-- Source spec, brainstorm output, or defect scope.
-- Optional related Linear QA issues and their blocker relationships.
-- Constraints, dependencies, and risk/compliance requirements.
-- Optional existing plan path to update or deepen.
-- Optional requirements document or recent planning artifact that should be treated as the primary source.
+- A Linear issue, spec, brainstorm, bug report, feature request, or existing plan to revise.
+- Known constraints, source acceptance IDs, relevant repo paths, and required validation evidence.
+- Branch or PR context when the work is already in flight.
 
-## Outputs
+## Deliverables
 
-- Ordered implementation plan with validation intent per task.
-- Ordered Linear QA issue execution sequence, with blocker-first work and independent issues marked parallelizable.
-- Explicit blockers, assumptions, and next-stage recommendation.
-- Domain-readiness decision that confirms canonical terms are stable or routes back upstream.
-- Explicit plan route: `fresh`, `resume`, or `deepen`.
-- Plan depth sized to the work: `lightweight`, `standard`, or `deep`.
-- Include `schema_version: 1` when structured output is requested.
+- A plan-mode decision: `fresh`, `resume`, or `deepen`.
+- Stable plan phase IDs, acceptance IDs, dependencies, validation, rollback notes, and the first `he-work` handoff.
+- For tracked work, Linear traceability frontmatter and a Linear/spec/plan/PR matrix.
+
+## Core Contract
+
+- Resolve the active Linear issue first for non-trivial tracked work; if none exists, stop and request or create one before planning.
+- Plan from the most authoritative source: Linear issue, existing plan, requirements doc, spec, brainstorm, or direct request.
+- Choose `fresh`, `resume`, or `deepen`; avoid duplicating a current plan.
+- Route back to `he-deepen-spec` when a required caller-facing interface, domain term, or expected behavior is not specified.
+- Sequence blockers first and mark independent Linear QA defects as parallelizable instead of blending them into one broad task.
+- Produce stable phase IDs (`P` or `UP`) and acceptance IDs (`AC` or `UAC`) with validation intent, rollback notes, dependencies, and one actionable first handoff step.
 
 ## Procedure
 
-1. Resolve the best planning source first: existing plan, requirements doc, spec, brainstorm output, or direct request.
-2. If a matching recent plan already exists, decide whether to resume, deepen, or start a fresh plan instead of duplicating it.
-3. Treat the most authoritative source artifact as primary input and carry forward its problem frame, scope, requirements, and open questions.
-4. Check interface readiness before task decomposition. If the work depends on a new module, API, CLI, plugin, tool, service, data-access, or shared-helper boundary, confirm the source defines the caller-facing contract.
-5. If the interface contract is missing or only implied, route back to `he-deepen-spec` instead of burying interface design inside implementation tasks.
-6. Check domain readiness: if core terms, relationships, or `CONTEXT.md` updates are missing, route back to `he-brainstorm` or `he-deepen-spec`.
-7. If the source is a set of Linear QA issues, put blockers first, preserve issue links, and mark independent defects as parallel work instead of merging them into one broad task.
-8. If source material is unclear or incomplete, run a lightweight planning bootstrap to establish enough context without leaving planning mode.
-9. Research local patterns and prior learnings before finalizing structure when they materially affect sequencing or risk.
-10. Size the plan depth to the work, then decompose into ordered, verifiable tasks with explicit dependencies, tests, and next-stage handoff.
+1. Resolve the authoritative source and active Linear issue.
+2. Choose `fresh`, `resume`, or `deepen`.
+3. Decompose work into ordered, verifiable units with acceptance IDs and validation.
+4. Add traceability and one next handoff step.
+
+## Traceability
+
+Written tracked plans must include Linear Work Item Contract frontmatter for issue, status, branch, PR or pending PR, and `traceability_required: true`.
+
+Add a Linear/spec/plan/PR matrix mapping:
+
+`Linear issue -> source acceptance IDs -> plan units -> acceptance IDs -> PR evidence`
+
+Keep GitHub PRs as delivery evidence linked back to Linear; Linear remains the tracker of record.
 
 ## Validation
 
-- Ensure tasks are actionable and independently verifiable.
-- Ensure dependencies, rollback, and risk controls are explicit.
-- Ensure the plan uses the most authoritative available source and does not silently drop upstream requirements.
-- Ensure any new caller-facing interface needed by the plan is already specified; otherwise stop and route to `he-deepen-spec`.
-- Ensure tasks use canonical domain terms from `CONTEXT.md` when one exists, and link Linear decision notes when durable tradeoffs shaped the plan.
-- Ensure the chosen route (`fresh`, `resume`, or `deepen`) matches the artifact state.
-- Fail fast: stop at first failed gate and do not proceed.
+- Verify source requirements were not dropped.
+- Verify tasks are executable and independently testable.
+- Verify stable IDs and the traceability matrix connect source, plan, Linear, and PR evidence.
+- For written tracked plans, run `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>` as a required gate.
+- Stop at the first failed gate.
 
 ## Constraints
 
 - Redact secrets, credentials, tokens, and sensitive data by default.
-- Do not produce plan steps that depend on unstated assumptions.
-- Do not turn planning into implementation, test execution, or speculative debugging.
-- Do not silently convert true product blockers into technical assumptions.
-- Do not create ADRs; use Linear issues or comments for durable decision capture.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Do not implement code in the planning stage.
+- Keep GitHub PRs as delivery evidence, not the tracker of record.
 
 ## Anti-patterns
 
 - Producing abstract plans without executable task boundaries.
-- Omitting verification intent for critical tasks.
-- Planning implementation tasks around an interface that has not been designed.
-- Decomposing tasks around ambiguous project terms that should have been resolved upstream.
-- Replanning from scratch when a relevant current plan or requirements doc should be updated in place.
-- Routing directly to execution when the request is still asking for planning.
+- Planning implementation around an unspecified interface.
+- Treating Linear as background context instead of the required work item.
 
 ## Examples
 
-- "When the user asks, `Turn this approved spec into an execution-ready implementation plan with phases, tests, and rollout guidance.`"
-- "Please plan this production bug fix from the report and validate the safest execution order."
-- "Help me inspect the recent plan and decide whether to resume it, deepen it, or replace it."
-- "Can you sequence these related Linear QA issues so blockers are fixed first and independent defects can move in parallel?"
+- "Turn this approved spec into an implementation-ready plan."
+- "Sequence these related Linear QA issues so blockers go first."
 
-## Full Context
+## Failure mode
 
-- Canonical contract: [./Infrastructure/references/contract.yaml](./Infrastructure/references/contract.yaml)
-- Canonical eval cases: [./Infrastructure/references/evals.yaml](./Infrastructure/references/evals.yaml)
-- Canonical task profile: [./Infrastructure/references/task-profile.json](./Infrastructure/references/task-profile.json)
-- Compatibility mirror (non-canonical): [./references](./references)
-- Subagent routing: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Domain model routing: [../../../references/domain-model-routing.md](../../../references/domain-model-routing.md)
-- QA intake routing: [../../../references/qa-intake-routing.md](../../../references/qa-intake-routing.md)
-Read when: project terminology, `CONTEXT.md`, or Linear issue wording affects planning readiness.
-Read when: planning from multiple Linear QA issues, especially when blocker order or parallel fix lanes matter.
-- Assets: [./assets](./assets)
-- Assets directory marker: `assets/`
+If the planning source is too vague, the Linear issue cannot be resolved for tracked work, or acceptance IDs cannot be mapped, stop and ask for the missing source instead of fabricating a plan.
 
-## Subagent Routing
+## Gotchas
 
-- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Machine-readable policy: [../../../references/routing-map.json](../../../references/routing-map.json)
-- Resolve available roles from `~/.codex/agents/manifest.json` before spawning helpers.
-- Apply the mapped stage policy (`always`, `conditional`, or `manual-only`) before delegation.
-- If auto-spawn is unavailable, continue inline and explicitly list the roles the user can launch manually.
-- If required roles are missing from the manifest, route to [codex-agent-creator](../../../../../Skills/agent-ops/codex-agent-creator/SKILL.md) and provide the exact role names to create or install.
+- Do not implement code from this skill.
+- Do not mutate Linear directly from the plan body; hand off to the installed Linear workflow when issue creation or update is requested.
+- Keep GitHub PRs as delivery evidence, not the tracker of record.
+
+## References
+
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/SKILL.full.md`
+- Plan artifact contract: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/plan-artifacts.md`
+- Verification-first planning: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/verification-first.md`
+- Production controls: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/production-considerations.md`
+- Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
+- Domain and QA routing: `Plugins/harness-engineering/references/domain-model-routing.md`, `Plugins/harness-engineering/references/qa-intake-routing.md`

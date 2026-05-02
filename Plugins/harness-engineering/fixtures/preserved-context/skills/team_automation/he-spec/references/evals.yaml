@@ -29,6 +29,32 @@ cases:
       - type: regex
         value: "(?i)(Problem Statement|System Boundary|Acceptance and Test Matrix|Docs/specs/)"
 
+  - id: linear-spec-traceability
+    name: Linear issue to spec acceptance traceability
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Turn Linear issue JSC-224 into a spec and make every SA item traceable back to the issue and ready for downstream planning."
+    acceptance:
+      - type: regex
+        value: "(?i)(?:\\$he-spec\\b|\\b(?:skill|route)\\s*[:=]\\s*he-spec\\b|\\busing\\s+\\$?he-spec\\b|\\bselected\\s+he-spec\\b)"
+      - type: regex
+        value: "(?i)(JSC-224|Linear Work Item Contract|SA1|Linear Acceptance Traceability)"
+
+  - id: tracked-spec-without-linear-blocks
+    name: tracked spec without Linear issue blocks
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Write a spec for this non-trivial tracked delivery item, but there is no Linear issue yet."
+    acceptance:
+      - type: regex
+        value: "(?i)(?:\\$he-spec\\b|\\b(?:skill|route)\\s*[:=]\\s*he-spec\\b|\\busing\\s+\\$?he-spec\\b|\\bselected\\s+he-spec\\b)"
+      - type: regex
+        value: "(?i)(Linear issue|stop|request|create|tracked work)"
+
   - id: existing-spec-revision
     name: revise existing spec
     category: happy

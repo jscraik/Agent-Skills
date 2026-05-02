@@ -16,6 +16,10 @@ The final handoff should include:
 - what changed
 - files or areas touched
 - tests, lint, type checks, and other validation run
+- active Linear issue, current status, parent/child links, and update/comment result
+- governing spec and plan paths
+- branch and PR link or a concrete pending-PR blocker
+- Linear/spec/plan/PR traceability status for every completed acceptance ID
 - completed plan/checklist/acceptance IDs when the governing artifact exposes them
 - any plan/spec updates made because execution discovered drift
 - remaining risks, follow-up work, or explicit deferrals
@@ -54,6 +58,8 @@ Tier 1: inline self-review
 - do not copy obsolete vendor-specific badge blocks or attribution templates from legacy prompts
 - if the repo or harness requires an attribution trailer, follow that rule exactly
 - keep commit boundaries logical and avoid `WIP` commits when a focused complete slice can land cleanly
+- include a PR traceability block for tracked work with Linear issue, spec, plan, completed IDs, validation, and remaining blockers
+- link PR evidence back to the Linear issue; GitHub is delivery evidence, not the tracker of record
 
 ## Status updates
 - if the governing artifact has a status field and repo convention expects it to change, update it when execution is actually complete

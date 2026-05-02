@@ -10,28 +10,44 @@ metadata:
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
 - [Deliverables](#deliverables)
+- [Philosophy](#philosophy)
+- [Procedure](#procedure)
 - [TOML Guidelines](#toml-guidelines)
 - [Editing Rules](#editing-rules)
-- [Examples](#examples)
+- [Validation](#validation)
+- [Constraints](#constraints)
+- [Anti-patterns](#anti-patterns)
 - [Failure mode](#failure-mode)
 - [Gotchas](#gotchas)
+- [References](#references)
 
 ## When to use
 
-- Use for TOML config creation and review.
-- Use when config correctness and low-churn edits are required.
+- Use for TOML config creation, review, or schema-safe fixes.
+- Inputs: target files, owning tool, expected key paths, and compatibility constraints.
+- Deliver valid TOML with minimal key-path churn and notes for schema-impacting edits.
 
 ## Required inputs
 
-- Target file(s) and owning tool.
-- Schema or expected key paths.
-- Constraints on backward compatibility.
+- Target TOML file path and owning tool or schema.
+- Intended key paths, value types, and compatibility constraints.
+- Validation command or parser expected to consume the file.
 
 ## Deliverables
 
-- Valid TOML updates.
-- Minimal-scope key-path changes.
-- Notes for any schema-impacting edits.
+- Minimal TOML edit preserving existing comments and order where possible.
+- Validation evidence from parser, schema, or owning tool.
+- Notes for any type, key-path, or compatibility risk.
+
+## Philosophy
+
+- Prefer schema truth and low-churn edits over clever rewrites.
+
+## Procedure
+
+1. Confirm the consumer schema and current key paths.
+2. Make the smallest compatible edit.
+3. Validate before closeout.
 
 ## TOML Guidelines
 
@@ -46,21 +62,23 @@ metadata:
 - Retain existing comments unless provably outdated.
 - Keep trailing commas out of arrays and inline tables.
 
-## Examples
+## Validation
 
-```toml
-[tool.ruff]
-line-length = 100
-src = ["src", "tests"]
+- Run the relevant parser/schema/tool checks for touched files.
+- Fail fast: stop at the first failed gate and report exact blocker evidence.
 
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-ignore = ["E501"]
-```
+## Constraints
+
+- If schema ownership is unclear, pause before adding keys.
+- Redact secrets and do not run destructive or network commands unless explicitly approved.
+
+## Anti-patterns
+
+- Redefining key paths, mixing table styles for one object, or skipping validation.
 
 ## Failure mode
 
-- If schema ownership is unclear, pause and confirm before adding keys.
+If the owning schema, value type, or validation command cannot be identified, stop and report the missing contract before editing.
 
 ## Gotchas
 
@@ -75,37 +93,6 @@ ignore = ["E501"]
 
 **Topic map:** [[agent-ops]]
 
+## References
 
-## Philosophy
-
-- Optimize for clear, verifiable outcomes with the minimum necessary changes.
-- Keep guidance deterministic so repeated runs produce consistent decisions.
-
-## Procedure
-
-1. Confirm scope, constraints, and required inputs before edits.
-2. Apply focused changes tied directly to the requested outcome.
-3. Re-run the highest-signal validations and capture concrete evidence.
-
-## Validation
-
-- Run the relevant local checks for touched files and workflow contracts.
-- Fail fast: stop at the first blocking validation failure and report exact evidence.
-- Re-run checks after fixes and record residual risk if any remains.
-
-## Constraints
-
-- Redact secrets, tokens, credentials, and sensitive data by default.
-- Do not expand scope beyond the request unless explicitly asked.
-- Prefer safe, reversible edits over broad refactors.
-
-## Anti-patterns
-
-- Skipping validation after making changes.
-- Applying broad refactors to solve narrow issues.
-- Assuming behavior without evidence from current checks.
-
-## References and assets
-
-- Open deep guidance: `Infrastructure/references/deep-guidance.md`
-- Read when: the task needs advanced edge cases, migration-safe patterns, or runtime-specific nuance beyond the core checklist.
+- Deep guidance: `references/deep-guidance.md`

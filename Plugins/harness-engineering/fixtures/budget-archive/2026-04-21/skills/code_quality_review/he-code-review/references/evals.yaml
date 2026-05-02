@@ -4,7 +4,7 @@ skill_name: "he-code-review"
 
 cases:
   - id: explicit-review-stage
-    name: explicit ce review stage
+    name: explicit he review stage
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
@@ -138,7 +138,26 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(Linear|expected behavior|repro|go|no-go|conditions)"
+        value: "(?i)(Linear|expected behavior|repro|\\bgo\\b|no-go|conditions)"
+
+  - id: codex-style-review-thread-readiness
+    name: codex style review thread readiness
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this PR before merge. It has Codex and CodeRabbit review threads, a dependency lockfile change, and one failing changed-surface check. Tell me the go/no-go call."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-code-review"
+      - type: regex
+        value: "(?i)(Codex|CodeRabbit|review thread)"
+      - type: regex
+        value: "(?i)(security|supply-chain)"
+      - type: regex
+        value: "(?i)(changed-surface)"
+      - type: regex
+        value: "(?i)(no-go|go-with-conditions)"
 
   - id: todo-follow-up
     name: todo follow-up lane
@@ -212,6 +231,6 @@ cases:
         value: "(?i)(untrusted input|protected artifact|blockers|cannot|validation)"
 
 metadata:
-  last_updated: "2026-03-30"
+  last_updated: "2026-04-30"
   author: "Codex"
   review_status: "draft"

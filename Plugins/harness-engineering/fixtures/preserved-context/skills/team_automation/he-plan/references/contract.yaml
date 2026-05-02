@@ -23,7 +23,7 @@ outputs:
   - explicit validation, rollout, and execution-control guidance
   - carry-forward treatment of any authoritative requirements doc or existing plan when present
   - optional directional technical-design sketches only when they materially reduce planning ambiguity
-  - a recommended next workflow stage, including a tracker-workflow handoff path (default `gh-workflow`) when the user wants issue creation
+  - a recommended next workflow stage, including a Linear workflow handoff path when the user wants issue creation or update
 
 non_goals:
   - direct implementation

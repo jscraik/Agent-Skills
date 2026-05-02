@@ -10,8 +10,11 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
 FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
-if str(FAMILY_SKILLS_DIR) not in sys.path:
-    sys.path.insert(0, str(FAMILY_SKILLS_DIR))
+for candidate in [FAMILY_SKILLS_DIR, *(parent / "skills" for parent in SCRIPT_DIR.parents)]:
+    if (candidate / "_template_utils.py").exists():
+        if str(candidate) not in sys.path:
+            sys.path.insert(0, str(candidate))
+        break
 
 from _template_utils import (  # noqa: E402
     TemplateRenderError,
@@ -19,7 +22,9 @@ from _template_utils import (  # noqa: E402
     ensure_trailing_newline,
     load_json_context,
     parse_key_value,
+    print_diff_lines,  # noqa: F401 - re-exported for check_plan_template_drift.py
     render_from_path,
+    unified_diff_lines,  # noqa: F401 - re-exported for check_plan_template_drift.py
 )
 
 DEFAULT_TEMPLATE_PATH = SKILL_DIR / "plan.md.tmpl"
@@ -30,9 +35,23 @@ DEFAULT_CONTEXT: dict[str, str] = {
     "PLAN_TYPE": "feat",
     "PLAN_STATUS": "active",
     "PLAN_DATE": "2026-04-10",
-    "PLAN_ORIGIN": "docs/brainstorms/2026-04-10-symphony-requirements.md",
+    "PLAN_ORIGIN": "Docs/brainstorms/2026-04-10-symphony-requirements.md",
+    "PLAN_REQUIREMENTS": "Docs/brainstorms/2026-04-10-symphony-requirements.md",
     "PLAN_SPEC": "Docs/specs/2026-04-10-symphony-service-spec.md",
-    "PLAN_UI_SPEC": "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md",
+    "PLAN_SOURCE_SPEC": "Docs/specs/2026-04-10-symphony-service-spec.md",
+    "PLAN_UI_SPEC": "Docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md",
+    "LINEAR_PROJECT": "JSC",
+    "LINEAR_ISSUE": "JSC-200",
+    "LINEAR_PARENT": "JSC-190",
+    "LINEAR_PARENT_CHILDREN": "JSC-190 parent, no child issues yet",
+    "LINEAR_CHILDREN": "[]",
+    "LINEAR_STATUS": "In Progress",
+    "PLAN_BRANCH": "feature/JSC-200-symphony-service",
+    "PLAN_PATH": "Docs/plans/2026-04-10-feat-symphony-service-plan.md",
+    "SOURCE_ACCEPTANCE_1": "SA1",
+    "SOURCE_ACCEPTANCE_2": "SA2",
+    "PLAN_ROUTE": "fresh",
+    "PLAN_DEPTH": "deep",
     "OVERVIEW_SUMMARY": "Ship a first implementation of Symphony orchestrator behavior with deterministic retry and workspace safety.",
     "PROBLEM_FRAME": "Current issue execution is manual and inconsistent; this plan defines an auditable implementation path.",
     "REQ_1": "Poll eligible tracker work and dispatch within bounded concurrency.",

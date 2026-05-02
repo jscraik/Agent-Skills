@@ -1141,6 +1141,18 @@ if replacements == 0:
             "Failed to refresh README governed-repository sentence; expected one of known patterns."
         )
 content = re.sub(
+    r"A governed repository of \*\*skills\*\* for AI coding agents",
+    f"A governed repository of **{catalog_count} skills** for AI coding agents",
+    content,
+    count=1,
+)
+content = re.sub(
+    r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
+    "A governed **Agent Skills Kit** repository for Codex and AI coding agents",
+    content,
+    count=1,
+)
+content = re.sub(
     r"currently expects \*\*\d+\*\* skills",
     f"currently expects **{catalog_count}** skills",
     content,
@@ -1351,6 +1363,9 @@ normalize_plugin_copy() {
   local skill_link=""
   local tmp_file=""
   local duplicate_category=""
+  local handle_name=""
+  local skill_entry=""
+  local command_surface_file="$repo_root/.skillsets/command-surface.json"
 
   plugin_dir_real="$(cd "$plugin_dir" 2>/dev/null && pwd -P || true)"
   if [ -z "$plugin_dir_real" ]; then
@@ -1480,6 +1495,54 @@ normalize_plugin_copy() {
       echo "[OK] Removed ${label} duplicate category lane: ${skills_dir:?}/${duplicate_category:?}"
     fi
   done
+
+  # Local plugin caches are still scanned by some Codex picker paths. When a
+  # plugin skill already has a generated `.agents/skills/<handle>` command
+  # handle, keeping the full plugin entry visible creates duplicate picker rows.
+  # The plugin copy remains the canonical source; only the runtime cache entry
+  # is pruned so the command handle owns mentionability.
+  if [ -f "$command_surface_file" ] && [ -d "$skills_dir" ]; then
+    local plugin_owner=""
+    plugin_owner="$(
+      jq -r '.name // empty | tostring | gsub("^\\s+|\\s+$"; "")' \
+        "${plugin_dir:?}/.codex-plugin/plugin.json" 2>/dev/null || true
+    )"
+    if ! is_safe_path_component "$plugin_owner"; then
+      plugin_owner="$(basename "$(dirname "${plugin_dir:?}")")"
+    fi
+    if ! is_safe_path_component "$plugin_owner"; then
+      echo "[WARN] Ignoring unsafe plugin owner for command-surface pruning: $plugin_owner"
+      return
+    fi
+
+    while IFS= read -r handle_name; do
+      [ -n "$handle_name" ] || continue
+      if ! is_safe_path_component "$handle_name"; then
+        echo "[WARN] Ignoring unsafe command handle in command surface: $handle_name"
+        continue
+      fi
+      if [ -e "${skills_dir:?}/${handle_name:?}" ] || [ -L "${skills_dir:?}/${handle_name:?}" ]; then
+        rm -rf -- "${skills_dir:?}/${handle_name:?}"
+        echo "[OK] Removed ${label} command-handle duplicate skill entry: ${skills_dir:?}/${handle_name:?}"
+      fi
+      while IFS= read -r skill_entry; do
+        [ -n "$skill_entry" ] || continue
+        rm -rf -- "${skill_entry:?}"
+        echo "[OK] Removed ${label} command-handle duplicate skill entry: $skill_entry"
+      done < <(
+        find "$skills_dir" -type f -name SKILL.md -path "*/$handle_name/SKILL.md" -print 2>/dev/null \
+          | while IFS= read -r skill_file; do dirname "$skill_file"; done
+      )
+    done < <(
+      jq -r --arg owner "$plugin_owner" '
+        .handles[]?
+        | select(type == "object")
+        | select((.owner // "") == $owner)
+        | select((.command_handle_path // "") | startswith(".agents/skills/"))
+        | .handle // empty
+      ' "$command_surface_file" 2>/dev/null || true
+    )
+  fi
 }
 
 # Keep home-level plugin source paths aligned with the canonical repo plugins.

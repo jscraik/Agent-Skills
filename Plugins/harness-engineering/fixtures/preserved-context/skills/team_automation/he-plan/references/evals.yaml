@@ -215,18 +215,44 @@ cases:
       - type: regex
         value: "(?i)(reclassif|standard|external contract|CLI|CI)"
 
-  - id: tracker-handoff-after-plan
-    name: tracker handoff after plan
+  - id: linear-tracker-handoff-after-plan
+    name: Linear tracker handoff after plan
     category: happy
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Write the implementation plan first, then hand it off to the gh-workflow tracker path so the finished plan becomes the issue input."
+    prompt: "Write the implementation plan first, then update the Linear issue so the finished plan becomes the tracked work input."
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
-        value: "(?i)(\\[\\[gh-workflow\\]\\]|hand off|tracker issue|read-before-write|plan artifact)"
+        value: "(?i)(Linear|tracker of record|hand off|issue|plan artifact)"
+
+  - id: linear-work-item-required
+    name: Linear work item required for tracked plan
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Plan this non-trivial tracked delivery work, but there is no Linear issue yet."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-plan"
+      - type: regex
+        value: "(?i)(Linear issue|stop|request|create|tracked work)"
+
+  - id: linear-spec-plan-pr-traceability
+    name: Linear spec plan PR traceability
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Turn JSC-224 and this spec into an execution plan, and make sure the plan traces Linear issue to SA IDs, plan units, AC IDs, and PR evidence."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "he-plan"
+      - type: regex
+        value: "(?i)(Linear / Spec / Plan / PR Traceability|JSC-224|SA|AC|PR evidence)"
 
   - id: planning-source-missing
     name: planning source missing

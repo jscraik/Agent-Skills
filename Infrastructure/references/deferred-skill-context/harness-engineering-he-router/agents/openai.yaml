@@ -1,0 +1,3 @@
+interface:
+  display_name: "Harness Engineering Router"
+  short_description: "Analyze Harness Engineering requests, choose exactly one stage, and return the next command when intent is ambiguous or stage selection is needed."

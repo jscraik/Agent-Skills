@@ -1,0 +1,37 @@
+schema_version: 1
+purpose: >
+  Run Harness Engineering implementation so approved work lands with traceable
+  task state, contract-drift control, validation evidence, and PR-ready handoff.
+triggers:
+  - user wants an approved plan, todo file, or tiny low-risk spec implemented
+  - user explicitly requests the he-work stage
+  - execution needs Linear, PR, spec/plan, IDs, and validation traceability
+inputs:
+  - plan path, todo path, small spec path, or obviously tiny low-risk bare request
+  - linked issue, branch, PR, acceptance IDs, invariants, non-goals, and validation gates
+  - optional execution notes such as test-first, characterization-first, or external-delegate
+outputs:
+  - chosen lane and synchronized task progress
+  - implemented code plus validation evidence
+  - traceability evidence linking Linear, spec, plan, PR, IDs, and validation
+  - drift updates when execution changes the contract
+  - handoff with Linear, PR, completed IDs, risks, rollback, and monitoring notes
+  - UI evidence when user-visible surfaces changed
+non_goals:
+  - first-pass specs or plans
+  - silent product scope expansion
+  - validation shortcuts
+  - prototype artifacts as production by default
+risks:
+  - wrong artifact; mitigate with current-vs-latest checks
+  - missing tracker; mitigate by stopping non-trivial tracked work
+  - contract drift; mitigate with artifact update before off-plan work
+  - dirty worktree damage; mitigate by preserving user changes
+  - delegate drift; mitigate by parent review and validation
+observability: >
+  Record validation commands/outcomes, Linear result or blocker, monitoring or
+  no-impact note, and screenshot evidence for user-visible changes.
+rollback_procedure: >
+  Keep logical commits scoped to verified slices, document rollback triggers
+  and smallest revert path, and do not hand off tracked work until validation
+  and traceability align.
