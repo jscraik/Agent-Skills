@@ -251,7 +251,40 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
     if strict:
         cmd.append("--strict")
 
-    process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        result.status = "error"
+        result.data["repo_surface"] = {
+            "status": "error",
+            "raw_stdout": exc.stdout or "",
+            "raw_stderr": exc.stderr or "",
+            "summary": {
+                "total_paths": 0,
+                "blocking_findings": 1,
+            },
+        }
+        result.data["strict"] = strict
+        result.errors.append(
+            ErrorObject(
+                code="ERR_TIMEOUT",
+                message=(
+                    "Repo surface inventory timed out after "
+                    f"{SCRIPT_TIMEOUT_SECONDS} seconds."
+                ),
+                fix_suggestion=(
+                    "Run the underlying inventory script directly to identify "
+                    "the slow path, then retry repo surface."
+                ),
+            )
+        )
+        return result
     parse_ok = True
     try:
         report = json.loads(process.stdout)

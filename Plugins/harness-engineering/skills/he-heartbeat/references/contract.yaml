@@ -18,7 +18,7 @@ inputs:
 
 outputs:
   - heartbeat mode, selected cadence, selected stage or folded mode, and target
-  - automation status, id when created or updated, destination, and active state
+  - automation name, status, id when created or updated, destination, target_binding, and active state
   - live checks, stop conditions, immediate-run outcome, and next wake-up behavior
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
 
@@ -34,8 +34,9 @@ risks:
   - unsafe unattended action; mitigate with explicit approval gates
 
 observability: >
-  Record automation id, cadence, target, selected stage, live checks,
-  immediate-run outcome, stop condition, blocker, and lifecycle exit status.
+  Record automation name, id, cadence, target_binding, target, selected stage,
+  live checks, immediate-run outcome, stop condition, blocker, and lifecycle
+  exit status.
 
 rollback_procedure: >
   Pause or delete the matching heartbeat automation, preserve the last live-state

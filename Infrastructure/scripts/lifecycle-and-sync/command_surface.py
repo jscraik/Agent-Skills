@@ -490,6 +490,7 @@ def _mention_rows(pattern: re.Pattern[str], prefix: str, text: str) -> list[dict
     for match in pattern.finditer(text):
         raw_handle = match.group(1)
         rows.append({
+            "mention": raw_handle,
             "token": f"{prefix}{raw_handle}",
             "handle": normalize_handle(raw_handle),
             "start": match.start(),

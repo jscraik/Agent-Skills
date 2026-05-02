@@ -107,11 +107,11 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         self.assertIn("./bin/ask skills resolve he-heartbeat --json", command_handle)
         self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", command_handle)
         self.assertIn(
-            "Canonical source path: `Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md`.",
+            "Canonical source path: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
             command_handle,
         )
         self.assertIn(
-            "Otherwise, load `Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md` directly.",
+            "Otherwise, load `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` directly.",
             command_handle,
         )
         self.assertNotIn("## Procedure", command_handle)
@@ -160,7 +160,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
             encoding="utf-8",
         )
-        source_path = "Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md"
+        source_path = "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md"
         source = self.temp_dir / source_path
         source.parent.mkdir(parents=True)
         source.write_text("---\nname: he-heartbeat\n---\n# HE Heartbeat\n", encoding="utf-8")
@@ -222,7 +222,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
                 kind="skill",
                 command_visibility="target",
                 runtime_visibility="latent",
-                source_path="Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md",
+                source_path="Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
                 command_handle_path=".agents/skills/he-heartbeat/SKILL.md",
                 owner="harness-engineering",
                 description="one",
@@ -233,7 +233,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
                 kind="skill",
                 command_visibility="target",
                 runtime_visibility="latent",
-                source_path="Plugins/harness-engineering/skills/team_automation/he-heartbeat/SKILL.md",
+                source_path="Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
                 command_handle_path=".agents/skills/he_heartbeat/SKILL.md",
                 owner="harness-engineering",
                 description="two",
