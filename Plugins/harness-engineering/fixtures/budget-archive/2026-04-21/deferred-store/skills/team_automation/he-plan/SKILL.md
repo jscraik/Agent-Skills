@@ -95,9 +95,9 @@ If the planning source is too vague, the Linear issue cannot be resolved for tra
 
 ## References
 
-- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/SKILL.full.md`
-- Plan artifact contract: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/plan-artifacts.md`
-- Verification-first planning: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/verification-first.md`
-- Production controls: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-plan/references/production-considerations.md`
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-plan/SKILL.full.md`
+- Plan artifact contract: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-plan/references/plan-artifacts.md`
+- Verification-first planning: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-plan/references/verification-first.md`
+- Production controls: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-plan/references/production-considerations.md`
 - Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
 - Domain and QA routing: `Plugins/harness-engineering/references/domain-model-routing.md`, `Plugins/harness-engineering/references/qa-intake-routing.md`

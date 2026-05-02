@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/code_quality_review/he-code-review"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-code-review"
 
 
 def read(path: Path) -> str:

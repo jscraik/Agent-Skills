@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/team_automation/he-spec"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-spec"
 SKILL = SKILL_DIR / "SKILL.md"
 EVALS = SKILL_DIR / "references/evals.yaml"
 CONTRACT = SKILL_DIR / "references/contract.yaml"
@@ -41,7 +41,7 @@ def test_plugin_owned_references_are_present_and_indexed() -> None:
     assert (ROOT / "Plugins/harness-engineering/references/he-spec-doctrine.md").exists()
     for rel in expected:
         assert (SKILL_DIR / rel).exists()
-        assert f"Plugins/harness-engineering/skills/team_automation/he-spec/{rel}" in index
+        assert f"Plugins/harness-engineering/skills/he-spec/{rel}" in index
     assert "Plugins/harness-engineering/references/he-spec-doctrine.md" in index
 
 

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Reliability Review"
-  short_description: "$he-reliability-review · SLOs, failure modes, retries, overload, cascading risk"

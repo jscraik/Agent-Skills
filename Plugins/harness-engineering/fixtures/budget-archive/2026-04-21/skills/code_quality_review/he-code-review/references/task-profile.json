@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "profile_id": "Plugins-harness-engineering-skills-code_quality_review-he-code-review",
-  "scope_skill": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
+  "scope_skill": "Plugins/harness-engineering/skills/he-code-review",
   "scope_profile": "Plugins",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

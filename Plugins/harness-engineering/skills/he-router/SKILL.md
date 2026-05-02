@@ -1,98 +1,30 @@
 ---
 name: he-router
-description: Choose the Harness Engineering lifecycle stage for ambiguous requests. Use when the user is unsure whether to spec, plan, work, review, debug, or schedule follow-up.
+description: "Analyze and route ambiguous Harness Engineering requests to the right lifecycle stage. Use when routing is unclear, mixed, or a folded HE alias is invoked."
 metadata:
   skill-type: team_automation
 ---
-
 # Harness Engineering Router
-
-Choose one Harness Engineering lifecycle stage.
-
-## Philosophy
-
-- Use the user request, artifact state, and Linear evidence as the routing source.
-- Prefer the smallest stage that safely unblocks the user.
-- Keep routing separate from implementation.
-
-## When to use
-
-- No stage is explicit.
-- Multiple stages appear plausible.
-- The user asks where to start, resume, plan, implement, review, debug, schedule a heartbeat, or resolve domain terminology.
-
-## Required inputs
-
-- User request text.
-- Optional artifact paths, issue state, branch state, or prior session evidence.
-
-## Deliverables
-
-- `schema_version: 1` when structured output is requested.
-- One selected stage.
-- One rationale sentence.
-- One recommended next step.
-- `confidence` and `missing_input` when blocked.
-
+## When to Use
+Use when stage choice is unclear, mixed, or a folded alias appears.
+## Inputs
+Request text, repo root, optional Linear/session evidence.
+## Outputs
+Return schema_version when structured. schema_version, selected stage, source_path, folded mode, blocker, lifecycle exit status.
 ## Procedure
-
-1. Parse direct `he-*` stage names, artifact state, lifecycle words, and risk words before broad keyword matches.
-2. Translate folded stage names through [folded skill context](../../references/folded-skill-context.md) before selecting a stage.
-3. Apply the deterministic decision order in [deterministic stage routing](../../references/deterministic-stage-routing.md).
-4. Pick exactly one stage from [routing map](../../references/routing-map.json).
-4. Route domain-language conflicts through [domain model routing](../../references/domain-model-routing.md).
-5. Route QA or feedback sessions through [QA intake routing](../../references/qa-intake-routing.md).
-6. Route prior-session or repeated-failure requests through [session evidence contract](../../references/session-evidence-contract.md).
-7. Route coverage-gap and skillify-candidate evidence to `he-improve` for triage before any new skill package is proposed.
-
-## Output contract
-
-Return `schema_version: 1` when structured output is requested, plus `selected_stage`, `matched_rule`, `confidence`, `rationale`, `recommended_next_step`, and `missing_input` when blocked.
-
-## Constraints
-
-- Select exactly one primary stage.
-- Do not implement product code.
-- Do not select `he-work` for review, PR, go/no-go, failing test, root-cause, TDD, browser-polish, optimization, or stale-branch cleanup requests.
-- Redact secrets and sensitive data.
-- Do not remove important context for budget trimming; move it to references and index it in [deferred context index](../../references/deferred-context-index.md).
-
-## Anti-patterns
-
-- Do not treat ambiguous review or failing-test language as implementation work.
-- Do not create a plan when a spec is missing.
-- Do not route stale-branch cleanup through feature work.
-- Do not invent Linear state when the issue status is absent.
-
-## Progressive Disclosure
-
-Never drop required context for brevity; move it into references or deferred context and link it here.
-
-- Local contract, evals, and task profile: `references/`
-- Shared HE routing references: `Plugins/harness-engineering/references/`
-- Folded stage alias map: `Plugins/harness-engineering/references/folded-skill-context.md`
-- Subagent call contract: `Plugins/harness-engineering/references/subagent-call-contract.md`
-- Archived router context: `Infrastructure/references/deferred-skill-context/harness-engineering-he-router/`
-
+Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement.
 ## Validation
-
-Ensure the selected stage exists in the HE stage set, the recommendation is stage-specific, and conflict cases obey deterministic routing before broad keyword matches.
-Fail fast when the selected stage is absent from the routing map, required artifact evidence is missing, or lifecycle cues conflict; stop at the first failed gate and report the blocker.
-
+Fail fast: stop at the first failed gate and do not proceed. Check deterministic aliases and subagent role availability.
+## Constraints
+Redact secrets; never enumerate every child skill to the model. Do not remove important context for budget trimming; move it to the deferred context index.
+## Anti-patterns
+No shell interpolation, broad loading, or archive symlink routing.
+## Philosophy
+Harness Engineering routing protects context budget and stage accuracy.
 ## Examples
-
-- `Can you turn JSC-224 into acceptance criteria from Docs/research/linear-notes.md?` -> `he-spec`
-- `Build Docs/plans/2026-04-29-linear-traceability-plan.md.` -> `he-work`
-- `Review PR 153 against JSC-224 and Docs/plans/2026-04-29-linear-traceability-plan.md.` -> `he-code-review`
-- `Check back later when JSC-224 leaves Blocked.` -> `he-heartbeat`
-
-## Failure mode
-
-If required evidence is missing, return `confidence: blocked` with exactly one `missing_input`; do not guess a stage.
-
-## Gotchas
-
-- `review`, `PR`, `go/no-go`, and `failing test` requests are not implementation requests.
-- Linear issue references are routing evidence, not a substitute for artifact checks.
-- Session evidence requests need prior-session or repeated-failure context before choosing a stage.
-- Collector `he-*` path fragments and bundle names are evidence labels, not valid stage invocations, until they match the routing map.
+- User says: "Can you inspect this mixed request and choose the right HE stage?"
+- User says: "Use he-deepen-plan on this approved spec."
+## References
+- Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
+- Preserved router rules: `references/context-preservation.md`

@@ -241,7 +241,11 @@ def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[
     task_tokens = tokenize(task)
     stage_ids = {str(row.get("id")) for row in rows}
 
-    mentioned_stages = [stage for stage in re.findall(r"\bhe-[a-z0-9-]+\b", task_text) if stage in stage_ids]
+    mentioned_stages = [
+        stage
+        for stage in re.findall(r"\bhe-[a-z0-9-]+\b", task_text)
+        if stage in stage_ids or resolve_he_stage_alias(stage) in stage_ids
+    ]
     distinct_mentioned_stages = sorted(set(mentioned_stages))
     resolved_mentioned_stages = sorted({resolve_he_stage_alias(stage) for stage in distinct_mentioned_stages})
     router_row = row_by_id(rows, "he-router")

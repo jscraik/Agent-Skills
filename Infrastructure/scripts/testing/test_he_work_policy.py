@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/team_automation/he-work"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-work"
 SKILL = SKILL_DIR / "SKILL.md"
 EVALS = SKILL_DIR / "references/evals.yaml"
 CONTRACT = SKILL_DIR / "references/contract.yaml"
@@ -42,7 +42,7 @@ def test_active_skill_uses_plugin_owned_references() -> None:
     assert "fixtures/preserved-context" not in text
     for rel in expected:
         assert (SKILL_DIR / rel).exists()
-        assert f"Plugins/harness-engineering/skills/team_automation/he-work/{rel}" in index
+        assert f"Plugins/harness-engineering/skills/he-work/{rel}" in index
 
 
 def test_contract_has_operational_readiness_keys() -> None:

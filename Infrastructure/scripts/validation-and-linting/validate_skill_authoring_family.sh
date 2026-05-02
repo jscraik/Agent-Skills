@@ -143,7 +143,7 @@ PY
 echo "[family-gate] Harness Engineering preserved-context alias passed"
 
 echo "[family-gate] validating Harness Engineering subagent routing"
-he_subagent_manifest="Plugins/harness-engineering/references/subagent-routing-manifest.fixture.json"
+he_subagent_manifest="Plugins/harness-engineering/fixtures/subagent-routing-manifest.fixture.json"
 "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py \
   --manifest "$he_subagent_manifest"
 echo "[family-gate] Harness Engineering subagent routing passed"
@@ -180,8 +180,7 @@ run_skill_builder_script() {
   "${python_cmd[@]}" "${skill_builder_scripts_dir}/${script_name}" "$@"
 }
 
-he_work_skill="Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md"
-he_tdd_skill="Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md"
+he_work_skill="Plugins/harness-engineering/skills/he-work/SKILL.md"
 ce_shared_approval_doc="Plugins/harness-engineering/skills/shared/references/approval-flow.md"
 ce_shared_approval_ref="../shared/references/approval-flow.md"
 ce_shared_approval_repo_ref="repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md"
@@ -307,30 +306,28 @@ fi
 
 echo "[family-gate] using python: $python_cmd_display"
 
-echo "[family-gate] validating he-work/he-tdd approval-flow linkage"
+echo "[family-gate] validating he-work approval-flow linkage"
 if [[ ! -f "$ce_shared_approval_doc" ]]; then
   echo "[family-gate] ERROR: missing shared approval flow document: $ce_shared_approval_doc"
   exit 1
 fi
 
-for skill_doc in "$he_work_skill" "$he_tdd_skill"; do
-  if [[ ! -f "$skill_doc" ]]; then
-    echo "[family-gate] ERROR: missing HE skill doc: $skill_doc"
-    exit 1
-  fi
+if [[ ! -f "$he_work_skill" ]]; then
+  echo "[family-gate] ERROR: missing HE skill doc: $he_work_skill"
+  exit 1
+fi
 
-  if ! grep -Fq "$ce_shared_approval_ref" "$skill_doc" && ! grep -Fq "$ce_shared_approval_repo_ref" "$skill_doc"; then
-    echo "[family-gate] ERROR: $skill_doc must reference $ce_shared_approval_ref or $ce_shared_approval_repo_ref"
-    exit 1
-  fi
+if ! grep -Fq "$ce_shared_approval_ref" "$he_work_skill" && ! grep -Fq "$ce_shared_approval_repo_ref" "$he_work_skill"; then
+  echo "[family-gate] ERROR: $he_work_skill must reference $ce_shared_approval_ref or $ce_shared_approval_repo_ref"
+  exit 1
+fi
 
-  if grep -Fq "continue without re-asking" "$skill_doc" || \
-     grep -Fq "ask a focused blocker question only when ambiguity would change scope, interface, architecture, or shipping risk" "$skill_doc"; then
-    echo "[family-gate] ERROR: $skill_doc still contains inline approval-flow text; use shared reference"
-    exit 1
-  fi
-done
-echo "[family-gate] he-work/he-tdd approval-flow linkage passed"
+if grep -Fq "continue without re-asking" "$he_work_skill" || \
+   grep -Fq "ask a focused blocker question only when ambiguity would change scope, interface, architecture, or shipping risk" "$he_work_skill"; then
+  echo "[family-gate] ERROR: $he_work_skill still contains inline approval-flow text; use shared reference"
+  exit 1
+fi
+echo "[family-gate] he-work approval-flow linkage passed"
 
 echo "[family-gate] validating harness-engineering progressive-disclosure contract"
 bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh
@@ -346,10 +343,10 @@ from pathlib import Path
 import yaml
 
 paths = [
-    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-hard-spec.yaml"),
-    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/team_automation/he-improve/references/example-judge-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/preserved-context/skills/he-improve/references/example-judge-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/he-improve/references/example-hard-spec.yaml"),
+    Path("Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/skills/he-improve/references/example-judge-spec.yaml"),
 ]
 for path in paths:
     if not path.exists():

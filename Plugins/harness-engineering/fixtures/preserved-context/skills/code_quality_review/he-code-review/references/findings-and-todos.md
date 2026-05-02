@@ -29,14 +29,14 @@ Canonical scaffold files for this skill:
 Render / refresh:
 
 ```bash
-python3 Plugins/harness-engineering/skills/code_quality_review/he-code-review/Infrastructure/scripts/render_review_todo_template.py
-python3 Plugins/harness-engineering/skills/code_quality_review/he-code-review/Infrastructure/scripts/check_review_todo_template_drift.py --update
+python3 Plugins/harness-engineering/skills/he-code-review/Infrastructure/scripts/render_review_todo_template.py
+python3 Plugins/harness-engineering/skills/he-code-review/Infrastructure/scripts/check_review_todo_template_drift.py --update
 ```
 
 Verify no drift:
 
 ```bash
-python3 Plugins/harness-engineering/skills/code_quality_review/he-code-review/Infrastructure/scripts/check_review_todo_template_drift.py
+python3 Plugins/harness-engineering/skills/he-code-review/Infrastructure/scripts/check_review_todo_template_drift.py
 ```
 
 ## When to create todo files

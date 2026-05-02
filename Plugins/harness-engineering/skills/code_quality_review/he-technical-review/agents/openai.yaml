@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Technical Review"
-  short_description: "Review diffs, PRs, specs, plans, or review-feedback items and return severity-ranked..."

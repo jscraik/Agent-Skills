@@ -1,0 +1,44 @@
+schema_version: 1
+
+purpose: >
+  Run the canonical Harness Engineering bug-fixing workflow with reproducible intake,
+  evidence-first root-cause analysis, and optional minimal remediation.
+
+triggers:
+  - user asks to debug or fix a bug
+  - user shares stack trace, failing test, regression symptoms, or issue tracker reference
+  - prior fix attempts failed and a structured investigation is required
+
+inputs:
+  - issue source and reference (`linear`, `github`, or `manual-context`)
+  - observable symptoms and expected behavior
+  - environment clues and reproduction constraints
+  - execution permission (`diagnosis-only` vs `diagnose-and-fix`)
+
+outputs:
+  - reproduction status (`confirmed`, `not_reproduced`, `partial`, or `blocked`)
+  - root-cause chain with evidence references
+  - fix plan and test recommendations
+  - implementation summary when fix execution is requested
+  - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
+  - structured summary including `schema_version: 1` on request
+
+non_goals:
+  - greenfield implementation work outside bug scope
+  - speculative fixes without diagnosis evidence
+  - automatic tracker mutations without explicit approval
+
+risks:
+  - symptom-fix bias; mitigate with causal-chain gate and prediction checks for uncertain links
+  - unreliable reproduction; mitigate with iterative instrumentation and environment notes
+  - scope drift into redesign; mitigate with explicit route to `he-brainstorm` when needed
+
+observability: >
+  Record reproduction status, root-cause evidence, changed scope, validation
+  command outcomes, tracker result or blocker, regression-test recommendation,
+  and lifecycle exit status for every completed or blocked bug-fix run.
+
+rollback_procedure: >
+  Revert only the minimal fix slice, keep reproduction evidence and validation
+  output attached to the tracker or handoff, and reroute unresolved behavior to
+  diagnosis before another implementation attempt.

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Prune Branches"
-  short_description: "Automate stale local git branch cleanup with worktree-aware deletion and explicit confirmation..."

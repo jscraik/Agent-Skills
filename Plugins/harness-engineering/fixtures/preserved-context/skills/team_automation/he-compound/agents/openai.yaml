@@ -1,8 +1,8 @@
 interface:
   display_name: "Harness Engineering Compound"
   short_description: "Coordinate the Harness Engineering lifecycle or capture a solved problem into durable docs/solutions knowledge, refreshing an existing solution doc when overlap is high."
-  icon_small: "../../../../../../skills/team_automation/he-compound/assets/icon-small.png"
-  icon_large: "../../../../../../skills/team_automation/he-compound/assets/icon-large.png"
+  icon_small: "../../../../../../skills/he-compound/assets/icon-small.png"
+  icon_large: "../../../../../../skills/he-compound/assets/icon-large.png"
 
 policy:
   allow_implicit_invocation: false

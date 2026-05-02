@@ -3,7 +3,7 @@ import re
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/team_automation/he-plan"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-plan"
 SKILL = SKILL_DIR / "SKILL.md"
 REFS = SKILL_DIR / "references"
 DOCTRINE = ROOT / "Plugins/harness-engineering/references/he-plan-doctrine.md"
@@ -102,6 +102,6 @@ def test_deferred_index_points_to_plan_context() -> None:
         "test-strategy.md",
         "visual-communication.md",
     ]:
-        path = f"Plugins/harness-engineering/skills/team_automation/he-plan/references/{name}"
+        path = f"Plugins/harness-engineering/skills/he-plan/references/{name}"
         assert path in index
         assert (ROOT / path).exists()

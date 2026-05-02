@@ -9,7 +9,7 @@
 ## Source input
 This package is aligned against the current local Harness Engineering refresh workflow:
 
-- active stage: `Plugins/harness-engineering/skills/team_automation/he-compound-refresh/`
+- active stage: `Plugins/harness-engineering/skills/he-compound-refresh/`
 - workflow reference: `Infrastructure/references/refresh-workflow.md`
 
 The package preserves the local progressive-disclosure entrypoint plus the deeper archived workflow references.

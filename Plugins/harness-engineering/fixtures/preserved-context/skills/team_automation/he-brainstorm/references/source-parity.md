@@ -10,12 +10,12 @@ Read when: you need to verify that `he-brainstorm` preserves the legacy brainsto
 - [No-loss checklist](#no-loss-checklist)
 
 ## Purpose
-This document maps the legacy brainstorm prompt plus the current Harness Engineering brainstorm workflow to the local skill at `Plugins/harness-engineering/skills/team_automation/he-brainstorm/` so prompt-to-skill migration and future refreshes remain auditable.
+This document maps the legacy brainstorm prompt plus the current Harness Engineering brainstorm workflow to the local skill at `Plugins/harness-engineering/skills/he-brainstorm/` so prompt-to-skill migration and future refreshes remain auditable.
 
 ## Source inputs
 - legacy prompt: `configs/codex/prompts/workflow-brainstorm.md`
-- current brainstorm review baseline: `Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/deferred-store/skills/team_automation/he-brainstorm/SKILL.md`
-- migration target: `Plugins/harness-engineering/skills/team_automation/he-brainstorm/`
+- current brainstorm review baseline: `Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/deferred-store/skills/he-brainstorm/SKILL.md`
+- migration target: `Plugins/harness-engineering/skills/he-brainstorm/`
 - lightweight review doctrine adapted locally in `Infrastructure/references/document-review-pass.md`
 
 ## Parity mapping

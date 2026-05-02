@@ -7,13 +7,13 @@ from pathlib import Path
 
 ROUTE_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py"
 SOURCE_PATHS = {
-    "he-brainstorm": "Plugins/harness-engineering/skills/team_automation/he-brainstorm/SKILL.md",
-    "he-code-review": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md",
+    "he-brainstorm": "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
+    "he-code-review": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
     "he-ideate": "Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md",
     "he-router": "Plugins/harness-engineering/skills/he-router/SKILL.md",
     "he-technical-review": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
     "he-tdd": "Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md",
-    "he-work": "Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md",
+    "he-work": "Plugins/harness-engineering/skills/he-work/SKILL.md",
     "plugin-builder": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
     "plugin-creator": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
     "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",

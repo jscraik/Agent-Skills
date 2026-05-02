@@ -200,6 +200,15 @@ has_context_move_evidence() {
         '
   )"
   for moved_line in "${removed_lines[@]}"; do
+    normalized_moved_line="$(
+      printf '%s\n' "$moved_line" \
+        | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g'
+    )"
+    if printf '%s\n' "$skill_added_blob" \
+      | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g' \
+      | grep -Fqx -- "$normalized_moved_line"; then
+      continue
+    fi
     if ! printf '%s\n' "$skill_added_blob" | grep -Fqx -- "$moved_line"; then
       missing_removed_line=1
       break
