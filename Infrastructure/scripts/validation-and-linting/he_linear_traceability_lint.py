@@ -224,7 +224,8 @@ def lint_markdown(path: Path, markdown: str) -> LintResult:
             )
         )
 
-    if expected_issue and expected_issue not in markdown:
+    body = FRONTMATTER_RE.sub("", markdown, count=1)
+    if expected_issue and expected_issue not in body:
         errors.append(f"artifact body must include frontmatter linear_issue {expected_issue}")
 
     return LintResult(path=path, errors=tuple(errors))
