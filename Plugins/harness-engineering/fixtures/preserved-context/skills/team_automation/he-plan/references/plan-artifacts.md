@@ -21,14 +21,14 @@ Canonical scaffold files for this skill:
 Render / refresh:
 
 ```bash
-python3 Plugins/harness-engineering/skills/team_automation/he-plan/Infrastructure/scripts/render_plan_template.py
-python3 Plugins/harness-engineering/skills/team_automation/he-plan/Infrastructure/scripts/check_plan_template_drift.py --update
+python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/render_plan_template.py
+python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/check_plan_template_drift.py --update
 ```
 
 Verify no drift:
 
 ```bash
-python3 Plugins/harness-engineering/skills/team_automation/he-plan/Infrastructure/scripts/check_plan_template_drift.py
+python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/check_plan_template_drift.py
 ```
 
 Validate tracked-work traceability:
@@ -168,6 +168,7 @@ plan_depth: lightweight|standard|deep
 | Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 | --- | --- | --- | --- | --- | --- |
 | ABC-123 | R1 | SA1 | P0 | AC1 | pending |
+| ABC-123 | R2 | SA2 | P1 | AC2 | pending |
 
 ## Scope Boundaries
 

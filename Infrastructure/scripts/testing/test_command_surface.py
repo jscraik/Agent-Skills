@@ -41,7 +41,7 @@ class CommandSurfaceTests(unittest.TestCase):
             kind="skill",
             command_visibility="target",
             runtime_visibility="latent",
-            source_path="Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md",
+            source_path="Plugins/harness-engineering/skills/he-work/SKILL.md",
             command_handle_path=".agents/skills/he-work/SKILL.md",
             owner="harness-engineering",
             description="Execute a plan.",
@@ -52,7 +52,7 @@ class CommandSurfaceTests(unittest.TestCase):
         body = render_skill_command_handle(handle)
 
         self.assertIn(
-            "Canonical source path: `Plugins/harness-engineering/skills/team_automation/he-work/SKILL.md`.",
+            "Canonical source path: `Plugins/harness-engineering/skills/he-work/SKILL.md`.",
             body,
         )
         self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", body)

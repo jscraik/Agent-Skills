@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "profile_id": "Plugins-harness-engineering-skills-team_automation-he-work",
-  "scope_skill": "Plugins/harness-engineering/skills/team_automation/he-work",
+  "scope_skill": "Plugins/harness-engineering/skills/he-work",
   "scope_profile": "Plugins",
   "rubric_version": "2026-02-26",
   "evaluator_version": "v1",

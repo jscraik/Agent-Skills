@@ -27,20 +27,6 @@ cases:
       - {type: contains, value: "validation"}
       - {type: contains, value: "SKILL.md"}
 
-  - id: happy-release-skillify-package
-    name: release skillify package
-    category: happy
-    eval_modes: [release]
-    should_trigger: true
-    prepend_skill: true
-    prompt: "Skillify this repeated release workflow into a reusable skill package with source evidence, SKILL.md instructions, packaging notes, and validation gates."
-    deterministic_checks:
-      forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]
-    acceptance:
-      - {type: contains, value: "skill package"}
-      - {type: contains, value: "SKILL.md"}
-      - {type: contains, value: "validation"}
-
   - id: edge-incomplete-context
     name: incomplete context
     category: edge

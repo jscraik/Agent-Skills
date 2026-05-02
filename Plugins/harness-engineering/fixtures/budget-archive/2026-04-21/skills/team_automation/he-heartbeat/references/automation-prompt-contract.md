@@ -35,12 +35,10 @@ heartbeat:
     requires_runtime_automation: true
     duplicate_policy: "update-existing"
     status_evidence: "<automation id, status, destination, and cadence>"
-  progress_cursor: null # optional unless heartbeat_mode is active_execution with a plan-led cursor
-  # For plan-led active_execution, replace progress_cursor: null with:
-  # progress_cursor:
-  #   source: "<plan checklist | issue | PR thread | artifact path>"
-  #   next_step_rule: "<how the next wake-up selects work>"
-  #   completion_gate: "<optional final HE stage or review gate>"
+  progress_cursor:
+    source: "<plan checklist | issue | PR thread | artifact path>"
+    next_step_rule: "<how the next wake-up selects work>"
+    completion_gate: "<optional final HE stage or review gate>"
   live_checks:
     - "<check 1>"
     - "<check 2>"

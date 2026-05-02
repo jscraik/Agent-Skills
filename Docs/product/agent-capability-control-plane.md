@@ -32,7 +32,7 @@ agent capabilities:
 | Remember workflows | Agents can reuse local review, validation, delivery, and operating standards.                                              | `Skills/**`, `Plugins/**`, `.agents/skills/**`, `ask skills resolve`, `ask skills goal`            |
 | Keep context small | Agents see routed front doors and command handles instead of every full workflow body.                                     | `ask runtime budget --json --robot`, rooted projection, generated `$handle` surfaces               |
 | Prevent drift      | Canonical source, generated manifests, runtime projections, plugin caches, and artifacts have distinct ownership.          | `ask repo surface --json`, `ask repo doctor-catalog --json --robot`, repo surface ownership policy |
-| Prove quality      | A capability should have structural, security, projection, runtime, and outcome evidence before it is treated as reliable. | `ask skills audit`, `ask skills prove`, workouts, evals, validation logs, closeout evidence        |
+| Prove quality      | A capability should have structural, security, projection, runtime, and outcome evidence before it is treated as reliable. | `ask skills audit`, `ask skills proof`, workouts, evals, validation logs, closeout evidence        |
 
 ## First Five Minutes
 
@@ -57,7 +57,7 @@ The next command contracts are specified in
 - `ask repo onboard`
 - `ask skills improve`
 - `ask skills explain`
-- `ask skills prove`
+- `ask skills proof`
 - `ask repo next`
 - `ask repo closeout`
 
@@ -84,7 +84,7 @@ Minimum proof format:
   "commands": [
     "./bin/ask skills audit <path> --level strict",
     "./bin/ask runtime budget --json --robot",
-    "./bin/ask skills prove <handle> --json --robot"
+    "./bin/ask skills proof <handle> --json --robot"
   ],
   "status": "proven"
 }

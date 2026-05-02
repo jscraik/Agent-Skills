@@ -87,3 +87,25 @@ def test_repo_surface_invalid_json_is_top_level_error(monkeypatch, tmp_path) -> 
     assert result.status == "error"
     assert result.data["repo_surface"]["status"] == "error"
     assert result.errors[0].message == "Repo surface inventory emitted invalid JSON."
+
+
+def test_repo_surface_timeout_is_top_level_error(monkeypatch, tmp_path) -> None:
+    timeout = subprocess.TimeoutExpired(
+        cmd=["check_repo_surface_inventory.py"],
+        timeout=repo_commands.SCRIPT_TIMEOUT_SECONDS,
+        output="partial",
+        stderr="slow",
+    )
+
+    def fake_timeout(*_args, **_kwargs):
+        raise timeout
+
+    monkeypatch.setattr(repo_commands.subprocess, "run", fake_timeout)
+
+    result = repo_commands.repo_surface(tmp_path)
+
+    assert result.status == "error"
+    assert result.data["repo_surface"]["status"] == "error"
+    assert result.data["repo_surface"]["raw_stdout"] == "partial"
+    assert result.data["repo_surface"]["raw_stderr"] == "slow"
+    assert result.errors[0].code == "ERR_TIMEOUT"

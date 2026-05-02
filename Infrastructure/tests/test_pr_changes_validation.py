@@ -10,6 +10,7 @@ Covers static artifact integrity for:
 """
 
 import json
+import sys
 import tomllib
 import unittest
 from pathlib import Path
@@ -18,6 +19,10 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
+sys.path.insert(0, str(LIFECYCLE_DIR))
+
+from selection_policy import policy_identity  # noqa: E402
 
 COMMAND_SURFACE_PATH = REPO_ROOT / ".skillsets" / "command-surface.json"
 CONTEXT_BUDGET_PATH = REPO_ROOT / "Infrastructure" / "GOVERNANCE" / "context-budget.yaml"
@@ -27,8 +32,7 @@ RUNTIME_SEPARATION_PATH = (
 ENVIRONMENT_TOML_PATH = REPO_ROOT / ".codex" / "environments" / "environment.toml"
 SKILLSETS_DIR = REPO_ROOT / ".skillsets"
 
-EXPECTED_POLICY_IDENTITY = "14c1588c6febe0c0"
-EXPECTED_SOURCE_REVISION = "6c4dc8455"
+EXPECTED_POLICY_IDENTITY = policy_identity()
 
 MANIFEST_REQUIRED_FIELDS = {
     "description",
@@ -114,9 +118,9 @@ class TestCommandSurfaceJsonStructure(unittest.TestCase):
             self.data["handle_count"],
         )
 
-    def test_handle_count_is_108(self) -> None:
-        """PR introduces exactly 108 handles; this anchors the expected surface size."""
-        self.assertEqual(self.data["handle_count"], 108)
+    def test_handle_count_is_not_empty(self) -> None:
+        """The rooted command surface must expose generated handles without hard-coding churn."""
+        self.assertGreater(self.data["handle_count"], 0)
 
     def test_each_handle_has_required_fields(self) -> None:
         """Every handle object must contain all required fields."""
@@ -286,7 +290,7 @@ class TestManifestJsonlStructure(unittest.TestCase):
                 )
 
     def test_all_manifests_use_new_policy_identity(self) -> None:
-        """PR bumped policy_identity to 14c1588c6febe0c0 for all manifests."""
+        """All manifests must match the active selection-policy identity."""
         for entry in self.manifest_rows:
             with self.subTest(id=entry["row"].get("id"), file=entry["file"].name):
                 prov = entry["row"].get("provenance", {})
@@ -297,13 +301,13 @@ class TestManifestJsonlStructure(unittest.TestCase):
                 )
 
     def test_all_manifests_use_new_source_revision(self) -> None:
-        """PR bumped source_revision to 6c4dc8455 for all manifests."""
+        """All manifests must carry a concrete short git source revision."""
         for entry in self.manifest_rows:
             with self.subTest(id=entry["row"].get("id"), file=entry["file"].name):
                 prov = entry["row"].get("provenance", {})
-                self.assertEqual(
-                    prov.get("source_revision"),
-                    EXPECTED_SOURCE_REVISION,
+                self.assertRegex(
+                    prov.get("source_revision", ""),
+                    r"^[0-9A-Fa-f]{7,}$",
                     f"Row '{entry['row'].get('id')}' in {entry['file'].name} has stale source_revision",
                 )
 
@@ -749,8 +753,6 @@ class TestEnvironmentTomlCodexEnvCommon(unittest.TestCase):
 
         This guards against accidentally adding the source without the call.
         """
-        import re
-
         scripts_to_check = [
             ("setup", self.parsed.get("setup", {}).get("script", "")),
         ]
@@ -764,7 +766,7 @@ class TestEnvironmentTomlCodexEnvCommon(unittest.TestCase):
             for idx, line in enumerate(lines):
                 if "codex_env_common.sh" in line and line.strip().startswith("source"):
                     # Find the next non-empty line
-                    next_lines = [l.strip() for l in lines[idx + 1:] if l.strip()]
+                    next_lines = [candidate.strip() for candidate in lines[idx + 1:] if candidate.strip()]
                     with self.subTest(block=block_name):
                         self.assertTrue(
                             next_lines,

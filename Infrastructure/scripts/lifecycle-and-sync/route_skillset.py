@@ -227,24 +227,50 @@ def is_stage_correctness_question(task_text: str, task_tokens: set[str]) -> bool
     )
 
 
-def harness_engineering_override(task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Apply the HE deterministic stage policy before generic token scoring."""
-    routing_map_path = repo_root() / "Plugins/harness-engineering/references/routing-map.json"
-    if not routing_map_path.is_file():
-        return None
+def harness_engineering_override(
+    task: str,
+    rows: list[dict[str, Any]],
+    *,
+    routing_map_path: Path | None = None,
+) -> dict[str, Any] | None:
+    """
+    Apply harness-engineering deterministic routing to the given task and manifest rows.
+    
+    Evaluates deterministic HE policies (explicit HE stage mentions, stage-correctness questions, and rules from Plugins/harness-engineering/references/routing-map.json) and returns a single routing decision when a deterministic override applies.
+    
+    Parameters:
+        task (str): The user task text to evaluate.
+        rows (list[dict[str, Any]]): Parsed manifest rows (each row is a dict from the manifest).
+    
+    Returns:
+        dict[str, Any] | None: A routing decision dict with keys:
+            - "row" (dict): The selected manifest row.
+            - "confidence" (float): Confidence score for the decision (e.g., 1.0, 0.95, 0.9).
+            - "reason" (str): Short explanation of which deterministic rule matched.
+        Returns None if no deterministic HE rule applies. Direct HE stage
+        mentions still route when the optional routing map is missing.
+    """
+    routing_map_path = routing_map_path or repo_root() / "Plugins/harness-engineering/references/routing-map.json"
+    routing_map: dict[str, Any] = {}
     try:
-        routing_map = json.loads(routing_map_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return None
+        if routing_map_path.is_file():
+            routing_map = json.loads(routing_map_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid Harness Engineering routing map at {routing_map_path}: {exc}") from exc
 
     task_text = task.lower()
     task_tokens = tokenize(task)
     stage_ids = {str(row.get("id")) for row in rows}
 
-    mentioned_stages = [stage for stage in re.findall(r"\bhe-[a-z0-9-]+\b", task_text) if stage in stage_ids]
+    mentioned_stages = [
+        stage
+        for stage in re.findall(r"\bhe-[a-z0-9-]+\b", task_text)
+        if stage in stage_ids or resolve_he_stage_alias(stage) in stage_ids
+    ]
     distinct_mentioned_stages = sorted(set(mentioned_stages))
+    resolved_mentioned_stages = sorted({resolve_he_stage_alias(stage) for stage in distinct_mentioned_stages})
     router_row = row_by_id(rows, "he-router")
-    if len(distinct_mentioned_stages) > 1 and router_row:
+    if len(resolved_mentioned_stages) > 1 and router_row:
         return {
             "row": router_row,
             "confidence": 0.9,
@@ -422,6 +448,26 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
 
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
+    """
+    Route a task to the best-matching stage within a root skill set.
+    
+    Parameters:
+    	skill_set (str): Root skill set name to route within.
+    	task (str): The user task text to route.
+    	top_k (int): Maximum number of candidate stages to return (bounded to 1..MAX_TOP_K).
+    	skillsets_dir (Path): Directory containing skill-set subfolders.
+    
+    Returns:
+    	payload (dict): A structured routing result with these keys:
+    		- schema_version (int): Payload schema version.
+    		- status (str): One of "selected", "low_confidence", "no_match", or an error status (e.g., "manifest_missing", "manifest_invalid").
+    		- policy_identity (dict): Identifying metadata for the routing policy.
+    		- skill_set (str): Echoed input skill set.
+    		- top_k (int): The bounded top_k used for this routing.
+    		- selected (dict|None): When status is "selected", the chosen stage summary with `id`, `level`, `source_path`, and `confidence`; otherwise None.
+    		- candidates (list[dict]): Ordered list of candidate summaries (each with `id`, `level`, `confidence`, `reason`).
+    		- operator_action (str|None): Suggested next action for an operator when manual intervention or repair is required.
+    """
     bounded_top_k = max(1, min(int(top_k), MAX_TOP_K))
     try:
         rows, error_status = read_manifest(skill_set, skillsets_dir)
@@ -449,10 +495,26 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "operator_action": "Generate manifests before routing." if error_status == "manifest_missing" else "Choose a valid root skill set.",
         }
     override = None
-    if skill_set == "harness-engineering":
-        override = harness_engineering_override(task, rows)
-    elif skill_set in {"plugin-factory", "skill-factory"}:
-        override = factory_override(skill_set, task, rows)
+    try:
+        if skill_set == "harness-engineering":
+            routing_map_path = skillsets_dir.parent / "Plugins/harness-engineering/references/routing-map.json"
+            if not routing_map_path.is_file():
+                routing_map_path = None
+            override = harness_engineering_override(task, rows, routing_map_path=routing_map_path)
+        elif skill_set in {"plugin-factory", "skill-factory"}:
+            override = factory_override(skill_set, task, rows)
+    except ValueError as exc:
+        return {
+            "schema_version": 1,
+            "status": "routing_policy_invalid",
+            "policy_identity": policy_identity(),
+            "skill_set": skill_set,
+            "top_k": bounded_top_k,
+            "selected": None,
+            "candidates": [],
+            "error": str(exc),
+            "operator_action": "Repair the routing policy and rerun routing.",
+        }
     if override:
         selected_row = override["row"]
         selected_confidence = float(override["confidence"])
@@ -507,16 +569,6 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
         resolved_selected_id = resolve_he_stage_alias(selected_id)
         if resolved_selected_id != selected_id:
             selected_row = row_by_id(rows, resolved_selected_id) or selected_row
-            scored[0] = (selected_confidence, selected_row, _reasons)
-            candidates = [
-                {
-                    "id": row.get("id"),
-                    "level": row.get("level"),
-                    "confidence": confidence,
-                    "reason": "; ".join(reasons) if reasons else "matched manifest metadata",
-                }
-                for confidence, row, reasons in scored[:bounded_top_k]
-            ]
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":

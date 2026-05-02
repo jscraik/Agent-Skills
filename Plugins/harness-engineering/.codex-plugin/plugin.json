@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Bundle Harness Engineering lifecycle stages with router-guided parent-stage routing and folded compatibility modes.",
+  "description": "Harness Engineering lifecycle router and stages.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -11,11 +11,11 @@
   "repository": "https://github.com/jscraik/Agent-Skills",
   "license": "Apache-2.0",
   "keywords": [
-    "plugin",
-    "harness-engineering",
-    "planning",
+    "harness",
+    "engineering",
+    "plan",
     "review",
-    "codex"
+    "linear"
   ],
   "governance": {
     "lifecycle_state": "active",
@@ -28,8 +28,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness Engineering",
-    "shortDescription": "Run Harness Engineering lifecycle stages through the router or parent stages",
-    "longDescription": "A Codex plugin package that bundles Harness Engineering lifecycle skills for parent-stage use, router-guided stage selection, folded compatibility modes, implementation execution, refinement loops, and readiness reviews. This plugin covers HE workflow orchestration, not @brainwav/coding-harness setup or CI scaffold management.",
+    "shortDescription": "Route HE brainstorm, spec, plan, work, review, and follow-up.",
+    "longDescription": "Harness Engineering workflow orchestration with Linear/spec/plan/PR traceability.",
     "developerName": "Jamie Craik",
     "category": "Coding",
     "capabilities": [
@@ -41,7 +41,7 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use he-router for unclear stage choice; fold legacy HE names through references/folded-skill-context.md."
+      "Use he-router."
     ],
     "brandColor": "#0EA5E9",
     "composerIcon": "./assets/icon.png",

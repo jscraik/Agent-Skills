@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/team_automation/he-brainstorm"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-brainstorm"
 SKILL = SKILL_DIR / "SKILL.md"
 REFERENCES = SKILL_DIR / "references"
 AGENT_METADATA = SKILL_DIR / "agents/openai.yaml"

@@ -9,7 +9,7 @@ HE_ROOT = REPO_ROOT / "Plugins" / "harness-engineering"
 TRIAGE_REF = HE_ROOT / "references" / "session-evidence-skillify-triage.md"
 SESSION_CONTRACT = HE_ROOT / "references" / "session-evidence-contract.md"
 ROUTING_MAP = HE_ROOT / "references" / "routing-map.json"
-HE_IMPROVE = HE_ROOT / "skills" / "team_automation" / "he-improve" / "SKILL.md"
+HE_IMPROVE = HE_ROOT / "skills" / "he-improve" / "SKILL.md"
 HE_ROUTER = HE_ROOT / "skills" / "he-router" / "SKILL.md"
 
 

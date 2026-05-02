@@ -88,8 +88,8 @@ If required behavior, interface boundaries, or tracker context cannot be resolve
 
 ## References
 
-- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-spec/SKILL.full.md`
-- Spec artifact contract: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-spec/references/spec-artifacts.md`
-- Spec mode rules: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-spec/references/spec-modes.md`
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-spec/SKILL.full.md`
+- Spec artifact contract: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-spec/references/spec-artifacts.md`
+- Spec mode rules: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-spec/references/spec-modes.md`
 - Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
 - Domain and QA routing: `Plugins/harness-engineering/references/domain-model-routing.md`, `Plugins/harness-engineering/references/qa-intake-routing.md`

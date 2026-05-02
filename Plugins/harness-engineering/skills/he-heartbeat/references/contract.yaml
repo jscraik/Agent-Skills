@@ -1,0 +1,44 @@
+schema_version: 1
+
+purpose: >
+  Create, update, or repair a Harness Engineering heartbeat so recurring work
+  wakes the current thread, reads live state first, and routes into exactly one
+  current HE stage or folded mode.
+
+triggers:
+  - user asks to keep checking PR, CI, review, deploy, validation, or Linear state
+  - user asks for a heartbeat, monitor, recurring wake-up, or until-green loop
+  - long-running HE work needs state-change follow-up rather than chat memory
+
+inputs:
+  - target repo, PR, branch, Linear issue, validation command, deploy, or artifact
+  - cadence, live checks, stop conditions, and reporting policy
+  - selected HE stage or evidence needed to route through `he-router`
+  - automation runtime availability and any existing matching heartbeat
+
+outputs:
+  - heartbeat mode, selected cadence, selected stage or folded mode, and target
+  - automation name, status, id when created or updated, destination, target_binding, and active state
+  - live checks, stop conditions, immediate-run outcome, and next wake-up behavior
+  - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
+
+non_goals:
+  - one-off implementation, review, planning, or bug fixing
+  - generic personal reminders unrelated to Harness Engineering
+  - unattended merge, deploy, destructive cleanup, or tracker closure
+
+risks:
+  - stale thread-memory action; mitigate by requiring fresh live-state reads
+  - duplicate automations; mitigate by searching for a matching heartbeat first
+  - noisy loops; mitigate with state-change reporting unless active execution requires every wake-up
+  - unsafe unattended action; mitigate with explicit approval gates
+
+observability: >
+  Record automation name, id, cadence, target_binding, target, selected stage,
+  live checks, immediate-run outcome, stop condition, blocker, and lifecycle
+  exit status.
+
+rollback_procedure: >
+  Pause or delete the matching heartbeat automation, preserve the last live-state
+  evidence in the handoff, and reroute the underlying HE stage before creating a
+  replacement.

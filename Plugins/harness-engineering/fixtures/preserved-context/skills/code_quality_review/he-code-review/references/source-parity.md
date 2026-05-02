@@ -8,7 +8,7 @@
 
 ## Source inputs
 This package was synthesized from:
-- the active Harness Engineering stage at `Plugins/harness-engineering/skills/code_quality_review/he-code-review/`
+- the active Harness Engineering stage at `Plugins/harness-engineering/skills/he-code-review/`
 - historical reference: `Infrastructure/config/codex/prompts/workflow-review.md` (not present in this repository snapshot; behavior is preserved through the legacy prompt notes below)
 - the longer legacy review prompt lineage that emphasized broad readiness review, explicit review modes, protected-artifact filtering, todo capture, and optional end-to-end follow-up
 - OpenClaw ClawSweeper prompt references at `https://github.com/openclaw/clawsweeper/tree/5c804ea0936794763ba7e22f107fa78bde919528/prompts`, used to strengthen Codex-style review finding quality, reviewer-thread disposition, and repair/merge preflight rules

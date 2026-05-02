@@ -6,15 +6,13 @@ from pathlib import Path
 import pytest
 
 
-def find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "Plugins").is_dir() and (candidate / "Infrastructure").is_dir():
-            return candidate
-    raise RuntimeError(f"Unable to locate repository root from {start}")
-
-
-ROOT = find_repo_root(Path(__file__).resolve())
-MODULE_PATH = ROOT / "Plugins" / "plugin-factory" / "skills" / "_template_utils.py"
+MODULE_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "Plugins"
+    / "plugin-factory"
+    / "skills"
+    / "_template_utils.py"
+)
 
 SPEC = importlib.util.spec_from_file_location("template_utils", MODULE_PATH)
 if SPEC is None:

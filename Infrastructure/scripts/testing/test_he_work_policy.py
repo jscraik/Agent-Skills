@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/team_automation/he-work"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-work"
 SKILL = SKILL_DIR / "SKILL.md"
 EVALS = SKILL_DIR / "references/evals.yaml"
 CONTRACT = SKILL_DIR / "references/contract.yaml"
@@ -30,6 +30,14 @@ def test_active_skill_keeps_required_work_contracts() -> None:
 
 
 def test_active_skill_uses_plugin_owned_references() -> None:
+    """
+    Ensure the active skill uses plugin-owned reference files and does not include preserved fixture references.
+    
+    Checks that:
+    - the SKILL.md content does not contain the substring "fixtures/preserved-context",
+    - each expected reference file exists under the skill's references directory,
+    - the global index file contains the plugin-relative path "Plugins/harness-engineering/skills/he-work/{rel}" for each expected reference.
+    """
     text = read(SKILL)
     index = read(INDEX)
     expected = [
@@ -42,10 +50,15 @@ def test_active_skill_uses_plugin_owned_references() -> None:
     assert "fixtures/preserved-context" not in text
     for rel in expected:
         assert (SKILL_DIR / rel).exists()
-        assert f"Plugins/harness-engineering/skills/team_automation/he-work/{rel}" in index
+        assert f"Plugins/harness-engineering/skills/he-work/{rel}" in index
 
 
 def test_contract_has_operational_readiness_keys() -> None:
+    """
+    Verify that the contract.yaml contains required operational-readiness keys and phrases.
+    
+    Asserts that the file includes the following entries: "schema_version: 1", "observability:", "rollback_procedure:", "traceability evidence", and "dirty worktree damage".
+    """
     text = read(CONTRACT)
 
     for phrase in [

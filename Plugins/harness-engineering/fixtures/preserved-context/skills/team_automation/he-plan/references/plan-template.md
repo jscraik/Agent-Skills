@@ -4,11 +4,11 @@ title: "Symphony Service Implementation Plan"
 type: "feat"
 status: "active"
 date: "2026-04-10"
-origin: "Docs/brainstorms/2026-04-10-symphony-requirements.md"
-requirements: "Docs/brainstorms/2026-04-10-symphony-requirements.md"
+origin: "docs/brainstorms/2026-04-10-symphony-requirements.md"
+requirements: "docs/brainstorms/2026-04-10-symphony-requirements.md"
 spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
-source_spec: "Docs/specs/2026-04-10-symphony-service-spec.md"
-ui_spec: "Docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
+source_spec: "docs/specs/2026-04-10-symphony-service-spec.md"
+ui_spec: "docs/ui-specs/2026-04-10-symphony-ops-ui-spec.md"
 linear_project: "JSC"
 linear_issue: "JSC-200"
 linear_parent: "JSC-190"
@@ -132,7 +132,7 @@ P0-U1 | pending | planning-agent | plan scaffold generated
 ## Sources & References
 
 - Linear issue: JSC-200
-- Origin document: Docs/brainstorms/2026-04-10-symphony-requirements.md
+- Origin document: docs/brainstorms/2026-04-10-symphony-requirements.md
 - Spec: Docs/specs/2026-04-10-symphony-service-spec.md
 - Plan: Docs/plans/2026-04-10-feat-symphony-service-plan.md
 - Related code: services/symphony/*

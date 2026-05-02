@@ -21,8 +21,6 @@ for candidate in [FAMILY_SKILLS_DIR, *(parent / "skills" for parent in SCRIPT_DI
         if str(candidate) not in sys.path:
             sys.path.insert(0, str(candidate))
         break
-else:
-    raise RuntimeError(f"Unable to locate _template_utils.py from {SCRIPT_DIR}")
 
 from _template_utils import (  # noqa: E402
     TemplateRenderError,

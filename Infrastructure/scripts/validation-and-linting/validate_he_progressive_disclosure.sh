@@ -133,6 +133,7 @@ append_candidate() {
   candidate_list+=("${resolved#"$REPO_ROOT"/}")
 }
 
+# has_context_move_evidence determines whether deleted non-empty lines from the given SKILL.md have been relocated into repository reference/index files or still appear in the changed SKILL.md after accepted normalizations, and exits success if relocation evidence is found.
 has_context_move_evidence() {
   local base_ref="$1"
   local skill_path="$2"
@@ -200,6 +201,15 @@ has_context_move_evidence() {
         '
   )"
   for moved_line in "${removed_lines[@]}"; do
+    normalized_moved_line="$(
+      printf '%s\n' "$moved_line" \
+        | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g'
+    )"
+    if printf '%s\n' "$skill_added_blob" \
+      | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g' \
+      | grep -Fqx -- "$normalized_moved_line"; then
+      continue
+    fi
     if ! printf '%s\n' "$skill_added_blob" | grep -Fqx -- "$moved_line"; then
       missing_removed_line=1
       break
@@ -222,6 +232,15 @@ has_context_move_evidence() {
           '
     )"
     for moved_line in "${removed_lines[@]}"; do
+      normalized_moved_line="$(
+        printf '%s\n' "$moved_line" \
+          | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g'
+      )"
+      if printf '%s\n' "$added_blob" \
+        | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g' \
+        | grep -Fqx -- "$normalized_moved_line"; then
+        return 0
+      fi
       if printf '%s\n' "$added_blob" | grep -Fqx -- "$moved_line"; then
         return 0
       fi
@@ -271,6 +290,7 @@ done
 
 if (( failures > 0 )); then
   echo "[he-progressive] FAIL: progressive-disclosure contract violations detected"
+  echo "[he-progressive] hint: move preserved lines into stage references, ${INDEX_PATH}, or Plugins/harness-engineering/references/folded-skill-context.md"
   exit 1
 fi
 

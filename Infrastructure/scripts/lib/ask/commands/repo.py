@@ -4,7 +4,7 @@ import re
 import sys
 from pathlib import Path
 from typing import List
-from ask.envelope import CallResult, ErrorObject
+from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 
 SCRIPT_TIMEOUT_SECONDS = 60
@@ -241,7 +241,21 @@ def provider_audit(repo_root: Path) -> CallResult:
 
 
 def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
-    """Run the repo surface inventory classifier and return its report."""
+    """
+    Produce a surface-inventory report for the repository.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root where the inventory check will run.
+        strict (bool): When true, require strict inventory validation.
+    
+    Returns:
+        CallResult: Result containing:
+            - data["repo_surface"]: parsed inventory report dictionary (or a fallback error report on parse failure).
+            - data["strict"]: the provided `strict` value.
+            - status: "success" when the inventory indicates no blocking failures, otherwise "error".
+            - errors: on failure, one or more ErrorObject entries describing the problem and suggested fixes.
+              Inventory failures use "ERR_VALIDATION"; inventory command timeouts use "ERR_TIMEOUT".
+    """
     result = CallResult()
     cmd = [
         sys.executable,
@@ -257,10 +271,10 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
             cwd=str(repo_root),
             capture_output=True,
             text=True,
-            check=False,
             timeout=SCRIPT_TIMEOUT_SECONDS,
         )
     except subprocess.TimeoutExpired as exc:
+        result.status = "error"
         result.data["repo_surface"] = {
             "status": "error",
             "raw_stdout": exc.stdout or "",
@@ -271,12 +285,17 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
             },
         }
         result.data["strict"] = strict
-        result.status = "error"
         result.errors.append(
             ErrorObject(
-                code="ERR_VALIDATION",
-                message="Repo surface inventory timed out.",
-                fix_suggestion="Run the inventory script directly, inspect for hangs, and retry.",
+                code=ErrorCode.ERR_TIMEOUT,
+                message=(
+                    "Repo surface inventory timed out after "
+                    f"{SCRIPT_TIMEOUT_SECONDS} seconds."
+                ),
+                fix_suggestion=(
+                    "Run the underlying inventory script directly to identify "
+                    "the slow path, then retry repo surface."
+                ),
             )
         )
         return result

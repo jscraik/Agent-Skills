@@ -31,6 +31,8 @@ Evidence beats intuition. Codex may write the insight, but the report must stay 
 
 ## Workflow
 
+Start with 2-3 focused surfaces: session themes, friction points, and next-step prompting improvements. Widen only when the user asks for a deeper analytics pass.
+
 Use the compatibility runner:
 
 ```bash
@@ -67,8 +69,9 @@ Schema-bound outputs include `schema_version`.
 
 ## Examples
 
-- "Generate my weekly Codex insights report from the last 7 days and open the local HTML report."
-- "Prepare the evidence bundle under `$HOME/.codex/usage-data` so this session can write the JSON."
+- User says: "Can you inspect the last week where I bounced between `agent-skills` and `coding-harness`, build me a Codex usage report, and open the HTML when it is ready?"
+- User says: "Help me validate why my prompts got messy while fixing PR checks yesterday; show where I stalled and give me practical wording fixes."
+- User says: "Please prepare only the evidence bundle under `$HOME/.codex/usage-data`; I want this Codex session to write the JSON before you render it."
 
 ## Failure mode
 

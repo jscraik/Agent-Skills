@@ -3,7 +3,7 @@ import re
 
 
 ROOT = Path(__file__).resolve().parents[3]
-SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/team_automation/he-plan"
+SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-plan"
 SKILL = SKILL_DIR / "SKILL.md"
 REFS = SKILL_DIR / "references"
 DOCTRINE = ROOT / "Plugins/harness-engineering/references/he-plan-doctrine.md"
@@ -90,6 +90,14 @@ def test_metadata_description_is_complete() -> None:
 
 
 def test_deferred_index_points_to_plan_context() -> None:
+    """
+    Verify the deferred-context index lists the plan-preserved context and points to required plan reference files.
+    
+    Checks:
+    - The index contains the "## Plan Preserved Context" section header.
+    - The index references "Plugins/harness-engineering/references/he-plan-doctrine.md" and that doctrine file exists.
+    - For each expected reference file under "Plugins/harness-engineering/skills/he-plan/references/", the index contains the repo-relative path and the referenced file exists on disk.
+    """
     index = read(ROOT / "Plugins/harness-engineering/references/deferred-context-index.md")
     assert "## Plan Preserved Context" in index
     assert "Plugins/harness-engineering/references/he-plan-doctrine.md" in index
@@ -102,6 +110,6 @@ def test_deferred_index_points_to_plan_context() -> None:
         "test-strategy.md",
         "visual-communication.md",
     ]:
-        path = f"Plugins/harness-engineering/skills/team_automation/he-plan/references/{name}"
+        path = f"Plugins/harness-engineering/skills/he-plan/references/{name}"
         assert path in index
         assert (ROOT / path).exists()

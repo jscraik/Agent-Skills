@@ -23,9 +23,10 @@ import os
 import re
 import shlex
 import shutil
+import statistics
 import subprocess
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -910,6 +911,144 @@ def build_evidence_bundle(data, sessions, args):
     return evidence
 
 
+def summarize_message_hours(hours):
+    """
+    Summarize user message hour-of-day activity into compact counts.
+
+    Parameters:
+        hours (list[int]): Hour-of-day integers in the range 0-23.
+
+    Returns:
+        dict: Counts per hour plus the busiest hours and totals.
+    """
+    if not hours:
+        return {
+            "total_messages": 0,
+            "counts_by_hour": {},
+            "top_hours": [],
+        }
+
+    counts = Counter(int(hour) for hour in hours if isinstance(hour, int))
+    ordered_counts = {str(hour): counts.get(hour, 0) for hour in range(24) if counts.get(hour, 0)}
+    top_hours = sorted(
+        (
+            {"hour": hour, "count": count}
+            for hour, count in counts.items()
+        ),
+        key=lambda item: (-item["count"], item["hour"]),
+    )[:5]
+    return {
+        "total_messages": len(hours),
+        "counts_by_hour": ordered_counts,
+        "top_hours": top_hours,
+    }
+
+
+def summarize_response_times(times):
+    """
+    Summarize response-time samples into compact descriptive statistics.
+
+    Parameters:
+        times (list[float]): Response-time values in seconds.
+
+    Returns:
+        dict: Aggregate stats and histogram buckets suitable for a prompt payload.
+    """
+    clean_times = [
+        float(value) for value in times
+        if isinstance(value, (int, float))
+    ]
+    if not clean_times:
+        return {
+            "count": 0,
+            "average_seconds": 0.0,
+            "median_seconds": 0.0,
+            "p90_seconds": 0.0,
+            "max_seconds": 0.0,
+            "buckets": {},
+        }
+
+    sorted_times = sorted(clean_times)
+    # Nearest-rank p90 so small samples still reflect the upper tail.
+    p90_index = max(0, min(len(sorted_times) - 1, (len(sorted_times) * 90 + 99) // 100 - 1))
+    bucket_counts = {
+        "lt_10s": 0,
+        "10s_to_30s": 0,
+        "30s_to_60s": 0,
+        "1m_to_2m": 0,
+        "2m_to_5m": 0,
+        "5m_to_15m": 0,
+        "gt_15m": 0,
+    }
+    for value in clean_times:
+        if value < 10:
+            bucket_counts["lt_10s"] += 1
+        elif value < 30:
+            bucket_counts["10s_to_30s"] += 1
+        elif value < 60:
+            bucket_counts["30s_to_60s"] += 1
+        elif value < 120:
+            bucket_counts["1m_to_2m"] += 1
+        elif value < 300:
+            bucket_counts["2m_to_5m"] += 1
+        elif value < 900:
+            bucket_counts["5m_to_15m"] += 1
+        else:
+            bucket_counts["gt_15m"] += 1
+
+    return {
+        "count": len(clean_times),
+        "average_seconds": round(sum(clean_times) / len(clean_times), 1),
+        "median_seconds": round(statistics.median(clean_times), 1),
+        "p90_seconds": round(sorted_times[p90_index], 1),
+        "max_seconds": round(sorted_times[-1], 1),
+        "buckets": bucket_counts,
+    }
+
+
+def build_codex_writer_payload(evidence):
+    """
+    Build a compact evidence payload for the nested Codex writer.
+
+    The full evidence bundle remains on disk for debugging and render-only flows,
+    but the writer receives only bounded summaries so the prompt stays inside the
+    model context window.
+
+    Parameters:
+        evidence (dict): Full evidence bundle returned by build_evidence_bundle().
+
+    Returns:
+        dict: Reduced writer-facing evidence payload.
+    """
+    data = evidence.get("data", {})
+    session_samples = evidence.get("session_samples", [])
+    compact_samples = []
+    for sample in session_samples[:8]:
+        compact_sample = dict(sample)
+        compact_sample["first_prompt"] = compact_sample.get("first_prompt", "")[:280]
+        compact_sample["transcript_excerpt"] = compact_sample.get("transcript_excerpt", "")[:600]
+        compact_samples.append(compact_sample)
+
+    return {
+        "schema_version": evidence.get("schema_version", "codex-insight-evidence.v1"),
+        "generated_at": evidence.get("generated_at", ""),
+        "writer": evidence.get("writer", "codex"),
+        "notes": evidence.get("notes", []),
+        "metrics": evidence.get("metrics", {}),
+        "analysis_context": {
+            "goal_categories": data.get("goal_categories", {}),
+            "outcomes": data.get("outcomes", {}),
+            "satisfaction": data.get("satisfaction", {}),
+            "session_types": data.get("session_types", {}),
+            "friction": data.get("friction", {}),
+            "success": data.get("success", {}),
+            "message_hours_summary": summarize_message_hours(data.get("message_hours", [])),
+            "response_time_summary": summarize_response_times(data.get("user_response_times", [])),
+        },
+        "session_samples": compact_samples,
+    }
+
+
 def build_codex_prompt(evidence):
     """
     Builds the full textual prompt sent to the Codex writer, embedding the provided evidence and the required writer instructions/schema.
@@ -920,7 +1059,8 @@ def build_codex_prompt(evidence):
     Returns:
         str: The complete prompt text that must be sent to the Codex CLI.
     """
-    evidence_json = json.dumps(evidence, indent=2, ensure_ascii=False)
+    writer_payload = build_codex_writer_payload(evidence)
+    evidence_json = json.dumps(writer_payload, indent=2, ensure_ascii=False)
     return f"""# Codex Insight Report Writer
 
 You are Codex writing Jamie's Codex usage insight report from local evidence.
@@ -1035,6 +1175,74 @@ Return ONLY a valid JSON object. Do not wrap it in Markdown. Do not include comm
 """
 
 
+def has_second_person(value: str) -> bool:
+    """
+    Determine whether the given text uses second-person pronouns.
+
+    Returns:
+        bool: True when `value` contains common second-person words.
+    """
+    return bool(re.search(r"\b(you|your|yours|yourself)\b", value, flags=re.IGNORECASE))
+
+
+def ensure_second_person_sentence(value: str) -> str:
+    """
+    Ensure required narrative fields contain second-person phrasing.
+
+    Parameters:
+        value (str): The model-generated sentence or paragraph.
+
+    Returns:
+        str: Original text if already compliant, otherwise a minimally prefixed
+        version that clearly addresses the user in second person.
+    """
+    if not isinstance(value, str):
+        return value
+    stripped = value.strip()
+    if not stripped or has_second_person(stripped):
+        return value
+    return f"For you, {stripped[0].lower()}{stripped[1:]}" if len(stripped) > 1 else f"For you, {stripped.lower()}"
+
+
+def normalize_insights(insights):
+    """
+    Apply conservative post-processing to writer output before validation.
+
+    This keeps the strict schema, but repairs small deterministic phrasing
+    misses that are not worth failing the whole report for.
+
+    Parameters:
+        insights (dict): Parsed writer output.
+
+    Returns:
+        dict: Normalized insights object.
+    """
+    if not isinstance(insights, dict):
+        return insights
+
+    at_a_glance = insights.get("at_a_glance")
+    if isinstance(at_a_glance, dict):
+        for field in ("whats_working", "whats_hindering", "quick_wins", "ambitious_workflows"):
+            if field in at_a_glance:
+                at_a_glance[field] = ensure_second_person_sentence(at_a_glance[field])
+
+    interaction_style = insights.get("interaction_style")
+    if isinstance(interaction_style, dict):
+        for field in ("narrative", "key_pattern"):
+            if field in interaction_style:
+                interaction_style[field] = ensure_second_person_sentence(interaction_style[field])
+
+    suggestions = insights.get("suggestions")
+    if isinstance(suggestions, dict):
+        features = suggestions.get("features_to_try")
+        if isinstance(features, list):
+            for item in features:
+                if isinstance(item, dict) and "why_for_you" in item:
+                    item["why_for_you"] = ensure_second_person_sentence(item["why_for_you"])
+
+    return insights
+
+
 def validate_insights(insights):
     """
     Validate a Codex writer insights object against the expected schema, required fields, list shapes, evidence entries, and second-person phrasing rules.
@@ -1101,15 +1309,6 @@ def validate_insights(insights):
         "on_the_horizon.opportunities",
         "actionable_fixes.priority_fixes",
     }
-
-    def has_second_person(value: str) -> bool:
-        """
-        Determine whether the given text uses second-person pronouns.
-        
-        Returns:
-            `True` if `value` contains any of the words "you", "your", "yours", or "yourself" (case-insensitive), `False` otherwise.
-        """
-        return bool(re.search(r"\b(you|your|yours|yourself)\b", value, flags=re.IGNORECASE))
 
     def section_payload(name: str) -> dict:
         """
@@ -1231,6 +1430,7 @@ def run_codex_writer(prompt):
     insights = extract_json_object(result.stdout)
     if not isinstance(insights, dict):
         raise RuntimeError("Codex writer did not return a valid JSON object")
+    insights = normalize_insights(insights)
     missing = validate_insights(insights)
     if missing:
         raise RuntimeError(f"Codex writer JSON missing required sections: {', '.join(missing)}")

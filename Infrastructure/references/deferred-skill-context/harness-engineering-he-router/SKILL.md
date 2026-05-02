@@ -23,7 +23,8 @@ Select exactly one `harness-engineering` stage and return one exact next skill i
 
 - `schema_version: 1` when structured output is requested.
 - One stage from [../../references/routing-map.json](../../references/routing-map.json).
-- One rationale sentence and one `recommended_next_step` payload with the next exact skill invocation.
+- One rationale sentence and one exact next skill invocation.
+- One subagent plan with mapped roles, available/missing split, and fallback.
 - One `confidence` value (`high`, `medium`, or `blocked`) and one `missing_input` value when blocked.
 
 ## Procedure
@@ -36,7 +37,7 @@ Select exactly one `harness-engineering` stage and return one exact next skill i
 6. Route prior-session, archived-session, session-collector, repeated-failure, or "what keeps failing" requests with [../../references/session-evidence-contract.md](../../references/session-evidence-contract.md): plugin/workflow improvement to `he-improve`, active lifecycle drift to `he-compound-refresh`, recurring waits to `he-heartbeat`, concrete derived tasks to `he-work`, and bug/root-cause evidence to `he-fix-bugs`.
 7. Route QA session, conversational bug-report, or feedback-to-Linear requests by expected-behavior clarity: clear single/multiple defects to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, issue-set sequencing to `he-plan`.
 8. Resolve mapped roles from `~/.codex/agents/manifest.json`, preferring `he-*` roles when available in the stage map.
-9. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `recommended_next_step`, and `missing_input` only when blocked.
+9. Return outputs with `selected_stage`, `matched_rule`, `confidence`, `rationale`, `next_invocation`, and subagent policy fields.
 10. If still ambiguous after applying the table, return blocked with exactly one missing input instead of guessing.
 
 ## Philosophy

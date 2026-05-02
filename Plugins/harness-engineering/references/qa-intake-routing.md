@@ -9,7 +9,7 @@ Use this reference when a user reports bugs, starts a QA session, wants conversa
 3. Explore the repo lightly for domain language and behavior boundaries. The goal is context for durable issue wording, not a fix.
 4. Read `CONTEXT-MAP.md` or `CONTEXT.md` when project terms shape the report, and prefer canonical terms in the Linear issue.
 5. Decide whether the report is one Linear issue or several thin issues.
-6. File or prepare Linear issue(s) in dependency order, then share URLs or the exact issue payload.
+6. File Linear issue(s) in dependency order. If Linear creation is blocked, stop with `linear_status: linear_blocked`, exact missing fields, and the ready-to-create issue payload; do not treat the payload as equivalent to a filed issue.
 7. Ask: "Next issue, or are we done?"
 
 ## Single Issue vs Breakdown
@@ -23,7 +23,7 @@ Break down into multiple Linear issues when:
 - different agents or engineers could work in parallel;
 - one issue genuinely blocks testing another.
 
-Create blockers first so later Linear issues can reference real issue IDs. Mark independent issues as "None - can start immediately" rather than inventing dependencies.
+Create blockers first so later Linear issues can reference real issue IDs. If blocker creation is blocked, return the ordered ready-to-create payloads and missing metadata instead of creating downstream placeholder links. Mark independent issues as "None - can start immediately" rather than inventing dependencies.
 
 ## Linear Issue Template
 
@@ -53,7 +53,8 @@ Create blockers first so later Linear issues can reference real issue IDs. Mark 
 - Describe behavior, not implementation.
 - Reproduction steps are mandatory; ask if they are missing.
 - Keep each issue readable in about 30 seconds.
-- If expected behavior is unclear, route to `he-brainstorm` or `he-spec` before filing an implementation issue.
+- If expected behavior is unclear, route to `he-brainstorm` or `he-spec` before filing an implementation issue; once the ambiguity is resolved, the Linear tracker gate is still mandatory before handoff.
+- If the Linear app is disconnected or team/project/priority metadata is missing, stop with `linear_status: linear_blocked` and a complete issue payload.
 - If the issue is already filed and ready for diagnosis, route to `he-fix-bugs`.
 - If multiple Linear issues need sequencing, route to `he-plan`.
-- If a repro should become a failing test first, route to `he-tdd`.
+- If a repro should become a failing test first, route to `he-work` with `test-first` posture.

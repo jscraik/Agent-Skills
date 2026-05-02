@@ -10,8 +10,6 @@ Covers the functions added/changed in the PR:
   - parse_args (argument parsing)
 """
 import importlib.util
-import sys
-import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -46,6 +44,12 @@ is_meta_session = _mod.is_meta_session
 count_lines_in_diff = _mod.count_lines_in_diff
 extract_message_text = _mod.extract_message_text
 categorize_tool_error = _mod.categorize_tool_error
+summarize_message_hours = _mod.summarize_message_hours
+summarize_response_times = _mod.summarize_response_times
+build_codex_writer_payload = _mod.build_codex_writer_payload
+build_codex_prompt = _mod.build_codex_prompt
+ensure_second_person_sentence = _mod.ensure_second_person_sentence
+normalize_insights = _mod.normalize_insights
 TOOL_ALIASES = _mod.TOOL_ALIASES
 LABEL_MAP = _mod.LABEL_MAP
 SATISFACTION_ORDER = _mod.SATISFACTION_ORDER
@@ -455,6 +459,144 @@ class TestParseArgs(unittest.TestCase):
     def test_insights_in_defaults_to_same_as_insights_out(self):
         args = self._parse([])
         self.assertEqual(args.insights_in, args.insights_out)
+
+
+class TestWriterPayloadCompaction(unittest.TestCase):
+    def test_summarize_message_hours_returns_hour_counts_and_top_hours(self):
+        summary = summarize_message_hours([9, 9, 14, 14, 14, 22])
+        self.assertEqual(summary["total_messages"], 6)
+        self.assertEqual(summary["counts_by_hour"]["9"], 2)
+        self.assertEqual(summary["counts_by_hour"]["14"], 3)
+        self.assertEqual(summary["top_hours"][0], {"hour": 14, "count": 3})
+
+    def test_summarize_response_times_returns_stats_and_buckets(self):
+        summary = summarize_response_times([5, 15, 45, 90, 240, 1200])
+        self.assertEqual(summary["count"], 6)
+        self.assertEqual(summary["median_seconds"], 67.5)
+        self.assertEqual(summary["buckets"]["lt_10s"], 1)
+        self.assertEqual(summary["buckets"]["10s_to_30s"], 1)
+        self.assertEqual(summary["buckets"]["30s_to_60s"], 1)
+        self.assertEqual(summary["buckets"]["1m_to_2m"], 1)
+        self.assertEqual(summary["buckets"]["2m_to_5m"], 1)
+        self.assertEqual(summary["buckets"]["gt_15m"], 1)
+
+    def test_summarize_response_times_uses_nearest_rank_p90(self):
+        summary = summarize_response_times([10, 100])
+        self.assertEqual(summary["p90_seconds"], 100.0)
+
+    def test_build_codex_writer_payload_omits_raw_arrays_and_compacts_samples(self):
+        evidence = {
+            "schema_version": "codex-insight-evidence.v1",
+            "generated_at": "2026-05-02T21:00:00+00:00",
+            "writer": "codex",
+            "notes": ["test note"],
+            "metrics": {"sessions": {"total": 2}},
+            "data": {
+                "goal_categories": {"debug": 3},
+                "outcomes": {"fully_achieved": 2},
+                "satisfaction": {"happy": 1},
+                "session_types": {"iterative_refinement": 1},
+                "friction": {"tool_failed": 2},
+                "success": {"good_debugging": 2},
+                "message_hours": [9, 9, 14],
+                "user_response_times": [5, 15, 120],
+            },
+            "session_samples": [
+                {
+                    "session_id": "abc123",
+                    "first_prompt": "p" * 500,
+                    "transcript_excerpt": "x" * 2000,
+                }
+            ] * 15,
+        }
+
+        payload = build_codex_writer_payload(evidence)
+
+        self.assertNotIn("data", payload)
+        self.assertEqual(len(payload["session_samples"]), 8)
+        self.assertEqual(len(payload["session_samples"][0]["transcript_excerpt"]), 600)
+        self.assertEqual(len(payload["session_samples"][0]["first_prompt"]), 280)
+        self.assertEqual(
+            payload["analysis_context"]["message_hours_summary"]["counts_by_hour"]["9"],
+            2,
+        )
+        self.assertEqual(
+            payload["analysis_context"]["response_time_summary"]["count"],
+            3,
+        )
+
+    def test_build_codex_prompt_uses_compact_payload_not_raw_arrays(self):
+        evidence = {
+            "schema_version": "codex-insight-evidence.v1",
+            "generated_at": "2026-05-02T21:00:00+00:00",
+            "writer": "codex",
+            "notes": [],
+            "metrics": {},
+            "data": {
+                "message_hours": [1, 2, 3],
+                "user_response_times": [10, 20, 30],
+                "goal_categories": {},
+                "outcomes": {},
+                "satisfaction": {},
+                "session_types": {},
+                "friction": {},
+                "success": {},
+            },
+            "session_samples": [],
+        }
+
+        prompt = build_codex_prompt(evidence)
+
+        self.assertIn('"analysis_context"', prompt)
+        self.assertIn('"message_hours_summary"', prompt)
+        self.assertNotIn('"user_response_times"', prompt)
+        self.assertNotIn('"message_hours": [', prompt)
+
+
+class TestInsightNormalization(unittest.TestCase):
+    def test_ensure_second_person_sentence_preserves_existing_second_person(self):
+        value = "You move quickly once the repo state is clear."
+        self.assertEqual(ensure_second_person_sentence(value), value)
+
+    def test_ensure_second_person_sentence_prefixes_missing_second_person(self):
+        value = "Moves quickly once the repo state is clear."
+        self.assertEqual(
+            ensure_second_person_sentence(value),
+            "For you, moves quickly once the repo state is clear.",
+        )
+
+    def test_normalize_insights_repairs_required_second_person_fields(self):
+        insights = {
+            "at_a_glance": {
+                "whats_working": "You keep momentum with direct commands.",
+                "whats_hindering": "Gets bogged down when prompts balloon.",
+                "quick_wins": "Can reduce failures by shrinking prompt payloads.",
+                "ambitious_workflows": "You already run complex multi-step repo flows.",
+            },
+            "interaction_style": {
+                "narrative": "Works iteratively across several repos.",
+                "key_pattern": "Prefers exact evidence over vague summaries.",
+            },
+            "suggestions": {
+                "features_to_try": [
+                    {
+                        "feature": "Example",
+                        "one_liner": "Example",
+                        "why_for_you": "Would make repeat runs more reliable.",
+                        "example_code": "echo hi",
+                        "evidence": ["session abc"],
+                    }
+                ]
+            },
+        }
+
+        normalized = normalize_insights(insights)
+
+        self.assertIn("you", normalized["at_a_glance"]["whats_hindering"].lower())
+        self.assertIn("you", normalized["at_a_glance"]["quick_wins"].lower())
+        self.assertIn("you", normalized["interaction_style"]["narrative"].lower())
+        self.assertIn("you", normalized["interaction_style"]["key_pattern"].lower())
+        self.assertIn("you", normalized["suggestions"]["features_to_try"][0]["why_for_you"].lower())
 
 
 if __name__ == "__main__":

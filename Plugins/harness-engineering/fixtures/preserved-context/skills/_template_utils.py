@@ -186,24 +186,23 @@ def unified_diff_lines(
     template_path: Path,
 ) -> list[str]:
     """
-    Generate unified diff lines comparing the actual text to the expected text.
-
-    Each returned string is a single line from a unified diff (no trailing newline characters).
-    The diff headers use `fromfile` set to the string form of `output_path` and `tofile` set to `rendered(<template_path>)`.
-
+    Produce unified diff lines comparing actual_text against expected_text.
+    
+    Each returned element is a single unified-diff line without a trailing newline. The diff headers use the string form of `output_path` for `fromfile` and `rendered(<template_path>)` for `tofile`.
+    
     Parameters:
-        actual_text (str): The existing or "from" content.
-        expected_text (str): The desired or "to" content.
-        output_path (Path): Path displayed as the `fromfile` header in the diff.
-        template_path (Path): Path displayed (wrapped as `rendered(...)`) as the `tofile` header in the diff.
-
+        actual_text (str): The existing content to compare (the "from" side).
+        expected_text (str): The desired content to compare (the "to" side).
+        output_path (Path): Path shown as the `fromfile` header in the diff.
+        template_path (Path): Path shown (wrapped as `rendered(...)`) as the `tofile` header in the diff.
+    
     Returns:
-        list[str]: Unified diff lines between `actual_text` and `expected_text`, with lines returned without trailing line terminators.
+        list[str]: Unified diff lines between `actual_text` and `expected_text`, each without a trailing line terminator.
     """
     return list(
         difflib.unified_diff(
-            actual_text.splitlines(keepends=True),
-            expected_text.splitlines(keepends=True),
+            actual_text.splitlines(),
+            expected_text.splitlines(),
             fromfile=str(output_path),
             tofile=f"rendered({template_path})",
             lineterm="",

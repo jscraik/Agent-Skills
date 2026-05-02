@@ -7,9 +7,9 @@
 - [Known constraints](#known-constraints)
 
 ## Source input
-This package is aligned against the current local Harness Engineering refresh workflow:
+This preserved fixture documents the historical Harness Engineering refresh workflow and links it to the current compound stage:
 
-- active stage: `Plugins/harness-engineering/skills/team_automation/he-compound-refresh/`
+- active stage: `Plugins/harness-engineering/skills/he-compound/`
 - workflow reference: `Infrastructure/references/refresh-workflow.md`
 
 The package preserves the local progressive-disclosure entrypoint plus the deeper archived workflow references.

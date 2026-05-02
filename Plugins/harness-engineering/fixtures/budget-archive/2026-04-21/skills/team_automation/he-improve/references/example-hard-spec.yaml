@@ -1,0 +1,36 @@
+name: improve-build-latency
+description: Reduce build latency while preserving correctness gates
+
+metric:
+  primary:
+    type: hard
+    name: build_seconds
+    direction: minimize
+  degenerate_gates:
+    - name: build_passed
+      check: "== 1"
+    - name: test_pass_rate
+      check: ">= 1.0"
+
+measurement:
+  command: "python evaluate.py"
+  timeout_seconds: 300
+  working_directory: "tools/eval"
+
+scope:
+  mutable:
+    - "src/build/"
+    - "config/build.yaml"
+  immutable:
+    - "tools/eval/evaluate.py"
+    - "tests/fixtures/"
+
+execution:
+  mode: serial
+  backend: worktree
+  max_concurrent: 1
+
+stopping:
+  max_iterations: 4
+  max_hours: 1
+  plateau_iterations: 3

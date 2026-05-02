@@ -91,8 +91,8 @@ If the base, target, review scope, or required tracker/spec/plan evidence is mis
 
 ## References
 
-- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-code-review/SKILL.full.md`
-- Review flow: `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-code-review/references/codex-review-flow.md`
-- Review modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/code_quality_review/he-code-review/references/review-modes.md`
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-code-review/SKILL.full.md`
+- Review flow: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-code-review/references/codex-review-flow.md`
+- Review modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-code-review/references/review-modes.md`
 - Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`
 - Domain and QA routing: `Plugins/harness-engineering/references/domain-model-routing.md`, `Plugins/harness-engineering/references/qa-intake-routing.md`

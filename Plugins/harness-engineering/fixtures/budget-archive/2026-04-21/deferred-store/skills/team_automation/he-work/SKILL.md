@@ -89,9 +89,9 @@ If the governing artifact is missing, Linear context is required but absent, or 
 
 ## References
 
-- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/SKILL.full.md`
-- Handoff and shipping: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/references/handoff-and-shipping.md`
-- Execution modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/team_automation/he-work/references/execution-modes.md`
+- Full guide: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-work/SKILL.full.md`
+- Handoff and shipping: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-work/references/handoff-and-shipping.md`
+- Execution modes: `Plugins/harness-engineering/fixtures/preserved-context/skills/he-work/references/execution-modes.md`
 - Approval flow: `repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md`
 - Session evidence contract: `Plugins/harness-engineering/references/session-evidence-contract.md`
 - Subagent routing: `Plugins/harness-engineering/references/subagent-routing.md`

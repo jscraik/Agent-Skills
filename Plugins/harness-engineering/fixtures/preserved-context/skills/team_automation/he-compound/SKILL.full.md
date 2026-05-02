@@ -289,7 +289,7 @@ Manual routing cues and success output format are documented in `references/lear
 - Anti-pattern catalog: `references/he-anti-patterns.md`
 - Canonical frontmatter schema: `references/schema.yaml`
 - YAML schema quick reference: `references/yaml-schema.md`
-- Resolution templates by track: `../../../../../skills/team_automation/he-compound/assets/resolution-template.md`
+- Resolution templates by track: `../../../../../skills/he-compound/assets/resolution-template.md`
 - Imported schema-driven capture guide: `references/upstream-compound-docs-guide.md`
 - Imported YAML schema: `references/compound-docs-yaml-schema.md`
 - Imported resolution template: `references/compound-docs-resolution-template.md`
