@@ -49,6 +49,39 @@ reduces this multi-command operator path into one stable envelope.
 
 All commands in this document must use the standard `ask` JSON envelope:
 
+```json
+{
+  "status": "success",
+  "trace_id": "550e8400-e29b-41d4-a716-446655440000",
+  "metadata": {
+    "version": "1.0.0",
+    "command": "ask repo doctor --json --robot",
+    "next_steps": ["Review runtime budget advisories", "Run ask repo surface --json for detailed findings"],
+    "correction_note": null
+  },
+  "data": {
+    "repo_doctor": {
+      "repo": {
+        "is_git": true,
+        "branch": "main",
+        "dirty": false,
+        "skills_synced": true
+      },
+      "runtime_budget": {
+        "status": "pass",
+        "advanced_visible_count": 162,
+        "advisories": []
+      },
+      "blockers": [],
+      "next_command": "./bin/ask repo surface --json"
+    }
+  },
+  "telemetry": {
+    "latency_ms": 245
+  },
+  "errors": []
+}
+```
 
 Every contract must preserve:
 
