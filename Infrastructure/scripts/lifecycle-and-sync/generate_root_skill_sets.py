@@ -271,6 +271,8 @@ def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
 
 
 def write_text_if_changed(path: Path, content: str) -> bool:
+    if path.is_symlink():
+        path.unlink()
     if path.is_file():
         try:
             if path.read_text(encoding="utf-8") == content:
