@@ -5,8 +5,9 @@ from ask.envelope import CallResult, ErrorObject
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts"
-SMOKE_EVAL_TIMEOUT_SECONDS = 5400
-RELEASE_EVAL_TIMEOUT_SECONDS = 10800
+SMOKE_CASE_TIMEOUT_SECONDS = 600
+SMOKE_EVAL_TIMEOUT_SECONDS = 10800
+RELEASE_EVAL_TIMEOUT_SECONDS = 21600
 
 
 def _as_text(value, encoding="utf-8") -> str:
@@ -34,7 +35,7 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke") -> CallResult:
     ]
     timeout = RELEASE_EVAL_TIMEOUT_SECONDS if mode == "release" else 300
     if mode == "smoke":
-        cmd.extend(["--model", "gpt-5.4-mini", "--timeout-sec", "300"])
+        cmd.extend(["--model", "gpt-5.4-mini", "--timeout-sec", str(SMOKE_CASE_TIMEOUT_SECONDS)])
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
 
     try:

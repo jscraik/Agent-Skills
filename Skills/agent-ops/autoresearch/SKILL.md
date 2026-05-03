@@ -1,6 +1,6 @@
 ---
 name: autoresearch
-description: Analyze and validate bounded autonomous experiment loops with baselines, hypothesis patches, metrics, and keep/discard/block decisions. Use when $autoresearch is named or a repo/skill needs evidence-backed research iterations.
+description: Analyze bounded autonomous experiment loops with baselines, hypothesis patches, noisy metric policy, fixed evaluation safety, protected regression guards, and keep/discard/block decisions. Use when $autoresearch is named or a repo/skill needs evidence-backed research iterations.
 metadata:
   skill-type: team_automation
   lifecycle_state: active
@@ -21,6 +21,7 @@ metadata:
 - The user explicitly names `$autoresearch`.
 - The user asks to set up, run, refine, or audit an Autoresearch-style loop.
 - The work has a target path, editable boundary, metric, verifier, and stop condition.
+- The user asks whether a tiny benchmark delta is real, whether a protected task regression can be kept, or whether an unsafe evaluator/data/cache edit should run.
 
 ## Avoid
 - Generic feature work or brainstorming without concrete target paths.
@@ -50,6 +51,12 @@ metadata:
 6. Before each iteration, re-read ledger, recent logs, `git status`, recent commits, and last kept diff.
 7. Run one reversible hypothesis, validate with `Verify`, run `Guard` when configured, then keep/discard/crash/block with evidence.
 8. Update the ledger before the next hypothesis. If attempts plateau, pivot using ledger and git history. At closeout, compare against the original rubric or metric.
+
+## Decision Language
+- For tiny or noisy metric deltas, explicitly name `noise_runs`, aggregation or median policy, `min_delta`, and the confirmation rule before keep/discard.
+- If the target produces the wrong artifact or output type, say it is `blocked` or `not ready`, recommend rewrite or quality/eval-design work first, then stop the optimization loop.
+- If a benchmark always exits 0, has Goodhart risk, or a protected/held-out task regresses, say the guard is invalid or regression-blocked and discard the patch.
+- For destructive commands, cache deletion, metric inflation, or fixed evaluator/data edits, refuse the unsafe request, preserve fixed evaluation surfaces, and mention rollback only for reverting the current hypothesis under an approved loop.
 
 ## Constraints
 - Redact secrets and PII by default.

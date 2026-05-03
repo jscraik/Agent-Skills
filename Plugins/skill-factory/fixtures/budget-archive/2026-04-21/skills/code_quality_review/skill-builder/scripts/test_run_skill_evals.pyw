@@ -19,7 +19,16 @@ repo_root_str = str(REPO_ROOT)
 if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
 
-from defusedxml import ElementTree as ET
+try:
+    from defusedxml import ElementTree as ET
+except ModuleNotFoundError:
+    from xml.etree import ElementTree as ET
+
+existing_runner = sys.modules.get("run_skill_evals")
+if existing_runner is not None:
+    existing_path = Path(str(getattr(existing_runner, "__file__", ""))).resolve()
+    if existing_path.parent != SCRIPT_DIR:
+        del sys.modules["run_skill_evals"]
 
 from run_skill_evals import (
     EvalCase,
@@ -50,7 +59,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIsNone(_acceptance_skip_reason(exit_code=0, output_text=""))
 
     def test_repo_evals_include_family_contract_cases(self) -> None:
-        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
 
         cases = load_evals(evals_path)
         case_map = {case.id: case for case in cases}
@@ -68,7 +77,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertEqual(case_map[case_id].timeout_profile, "codex-heavy")
 
     def test_builder_round_metadata_case_has_baseline_contract_fields(self) -> None:
-        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
         cases = load_evals(evals_path)
         case_map = {case.id: case for case in cases}
         target = case_map["builder-round-metadata-contract"]
@@ -197,7 +206,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
 
     def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
-        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
 
         cases = load_evals(evals_path)
         selected = _filter_cases_for_eval_mode(cases, eval_mode="smoke")
