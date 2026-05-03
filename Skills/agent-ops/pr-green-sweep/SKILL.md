@@ -104,3 +104,10 @@ metadata:
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` for trigger and safety benchmark expectations.
 - Use `references/task-profile.json` for evaluator thresholds.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[autofix]] | Address actionable CodeRabbit or Codex review findings with verified code changes |
+| [[verification-before-completion]] | Confirm latest-head checks, review threads, mergeability, and cleanup evidence before closeout |

@@ -129,3 +129,10 @@ Config pruning is report-only by default. Run the dedicated config prune command
 - Use `references/evals.yaml` for quality and benchmark expectations.
 - Use `references/handoff-template.md` when old chats need durable continuity before archival.
 - Use `references/source-review.md` for the external repo review that informed this version.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[verification-before-completion]] | Confirm report, backup, apply, and restore evidence before closeout |
+| [[project-brain]] | Preserve durable cleanup decisions and handoffs before archiving active work history |
