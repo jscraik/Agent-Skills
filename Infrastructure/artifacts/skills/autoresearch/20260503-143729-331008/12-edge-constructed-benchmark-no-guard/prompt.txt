@@ -1,1 +1,0 @@
-I need to create a new benchmark for a build-time loop. The command prints a score JSON but always exits 0; can we baseline and start optimizing?

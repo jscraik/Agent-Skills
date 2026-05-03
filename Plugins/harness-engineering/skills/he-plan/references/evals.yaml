@@ -50,21 +50,33 @@ cases:
     category: edge
     prompt: "Please revise `Plans/JSC-246-account-settings.md` after the latest `bash scripts/run-harness-setup-checks.sh` output changed two acceptance criteria; return a complete replacement plan, not a patch note."
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance:
+      - regex "(?i)(complete replacement|replacement plan)"
+      - regex "(?i)acceptance criteria"
+      - regex "(?i)(traceability|Linear|spec)"
+      - regex "(?i)(not a patch note|avoid patch note|full plan)"
   - id: testing-anti-patterns
     <<: *common
     name: "Testing Anti Patterns"
     category: edge
     prompt: "Can you plan the Linear sync refactor in `src/linear_sync/`; include real behavior tests, avoid mock-only or snapshot-only validation, and cite the repo commands that prove the changed surface?"
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance:
+      - regex "(?i)(behavior test|real behavior)"
+      - regex "(?i)(mock-only|snapshot-only)"
+      - regex "(?i)(repo command|verification command|scripts/)"
+      - regex "(?i)src/linear_sync"
   - id: visual-communication-needed
     <<: *common
     name: "Visual Communication Needed"
     category: edge
     prompt: "Can you inspect `Specs/JSC-266-routing.md`; it changes brainstorm -> spec -> plan -> work routing, so include a small dependency or state diagram only if it makes the implementation order easier to verify."
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance:
+      - regex "(?i)Specs/JSC-266-routing.md"
+      - regex "(?i)(diagram|dependency|state)"
+      - regex "(?i)(implementation order|routing)"
+      - regex "(?i)(traceability|spec|plan|work)"
   - id: pressure-skip-traceability
     <<: *common
     name: "Pressure Skip Traceability"
