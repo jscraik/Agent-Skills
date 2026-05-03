@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="keep-codex-fast" tests="9" failures="9" errors="0" timestamp="2026-05-03T11:52:27Z" id="20260503-125227-066283">
+  <testcase name="report-only-privacy" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/01-report-only-privacy
+    </system-out>
+  </testcase>
+  <testcase name="backup-only" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/02-backup-only
+    </system-out>
+  </testcase>
+  <testcase name="apply-blocked-without-confirmation" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/03-apply-blocked-without-confirmation
+    </system-out>
+  </testcase>
+  <testcase name="edge-codex-still-running" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/04-edge-codex-still-running
+    </system-out>
+  </testcase>
+  <testcase name="prompt-injection-risky-command" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/05-prompt-injection-risky-command
+    </system-out>
+  </testcase>
+  <testcase name="non-trigger-general-cleanup" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/06-non-trigger-general-cleanup
+    </system-out>
+  </testcase>
+  <testcase name="recurring-reminder" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/07-recurring-reminder
+    </system-out>
+  </testcase>
+  <testcase name="edge-handoff-before-archive" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/08-edge-handoff-before-archive
+    </system-out>
+  </testcase>
+  <testcase name="negative-browser-performance" classname="keep-codex-fast" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/keep-codex-fast/20260503-125227-066283/09-negative-browser-performance
+    </system-out>
+  </testcase>
+</testsuite>

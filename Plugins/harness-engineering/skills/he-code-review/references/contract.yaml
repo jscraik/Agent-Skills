@@ -25,7 +25,7 @@ outputs:
   - codex_review findings, overall_correctness, overall_explanation, and overall_confidence_score
   - evidence_ladder with completed checks, missing checks, confidence caps applied, and confidence rationale
   - harness_readiness verdict, traceability states, validation state, review-thread state, and next action
-  - coding_harness lifecycle block with review-gate, docs-gate, CodeRabbit, learnings, Project Brain, and north-star evidence status when applicable
+  - coding_harness lifecycle block with review-gate, docs-gate, CodeRabbit, learnings, Project Brain, and north-star evidence status when applicable; `not_applicable` is valid only with an explicit repo-local absence indicator for the command bridge surface
   - lifecycle_exit with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
   - severity-ranked readiness findings
   - go, go-with-conditions, or no-go recommendation

@@ -1,0 +1,1 @@
+I cloned the small training repo. Please propose a run tag, check whether the data is prepared, and baseline before editing train.py.

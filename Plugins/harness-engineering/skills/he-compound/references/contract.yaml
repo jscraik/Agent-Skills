@@ -21,11 +21,11 @@ inputs:
 outputs:
   - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
   - "for lifecycle mode, the current stage, completed stages, blockers, and exact next Harness Engineering command"
-  - "for coding-harness-managed repos, the Linear state, Harness transition, Project Brain status, and north-star evidence status"
+  - "for coding-harness-managed repos, command-level bridge evidence for Linear state, Harness transition, Project Brain status, and north-star evidence status"
   - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
   - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
-  - "structured status output with schema_version: 1 when requested"
+  - "structured status output with schema_version: 1 when requested, including exact Harness command/path evidence for every blocked lifecycle field"
 
 non_goals:
   - direct product-code implementation inside the compound orchestrator

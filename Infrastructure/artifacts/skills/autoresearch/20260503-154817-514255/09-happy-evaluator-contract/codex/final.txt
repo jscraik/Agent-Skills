@@ -1,0 +1,46 @@
+Use a two-stage accept rule:
+
+1. The **guard command must pass**.
+2. Among the passing candidates, keep only the ones with a **higher `score`** than the current best.
+
+A simple decision rule looks like this:
+
+```js
+if (!guardPassed) {
+  rejectCandidate();
+} else if (evaluator.pass && evaluator.score > bestScore) {
+  bestScore = evaluator.score;
+  acceptCandidate();
+} else {
+  rejectCandidate();
+}
+```
+
+If you want to run this in a loop, the pattern is:
+
+```js
+let bestScore = -Infinity;
+let bestCandidate = null;
+
+for (const candidate of candidates) {
+  const guardPassed = runGuard(candidate);
+  if (!guardPassed) continue;
+
+  const result = runJsonEvaluator(candidate); // { pass: boolean, score: number }
+  if (result.pass && result.score > bestScore) {
+    bestScore = result.score;
+    bestCandidate = candidate;
+  }
+}
+```
+
+If your evaluator emits JSON, make sure you treat `pass` as the hard gate and `score` as the optimization target:
+
+- `pass: false` => discard, even if the score is high.
+- `pass: true` and higher `score` => keep.
+- `pass: true` but lower or equal `score` => ignore.
+
+If you want, I can turn this into:
+1. a shell script pattern,
+2. a Node/TypeScript helper,
+3. or the exact `autoresearch` workflow shape for this repo.

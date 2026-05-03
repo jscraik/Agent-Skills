@@ -1,0 +1,2 @@
+2026-05-03T14:56:51.126855Z ERROR codex_core::tools::router: error=resources/list failed: unknown MCP server 'filesystem'
+2026-05-03T14:56:55.391709Z ERROR codex_core::tools::router: error=approval policy is Never; reject command — you cannot ask for escalated permissions if the approval policy is Never

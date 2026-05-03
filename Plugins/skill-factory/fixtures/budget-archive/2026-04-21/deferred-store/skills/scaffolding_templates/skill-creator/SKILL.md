@@ -170,7 +170,7 @@ For complex revisions, run forward-testing and verify the skill can solve realis
 
 ## Governance Spine
 
-Use [references/factory-governance-spine.md](./references/factory-governance-spine.md) when the skill is reusable, delivery-related, delegated to agents, connected to `coding-harness`, or being improved from existing behavior.
+Use [references/factory-governance-spine.md](./references/factory-governance-spine.md) when the skill is reusable, delivery-related, delegated to agents, connected to `coding_harness`, or being improved from existing behavior.
 
 Keep `tiny_helper` skills light. Require traceability, session evidence, A/B/C improvement loops, and Linear or Project Brain lifecycle fields only when the classification calls for them.
 

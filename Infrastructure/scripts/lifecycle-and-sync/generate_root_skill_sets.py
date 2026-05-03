@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -304,8 +303,9 @@ def write_roots(report: dict[str, Any], output_dir: Path, *, repo_root_path: Pat
             if target_dir.is_symlink() or target_dir.is_file():
                 target_dir.unlink()
             else:
-                shutil.rmtree(target_dir)
-        target_dir.mkdir(parents=True, exist_ok=True)
+                target_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            target_dir.mkdir(parents=True, exist_ok=True)
         target = target_dir / "SKILL.md"
         skill_written = write_text_if_changed(target, root["content"])
         refs_dir = target_dir / "references"

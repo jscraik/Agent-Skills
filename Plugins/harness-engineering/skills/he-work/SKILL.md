@@ -15,6 +15,7 @@ Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff.
 ## Procedure
 Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates; handoff to he-code-review mode:autofix when needed.
+For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
 ## Failure mode

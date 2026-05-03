@@ -76,7 +76,7 @@ For short chat responses, summarize the same fields without losing blocker, trac
 
 ## Coding Harness Managed Repos
 
-When `harness.contract.json`, `.harness/`, or Harness gates are present, load `references/coding-harness-command-bridge.md`. Record Project Brain and north-star evidence as `updated`, `pass`, or blocked with the exact missing command/path.
+When `harness.contract.json`, `.harness/`, or Harness gates are present, load `references/coding-harness-command-bridge.md`. Record Project Brain and north-star evidence using the exact bridge vocabularies: `project_brain_status` is `updated|blocked|not_checked|not_applicable`, and `north_star_evidence_status` is `pass|blocked|not_checked|not_applicable`. A blocked or not-checked status must preserve the exact missing command/path in `harness_commands_blocked` or the matching evidence field.
 
 ## Cut Policy
 

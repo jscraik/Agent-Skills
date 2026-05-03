@@ -14,7 +14,7 @@ outputs:
   - chosen lane and synchronized task progress
   - implemented code plus validation evidence
   - traceability evidence linking Linear, spec, plan, PR, IDs, and validation
-  - coding_harness lifecycle block with blast-radius, policy, preflight, validation-plan, and transition evidence when available
+  - mandatory coding_harness lifecycle block for coding-harness-managed repos, with blast-radius, policy, preflight, validation-plan, and transition evidence; if a gate cannot run, record explicit blocked evidence
   - lifecycle exit status with schema_version, he_stage, mode, tracker_status, artifact_status, traceability_status, validation_status, exit_status, next_stage, missing_inputs, and evidence fields
   - drift updates when execution changes the contract
   - handoff with Linear, PR, completed IDs, risks, rollback, and monitoring notes

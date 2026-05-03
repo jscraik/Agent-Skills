@@ -8,6 +8,7 @@ import sys
 import tempfile
 import textwrap
 import unittest
+import unittest.mock
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -25,6 +26,7 @@ from run_skill_evals import (
     _acceptance_skip_reason,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
+    _isolated_codex_home_for_eval,
     _is_smoke_only_case,
     _write_junit_report,
     load_evals,
@@ -280,6 +282,25 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(len(warnings), 1)
         self.assertIn("auth environment variables are present", warnings[0])
+
+    def test_isolated_codex_home_copies_auth_config_and_keeps_sessions_private(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            default_home = home_root / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (default_home / "config.toml").write_text("[profiles.test]\nmodel = \"gpt-test\"\n", encoding="utf-8")
+
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, warnings = _isolated_codex_home_for_eval()
+
+        self.assertNotEqual(isolated_home, default_home)
+        self.assertTrue((isolated_home / "auth.json").exists())
+        self.assertTrue((isolated_home / "config.toml").exists())
+        self.assertTrue((isolated_home / "sessions").is_dir())
+        self.assertTrue((isolated_home / "logs").is_dir())
+        self.assertIn("Using isolated CODEX_HOME", "\n".join(warnings))
 
     def test_write_junit_report_outputs_failures(self) -> None:
         summary = {

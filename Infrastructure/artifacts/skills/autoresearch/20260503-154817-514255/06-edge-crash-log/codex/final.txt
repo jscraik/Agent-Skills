@@ -1,0 +1,7 @@
+I couldn’t read `run.log` from this environment because every shell/file command is being blocked by the workspace sandbox before execution.
+
+So I can’t honestly classify the crash yet. Right now the status is:
+
+- `blocked` for investigation access, not necessarily blocked in the run itself
+
+If you paste `run.log` here, I’ll immediately read it and tell you whether the `uv run train.py` crash looks `fixable` or truly `blocked`.

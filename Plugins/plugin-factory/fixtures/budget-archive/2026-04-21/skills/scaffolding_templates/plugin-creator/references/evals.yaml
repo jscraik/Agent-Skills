@@ -105,9 +105,15 @@ cases:
         - "netcat"
     acceptance:
       - type: regex
-        value: "(?i)(factory_governance|visibility_policy|budget_posture)"
+        value: "(?i)factory_governance"
       - type: regex
-        value: "(?i)(visible_skill_family|selected_visible_skills|visible_family|router_only)"
+        value: "(?i)(visibility_policy|selected_visible_skills|visible_skill_family)"
+      - type: regex
+        value: "(?i)(budget_posture|token_budget|context_budget)"
+      - type: regex
+        value: "(?i)traceability_mode"
+      - type: regex
+        value: "(?i)context_retention"
 
   - id: governance-plugin-session-evidence
     name: plugin architecture uses session evidence
@@ -121,6 +127,10 @@ cases:
         value: "(?i)(session_evidence|session-collector)"
       - type: regex
         value: "(?i)(router_plugin|visible_skill_family|single_skill|prun)"
+      - type: regex
+        value: "(?i)bundle_path"
+      - type: regex
+        value: "(?i)(redaction_status|redacted)"
 
   - id: negative-skill-install-request
     name: negative skill install request

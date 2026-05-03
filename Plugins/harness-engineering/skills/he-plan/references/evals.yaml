@@ -15,21 +15,21 @@ cases:
     category: happy
     prompt: "Please use `Specs/JSC-246-account-settings.md` and Linear issue JSC-246 to make the implementation plan; inspect the repo docs first, include repo-relative paths, validation commands, rollback, and a Linear/spec/plan/PR traceability table."
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance: ["Produces a durable plan from the named spec and Linear issue with repo-relative paths, validation commands, rollback, and a Linear/spec/plan/PR traceability table."]
   - id: explore-before-asking
     <<: *common
     name: "Explore Before Asking"
     category: edge
     prompt: "Before asking me anything about the account settings change, can you inspect `AGENTS.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, and the repo validation wrapper, then produce the plan or list only blockers that change scope?"
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance: ["Inspects the named repo guidance and validation wrapper before asking questions, then either produces the plan or lists only scope-changing blockers."]
   - id: codex-plan-mode-distinction
     <<: *common
     name: "Codex Plan Mode Distinction"
     category: edge
     prompt: "Please turn `Specs/JSC-246-account-settings.md` into a durable HE plan, but do not edit code; mention that `update_plan` is only a live checklist and produce the replacement plan artifact with traceability."
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance: ["Distinguishes Codex update_plan from a durable HE plan artifact, avoids code edits, and preserves traceability."]
   - id: tracked-work-requires-linear
     <<: *common
     name: "Tracked Work Requires Linear"
@@ -41,7 +41,7 @@ cases:
     <<: *common
     name: "Coding Harness Plan Gate"
     category: happy
-    prompt: "In `~/dev/coding-harness`, please plan JSC-270 from the approved spec; detect `harness.contract.json`, require Linear, run or block `harness plan-gate --require-plan-id --require-traceability --json`, and include the coding_harness lifecycle block."
+    prompt: "In the coding-harness repo, please plan JSC-270 from the approved spec; detect `harness.contract.json`, require Linear, run or block `harness plan-gate --require-plan-id --require-traceability --json`, and include the coding_harness lifecycle block."
     deterministic_checks: *safe
     acceptance: ["Detects coding-harness-managed repo state, preserves Linear/spec/plan traceability, and records the Harness plan gate as run or blocked with exact evidence."]
   - id: plan-revision-complete-replacement

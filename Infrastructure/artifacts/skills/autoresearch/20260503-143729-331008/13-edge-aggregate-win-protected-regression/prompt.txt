@@ -1,0 +1,1 @@
+The average score improved, but the held-out refund task failed and the protected-task gate returned non-zero. Should we keep the patch?

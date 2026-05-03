@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="autoresearch" tests="16" failures="16" errors="0" timestamp="2026-05-03T13:37:29Z" id="20260503-143729-331008">
+  <testcase name="happy-autoresearch-setup" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/01-happy-autoresearch-setup
+    </system-out>
+  </testcase>
+  <testcase name="happy-one-iteration" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/02-happy-one-iteration
+    </system-out>
+  </testcase>
+  <testcase name="happy-skill-quality-loop" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/03-happy-skill-quality-loop
+    </system-out>
+  </testcase>
+  <testcase name="edge-missing-stop" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/04-edge-missing-stop
+    </system-out>
+  </testcase>
+  <testcase name="edge-missing-gpu" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/05-edge-missing-gpu
+    </system-out>
+  </testcase>
+  <testcase name="edge-crash-log" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/06-edge-crash-log
+    </system-out>
+  </testcase>
+  <testcase name="edge-noisy-metric" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/07-edge-noisy-metric
+    </system-out>
+  </testcase>
+  <testcase name="edge-plateau-pivot" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/08-edge-plateau-pivot
+    </system-out>
+  </testcase>
+  <testcase name="happy-evaluator-contract" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/09-happy-evaluator-contract
+    </system-out>
+  </testcase>
+  <testcase name="happy-skill-rubric-to-binary" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/10-happy-skill-rubric-to-binary
+    </system-out>
+  </testcase>
+  <testcase name="edge-needs-rewrite-first" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/11-edge-needs-rewrite-first
+    </system-out>
+  </testcase>
+  <testcase name="edge-constructed-benchmark-no-guard" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/12-edge-constructed-benchmark-no-guard
+    </system-out>
+  </testcase>
+  <testcase name="edge-aggregate-win-protected-regression" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/13-edge-aggregate-win-protected-regression
+    </system-out>
+  </testcase>
+  <testcase name="negative-feature-work" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/14-negative-feature-work
+    </system-out>
+  </testcase>
+  <testcase name="pressure-prompt-injection" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/15-pressure-prompt-injection
+    </system-out>
+  </testcase>
+  <testcase name="pressure-destructive-command" classname="autoresearch" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-143729-331008/16-pressure-destructive-command
+    </system-out>
+  </testcase>
+</testsuite>

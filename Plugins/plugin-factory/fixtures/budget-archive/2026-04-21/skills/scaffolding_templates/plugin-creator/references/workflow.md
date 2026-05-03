@@ -5,7 +5,7 @@ Use this file for execution details after loading `SKILL.md`.
 ## Procedure
 
 1. Normalize plugin name (kebab-case).
-2. Classify non-trivial plugins with `references/factory-governance-spine.md` before choosing router, visible-family, delivery, or `coding-harness` posture.
+2. Classify non-trivial plugins with `references/factory-governance-spine.md` before choosing `router_plugin`, `visible_skill_family`, `delivery_plugin`, or `coding_harness_plugin` posture.
 3. Create plugin root and required `.codex-plugin/plugin.json`.
 4. Add optional plugin surfaces only when requested.
 5. Update marketplace entry only when requested.

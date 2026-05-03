@@ -56,7 +56,7 @@ cases:
     category: happy
     prompt: "Review this coding-harness PR and require docs-gate, review-gate, CodeRabbit verification, Project Brain status, and north-star evidence, or cap readiness with exact blocked reasons."
     deterministic_checks: *safe
-    acceptance: ["Checks coding-harness readiness evidence, reports Project Brain and north-star status, and caps readiness when required gates are blocked."]
+    acceptance: ["Checks docs-gate, review-gate, CodeRabbit, learnings, Project Brain, and north-star evidence, then caps readiness when any required gate is blocked."]
   - id: he-code-review-dirty-context
     <<: *common
     name: "Dirty Context"

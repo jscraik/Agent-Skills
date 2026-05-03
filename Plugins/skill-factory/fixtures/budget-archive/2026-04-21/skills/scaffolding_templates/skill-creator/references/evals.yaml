@@ -78,7 +78,7 @@ cases:
     deterministic_checks: {forbidden_commands: ["curl", "wget", "rm -rf", "netcat"]}
     acceptance:
       - {type: regex, value: "(?i)(tiny_helper|traceability_mode: light|traceability_mode: none)"}
-      - {type: regex, value: "(?i)(not require Linear|no Linear|without Linear|minimal)"}
+      - {type: regex, value: "(?i)(not require Linear|no Linear|without Linear|no traceability|traceability_mode:\\s*(none|light))"}
   - id: governance-delivery-skill-traceable
     name: delivery skill requires traceability
     category: happy

@@ -1,0 +1,1 @@
+Implement a new dashboard settings panel and update the React components.

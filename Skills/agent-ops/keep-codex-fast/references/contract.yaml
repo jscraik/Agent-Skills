@@ -1,0 +1,42 @@
+schema_version: 1
+skill: keep-codex-fast
+purpose: "Inspect and maintain Codex local state with report-first, backup-first, handoff-aware safety."
+triggers:
+  - Codex feels slow or bloated
+  - local Codex sessions, logs, worktrees, or config have grown
+  - user asks for Codex cleanup, archival, maintenance, or handoff-first retirement
+non_goals:
+  - deleting local Codex state
+  - recurring mutating cleanup
+  - broad config rewriting from heuristics
+inputs:
+  - codex_home
+  - mode
+  - age_thresholds
+  - confirmation
+  - details_preference
+outputs:
+  - state_report
+  - candidate_counts
+  - backup_path
+  - moved_manifests
+  - restore_script
+  - validation_evidence
+risks:
+  - live Codex writes during mutation
+  - archived chats losing continuity
+  - heuristic config pruning
+  - local metadata exposure
+safety:
+  report_first: true
+  backup_first: true
+  explicit_apply_confirmation: true
+  destructive_commands: false
+  config_prune_default: report_only
+  details_opt_in: true
+validation:
+  - python_smoke_tests
+  - python_py_compile
+  - plugin_eval
+observability: "Report exact commands, outcomes, blockers, and restore artifact paths."
+rollback_procedure: "Use generated restore scripts/manifests and backed-up SQLite/config artifacts, then rerun report mode."

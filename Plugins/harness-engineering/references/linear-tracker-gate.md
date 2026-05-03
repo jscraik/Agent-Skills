@@ -27,7 +27,7 @@ The gate does not apply to throwaway exploration, tiny local-only edits, private
 2. Reuse if found; link key/URL and why it is tracker of record.
 3. Create if missing and metadata is available.
 4. If metadata/tooling is missing, return `linear_status: linear_blocked`, exact missing fields/tool state, and a complete ready payload.
-5. Continue only after `linear_status: resolved|created|user_opted_out` or an explicit decision to proceed despite `linear_blocked`.
+5. Stop when `linear_status: linear_blocked` unless an explicit override decision is recorded with actor, reason, timestamp, and the blocked payload. Continue only after `linear_status: resolved|created|user_opted_out` or that recorded override.
 
 ## Minimum Issue Payload
 

@@ -1,0 +1,3 @@
+$autoresearch
+
+Help me use my JSON evaluator with pass and score fields, keeping only score improvements while the guard command still passes.

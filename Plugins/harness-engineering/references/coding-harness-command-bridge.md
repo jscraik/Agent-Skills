@@ -4,7 +4,7 @@ Use this when HE is operating inside a `coding-harness` managed repo.
 
 ## Detection
 
-Treat the repo as managed when `harness.contract.json`, `.harness/`, Harness docs, `~/dev/coding-harness`, Project Brain, north-star evidence, or Harness-managed Linear state is present.
+Treat the repo as managed when repo-local evidence such as `harness.contract.json`, `.harness/`, Harness docs, Project Brain, north-star evidence, or Harness-managed Linear state is present.
 
 When uncertain, inspect first and record `coding_harness.mode: unknown`.
 

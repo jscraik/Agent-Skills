@@ -1,0 +1,1 @@
+Can you read `run.log` from the crashed `uv run train.py` run and record whether it is fixable or blocked?

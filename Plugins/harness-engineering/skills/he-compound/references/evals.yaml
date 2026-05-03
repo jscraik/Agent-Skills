@@ -28,7 +28,7 @@ cases:
     category: happy
     prompt: "Resume this coding-harness-managed run by mapping Linear state, earliest incomplete HE stage, Project Brain status, north-star evidence, and the next exact Harness Engineering command."
     deterministic_checks: *safe
-    acceptance: ["Preserves coding_harness lifecycle state, keeps Project Brain and Linear traceability, and returns the next exact HE stage rather than a vague summary."]
+    acceptance: ["Preserves full coding_harness lifecycle fields, including Linear state, Harness transition command, Project Brain status, north-star evidence status, exact next HE stage, and command/path evidence for blocked checks."]
   - id: resume-active-run
     <<: *common
     name: "Resume Active Run"

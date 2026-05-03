@@ -114,6 +114,17 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: autoresearch}
       - {type: regex, value: "(?i)(rewrite|not ready|planning|quality|output type|blocked)"}
+  - id: edge-benchmark-guard-regression
+    name: benchmark guard and protected regression
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "A new benchmark command prints score JSON but always exits 0, and the average score later improves while a held-out protected task fails. Can we baseline, optimize, and keep the patch?"
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: autoresearch}
+      - {type: regex, value: "(?i)(guard|goodhart|blocked|held-out|protected|regression|discard)"}
   - id: negative-feature-work
     name: unrelated product feature
     category: negative

@@ -1,0 +1,1 @@
+Please read the ledger after three discarded attempts with no score improvement and choose what to do next.

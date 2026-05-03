@@ -1,0 +1,13 @@
+I couldn’t complete the inspection from this session because the local shell is blocked by the sandbox layer here, so I’m not able to verify the checkout state directly.
+
+What I can say confidently is:
+- I could not confirm whether the GPU is present or whether tokenizer caches exist.
+- I also couldn’t run the repo’s own `./bin/ask repo status` check from this environment.
+
+Fastest local checks to run are:
+- `nvidia-smi`
+- `./bin/ask repo status`
+- `ls -d ~/.cache/huggingface ~/.cache/torch 2>/dev/null`
+- `find . -maxdepth 3 \( -iname '*token*cache*' -o -iname '*huggingface*' -o -iname '*torch*' \)`
+
+If you paste those outputs, I can tell you right away whether the checkout is missing the GPU, the tokenizer cache, or both before the first experiment.

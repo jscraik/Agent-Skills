@@ -21,6 +21,16 @@ outputs:
   - adopted skill moved under Plugins/<plugin-name>/skills/<skill-name> when provided
   - no duplicate canonical skill source locations after adoption
   - factory governance posture for non-trivial plugin scaffolds
+output_contract:
+  schema_version: "1"
+  required_fields:
+    - "schema_version"
+    - "plugin_name"
+    - "plugin_path"
+    - "validation_evidence"
+  conditional_required:
+    non_trivial_plugin:
+      - "factory_governance"
 non_goals:
   - authoring lifecycle hardening for bundled skills
   - installing remote skills from curated/github sources

@@ -19,10 +19,12 @@ output_contract:
     - "schema_version"
     - "mode"
     - "validation_evidence"
+  conditional_required:
+    governed_flow:
+      - "factory_governance"
+      - "session_evidence"
+      - "skill_improvement_loop"
   optional_fields:
     - "blocked_by"
-    - "factory_governance"
-    - "session_evidence"
-    - "skill_improvement_loop"
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."
 observability: "Track pass/fail/blocked outcomes for each validation command in run output."

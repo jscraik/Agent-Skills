@@ -1,6 +1,6 @@
 ---
 name: plugin-creator
-description: Scaffold minimal Codex plugin packages with deterministic manifests and marketplace metadata. Use when creating plugin roots or adopting existing skills into plugin ownership.
+description: Scaffold Codex plugin packages with deterministic manifests, marketplace metadata, and traceability or evidence contracts for non-trivial adoption. Use when creating plugin roots or adopting existing skills into plugin ownership.
 metadata:
   skill-type: scaffolding_templates
 ---

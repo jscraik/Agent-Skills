@@ -119,7 +119,7 @@ cases:
     category: happy
     prompt: "Implement the approved coding-harness plan and record blast-radius, policy, preflight, and validation-plan Harness gates as run or blocked before closeout."
     deterministic_checks: *safe
-    acceptance: ["Requires coding_harness lifecycle state, records each available Harness admission gate outcome, and preserves Linear/spec/plan/PR validation traceability."]
+    acceptance: ["Requires coding_harness lifecycle state, records exact command/path evidence for each run or blocked Harness admission gate, and preserves Linear/spec/plan/PR validation traceability."]
   - id: tiny-low-risk-spec
     <<: *common
     name: "Tiny Low Risk Spec"
