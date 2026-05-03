@@ -21,6 +21,7 @@ inputs:
 outputs:
   - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
   - "for lifecycle mode, the current stage, completed stages, blockers, and exact next Harness Engineering command"
+  - "for coding-harness-managed repos, the Linear state, Harness transition, Project Brain status, and north-star evidence status"
   - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
   - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
@@ -35,6 +36,7 @@ non_goals:
 
 risks:
   - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
+  - coding-harness lifecycle drift; mitigate with Harness command bridge state before choosing the next stage
   - losing the strong legacy solved-problem flow; mitigate with explicit learning-capture mode and dedicated reference rules
   - creating duplicate solution docs for the same solved problem; mitigate with overlap scoring and refresh-in-place on high-overlap matches
   - over-broad refresh recommendations; mitigate with narrow scope hints and evidence thresholds

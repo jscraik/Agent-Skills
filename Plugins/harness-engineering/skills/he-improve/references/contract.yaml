@@ -18,6 +18,7 @@ inputs:
 
 outputs:
   - normalized optimization spec
+  - A/B/C skill-improvement loop status when the target is a skill or skill family
   - baseline + per-experiment log entries
   - best-result summary with delta from baseline
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
@@ -34,11 +35,12 @@ risks:
   - result loss during long runs; mitigate with immediate on-disk log writes and verification
   - uncontrolled parallel conflicts; mitigate with probe checks and bounded concurrency
   - missing helper roles; mitigate with manifest checks and codex-agent-creator fallback
+  - skill behavior loss during prompt slimming; mitigate by moving source context into references and requiring Codex C to compare original, spec, and implementation
 
 observability: >
   Record baseline metric, experiment ids, measurement commands, deltas,
-  accepted/rejected changes, helper-role availability, rollback posture,
-  and lifecycle exit status.
+  accepted/rejected changes, helper-role availability, A/B/C loop artifacts,
+  warnings remaining, rollback posture, and lifecycle exit status.
 
 rollback_procedure: >
   Revert only the accepted experiment slice when metrics regress or gates fail,

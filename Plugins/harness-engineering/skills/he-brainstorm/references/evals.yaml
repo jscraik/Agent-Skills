@@ -5,6 +5,7 @@ last_updated: "2026-05-02"
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
 x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
+x_accept_trace: &accept_trace ["Routes correctly, preserves traceability, and avoids forbidden commands."]
 
 cases:
   - id: missing-subject-gate
@@ -13,35 +14,35 @@ cases:
     category: edge
     prompt: "Can you inspect the missing subject gate workflow and keep the traceability evidence?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: *accept_trace
   - id: synthesis-before-artifact
     <<: *common
     name: "Synthesis Before Artifact"
     category: happy
     prompt: "Can you inspect the synthesis before artifact workflow and keep the traceability evidence?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: *accept_trace
   - id: warranted-ideation
     <<: *common
     name: "Warranted Ideation"
     category: happy
     prompt: "Can you inspect the warranted ideation workflow and keep the traceability evidence?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: *accept_trace
   - id: visual-communication-needed
     <<: *common
     name: "Visual Communication Needed"
     category: edge
     prompt: "Can you inspect the visual communication needed workflow and keep the traceability evidence?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: *accept_trace
   - id: deep-product-scope
     <<: *common
     name: "Deep Product Scope"
     category: edge
     prompt: "Can you inspect the deep product scope workflow and keep the traceability evidence?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: *accept_trace
   - id: direct-spec-request
     <<: *negative
     should_trigger: false
