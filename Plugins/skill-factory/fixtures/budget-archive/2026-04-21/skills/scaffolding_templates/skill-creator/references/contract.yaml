@@ -11,6 +11,8 @@ non_goals:
   - "unrelated implementation work outside skill scope"
 risks:
   - "ambiguous intent can cause wrong lane selection"
+  - "over-applying Linear or Project Brain ceremony to tiny helpers creates bloat"
+  - "skipping session evidence during skill improvement can preserve known failure modes"
 output_contract:
   schema_version: "1"
   required_fields:
@@ -19,5 +21,8 @@ output_contract:
     - "validation_evidence"
   optional_fields:
     - "blocked_by"
+    - "factory_governance"
+    - "session_evidence"
+    - "skill_improvement_loop"
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."
 observability: "Track pass/fail/blocked outcomes for each validation command in run output."

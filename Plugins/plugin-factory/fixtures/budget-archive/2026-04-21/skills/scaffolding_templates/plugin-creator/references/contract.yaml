@@ -20,6 +20,7 @@ outputs:
   - marketplace entry with required policy and category fields when enabled
   - adopted skill moved under Plugins/<plugin-name>/skills/<skill-name> when provided
   - no duplicate canonical skill source locations after adoption
+  - factory governance posture for non-trivial plugin scaffolds
 non_goals:
   - authoring lifecycle hardening for bundled skills
   - installing remote skills from curated/github sources
@@ -30,6 +31,10 @@ risks:
   - accidental overwrite; mitigated by force-only replacement semantics
   - split-brain skill ownership (standalone + plugin); mitigated by move-first adoption
     and post-adoption projection parity checks
+  - hidden bloat or untraceable visible skill families; mitigated by explicit posture,
+    visibility, budget, and traceability decisions
+  - stale plugin architecture decisions; mitigated by bounded session-collector evidence
+    for architecture reviews, pruning, and repeated workflow capture
 rollback_procedure: >
   If plugin-creator generates a malformed scaffold (invalid plugin.json, missing required policy
   fields, or incorrect directory structure), delete the generated plugin directory and re-invoke

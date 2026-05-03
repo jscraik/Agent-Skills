@@ -18,6 +18,7 @@ Create and evolve Codex skills that are reusable, auditable, and easy for anothe
 - [Outputs](#outputs)
 - [Procedure](#procedure)
 - [Validation](#validation)
+- [Governance Spine](#governance-spine)
 - [Encouraging Variation](#encouraging-variation)
 - [Antipatterns](#antipatterns)
 - [Constraints](#constraints)
@@ -109,6 +110,9 @@ For non-trivial responses, include:
 - `changed_files`
 - `context_routes` as `[{from, to, read_when}]` whenever required detail moved from `SKILL.md` to `references/`
 - `validation_evidence` as `[{command, outcome, note}]` with `outcome` in `pass|fail|blocked`
+- `factory_governance` for non-trivial skills, including posture, traceability mode, eval coverage, and agent injection decision
+- `session_evidence` when improving, refactoring, warning-cleaning, pruning, or deriving a skill from repeated session behavior
+- `skill_improvement_loop` when improving or refactoring an existing skill
 - `risks`
 
 ## Procedure
@@ -117,6 +121,8 @@ Follow this workflow in order unless the user asks for a scoped shortcut.
 
 1. Clarify scope with concrete examples.
 2. Plan reusable resource boundaries (`scripts/`, `references/`, `assets/`).
+   - For non-trivial skills, classify the work with [references/factory-governance-spine.md](./references/factory-governance-spine.md) before editing.
+   - Use bounded `~/.agents/session-collector` bundle evidence for skill improvement, warning cleanup, repeated workflow capture, pruning, or confidence-target work when available.
 3. Initialize when creating from scratch:
 
 ```bash
@@ -139,6 +145,7 @@ Detailed procedures, examples, and rationale live in:
 
 - [references/foundations.md](./references/foundations.md)
 - [references/creation-playbook.md](./references/creation-playbook.md)
+- [references/factory-governance-spine.md](./references/factory-governance-spine.md)
 - [references/openai_yaml.md](./references/openai_yaml.md)
 
 ## Validation
@@ -157,6 +164,12 @@ Fail-fast policy:
 - Treat strict gate failures as blockers for handoff.
 
 For complex revisions, run forward-testing and verify the skill can solve realistic tasks without privileged context leakage.
+
+## Governance Spine
+
+Use [references/factory-governance-spine.md](./references/factory-governance-spine.md) when the skill is reusable, delivery-related, delegated to agents, connected to `coding-harness`, or being improved from existing behavior.
+
+Keep `tiny_helper` skills light. Require traceability, session evidence, A/B/C improvement loops, and Linear or Project Brain lifecycle fields only when the classification calls for them.
 
 ## Encouraging Variation
 
@@ -206,6 +219,7 @@ Read these files based on the task:
 
 - [references/foundations.md](./references/foundations.md): Read when defining scope, boundaries, and progressive-disclosure posture.
 - [references/creation-playbook.md](./references/creation-playbook.md): Read when scaffolding or iterating on a skill package end to end.
+- [references/factory-governance-spine.md](./references/factory-governance-spine.md): Read when classifying traceability depth, session-evidence intake, or A/B/C improvement-loop requirements.
 - [references/openai_yaml.md](./references/openai_yaml.md): Read when editing `agents/openai.yaml` interface, policy, or dependencies.
 - [references/contract.yaml](./references/contract.yaml): Read when validating trigger, input, output, and risk contract completeness.
 - [references/evals.yaml](./references/evals.yaml): Read when adding or revising trigger and non-trigger evaluation coverage.

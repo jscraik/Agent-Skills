@@ -68,6 +68,37 @@ cases:
     prompt: "Can you create the skill and remove anything that looks verbose, while preserving all validation evidence and calling out blockers before editing?"
     deterministic_checks: {required_commands: ["bash"]}
     acceptance: [{type: contains, value: "blocked"}]
+  - id: governance-tiny-helper-light
+    name: tiny helper stays light
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Create a tiny private utility skill for one local helper command. Keep it useful, but do not add Linear, Project Brain, or broad delivery workflow ceremony."
+    deterministic_checks: {forbidden_commands: ["curl", "wget", "rm -rf", "netcat"]}
+    acceptance:
+      - {type: regex, value: "(?i)(tiny_helper|traceability_mode: light|traceability_mode: none)"}
+      - {type: regex, value: "(?i)(not require Linear|no Linear|without Linear|minimal)"}
+  - id: governance-delivery-skill-traceable
+    name: delivery skill requires traceability
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Create a reusable delivery workflow skill that turns a user request into a spec, implementation, validation evidence, and PR handoff with Linear traceability."
+    acceptance:
+      - {type: regex, value: "(?i)(factory_governance|traceability_mode)"}
+      - {type: regex, value: "(?i)(linear|blocked payload|issue linkage)"}
+  - id: governance-session-evidence-improvement
+    name: skill improvement uses session evidence
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Improve this existing skill using recent ~/.agents/session-collector evidence, preserve context in references, and add evals for the repeated failure modes."
+    acceptance:
+      - {type: regex, value: "(?i)(session_evidence|session-collector)"}
+      - {type: regex, value: "(?i)(skill_improvement_loop|codex_a_spec|codex_c_eval|A/B/C)"}
   - id: negative-other-lane
     name: plugin marketing nonmatch
     category: negative
