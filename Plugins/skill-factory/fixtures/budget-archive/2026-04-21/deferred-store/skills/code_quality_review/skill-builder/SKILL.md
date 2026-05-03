@@ -21,6 +21,8 @@ Evidence beats taste. Keep `SKILL.md` small, preserve nuance in references, and 
 
 Do not remove important context for budget trimming; move it to `references/` or `scripts/` and leave clear signposts in this entrypoint.
 
+Every skill must remain agent-native: `SKILL.md` must expose execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria so another agent can run the workflow without hidden context. Read when: applying this contract to generated artifacts, CLIs, subagents, credentials, or multi-phase repair: [agent-native skill contract](../../../../../Infrastructure/references/agent-native-skill-contract.md).
+
 ## When to use
 
 Use for existing skill or plugin quality work: audit fixes, routing, budget reduction, eval coverage, safety hardening, readiness, packaging, or install handoff after lifecycle judgment is settled.
@@ -48,8 +50,9 @@ If a missing input changes the safe edit path, ask one direct question. If risk 
 2. Run the smallest failing gate first; fix one failure class at a time.
 3. Keep `SKILL.md` as the map: triggers, inputs, output contract, safety, and validation. Move deep policy and mechanics into `references/` or `scripts/`.
 4. Preserve context by relocation, not deletion. Add `Read when:` signposts whenever important detail moves.
-5. Preserve local contract/eval/profile files when they already exist.
-6. Record exact validation commands with `pass`, `fail`, or `blocked`.
+5. Enforce agent-native operation: name ownership boundaries, expected artifacts, the smallest repair loop, and completion criteria in the entrypoint.
+6. Preserve local contract/eval/profile files when they already exist.
+7. Record exact validation commands with `pass`, `fail`, or `blocked`.
 
 ## Deliverables
 

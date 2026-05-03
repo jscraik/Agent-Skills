@@ -37,8 +37,61 @@ HEADING_ALIASES = {
     "Required inputs": {"required inputs", "inputs", "full context"},
     "Deliverables": {"deliverables", "outputs", "required output contract", "full context"},
     "Failure mode": {"failure mode", "anti-patterns", "anti-patterns to avoid", "do not use", "notes"},
-    "Gotchas": {"gotchas", "constraints", "notes"},
+    "Gotchas": {"gotchas", "constraints", "notes", "anti-patterns", "anti-patterns to avoid"},
 }
+AGENT_NATIVE_CONTRACTS = (
+    (
+        "execution boundaries",
+        {
+            "execution boundaries",
+            "boundary map",
+            "constraints",
+            "constraints and safety",
+            "safety",
+            "safety rules",
+            "rules",
+            "anti patterns",
+            "anti patterns to avoid",
+            "avoid",
+            "do not use",
+        },
+    ),
+    (
+        "expected artifacts",
+        {
+            "expected artifacts",
+            "deliverables",
+            "outputs",
+            "output contract",
+            "required output contract",
+            "acceptance criteria",
+        },
+    ),
+    (
+        "repair or failure loop",
+        {
+            "repair loop",
+            "repair workflow",
+            "failure mode",
+            "validation",
+            "gotchas",
+            "safety",
+            "anti patterns",
+            "anti patterns to avoid",
+        },
+    ),
+    (
+        "validation or acceptance criteria",
+        {
+            "validation",
+            "acceptance criteria",
+            "deliverables",
+            "outputs",
+            "output contract",
+            "required output contract",
+        },
+    ),
+)
 RELOCATION_GUARD_SKILL_FILES = {
     "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
     "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
@@ -186,6 +239,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
     - Line-count limits (hard cap and target) and requirement for an Infrastructure/references/ directory when length exceeds target.
     - Presence of an Infrastructure/scripts/ directory when many code fences are present.
     - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
+    - Presence of the agent-native execution contract across all skills: execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria (missing contract dimensions are errors in "strict" mode, warnings otherwise).
     - For relocation-guard skills (a predefined set of relative paths), additional checks for context-preservation policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
     
     The function prints per-file error/warning messages and a final summary to stdout.
@@ -231,6 +285,16 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
             if normalized_headings.isdisjoint(accepted_headings):
                 severity = "error" if mode == "strict" else "warn"
                 emit(severity, skill.relative_path, f"missing recommended section heading: ## {heading}")
+
+        for contract_name, accepted_headings in AGENT_NATIVE_CONTRACTS:
+            normalized_contract_headings = {normalize_heading(heading) for heading in accepted_headings}
+            if normalized_headings.isdisjoint(normalized_contract_headings):
+                severity = "error" if mode == "strict" else "warn"
+                emit(
+                    severity,
+                    skill.relative_path,
+                    f"missing agent-native contract surface: {contract_name}",
+                )
 
         skill_directory = str(Path(skill.relative_path).parent).replace("\\", "/")
         if skill_directory.lower() in RELOCATION_GUARD_SKILL_FILES:
