@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: "Use when an existing Codex skill or plugin needs release hardening: audit structure, reduce context budget, improve eval coverage, validate safety gates, or prepare an install/package handoff."
+description: "Use when an existing Codex skill or plugin needs release hardening: audit structure, context-lifecycle coverage, eval coverage, safety gates, budget reduction, or install/package handoff."
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active
@@ -20,6 +20,8 @@ Harden existing Codex skills and plugin packages with evidence, small edits, and
 Evidence beats taste. Keep `SKILL.md` small, preserve nuance in references, and tie completion claims to commands or artifacts.
 
 Do not remove important context for budget trimming; move it to `references/` or `scripts/` and leave clear signposts in this entrypoint.
+
+Treat every skill as a context package: generate, test, distribute, observe, then adapt it from real evidence.
 
 ## When to use
 
@@ -48,8 +50,9 @@ If a missing input changes the safe edit path, ask one direct question. If risk 
 2. Run the smallest failing gate first; fix one failure class at a time.
 3. Keep `SKILL.md` as the map: triggers, inputs, output contract, safety, and validation. Move deep policy and mechanics into `references/` or `scripts/`.
 4. Preserve context by relocation, not deletion. Add `Read when:` signposts whenever important detail moves.
-5. Preserve local contract/eval/profile files when they already exist.
-6. Record exact validation commands with `pass`, `fail`, or `blocked`.
+5. Apply the context lifecycle: name what changed, add/refresh a realistic eval or validation route, and state how future failures will be observed.
+6. Preserve local contract/eval/profile files when they already exist.
+7. Record exact validation commands with `pass`, `fail`, or `blocked`.
 
 ## Deliverables
 
@@ -97,6 +100,8 @@ Read when: you need iteration, benchmark, readiness, or artifact semantics: [ref
 Read when: you need full install-distribute mechanics, provenance, quarantine, or rollback detail: [references/advanced-workflow.md](./references/advanced-workflow.md).
 
 Read when: discovery inputs are underspecified: [references/discovery-interview.md](./references/discovery-interview.md).
+
+Read when: a skill change should become durable agent behavior rather than a one-off edit: [../../../references/context-development-lifecycle.md](../../../references/context-development-lifecycle.md).
 
 Preserve important context in references; do not delete it for budget alone.
 

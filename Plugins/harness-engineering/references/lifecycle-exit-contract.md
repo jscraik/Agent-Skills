@@ -10,6 +10,8 @@ The active lifecycle spine is:
 
 Use `he-improve` only when existing behavior needs a measured improvement loop. Use `he-compound` only when the user needs orchestration across several spine stages or durable solved-problem capture. Use `he-heartbeat` only when the thread must wake later and re-check live state.
 
+Use Codex `/goal` as optional continuity state for long-running work, not as a lifecycle stage. Goals must point back to the active tracker/artifact/branch/PR chain and follow `references/goal-continuity.md`.
+
 Folded stages are modes, not the default route:
 
 - `he-ideate` folds into `he-brainstorm`.
@@ -51,6 +53,7 @@ For short chat responses, summarize the same fields in prose without losing bloc
 - Do not route to `he-work` while plan/source traceability, validation strategy, or scope boundary is missing for non-trivial work.
 - Do not claim `done` without validation evidence or a concrete reason validation is not applicable.
 - Do not let a PR, branch, local plan, or session summary replace Linear as tracker of record.
+- Do not mark an active thread goal complete until this exit contract is satisfied or explicitly blocked for every requirement in the goal.
 
 ## Stage-Specific Minimums
 
@@ -64,6 +67,7 @@ For short chat responses, summarize the same fields in prose without losing bloc
 - `he-improve`: baseline, measured delta, accepted/rejected experiment, rollback posture.
 - `he-compound`: mode, earliest incomplete stage, stage exit evidence, next exact stage.
 - `he-heartbeat`: live checks, cadence, stop conditions, next stage when the heartbeat wakes.
+- Active goal: objective alignment, status, completion/blocker evidence, and the next HE stage when the goal remains active.
 
 ## Cut Policy
 

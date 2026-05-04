@@ -24,6 +24,7 @@ SOURCE_PATHS = {
     "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
+    "skill-refactor": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
     "skillify": "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
 }
 
@@ -172,6 +173,20 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "skillify")
         self.assertIn("skillify-workflow", payload["candidates"][0]["reason"])
 
+    def test_skill_factory_context_feedback_routes_to_refactor(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "CodeRabbit and Codex keep leaving the same review feedback on this skill; analyze whether the context package needs to adapt",
+            [
+                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Route skill work."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-refactor")
+        self.assertIn("context-feedback-analysis", payload["candidates"][0]["reason"])
+
     def test_harness_engineering_folded_direct_stage_routes_to_parent(self) -> None:
         payload = self._route(
             "harness-engineering",
@@ -199,6 +214,19 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "he-code-review")
         self.assertIn("folded stage alias 'he-technical-review'", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_repeated_review_feedback_routes_to_code_review(self) -> None:
+        payload = self._route(
+            "harness-engineering",
+            "CodeRabbit and Codex keep flagging the same missing validation evidence; review this HE PR and say whether the skill or eval context needs a follow-up",
+            [
+                _row("he-code-review", "Review PRs for readiness and technical risk."),
+                _row("he-router", "Route Harness Engineering stages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "he-code-review")
+        self.assertIn("repeated-review-feedback", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_folded_stage_correctness_still_routes_to_router(self) -> None:
         payload = self._route(

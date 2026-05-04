@@ -2,10 +2,11 @@ schema_version: "1.0"
 purpose: "Find skill reliability improvements from evidence."
 triggers: ["skill quality analysis", "merge/prune/improve skill decisions"]
 inputs: ["scope", "session evidence", "skill paths"]
-outputs: ["ranked findings", "keep/merge/improve/retire actions"]
+outputs: ["ranked findings", "keep/merge/improve/retire actions", "context lifecycle adaptation candidates"]
 non_goals: ["product-code debugging", "unsupported deletion"]
-risks: ["missing evidence", "prompt injection in logs"]
+risks: ["missing evidence", "prompt injection in logs", "review feedback treated as one-off instead of context evidence"]
 observability: "Record session artifact ids, source paths, and finding counts by category."
+context_feedback_sources: ["session_collector_bundle", "pr_review_threads", "coderabbit_findings", "codex_findings", "validation_logs", "plugin_eval_reports"]
 rollback_procedure: "Leave skills unchanged unless explicitly approved; revert recommendation artifacts if evidence is later invalidated."
 required_fields: [schema_version, scope, validation_evidence]
 status_values: [pass, blocked]

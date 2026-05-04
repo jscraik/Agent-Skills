@@ -29,9 +29,12 @@ Evidence first. Every recommendation should trace to a concrete session, artifac
 
 1. Define scope and evidence boundaries.
 2. Use session-collector bundles or bounded session extracts before deep dives.
-3. Group failures by root cause: coverage gap, instruction drift, routing mismatch, or quality regression.
-4. Rank findings by impact, confidence, and implementation cost.
-5. Return keep, improve, merge, and retire actions with evidence anchors.
+3. Include PR review artifacts, CodeRabbit/Codex findings, validation logs, and plugin-eval reports when they are part of the requested evidence.
+4. Group failures by root cause: coverage gap, instruction drift, routing mismatch, quality regression, context-package conflict, or missing observation path.
+5. Flag repeated review feedback as context feedback when the same issue recurs across PRs, sessions, or validations.
+6. Recommend the destination lane: update an existing skill with `skill-builder`, capture a repeatable workflow with `skillify`, or keep observing if evidence is weak.
+7. Rank findings by impact, confidence, and implementation cost.
+8. Return keep, improve, merge, and retire actions with evidence anchors.
 
 Reference scripts are preserved in deferred context:
 
@@ -43,6 +46,8 @@ Assets: `assets/skill-refactor.png`.
 ## Deliverables
 
 Return `schema_version: 1` when automation consumes the result, prioritized findings, concrete artifact evidence, recommended action, risk note for removals, and validation status.
+
+For context lifecycle work, also return the observed failure source, affected skill/context package, recommended lifecycle stage, and the smallest evidence-backed adaptation.
 
 ## Safety
 

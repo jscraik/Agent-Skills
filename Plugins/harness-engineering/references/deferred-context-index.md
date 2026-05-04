@@ -8,6 +8,7 @@ Use this index when a compact stage says context was moved for budget reasons. D
 
 - Routing: `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/domain-model-routing.md`
 - Lifecycle and tracker gates: `references/lifecycle-exit-contract.md`, `references/linear-tracker-gate.md`
+- Goal continuity: `references/goal-continuity.md`
 - Intake and evidence: `references/qa-intake-routing.md`, `references/session-evidence-contract.md`, `references/session-evidence-skillify-triage.md`
 - Delegation: `references/subagent-routing.md`, `references/subagent-call-contract.md`
 - Folded compatibility: `references/folded-skill-context.md`
@@ -63,6 +64,16 @@ The budget-archive heartbeat fixture intentionally preserves the removed automat
 Recent active-entrypoint tightening moved these replaced lines out of compact `SKILL.md` files:
 
 ```text
+description: "Use when HE PRs, diffs, commits, CI, readiness, traceability, or autofix need review."
+Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff.
+Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix.
+description: "Use when HE wakeups, monitoring, until-green checks, or thread follow-through are needed."
+Target thread/workspace, cadence, stop condition, issue/PR/check links.
+Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations.
+Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement.
+description: "Use when approved HE plans or tiny low-risk tasks need traceable execution."
+Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
+Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; handoff to he-code-review mode:autofix when needed.
 Inspect live state; pick stage order; keep Linear/spec/plan/PR links; refresh Project Brain when ~/dev/coding-harness context changes.
 Return schema_version when structured. schema_version, selected stage, source_path, folded mode, blocker, lifecycle exit status.
 Harness Engineering brainstorming makes ambiguity useful without losing evidence.

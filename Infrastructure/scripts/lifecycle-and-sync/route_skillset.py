@@ -364,6 +364,19 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
             }
 
     task_tokens = tokenize(task)
+
+    if skill_set == "skill-factory":
+        context_feedback_tokens = {"feedback", "review", "reviews", "coderabbit", "codex", "adapt", "recurring", "repeated"}
+        context_package_tokens = {"skill", "skills", "context", "package", "packages", "eval", "evals"}
+        if task_tokens & context_feedback_tokens and task_tokens & context_package_tokens:
+            row = row_by_id(rows, "skill-refactor")
+            if row:
+                return {
+                    "row": row,
+                    "confidence": 0.95,
+                    "reason": "matched deterministic skill-factory rule 'context-feedback-analysis'",
+                }
+
     rules = {
         "plugin-factory": [
             (

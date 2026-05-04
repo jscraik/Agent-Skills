@@ -50,11 +50,16 @@ Before deep review, classify closed, draft, automated, trivial, already-reviewed
 
 Block `go` or merge for unresolved `P0`/`P1`, actionable threads, relevant failing checks, stale conflicts, missing validation, missing traceability, security/supply-chain concerns, or unrelated churn. Failing checks do not block classification.
 
+## Context Feedback
+
+Treat repeated PR review themes as evidence about the context package that produced the work. If CodeRabbit, Codex, or human reviewers keep flagging the same validation gap, traceability gap, unsafe shell pattern, routing miss, or unclear done criterion, record a context-feedback candidate after the immediate review verdict. Route evidence-backed skill changes to `skill-refactor` or `skill-builder`; route a repeatable new workflow to `skillify`.
+
 ## Output
 
 - Codex review: `findings[]`, `overall_correctness`, `overall_explanation`, `overall_confidence_score`.
 - Evidence ladder: completed checks, missing checks, confidence caps, and final confidence rationale.
 - Findings: severity, location, evidence, impact, confidence, remediation.
+- Context feedback: repeated theme, evidence source, affected skill/context package when known, suggested follow-up lane, and whether it blocks this review.
 - Harness readiness: `go`, `go-with-conditions`, or `no-go`.
 - Commit review: changed files, code read, checks run/skipped, limitations, findings or clean report.
 - Repair/execute: target, live state, classification, refs, idempotency key, evidence.
