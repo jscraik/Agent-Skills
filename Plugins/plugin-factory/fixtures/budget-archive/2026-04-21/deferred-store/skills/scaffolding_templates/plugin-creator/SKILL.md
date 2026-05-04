@@ -1,6 +1,6 @@
 ---
 name: plugin-creator
-description: Scaffold a minimal Codex plugin package and optional marketplace entry. Use when the user needs first-pass plugin creation.
+description: Scaffold Codex plugin packages with deterministic manifests, marketplace metadata, and traceability or evidence contracts for non-trivial adoption. Use when creating plugin roots or adopting existing skills into plugin ownership.
 metadata:
   skill-type: scaffolding_templates
 ---
@@ -26,15 +26,19 @@ Use for initial plugin scaffolding.
 
 Return: `schema_version`, `plugin_name`, `plugin_path`, `validation`, optional `blocked_by`.
 
+For non-trivial plugins, also return `factory_governance` with plugin posture, visibility policy, traceability mode, budget posture, and risks.
+
 ## Workflow
 
 Use the detailed scaffold procedure in `references/workflow.md`.
 
 Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
 Do not remove important context for budget trimming; move it to `references/` and add explicit `Read when` signposts in `SKILL.md`.
+Classify reusable, delivery-oriented, visible-family, or `coding-harness` plugins with [references/factory-governance-spine.md](./references/factory-governance-spine.md). Keep one-skill plugins minimal.
 
 Read when:
 - You need full plugin scaffold and marketplace update flow: [references/workflow.md](./references/workflow.md).
+- You need plugin posture, visibility, budget, traceability, or session-evidence rules: [references/factory-governance-spine.md](./references/factory-governance-spine.md).
 
 ## Required Behavior
 
@@ -77,6 +81,7 @@ Fail fast: stop at first failed gate and report blocker text.
 ## References
 
 - `references/workflow.md`
+- `references/factory-governance-spine.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`

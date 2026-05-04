@@ -1,10 +1,12 @@
 ---
 name: he-spec
-description: "Use when HE work needs Linear-backed scope, requirements, acceptance, and validation."
+description: "WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning."
 metadata:
   skill-type: product_verification
 ---
 # Harness Engineering Spec
+## Philosophy
+Make intent testable. A good HE spec preserves source truth, states boundaries, and gives planning enough acceptance detail without doing the plan's job.
 ## When to Use
 Use when requirements are needed before plan/work; Explore first and ask second.
 ## Inputs
@@ -12,18 +14,26 @@ Problem, Linear issue, QA report, source evidence, current-vs-latest spec status
 ## Outputs
 Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan.
 ## Procedure
-Inspect session-collector evidence and repo truth; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan.
+Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Constraints
 Redact secrets; do not invent requirements. Do not remove important context for budget trimming; move deep context to references.
+## Anti-Patterns
+- Inventing acceptance criteria that are not grounded in source evidence.
+- Writing task sequences instead of behavior contracts.
+- Weakening Linear traceability because a local spec already exists.
 ## Examples
 - For `JSC-246`, convert a QA report about the account settings flow into a complete replacement spec section with Linear Acceptance Traceability, acceptance IDs, assumptions, validation, and rollback notes.
 - When a current spec exists but the latest session evidence changes scope, compare current-vs-latest spec status before adding requirements.
+## Assets
+Reference `assets/` only for skill packaging and browseability; spec source material belongs in references, not generated images.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
+- Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`
+- Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Doctrine: `Plugins/harness-engineering/references/he-spec-doctrine.md`
 - Artifact: `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`

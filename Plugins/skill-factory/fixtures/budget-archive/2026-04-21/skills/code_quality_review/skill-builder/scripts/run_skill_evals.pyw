@@ -25,14 +25,17 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import atexit
 import datetime as dt
 import html
 import json
 import os
 import re
+import shutil
 import shlex
 import subprocess as sp
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
@@ -1318,6 +1321,46 @@ def _effective_codex_home(codex_home: Optional[Path]) -> Path:
     return Path(raw).expanduser().resolve()
 
 
+def _copy_codex_home_file(source_home: Path, target_home: Path, name: str) -> Optional[str]:
+    source = source_home / name
+    if not source.exists():
+        return None
+    try:
+        shutil.copy2(source, target_home / name)
+    except OSError as exc:
+        return f"Could not copy {source} into isolated Codex eval home: {exc}"
+    return None
+
+
+def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
+    """
+    Build a temporary CODEX_HOME for live eval runs.
+
+    Codex evals need authenticated state, but they should not write sessions into
+    the operator's real ~/.codex tree. The temporary home receives only the small
+    auth/config files needed to run `codex exec`; sessions and logs stay isolated.
+    """
+    warnings: List[str] = []
+    source_home = _effective_codex_home(None)
+    temp_home_ctx = tempfile.TemporaryDirectory(prefix="skill-evals-codex-home-")
+    atexit.register(temp_home_ctx.cleanup)
+    target_home = Path(temp_home_ctx.name).resolve()
+
+    for child in ("sessions", "logs", "worktrees"):
+        (target_home / child).mkdir(parents=True, exist_ok=True)
+
+    if source_home.exists():
+        for name in ("auth.json", "config.toml"):
+            warning = _copy_codex_home_file(source_home, target_home, name)
+            if warning:
+                warnings.append(warning)
+    else:
+        warnings.append(f"Default Codex home does not exist, using empty isolated eval home: {source_home}")
+
+    warnings.append(f"Using isolated CODEX_HOME for live eval session writes: {target_home}")
+    return target_home, warnings
+
+
 def _codex_env(*, codex_bin: Optional[Path], codex_home: Optional[Path]) -> Dict[str, str]:
     """
     Builds an environment mapping configured for running the Codex CLI.
@@ -2093,6 +2136,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     codex_fallback_profile = str(args.codex_fallback_profile or "").strip() or None
     codex_kimi_command = str(args.codex_kimi_command or "").strip() or "codex-kimi"
     codex_zai_command = str(args.codex_zai_command or "").strip() or "codex-zai"
+    preflight_warnings: List[str] = []
+
+    if "codex" in selected_runners and codex_home is None:
+        codex_home, isolation_warnings = _isolated_codex_home_for_eval()
+        preflight_warnings.extend(isolation_warnings)
 
     # Smoke-profile routing:
     # - For discovery-smoke runs, prefer cases that declare a smoke_mode.
@@ -2147,7 +2195,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 codex_zai_settings = candidate
 
     preflight_errors: List[str] = []
-    preflight_warnings: List[str] = []
     if "codex" in selected_runners:
         if not (workspace_root / ".git").exists() and not _has_skip_git_repo_check(args.codex_arg):
             preflight_warnings.append(

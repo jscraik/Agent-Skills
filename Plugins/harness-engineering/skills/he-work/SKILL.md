@@ -1,10 +1,12 @@
 ---
 name: he-work
-description: "Use when approved HE plans or tiny low-risk tasks need traceable execution."
+description: "WHAT: Build approved HE changes in verified slices with traceability. Use when execution is approved or bounded delegation is needed."
 metadata:
   skill-type: team_automation
 ---
 # Harness Engineering Work
+## Philosophy
+Ship the smallest honest slice. Work should leave clear proof of what changed, why it matched the plan, and which validation or blocked gate supports the handoff.
 ## When to Use
 Use when execution is approved or tiny and low risk.
 ## Inputs
@@ -12,19 +14,27 @@ Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
 ## Outputs
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff.
 ## Procedure
-Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; handoff to he-code-review mode:autofix when needed.
+Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
+For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Constraints
 Redact secrets; preserve user edits. Do not remove important context for budget trimming; move deep context to references.
+## Anti-Patterns
+- Editing before checking the active branch, dirty state, and source artifact.
+- Expanding product scope because implementation uncovered a tempting adjacent fix.
+- Claiming done without exact validation or blocked-gate evidence.
 ## Examples
-- For `JSC-246`, implement the approved account settings flow plan in delegate mode, keep `update_plan` as the live checklist, and return changed files plus verified slices.
-- For a tiny low-risk fix, capture the current active state, make the smallest traceable edit, run the exact gate, and hand off to `he-code-review mode:autofix` if review findings remain.
+- "Inspect JSC-246 and implement only the units in `Plans/JSC-246-account-settings.md`, preserve my dirty edits, then run `bash scripts/run-harness-setup-checks.sh`."
+- "Inspect `Infrastructure/templates/linear-handoff.md`; it has the wrong Linear field name, so make that tiny fix, run its focused test, and hand off for review."
+## Assets
+Reference `assets/` only for skill packaging and browseability; execution evidence belongs in validation output, PRs, and handoff notes.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Approval flow: `repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md`
+- Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Work contract: `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
 - Modes: `Plugins/harness-engineering/skills/he-work/references/execution-modes.md`

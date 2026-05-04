@@ -1,0 +1,1 @@
+Jamie says: Codex feels sluggish after a bunch of long chats; inspect local state first and do not change anything.

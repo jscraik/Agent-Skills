@@ -33,6 +33,7 @@ outputs:
   - kept_discarded_crash_blocked_summary
   - score_delta
   - decision_policy
+  - protected_or_held_out_guard_status
   - pivot_recommendation_when_plateaued
   - evidence_summary
   - validation_status
@@ -58,9 +59,12 @@ safety:
   bounded_loop_required: true
   regression_guard_absolute: true
   binary_checks_for_autonomous_quality_loops: true
+  explicit_approval_required_for_contract_edits: true
+  parent_owned_ledger: true
 validation:
   - plugin_eval_grade_a
   - strict_skill_audit
   - smoke_evals_when_runner_available
 observability: "Report validation commands and outcomes."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
+failure_behavior: "Repair the smallest failing hypothesis, parser, command, or ledger entry first; otherwise report blocked with exact missing runtime, permission, credential, metric, corpus, or toolchain."

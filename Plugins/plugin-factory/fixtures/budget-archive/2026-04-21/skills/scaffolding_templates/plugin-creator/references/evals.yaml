@@ -90,6 +90,48 @@ cases:
       - type: regex
         value: "(?i)(reject|invalid|do not guess|validation)"
 
+  - id: governance-visible-family-budget
+    name: visible skill family requires budget posture
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Create a plugin with several intentionally visible skills. Explain picker visibility, budget posture, context retention, and traceability policy without hiding active content in fixtures."
+    deterministic_checks:
+      forbidden_commands:
+        - "curl"
+        - "wget"
+        - "rm -rf"
+        - "netcat"
+    acceptance:
+      - type: regex
+        value: "(?i)factory_governance"
+      - type: regex
+        value: "(?i)(visibility_policy|selected_visible_skills|visible_skill_family)"
+      - type: regex
+        value: "(?i)(budget_posture|token_budget|context_budget)"
+      - type: regex
+        value: "(?i)traceability_mode"
+      - type: regex
+        value: "(?i)context_retention"
+
+  - id: governance-plugin-session-evidence
+    name: plugin architecture uses session evidence
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Review this plugin architecture using a bounded ~/.agents/session-collector bundle before deciding whether it should be router-first, a visible family, split, or pruned."
+    acceptance:
+      - type: regex
+        value: "(?i)(session_evidence|session-collector)"
+      - type: regex
+        value: "(?i)(router_plugin|visible_skill_family|single_skill|prun)"
+      - type: regex
+        value: "(?i)bundle_path"
+      - type: regex
+        value: "(?i)(redaction_status|redacted)"
+
   - id: negative-skill-install-request
     name: negative skill install request
     category: negative

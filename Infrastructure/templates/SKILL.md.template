@@ -2,6 +2,8 @@
 
 Use this starter when creating a new canonical skill. Keep the initial artifact honest: gather the real trigger, owner, and review cadence up front, keep the skill in `incubating` state until the workflow is real, and avoid broad placeholder debt that looks ready to merge.
 
+Read when: the skill has generated artifacts, subagents, credentials, install steps, live services, or multi-phase repair: [agent-native skill contract](../references/agent-native-skill-contract.md).
+
 ---
 name: skill-name-here
 description: Concrete discovery description for the real trigger
@@ -21,7 +23,11 @@ This scaffold starts as an incubating skill. Replace the starter workflow below 
 ## Table of Contents
 - [When to use](#when-to-use)
 - [Required inputs](#required-inputs)
+- [Execution boundaries](#execution-boundaries)
 - [Workflow](#workflow)
+- [Expected artifacts](#expected-artifacts)
+- [Repair or failure loop](#repair-or-failure-loop)
+- [Acceptance criteria](#acceptance-criteria)
 - [Validation](#validation)
 - [Resources](#resources)
 
@@ -34,11 +40,34 @@ This scaffold starts as an incubating skill. Replace the starter workflow below 
 - execution posture and validation depth the finished skill should support
 - any external tools, auth, or references the final workflow will require
 
+## Execution boundaries
+- This skill owns the routing, source-of-truth checks, and user-facing handoff for its workflow.
+- Delegate specialized generation, research, implementation, or validation to the named skill, tool, script, or subagent that owns that work.
+- Do not fabricate missing inputs, generated outputs, manifests, review artifacts, or validation evidence.
+- Stop and report a blocker when required tools, permissions, source artifacts, or provenance are unavailable.
+
 ## Workflow
 1. Rewrite the summary so it describes the real user request, not the scaffold.
 2. Replace the starter sections with the smallest workflow or task structure that matches the skill.
 3. Add only the supporting scripts, references, and assets the skill actually uses.
 4. Run the repo validation gates before treating the skill as active.
+
+## Expected artifacts
+- Replace with the concrete files, reports, manifests, generated assets, command outputs, or handoff fields this skill must produce.
+- Include paths and schemas when automation or another agent will consume the result.
+- If the skill is advisory-only, name the required response shape and evidence fields instead of inventing files.
+
+## Repair or failure loop
+- Fix the smallest failing scope first.
+- Preserve the canonical source of truth and provenance while repairing.
+- Re-run the focused validation that failed before widening to broader checks.
+- If repair is unsafe or underspecified, return the exact blocker and next minimal diagnostic.
+
+## Acceptance criteria
+- Required artifacts exist and are non-empty, or the response includes the promised structured fields.
+- Automated validation has a recorded `pass`, `fail`, or `blocked` outcome.
+- Domain review confirms the output still matches the source of truth and did not use forbidden shortcuts.
+- Remaining risks and follow-up ownership are explicit.
 
 ## Validation
 - Run the skill-format and progressive-disclosure checks after customizing this file.

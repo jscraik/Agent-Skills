@@ -60,6 +60,9 @@ Inputs here.
 ## Deliverables
 Deliverables here.
 
+## Safety
+Safety and boundary handling here.
+
 ## Failure mode
 Failure handling here.
 
@@ -131,11 +134,38 @@ class SkillScanProgressiveDisclosureTests(TestCase):
 
             self.assertEqual(rc, 0)
 
-    def test_strict_mode_ignores_non_targeted_skills_for_relocation_guard(self) -> None:
+    def test_strict_mode_still_enforces_agent_native_contract_for_non_targeted_skills(self) -> None:
         """
-        Verify the strict progressive-disclosure relocation guard does not apply to skills located under non-targeted repository paths.
-        
-        Creates a temporary repository tree with a skill placed under a non-targeted plugin-factory path that intentionally lacks relocation signposting, runs cmd_lint_progressive_disclosure("strict") with REPO_ROOT and ROOTS patched to scan only Plugins, and asserts the command returns 0.
+        Verify strict linting applies the agent-native contract to non-targeted skills.
+
+        The relocation guard stays limited to selected authoring skills, but all
+        canonical skills must still expose execution-boundary information.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_dir = root / "Plugins" / "plugin-factory" / "skills" / "team_automation" / "not-router"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True, exist_ok=True)
+            (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                _skill_with_required_headings("No relocation signposts by design.").replace(
+                    "\n## Safety\nSafety and boundary handling here.\n",
+                    "\n",
+                ),
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.object(self.module, "REPO_ROOT", root),
+                mock.patch.object(self.module, "ROOTS", ("Plugins",)),
+            ):
+                rc = self.module.cmd_lint_progressive_disclosure("strict")
+
+            self.assertEqual(rc, 1)
+
+    def test_strict_mode_does_not_require_relocation_signposts_for_non_targeted_skills(self) -> None:
+        """
+        Verify non-targeted skills pass without relocation signposts when the agent-native contract is present.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

@@ -1,5 +1,9 @@
 schema_version: "2.0"
 skill_name: "skill-builder"
+neutral_baseline_approvals:
+  - id: planner-approved-neutral-baseline-skill-builder
+    rationale: archived fixture baseline for skill-builder comparison contracts
+    approved_by: archive-fixture
 cases:
   - id: happy-basic
     name: happy
@@ -18,6 +22,68 @@ cases:
     prepend_skill: true
     prompt: "Please review this small skill update with minimal inputs and keep the safety constraints intact."
     acceptance: [{type: contains, value: "validation"}]
+  - id: clarification-package-ambiguous
+    name: clarification package ambiguous
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "The skill package request is ambiguous; ask one clarifying question before editing."
+    acceptance: [{type: contains, value: "clarify"}]
+  - id: plugin-only-handoff
+    name: plugin only handoff
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Route a plugin-only authoring request to the correct handoff."
+    acceptance: [{type: contains, value: "plugin"}]
+  - id: mixed-authoring-install-handoff
+    name: mixed authoring install handoff
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Separate skill authoring from install work and hand off the install step."
+    acceptance: [{type: contains, value: "handoff"}]
+  - id: audit-package-validation-first
+    name: audit package validation first
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Audit a skill package and run validation before suggesting edits."
+    acceptance: [{type: contains, value: "validation"}]
+  - id: provenance-import-rollback
+    name: provenance import rollback
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Import a skill with provenance and explain rollback evidence."
+    acceptance: [{type: contains, value: "rollback"}]
+  - id: builder-round-metadata-contract
+    name: builder round metadata contract
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Define one explicit iteration contract for skill-builder."
+    baseline_type: neutral_repo_baseline
+    neutral_baseline_approval_id: planner-approved-neutral-baseline-skill-builder
+    comparison_inputs:
+      prompt_set: frozen-first-response-contract
+    iteration_round_state: reviewed
+    metric_availability: unavailable
+    readiness_state: comparison_incomplete
+    comparison_review_artifact: comparison_review.md
+    acceptance: [{type: contains, value: "## Inputs"}]
   - id: edge-ambiguous
     name: edge-ambiguous
     category: edge

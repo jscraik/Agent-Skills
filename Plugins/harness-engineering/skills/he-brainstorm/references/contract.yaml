@@ -28,6 +28,7 @@ outputs:
   - synthesis checkpoint before artifact writing
   - requirements artifact path when a durable handoff is created
   - Linear issue key/URL for tracked handoffs, or linear_blocked status with missing fields and ready-to-create payload
+  - coding_harness lifecycle block when the target repo exposes Harness gates or Project Brain
   - recommended next HE stage
 
 non_goals:
@@ -41,6 +42,7 @@ risks:
   - decision sprawl; record only hard-to-reverse domain decisions
   - weak handoff; name blockers, next artifact, and HE stage explicitly
   - optional tracker drift; mitigate by running the Linear tracker gate before durable handoff
+  - coding-harness state drift; mitigate by preserving Harness transition state and blocked command evidence
   - generic ideation; require warrants for survivor options
   - stale evidence; verify repo or Linear claims before using as facts
 
