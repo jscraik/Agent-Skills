@@ -216,6 +216,11 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertIn("folded stage alias 'he-technical-review'", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_repeated_review_feedback_routes_to_code_review(self) -> None:
+        """
+        Asserts that repeated review-feedback requests in Harness Engineering route to the code review skill.
+        
+        Validates that the routing payload selects "he-code-review" and that the top candidate's reason includes "repeated-review-feedback".
+        """
         payload = self._route(
             "harness-engineering",
             "CodeRabbit and Codex keep flagging the same missing validation evidence; review this HE PR and say whether the skill or eval context needs a follow-up",
@@ -229,6 +234,11 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertIn("repeated-review-feedback", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_folded_stage_correctness_still_routes_to_router(self) -> None:
+        """
+        Verifies that questions about a stage's correctness route to the harness-engineering router.
+        
+        Calls the routing helper with a task asking whether "he-tdd" is appropriate and three candidate stages; asserts the router ("he-router") is selected and that the top candidate's reason includes "stage-correctness-question".
+        """
         payload = self._route(
             "harness-engineering",
             "is he-tdd right for this request?",

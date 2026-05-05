@@ -328,7 +328,21 @@ def harness_engineering_override(
 
 
 def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Apply deterministic factory lane routing before generic token scoring."""
+    """
+    Route tasks deterministically for the `plugin-factory` and `skill-factory` skill sets before falling back to generic scoring.
+    
+    Parameters:
+        skill_set (str): Root skill set name, e.g., "plugin-factory" or "skill-factory".
+        task (str): The user task text to evaluate for deterministic routing signals.
+        rows (list[dict[str, Any]]): Manifest rows for the skill set.
+    
+    Returns:
+        dict[str, Any] | None: A routing decision dict with keys:
+            - "row": the selected manifest row (dict),
+            - "confidence": confidence score as a float,
+            - "reason": short string describing the matched deterministic rule;
+        or `None` if no deterministic rule applies.
+    """
     task_text = task.lower()
     row_ids = {str(row.get("id")) for row in rows}
 
