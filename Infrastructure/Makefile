@@ -15,7 +15,11 @@ hooks-commit-msg:
 	*) hook_file="$(CURDIR)/../$$hook_file" ;; \
 	esac; \
 	if [ ! -f "$$hook_file" ] && [ "$$(basename "$$hook_file")" = "COMMIT_EDITMSG" ]; then \
-		hook_file="$$repo_root/.git/COMMIT_EDITMSG"; \
+		hook_file="$$(git -C "$$repo_root" rev-parse --path-format=absolute --git-path COMMIT_EDITMSG)"; \
+	fi; \
+	if [ ! -f "$$hook_file" ]; then \
+		echo "Error: commit message file not found: $$hook_file"; \
+		exit 2; \
 	fi; \
 	$(MAKE) -C "$$repo_root" hooks-commit-msg HOOK_COMMIT_MSG_FILE="$$hook_file"
 

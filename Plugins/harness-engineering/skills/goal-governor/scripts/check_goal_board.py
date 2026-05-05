@@ -120,6 +120,27 @@ def as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def active_tasks_are_parallel_workers(
+    active_tasks: list[dict[str, Any]], rules: dict[str, Any]
+) -> bool:
+    if len(active_tasks) <= 1:
+        return True
+    if rules.get("one_active_task") is not False and rules.get("parallel_workers") is not True:
+        return False
+    seen_files: set[str] = set()
+    for task in active_tasks:
+        if task.get("type") != "worker":
+            return False
+        allowed_files = as_list(task.get("allowed_files"))
+        if not allowed_files:
+            return False
+        file_set = {str(path) for path in allowed_files}
+        if seen_files & file_set:
+            return False
+        seen_files.update(file_set)
+    return True
+
+
 def validate_receipts(path: Path) -> dict[str, dict[str, Any]]:
     receipts: dict[str, dict[str, Any]] = {}
     if not path.exists():
@@ -174,6 +195,10 @@ def validate_board(goal_dir: Path) -> list[str]:
     elif goal.get("status") not in {"active", "paused", "blocked", "done"}:
         errors.append("goal.status must be active, paused, blocked, or done")
 
+    rules = state.get("rules")
+    if not isinstance(rules, dict):
+        rules = {}
+
     tasks = state.get("tasks")
     if not isinstance(tasks, list) or not tasks:
         errors.append("tasks must be a non-empty list")
@@ -213,21 +238,33 @@ def validate_board(goal_dir: Path) -> list[str]:
             for field in ("allowed_files", "verify", "stop_if"):
                 if not as_list(task.get(field)):
                     errors.append(f"{task_id or f'task {index}'} worker missing {field}")
-        if status == "done" and task.get("receipt_id") not in receipts:
-            errors.append(f"{task_id or f'task {index}'} done without matching receipt")
+        if status == "done":
+            receipt_id = task.get("receipt_id")
+            receipt = receipts.get(receipt_id)
+            if receipt is None:
+                errors.append(f"{task_id or f'task {index}'} done without matching receipt")
+            elif receipt.get("task_id") != task_id:
+                errors.append(f"{task_id or f'task {index}'} done receipt belongs to another task")
 
-    if goal.get("status") != "done" and len(active_tasks) != 1:
-        errors.append("non-done goals require exactly one active task")
+    if goal.get("status") != "done" and not active_tasks_are_parallel_workers(active_tasks, rules):
+        errors.append(
+            "non-done goals require exactly one active task unless parallel active workers have disjoint allowed_files"
+        )
 
     if goal.get("status") == "done":
+        if active_tasks:
+            errors.append("done goals cannot have active tasks")
         final_receipts = [
             receipt
             for receipt in receipts.values()
             if receipt.get("decision") == "complete"
             and receipt.get("assignee") in {"Judge", "PM"}
+            and receipt.get("task_id") in ids
         ]
         if not final_receipts:
-            errors.append("done goal requires final Judge or PM receipt with decision=complete")
+            errors.append(
+                "done goal requires final Judge or PM receipt with decision=complete for an existing task"
+            )
 
     return errors
 
