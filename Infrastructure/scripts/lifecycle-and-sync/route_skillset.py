@@ -380,9 +380,14 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
     task_tokens = tokenize(task)
 
     if skill_set == "skill-factory":
-        context_feedback_tokens = {"feedback", "review", "reviews", "coderabbit", "codex", "adapt", "recurring", "repeated"}
+        feedback_source_tokens = {"feedback", "coderabbit", "codex"}
+        recurrence_tokens = {"again", "across", "recurring", "repeat", "repeated", "same"}
         context_package_tokens = {"skill", "skills", "context", "package", "packages", "eval", "evals"}
-        if task_tokens & context_feedback_tokens and task_tokens & context_package_tokens:
+        if (
+            task_tokens & feedback_source_tokens
+            and task_tokens & recurrence_tokens
+            and task_tokens & context_package_tokens
+        ):
             row = row_by_id(rows, "skill-refactor")
             if row:
                 return {

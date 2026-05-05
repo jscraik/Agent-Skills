@@ -187,6 +187,19 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertEqual(payload["selected"]["id"], "skill-refactor")
         self.assertIn("context-feedback-analysis", payload["candidates"][0]["reason"])
 
+    def test_skill_factory_single_review_request_does_not_route_to_refactor(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "review this skill package before release",
+            [
+                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Route skill work."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+            ],
+        )
+
+        self.assertNotEqual(payload["selected"]["id"], "skill-refactor")
+
     def test_harness_engineering_folded_direct_stage_routes_to_parent(self) -> None:
         payload = self._route(
             "harness-engineering",
