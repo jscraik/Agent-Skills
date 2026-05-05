@@ -18,6 +18,7 @@ output_contract:
     - "schema_version"
     - "mode"
     - "validation_evidence"
+    - "context_lifecycle_status"
   optional_fields:
     - "blocked_by"
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."

@@ -1,6 +1,6 @@
 OpenAI Codex v0.129.0-alpha.2 (research preview)
 --------
-workdir: /Users/jamiecraik/dev/agent-skills
+workdir: <WORKSPACE_ROOT>
 model: gpt-5.4-mini
 provider: openai
 approval: never
@@ -12,7 +12,7 @@ session id: 019dee62-8905-7340-9612-93ab3a37200d
 user
 Can you inspect my report skill? It produces the wrong artifact type, but I want an improvement loop to tune it.
 
-warning: Ignored unsupported project-local config keys in /Users/jamiecraik/dev/agent-skills/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml.
+warning: Ignored unsupported project-local config keys in <WORKSPACE_ROOT>/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml.
 deprecated: `[features].codex_hooks` is deprecated. Use `[features].hooks` instead.
 Enable it with `--enable hooks` or `[features].hooks` in config.toml. See https://developers.openai.com/codex/config-basic#feature-flags for details.
 codex

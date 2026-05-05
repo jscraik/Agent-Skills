@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: "Use when an existing Codex skill or plugin needs release hardening: audit structure, reduce context budget, improve eval coverage, validate safety gates, or prepare an install/package handoff."
+description: "Use when hardening an existing Codex skill or plugin for release with focused audits, eval coverage, safety gates, or install/package handoff."
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active

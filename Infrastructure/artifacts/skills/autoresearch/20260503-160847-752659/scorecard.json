@@ -13,7 +13,7 @@
     "source_commit": "bb8e1a22202a61248f385ef4cafd4965aa77b25b",
     "source_branch": "codex/factory-governance-spine"
   },
-  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "workspace_root": "<WORKSPACE_ROOT>",
   "runner_mode": "codex",
   "eval_mode": "smoke",
   "tier2_mode": "warn",

@@ -1,9 +1,0 @@
-I can’t validate it from this workspace right now because every repo command is being blocked by the sandbox wrapper, so I don’t have a trustworthy rerun or diff to inspect.
-
-My read, though, is that a `0.1%` benchmark movement is usually too small to trust on a single run. I’d treat it as noise unless you can show one of these:
-
-1. Multiple repeated runs with the same harness and the movement stays in the same direction.
-2. A confidence interval or standard deviation that is clearly smaller than `0.1%`.
-3. A paired benchmark setup where the old and new patch are compared back-to-back and the gap survives several cycles.
-
-If you want, send me the benchmark command plus the before/after output, or let me know the exact benchmark name, and I’ll help judge whether that delta is real or just variance.

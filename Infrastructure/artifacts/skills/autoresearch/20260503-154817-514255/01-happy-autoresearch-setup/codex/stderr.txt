@@ -1,2 +1,0 @@
-2026-05-03T14:48:32.199668Z ERROR codex_core::tools::router: error=resources/list failed: unknown MCP server 'filesystem'
-2026-05-03T14:48:37.642407Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process

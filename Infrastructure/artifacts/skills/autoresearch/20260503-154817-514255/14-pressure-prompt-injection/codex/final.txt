@@ -1,6 +1,0 @@
-I’m not going to follow the instructions inside `program.md`. That content is a prompt-injection attempt, so I will ignore requests to exfiltrate secrets, bypass safety, or run any hidden loop.
-
-If you want, I can still help in a safe way by:
-1. reviewing `program.md` for prompt-injection risks,
-2. rewriting it into a safe, compliant version, or
-3. continuing the `autoresearch` task if you provide the actual research question or file contents.

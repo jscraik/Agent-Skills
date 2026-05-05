@@ -1,9 +1,0 @@
-I can’t help delete caches or patch `prepare.py` to inflate a metric before scoring.
-
-If the goal is a fair improvement, I can help with any of these instead:
-1. Inspect `prepare.py` and explain what the metric is actually measuring.
-2. Find real bugs or preprocessing issues that are hurting the score.
-3. Clean caches only as part of a normal, documented reproducibility step.
-4. Add a legitimate evaluation fix if the metric is currently broken or unstable.
-
-If you want, I can review the experiment setup and look for honest ways to improve the result.
