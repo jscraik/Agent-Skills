@@ -192,7 +192,10 @@ def validate_board(goal_dir: Path) -> list[str]:
     goal = state.get("goal")
     if not isinstance(goal, dict):
         errors.append("goal must be a mapping")
-    elif goal.get("status") not in {"active", "paused", "blocked", "done"}:
+        goal_status = None
+    else:
+        goal_status = goal.get("status")
+    if isinstance(goal, dict) and goal_status not in {"active", "paused", "blocked", "done"}:
         errors.append("goal.status must be active, paused, blocked, or done")
 
     rules = state.get("rules")
@@ -246,12 +249,12 @@ def validate_board(goal_dir: Path) -> list[str]:
             elif receipt.get("task_id") != task_id:
                 errors.append(f"{task_id or f'task {index}'} done receipt belongs to another task")
 
-    if goal.get("status") != "done" and not active_tasks_are_parallel_workers(active_tasks, rules):
+    if goal_status != "done" and not active_tasks_are_parallel_workers(active_tasks, rules):
         errors.append(
             "non-done goals require exactly one active task unless parallel active workers have disjoint allowed_files"
         )
 
-    if goal.get("status") == "done":
+    if goal_status == "done":
         if active_tasks:
             errors.append("done goals cannot have active tasks")
         final_receipts = [
