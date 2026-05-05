@@ -3,6 +3,11 @@ name: goal-governor
 description: Create, continue, and audit Codex persistent-goal work with repo-visible goal boards, native goal reconciliation, scoped agent tasks, receipts, and verification freshness gates. Use when a user wants durable `/goal` workflows, long-running Codex goal governance, or safe continuation of stalled goal work.
 metadata:
   skill-type: team_automation
+  triggers:
+    - goal governor
+    - /goal workflows
+    - goal workflows
+    - durable goal governance
   lifecycle_state: active
   maturity: experimental
   owner: Harness Engineering Team

@@ -8,12 +8,16 @@ hooks-commit-msg:
 		echo "Error: HOOK_COMMIT_MSG_FILE is required"; \
 		exit 2; \
 	fi
-	@hook_file="$(HOOK_COMMIT_MSG_FILE)"; \
+	@repo_root="$$(git -C "$(CURDIR)/.." rev-parse --show-toplevel)"; \
+	hook_file="$(HOOK_COMMIT_MSG_FILE)"; \
 	case "$$hook_file" in \
 	/*) ;; \
 	*) hook_file="$(CURDIR)/../$$hook_file" ;; \
 	esac; \
-	$(MAKE) -C .. hooks-commit-msg HOOK_COMMIT_MSG_FILE="$$hook_file"
+	if [ ! -f "$$hook_file" ] && [ "$$(basename "$$hook_file")" = "COMMIT_EDITMSG" ]; then \
+		hook_file="$$repo_root/.git/COMMIT_EDITMSG"; \
+	fi; \
+	$(MAKE) -C "$$repo_root" hooks-commit-msg HOOK_COMMIT_MSG_FILE="$$hook_file"
 
 hooks-pre-push:
 	$(MAKE) -C .. hooks-pre-push

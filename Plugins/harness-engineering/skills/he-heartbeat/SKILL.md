@@ -3,6 +3,11 @@ name: he-heartbeat
 description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
 metadata:
   skill-type: team_automation
+  triggers:
+    - he heartbeat
+    - goal-aware scheduling
+    - until-green checks
+    - thread continuation
 ---
 # Harness Engineering Heartbeat
 ## Philosophy
