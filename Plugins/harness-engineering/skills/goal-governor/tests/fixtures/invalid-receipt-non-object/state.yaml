@@ -1,0 +1,20 @@
+version: 2
+goal:
+  slug: invalid-receipt-non-object
+  status: active
+  objective: "Reject non-object receipt rows."
+tasks:
+  - id: T001
+    type: scout
+    assignee: Scout
+    status: active
+    objective: "Find validation commands."
+    inputs: []
+    constraints:
+      - "Read-only."
+    expected_output: "Evidence receipt."
+    allowed_files: []
+    verify: []
+    stop_if:
+      - "Needs write access."
+    receipt_id: null

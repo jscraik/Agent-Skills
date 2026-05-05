@@ -156,6 +156,8 @@ def validate_receipts(path: Path) -> dict[str, dict[str, Any]]:
                 receipt = json.loads(stripped)
             except json.JSONDecodeError as exc:
                 raise ValueError(f"receipts.jsonl:{line_number}: invalid JSON: {exc}") from exc
+            if not isinstance(receipt, dict):
+                raise ValueError(f"receipts.jsonl:{line_number}: receipt must be an object")
             receipt_id = receipt.get("id")
             task_id = receipt.get("task_id")
             if not isinstance(receipt_id, str) or not receipt_id:
@@ -164,6 +166,27 @@ def validate_receipts(path: Path) -> dict[str, dict[str, Any]]:
                 raise ValueError(f"receipts.jsonl:{line_number}: invalid task_id")
             receipts[receipt_id] = receipt
     return receipts
+
+
+def validate_done_receipt_schema(task: dict[str, Any], receipt: dict[str, Any]) -> list[str]:
+    task_id = str(task.get("id") or "task")
+    task_type = task.get("type")
+    errors: list[str] = []
+    if task_type == "worker":
+        if not isinstance(receipt.get("summary"), str) or not receipt["summary"].strip():
+            errors.append(f"{task_id} worker receipt missing summary")
+        if not as_list(receipt.get("changed_files")):
+            errors.append(f"{task_id} worker receipt missing changed_files")
+        if not as_list(receipt.get("commands")):
+            errors.append(f"{task_id} worker receipt missing commands")
+    if task_type == "judge":
+        if not isinstance(receipt.get("decision"), str) or not receipt["decision"].strip():
+            errors.append(f"{task_id} judge receipt missing decision")
+        if not isinstance(receipt.get("summary"), str) or not receipt["summary"].strip():
+            errors.append(f"{task_id} judge receipt missing summary")
+        if not as_list(receipt.get("evidence")):
+            errors.append(f"{task_id} judge receipt missing evidence")
+    return errors
 
 
 def validate_board(goal_dir: Path) -> list[str]:
@@ -250,6 +273,8 @@ def validate_board(goal_dir: Path) -> list[str]:
                 errors.append(f"{task_id or f'task {index}'} done without matching receipt")
             elif receipt.get("task_id") != task_id:
                 errors.append(f"{task_id or f'task {index}'} done receipt belongs to another task")
+            else:
+                errors.extend(validate_done_receipt_schema(task, receipt))
 
     if goal_status != "done" and not active_tasks_are_parallel_workers(active_tasks, rules):
         errors.append(
