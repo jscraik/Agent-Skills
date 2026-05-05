@@ -1,0 +1,2 @@
+2026-05-03T12:07:05.886285Z ERROR codex_core_skills::manager: failed to install system skills: io error while create system skills dir: Operation not permitted (os error 1)
+2026-05-03T12:07:25.986942Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(Io, Os { code: 54, kind: ConnectionReset, message: \\\"Connection reset by peer\\\" })) }\")" Failed during the export process

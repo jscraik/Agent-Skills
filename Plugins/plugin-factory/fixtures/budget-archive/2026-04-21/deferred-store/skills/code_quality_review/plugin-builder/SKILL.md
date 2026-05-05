@@ -30,6 +30,12 @@ Route elsewhere:
 - requested mode: `scaffold|convert|harden`
 - marketplace requirements (if any)
 
+## Execution Boundaries
+
+Plugin Builder owns plugin contract review, deterministic remediation guidance, validation evidence, and the final hardening handoff.
+
+Delegate first-draft plugin shell creation to `[[plugin-creator]]` and runtime install or visibility checks to `[[plugin-installer]]`. Do not execute third-party install scripts, mutate marketplace policy fields, or package a plugin for release without explicit validation evidence.
+
 ## Outputs
 
 Return: `schema_version`, `execution_mode`, `plugin_path`, `validation`, `artifacts`, optional `blocked_by`.
@@ -55,6 +61,12 @@ Fail fast: stop at first failed gate and report blocker text.
 
 - skipping `validate` before package handoff
 - changing marketplace policy fields without explicit request
+
+## Examples
+
+- "Harden this Codex plugin package and prove the contract before release."
+- "Convert this local plugin source into Codex plugin layout, but stop before writes if source ownership is unclear."
+- "Audit this plugin against marketplace policy and tell me whether it should fold into an existing plugin."
 
 ## Constraints
 

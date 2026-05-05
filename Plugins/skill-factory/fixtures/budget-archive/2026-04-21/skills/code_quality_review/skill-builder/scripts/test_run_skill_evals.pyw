@@ -8,6 +8,7 @@ import sys
 import tempfile
 import textwrap
 import unittest
+import unittest.mock
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -18,13 +19,23 @@ repo_root_str = str(REPO_ROOT)
 if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
 
-from defusedxml import ElementTree as ET
+try:
+    from defusedxml import ElementTree as ET
+except ModuleNotFoundError:
+    from xml.etree import ElementTree as ET
+
+existing_runner = sys.modules.get("run_skill_evals")
+if existing_runner is not None:
+    existing_path = Path(str(getattr(existing_runner, "__file__", ""))).resolve()
+    if existing_path.parent != SCRIPT_DIR:
+        del sys.modules["run_skill_evals"]
 
 from run_skill_evals import (
     EvalCase,
     _acceptance_skip_reason,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
+    _isolated_codex_home_for_eval,
     _is_smoke_only_case,
     _write_junit_report,
     load_evals,
@@ -48,7 +59,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIsNone(_acceptance_skip_reason(exit_code=0, output_text=""))
 
     def test_repo_evals_include_family_contract_cases(self) -> None:
-        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
 
         cases = load_evals(evals_path)
         case_map = {case.id: case for case in cases}
@@ -66,7 +77,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertEqual(case_map[case_id].timeout_profile, "codex-heavy")
 
     def test_builder_round_metadata_case_has_baseline_contract_fields(self) -> None:
-        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
         cases = load_evals(evals_path)
         case_map = {case.id: case for case in cases}
         target = case_map["builder-round-metadata-contract"]
@@ -195,7 +206,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
 
     def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
-        evals_path = REPO_ROOT / "utilities" / "skill-builder" / "references" / "evals.yaml"
+        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
 
         cases = load_evals(evals_path)
         selected = _filter_cases_for_eval_mode(cases, eval_mode="smoke")
@@ -280,6 +291,25 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(len(warnings), 1)
         self.assertIn("auth environment variables are present", warnings[0])
+
+    def test_isolated_codex_home_copies_auth_config_and_keeps_sessions_private(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            home_root = Path(tmpdir) / "home-root"
+            default_home = home_root / ".codex"
+            default_home.mkdir(parents=True)
+            (default_home / "auth.json").write_text('{"token":"test"}', encoding="utf-8")
+            (default_home / "config.toml").write_text("[profiles.test]\nmodel = \"gpt-test\"\n", encoding="utf-8")
+
+            with unittest.mock.patch("run_skill_evals.Path.home", return_value=home_root):
+                with unittest.mock.patch.dict("run_skill_evals.os.environ", {}, clear=True):
+                    isolated_home, warnings = _isolated_codex_home_for_eval()
+
+        self.assertNotEqual(isolated_home, default_home)
+        self.assertTrue((isolated_home / "auth.json").exists())
+        self.assertTrue((isolated_home / "config.toml").exists())
+        self.assertTrue((isolated_home / "sessions").is_dir())
+        self.assertTrue((isolated_home / "logs").is_dir())
+        self.assertIn("Using isolated CODEX_HOME", "\n".join(warnings))
 
     def test_write_junit_report_outputs_failures(self) -> None:
         summary = {

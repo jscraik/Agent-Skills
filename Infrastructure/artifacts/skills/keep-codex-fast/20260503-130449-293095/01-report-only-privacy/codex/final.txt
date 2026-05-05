@@ -1,0 +1,12 @@
+I couldn’t complete a live repo inspection in this session because every shell-based read was blocked by the environment before it reached the filesystem (`sandbox_apply: Operation not permitted`), so I can’t honestly claim a repo-verified root cause.
+
+What I’d expect to be the main cause, based on how Codex-style long chats usually degrade, is:
+
+1. `Context growth`: each long conversation makes the next turn more expensive because the model has to re-read more prior messages.
+2. `Transcript/UI growth`: if the client keeps the full chat mounted, rendering and markdown/code highlighting can get noticeably slower over time.
+3. `Large tool/output payloads`: big pasted logs, diffs, or long tool outputs can bloat the active conversation state and slow every subsequent turn.
+4. `Persistence overhead`: if the app is writing conversation state, memory, or telemetry synchronously on each turn, that can add visible lag after long sessions.
+
+If you want, I can still help in one of two concrete ways:
+1. You give me a working shell-backed session and I’ll do a real read-only inspection.
+2. You paste the relevant runtime logs or profiling output, and I’ll trace the slowdown from there without changing anything.

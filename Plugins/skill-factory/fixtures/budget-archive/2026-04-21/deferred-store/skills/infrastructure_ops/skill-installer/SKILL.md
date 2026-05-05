@@ -1,6 +1,6 @@
 ---
 name: skill-installer
-description: Install Codex skills into the canonical git source tree from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos).
+description: Install Codex skills into the canonical git source tree from curated lists or GitHub repo paths while requiring ContractValidityEvidence for governed installs. Use when listing installable skills or installing curated, external, or private-repo skills.
 metadata:
   skill-type: infrastructure_ops
 ---
@@ -75,6 +75,7 @@ For non-trivial responses, include:
 - `context_routes` as `[{from, to, read_when}]` whenever required detail moved from `SKILL.md` to `Infrastructure/references/`
 - `validation_evidence` as `[{command, outcome, note}]` with `outcome` in `pass|fail|blocked`
 - `restart_required` (`true` after successful installs)
+- `ContractValidityEvidence` for governed installs, or an explicit force/waiver decision when evidence is missing
 
 ## Constraints and Safety
 

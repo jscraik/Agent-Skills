@@ -1,77 +1,42 @@
-schema_version: keep-codex-fast.contract.v1
-purpose: Diagnose Codex Desktop or CLI local-state bloat safely before cleanup.
+schema_version: 1
+skill: keep-codex-fast
+purpose: "Inspect and maintain Codex local state with report-first, backup-first, handoff-aware safety."
 triggers:
-  - Codex feels slow after long-running chats.
-  - User asks for safe report, backup planning, archive planning, or report-only reminder.
-  - Sessions, logs, worktrees, archives, SQLite state, or stale config may be large.
-inputs:
-  - name: codex_home
-    default: CODEX_HOME or ~/.codex
-    required: false
-  - name: mode
-    allowed: [report, backup, apply, handoff, automation]
-    required: true
-  - name: thresholds
-    fields: [age, size, top_n, max_files_per_target, max_seconds_per_target]
-    required: false
-  - name: confirmation
-    description: exact Codex home required for apply
-    required_for: [apply]
-outputs:
-  - schema_version
-  - mode
-  - status
-  - codex_home
-  - limits
-  - storage_targets
-  - large_target_explanations
-  - sqlite_diagnostics
-  - elapsed_ms
-  - mutation_plan
-  - created_artifacts
+  - Codex feels slow or bloated
+  - local Codex sessions, logs, worktrees, or config have grown
+  - user asks for Codex cleanup, archival, maintenance, or handoff-first retirement
 non_goals:
-  - automatic cleanup
-  - deleting chats or logs
-  - unreviewed config pruning
-  - recurring apply automation
-  - content inspection by default
+  - deleting local Codex state
+  - recurring mutating cleanup
+  - broad config rewriting from heuristics
+inputs:
+  - codex_home
+  - mode
+  - age_thresholds
+  - confirmation
+  - details_preference
+outputs:
+  - state_report
+  - candidate_counts
+  - backup_path
+  - moved_manifests
+  - restore_script
+  - validation_evidence
 risks:
-  - active Codex processes may be writing SQLite or session files
-  - old chats may contain active work history
-  - symlinked session stores can be under-reported by local-only scans
-  - logs and transcripts may contain sensitive operational details
-modes:
-  report:
-    writes_allowed: false
-    follows_top_level_symlinks: true
-    content_inspection_default: false
-    scan_bounds:
-      top_n_default: 10
-      max_files_per_target_default: 100000
-      max_seconds_per_target_default: 4.0
-      recent_files_per_target: 3
-  backup:
-    writes_allowed: true
-    allowed_actions:
-      - write backup artifacts only after explicit user request
-    forbidden_actions:
-      - move sessions
-      - rotate logs
-      - rewrite config
-      - delete local state
-  apply:
-    writes_allowed: true
-    required_gates:
-      - report reviewed in current thread
-      - exact codex home confirmed
-      - Codex closed or explicit wait accepted
-      - checked-in implementation path exists
-    forbidden_by_default:
-      - config pruning
-      - recurring cleanup
-      - deleting chats
-      - deleting logs
-      - deleting worktrees
-
-observability: "Report elapsed_ms, per-target elapsed_ms, truncated targets, scan limits, and exact validation command outcomes."
-rollback_procedure: "Report mode writes nothing and needs no rollback; backup/apply modes must provide backup manifests, restore paths, and a second report."
+  - live Codex writes during mutation
+  - archived chats losing continuity
+  - heuristic config pruning
+  - local metadata exposure
+safety:
+  report_first: true
+  backup_first: true
+  explicit_apply_confirmation: true
+  destructive_commands: false
+  config_prune_default: report_only
+  details_opt_in: true
+validation:
+  - python_smoke_tests
+  - python_py_compile
+  - plugin_eval
+observability: "Report exact commands, outcomes, blockers, and restore artifact paths."
+rollback_procedure: "Use generated restore scripts/manifests and backed-up SQLite/config artifacts, then rerun report mode."

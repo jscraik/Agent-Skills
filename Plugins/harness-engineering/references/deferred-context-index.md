@@ -1,21 +1,21 @@
 # Harness Engineering Deferred Context Index
 
-Harness Engineering active files must stay real plugin-owned text. Historical snapshots live under `fixtures/**` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`; active paths must not symlink into archives.
+HE active files must stay real plugin-owned text. Historical snapshots live under `fixtures/**` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`; active paths must not symlink into archives.
 
-Use this index when a compact stage says context was moved for budget reasons. Do not trim context silently: move it to a stage reference, link it here, and keep enough wording for validators and future agents to recover the source.
+Use this when compact stage files defer context. Do not trim silently: move durable behavior to a stage reference, link it here, and keep enough wording for validators and future agents.
 
 ## Runtime References
 
 - Routing: `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/domain-model-routing.md`
-- Lifecycle and tracker gates: `references/lifecycle-exit-contract.md`, `references/linear-tracker-gate.md`
-- Goal continuity: `references/goal-continuity.md`
+- Lifecycle and tracker gates: `references/lifecycle-exit-contract.md`, `references/linear-tracker-gate.md`, `references/coding-harness-command-bridge.md`, `references/goal-continuity.md`
 - Intake and evidence: `references/qa-intake-routing.md`, `references/session-evidence-contract.md`, `references/session-evidence-skillify-triage.md`
+- Skill improvement: `references/skill-improvement-loop.md`
 - Delegation: `references/subagent-routing.md`, `references/subagent-call-contract.md`
 - Folded compatibility: `references/folded-skill-context.md`
 
-## Plan Preserved Context
+## Stage Preserved Context
 
-The active `he-plan` entrypoint keeps Codex plan-mode lessons, synthesis, deepening, testing, handoff, and visual planning doctrine in:
+`he-plan` keeps plan-mode, synthesis, deepening, testing, handoff, and visual planning doctrine in:
 
 - `Plugins/harness-engineering/references/he-plan-doctrine.md`
 - `Plugins/harness-engineering/skills/he-plan/references/codex-plan-mode.md`
@@ -25,9 +25,7 @@ The active `he-plan` entrypoint keeps Codex plan-mode lessons, synthesis, deepen
 - `Plugins/harness-engineering/skills/he-plan/references/test-strategy.md`
 - `Plugins/harness-engineering/skills/he-plan/references/visual-communication.md`
 
-## Spec Preserved Context
-
-The active `he-spec` entrypoint keeps Codex collaboration lessons, session evidence intake, source-parity rules, artifact templates, and autoresearch decisions in:
+`he-spec` keeps collaboration, session evidence, source parity, artifact templates, and autoresearch decisions in:
 
 - `Plugins/harness-engineering/references/he-spec-doctrine.md`
 - `Plugins/harness-engineering/skills/he-spec/references/autoresearch-2026-05-02.md`
@@ -35,9 +33,7 @@ The active `he-spec` entrypoint keeps Codex collaboration lessons, session evide
 - `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
 - `Plugins/harness-engineering/skills/he-spec/references/spec-mode-rules.md`
 
-## Work Preserved Context
-
-The active `he-work` entrypoint keeps Codex execution lessons, Harness Engineering work-execution patterns, execution mode rules, and handoff requirements in:
+`he-work` keeps execution lessons, work patterns, execution modes, and handoff rules in:
 
 - `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
 - `Plugins/harness-engineering/skills/he-work/references/codex-execution-lessons.md`
@@ -50,42 +46,32 @@ The active `he-work` entrypoint keeps Codex execution lessons, Harness Engineeri
 - Removed operational prose belongs in stage-local `references/*` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`.
 - `fixtures/preserved-context/**` preserves legacy full-stage guides for audit and migration comparison only.
 
-## Heartbeat Archive Preservation
-
-The budget-archive heartbeat fixture intentionally preserves the removed automation fields:
-
-```yaml
-  name: "<automation name>"
-  target_binding: "<current thread | explicit target thread | detached workspace>"
-```
-
 ## Active Entrypoint Rewrite Preservation
 
-Recent active-entrypoint tightening moved these replaced lines out of compact `SKILL.md` files:
+The 2026-05-03 Harness Engineering tightening preserved these compact-entrypoint lines outside the runtime bodies:
 
 ```text
-description: "Use when HE PRs, diffs, commits, CI, readiness, traceability, or autofix need review."
-Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff.
+Explore first; separate evidence from guesses; route to he-spec, he-plan, or he-work only when ready.
+description: "Use when fuzzy intent needs grounded HE options before spec, plan, or work."
 Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix.
+description: "Use when HE PRs, diffs, commits, CI, readiness, traceability, or autofix need review."
+Inspect live state; pick stage order; keep Linear/spec/plan/PR links; refresh Project Brain when repository context changes.
+description: "Use when HE work spans Linear, spec, plan, work, review, and PR state."
+description: "Use when HE test, QA, CI, incident, or regression failures need reproduction and fixes."
 description: "Use when HE wakeups, monitoring, until-green checks, or thread follow-through are needed."
-Target thread/workspace, cadence, stop condition, issue/PR/check links.
-Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations.
-Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement.
-description: "Use when approved HE plans or tiny low-risk tasks need traceable execution."
-Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
+Before any new skill package is proposed, inspect existing surfaces; label path fragments and bundle names as evidence labels; close coverage-gap items.
+Redact secrets; preserve important context in references. Do not remove important context for budget trimming; move deep context to references.
+description: "Use when HE hardening, optimization, polish, or capability improvement needs measurement."
+Explore first, ask second; use update_plan only for live progress; turn scope into ordered implementation units.
+description: "Use when approved specs or Linear issues need execution-ready HE plans before work."
+- "Route this old `$he-refine` request through the current Harness Engineering surface."
+- "The user asked for brainstorm and implementation in one message; decide the first lifecycle stage and preserve Linear traceability."
+- "This HE request mentions a bug, plan drift, and CodeRabbit comments; pick the right stage and tell me what evidence is missing."
+description: "Selects the correct Harness Engineering lifecycle stage and compatibility alias route. Use when a request is ambiguous, mixes brainstorm/spec/plan/work/review intent, references folded he-* aliases, or needs Linear/session evidence checked before loading a deeper stage."
+Inspect session-collector evidence and repo truth; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan.
+description: "Use when HE work needs Linear-backed scope, requirements, acceptance, and validation."
+- For `JSC-246`, implement the approved account settings flow plan in delegate mode, keep `update_plan` as the live checklist, and return changed files plus verified slices.
+- For a tiny low-risk fix, capture the current active state, make the smallest traceable edit, run the exact gate, and hand off to `he-code-review mode:autofix` if review findings remain.
 Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; handoff to he-code-review mode:autofix when needed.
-Inspect live state; pick stage order; keep Linear/spec/plan/PR links; refresh Project Brain when ~/dev/coding-harness context changes.
-Return schema_version when structured. schema_version, selected stage, source_path, folded mode, blocker, lifecycle exit status.
-Harness Engineering brainstorming makes ambiguity useful without losing evidence.
-Review policy index, evidence_ladder, and Codex-compatible findings must be tight.
-Harness Engineering compounds coordinate state, not ceremony.
-Harness Engineering fixes explain cause before claiming repair.
-Harness Engineering heartbeats keep live work honest.
-Harness Engineering improvement raises reliability without hiding tradeoffs.
-Harness Engineering plans are execution contracts.
-Harness Engineering routing protects context budget and stage accuracy.
-Harness Engineering specs make intent testable.
-Harness Engineering work ships traceable verified slices.
-Return schema_version when structured. Heartbeat prompt, status, stop rule, and next user-visible update.
-  skill-type: team_automation
+description: "Use when approved HE plans or tiny low-risk tasks need traceable execution."
 ```

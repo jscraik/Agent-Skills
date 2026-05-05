@@ -1,6 +1,6 @@
 ---
 name: he-router
-description: "Selects the correct Harness Engineering lifecycle stage and compatibility alias route. Use when a request is ambiguous, mixes brainstorm/spec/plan/work/review intent, references folded he-* aliases, or needs Linear/session evidence checked before loading a deeper stage."
+description: "WHAT: Route ambiguous HE requests to the right lifecycle stage. Use when intent mixes brainstorm, spec, plan, work, review, or aliases."
 metadata:
   skill-type: team_automation
 ---
@@ -27,9 +27,9 @@ Redact secrets; never enumerate every child skill to the model. Do not remove im
 - Do not continue into implementation, review, or planning when required Linear, spec, plan, PR, validation, or session evidence is missing.
 - Do not load every Harness Engineering reference file to choose a route; inspect the router rules and then load only the selected stage.
 ## Examples
-- "This HE request mentions a bug, plan drift, and CodeRabbit comments; pick the right stage and tell me what evidence is missing."
-- "Route this old `$he-refine` request through the current Harness Engineering surface."
-- "The user asked for brainstorm and implementation in one message; decide the first lifecycle stage and preserve Linear traceability."
+- "Inspect this HE request; it mentions a bug, plan drift, and CodeRabbit comments, so pick the right stage and tell me what evidence is missing."
+- "Inspect and route this old `$he-refine` request through the current Harness Engineering surface."
+- "Inspect the mixed brainstorm plus implementation request, decide the first lifecycle stage, and preserve Linear traceability."
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

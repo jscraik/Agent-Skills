@@ -1,31 +1,33 @@
 # Linear Tracker Gate
 
-Use this reference whenever `he-brainstorm`, `he-spec`, or `he-plan` handles non-trivial work that is intended to become delivery, QA, bug-fix, improvement, refactor, or operator-visible change.
+Use this when `he-brainstorm`, `he-spec`, or `he-plan` handles non-trivial delivery, QA, bug-fix, improvement, refactor, or operator-visible work.
 
 ## Rule
 
-Linear is the tracker of record. A Harness Engineering brainstorm, spec, or plan can support Linear, but it does not replace it.
+Linear is the tracker of record. HE brainstorms, specs, and plans support Linear; they do not replace it.
 
-Before a non-trivial HE stage hands work to the next lifecycle stage, the agent must resolve an existing Linear issue or create one through the Linear workflow. If creation is blocked, the stage must stop with a `linear_blocked` status, exact missing fields, and a ready-to-create issue payload.
+Before handoff, resolve or create the Linear issue. If creation is blocked, stop with `linear_blocked`, exact missing fields, and a ready-to-create payload.
+
+When the target repo is coding-harness-managed, prefer the repo's Harness Linear gate or transition command when available, and record the result in the `coding_harness` lifecycle block. The Linear issue remains mandatory; Harness state does not replace it.
 
 ## Applies To
 
 Run the gate when any of these are true:
 
-- the user mentions a bug, issue, QA report, feature, improvement, refactor, release, plan, spec, PR, or tracked delivery work;
-- the output will become a durable requirements, spec, plan, or implementation handoff artifact;
+- the user mentions a bug, issue, QA report, feature, improvement, refactor, release, plan, spec, PR, or tracked delivery;
+- the output becomes durable requirements, spec, plan, or implementation handoff;
 - work needs acceptance criteria, priority, owner, blocker ordering, or PR traceability;
-- multiple HE stages or agents will use the artifact later.
+- multiple HE stages or agents will use the artifact.
 
-The gate does not apply to throwaway exploration, tiny local-only edits, private note cleanup, or requests where the user explicitly says not to use Linear. When the user opts out, record `linear_status: user_opted_out` and do not present the work as normally traceable.
+The gate does not apply to throwaway exploration, tiny local-only edits, private note cleanup, or explicit no-Linear requests. When opted out, record `linear_status: user_opted_out` and do not present the work as normally traceable.
 
 ## Required Workflow
 
-1. Read first. Use the Linear workflow to search/list/get likely existing issues before creating a new one.
-2. Reuse if found. Link the issue key/URL and summarize why it is the tracker of record.
-3. Create if missing and required metadata is available. Use the appropriate team, project, title, description, labels, priority, cycle, assignee, and blocker links.
-4. Block if metadata or tooling is missing. Return `linear_status: linear_blocked`, the exact missing fields or disconnected tool state, and a complete issue payload the user can approve or use after reconnecting Linear.
-5. Continue only after the stage has either `linear_status: resolved|created|user_opted_out` or an explicit user decision to proceed despite `linear_blocked`.
+1. Search/list/get likely Linear issues before creating one.
+2. Reuse if found; link key/URL and why it is tracker of record.
+3. Create if missing and metadata is available.
+4. If metadata/tooling is missing, return `linear_status: linear_blocked`, exact missing fields/tool state, and a complete ready payload.
+5. Stop when `linear_status: linear_blocked` unless an explicit override decision is recorded with actor, reason, timestamp, and the blocked payload. Continue only after `linear_status: resolved|created|user_opted_out` or that recorded override.
 
 ## Minimum Issue Payload
 

@@ -1,0 +1,1 @@
+Please back up my Codex state, but do not move sessions, rotate logs, or rewrite config.

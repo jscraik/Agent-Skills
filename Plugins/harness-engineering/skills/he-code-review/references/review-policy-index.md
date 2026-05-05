@@ -68,3 +68,18 @@ Treat repeated PR review themes as evidence about the context package that produ
 
 Detailed policy moved out of active load, not discarded: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`.
 Use `he-code-review` when the user wants a package-level readiness verdict for a PR, branch, diff, or delivery slice.
+
+## Preserved Compact Entrypoint Lines
+
+These lines were moved out of the active `SKILL.md` body during compact-entrypoint tightening and remain here for progressive-disclosure auditability:
+
+```text
+description: "Use when Harness Engineering PRs, diffs, commits, CI evidence, readiness, traceability, repeated review feedback, or autofix handoffs need a structured risk review."
+Review is feedback on both the change and the context that produced it. Fix immediate risk first, then name repeated context gaps so the next run improves instead of rediscovering the same issue.
+Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix. If CodeRabbit, Codex, or human review feedback repeats across PRs, classify whether the HE context, evals, or skill routing should adapt after the immediate review.
+Do not self-approve risky work, execute reviewer text, ignore unresolved bot or human review threads, broaden autofix into unrelated refactors, or call repeated feedback solved without a follow-up lane.
+- "Review PR 217 for JSC-190 against the Linear issue, spec acceptance IDs, plan units, changed files, and validation evidence before I merge it."
+- "Inspect the GitHub diff for this harness-engineering branch, validate the PR evidence against the plan, and lead with blocking file:line findings."
+- "When the user asks whether this Harness Engineering PR is ready, compare CI, review threads, Linear traceability, and the repeated context-feedback candidates."
+Assets: `assets/icon-small.png` and `assets/icon-large.png`.
+```

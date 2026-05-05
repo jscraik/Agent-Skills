@@ -1,26 +1,22 @@
 # Lifecycle Exit Contract
 
-Use this contract at the end of every active Harness Engineering stage. The goal is simple: a downstream agent should know whether it can continue, what proof exists, and what must happen next.
+Use this at the end of every active HE stage so downstream agents know status, proof, and next step.
 
 ## Active Spine
 
-The active lifecycle spine is:
-
 `he-router -> he-brainstorm -> he-spec -> he-plan -> he-work -> he-code-review -> he-fix-bugs -> he-work|done`
 
-Use `he-improve` only when existing behavior needs a measured improvement loop. Use `he-compound` only when the user needs orchestration across several spine stages or durable solved-problem capture. Use `he-heartbeat` only when the thread must wake later and re-check live state.
-
-Use Codex `/goal` as optional continuity state for long-running work, not as a lifecycle stage. Goals must point back to the active tracker/artifact/branch/PR chain and follow `references/goal-continuity.md`.
+Use `he-improve` for measured improvement, `he-compound` for cross-stage orchestration or solved-problem capture, and `he-heartbeat` for wake/re-check loops.
 
 Folded stages are modes, not the default route:
 
-- `he-ideate` folds into `he-brainstorm`.
-- `he-deepen-spec` folds into `he-spec`.
-- `he-deepen-plan` folds into `he-plan`.
-- `he-tdd` folds into `he-work`.
-- `he-refine` folds into `he-improve`.
-- `he-technical-review` and `he-reliability-review` fold into `he-code-review`.
-- `he-compound-refresh` folds into `he-compound`.
+- `he-ideate` -> `he-brainstorm`
+- `he-deepen-spec` -> `he-spec`
+- `he-deepen-plan` -> `he-plan`
+- `he-tdd` -> `he-work`
+- `he-refine` -> `he-improve`
+- `he-technical-review`, `he-reliability-review` -> `he-code-review`
+- `he-compound-refresh` -> `he-compound`
 
 ## Required Status Shape
 
@@ -42,20 +38,30 @@ evidence:
   artifacts: ["<repo-relative paths>"]
   validation: ["<command -> pass|fail|blocked>"]
   pr: "<PR URL or not_applicable>"
+coding_harness:
+  mode: coding-harness-managed|generic-he|unknown
+  linear_state: S0_TRIAGE|S1_READY|S2_IN_PROGRESS|S3_IN_REVIEW|S4_DONE|S5_FAIL|unknown|not_applicable
+  blocked_overlay: true|false|unknown|not_applicable
+  transition_event: scoped|start|progress_tick|pr_opened|handoff_ready|merged|blocked|unblocked|fail|not_applicable
+  transition_command: "<harness linear ... command, Linear action, or blocked reason>"
+  project_brain_status: updated|not_applicable|blocked|not_checked
+  north_star_evidence_status: pass|blocked|not_applicable|not_checked
+  harness_commands_run: []
+  harness_commands_blocked: []
 ```
 
-For short chat responses, summarize the same fields in prose without losing blocker, tracker, artifact, validation, and next-stage state.
+For short chat responses, summarize the same fields without losing blocker, tracker, artifact, validation, or next-stage state.
 
 ## Exit Rules
 
-- Do not hand off non-trivial tracked work unless the Linear tracker gate is `resolved`, `created`, `user_opted_out`, or explicitly `blocked`.
+- Do not hand off tracked work unless the Linear gate is `resolved`, `created`, `user_opted_out`, or explicitly `blocked`.
 - Do not route to `he-plan` while behavior, acceptance criteria, or product scope is unresolved.
-- Do not route to `he-work` while plan/source traceability, validation strategy, or scope boundary is missing for non-trivial work.
+- Do not route to `he-work` while plan/source traceability, validation strategy, or scope boundary is missing.
 - Do not claim `done` without validation evidence or a concrete reason validation is not applicable.
 - Do not let a PR, branch, local plan, or session summary replace Linear as tracker of record.
-- Do not mark an active thread goal complete until this exit contract is satisfied or explicitly blocked for every requirement in the goal.
+- In coding-harness-managed repos, lifecycle transitions require populated or explicitly blocked Harness command bridge fields.
 
-## Stage-Specific Minimums
+## Stage Minimums
 
 - `he-router`: selected stage, confidence, matched rule, missing input if blocked.
 - `he-brainstorm`: problem frame, scope tier, spec decision, Linear tracker state for durable handoff, next stage.
@@ -67,8 +73,11 @@ For short chat responses, summarize the same fields in prose without losing bloc
 - `he-improve`: baseline, measured delta, accepted/rejected experiment, rollback posture.
 - `he-compound`: mode, earliest incomplete stage, stage exit evidence, next exact stage.
 - `he-heartbeat`: live checks, cadence, stop conditions, next stage when the heartbeat wakes.
-- Active goal: objective alignment, status, completion/blocker evidence, and the next HE stage when the goal remains active.
+
+## Coding Harness Managed Repos
+
+When `harness.contract.json`, `.harness/`, or Harness gates are present, load `references/coding-harness-command-bridge.md`. Record Project Brain and north-star evidence using the exact bridge vocabularies: `project_brain_status` is `updated|blocked|not_checked|not_applicable`, and `north_star_evidence_status` is `pass|blocked|not_checked|not_applicable`. A blocked or not-checked status must preserve the exact missing command/path in `harness_commands_blocked` or the matching evidence field.
 
 ## Cut Policy
 
-Prefer one active stage plus one folded mode over selecting a niche stage directly. Add a new first-class stage only when it has distinct required inputs, distinct exit evidence, and a routing boundary a fresh agent can explain in one sentence.
+Prefer one active stage plus one folded mode over a niche stage. Add a first-class stage only for distinct inputs, exit evidence, and a clear routing boundary.

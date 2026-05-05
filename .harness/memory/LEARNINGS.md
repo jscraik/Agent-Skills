@@ -102,38 +102,40 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-04-17 [Codex]:** Repository script paths evolved after March/April refactors (`sync_skills.sh`, `verify-work.sh`, and `docs_lint.py` moved into scoped directories), but this file remains append-only. Preserve historical command strings as-run and append new entries for current-equivalent paths instead of rewriting older bullets in place.
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/autofix/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2819853580)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/autofix/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2819853580)
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/triage/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:249380224)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/triage/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:249380224)
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/fallback-release/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1691652568)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/fallback-release/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1691652568)
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/production-deployment/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:501290506)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && sed -n "1,220p" Infrastructure/artifacts/skills/production-deployment/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:501290506)
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && cat Infrastructure/artifacts/skills/autofix/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2646869697)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /Users/jamiecraik/dev/agent-skills && cat Infrastructure/artifacts/skills/autofix/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2646869697)
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skill-refactor/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3208018670)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skill-refactor/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3208018670)
 
-**2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skillify/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:325006765)
+- **2026-04-23 [Codex]:** Bash command 'zsh -lc 'cd /tmp/agent-skills-pr133-merge && cat Infrastructure/artifacts/skills/skillify/structure-gate.json'' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:325006765)
 
-**2026-05-01 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3330151315)
+- **2026-05-01 [Codex]:** Bash command 'python3' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:3330151315)
 
-**2026-05-01 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:79624506)
+- **2026-05-01 [Codex]:** Bash command 'jq' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:79624506)
 
-**2026-05-01 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:429827414)
+- **2026-05-01 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:429827414)
 
-**2026-05-01 [Codex]:** Bash command 'sed' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2762304617)
+- **2026-05-01 [Codex]:** Bash command 'sed' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:2762304617)
 
-**2026-05-01 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2708472663)
+- **2026-05-01 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:2708472663)
 
-**2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2643958404)
+- **2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:2643958404)
 
-**2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3933523635)
+- **2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:3933523635)
 
-**2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3532691287)
+- **2026-05-03 [Codex]:** Bash command 'jq' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:966319190)
 
-**2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:331062825)
+- **2026-05-03 [Codex]:** Bash command 'jq' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:3855667086)
 
-**2026-05-03 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1189635060)
+- **2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:1052531758)
 
-**2026-05-03 [Codex]:** Bash command 'zsh' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:1476900781)
+- **2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:1596859018)
+
+- **2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:122602518)

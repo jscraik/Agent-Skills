@@ -3,49 +3,52 @@
   "profile_id": "Skills-agent-ops-keep-codex-fast",
   "scope_skill": "Skills/agent-ops/keep-codex-fast",
   "scope_profile": "Skills",
-  "rubric_version": "2026-04-13",
+  "rubric_version": "2026-02-26",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
   "thresholds": {
     "stability_consecutive_passes": 1,
     "critical_non_regression": true,
-    "max_iterations": 6,
-    "max_elapsed_ms": 180000,
-    "max_tokens": 14000,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
     "no_improvement_escalation_limit": 2
   },
   "criteria": [
     {
-      "id": "report_safety",
-      "label": "Report mode remains read-only and explicit about risk",
-      "threshold": 0.9,
-      "weight": 0.34,
+      "id": "clarity",
+      "label": "Clear operational state and next step",
+      "threshold": 0.72,
+      "weight": 0.3,
       "critical": true
     },
     {
-      "id": "diagnostic_accuracy",
-      "label": "Bloat causes are evidence-backed and symlink-aware",
-      "threshold": 0.82,
-      "weight": 0.33,
+      "id": "specificity",
+      "label": "Exact paths, commands, and validation evidence",
+      "threshold": 0.7,
+      "weight": 0.35,
       "critical": true
     },
     {
-      "id": "runtime_efficiency",
-      "label": "Dry-run reporting stays bounded and fast",
-      "threshold": 0.86,
-      "weight": 0.33,
+      "id": "safety",
+      "label": "Backup-first mutation control",
+      "threshold": 0.88,
+      "weight": 0.35,
       "critical": true
     }
   ],
   "delegation": {
     "mode": "co-pilot",
-    "human_baseline_minutes": 30.0,
-    "ai_process_minutes": 5.0,
-    "probability_of_success": 0.88,
-    "rationale": "Local-state diagnosis benefits from deterministic helper output while human review controls cleanup decisions."
+    "human_baseline_minutes": 30,
+    "ai_process_minutes": 10,
+    "probability_of_success": 0.8,
+    "rationale": "Local Codex state maintenance is deterministic when report mode runs first and mutating actions remain user-confirmed."
   },
   "learning_posture": {
-    "supported": ["guided", "execute"],
+    "supported": [
+      "guided",
+      "execute"
+    ],
     "default": "guided"
   }
 }

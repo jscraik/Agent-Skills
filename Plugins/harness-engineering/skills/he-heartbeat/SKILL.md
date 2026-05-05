@@ -1,13 +1,12 @@
 ---
 name: he-heartbeat
-description: "Create or repair Harness Engineering thread heartbeats when monitoring, wakeups, until-green loops, scheduled live checks, or follow-through automation must re-enter the correct HE stage."
+description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
 metadata:
   skill-type: team_automation
 ---
 # Harness Engineering Heartbeat
 ## Philosophy
-Wake the thread with fresh state, not stale memory. Scheduling keeps cadence; the HE lifecycle still owns the work.
-
+Continue only with a clear stop rule. Heartbeats should preserve context, wake the thread with fresh state, and keep scheduling separate from HE lifecycle ownership.
 ## When to Use
 Use when monitoring, wakeups, until-green loops, or follow-up automation is requested.
 ## Inputs
@@ -24,13 +23,14 @@ Fail fast: stop at the first failed gate and do not proceed. Confirm schedule, d
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Constraints
 Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references.
-## Anti-patterns
-- Do not create duplicate heartbeats for the same target and stop rule.
-- Do not use a heartbeat prompt or `/goal` objective as a replacement for Linear, PR, validation, or lifecycle exit evidence.
-- Do not schedule unattended destructive actions, merges, deploys, or tracker closure without explicit approval.
+## Anti-Patterns
+- Creating duplicate wakeups for the same PR, issue, or thread.
+- Running without an explicit stop condition or next visible update.
+- Using a heartbeat prompt or `/goal` objective as a replacement for Linear, PR, validation, or lifecycle exit evidence.
+- Scheduling unattended destructive actions, merges, deploys, or tracker closure without explicit approval.
 ## Examples
-- "Wake this thread every 30 minutes until PR #68 is green, then route to `he-work` for the merge handoff."
-- "Monitor the deployment check for JSC-246 and stop once the live health query passes twice."
+- "Inspect PR 154 every 30 minutes in this thread until CI is green or a blocker appears."
+- "Keep watching JSC-246 after the merge queue starts and wake this thread with the next required action."
 - "Rotate across the open coding-harness PRs with GitHub, CircleCI, CodeRabbit, and Codex comments; use `git-project-triage` when available, wake every 30 minutes, and stop only once the PRs are green, merged, or explicitly blocked."
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`

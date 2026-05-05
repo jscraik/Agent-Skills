@@ -149,7 +149,10 @@ def source_revision() -> str:
 
 def file_hash(path: Path) -> str:
     digest = hashlib.sha256()
-    digest.update(path.read_bytes())
+    if path.is_symlink():
+        digest.update(str(path.readlink()).encode("utf-8"))
+    else:
+        digest.update(path.read_bytes())
     return digest.hexdigest()
 
 

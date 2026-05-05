@@ -86,6 +86,7 @@ Infrastructure/artifacts/run_skill_validation.sh
 Infrastructure/artifacts/skill-graphs/drills/
 Infrastructure/artifacts/skills/**/structure-gate.json
 Infrastructure/artifacts/skills/**/structure-gate.sarif
+Infrastructure/artifacts/skills/autoresearch/
 Infrastructure/reports/20*.md
 Infrastructure/reports/data/pattern-registry.json
 Infrastructure/reports/data/candidates.json
