@@ -1,0 +1,14 @@
+I can propose a run tag, but I couldn’t complete the repo checks from this session because the local shell is blocked by the sandbox wrapper here.
+
+Suggested run tag:
+- `train-baseline-2026-05-03`
+
+What I could not verify yet:
+- Whether the data is prepared
+- The current baseline state before editing `train.py`
+
+If you want, I can continue as soon as the workspace shell is usable, and then I’ll:
+1. inspect the repo for the data-prep step,
+2. confirm the prepared-data state,
+3. capture the baseline, and
+4. start editing `train.py` from that known-good snapshot.

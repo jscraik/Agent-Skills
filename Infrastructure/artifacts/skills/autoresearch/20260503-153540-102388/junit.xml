@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="autoresearch" tests="1" failures="0" errors="0" timestamp="2026-05-03T14:35:40Z" id="20260503-153540-102388">
+  <testcase name="happy-autoresearch-setup" classname="autoresearch" time="300.0">
+    <system-out>
+warnings:
+[codex] should_trigger set, but skill selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/autoresearch/20260503-153540-102388/01-happy-autoresearch-setup
+    </system-out>
+  </testcase>
+</testsuite>

@@ -1,0 +1,13 @@
+I couldn’t verify the checkout from here because the sandbox is refusing every local command I tried, including `./bin/ask repo status` and a plain repo search. The error is:
+
+`sandbox-exec: sandbox_apply: Operation not permitted`
+
+So at the moment I can’t honestly confirm whether the GPU or tokenizer cache is present before the first experiment.
+
+If you want to self-check quickly, the most useful signals are:
+
+1. `nvidia-smi` to confirm the GPU is visible.
+2. `ls -la ~/.cache/huggingface` and, if relevant, your tokenizer cache location to confirm the cache exists.
+3. `./bin/ask repo status` from a shell that is allowed to run repo commands.
+
+If you paste those outputs, I can tell you immediately whether the checkout looks ready or what’s missing.

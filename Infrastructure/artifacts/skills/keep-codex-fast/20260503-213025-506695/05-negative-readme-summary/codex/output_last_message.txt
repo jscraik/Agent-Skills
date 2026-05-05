@@ -1,0 +1,12 @@
+[`README.md`](/Users/jamiecraik/dev/agent-skills/README.md) is basically the repo’s operating manual for an “agent capability control plane.”
+
+In plain English:
+
+- It says this repo is where Codex and other coding agents learn repeatable workflows, instead of relying on memory.
+- The core idea is: define skills once, expose them through a small command surface, keep canonical source separate from generated/runtime projections, and validate everything before trusting it.
+- `ask` is the main interface. The README shows how to use it to discover skills, validate quality, manage skill/plugin lifecycle, inspect runtime surface/budget, and run in `--robot` mode for fuzzy command recovery.
+- The repo is organized around canonical skill sources in `Skills/` and `Plugins/<plugin>/skills/`, with generated or runtime-only surfaces in things like `.skillsets/` and `.agents/`.
+- It also documents governance and boundaries: edit source, regenerate projections, don’t hand-edit runtime mirrors, and keep secrets/personal data out.
+- The supporting docs it points to are about product framing, repo surface ownership, runtime projection modes, skill workouts, and the CLI spec.
+
+Short version: it’s a guide to using this repo as a structured skill/control plane for agents, with `ask` as the main front door and strict separation between source, generated output, and runtime visibility.

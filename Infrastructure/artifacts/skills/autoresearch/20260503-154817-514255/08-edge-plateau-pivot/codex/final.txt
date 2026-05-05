@@ -1,0 +1,8 @@
+I can’t actually read the ledger from this sandbox right now because workspace access is blocked.
+
+Based on the situation you described, the next move should be to **stop repeating the current approach and pivot**. Three discarded attempts with no score improvement is a strong signal that further retries are unlikely to help.
+
+If you want, I can still help by:
+1. Recommending a concrete alternative strategy.
+2. Reviewing the ledger text if you paste it here.
+3. Turning the situation into a decision rule for future attempts.

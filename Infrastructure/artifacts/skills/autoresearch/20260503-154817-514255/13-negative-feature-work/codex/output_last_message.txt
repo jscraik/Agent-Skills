@@ -1,0 +1,7 @@
+I can implement this, but this session is currently blocked from accessing the workspace.
+
+What I verified:
+- Every shell command fails immediately with `sandbox_apply: Operation not permitted`.
+- I can’t read the repo files, inspect the current React components, or write the patch safely.
+
+If you can reopen this task in a writable workspace, I’ll take it from there and make the dashboard settings panel change end-to-end. If you want, you can also paste the relevant component files here and I can draft the exact patch against them.

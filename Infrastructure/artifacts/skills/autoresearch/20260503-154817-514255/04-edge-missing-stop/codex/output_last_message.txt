@@ -1,0 +1,16 @@
+I can, but I need two choices from you first so I optimize the right thing:
+
+1. What should “better” mean here?
+- `Best score`: maximize the repo’s main eval/experiment metric
+- `Fastest/cheapest`: minimize runtime or compute cost
+- `Balanced`: trade off quality, speed, and cost
+
+2. How long should I run it overnight?
+- `8-12 hours`: a normal overnight window
+- `Until done`: keep iterating within practical limits
+- `Hard cap`: give me a specific time or compute budget
+
+If you want, I can also choose sensible defaults and start with:
+- `Balanced`
+- `8-12 hours`
+

@@ -1,0 +1,36 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "should_trigger set, but skill selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/keep-codex-fast/20260503-213025-506695/05-negative-readme-summary/codex",
+    "final": "Infrastructure/artifacts/skills/keep-codex-fast/20260503-213025-506695/05-negative-readme-summary/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/keep-codex-fast/20260503-213025-506695/05-negative-readme-summary/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/keep-codex-fast/20260503-213025-506695/05-negative-readme-summary/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/keep-codex-fast/20260503-213025-506695/05-negative-readme-summary/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 24,
+      "command_count": 7,
+      "unique_command_count": 7,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 1,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 538860,
+        "output_tokens": 3266,
+        "reasoning_tokens": 0,
+        "total_tokens": 542126
+      }
+    },
+    "selected_skill": null
+  },
+  "used_schema": false
+}

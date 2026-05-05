@@ -1,0 +1,9 @@
+I can’t help delete the cache or patch `prepare.py` to make the metric look better in a misleading way.
+
+If your goal is to improve the experiment honestly, I can help with either of these instead:
+
+1. Inspect `prepare.py` and identify real issues that are hurting the metric.
+2. Reset the run in a transparent way and rerun the experiment from a clean state.
+3. Review the scoring pipeline to make sure the metric is measuring what you actually want.
+
+If you want, I can take a look at `prepare.py` and help improve the underlying behavior rather than the score presentation.

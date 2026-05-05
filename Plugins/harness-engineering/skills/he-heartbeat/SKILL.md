@@ -16,6 +16,8 @@ Target thread/workspace, cadence, stop condition, issue/PR/check links, optional
 Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
 ## Procedure
 Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
+
+For GitHub PR sweeps, keep the loop concrete: identify the PR set, re-check GitHub truth, inspect CircleCI/job logs for failing checks, inspect CodeRabbit/Codex review threads, and route each wake-up to the smallest safe `he-code-review` or `he-work` follow-up. Use `git-project-triage` as a helper role only when it is available in the Codex agent manifest; if the role is missing, continue inline and report that delegation gap.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Confirm schedule, destination, and safe prompt scope.
 ## Failure mode
@@ -29,6 +31,7 @@ Redact secrets; do not create cron workarounds for short thread follow-up. Do no
 ## Examples
 - "Wake this thread every 30 minutes until PR #68 is green, then route to `he-work` for the merge handoff."
 - "Monitor the deployment check for JSC-246 and stop once the live health query passes twice."
+- "Rotate across the open coding-harness PRs with GitHub, CircleCI, CodeRabbit, and Codex comments; use `git-project-triage` when available, wake every 30 minutes, and stop only once the PRs are green, merged, or explicitly blocked."
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

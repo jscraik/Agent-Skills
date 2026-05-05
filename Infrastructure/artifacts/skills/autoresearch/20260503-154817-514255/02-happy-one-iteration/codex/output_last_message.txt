@@ -1,0 +1,22 @@
+I resolved the `autoresearch` contract and checked the target repo’s training surface, but I could not complete a real experiment in this environment.
+
+What I confirmed:
+- The editable surface is `train.py`; `prepare.py` is fixed.
+- The loop’s metric is `val_bpb`, lower is better.
+- The repo docs and current `train.py` line up with a one-file, bounded hypothesis loop.
+
+What blocked the run:
+- Shell execution is blocked here by `sandbox_apply: Operation not permitted`, so I can’t run `uv run train.py` or write a local `results.tsv`.
+- The GitHub repo view I used is pull-only, so I also can’t commit the hypothesis remotely from this session.
+
+The bounded hypothesis I would test next is:
+- Remove the final logit `tanh` cap in `train.py` and rerun the fixed 5-minute training loop.
+- That change is reversible, stays inside the approved training surface, and is consistent with the repo notes that later winning runs used no logit cap.
+
+Sources I used:
+- [README.md](https://github.com/trevin-creator/autoresearch-mlx/blob/ba6ebf6d3594c0f33dbf753fafa8cad96f41c6d8/README.md)
+- [program.md](https://github.com/trevin-creator/autoresearch-mlx/blob/ba6ebf6d3594c0f33dbf753fafa8cad96f41c6d8/program.md)
+- [train.py](https://github.com/trevin-creator/autoresearch-mlx/blob/ba6ebf6d3594c0f33dbf753fafa8cad96f41c6d8/train.py)
+- [prepare.py](https://github.com/trevin-creator/autoresearch-mlx/blob/ba6ebf6d3594c0f33dbf753fafa8cad96f41c6d8/prepare.py)
+
+If you can provide a runtime-capable workspace, I can carry this through to an actual baseline, one hypothesis run, and a keep/discard decision with the logged `val_bpb`.

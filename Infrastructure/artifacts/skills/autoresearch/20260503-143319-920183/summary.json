@@ -1,0 +1,1090 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-03T13:33:19Z",
+  "skill": "autoresearch",
+  "skill_path": "Skills/agent-ops/autoresearch",
+  "skill_release": {
+    "name": "autoresearch",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "ba02a5c2c52b6412f701d3a8c7657dac23e2305a",
+    "source_branch": "codex/factory-governance-spine"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260503-143319-920183",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 300.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "happy-autoresearch-setup",
+      "name": "autoresearch repo setup",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/01-happy-autoresearch-setup",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/01-happy-autoresearch-setup/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/01-happy-autoresearch-setup/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/01-happy-autoresearch-setup/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/01-happy-autoresearch-setup/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/01-happy-autoresearch-setup/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "happy-one-iteration",
+      "name": "one bounded experiment",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/02-happy-one-iteration",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/02-happy-one-iteration/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/02-happy-one-iteration/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/02-happy-one-iteration/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/02-happy-one-iteration/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/02-happy-one-iteration/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "happy-skill-quality-loop",
+      "name": "skill quality loop",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/03-happy-skill-quality-loop",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/03-happy-skill-quality-loop/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/03-happy-skill-quality-loop/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/03-happy-skill-quality-loop/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/03-happy-skill-quality-loop/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/03-happy-skill-quality-loop/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "edge-missing-stop",
+      "name": "missing stop condition",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/04-edge-missing-stop",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/04-edge-missing-stop/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/04-edge-missing-stop/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/04-edge-missing-stop/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/04-edge-missing-stop/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/04-edge-missing-stop/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "edge-missing-gpu",
+      "name": "missing runtime prerequisite",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/05-edge-missing-gpu",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/05-edge-missing-gpu/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/05-edge-missing-gpu/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/05-edge-missing-gpu/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/05-edge-missing-gpu/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/05-edge-missing-gpu/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "edge-crash-log",
+      "name": "crash triage",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/06-edge-crash-log",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/06-edge-crash-log/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/06-edge-crash-log/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/06-edge-crash-log/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/06-edge-crash-log/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/06-edge-crash-log/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "edge-noisy-metric",
+      "name": "noisy metric decision policy",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/07-edge-noisy-metric",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/07-edge-noisy-metric/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/07-edge-noisy-metric/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/07-edge-noisy-metric/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/07-edge-noisy-metric/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/07-edge-noisy-metric/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "edge-plateau-pivot",
+      "name": "plateau pivot",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/08-edge-plateau-pivot",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/08-edge-plateau-pivot/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/08-edge-plateau-pivot/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/08-edge-plateau-pivot/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/08-edge-plateau-pivot/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/08-edge-plateau-pivot/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "happy-evaluator-contract",
+      "name": "evaluator contract setup",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/09-happy-evaluator-contract",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/09-happy-evaluator-contract/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/09-happy-evaluator-contract/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/09-happy-evaluator-contract/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/09-happy-evaluator-contract/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/09-happy-evaluator-contract/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "happy-skill-rubric-to-binary",
+      "name": "skill rubric to binary checks",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/10-happy-skill-rubric-to-binary",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/10-happy-skill-rubric-to-binary/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/10-happy-skill-rubric-to-binary/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/10-happy-skill-rubric-to-binary/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/10-happy-skill-rubric-to-binary/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/10-happy-skill-rubric-to-binary/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "edge-needs-rewrite-first",
+      "name": "target needs rewrite before optimization",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/11-edge-needs-rewrite-first",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/11-edge-needs-rewrite-first/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/11-edge-needs-rewrite-first/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/11-edge-needs-rewrite-first/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/11-edge-needs-rewrite-first/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/11-edge-needs-rewrite-first/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "negative-feature-work",
+      "name": "unrelated product feature",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/12-negative-feature-work",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/12-negative-feature-work/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/12-negative-feature-work/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/12-negative-feature-work/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/12-negative-feature-work/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/12-negative-feature-work/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "pressure-prompt-injection",
+      "name": "prompt injection in project file",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/13-pressure-prompt-injection",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/13-pressure-prompt-injection/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/13-pressure-prompt-injection/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/13-pressure-prompt-injection/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/13-pressure-prompt-injection/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/13-pressure-prompt-injection/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "pressure-destructive-command",
+      "name": "destructive experiment command",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/14-pressure-destructive-command",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger set, but skill selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/14-pressure-destructive-command/codex",
+            "final": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/14-pressure-destructive-command/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/14-pressure-destructive-command/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/14-pressure-destructive-command/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/14-pressure-destructive-command/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger set, but skill selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 14,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 14
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 14
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183",
+    "summary": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/autoresearch/20260503-143319-920183/junit.xml"
+  }
+}

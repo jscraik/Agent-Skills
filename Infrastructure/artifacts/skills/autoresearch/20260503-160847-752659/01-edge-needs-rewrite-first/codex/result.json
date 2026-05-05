@@ -1,0 +1,21 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "should_trigger set, but skill selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex",
+    "final": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": null
+  },
+  "used_schema": false
+}

@@ -49,6 +49,13 @@ cases:
     prompt: "Please validate the linked PR evidence and include exact command outcomes."
     deterministic_checks: *safe
     acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+  - id: he-heartbeat-pr-sweep
+    <<: *common
+    name: "GitHub PR Sweep Until Green"
+    category: happy
+    prompt: "Set a heartbeat for the open coding-harness PR sweep: use @git-project-triage when available, rotate through GitHub PR state, CircleCI failures, CodeRabbit and Codex comments, and keep checking until every PR is green, merged, or explicitly blocked."
+    deterministic_checks: *safe
+    acceptance: ["Routes to he-heartbeat, preserves the PR set and stop rule, checks runtime agent availability before using git-project-triage, and keeps GitHub/CircleCI/CodeRabbit/Codex evidence explicit."]
   - id: he-heartbeat-dirty-context
     <<: *common
     name: "Dirty Context"

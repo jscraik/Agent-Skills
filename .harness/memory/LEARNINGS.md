@@ -129,3 +129,11 @@ Repo-specific agent knowledge base. Append-only.
 **2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2643958404)
 
 **2026-05-02 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3933523635)
+
+**2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3532691287)
+
+**2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:331062825)
+
+**2026-05-03 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1189635060)
+
+**2026-05-03 [Codex]:** Bash command 'zsh' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:1476900781)

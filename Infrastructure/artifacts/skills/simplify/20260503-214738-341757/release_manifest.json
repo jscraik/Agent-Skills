@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-03T20:47:38Z",
+  "skill": {
+    "name": "simplify",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "7a296ba7eb2c256b4e9f6fb4d0c650e89248dc04",
+    "source_branch": "main"
+  },
+  "run": {
+    "run_id": "20260503-214738-341757",
+    "eval_mode": "smoke",
+    "runner_mode": "codex",
+    "tier2_mode": "warn",
+    "capture_jsonl": true,
+    "readiness_summary": {
+      "comparison_blocked": 0,
+      "comparison_incomplete": 0,
+      "downstream_ready": 0,
+      "starter_valid": 0,
+      "unknown": 5
+    },
+    "round_state_summary": {
+      "blocked": 0,
+      "decision_recorded": 0,
+      "evidence_captured": 0,
+      "prepared": 0,
+      "reviewed": 0,
+      "running": 0,
+      "unknown": 5
+    },
+    "neutral_baseline_approvals_used": [],
+    "reports_base": "Infrastructure/artifacts/skills/simplify/20260503-214738-341757"
+  },
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/simplify/20260503-214738-341757",
+    "summary": "Infrastructure/artifacts/skills/simplify/20260503-214738-341757/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/simplify/20260503-214738-341757/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/simplify/20260503-214738-341757/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/simplify/20260503-214738-341757/junit.xml"
+  }
+}
