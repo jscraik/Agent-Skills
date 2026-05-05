@@ -5,7 +5,7 @@ inputs: ["workflow evidence", "target path or category"]
 outputs: ["validated skill package", "explicit blocked status", "context lifecycle handoff"]
 non_goals: ["unrelated implementation work"]
 risks: ["ambiguous scope", "sensitive transcript content", "codifying a workflow with no observation path"]
-output_contract: {schema_version: "1", required_fields: [schema_version, mode, validation_evidence], optional_fields: [blocked_by]}
+output_contract: {schema_version: "1", required_fields: [schema_version, mode, validation_evidence, lifecycle_stage], optional_fields: [blocked_by]}
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."
 observability: "Track pass/fail/blocked validation outcomes."
-context_lifecycle: {requires_test_path: true, requires_distribution_target: true, requires_observation_source: true, requires_adaptation_owner: true}
+context_lifecycle: {requires_generate_stage: true, requires_test_path: true, requires_distribution_target: true, requires_observation_source: true, requires_adaptation_owner: true}
