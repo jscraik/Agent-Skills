@@ -19,6 +19,7 @@ output_contract:
     - "mode"
     - "validation_evidence"
     - "context_lifecycle_status"
+    - "context.lifecycle.stage"
   optional_fields:
     - "blocked_by"
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."
