@@ -123,7 +123,7 @@ def as_list(value: Any) -> list[Any]:
 def active_tasks_are_parallel_workers(
     active_tasks: list[dict[str, Any]], rules: dict[str, Any]
 ) -> bool:
-    if len(active_tasks) <= 1:
+    if len(active_tasks) == 1:
         return True
     if rules.get("one_active_task") is not False and rules.get("parallel_workers") is not True:
         return False
