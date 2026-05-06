@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-AUTHORING-ROLLOUT-20260404
 title: feat: Skill Authoring Family Contract Rollout
 type: feat
 status: complete

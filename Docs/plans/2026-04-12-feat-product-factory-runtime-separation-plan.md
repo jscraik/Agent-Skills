@@ -1,3 +1,12 @@
+---
+schema_version: 1
+plan_id: ASK-PRODUCT-FACTORY-RUNTIME-20260412
+title: Product-Factory-Runtime Separation Plan
+type: feat
+status: draft
+date: 2026-04-12
+---
+
 # Product-Factory-Runtime Separation Plan
 
 ## Table of Contents

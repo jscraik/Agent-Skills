@@ -1,5 +1,6 @@
 ---
 schema_version: 1
+plan_id: JSC-246-SURFACE-20260501
 title: "feat: Agent Capability Control Plane and Repo Surface Contract Plan"
 type: feat
 status: active

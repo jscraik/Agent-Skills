@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-AUTHORING-GOLD-20260405
 title: feat: Skill Authoring Family Gold Standard Upgrade
 type: feat
 status: active

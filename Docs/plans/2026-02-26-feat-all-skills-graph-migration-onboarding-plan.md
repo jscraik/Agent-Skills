@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-ALL-SKILLS-GRAPH-20260226
 title: feat: All-Skills Knowledge Graph Migration + Onboarding
 type: feat
 status: completed

@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-RECURSIVE-SELF-IMPROVE-20260219
 title: feat: Recursive Skill Self-Improvement Loop (Drafts to Canonical Graph)
 type: feat
 date: 2026-02-19

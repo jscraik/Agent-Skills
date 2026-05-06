@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-ONBOARDING-CLOSEOUT-20260329
 title: fix: Outstanding Onboarding and Readiness Closeout
 type: fix
 status: active

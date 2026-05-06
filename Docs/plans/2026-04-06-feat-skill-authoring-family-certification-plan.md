@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-AUTHORING-CERT-20260406
 title: Skill Authoring Family — Release-Ready Certification
 date: 2026-04-06
 status: active

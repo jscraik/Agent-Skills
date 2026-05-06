@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-GENOME-COPILOT-20260302
 title: feat: Skill Genome Loop Draft PR Copilot
 type: feat
 status: active

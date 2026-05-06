@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-GRAPH-AUTO-LEARNING-20260224
 title: feat: Skill Graph Live Auto-Learning (Post-Use Capture + Start-of-Run Injection)
 type: feat
 date: 2026-02-24

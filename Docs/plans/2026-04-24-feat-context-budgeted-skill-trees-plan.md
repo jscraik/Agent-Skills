@@ -1,5 +1,6 @@
 ---
 schema_version: 1
+plan_id: ASK-CONTEXT-TREES-20260424
 title: "feat: Context-Budgeted Skill Trees Implementation Plan"
 type: feat
 status: implementation-in-review

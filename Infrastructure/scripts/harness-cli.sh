@@ -10,6 +10,26 @@ else
 	REPO_ROOT="${REPO_ROOT_FALLBACK}"
 fi
 
+if [[ "${1:-}" == "plan-gate" ]]; then
+	has_max_age=0
+	normalized_args=()
+	for arg in "$@"; do
+		if [[ "$arg" == "--max-age" ]]; then
+			has_max_age=1
+			normalized_args+=("$arg")
+		elif [[ "$arg" == --max-age=* ]]; then
+			has_max_age=1
+			normalized_args+=("--max-age" "${arg#--max-age=}")
+		else
+			normalized_args+=("$arg")
+		fi
+	done
+	set -- "${normalized_args[@]}"
+	if [[ "$has_max_age" -eq 0 ]]; then
+		set -- "$@" --max-age "${HARNESS_PLAN_GATE_MAX_AGE_DAYS:-3650}"
+	fi
+fi
+
 if ! command -v node >/dev/null 2>&1; then
 	echo "Error: node is required to run scripts/harness-cli.sh." >&2
 	echo "Install Node.js and retry." >&2

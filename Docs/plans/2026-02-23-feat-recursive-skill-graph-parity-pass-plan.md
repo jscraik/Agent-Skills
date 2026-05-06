@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-RECURSIVE-GRAPH-PARITY-20260223
 title: feat: Skill Graph Recursive Loop Parity Pass (Canonical, Governance, Telemetry)
 type: feat
 date: 2026-02-23
