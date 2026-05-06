@@ -1,0 +1,1 @@
+Can you inspect session-collector evidence before writing the spec?

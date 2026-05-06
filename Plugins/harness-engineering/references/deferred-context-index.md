@@ -6,7 +6,7 @@ Use this when compact stage files defer context. Do not trim silently: move dura
 
 ## Runtime References
 
-- Routing: `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/domain-model-routing.md`
+- Routing and domain context: `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/domain-model-routing.md`, `references/domain-context-contract.md`, `references/design-complexity-contract.md`
 - Lifecycle and tracker gates: `references/lifecycle-exit-contract.md`, `references/linear-tracker-gate.md`, `references/coding-harness-command-bridge.md`, `references/goal-continuity.md`
 - Intake and evidence: `references/qa-intake-routing.md`, `references/session-evidence-contract.md`, `references/session-evidence-skillify-triage.md`
 - Skill improvement: `references/skill-improvement-loop.md`

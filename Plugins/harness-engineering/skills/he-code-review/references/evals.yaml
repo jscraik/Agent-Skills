@@ -64,6 +64,13 @@ cases:
     prompt: "Review this coding-harness PR and require docs-gate, review-gate, CodeRabbit verification, Project Brain status, and north-star evidence, or cap readiness with exact blocked reasons."
     deterministic_checks: *safe
     acceptance: ["Checks docs-gate, review-gate, CodeRabbit, learnings, Project Brain, and north-star evidence, then caps readiness when any required gate is blocked."]
+  - id: review-domain-term-drift
+    <<: *common
+    name: "Review Domain Term Drift"
+    category: edge
+    prompt: "Review this PR where Linear calls the behavior harness admission, the spec says validation gate, code names it preflight, and CodeRabbit says harness run."
+    deterministic_checks: *safe
+    acceptance: ["Findings-first review checks term drift before readiness, records domain_language and context_map status, translates CodeRabbit feedback instead of accepting it blindly, and blocks or conditions readiness when terminology changes behavior."]
   - id: he-code-review-dirty-context
     <<: *common
     name: "Dirty Context"
