@@ -254,6 +254,16 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
       - name: Prepare baseline seed fallback
         run: |
           mkdir -p artifacts/consistency-gate
@@ -267,7 +277,13 @@ jobs:
           fi
       - name: Run advisory drift gate
         continue-on-error: true
-        run: ./bin/ask repo validate --scope=consistency-advisory
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+        run: |
+          bash Infrastructure/scripts/harness-cli.sh drift-gate \
+            --mode advisory \
+            --out artifacts/consistency-gate/consistency-drift-advisory-latest.json \
+            --json
       - name: Advisory guard (soft-fail)
         if: always()
         run: |
@@ -317,6 +333,16 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
       - name: Detect baseline seed
         id: baseline-seed
         run: |
@@ -329,7 +355,13 @@ jobs:
       - name: Run health drift gate
         if: steps.baseline-seed.outputs.seeded == 'true'
         continue-on-error: true
-        run: ./bin/ask repo validate --scope=consistency-health
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+        run: |
+          bash Infrastructure/scripts/harness-cli.sh drift-gate \
+            --mode health \
+            --out artifacts/consistency-gate/health.json \
+            --json
       - name: Bootstrap health warning (fallback)
         if: always()
         run: |
