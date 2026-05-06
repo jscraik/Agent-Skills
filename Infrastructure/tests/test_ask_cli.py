@@ -267,6 +267,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("drift_detected", report)
         self.assertIn("surfaces", report)
 
+    def test_repo_doctor_json_contract(self):
+        """Verify `ask repo doctor --json` exposes the golden-path payload."""
+        cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "repo", "doctor", "--json"]
+        result = _run_cli(cmd)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        doctor = output.get("data", {}).get("doctor", {})
+        self.assertIn("agent_summary", doctor)
+        self.assertIn("blocking", doctor)
+        self.assertIn("blockers", doctor)
+        self.assertIn("next_command", doctor)
+        self.assertIn("signals", doctor)
+        self.assertIn("diagnostic_debt", doctor)
+
+    def test_repo_doctor_help_mentions_agent_health_entrypoint(self):
+        """Verify `ask repo doctor --help` exposes the agent health wording."""
+        cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "repo", "doctor", "--help"]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Agent-facing repository health entrypoint", result.stdout)
+
     def test_goal_alias_normalization(self):
         """
         Ensure the `goal create` CLI alias returns a skills-style goal decision in the JSON envelope.

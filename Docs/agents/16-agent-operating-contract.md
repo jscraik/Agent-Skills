@@ -11,7 +11,7 @@ All agents should use `./bin/ask` for repo operations.
 
 | Task            | Command                                        |
 | --------------- | ---------------------------------------------- |
-| Repo health     | `./bin/ask repo status`                        |
+| Repo health     | `./bin/ask repo doctor --json --robot`         |
 | Full validation | `./bin/ask repo validate`                      |
 | List skills     | `./bin/ask skills list --category <topic>`     |
 | Audit skill     | `./bin/ask skills audit <path> --level strict` |
@@ -20,6 +20,20 @@ All agents should use `./bin/ask` for repo operations.
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward
 into `Infrastructure/**`; keep them as real files/directories, not symlinks.
+
+For AI coding agents, start with the compact doctor command before deeper repo
+inspection:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo doctor-catalog --json --robot
+./bin/ask repo surface --json --robot
+```
+
+`repo doctor` is the first health entrypoint. It composes repo status, catalog
+parity, runtime budget, command-handle health, and repo-surface diagnostic debt
+into one agent-facing payload with `agent_summary`, `blocking`, `blockers`,
+`next_command`, `signals`, and `diagnostic_debt`.
 
 ## Robot Mode
 

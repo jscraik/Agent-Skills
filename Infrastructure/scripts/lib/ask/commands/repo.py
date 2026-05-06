@@ -3,9 +3,11 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import List
+from typing import Any, List
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
+from ask.commands.skills import skills_budget, skills_handles
+from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
 
@@ -188,6 +190,267 @@ def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
             fix_suggestion="Regenerate catalog parity diagnostics and rerun doctor-catalog.",
         )
     )
+    return result
+
+
+def _error_summary(result: CallResult, fallback: str) -> str:
+    if result.errors:
+        return result.errors[0].message
+    return fallback
+
+
+def _repo_status_signal(status_result: CallResult) -> dict[str, Any]:
+    if status_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(status_result, "Repository status check failed."),
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+        }
+    if not status_result.data.get("is_git"):
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": "Repository root is not a git repository.",
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Repository status is readable.",
+        "source": "repo_status",
+        "details": {
+            "repo_root": status_result.data.get("repo_root"),
+            "is_git": status_result.data.get("is_git"),
+        },
+    }
+
+
+def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
+    if status_result.status != "success":
+        return {
+            "state": "skipped",
+            "severity": "warning",
+            "summary": "Projection sync could not be checked because repo status failed.",
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+        }
+    if status_result.data.get("skills_synced"):
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Workspace skill runtime appears synced.",
+            "source": "repo_status",
+            "details": {"skills_synced": True},
+        }
+    return {
+        "state": "block",
+        "severity": "blocker",
+        "summary": "Workspace skill runtime does not appear synced.",
+        "source": "repo_status",
+        "next_command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "details": {"skills_synced": False},
+    }
+
+
+def _catalog_parity_signal(catalog_result: CallResult) -> dict[str, Any]:
+    report = catalog_result.data.get("catalog_parity", {})
+    if catalog_result.status == "success" and report.get("drift_detected") is False:
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Catalog parity is resolved.",
+            "source": "doctor_catalog",
+            "details": {
+                "decision_status": report.get("decision_status"),
+                "canonical_count": report.get("canonical_count"),
+                "policy_identity": report.get("policy_identity"),
+            },
+        }
+    if report.get("drift_detected") is True:
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": f"Catalog parity drift detected: {report.get('drift_class')}.",
+            "source": "doctor_catalog",
+            "next_command": "./bin/ask repo doctor-catalog --json --robot",
+            "details": {
+                "decision_status": report.get("decision_status"),
+                "drift_class": report.get("drift_class"),
+                "operator_action": report.get("operator_action"),
+            },
+        }
+    return {
+        "state": "error",
+        "severity": "blocker",
+        "summary": _error_summary(catalog_result, "Catalog parity check failed."),
+        "source": "doctor_catalog",
+        "next_command": "./bin/ask repo doctor-catalog --json --robot",
+    }
+
+
+def _runtime_budget_signal(runtime_result: CallResult) -> dict[str, Any]:
+    report = runtime_result.data.get("runtime_budget", {})
+    violations = report.get("violations") or []
+    status = report.get("status")
+    details = {
+        "status": status,
+        "default_visible_count": report.get("default_visible_count"),
+        "estimated_description_tokens": report.get("estimated_description_tokens"),
+        "violation_count": len(violations),
+    }
+    if runtime_result.status == "success" and status == "pass":
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Runtime budget is within policy.",
+            "source": "skills_budget",
+            "details": details,
+        }
+    if violations:
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": f"Runtime budget has {len(violations)} policy violation(s).",
+            "source": "skills_budget",
+            "next_command": "./bin/ask runtime budget --json --robot",
+            "details": details,
+        }
+    if runtime_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(runtime_result, "Runtime budget check failed."),
+            "source": "skills_budget",
+            "next_command": "./bin/ask runtime budget --json --robot",
+            "details": details,
+        }
+    return {
+        "state": "warn",
+        "severity": "warning",
+        "summary": "Runtime budget returned a non-passing advisory status.",
+        "source": "skills_budget",
+        "next_command": "./bin/ask runtime budget --json --robot",
+        "details": details,
+    }
+
+
+def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
+    report = handles_result.data.get("command_surface", {})
+    violations = report.get("violations") or []
+    details = {
+        "status": report.get("status"),
+        "handle_count": report.get("handle_count"),
+        "violation_count": len(violations),
+    }
+    if handles_result.status == "success" and report.get("status") == "pass":
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Command handles validate cleanly.",
+            "source": "skills_handles",
+            "details": details,
+        }
+    if violations:
+        summary = f"Command-handle validation found {len(violations)} violation(s)."
+    else:
+        summary = _error_summary(handles_result, "Command-handle validation failed.")
+    return {
+        "state": "block",
+        "severity": "blocker",
+        "summary": summary,
+        "source": "skills_handles",
+        "next_command": "./bin/ask skills handles --check --json --robot",
+        "details": details,
+    }
+
+
+def _repo_surface_signal(surface_result: CallResult) -> dict[str, Any]:
+    report = surface_result.data.get("repo_surface", {})
+    summary = report.get("summary", {})
+    blocking_findings = summary.get("blocking_findings", 0)
+    details = {
+        "status": report.get("status"),
+        "total_paths": summary.get("total_paths"),
+        "blocking_findings": blocking_findings,
+        "counts_by_code": summary.get("counts_by_code", {}),
+    }
+    if surface_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(surface_result, "Repo surface inventory failed."),
+            "source": "repo_surface",
+            "next_command": "./bin/ask repo surface --json --robot",
+            "details": details,
+        }
+    if report.get("status") == "warning" or blocking_findings:
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": f"Repo surface has {blocking_findings} diagnostic finding(s).",
+            "source": "repo_surface",
+            "next_command": "./bin/ask repo surface --json --robot",
+            "details": details,
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Repo surface inventory has no diagnostic debt.",
+        "source": "repo_surface",
+        "details": details,
+    }
+
+
+def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
+    return {
+        "state": "error",
+        "severity": "blocker",
+        "summary": f"Repo doctor failed while composing signals: {type(exc).__name__}.",
+        "source": "repo_doctor",
+        "next_command": "./bin/ask repo status --json --robot",
+        "details": {
+            "error_type": type(exc).__name__,
+        },
+    }
+
+
+def repo_doctor(repo_root: Path) -> CallResult:
+    """Compose repo health checks into one compact agent-facing doctor payload."""
+    result = CallResult()
+    try:
+        status_result = repo_status(repo_root)
+        signals = {
+            "repo_status": _repo_status_signal(status_result),
+            "projection_sync": _projection_sync_signal(status_result),
+            "catalog_parity": _catalog_parity_signal(doctor_catalog(repo_root)),
+            "runtime_budget": _runtime_budget_signal(skills_budget(repo_root)),
+            "command_handles": _command_handles_signal(
+                skills_handles(repo_root, check=True, include_handles=False)
+            ),
+            "repo_surface": _repo_surface_signal(repo_surface(repo_root)),
+        }
+    except Exception as exc:
+        signals = {
+            "unknown_signal_error": _unknown_signal_error_signal(exc),
+        }
+    payload = build_golden_path_payload(
+        signals=signals,
+        normal_next_command="./bin/ask repo status --json --robot",
+    )
+    result.data["doctor"] = payload
+    result.data.update(payload)
+    result.status = "error" if payload["blocking"] else "success"
+    if payload["blocking"]:
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=payload["agent_summary"],
+                fix_suggestion=payload.get("next_command"),
+            )
+        )
     return result
 
 
