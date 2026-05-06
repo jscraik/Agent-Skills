@@ -110,23 +110,23 @@ jobs:
           if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
             printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
           fi
-      - name: Install harness CLI
-        run: npm install -g @brainwav/coding-harness@latest
       - name: Enforce Linear-first issue tracking policy
         shell: bash
         env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          HEAD_REF: ${{ github.head_ref }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BRANCH="${{ github.head_ref }}"
-            harness linear-gate \
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BRANCH="$HEAD_REF"
+            bash Infrastructure/scripts/harness-cli.sh linear-gate \
               --branch "$BRANCH" \
               --pr-title "$PR_TITLE" \
               --pr-body "$PR_BODY" \
               --json
           else
-            harness linear-gate \
+            bash Infrastructure/scripts/harness-cli.sh linear-gate \
               --allow-missing-branch \
               --allow-missing-pr \
               --json
@@ -152,14 +152,19 @@ jobs:
           if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
             printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
           fi
-      - name: Install harness CLI
-        run: npm install -g @brainwav/coding-harness@latest
       - name: Run fast preflight policy gate
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_REF: ${{ github.base_ref }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          MERGE_GROUP_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-            BASE_REF="${{ github.base_ref }}"
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="$PR_BASE_SHA"
+            HEAD_SHA="$PR_HEAD_SHA"
+            BASE_REF="$PR_BASE_REF"
             # Load contract from the trusted base branch, not the PR checkout.
             # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
             CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
@@ -168,8 +173,8 @@ jobs:
               exit 1
             fi
           else
-            BASE_SHA="${{ github.event.merge_group.base_sha }}"
-            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
+            BASE_SHA="$MERGE_GROUP_BASE_SHA"
+            HEAD_SHA="$MERGE_GROUP_HEAD_SHA"
             # Merge queue: contract is committed and protected by branch rules.
             CONTRACT_PATH="harness.contract.json"
           fi
@@ -177,7 +182,7 @@ jobs:
           if [[ -z "$CHANGED_FILES" ]]; then
             CHANGED_FILES="$(git ls-files | paste -sd, -)"
           fi
-          harness preflight-gate \
+          bash Infrastructure/scripts/harness-cli.sh preflight-gate \
             --contract "$CONTRACT_PATH" \
             --max-tier medium \
             --files "${CHANGED_FILES}" \
