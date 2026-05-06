@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT_FALLBACK="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+FALLBACK_PACKAGE="@brainwav/coding-harness@0.14.0"
 if REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
 else
@@ -52,7 +53,7 @@ if [[ $resolution_status -eq 42 || -z "$CLI_PATH" ]]; then
 			echo "Error: npm is required for HARNESS_CLI_ALLOW_NPM_EXEC fallback." >&2
 			exit 1
 		fi
-		exec npm exec --yes --package @brainwav/coding-harness@latest -- harness "$@"
+		exec npm exec --yes --package "$FALLBACK_PACKAGE" -- harness "$@"
 	fi
 
 	echo "Error: local @brainwav/coding-harness could not be resolved from this repo." >&2
