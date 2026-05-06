@@ -14,6 +14,7 @@ VALID_ACTIONS = {
         "resolve",
         "parse",
         "proof",
+        "explain",
         "route",
         "goal",
         "improve",
@@ -52,6 +53,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
             "\"use $skill-builder to validate $he-heartbeat with @skillinspector\" --json"
         ),
         "ask skills proof he-heartbeat --json",
+        "ask skills explain he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
         "ask skills improve \"fix PR review comments faster\" --json",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
@@ -122,6 +124,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills sync --scope workspace --projection rooted --json",
         "ask skills sync --scope user --projection rooted --json",
     ],
+    ("skills", "explain"): [
+        "ask skills explain autofix --json",
+    ],
     ("reviewers", "resolve"): [
         "ask reviewers resolve skillinspector --json",
     ],
@@ -185,6 +190,7 @@ FUZZY_MATCHES = {
     "list": "list",
     "ls": "list",
     "resolve": "resolve",
+    "explain": "explain",
     "handles": "handles",
     "init": "init",
     "create": "init",

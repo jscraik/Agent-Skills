@@ -210,8 +210,9 @@ ask repo surface --json
 The policy for classifying source, fixtures, generated state, runtime state,
 historical artifacts, and unknown ownership lives in
 [Repo Surface Ownership](Docs/agents/15-repo-surface-ownership.md).
-Namespace-first product command contracts for future health, onboarding,
-improvement, explanation, proof, next-action, and closeout flows live in
+Namespace-first product command contracts for current and future health,
+onboarding, improvement, explanation, proof, next-action, and closeout flows
+live in
 [ask Product Golden Path Command Contracts](Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md).
 
 ## Skill graph (manual topic clusters, non-canonical)

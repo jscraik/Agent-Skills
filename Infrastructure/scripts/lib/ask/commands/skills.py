@@ -784,6 +784,156 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     return result
 
 
+def _skill_sections(path: Path) -> dict[str, list[str]]:
+    """Return markdown section bodies keyed by heading text."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return {}
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in lines:
+        match = re.match(r"^##\s+(.+?)\s*$", line)
+        if match:
+            current = match.group(1).strip().lower()
+            sections[current] = []
+            continue
+        if current:
+            sections[current].append(line)
+    return sections
+
+
+def _section_items(sections: dict[str, list[str]], names: tuple[str, ...], limit: int = 4) -> list[str]:
+    """Extract concise bullets or first paragraphs from named markdown sections."""
+    items: list[str] = []
+    for name in names:
+        for raw in sections.get(name, []):
+            line = raw.strip()
+            if not line:
+                continue
+            line = re.sub(r"^[-*]\s+", "", line)
+            line = re.sub(r"^\d+\.\s+", "", line)
+            items.append(line)
+            if len(items) >= limit:
+                return items
+    return items
+
+
+def _skill_usage_items(sections: dict[str, list[str]], limit: int = 4) -> tuple[list[str], list[str]]:
+    """Split positive and negative guidance from a skill's usage section."""
+    when_to_use: list[str] = []
+    when_not_to_use: list[str] = []
+    for raw in sections.get("when to use", []):
+        line = raw.strip()
+        if not line:
+            continue
+        line = re.sub(r"^[-*]\s+", "", line)
+        line = re.sub(r"^\d+\.\s+", "", line)
+        if line.lower().startswith("avoid "):
+            when_not_to_use.append(line)
+        else:
+            when_to_use.append(line)
+        if len(when_to_use) >= limit and len(when_not_to_use) >= limit:
+            break
+    return when_to_use[:limit], when_not_to_use[:limit]
+
+
+def _skill_validation_commands(source_path: Path, repo_root: Path) -> list[str]:
+    """Return executable validation commands for a resolved skill source."""
+    try:
+        relative_source = source_path.relative_to(repo_root)
+    except ValueError:
+        return []
+    audit_target = relative_source.parent if relative_source.name == "SKILL.md" else relative_source
+    return [f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict"]
+
+
+def explain_skill(repo_root: Path, handle: str) -> CallResult:
+    """Explain one command-visible skill handle for agent use."""
+    result = CallResult()
+    result.metadata["command"] = "skills explain"
+    resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
+    normalized = resolution.get("handle", handle.lstrip("$"))
+    if resolution.get("status") != "ok":
+        result.status = "error"
+        result.data["explanation"] = {
+            "schema_version": "skill-explanation.v1",
+            "status": "blocked",
+            "handle": normalized,
+            "agent_summary": f"Could not resolve skill handle '{normalized}'.",
+            "next_command": f"./bin/ask skills resolve {shlex.quote(str(normalized))} --json --robot",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Could not explain skill handle '{normalized}': {resolution.get('error_code')}",
+                fix_suggestion=resolution.get("operator_action"),
+            )
+        )
+        return result
+
+    source_path = repo_root / str(resolution.get("source_path"))
+    sections = _skill_sections(source_path)
+    description = str(resolution.get("description") or "").strip()
+    when_to_use, inline_when_not_to_use = _skill_usage_items(sections, limit=4)
+    when_to_use = when_to_use or ([description] if description else [])
+    when_not_to_use = inline_when_not_to_use or _section_items(sections, ("avoid",), limit=4)
+    required_validation = _section_items(sections, ("validation",), limit=4)
+    known_limitations = _section_items(sections, ("failure mode", "anti-patterns", "constraints"), limit=4)
+    validation_commands = _skill_validation_commands(source_path, repo_root)
+    proof_result = skills_proof(repo_root, str(normalized))
+    proof = proof_result.data.get("proof", {})
+
+    skills_explain = {
+        "schema_version": "skills-explain.v1",
+        "query": handle,
+        "canonical_source": resolution.get("source_path"),
+        "generated_handle": resolution.get("command_handle_path"),
+        "runtime_projection": (resolution.get("provenance") or {}).get("projection_mode"),
+        "runtime_visibility": resolution.get("runtime_visibility"),
+        "owner": resolution.get("owner"),
+        "root_router": resolution.get("invoke_via"),
+        "loaded_references": [],
+        "when_to_use": when_to_use,
+        "when_not_to_use": when_not_to_use,
+        "validation": validation_commands,
+        "overlaps": [],
+        "ambiguity_notes": [],
+    }
+    explanation = {
+        "schema_version": "skill-explanation.v1",
+        "status": "resolved",
+        "handle": normalized,
+        "agent_summary": f"${normalized} is for {description}" if description else f"${normalized} is resolved.",
+        "what_it_is": description,
+        "when_to_use": when_to_use,
+        "when_not_to_use": when_not_to_use,
+        "canonical_source_path": resolution.get("source_path"),
+        "runtime_projection_path": resolution.get("command_handle_path"),
+        "command_handles": [
+            {
+                "handle": normalized,
+                "path": resolution.get("command_handle_path"),
+                "invoke_via": resolution.get("invoke_via"),
+            }
+        ],
+        "required_validation": required_validation,
+        "validation_commands": validation_commands,
+        "known_limitations": known_limitations,
+        "overlaps": skills_explain["overlaps"],
+        "ambiguity_notes": skills_explain["ambiguity_notes"],
+        "reachability": {
+            "status": proof.get("status") if isinstance(proof, dict) else "not_checked",
+            "proof_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+        },
+        "resolution": resolution,
+        "next_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+    }
+    result.data["skills_explain"] = skills_explain
+    result.data["explanation"] = explanation
+    return result
+
+
 def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
     """Resolve one reviewer/subagent handle from the reviewer namespace."""
     result = CallResult()

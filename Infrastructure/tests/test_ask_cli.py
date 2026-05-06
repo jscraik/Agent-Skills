@@ -198,6 +198,37 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
         self.assertIn("live invocation: manual_session_gate", result.stdout)
 
+    def test_skills_explain_json_contract(self):
+        """Verify ask skills explain returns concise agent-facing skill guidance."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        skills_explain = output["data"]["skills_explain"]
+        self.assertEqual(skills_explain["schema_version"], "skills-explain.v1")
+        self.assertEqual(skills_explain["query"], "autofix")
+        self.assertEqual(skills_explain["canonical_source"], "Skills/agent-ops/autofix/SKILL.md")
+        self.assertEqual(skills_explain["generated_handle"], ".agents/skills/autofix/SKILL.md")
+        self.assertIn("validation", skills_explain)
+        self.assertIn("when_not_to_use", skills_explain)
+
+        explanation = output["data"]["explanation"]
+        self.assertEqual(explanation["schema_version"], "skill-explanation.v1")
+        self.assertEqual(explanation["handle"], "autofix")
+        self.assertEqual(explanation["status"], "resolved")
+        for field in (
+            "agent_summary",
+            "canonical_source_path",
+            "runtime_projection_path",
+            "command_handles",
+            "required_validation",
+            "validation_commands",
+            "known_limitations",
+            "next_command",
+        ):
+            self.assertIn(field, explanation)
+
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector", "--json"]

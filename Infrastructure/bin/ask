@@ -29,6 +29,7 @@ from ask.commands.skills import (
     skills_resolve,
     skills_parse,
     skills_proof,
+    explain_skill,
     reviewers_resolve,
     route_skills,
     goal_skills,
@@ -572,6 +573,7 @@ def main():
     )
     skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser])
     skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
+    skills_subparsers.add_parser("explain", help="Explain when and how to use a skill handle", parents=[global_parser]).add_argument("handle", help="Skill handle to explain")
 
     # --- reviewers ---
     reviewers_parser = subparsers.add_parser("reviewers", help="Reviewer/subagent handle management", parents=[global_parser])
@@ -980,6 +982,8 @@ def main():
             result = skills_parse(repo_root, request_text=" ".join(args.request))
         elif args.action == "proof":
             result = skills_proof(repo_root, handle=args.handle)
+        elif args.action == "explain":
+            result = explain_skill(repo_root, handle=args.handle)
         elif args.action == "route":
             result = route_skills(
                 repo_root,
@@ -1022,14 +1026,7 @@ def main():
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'skills'",
-                fix_suggestion=(
-                    "Valid actions: list, budget, handles, resolve, parse, proof, "
-                    "route, goal, improve, starter, sync, audit, install, fold, init"
-                )
-            ))
+            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, explain, route, goal, improve, starter, sync, audit, install, fold, init"))
 
     elif args.topic == "reviewers":
         if args.action == "resolve":
@@ -1440,6 +1437,12 @@ def main():
                     live = proof.get("live_codex_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
+                elif args.topic == "skills" and args.action == "explain":
+                    explanation = result.data.get("explanation", {})
+                    print(f"ℹ️  Skill: ${explanation.get('handle')} ({explanation.get('status')})")
+                    print(explanation.get("agent_summary", ""))
+                    print(f"Source: {explanation.get('canonical_source_path')}")
+                    print(f"Next: {explanation.get('next_command')}")
                 elif args.topic == "skills" and args.action == "parse":
                     parsed = result.data.get("parse", {})
                     print(f"✅ Parse succeeded: {parsed.get('status', 'ok')}")

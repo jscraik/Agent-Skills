@@ -13,6 +13,7 @@ All agents should use `./bin/ask` for repo operations.
 | --------------- | -------------------------------------------------- |
 | Repo health     | `./bin/ask repo doctor --json --robot`             |
 | Improve agents  | `./bin/ask skills improve "<goal>" --json --robot` |
+| Explain skill   | `./bin/ask skills explain <handle> --json --robot` |
 | Full validation | `./bin/ask repo validate`                          |
 | List skills     | `./bin/ask skills list --category <topic>`         |
 | Audit skill     | `./bin/ask skills audit <path> --level strict`     |
@@ -28,6 +29,7 @@ inspection:
 ```bash
 ./bin/ask repo doctor --json --robot
 ./bin/ask skills improve "autofix" --json --robot
+./bin/ask skills explain autofix --json --robot
 ./bin/ask repo doctor-catalog --json --robot
 ./bin/ask repo surface --json --robot
 ```
@@ -41,6 +43,11 @@ into one agent-facing payload with `agent_summary`, `blocking`, `blockers`,
 goal routing, runs command-handle proof for the selected capability, and returns
 `agent_summary`, `recommended_capability`, `why`, `reachability`, `proof`, and
 one existing `next_command`.
+
+`skills explain` turns a command handle into concise use guidance. It returns
+what the capability is for, when to use it, canonical source, runtime handle,
+validation guidance, known limitations, reachability status, and the proof
+command to run next.
 
 ## Robot Mode
 
