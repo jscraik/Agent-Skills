@@ -201,6 +201,9 @@ def validate_board(goal_dir: Path) -> list[str]:
     for required in ("goal.md", "state.yaml", "notes"):
         if required not in root_names:
             errors.append(f"missing {required}")
+    for required_file in ("goal.md", "state.yaml"):
+        if required_file in root_names and not (goal_dir / required_file).is_file():
+            errors.append(f"{required_file} must be a file")
     if "notes" in root_names and not (goal_dir / "notes").is_dir():
         errors.append("notes must be a directory")
     if errors:
