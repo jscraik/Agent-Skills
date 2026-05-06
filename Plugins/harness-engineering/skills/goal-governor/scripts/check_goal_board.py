@@ -19,7 +19,7 @@ ALLOWED_ROOT = {"goal.md", "state.yaml", "receipts.jsonl", "notes"}
 TASK_TYPES = {"scout", "judge", "worker", "pm"}
 ASSIGNEES = {"Scout", "Judge", "Worker", "PM"}
 STATUSES = {"queued", "active", "blocked", "done"}
-NATIVE_STATUSES = {"active", "paused", "budget_limited", "complete", None}
+NATIVE_STATUSES = {"active", "paused", "budgetLimited", "budget_limited", "complete", None}
 MAX_NATIVE_OBJECTIVE_CHARS = 4_000
 TASK_ID = re.compile(r"^T\d{3}$")
 
@@ -230,7 +230,7 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
 
     native_status = goal.get("native_status")
     if native_status not in NATIVE_STATUSES:
-        errors.append("goal.native_status must be active, paused, budget_limited, or complete")
+        errors.append("goal.native_status must be active, paused, budgetLimited, budget_limited, or complete")
 
     for field in ("tokens_used", "time_used_seconds"):
         value = goal.get(field)

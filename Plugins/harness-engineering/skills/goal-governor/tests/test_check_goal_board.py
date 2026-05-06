@@ -84,3 +84,21 @@ def test_native_goal_runtime_fields_accept_budget_limited_status() -> None:
 
     assert errors == []
     assert goal_status == "active"
+
+
+def test_native_goal_runtime_fields_accept_raw_budget_limited_status() -> None:
+    state = {
+        "goal": {
+            "status": "active",
+            "native_objective": "/goal Follow docs/goals/current/goal.md",
+            "native_status": "budgetLimited",
+            "token_budget": 1000,
+            "tokens_used": 1000,
+            "time_used_seconds": 60,
+        }
+    }
+
+    errors, goal_status = check_goal_board.validate_goal_section(state)
+
+    assert errors == []
+    assert goal_status == "active"
