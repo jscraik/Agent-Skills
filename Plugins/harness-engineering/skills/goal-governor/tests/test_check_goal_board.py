@@ -49,3 +49,38 @@ tasks:
         )
 
         assert "goal.md must be a file" in check_goal_board.validate_board(goal_dir)
+
+
+def test_native_objective_has_codex_length_limit() -> None:
+    state = {
+        "goal": {
+            "status": "active",
+            "native_objective": "x" * 4001,
+            "native_status": "active",
+            "token_budget": 1000,
+            "tokens_used": 0,
+            "time_used_seconds": 0,
+        }
+    }
+
+    errors, _ = check_goal_board.validate_goal_section(state)
+
+    assert "goal.native_objective must be at most 4000 characters" in errors
+
+
+def test_native_goal_runtime_fields_accept_budget_limited_status() -> None:
+    state = {
+        "goal": {
+            "status": "active",
+            "native_objective": "/goal Follow docs/goals/current/goal.md",
+            "native_status": "budget_limited",
+            "token_budget": 1000,
+            "tokens_used": 1000,
+            "time_used_seconds": 60,
+        }
+    }
+
+    errors, goal_status = check_goal_board.validate_goal_section(state)
+
+    assert errors == []
+    assert goal_status == "active"

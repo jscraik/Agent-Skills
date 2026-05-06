@@ -19,6 +19,8 @@ ALLOWED_ROOT = {"goal.md", "state.yaml", "receipts.jsonl", "notes"}
 TASK_TYPES = {"scout", "judge", "worker", "pm"}
 ASSIGNEES = {"Scout", "Judge", "Worker", "PM"}
 STATUSES = {"queued", "active", "blocked", "done"}
+NATIVE_STATUSES = {"active", "paused", "budget_limited", "complete", None}
+MAX_NATIVE_OBJECTIVE_CHARS = 4_000
 TASK_ID = re.compile(r"^T\d{3}$")
 
 
@@ -189,7 +191,7 @@ def validate_done_receipt_schema(task: dict[str, Any], receipt: dict[str, Any]) 
     return errors
 
 
-def validate_board(goal_dir: Path) -> list[str]:
+def validate_root(goal_dir: Path) -> list[str]:
     errors: list[str] = []
     if not goal_dir.exists() or not goal_dir.is_dir():
         return [f"{goal_dir} is not a directory"]
@@ -206,42 +208,92 @@ def validate_board(goal_dir: Path) -> list[str]:
             errors.append(f"{required_file} must be a file")
     if "notes" in root_names and not (goal_dir / "notes").is_dir():
         errors.append("notes must be a directory")
-    if errors:
-        return errors
+    return errors
 
-    try:
-        state = load_yaml(goal_dir / "state.yaml")
-    except Exception as exc:  # noqa: BLE001 - command should explain any parser failure
-        return [str(exc)]
 
-    if not isinstance(state, dict):
-        return ["state.yaml must be a mapping"]
-    if state.get("version") != 2:
-        errors.append("version must be 2")
-
+def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]:
+    errors: list[str] = []
     goal = state.get("goal")
     if not isinstance(goal, dict):
-        errors.append("goal must be a mapping")
-        goal_status = None
-    else:
-        goal_status = goal.get("status")
-    if isinstance(goal, dict) and goal_status not in {"active", "paused", "blocked", "done"}:
+        return ["goal must be a mapping"], None
+
+    goal_status = goal.get("status")
+    if goal_status not in {"active", "paused", "blocked", "done"}:
         errors.append("goal.status must be active, paused, blocked, or done")
 
-    rules = state.get("rules")
-    if not isinstance(rules, dict):
-        rules = {}
+    native_objective = goal.get("native_objective")
+    if native_objective is not None:
+        if not isinstance(native_objective, str) or not native_objective.strip():
+            errors.append("goal.native_objective must be a non-empty string when present")
+        elif len(native_objective) > MAX_NATIVE_OBJECTIVE_CHARS:
+            errors.append("goal.native_objective must be at most 4000 characters")
 
-    tasks = state.get("tasks")
+    native_status = goal.get("native_status")
+    if native_status not in NATIVE_STATUSES:
+        errors.append("goal.native_status must be active, paused, budget_limited, or complete")
+
+    for field in ("tokens_used", "time_used_seconds"):
+        value = goal.get(field)
+        if value is not None and (not isinstance(value, int) or value < 0):
+            errors.append(f"goal.{field} must be a non-negative integer when present")
+
+    token_budget = goal.get("token_budget")
+    if token_budget is not None and (not isinstance(token_budget, int) or token_budget <= 0):
+        errors.append("goal.token_budget must be a positive integer when present")
+
+    return errors, str(goal_status) if isinstance(goal_status, str) else None
+
+
+def validate_task(
+    task: dict[str, Any],
+    index: int,
+    ids: set[str],
+    receipts: dict[str, dict[str, Any]],
+) -> tuple[list[str], bool]:
+    errors: list[str] = []
+    task_id = task.get("id")
+    if not isinstance(task_id, str) or not TASK_ID.match(task_id):
+        errors.append(f"task {index} has invalid id")
+    elif task_id in ids:
+        errors.append(f"duplicate task id {task_id}")
+    else:
+        ids.add(task_id)
+
+    label = task_id or f"task {index}"
+    if task.get("type") not in TASK_TYPES:
+        errors.append(f"{label} has invalid type")
+    if task.get("assignee") not in ASSIGNEES:
+        errors.append(f"{label} has invalid assignee")
+    status = task.get("status")
+    if status not in STATUSES:
+        errors.append(f"{label} has invalid status")
+    if not isinstance(task.get("objective"), str) or not task["objective"].strip():
+        errors.append(f"{label} missing objective")
+    if task.get("type") == "worker":
+        for field in ("allowed_files", "verify", "stop_if"):
+            if not as_list(task.get(field)):
+                errors.append(f"{label} worker missing {field}")
+    if status == "done":
+        receipt_id = task.get("receipt_id")
+        receipt = receipts.get(receipt_id)
+        if receipt is None:
+            errors.append(f"{label} done without matching receipt")
+        elif receipt.get("task_id") != task_id:
+            errors.append(f"{label} done receipt belongs to another task")
+        else:
+            errors.extend(validate_done_receipt_schema(task, receipt))
+    return errors, status == "active"
+
+
+def validate_tasks_and_receipts(
+    tasks: Any,
+    receipts: dict[str, dict[str, Any]],
+    rules: dict[str, Any],
+    goal_status: str | None,
+) -> list[str]:
+    errors: list[str] = []
     if not isinstance(tasks, list) or not tasks:
-        errors.append("tasks must be a non-empty list")
-        return errors
-
-    try:
-        receipts = validate_receipts(goal_dir / "receipts.jsonl")
-    except ValueError as exc:
-        errors.append(str(exc))
-        receipts = {}
+        return ["tasks must be a non-empty list"]
 
     ids: set[str] = set()
     active_tasks: list[dict[str, Any]] = []
@@ -249,37 +301,10 @@ def validate_board(goal_dir: Path) -> list[str]:
         if not isinstance(task, dict):
             errors.append(f"task {index} must be a mapping")
             continue
-        task_id = task.get("id")
-        if not isinstance(task_id, str) or not TASK_ID.match(task_id):
-            errors.append(f"task {index} has invalid id")
-        elif task_id in ids:
-            errors.append(f"duplicate task id {task_id}")
-        else:
-            ids.add(task_id)
-        if task.get("type") not in TASK_TYPES:
-            errors.append(f"{task_id or f'task {index}'} has invalid type")
-        if task.get("assignee") not in ASSIGNEES:
-            errors.append(f"{task_id or f'task {index}'} has invalid assignee")
-        status = task.get("status")
-        if status not in STATUSES:
-            errors.append(f"{task_id or f'task {index}'} has invalid status")
-        if not isinstance(task.get("objective"), str) or not task["objective"].strip():
-            errors.append(f"{task_id or f'task {index}'} missing objective")
-        if status == "active":
+        task_errors, is_active = validate_task(task, index, ids, receipts)
+        errors.extend(task_errors)
+        if is_active:
             active_tasks.append(task)
-        if task.get("type") == "worker":
-            for field in ("allowed_files", "verify", "stop_if"):
-                if not as_list(task.get(field)):
-                    errors.append(f"{task_id or f'task {index}'} worker missing {field}")
-        if status == "done":
-            receipt_id = task.get("receipt_id")
-            receipt = receipts.get(receipt_id)
-            if receipt is None:
-                errors.append(f"{task_id or f'task {index}'} done without matching receipt")
-            elif receipt.get("task_id") != task_id:
-                errors.append(f"{task_id or f'task {index}'} done receipt belongs to another task")
-            else:
-                errors.extend(validate_done_receipt_schema(task, receipt))
 
     if goal_status != "done" and not active_tasks_are_parallel_workers(active_tasks, rules):
         errors.append(
@@ -301,6 +326,38 @@ def validate_board(goal_dir: Path) -> list[str]:
                 "done goal requires final Judge or PM receipt with decision=complete for an existing task"
             )
 
+    return errors
+
+
+def validate_board(goal_dir: Path) -> list[str]:
+    errors = validate_root(goal_dir)
+    if errors:
+        return errors
+
+    try:
+        state = load_yaml(goal_dir / "state.yaml")
+    except Exception as exc:  # noqa: BLE001 - command should explain any parser failure
+        return [str(exc)]
+
+    if not isinstance(state, dict):
+        return ["state.yaml must be a mapping"]
+    if state.get("version") != 2:
+        errors.append("version must be 2")
+
+    goal_errors, goal_status = validate_goal_section(state)
+    errors.extend(goal_errors)
+
+    rules = state.get("rules")
+    if not isinstance(rules, dict):
+        rules = {}
+
+    try:
+        receipts = validate_receipts(goal_dir / "receipts.jsonl")
+    except ValueError as exc:
+        errors.append(str(exc))
+        receipts = {}
+
+    errors.extend(validate_tasks_and_receipts(state.get("tasks"), receipts, rules, goal_status))
     return errors
 
 

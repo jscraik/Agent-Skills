@@ -20,21 +20,21 @@ metadata:
 
 ## Philosophy
 
-Use this skill to turn Codex's native `/goal` feature into an auditable operating loop. Native goals persist an objective; this skill governs the repo-visible plan, current task, verification evidence, and completion audit that keep the objective from drifting.
+Use this skill to turn Codex's native `/goal` feature into an auditable operating loop. Native goals persist a thread objective and runtime status; this skill governs the repo-visible plan, active task, receipts, and completion audit.
 
-Treat goal work as a state machine, not a vibe. The agent should always know the native goal status, the board status, the active task, the write scope, and the exact evidence required to continue.
+Treat goal work as a state machine. Know the native status, board status, active task, write scope, and required evidence before continuing.
 
 ## When To Use
 
-Use when the user asks to create, continue, repair, audit, or operationalize a long-running Codex goal, especially when the work is broad, stale, blocked, multi-agent, high-risk, or likely to span more than one session.
+Use when the user asks to create, continue, repair, audit, or operationalize a long-running Codex goal, especially when work is broad, stale, blocked, multi-agent, high-risk, or likely to span sessions.
 
 Do not use for ordinary one-file fixes, quick questions, or implementation tasks where the user has not asked for durable `/goal` governance.
 
 ## Modes
 
-- `create`: scaffold a goal board, verify the local Codex runtime can support goals, and print the `/goal Follow <goal.md>` command.
+- `create`: scaffold a goal board, verify native goal support, and print `/goal Follow <goal.md>`.
 - `continue`: read native goal state and the board, reconcile drift, and select the next safe action before implementation.
-- `doctor`: check installation, Codex goal enablement, agent runtime depth, board validity, and verification freshness.
+- `doctor`: check installation, Codex goal enablement, objective fit, agent runtime depth, board validity, and verification freshness.
 - `check`: validate a goal board and receipts without changing files.
 - `repair`: propose or apply low-risk board repairs only after reporting the exact drift.
 - `import`: convert an existing spec, plan, or issue into a goal board without losing its original source path.
@@ -42,15 +42,15 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
 ## Required Inputs
 
 - Target repository path.
-- Goal intent, existing goal path, or source artifact to import.
+- Goal intent, existing goal path, or artifact to import.
 - Editable boundary for any write-capable task.
 - Verification command contract from the target repo.
 - Stop condition, such as owner input, red validation, scope expansion, or completion audit.
 
 ## Outputs
 
-- Goal board health report with native/board reconciliation status.
-- Created or repaired board files when the selected mode allows edits.
+- Board health report with native/board reconciliation.
+- Created or repaired board files when the mode allows edits.
 - Next safe action classification.
 - Machine-checkable validation evidence.
 - Residual risks or owner-input blockers.
@@ -60,15 +60,17 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
 1. Read the nearest project instructions first. In `~/dev/codex`, read `instructions/CODESTYLE.md` when present before technical edits.
 2. Run `doctor` checks before `create` or `continue`:
    - `[features].goals = true` is configured or the user accepts a blocked setup.
+   - Native objective is non-empty and no more than 4,000 characters; keep bulk instructions in `goal.md`.
    - Agent config supports the intended delegation depth; for Jamie's Codex harness, require `max_depth >= 2`.
    - The selected validation commands exist and are repo-canonical.
    - Existing board files pass `scripts/check_goal_board.py`.
-3. Reconcile native goal state with board state. Treat mismatches as PM or Judge work before Worker implementation.
-4. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
-5. Refuse write-capable work until the active Worker task declares `allowed_files`, `verify`, and `stop_if`.
-6. If verification is missing, red, stale, blocked, or from a different dirty fingerprint, recover verification before feature work.
-7. After each task, append a machine-checkable receipt and select the next safe task.
-8. Mark a goal complete only after a final Judge or PM audit receipt with `decision: complete`; then update the native goal status.
+3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete`.
+4. Treat token budget, tokens used, elapsed seconds, lifecycle updates, and budget-limited transitions as evidence, not completion proof.
+5. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
+6. Refuse write-capable work until the active Worker task declares `allowed_files`, `verify`, and `stop_if`.
+7. If verification is missing, red, stale, blocked, or from a different dirty fingerprint, recover verification before feature work.
+8. After each task, append a machine-checkable receipt and select the next safe task.
+9. Mark a goal complete only after a final Judge or PM audit receipt with `decision: complete`; then update the native goal status.
 
 ## Goal Directory
 
@@ -87,13 +89,14 @@ docs/goals/<slug>/
 ## Safety Rules
 
 - `/goal Follow docs/goals/<slug>/goal.md` is a prompt convention, not a native file binding. Always read `goal.md` and `state.yaml` before acting.
+- Native `/goal` objective text is validated by Codex. Long plans belong in repo files.
 - Redact secrets, credentials, tokens, private keys, and sensitive personal data by default in receipts, notes, examples, and chat output.
 - Do not edit implementation files until board health, native-goal reconciliation, and verification freshness are known.
 - Do not write outside `allowed_files` for an active Worker task.
 - Do not treat generated templates as proof that agents are installed; verify runtime config and role availability.
 - Do not install or mutate `~/.codex` directly unless the user asks for a direct runtime install. Prefer canonical repo projection paths.
 - If native goal state and board state conflict, stop implementation and classify the mismatch.
-- Do not remove important context for budget trimming; move deep context to references and keep it discoverable through the deferred context index.
+- Do not remove important context for budget trimming; move deep context to references instead of deleting it.
 
 ## Anti-Patterns
 
@@ -108,6 +111,7 @@ docs/goals/<slug>/
 
 - Native `/goal` state and repo-visible board state can drift. Reconcile both before choosing Worker work.
 - A receipt is only useful when it names the exact verifier and outcome; vague "tested" notes are not completion evidence.
+- `budgetLimited` is a native stop/steering state. Classify scope, verification, and owner decision before Worker work.
 - Delegation still follows the shared HE subagent call contract; do not assume Scout, Judge, or Worker roles exist until runtime config proves they are available.
 
 ## Output Contract
@@ -118,7 +122,7 @@ Return:
 schema_version: 1
 mode: create|continue|doctor|check|repair|import
 goal_path: path-or-null
-native_goal_status: active|paused|complete|missing|unknown|blocked
+native_goal_status: active|paused|budget_limited|complete|missing|unknown|blocked
 board_status: active|paused|done|blocked|invalid|missing
 next_action: continue|scout|judge|worker|repair|ask_owner|stop
 validation_evidence:
@@ -133,6 +137,7 @@ risks:
 
 - Read [references/deferred-context-index.md](../../references/deferred-context-index.md) when preserving or recovering context moved out of active skill text.
 - Read [references/subagent-call-contract.md](../../references/subagent-call-contract.md) before delegating Scout, Judge, PM, or Worker tasks.
+- Read [references/native-goal-runtime.md](./references/native-goal-runtime.md) when reconciling with current `~/dev/codex` native goal behavior.
 - Read [references/goal-contract.md](./references/goal-contract.md) when creating or validating `goal.md`, `state.yaml`, or `receipts.jsonl`.
 - Read [references/creation-and-continuation.md](./references/creation-and-continuation.md) when choosing create, continue, repair, or import behavior.
 - Read [references/evals.yaml](./references/evals.yaml) when testing this skill with binary trigger and behavior checks.
@@ -152,6 +157,6 @@ When changing this skill, use an Autoresearch-style loop: baseline first, patch 
 
 ## Examples
 
-- "I want `/goal` to keep working on the Codex config cleanup tomorrow without forgetting the validation gates; create the board first."
-- "Continue `docs/goals/codex-goal-governance/goal.md`; I switched branches yesterday, so verify the board before touching code."
-- "Before I let this run in my harness, doctor whether goals are enabled, the worker scope is safe, and Scout/Judge/Worker can actually run."
+- "Create a `/goal` board for `JSC-190` in `coding-harness`; tomorrow's run must start with `bash scripts/run-harness-setup-checks.sh`."
+- "Continue `docs/goals/codex-goal-governance/goal.md`; I moved from `main` to `feature/jscraik-agent-first-golden-path-spec-plan`, so verify before editing."
+- "Doctor the overnight Codex config cleanup goal before it runs; check native goals, worker scope, and Scout/Judge/Worker availability."
