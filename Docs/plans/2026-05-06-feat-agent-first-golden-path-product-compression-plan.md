@@ -17,7 +17,7 @@ linear_children: []
 linear_status: Open
 linear_comment_required: true
 branch: feature/jscraik-agent-first-golden-path-spec-plan
-pr: not_opened
+pr: https://github.com/jscraik/Agent-Skills/pull/152
 traceability_required: true
 plan_route: child
 plan_depth: deep
@@ -103,7 +103,7 @@ This plan includes its own `plan_id` and traceability fields.
 - Labels: `Roadmap: Next`, `Agent`, `Infra`, `Improvement`
 - Current status: Open
 - Branch: `feature/jscraik-agent-first-golden-path-spec-plan`
-- PR: not opened
+- PR: https://github.com/jscraik/Agent-Skills/pull/152 (draft)
 - Linear comment required: true
 
 Implementation should add a Linear workpad comment before code changes start,
@@ -113,8 +113,8 @@ linking the spec, this plan, and the intended first-slice scope.
 
 | Linear issue | Source acceptance IDs          | Plan units                     | Acceptance IDs                    | PR evidence |
 | ------------ | ------------------------------ | ------------------------------ | --------------------------------- | ----------- |
-| JSC-246      | R1, R2, R3, R4, R5, R6, R7, R8 | P0, P1, P2, P3, P4, P5, P6     | AC1, AC2, AC3, AC4, AC5, AC6, AC7 | not opened  |
-| JSC-246      | R9, R10, R11, R12              | F1, F2, F3, F4, F5, F6, F7, F8 | deferred follow-on acceptance     | not opened  |
+| JSC-246      | R1, R2, R3, R4, R5, R6, R7, R8 | P0, P1, P2, P3, P4, P5, P6     | AC1, AC2, AC3, AC4, AC5, AC6, AC7 | https://github.com/jscraik/Agent-Skills/pull/152 (draft) |
+| JSC-246      | R9, R10, R11, R12              | F1, F2, F3, F4, F5, F6, F7, F8 | deferred follow-on acceptance     | https://github.com/jscraik/Agent-Skills/pull/152 (draft) |
 
 ## Requirements Trace
 
@@ -172,11 +172,11 @@ Command evidence gathered before this plan:
   `provider-audit`, and `surface`; there is no `repo doctor` route yet.
 - `fd` evidence shows existing tests for `repo doctor-catalog`, `repo surface`,
   `repo status`, and the `ask` CLI, but no dedicated `repo doctor` test yet.
-- `/Users/jamiecraik/.agents/session-collector` is the collector code project;
+- `$HOME/.agents/session-collector` is the collector code project;
   its raw telemetry input root is
-  `/Users/jamiecraik/.agents/otel-collector/data/raw`.
+  `$HOME/.agents/otel-collector/data/raw`.
 - A narrowed session-collector run using OTel raw files and
-  `/Users/jamiecraik/.codex/sessions` wrote
+  `$HOME/.codex/sessions` wrote
   `/tmp/ask-session-collector-spec-evidence.json` and
   `/tmp/ask-session-collector-spec-bundle`.
 - That collector run kept `391942` records across `596` source files:
@@ -208,8 +208,8 @@ Out of scope for the first implementation:
 - changing current `ask skills proof` behavior;
 - implementing `ask skills improve`, `ask skills explain`, `ask skills prove`,
   or `ask repo closeout --changed`;
-- modifying `/Users/jamiecraik/.agents/session-collector`;
-- modifying `/Users/jamiecraik/.agents/otel-collector`;
+- modifying `$HOME/.agents/session-collector`;
+- modifying `$HOME/.agents/otel-collector`;
 - ingesting or storing high-cardinality per-turn analytics in Agent Skills Kit.
 
 ## Key Decisions
@@ -633,7 +633,7 @@ when available.
 
 ### F5: Session Collector Changes
 
-Update `/Users/jamiecraik/.agents/session-collector` to normalize supported
+Update `$HOME/.agents/session-collector` to normalize supported
 skill invocation events from:
 
 - `~/.agents/otel-collector/data/raw/*.ndjson`;
@@ -681,11 +681,11 @@ Required normalized record semantics:
 Validation for this unit:
 
 ```bash
-cd /Users/jamiecraik/.agents/session-collector
+cd $HOME/.agents/session-collector
 UV_CACHE_DIR=/tmp/session-collector-uv-cache uv run --python 3.12 ruff check .
 UV_CACHE_DIR=/tmp/session-collector-uv-cache uv run --python 3.12 python -m py_compile main.py evidence.py renderer.py tests/test_session_collector.py
 UV_CACHE_DIR=/tmp/session-collector-uv-cache uv run --python 3.12 python -m unittest discover -s tests -v
-UV_CACHE_DIR=/tmp/session-collector-uv-cache uv run --python 3.12 python main.py --days 7 --max-sessions 200 --codex-sessions-dir /Users/jamiecraik/.codex/sessions --output /tmp/session-collector-skill-analytics.json --bundle-dir /tmp/session-collector-skill-analytics-bundle --verbose
+UV_CACHE_DIR=/tmp/session-collector-uv-cache uv run --python 3.12 python main.py --days 7 --max-sessions 200 --codex-sessions-dir $HOME/.codex/sessions --output /tmp/session-collector-skill-analytics.json --bundle-dir /tmp/session-collector-skill-analytics-bundle --verbose
 ```
 
 Exit criteria:
@@ -700,7 +700,7 @@ Exit criteria:
 
 ### F6: OTel Collector Changes
 
-Update `/Users/jamiecraik/.agents/otel-collector` to preserve raw skill
+Update `$HOME/.agents/otel-collector` to preserve raw skill
 invocation attribution metadata and expose low-cardinality aggregate health:
 
 - seen skill invocation event count;
@@ -876,8 +876,8 @@ Resolution:
 - `Infrastructure/tests/test_ask_repo_doctor_catalog.py`
 - `Infrastructure/tests/test_ask_repo_surface.py`
 - `Infrastructure/tests/test_ask_cli.py`
-- `/Users/jamiecraik/.agents/session-collector`
-- `/Users/jamiecraik/.agents/otel-collector`
+- `$HOME/.agents/session-collector`
+- `$HOME/.agents/otel-collector`
 
 ## Next Stage Handoff
 

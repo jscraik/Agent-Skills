@@ -74,6 +74,13 @@ Mark current active state; Explore first, ask second; `update_plan` is live chec
 
 ## Active Entrypoint Rewrite Preservation
 
+The PR 152 review-fix pass preserved removed Goal Governor validator wording
+while replacing the active command examples with the canonical packaged path:
+
+```text
+   - Existing board files pass `scripts/check_goal_board.py`.
+```
+
 The 2026-05-03 Harness Engineering tightening preserved these compact-entrypoint lines outside the runtime bodies:
 
 ```text

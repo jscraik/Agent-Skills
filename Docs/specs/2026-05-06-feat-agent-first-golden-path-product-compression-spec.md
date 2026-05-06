@@ -157,11 +157,11 @@ must split from repo-surface delivery.
 The golden-path proof work spans three local projects, but ownership must stay
 separated:
 
-- `/Users/jamiecraik/dev/agent-skills` owns product commands, proof decisions,
+- `$HOME/dev/agent-skills` owns product commands, proof decisions,
   command envelopes, docs, and generated ASK-local projections.
-- `/Users/jamiecraik/.agents/session-collector` owns privacy-safe normalized
+- `$HOME/.agents/session-collector` owns privacy-safe normalized
   session and skill evidence derived from supported local telemetry sources.
-- `/Users/jamiecraik/.agents/otel-collector` owns raw OTLP ingest, raw NDJSON,
+- `$HOME/.agents/otel-collector` owns raw OTLP ingest, raw NDJSON,
   and low-cardinality aggregate telemetry health stats.
 
 The collector source contract for this slice is intentionally narrow:
@@ -180,8 +180,8 @@ The collector source contract for this slice is intentionally narrow:
 - `Docs/agents/15-repo-surface-ownership.md`
 - `Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md`
 - `Docs/product/agent-capability-control-plane.md`
-- `/Users/jamiecraik/.agents/session-collector/README.md`
-- `/Users/jamiecraik/.agents/otel-collector/README.md`
+- `$HOME/.agents/session-collector/README.md`
+- `$HOME/.agents/otel-collector/README.md`
 
 ### Out of Scope
 
@@ -218,12 +218,12 @@ intuitive to AI coding agents" --json --robot` failed with
   addition to existing skill name, skill ID, scope, repo URL, thread ID, invoke
   type, model slug, and product client ID.
 
-Collector-backed baseline from `/Users/jamiecraik/.agents/session-collector`
+Collector-backed baseline from `$HOME/.agents/session-collector`
 on 2026-05-06:
 
 - The session collector is the code project, while the actual raw telemetry
-  input root is `/Users/jamiecraik/.agents/otel-collector/data/raw`.
-- A narrowed run using only `/Users/jamiecraik/.codex/sessions` plus OTel raw
+  input root is `$HOME/.agents/otel-collector/data/raw`.
+- A narrowed run using only `$HOME/.codex/sessions` plus OTel raw
   files wrote `/tmp/ask-session-collector-spec-evidence.json` and
   `/tmp/ask-session-collector-spec-bundle`.
 - That run kept `391942` records across `596` source files, including
@@ -339,7 +339,7 @@ The skill analytics feature must use a three-layer pipeline.
 
 ### 1. OTel Collector Layer
 
-`/Users/jamiecraik/.agents/otel-collector` remains the raw telemetry receiver.
+`$HOME/.agents/otel-collector` remains the raw telemetry receiver.
 It should store raw OTLP payloads in `data/raw/*.ndjson` and may expose only
 low-cardinality skill analytics health fields in `/stats`, such as:
 
@@ -355,7 +355,7 @@ per-thread, per-turn, per-repo, or per-skill proof details in aggregate stats.
 
 ### 2. Session Collector Layer
 
-`/Users/jamiecraik/.agents/session-collector` is the canonical normalizer for
+`$HOME/.agents/session-collector` is the canonical normalizer for
 this feature. It should read the supported local sources, extract native Codex
 `skill_invocation` events when present, preserve legacy skill-mention fallback
 signals, and emit privacy-safe normalized evidence.
@@ -786,7 +786,7 @@ Required composed signals:
 
 ### ASK Skill Telemetry Projection
 
-Required generated projection behavior in `/Users/jamiecraik/dev/agent-skills`:
+Required generated projection behavior in `$HOME/dev/agent-skills`:
 
 - Projection path: `.skill-telemetry/**`.
 - Projection ownership: generated runtime evidence, not canonical source.
@@ -800,7 +800,7 @@ Required generated projection behavior in `/Users/jamiecraik/dev/agent-skills`:
 
 ### Session Collector Skill Evidence
 
-Required changes in `/Users/jamiecraik/.agents/session-collector`:
+Required changes in `$HOME/.agents/session-collector`:
 
 - Parse native Codex `skill_invocation` events from supported local telemetry
   sources when present.
@@ -824,7 +824,7 @@ Required changes in `/Users/jamiecraik/.agents/session-collector`:
 
 ### OTel Collector Skill Health
 
-Required changes in `/Users/jamiecraik/.agents/otel-collector`:
+Required changes in `$HOME/.agents/otel-collector`:
 
 - Preserve raw NDJSON capture of any native Codex analytics payloads.
 - Add only low-cardinality aggregate visibility for skill analytics if the raw

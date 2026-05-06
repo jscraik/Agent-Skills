@@ -417,25 +417,28 @@ def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
     }
 
 
+def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
+    try:
+        return builder(*args)
+    except Exception as exc:
+        return _unknown_signal_error_signal(exc)
+
+
 def repo_doctor(repo_root: Path) -> CallResult:
     """Compose repo health checks into one compact agent-facing doctor payload."""
     result = CallResult()
-    try:
-        status_result = repo_status(repo_root)
-        signals = {
-            "repo_status": _repo_status_signal(status_result),
-            "projection_sync": _projection_sync_signal(status_result),
-            "catalog_parity": _catalog_parity_signal(doctor_catalog(repo_root)),
-            "runtime_budget": _runtime_budget_signal(skills_budget(repo_root)),
-            "command_handles": _command_handles_signal(
+    signals = {
+        "repo_status": _safe_signal(lambda: _repo_status_signal(repo_status(repo_root))),
+        "projection_sync": _safe_signal(lambda: _projection_sync_signal(repo_status(repo_root))),
+        "catalog_parity": _safe_signal(lambda: _catalog_parity_signal(doctor_catalog(repo_root))),
+        "runtime_budget": _safe_signal(lambda: _runtime_budget_signal(skills_budget(repo_root))),
+        "command_handles": _safe_signal(
+            lambda: _command_handles_signal(
                 skills_handles(repo_root, check=True, include_handles=False)
-            ),
-            "repo_surface": _repo_surface_signal(repo_surface(repo_root)),
-        }
-    except Exception as exc:
-        signals = {
-            "unknown_signal_error": _unknown_signal_error_signal(exc),
-        }
+            )
+        ),
+        "repo_surface": _safe_signal(lambda: _repo_surface_signal(repo_surface(repo_root))),
+    }
     payload = build_golden_path_payload(
         signals=signals,
         normal_next_command="./bin/ask repo status --json --robot",

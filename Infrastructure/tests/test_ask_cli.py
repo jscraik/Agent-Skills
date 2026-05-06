@@ -289,6 +289,7 @@ class TestAskCLI(unittest.TestCase):
             "skills",
             "improve",
             "autofix",
+            "--robot",
             "--json",
         ]
         result = _run_cli(cmd)
@@ -321,7 +322,14 @@ class TestAskCLI(unittest.TestCase):
 
     def test_repo_doctor_json_contract(self):
         """Verify `ask repo doctor --json` exposes the golden-path payload."""
-        cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "repo", "doctor", "--json"]
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "doctor",
+            "--robot",
+            "--json",
+        ]
         result = _run_cli(cmd)
         self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
         output = json.loads(result.stdout)

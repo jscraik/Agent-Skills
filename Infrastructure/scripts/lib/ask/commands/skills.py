@@ -1765,7 +1765,7 @@ def improve_skills(
     }
 
     fallback_used = False
-    fallback_allowed = route_decision_status in (None, "unresolved_ambiguity")
+    fallback_allowed = route_decision_status == "unresolved_ambiguity"
     if not isinstance(recommended, dict) and fallback_allowed:
         recommended = _fallback_improvement_candidate(repo_root, goal_text)
         fallback_used = recommended is not None
