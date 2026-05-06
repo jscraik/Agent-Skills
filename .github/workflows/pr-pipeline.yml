@@ -100,37 +100,8 @@ jobs:
     if: ${{ always() && (github.event_name == 'merge_group' || needs.pr-template.result == 'success') }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Enforce Linear-first issue tracking policy
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BRANCH="${{ github.head_ref }}"
-            PR_TITLE="$(cat <<'EOF'
-${{ github.event.pull_request.title }}
-EOF
-)"
-            PR_BODY="$(cat <<'EOF'
-${{ github.event.pull_request.body }}
-EOF
-)"
-            pnpm exec tsx src/cli.ts linear-gate \
-              --branch "$BRANCH" \
-              --pr-title "$PR_TITLE" \
-              --pr-body "$PR_BODY" \
-              --json
-          else
-            pnpm exec tsx src/cli.ts linear-gate \
-              --allow-missing-branch \
-              --allow-missing-pr \
-              --json
-          fi
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
 
   risk-policy-gate:
@@ -142,41 +113,8 @@ EOF
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run fast preflight policy gate
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-            BASE_REF="${{ github.base_ref }}"
-            # Load contract from the trusted base branch, not the PR checkout.
-            # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
-            CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
-            if ! git show "origin/$BASE_REF:harness.contract.json" > "$CONTRACT_PATH"; then
-              echo "::error::Unable to load trusted harness.contract.json from origin/$BASE_REF"
-              exit 1
-            fi
-          else
-            BASE_SHA="${{ github.event.merge_group.base_sha }}"
-            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
-            # Merge queue: contract is committed and protected by branch rules.
-            CONTRACT_PATH="harness.contract.json"
-          fi
-          CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
-          if [[ -z "$CHANGED_FILES" ]]; then
-            CHANGED_FILES="$(git ls-files | paste -sd, -)"
-          fi
-          pnpm exec tsx src/cli.ts preflight-gate \
-            --contract "$CONTRACT_PATH" \
-            --max-tier medium \
-            --files "${CHANGED_FILES}" \
-            --json
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
   dependency-review:
     name: dependency-review
@@ -244,13 +182,6 @@ EOF
       actions: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
       - name: Prepare baseline seed fallback
         run: |
           mkdir -p artifacts/consistency-gate
@@ -263,11 +194,7 @@ EOF
           JSON
           fi
       - name: Run advisory drift gate
-        run: |
-          pnpm exec tsx src/cli.ts drift-gate \
-            --mode advisory \
-            --json \
-            --out artifacts/consistency-gate/consistency-drift-advisory-latest.json
+        run: ./bin/ask repo validate
       - name: Advisory guard (soft-fail)
         run: |
 	          if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
@@ -314,13 +241,6 @@ EOF
       actions: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
       - name: Detect baseline seed
         id: baseline-seed
         run: |
@@ -332,11 +252,7 @@ EOF
           fi
       - name: Run health drift gate
         if: steps.baseline-seed.outputs.seeded == 'true'
-        run: |
-          pnpm exec tsx src/cli.ts drift-gate \
-            --mode health \
-            --json \
-            --out artifacts/consistency-gate/health.json
+        run: ./bin/ask repo validate
       - name: Bootstrap health warning (first-run)
         if: steps.baseline-seed.outputs.seeded != 'true'
         run: |
@@ -378,15 +294,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run lint
-        run: npm run lint
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
   typecheck:
     name: typecheck
@@ -394,15 +303,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run typecheck
-        run: npm run typecheck
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
   test:
     name: test
@@ -410,15 +312,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests
-        run: npm run test
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
   audit:
     name: audit
@@ -426,15 +321,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run audit
-        run: npm run audit
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
   check:
     name: check
@@ -442,15 +330,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run full check
-        run: npm run check
+      - name: Run repo validation
+        run: ./bin/ask repo validate
 
   memory:
     name: memory
