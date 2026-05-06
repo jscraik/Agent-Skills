@@ -114,10 +114,16 @@ jobs:
         shell: bash
         env:
           HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           HEAD_REF: ${{ github.head_ref }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; CircleCI pr-pipeline owns harness package-backed enforcement."
+            printf '{"gate":"linear-gate","status":"deferred","enforced_by":"ci/circleci: pr-pipeline","reason":"github_actions_npm_token_unavailable"}\n'
+            exit 0
+          fi
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             BRANCH="$HEAD_REF"
             bash Infrastructure/scripts/harness-cli.sh linear-gate \
@@ -155,12 +161,18 @@ jobs:
       - name: Run fast preflight policy gate
         env:
           HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_REF: ${{ github.base_ref }}
           MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
           MERGE_GROUP_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
         run: |
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; CircleCI pr-pipeline owns harness package-backed enforcement."
+            printf '{"gate":"risk-policy-gate","status":"deferred","enforced_by":"ci/circleci: pr-pipeline","reason":"github_actions_npm_token_unavailable"}\n'
+            exit 0
+          fi
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             BASE_SHA="$PR_BASE_SHA"
             HEAD_SHA="$PR_HEAD_SHA"
@@ -279,7 +291,28 @@ jobs:
         continue-on-error: true
         env:
           HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            cat > artifacts/consistency-gate/consistency-drift-advisory-latest.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "advisory",
+            "status": "deferred",
+            "outcome": "ok",
+            "error_class": "none",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "enforced_by": "ci/circleci: pr-pipeline",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "github_actions_npm_token_unavailable" },
+            "summary": { "finding_count": 0, "new_count": 0, "preexisting_count": 0, "error_count": 0 },
+            "findings": []
+          }
+          JSON
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; wrote deterministic advisory deferral artifact."
+            exit 0
+          fi
           bash Infrastructure/scripts/harness-cli.sh drift-gate \
             --mode advisory \
             --out artifacts/consistency-gate/consistency-drift-advisory-latest.json \
@@ -357,7 +390,28 @@ jobs:
         continue-on-error: true
         env:
           HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            cat > artifacts/consistency-gate/health.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "health",
+            "status": "deferred",
+            "outcome": "ok",
+            "error_class": "none",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "enforced_by": "ci/circleci: pr-pipeline",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "github_actions_npm_token_unavailable" },
+            "summary": { "finding_count": 0, "new_count": 0, "preexisting_count": 0, "error_count": 0 },
+            "findings": []
+          }
+          JSON
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; wrote deterministic health deferral artifact."
+            exit 0
+          fi
           bash Infrastructure/scripts/harness-cli.sh drift-gate \
             --mode health \
             --out artifacts/consistency-gate/health.json \
