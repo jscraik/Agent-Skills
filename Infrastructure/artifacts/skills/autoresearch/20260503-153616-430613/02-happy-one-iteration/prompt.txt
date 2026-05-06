@@ -1,0 +1,3 @@
+$autoresearch
+
+Please use this skill for one bounded hypothesis on `train.py`; keep it only if `val_bpb` improves and log the result.

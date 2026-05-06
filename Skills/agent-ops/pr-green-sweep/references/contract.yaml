@@ -1,6 +1,6 @@
 schema_version: 1
 skill: pr-green-sweep
-purpose: "Run an until-green PR remediation loop that composes GitHub, git-project-triage, CodeRabbit, autofix, CircleCI, HE heartbeat, and HE router cleanup."
+purpose: "Run an until-green PR remediation loop that composes GitHub, git-project-triage, CodeRabbit, autofix, CircleCI, HE heartbeat, and HE router prune-branches cleanup."
 triggers:
   - "monitor open PRs until green"
   - "set a heartbeat for PR checks and review fixes"
@@ -48,7 +48,7 @@ delegation:
   coderabbit: "CodeRabbit review inventory, comments, and resolution support."
   circleci: "Failing job log inspection, reruns, and CI blocker classification."
   he_heartbeat: "Recurring until-green continuation with explicit stop rule."
-  he_router: "Post-merge branch and worktree pruning."
+  he_router_prune_branches: "Post-merge branch and worktree pruning."
 validation:
   - heartbeat_created_or_reused_before_rotation
   - focused_repo_checks_for_each_fix

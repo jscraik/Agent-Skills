@@ -1,0 +1,15 @@
+version: 2
+goal:
+  slug: invalid-worker-scope
+  status: active
+  objective: "Reject unscoped workers."
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement without a scope."
+    allowed_files: []
+    verify: []
+    stop_if: []
+    receipt_id: null

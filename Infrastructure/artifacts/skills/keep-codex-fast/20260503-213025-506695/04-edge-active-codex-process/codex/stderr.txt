@@ -1,0 +1,9 @@
+2026-05-03T20:36:17.397049Z ERROR codex_core_skills::manager: failed to install system skills: io error while create system skills dir: Operation not permitted (os error 1)
+2026-05-03T20:36:42.429177Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process
+2026-05-03T20:37:02.514468Z ERROR codex_core::tools::router: error=exec_command failed for `/bin/bash -c "python3 - <<'PY'
+from pathlib import Path
+p=Path('Skills/agent-ops/keep-codex-fast/SKILL.md')
+for i,line in enumerate(p.read_text().splitlines(),1):
+    if 1 <= i <= 120:
+        print(f\"{i:4d}  {line}\")
+PY"`: CreateProcess { message: "Rejected(\"approval required by policy, but AskForApproval is set to Never\")" }

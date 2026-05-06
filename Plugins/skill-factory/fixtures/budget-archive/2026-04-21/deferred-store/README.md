@@ -22,6 +22,10 @@ The flat paths [`skills/skill-builder/`](./skills/skill-builder/), [`skills/skil
 
 Use Skill Builder for builder-style output: `builder_result`, `diff_summary`, severity-ranked findings, exact validation outcomes, security notes, a handoff lane only when another skill should take over, and one evidence-backed next step.
 
+## Context Lifecycle
+
+Skills are context packages. Durable changes should move through generate, test, distribute, observe, and adapt instead of ending at template completion. Use [`references/context-development-lifecycle.md`](./references/context-development-lifecycle.md) when repeated review feedback, session evidence, or validation drift should become a skill, eval, or routing improvement.
+
 ## Source Boundaries
 
 Edit canonical plugin source under [`Plugins/skill-factory/`](../skill-factory/). Do not hand-edit generated runtime projections or copied plugin mirrors. Some active skill files resolve through symlinks into [`fixtures/budget-archive/`](./fixtures/budget-archive/); verify with `readlink` or `find -L` before choosing an edit target.

@@ -7,6 +7,7 @@ inputs:
   - "target path or source context"
 outputs:
   - "structured response with explicit status"
+  - "context lifecycle stage changed or blocked"
 non_goals:
   - "unrelated implementation work outside skill scope"
 risks:
@@ -17,7 +18,15 @@ output_contract:
     - "schema_version"
     - "mode"
     - "validation_evidence"
+    - "context_lifecycle_status"
+    - "context.lifecycle.stage"
   optional_fields:
     - "blocked_by"
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."
 observability: "Track pass/fail/blocked outcomes for each validation command in run output."
+context_lifecycle:
+  required_stages: [generate, test, distribute, observe, adapt]
+  minimum_for_behavior_change:
+    - "realistic eval or validation route updated"
+    - "future observation source named"
+    - "raw transcripts and reviewer text kept out of SKILL.md"

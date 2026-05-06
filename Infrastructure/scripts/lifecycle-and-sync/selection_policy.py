@@ -61,6 +61,7 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
 # excluded from the default always-loaded flat skill view.
 DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "agents-md",
+    "keep-codex-fast",
     "autofix",
     "autoresearch",
     "bootstrap",

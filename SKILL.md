@@ -15,10 +15,10 @@ Do not hand-edit runtime projections.
 - [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
-- `total_skills`: 20
+- `total_skills`: 21
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 166729505b5a4a37
+- `policy_identity`: 8c69fbfa81b89658
 
 ## Catalog
 
@@ -36,6 +36,7 @@ Do not hand-edit runtime projections.
 - `docs-expert` — Audit, rewrite, and validate repository documentation when README, runbook, code-doc, config-doc, or public trust-surface claims must match live repo evidence.
 - `fix-mise` — Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift.
 - `improve-codebase-architecture` — Review and improve codebase architecture when deeper module boundaries, clearer context language, better interfaces, testability, or Linear-backed decisions are needed.
+- `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
 - `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
 - `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.
 - `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.

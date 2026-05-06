@@ -1,0 +1,2 @@
+{"id":"R001","task_id":"T001","assignee":"Worker","decision":"complete","evidence":["focused validation passed"]}
+{"id":"R002","task_id":"T002","assignee":"PM","decision":"complete","summary":"Final audit passed.","evidence":["board checked"],"created_at":"2026-05-05T12:00:00Z"}

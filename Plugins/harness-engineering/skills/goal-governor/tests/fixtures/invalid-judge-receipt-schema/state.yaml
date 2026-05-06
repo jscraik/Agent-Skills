@@ -1,0 +1,12 @@
+version: 2
+goal:
+  slug: invalid-judge-receipt-schema
+  status: done
+  objective: "Reject incomplete done Judge receipts."
+tasks:
+  - id: T001
+    type: judge
+    assignee: Judge
+    status: done
+    objective: "Audit the completed goal."
+    receipt_id: R001
