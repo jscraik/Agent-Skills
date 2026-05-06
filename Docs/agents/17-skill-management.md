@@ -5,11 +5,14 @@
 Keep skill authoring and lifecycle details out of the always-loaded root
 instructions while preserving the commands agents need when working on skills.
 
+Before changing skills, sync policy, runtime projections, or agent-facing docs,
+read [UBIQUITOUS_LANGUAGE.md](/UBIQUITOUS_LANGUAGE.md).
+
 ## Install Failure Recovery
 
 ```bash
-./bin/ask skills install <url> --remediate
-./bin/ask skills audit <path> --level strict
+./bin/ask skills install <url> --remediate --robot
+./bin/ask skills audit <path> --level strict --robot
 ```
 
 Use `--remediate` to scaffold missing files during install recovery, then run a
@@ -17,7 +20,7 @@ strict audit before treating the skill as ready.
 
 ## Folding Strategy
 
-If `./bin/ask skills fold source target` returns confidence `>= 0.2`, fold
+If `./bin/ask skills fold source target --robot` returns confidence `>= 0.2`, fold
 rather than duplicate unless the user explicitly wants a separate skill.
 
 ## Line Budget

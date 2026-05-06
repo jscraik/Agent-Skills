@@ -100,10 +100,10 @@ Start with 2-3 focused surfaces before expanding scope.
 - Archived full context: Infrastructure/references/deferred-skill-context/agent-ops-agents-md/.
 - Load archived references, scripts, prompts, templates, or assets only when the active workflow needs that exact detail.
 - Key references:
-  - `references/official-codex-agents-guidance.md` for Codex discovery, precedence, limits, and verification.
-  - `references/project-tailored-agents-baseline.md` for evidence-backed repo operating baselines.
-  - `references/shared-guidance-propagation.md` for aligning shared rules across multiple instruction surfaces.
-  - `references/discovery-interview.md` for underspecified AGENTS refactor requests.
+  - `Infrastructure/references/deferred-skill-context/agent-ops-agents-md/references/official-codex-agents-guidance.md` for Codex discovery, precedence, limits, and verification.
+  - `Infrastructure/references/deferred-skill-context/agent-ops-agents-md/references/project-tailored-agents-baseline.md` for evidence-backed repo operating baselines.
+  - `Infrastructure/references/deferred-skill-context/agent-ops-agents-md/references/shared-guidance-propagation.md` for aligning shared rules across multiple instruction surfaces.
+  - `Infrastructure/references/deferred-skill-context/agent-ops-agents-md/references/discovery-interview.md` for underspecified AGENTS refactor requests.
   - `Plugins/harness-engineering/skills/he-plan/SKILL.md` and `Plugins/harness-engineering/skills/he-plan/references/plan-artifact-contract.md` for this repo's plan contract.
   - OpenAI cookbook `codex_exec_plans` only as background for the Context Pointer pattern; do not let it override Harness Engineering plan doctrine.
 - Keep the active path compact. Do not remove important context for budget trimming.
