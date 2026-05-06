@@ -100,8 +100,37 @@ jobs:
     if: ${{ always() && (github.event_name == 'merge_group' || needs.pr-template.result == 'success') }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - name: Run repo validation
-        run: ./bin/ask repo validate
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
+      - name: Install harness CLI
+        run: npm install -g @brainwav/coding-harness@latest
+      - name: Enforce Linear-first issue tracking policy
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH="${{ github.head_ref }}"
+            harness linear-gate \
+              --branch "$BRANCH" \
+              --pr-title "$PR_TITLE" \
+              --pr-body "$PR_BODY" \
+              --json
+          else
+            harness linear-gate \
+              --allow-missing-branch \
+              --allow-missing-pr \
+              --json
+          fi
 
 
   risk-policy-gate:
@@ -113,8 +142,46 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
-      - name: Run repo validation
-        run: ./bin/ask repo validate
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
+      - name: Install harness CLI
+        run: npm install -g @brainwav/coding-harness@latest
+      - name: Run fast preflight policy gate
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            BASE_REF="${{ github.base_ref }}"
+            # Load contract from the trusted base branch, not the PR checkout.
+            # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
+            CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
+            if ! git show "origin/$BASE_REF:harness.contract.json" > "$CONTRACT_PATH"; then
+              echo "::error::Unable to load trusted harness.contract.json from origin/$BASE_REF"
+              exit 1
+            fi
+          else
+            BASE_SHA="${{ github.event.merge_group.base_sha }}"
+            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
+            # Merge queue: contract is committed and protected by branch rules.
+            CONTRACT_PATH="harness.contract.json"
+          fi
+          CHANGED_FILES="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | paste -sd, -)"
+          if [[ -z "$CHANGED_FILES" ]]; then
+            CHANGED_FILES="$(git ls-files | paste -sd, -)"
+          fi
+          harness preflight-gate \
+            --contract "$CONTRACT_PATH" \
+            --max-tier medium \
+            --files "${CHANGED_FILES}" \
+            --json
 
   dependency-review:
     name: dependency-review
@@ -197,8 +264,8 @@ jobs:
         run: ./bin/ask repo validate
       - name: Advisory guard (soft-fail)
         run: |
-	          if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
-	            echo "::warning::advisory report missing; writing deterministic fallback report."
+          if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
+            echo "::warning::advisory report missing; writing deterministic fallback report."
             cat > artifacts/consistency-gate/consistency-drift-advisory-latest.json <<'JSON'
           {
             "schemaVersion": "1.0.0",
@@ -218,7 +285,7 @@ jobs:
                 "rule_result": "error",
                 "severity": "error",
                 "baseline_state": "new",
-	                "message": "Advisory report missing; generated deterministic fallback report."
+                "message": "Advisory report missing; generated deterministic fallback report."
               }
             ]
           }
