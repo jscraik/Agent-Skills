@@ -16,7 +16,7 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
 - Before changing skills, sync policy, runtime projections, or agent-facing
   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
 - Edit canonical sources, not runtime projections. See
-  [Path Ownership Boundaries](./docs/agents/14-path-ownership-boundaries.md).
+  [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
 
 ## Common Commands
 
@@ -30,19 +30,19 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
 ## Further Guidance
 
 - Repo command behavior and `--robot` mode:
-  [Agent Operating Contract](./docs/agents/16-agent-operating-contract.md)
+  [Agent Operating Contract](./Docs/agents/16-agent-operating-contract.md)
 - Tooling and package command policy:
-  [Tooling and Command Policy](./docs/agents/02-tooling-policy.md)
+  [Tooling and Command Policy](./Docs/agents/02-tooling-policy.md)
 - Validation order and evidence rules:
-  [Validation and Checks](./docs/agents/04-validation.md)
+  [Validation and Checks](./Docs/agents/04-validation.md)
 - Workflow, git, refactoring, docs, and safety:
-  [Workflow and Safety Guidance](./docs/agents/13-workflow-and-safety-guidance.md)
+  [Workflow and Safety Guidance](./Docs/agents/13-workflow-and-safety-guidance.md)
 - Skill install, audit, fold, and line-budget rules:
-  [Skill Management](./docs/agents/17-skill-management.md)
+  [Skill Management](./Docs/agents/17-skill-management.md)
 - Browser and local preview fallback:
-  [Browser and Local Preview](./docs/agents/18-browser-and-local-preview.md)
+  [Browser and Local Preview](./Docs/agents/18-browser-and-local-preview.md)
 - Instruction cleanup notes and stale guidance to remove:
-  [Contradictions and Cleanup](./docs/agents/05-contradictions-and-cleanup.md)
+  [Contradictions and Cleanup](./Docs/agents/05-contradictions-and-cleanup.md)
 
-Start at [docs/agents/README.md](./docs/agents/README.md) when you need the
+Start at [Docs/agents/README.md](./Docs/agents/README.md) when you need the
 full instruction map.

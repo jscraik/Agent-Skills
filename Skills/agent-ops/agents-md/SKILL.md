@@ -31,8 +31,15 @@ Context Pointers are the links, module names, shared functions, command handles,
 - Schema-bound outputs include schema_version.
 - Instruction-surface findings or edited AGENTS files.
 - Contradiction and precedence notes.
-- Context ledger: what stayed root, moved to linked docs, became nested scope, stayed supplemental, or was flagged for deletion.
-- Context Pointer map: the links, nested AGENTS files, skills, commands, or code anchors that now carry the relocated context.
+- Context ledger: a returned section that lists what stayed root, moved to
+  linked docs, became nested scope, stayed supplemental, or was flagged for
+  deletion. Each entry should include the evidence or reason for that routing.
+- Context Pointer map: a returned section that lists the links, nested AGENTS
+  files, skills, commands, headings, or code anchors that now carry relocated
+  context. Verify every pointer before relying on it.
+- Contradiction notes: a returned section that records resolved contradictions,
+  unresolved contradictions requiring user choice, and stale instructions that
+  were neutralized or flagged for deletion.
 - Validation commands and remaining instruction risks.
 
 ## Workflow

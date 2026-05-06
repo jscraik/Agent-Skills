@@ -51,9 +51,14 @@ This workflow keeps delivery auditable, reversible, and consistent even for solo
 
 ## Required pre-merge gates
 
-- bash scripts/validate-codestyle.sh
-- npm run check
-- test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null
+- `./bin/ask repo validate`
+- Run package-level checks only inside verified package roots with their own
+  `package.json` and lockfile.
+- Do not run `npm run check` at the repository root; this repository has no
+  root package manager install step.
+- Keep any task-specific memory or artifact validation tied to the owning
+  package, skill, or wrapper command instead of adding root package-manager
+  gates.
 
 ## Required tooling baseline
 

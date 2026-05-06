@@ -29,5 +29,5 @@ clear link in the `SKILL.md`.
 Do not delete important context just to reduce line count. Context is preserved
 by relocation, not removed.
 
-See [Tooling and Command Policy](/docs/agents/02-tooling-policy.md#skill-line-budget-policy)
+See [Tooling and Command Policy](/Docs/agents/02-tooling-policy.md#skill-line-budget-policy)
 for the detailed policy.
