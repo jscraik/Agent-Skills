@@ -416,12 +416,15 @@ jobs:
             --mode health \
             --out artifacts/consistency-gate/health.json \
             --json
-      - name: Bootstrap health warning (fallback)
+      - name: Ensure health artifact
         if: always()
+        env:
+          BASELINE_SEEDED: ${{ steps.baseline-seed.outputs.seeded }}
         run: |
           mkdir -p artifacts/consistency-gate
           if [[ ! -s artifacts/consistency-gate/health.json ]]; then
-            cat > artifacts/consistency-gate/health.json <<'JSON'
+            if [[ "${BASELINE_SEEDED:-false}" != "true" ]]; then
+              cat > artifacts/consistency-gate/health.json <<'JSON'
           {
             "schemaVersion": "1.0.0",
             "command": "drift-gate",
@@ -445,7 +448,36 @@ jobs:
             ]
           }
           JSON
-            echo "::warning::consistency-drift-health wrote fallback health artifact."
+              echo "::warning::consistency-drift-health wrote bootstrap health artifact."
+              exit 0
+            fi
+
+            cat > artifacts/consistency-gate/health.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "health",
+            "status": "blocked",
+            "outcome": "error",
+            "error_class": "io",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": true, "reason": "health_report_missing_after_drift_gate" },
+            "summary": { "finding_count": 1, "new_count": 1, "preexisting_count": 0, "error_count": 1 },
+            "findings": [
+              {
+                "rule_id": "report.output.missing",
+                "surface": "status",
+                "rule_result": "error",
+                "severity": "error",
+                "baseline_state": "new",
+                "message": "Health report missing after seeded drift-gate run; generated deterministic failure report."
+              }
+            ]
+          }
+          JSON
+            echo "::error::consistency-drift-health missing report after seeded drift-gate run."
+            exit 1
           fi
       - name: Upload health artifact
         if: always()

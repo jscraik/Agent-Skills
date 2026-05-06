@@ -47,7 +47,7 @@ try {
 resolution_status=$?
 set -e
 
-if [[ $resolution_status -eq 42 || -z "$CLI_PATH" ]]; then
+if [[ $resolution_status -eq 42 ]]; then
 	if [[ "${HARNESS_CLI_ALLOW_NPM_EXEC:-}" == "1" ]]; then
 		if ! command -v npm >/dev/null 2>&1; then
 			echo "Error: npm is required for HARNESS_CLI_ALLOW_NPM_EXEC fallback." >&2
@@ -69,6 +69,15 @@ fi
 
 if [[ $resolution_status -ne 0 ]]; then
 	echo "Error: failed to resolve the local @brainwav/coding-harness CLI entrypoint." >&2
+	echo "This indicates a local install/bootstrap problem, not a harness command failure." >&2
+	echo "Repair from the repo root with one of:" >&2
+	echo "  npm install" >&2
+	echo "  npm install --save-dev @brainwav/coding-harness" >&2
+	exit 1
+fi
+
+if [[ -z "$CLI_PATH" ]]; then
+	echo "Error: local @brainwav/coding-harness resolver returned an empty CLI path." >&2
 	echo "This indicates a local install/bootstrap problem, not a harness command failure." >&2
 	echo "Repair from the repo root with one of:" >&2
 	echo "  npm install" >&2
