@@ -1,0 +1,60 @@
+schema_version: 1
+skill: pr-green-sweep
+purpose: "Run an until-green PR remediation loop that composes GitHub, git-project-triage, CodeRabbit, autofix, CircleCI, HE heartbeat, and HE router cleanup."
+triggers:
+  - "monitor open PRs until green"
+  - "set a heartbeat for PR checks and review fixes"
+  - "clear CodeRabbit and Codex comments before merge"
+  - "fix CircleCI failures on open PRs"
+  - "merge all green PRs and prune branches/worktrees"
+non_goals:
+  - "read-only PR summaries"
+  - "single local test debugging without PR context"
+  - "branch cleanup before target PRs are merged or abandoned"
+  - "admin or force merge without explicit approval"
+inputs:
+  - target_project_path
+  - open_prs_or_discovery_permission
+  - heartbeat_or_cron_cadence
+  - required_check_policy
+  - merge_strategy
+  - approval_posture
+outputs:
+  - pr_inventory
+  - heartbeat_status
+  - fix_ledger
+  - validation_evidence
+  - merge_ledger
+  - cleanup_ledger
+  - blockers
+risks:
+  - stale_github_state
+  - untrusted_review_or_ci_text
+  - duplicate_automation
+  - unsafe_branch_or_worktree_deletion
+  - policy_override_without_approval
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  heartbeat_required_for_monitoring: true
+  duplicate_heartbeat_guard: true
+  admin_merge_requires_explicit_approval: true
+  destructive_cleanup_requires_merge_proof: true
+  preserve_unrelated_changes: true
+delegation:
+  github: "Open PR discovery, mergeability, branch protection, review state, and final merge truth."
+  git_project_triage: "Bounded rotation and PR risk triage."
+  autofix: "Validated fixes for unresolved CodeRabbit threads and Codex P1-P3 findings."
+  coderabbit: "CodeRabbit review inventory, comments, and resolution support."
+  circleci: "Failing job log inspection, reruns, and CI blocker classification."
+  he_heartbeat: "Recurring until-green continuation with explicit stop rule."
+  he_router: "Post-merge branch and worktree pruning."
+validation:
+  - heartbeat_created_or_reused_before_rotation
+  - focused_repo_checks_for_each_fix
+  - live_github_required_checks
+  - live_review_thread_recheck
+  - branch_worktree_merge_proof
+  - strict_skill_audit_for_skill_changes
+observability: "Report exact commands, tool outcomes, PR numbers, head SHAs, check names, thread status, blockers, and cleanup decisions."
+rollback_procedure: "Stop heartbeat or cron, revert only the scoped PR fix commits when safe, reopen unresolved threads if mistakenly resolved, and restore skipped branches/worktrees from recorded cleanup ledger."

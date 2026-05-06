@@ -55,16 +55,31 @@ metadata:
 When refusing or deferring unsafe cleanup, say `blocked`, name the blocker, and give the next safe command or confirmation needed. When proceeding, include `schema_version`, requested mode, Codex home privacy level, exact command, pass/fail/blocked outcome, created artifact paths, residual risk, and next smallest safe action.
 
 ## Workflow
-1. Start with a read-only report plan for the resolved Codex home. If a checked-in helper script exists, use its `report` mode; otherwise inspect only metadata, file counts, sizes, and timestamps.
+1. Run report mode first:
+
+```bash
+python3 Skills/agent-ops/keep-codex-fast/scripts/keep_codex_fast.py report
+```
+
 2. Summarize active sessions, archives, stale worktrees, logs, extended path candidates, and config prune candidates.
-3. If old active chats may still matter, create repo-local handoff docs before archival. Use `references/handoff-template.md` when the user wants a template and it exists.
-4. For backup-only evidence, write backup artifacts only after the user asks for backup mode; do not move sessions, rotate logs, or rewrite config.
+3. If old active chats may still matter, create repo-local handoff docs before archival. Use `references/handoff-template.md` when the user wants a template.
+4. For backup-only evidence, run:
+
+```bash
+python3 Skills/agent-ops/keep-codex-fast/scripts/keep_codex_fast.py backup
+```
+
 5. Before any apply run, confirm:
    - the report was reviewed in this thread
    - important active chats have handoffs or are not needed
    - Codex is closed, or the user accepts waiting for exit
    - the exact Codex home is correct
-6. Apply archive actions only with explicit confirmation and an implementation path that already exists in the repository.
+6. Apply archive actions only with explicit confirmation:
+
+```bash
+python3 Skills/agent-ops/keep-codex-fast/scripts/keep_codex_fast.py apply --confirm-codex-home ~/.codex
+```
+
 7. Verify with a second report and include exact command outcomes.
 8. If the user wants automation, create only a report/reminder automation. Its prompt must explicitly forbid `apply`, backup, config pruning, moves, and log rotation.
 
@@ -101,11 +116,6 @@ Config pruning is report-only by default. Run the dedicated config prune command
 - Hiding skipped process checks, missing databases, or schema drift behind a generic success message.
 - Slimming this skill by deleting safety context; move depth to references instead.
 
-## Gotchas
-- This skill package may be installed before its optional helper script lands. If `scripts/keep_codex_fast.py` or its Infrastructure implementation is missing, treat the skill as a manual safety runbook and do not invent commands.
-- Do not treat generated runtime handles under `.agents/skills/keep-codex-fast` as canonical source; the source of truth is this `Skills/agent-ops/keep-codex-fast/SKILL.md` package.
-- Report-only automation is allowed, but recurring cleanup is not.
-
 ## Examples
 - "Use $keep-codex-fast to inspect my Codex local state and tell me what is safe to archive."
 - "Back up Codex state, but do not move sessions or rewrite config."
@@ -114,7 +124,7 @@ Config pruning is report-only by default. Run the dedicated config prune command
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
-- If a helper script exists, prefer it over retyping cleanup logic; otherwise stay in manual report mode.
+- The stable skill entrypoint is `scripts/keep_codex_fast.py`; the full implementation lives at `Infrastructure/scripts/agent-ops/keep_codex_fast.py` to keep the skill package light.
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` for quality and benchmark expectations.
 - Use `references/handoff-template.md` when old chats need durable continuity before archival.

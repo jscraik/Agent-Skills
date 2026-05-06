@@ -1,0 +1,4 @@
+Yes. I’ll skip the report and I won’t ask you to close Codex.
+
+I need one concrete anchor for the cleanup target first, because this turn doesn’t have enough live repo context to safely infer what to clean up from the dirty worktree. If you send me the file, path, or the specific cleanup you want finished, I’ll apply it directly.
+

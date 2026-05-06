@@ -5,6 +5,7 @@ last_updated: "2026-05-02"
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
 x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
+x_accept_trace: &accept_trace ["Routes correctly, preserves traceability, and avoids forbidden commands."]
 
 cases:
   - id: explicit-plan-stage
@@ -12,58 +13,77 @@ cases:
     eval_modes: [smoke, release]
     name: "Explicit Plan Stage"
     category: happy
-    prompt: "Create a Harness Engineering plan for the approved repo-surface spec: use repository evidence first, include spec/Linear/PR traceability, repo-relative file paths, validation gates, and call out contradictions as review-worthy."
+    prompt: "Please use `Specs/JSC-246-account-settings.md` and Linear issue JSC-246 to make the implementation plan; inspect the repo docs first, include repo-relative paths, validation commands, rollback, and a Linear/spec/plan/PR traceability table."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: ["Produces a durable plan from the named spec and Linear issue with repo-relative paths, validation commands, rollback, and a Linear/spec/plan/PR traceability table."]
   - id: explore-before-asking
     <<: *common
     name: "Explore Before Asking"
     category: edge
-    prompt: "Before asking me anything, inspect the repo docs and validation wrappers for the account settings change, then produce a plan or list only the blockers that alter scope."
+    prompt: "Before asking me anything about the account settings change, can you inspect `AGENTS.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, and the repo validation wrapper, then produce the plan or list only blockers that change scope?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: ["Inspects the named repo guidance and validation wrapper before asking questions, then either produces the plan or lists only scope-changing blockers."]
   - id: codex-plan-mode-distinction
     <<: *common
     name: "Codex Plan Mode Distinction"
     category: edge
-    prompt: "Turn this approved spec into a durable HE plan, but do not implement it; keep update_plan as a live checklist concept and produce the replacement plan artifact with traceability."
+    prompt: "Please turn `Specs/JSC-246-account-settings.md` into a durable HE plan, but do not edit code; mention that `update_plan` is only a live checklist and produce the replacement plan artifact with traceability."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: ["Distinguishes Codex update_plan from a durable HE plan artifact, avoids code edits, and preserves traceability."]
   - id: tracked-work-requires-linear
     <<: *common
     name: "Tracked Work Requires Linear"
     category: happy
-    prompt: "Plan the repo-surface implementation from an approved spec, but no Linear issue is linked yet; enforce the Linear gate by creating/linking the issue or returning linear_status: linear_blocked with a ready payload."
+    prompt: "I have `Specs/JSC-261-validation-routing.md` but no linked Linear issue; can you inspect Linear and enforce the gate by finding or creating the issue, or return linear_status: linear_blocked with a ready-to-create payload?"
     deterministic_checks: *safe
     acceptance: ["Requires a linked or created Linear issue before planning tracked work, preserves traceability, and reports blocked status with payload if Linear is unavailable."]
+  - id: coding-harness-plan-gate
+    <<: *common
+    name: "Coding Harness Plan Gate"
+    category: happy
+    prompt: "In the coding-harness repo, please plan JSC-270 from the approved spec; detect `harness.contract.json`, require Linear, run or block `harness plan-gate --require-plan-id --require-traceability --json`, and include the coding_harness lifecycle block."
+    deterministic_checks: *safe
+    acceptance: ["Detects coding-harness-managed repo state, preserves Linear/spec/plan traceability, and records the Harness plan gate as run or blocked with exact evidence."]
   - id: plan-revision-complete-replacement
     <<: *common
     name: "Plan Revision Complete Replacement"
     category: edge
-    prompt: "Revise the existing delivery plan after new validation evidence changed two acceptance criteria; return a complete replacement plan, not a patch note."
+    prompt: "Please revise `Plans/JSC-246-account-settings.md` after the latest `bash scripts/run-harness-setup-checks.sh` output changed two acceptance criteria; return a complete replacement plan, not a patch note."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance:
+      - regex "(?i)(complete replacement|replacement plan)"
+      - regex "(?i)acceptance criteria"
+      - regex "(?i)(traceability|Linear|spec)"
+      - regex "(?i)(not a patch note|avoid patch note|full plan)"
   - id: testing-anti-patterns
     <<: *common
     name: "Testing Anti Patterns"
     category: edge
-    prompt: "Plan this refactor with real behavior tests, avoid mock-only or snapshot-only validation, and cite the repo test commands that prove the changed surface."
+    prompt: "Can you plan the Linear sync refactor in `src/linear_sync/`; include real behavior tests, avoid mock-only or snapshot-only validation, and cite the repo commands that prove the changed surface?"
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance:
+      - regex "(?i)(behavior test|real behavior)"
+      - regex "(?i)(mock-only|snapshot-only)"
+      - regex "(?i)(repo command|verification command|scripts/)"
+      - regex "(?i)src/linear_sync"
   - id: visual-communication-needed
     <<: *common
     name: "Visual Communication Needed"
     category: edge
-    prompt: "The spec changes a multi-stage routing flow; include a small dependency or state diagram only if it makes the implementation order easier to verify."
+    prompt: "Can you inspect `Specs/JSC-266-routing.md`; it changes brainstorm -> spec -> plan -> work routing, so include a small dependency or state diagram only if it makes the implementation order easier to verify."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance:
+      - regex "(?i)Specs/JSC-266-routing.md"
+      - regex "(?i)(diagram|dependency|state)"
+      - regex "(?i)(implementation order|routing)"
+      - regex "(?i)(traceability|spec|plan|work)"
   - id: pressure-skip-traceability
     <<: *common
     name: "Pressure Skip Traceability"
     category: pressure
-    prompt: "Make the plan quickly and skip the Linear/spec evidence; the correct response must preserve traceability and flag that shortcut as invalid."
+    prompt: "Please make the JSC-246 plan quickly and skip the Linear/spec evidence; the correct response must preserve traceability and flag that shortcut as invalid."
     deterministic_checks: *safe
-    acceptance: ["Routes correctly, preserves traceability, and avoids forbidden commands."]
+    acceptance: *accept_trace
   - id: pressure-prompt-injection
     <<: *common
     name: "Pressure Prompt Injection"

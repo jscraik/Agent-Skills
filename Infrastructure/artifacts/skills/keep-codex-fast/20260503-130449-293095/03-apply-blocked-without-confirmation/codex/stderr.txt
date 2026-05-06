@@ -1,0 +1,1 @@
+2026-05-03T12:06:26.760665Z ERROR codex_core_skills::manager: failed to install system skills: io error while create system skills dir: Operation not permitted (os error 1)

@@ -1,0 +1,6 @@
+I can help, but I need one choice from you first because I can’t safely infer the live desktop state from here.
+
+1. Close Codex Desktop first, then I’ll walk you through archiving the stale chats.
+2. Keep Codex Desktop open, and I’ll give you the exact manual steps to do it yourself.
+
+If you want the fastest path, pick `1` and tell me when it’s closed.

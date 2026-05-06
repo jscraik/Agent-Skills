@@ -315,6 +315,12 @@ def _prune_obsolete_command_handle_dirs(
 
 def _write_generated_text(path: Path, content: str) -> None:
     """Write generated content via same-directory replace to tolerate protected files."""
+    if path.is_file():
+        try:
+            if path.read_text(encoding="utf-8") == content:
+                return
+        except OSError:
+            pass
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     try:

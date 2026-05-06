@@ -30,6 +30,9 @@
 - [13-workflow-and-safety-guidance](/Docs/agents/13-workflow-and-safety-guidance.md)
 - [14-path-ownership-boundaries](/Docs/agents/14-path-ownership-boundaries.md)
 - [15-repo-surface-ownership](/Docs/agents/15-repo-surface-ownership.md)
+- [16-agent-operating-contract](/docs/agents/16-agent-operating-contract.md)
+- [17-skill-management](/docs/agents/17-skill-management.md)
+- [18-browser-and-local-preview](/docs/agents/18-browser-and-local-preview.md)
 - [ask product golden path command contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
 
 ## Quick picks
@@ -42,4 +45,7 @@
 | Release and risky git controls                    | [/Docs/agents/08-release-and-change-control.md](/Docs/agents/08-release-and-change-control.md)                                     |
 | Canonical vs runtime edit ownership               | [/Docs/agents/14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md)                                       |
 | Repo surface classification and cleanup ownership | [/Docs/agents/15-repo-surface-ownership.md](/Docs/agents/15-repo-surface-ownership.md)                                             |
+| Repo command behavior and robot mode              | [/docs/agents/16-agent-operating-contract.md](/docs/agents/16-agent-operating-contract.md)                                         |
+| Skill install, audit, fold, and line budgets      | [/docs/agents/17-skill-management.md](/docs/agents/17-skill-management.md)                                                         |
+| Browser and local preview fallback                | [/docs/agents/18-browser-and-local-preview.md](/docs/agents/18-browser-and-local-preview.md)                                       |
 | Product command contracts                         | [/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) |

@@ -14,6 +14,7 @@ outputs:
   - chosen lane and synchronized task progress
   - implemented code plus validation evidence
   - traceability evidence linking Linear, spec, plan, PR, IDs, and validation
+  - mandatory coding_harness lifecycle block for coding-harness-managed repos, with blast-radius, policy, preflight, validation-plan, and transition evidence; if a gate cannot run, record explicit blocked evidence
   - lifecycle exit status with schema_version, he_stage, mode, tracker_status, artifact_status, traceability_status, validation_status, exit_status, next_stage, missing_inputs, and evidence fields
   - drift updates when execution changes the contract
   - handoff with Linear, PR, completed IDs, risks, rollback, and monitoring notes
@@ -27,6 +28,7 @@ risks:
   - wrong artifact; mitigate with current-vs-latest checks
   - missing tracker; mitigate by stopping non-trivial tracked work
   - contract drift; mitigate with artifact update before off-plan work
+  - missed Harness admission gates; mitigate by recording every available gate as run or blocked with exact command/path evidence
   - dirty worktree damage; mitigate by preserving user changes
   - delegate drift; mitigate by parent review and validation
 observability: >

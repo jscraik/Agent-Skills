@@ -11,7 +11,7 @@ hooks-commit-msg:
 	@hook_file="$(HOOK_COMMIT_MSG_FILE)"; \
 	case "$$hook_file" in \
 	/*) ;; \
-	*) hook_file="$(CURDIR)/../$$hook_file" ;; \
+	*) hook_file="$(CURDIR)/$$hook_file" ;; \
 	esac; \
 	$(MAKE) -C .. hooks-commit-msg HOOK_COMMIT_MSG_FILE="$$hook_file"
 

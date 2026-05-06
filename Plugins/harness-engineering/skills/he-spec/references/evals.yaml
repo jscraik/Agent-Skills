@@ -5,6 +5,7 @@ last_updated: "2026-05-02"
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
 x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
+x_accept_trace: &accept_trace ["Routes correctly, preserves traceability, and avoids forbidden commands."]
 
 cases:
   - id: explicit-spec-stage
