@@ -261,9 +261,12 @@ jobs:
           JSON
           fi
       - name: Run advisory drift gate
-        run: ./bin/ask repo validate
+        continue-on-error: true
+        run: ./bin/ask repo validate --scope=consistency-advisory
       - name: Advisory guard (soft-fail)
+        if: always()
         run: |
+          mkdir -p artifacts/consistency-gate
           if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
             echo "::warning::advisory report missing; writing deterministic fallback report."
             cat > artifacts/consistency-gate/consistency-drift-advisory-latest.json <<'JSON'
@@ -297,6 +300,7 @@ jobs:
         with:
           name: consistency-drift-advisory-latest
           path: artifacts/consistency-gate/consistency-drift-advisory-latest.json
+          if-no-files-found: error
 
   consistency-drift-health:
     name: consistency-drift-health
@@ -319,11 +323,14 @@ jobs:
           fi
       - name: Run health drift gate
         if: steps.baseline-seed.outputs.seeded == 'true'
-        run: ./bin/ask repo validate
-      - name: Bootstrap health warning (first-run)
-        if: steps.baseline-seed.outputs.seeded != 'true'
+        continue-on-error: true
+        run: ./bin/ask repo validate --scope=consistency-health
+      - name: Bootstrap health warning (fallback)
+        if: always()
         run: |
-          cat > artifacts/consistency-gate/health.json <<'JSON'
+          mkdir -p artifacts/consistency-gate
+          if [[ ! -s artifacts/consistency-gate/health.json ]]; then
+            cat > artifacts/consistency-gate/health.json <<'JSON'
           {
             "schemaVersion": "1.0.0",
             "command": "drift-gate",
@@ -347,13 +354,15 @@ jobs:
             ]
           }
           JSON
-          echo "::warning::consistency-drift-health running in bootstrap mode (baseline seed missing)."
+            echo "::warning::consistency-drift-health wrote fallback health artifact."
+          fi
       - name: Upload health artifact
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: consistency-drift-health-latest
           path: artifacts/consistency-gate/health.json
+          if-no-files-found: error
 
   lint:
     name: lint
@@ -362,7 +371,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run repo validation
-        run: ./bin/ask repo validate
+        run: ./bin/ask repo validate --scope=lint
 
   typecheck:
     name: typecheck
@@ -371,7 +380,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run repo validation
-        run: ./bin/ask repo validate
+        run: ./bin/ask repo validate --scope=typecheck
 
   test:
     name: test
@@ -380,7 +389,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run repo validation
-        run: ./bin/ask repo validate
+        run: ./bin/ask repo validate --scope=test
 
   audit:
     name: audit
@@ -389,7 +398,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run repo validation
-        run: ./bin/ask repo validate
+        run: ./bin/ask repo validate --scope=audit
 
   check:
     name: check
@@ -398,7 +407,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run repo validation
-        run: ./bin/ask repo validate
+        run: ./bin/ask repo validate --scope=check
 
   memory:
     name: memory

@@ -96,6 +96,29 @@ class TestAskRepoValidate(unittest.TestCase):
         self.assertEqual(result.data["required_failures"], 1)
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
+    def test_repo_validate_forwards_scope_to_validate_all(self) -> None:
+        lines = [
+            "🔍 Running all validations...\n",
+            "🎯 Validation scope: lint\n",
+            "Validation summary:\n",
+            "- required_failures: 0\n",
+            "- warn_only_issues: 0\n",
+        ]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            with patch(
+                "ask.commands.repo.subprocess.Popen",
+                return_value=_FakePopen(lines, returncode=0),
+            ) as popen:
+                result = repo_validate(repo, ephemeral=True, scope="lint")
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["scope"], "lint")
+        cmd = popen.call_args.args[0]
+        self.assertIn("--scope", cmd)
+        self.assertIn("lint", cmd)
+
 
 if __name__ == "__main__":
     unittest.main()

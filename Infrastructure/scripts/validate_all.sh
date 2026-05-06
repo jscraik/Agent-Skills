@@ -4,13 +4,16 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--changed-files <file>...]
+Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--scope <name>] [--changed-files <file>...]
 
   --ephemeral   Write logs to a temporary directory and do not mutate repo
                 validation artifacts. Intended for git hook runs.
   --persistent  Write logs to Infrastructure/artifacts/validation/<timestamp> and refresh
                 Infrastructure/artifacts/validation/latest. This is the default behavior.
   --fail-fast   Stop scheduling new checks after the first required failure.
+  --scope       Run a named validation subset. Valid scopes: all, lint,
+                typecheck, test, audit, check, consistency-advisory,
+                consistency-health.
   --changed-files
                 Scope checks to files changed in this lane. When omitted, run full validation.
 EOF
@@ -18,6 +21,7 @@ EOF
 
 output_mode="${VALIDATE_ALL_OUTPUT_MODE:-persistent}"
 fail_fast=0
+validation_scope="all"
 changed_files=()
 changed_files_mode=0
 parallel_limit="${VALIDATE_ALL_MAX_PARALLEL:-2}"
@@ -32,6 +36,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --fail-fast)
       fail_fast=1
+      ;;
+    --scope)
+      shift
+      if [[ $# -eq 0 || "$1" == --* ]]; then
+        echo "Error: --scope requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      validation_scope="$1"
+      ;;
+    --scope=*)
+      validation_scope="${1#--scope=}"
       ;;
     --changed-files)
       changed_files_mode=1
@@ -57,6 +73,16 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+case "$validation_scope" in
+  all|lint|typecheck|test|audit|check|consistency-advisory|consistency-health)
+    ;;
+  *)
+    echo "Error: unknown validation scope '$validation_scope'" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
 
 if [[ "$changed_files_mode" -eq 1 ]]; then
   normalized_changed_files=()
@@ -178,8 +204,66 @@ mark_blocked_check() {
 }
 
 # should_run_check determines whether a check should run in changed-files mode.
+check_matches_validation_scope() {
+  local slug="$1"
+
+  case "$validation_scope" in
+    all|check)
+      return 0
+      ;;
+    lint)
+      case "$slug" in
+        docs-lint|skill-types|openai-format|progressive-disclosure)
+          return 0
+          ;;
+      esac
+      ;;
+    typecheck)
+      case "$slug" in
+        verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|selection-contract|router-schema|ask-cli-modularity)
+          return 0
+          ;;
+      esac
+      ;;
+    test)
+      case "$slug" in
+        skill-lifecycle-tests|skill-authoring-family|skill-graph-profiles|gotcha-store)
+          return 0
+          ;;
+      esac
+      ;;
+    audit)
+      case "$slug" in
+        skill-catalog|plugin-shadowing|provider-policy|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
+          return 0
+          ;;
+      esac
+      ;;
+    consistency-advisory)
+      case "$slug" in
+        plan-graphs|recursive-artifacts|docs-lint|projection-integrity|selection-contract|router-schema|selection-gate-severity)
+          return 0
+          ;;
+      esac
+      ;;
+    consistency-health)
+      case "$slug" in
+        runtime-separation-*|selection-contract|router-schema|selection-gate-severity)
+          return 0
+          ;;
+      esac
+      ;;
+  esac
+
+  return 1
+}
+
 should_run_check() {
   local slug="$1"
+  if ! check_matches_validation_scope "$slug"; then
+    return 1
+  fi
+
   if [[ "$changed_files_mode" -eq 0 || ${#changed_files[@]} -eq 0 ]]; then
     return 0
   fi
@@ -338,6 +422,9 @@ run_initial_warn_checks() {
 echo "🔍 Running all validations..."
 echo "📁 Validation logs: $run_dir"
 echo "🐍 Python launcher: $python_cmd_display"
+if [[ "$validation_scope" != "all" ]]; then
+  echo "🎯 Validation scope: $validation_scope"
+fi
 if [[ "$output_mode" == "ephemeral" ]]; then
   echo "🧹 Ephemeral mode: repo validation artifacts will not be updated"
 fi

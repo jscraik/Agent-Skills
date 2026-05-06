@@ -43,6 +43,18 @@
 ## PR gate structure
 See [CI Required Checks](/Docs/agents/12-ci-required-checks.md) for the complete dependency policy and workflow orchestration.
 
+Named PR validation jobs call `./bin/ask repo validate --scope=<name>` so the
+job name matches the subset it enforces:
+- `lint`: docs, OpenAI skill format, skill type, and progressive-disclosure linting.
+- `typecheck`: ask CLI, lifecycle, router, and governance-contract shape checks.
+- `test`: skill lifecycle, authoring-family, graph-profile, and gotcha-store checks.
+- `audit`: catalog, policy, projection, ownership, budget, shadowing, and runtime-separation checks.
+- `check`: the full validation suite.
+- `consistency-advisory` and `consistency-health`: drift artifact lanes used by the PR workflow.
+
+Unknown scopes are rejected by `./bin/ask repo validate` and
+`bash Infrastructure/scripts/validate_all.sh` with a non-zero exit.
+
 ## Authoring-family contract behavior
 `authoring-family-gate` invokes `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`.
 
