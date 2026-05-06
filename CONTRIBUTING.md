@@ -51,9 +51,16 @@ This workflow keeps delivery auditable, reversible, and consistent even for solo
 
 ## Required pre-merge gates
 
-- bash scripts/validate-codestyle.sh
-- npm run check
-- test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null
+- `./bin/ask repo validate`
+- Run package-level checks only inside verified package roots with their own
+  `package.json` and lockfile.
+- Do not run `npm run check` at the repository root; this repository has no
+  root package manager install step.
+- Treat package-manager repair commands in repo-template or consumer-repo
+  sections as scoped to repositories that actually contain that package root.
+- Keep any task-specific memory or artifact validation tied to the owning
+  package, skill, or wrapper command instead of adding root package-manager
+  gates.
 
 ## Required tooling baseline
 
@@ -116,10 +123,11 @@ Recommended policy:
 - `harness init` also scaffolds `scripts/harness-cli.sh` for repositories that want a repo-local wrapper around the published CLI package.
 - The wrapper resolves `@brainwav/coding-harness/dist/cli.js` from the current repository before running any harness command.
 - If the wrapper cannot resolve the package, treat that as local install/bootstrap drift rather than a harness command failure.
-- Repair from the repo root with:
+- In a consumer repository with a root `package.json` and lockfile, repair from
+  that repo root with:
   - `npm install`
   - `npm install --save-dev @brainwav/coding-harness`
-- After repair, rerun:
+- After repair in that verified package root, rerun:
   - `bash scripts/harness-cli.sh <command>`
   - `npm exec harness -- <command>`
 

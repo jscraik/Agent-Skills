@@ -103,30 +103,36 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
       - name: Enforce Linear-first issue tracking policy
         shell: bash
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BRANCH="${{ github.head_ref }}"
-            PR_TITLE="$(cat <<'EOF'
-${{ github.event.pull_request.title }}
-EOF
-)"
-            PR_BODY="$(cat <<'EOF'
-${{ github.event.pull_request.body }}
-EOF
-)"
-            pnpm exec tsx src/cli.ts linear-gate \
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; CircleCI pr-pipeline owns harness package-backed enforcement."
+            printf '{"gate":"linear-gate","status":"deferred","enforced_by":"ci/circleci: pr-pipeline","reason":"github_actions_npm_token_unavailable"}\n'
+            exit 0
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BRANCH="$HEAD_REF"
+            bash Infrastructure/scripts/harness-cli.sh linear-gate \
               --branch "$BRANCH" \
               --pr-title "$PR_TITLE" \
               --pr-body "$PR_BODY" \
               --json
           else
-            pnpm exec tsx src/cli.ts linear-gate \
+            bash Infrastructure/scripts/harness-cli.sh linear-gate \
               --allow-missing-branch \
               --allow-missing-pr \
               --json
@@ -145,16 +151,32 @@ EOF
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run fast preflight policy gate
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-            BASE_REF="${{ github.base_ref }}"
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
+      - name: Run fast preflight policy gate
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_REF: ${{ github.base_ref }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          MERGE_GROUP_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
+        run: |
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; CircleCI pr-pipeline owns harness package-backed enforcement."
+            printf '{"gate":"risk-policy-gate","status":"deferred","enforced_by":"ci/circleci: pr-pipeline","reason":"github_actions_npm_token_unavailable"}\n'
+            exit 0
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="$PR_BASE_SHA"
+            HEAD_SHA="$PR_HEAD_SHA"
+            BASE_REF="$PR_BASE_REF"
             # Load contract from the trusted base branch, not the PR checkout.
             # Prevents a malicious PR from weakening policy by modifying harness.contract.json.
             CONTRACT_PATH="$RUNNER_TEMP/harness.contract.base.json"
@@ -163,8 +185,8 @@ EOF
               exit 1
             fi
           else
-            BASE_SHA="${{ github.event.merge_group.base_sha }}"
-            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
+            BASE_SHA="$MERGE_GROUP_BASE_SHA"
+            HEAD_SHA="$MERGE_GROUP_HEAD_SHA"
             # Merge queue: contract is committed and protected by branch rules.
             CONTRACT_PATH="harness.contract.json"
           fi
@@ -172,7 +194,7 @@ EOF
           if [[ -z "$CHANGED_FILES" ]]; then
             CHANGED_FILES="$(git ls-files | paste -sd, -)"
           fi
-          pnpm exec tsx src/cli.ts preflight-gate \
+          bash Infrastructure/scripts/harness-cli.sh preflight-gate \
             --contract "$CONTRACT_PATH" \
             --max-tier medium \
             --files "${CHANGED_FILES}" \
@@ -247,10 +269,13 @@ EOF
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
       - name: Prepare baseline seed fallback
         run: |
           mkdir -p artifacts/consistency-gate
@@ -263,15 +288,41 @@ EOF
           JSON
           fi
       - name: Run advisory drift gate
+        continue-on-error: true
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          pnpm exec tsx src/cli.ts drift-gate \
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            cat > artifacts/consistency-gate/consistency-drift-advisory-latest.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "advisory",
+            "status": "deferred",
+            "outcome": "ok",
+            "error_class": "none",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "enforced_by": "ci/circleci: pr-pipeline",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "github_actions_npm_token_unavailable" },
+            "summary": { "finding_count": 0, "new_count": 0, "preexisting_count": 0, "error_count": 0 },
+            "findings": []
+          }
+          JSON
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; wrote deterministic advisory deferral artifact."
+            exit 0
+          fi
+          bash Infrastructure/scripts/harness-cli.sh drift-gate \
             --mode advisory \
-            --json \
-            --out artifacts/consistency-gate/consistency-drift-advisory-latest.json
+            --out artifacts/consistency-gate/consistency-drift-advisory-latest.json \
+            --json
       - name: Advisory guard (soft-fail)
+        if: always()
         run: |
-	          if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
-	            echo "::warning::advisory report missing; writing deterministic fallback report."
+          mkdir -p artifacts/consistency-gate
+          if [[ ! -s artifacts/consistency-gate/consistency-drift-advisory-latest.json ]]; then
+            echo "::warning::advisory report missing; writing deterministic fallback report."
             cat > artifacts/consistency-gate/consistency-drift-advisory-latest.json <<'JSON'
           {
             "schemaVersion": "1.0.0",
@@ -291,7 +342,7 @@ EOF
                 "rule_result": "error",
                 "severity": "error",
                 "baseline_state": "new",
-	                "message": "Advisory report missing; generated deterministic fallback report."
+                "message": "Advisory report missing; generated deterministic fallback report."
               }
             ]
           }
@@ -303,6 +354,7 @@ EOF
         with:
           name: consistency-drift-advisory-latest
           path: artifacts/consistency-gate/consistency-drift-advisory-latest.json
+          if-no-files-found: error
 
   consistency-drift-health:
     name: consistency-drift-health
@@ -317,10 +369,13 @@ EOF
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "${NODE_AUTH_TOKEN:-}" ]]; then
+            printf "//registry.npmjs.org/:_authToken=%s\n" "$NODE_AUTH_TOKEN" > ~/.npmrc
+          fi
       - name: Detect baseline seed
         id: baseline-seed
         run: |
@@ -332,15 +387,44 @@ EOF
           fi
       - name: Run health drift gate
         if: steps.baseline-seed.outputs.seeded == 'true'
+        continue-on-error: true
+        env:
+          HARNESS_CLI_ALLOW_NPM_EXEC: "1"
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          pnpm exec tsx src/cli.ts drift-gate \
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            cat > artifacts/consistency-gate/health.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "health",
+            "status": "deferred",
+            "outcome": "ok",
+            "error_class": "none",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "enforced_by": "ci/circleci: pr-pipeline",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": false, "reason": "github_actions_npm_token_unavailable" },
+            "summary": { "finding_count": 0, "new_count": 0, "preexisting_count": 0, "error_count": 0 },
+            "findings": []
+          }
+          JSON
+            echo "::notice::NPM_TOKEN is unavailable in GitHub Actions; wrote deterministic health deferral artifact."
+            exit 0
+          fi
+          bash Infrastructure/scripts/harness-cli.sh drift-gate \
             --mode health \
-            --json \
-            --out artifacts/consistency-gate/health.json
-      - name: Bootstrap health warning (first-run)
-        if: steps.baseline-seed.outputs.seeded != 'true'
+            --out artifacts/consistency-gate/health.json \
+            --json
+      - name: Ensure health artifact
+        if: always()
+        env:
+          BASELINE_SEEDED: ${{ steps.baseline-seed.outputs.seeded }}
         run: |
-          cat > artifacts/consistency-gate/health.json <<'JSON'
+          mkdir -p artifacts/consistency-gate
+          if [[ ! -s artifacts/consistency-gate/health.json ]]; then
+            if [[ "${BASELINE_SEEDED:-false}" != "true" ]]; then
+              cat > artifacts/consistency-gate/health.json <<'JSON'
           {
             "schemaVersion": "1.0.0",
             "command": "drift-gate",
@@ -364,13 +448,44 @@ EOF
             ]
           }
           JSON
-          echo "::warning::consistency-drift-health running in bootstrap mode (baseline seed missing)."
+              echo "::warning::consistency-drift-health wrote bootstrap health artifact."
+              exit 0
+            fi
+
+            cat > artifacts/consistency-gate/health.json <<'JSON'
+          {
+            "schemaVersion": "1.0.0",
+            "command": "drift-gate",
+            "mode": "health",
+            "status": "blocked",
+            "outcome": "error",
+            "error_class": "io",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "repo_root": ".",
+            "baseline": { "path": "artifacts/consistency-gate/consistency-baseline-latest.json", "loaded": true, "reason": "health_report_missing_after_drift_gate" },
+            "summary": { "finding_count": 1, "new_count": 1, "preexisting_count": 0, "error_count": 1 },
+            "findings": [
+              {
+                "rule_id": "report.output.missing",
+                "surface": "status",
+                "rule_result": "error",
+                "severity": "error",
+                "baseline_state": "new",
+                "message": "Health report missing after seeded drift-gate run; generated deterministic failure report."
+              }
+            ]
+          }
+          JSON
+            echo "::error::consistency-drift-health missing report after seeded drift-gate run."
+            exit 1
+          fi
       - name: Upload health artifact
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: consistency-drift-health-latest
           path: artifacts/consistency-gate/health.json
+          if-no-files-found: error
 
   lint:
     name: lint
@@ -378,15 +493,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run lint
-        run: npm run lint
+      - name: Run repo validation
+        run: ./bin/ask repo validate --scope=lint
 
   typecheck:
     name: typecheck
@@ -394,15 +502,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run typecheck
-        run: npm run typecheck
+      - name: Run repo validation
+        run: ./bin/ask repo validate --scope=typecheck
 
   test:
     name: test
@@ -410,15 +511,13 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests
-        run: npm run test
+          python-version: "3.12"
+      - name: Install Python validation deps
+        run: python -m pip install --upgrade pip pyyaml pytest jsonschema
+      - name: Run repo validation
+        run: ./bin/ask repo validate --scope=test
 
   audit:
     name: audit
@@ -426,15 +525,8 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run audit
-        run: npm run audit
+      - name: Run repo validation
+        run: ./bin/ask repo validate --scope=audit
 
   check:
     name: check
@@ -442,15 +534,13 @@ EOF
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          node-version: "24"
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: npm install
-      - name: Run full check
-        run: npm run check
+          python-version: "3.12"
+      - name: Install Python validation deps
+        run: python -m pip install --upgrade pip pyyaml pytest jsonschema
+      - name: Run repo validation
+        run: ./bin/ask repo validate --scope=check
 
   memory:
     name: memory

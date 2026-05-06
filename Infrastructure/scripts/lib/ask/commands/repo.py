@@ -39,6 +39,7 @@ def repo_validate(
     repo_root: Path,
     ephemeral: bool = False,
     fail_fast: bool = False,
+    scope: str = "all",
     changed_files: List[str] | None = None,
 ) -> CallResult:
     """
@@ -50,6 +51,7 @@ def repo_validate(
         repo_root (Path): Path to the repository root where the script will be executed.
         ephemeral (bool): When True run validation with `--ephemeral`; otherwise use `--persistent`.
         fail_fast (bool): When True stop after the first required failure.
+        scope (str): Named validation subset to run.
         changed_files (List[str] | None): Optional repo-relative changed files to scope validations.
     
     Returns:
@@ -69,6 +71,8 @@ def repo_validate(
         cmd.append("--persistent")
     if fail_fast:
         cmd.append("--fail-fast")
+    if scope and scope != "all":
+        cmd.extend(["--scope", scope])
     if changed_files:
         cmd.append("--changed-files")
         cmd.extend(changed_files)
@@ -119,6 +123,7 @@ def repo_validate(
     result.data["raw_output"] = stdout
     result.data["ephemeral"] = ephemeral
     result.data["fail_fast"] = fail_fast
+    result.data["scope"] = scope
     result.data["changed_files"] = changed_files or []
     
     if process.returncode == 0:

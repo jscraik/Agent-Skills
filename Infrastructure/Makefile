@@ -12,7 +12,7 @@ hooks-commit-msg:
 	hook_file="$(HOOK_COMMIT_MSG_FILE)"; \
 	case "$$hook_file" in \
 	/*) ;; \
-	*) hook_file="$(CURDIR)/../$$hook_file" ;; \
+	*) hook_file="$(CURDIR)/$$hook_file" ;; \
 	esac; \
 	if [ ! -f "$$hook_file" ] && [ "$$(basename "$$hook_file")" = "COMMIT_EDITMSG" ]; then \
 		hook_file="$$(git -C "$$repo_root" rev-parse --path-format=absolute --git-path COMMIT_EDITMSG)"; \

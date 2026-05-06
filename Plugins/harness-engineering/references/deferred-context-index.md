@@ -40,6 +40,32 @@ Use this when compact stage files defer context. Do not trim silently: move dura
 - `Plugins/harness-engineering/skills/he-work/references/handoff-and-shipping.md`
 - `Plugins/harness-engineering/skills/he-work/references/execution-modes.md`
 
+`he-router`, `he-work`, and `he-heartbeat` preserve goal-continuity routing in:
+
+- `Plugins/harness-engineering/references/goal-continuity.md`
+
+`he-code-review` preserves repeated review-feedback routing in:
+
+- `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
+- `Plugins/harness-engineering/skills/he-code-review/references/evals.yaml`
+
+The 2026-05-06 goal-continuity merge preserved these compact-entrypoint lines
+outside the runtime bodies:
+
+```text
+description: "WHAT: Review HE PRs, diffs, CI, traceability, and autofix loops. Use when merge readiness or review fixes need evidence."
+Find introduced risk before summaries. Code review should be precise enough for Codex inline findings and broad enough to catch traceability, validation, and readiness gaps.
+Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff.
+Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; in coding-harness-managed repos also check Project Brain, north-star evidence, and Harness review gates; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix.
+description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation is needed."
+Continue only with a clear stop rule. Heartbeats should preserve context, not create background noise.
+Target thread/workspace, cadence, stop condition, issue/PR/check links.
+Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations.
+Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement.
+Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
+Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
+```
+
 ## Preservation Contract
 
 - Active `SKILL.md` files stay concise and routing-safe.

@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT_FALLBACK="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+FALLBACK_PACKAGE="@brainwav/coding-harness@0.14.0"
 if REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
 else
@@ -46,7 +47,15 @@ try {
 resolution_status=$?
 set -e
 
-if [[ $resolution_status -eq 42 || -z "$CLI_PATH" ]]; then
+if [[ $resolution_status -eq 42 ]]; then
+	if [[ "${HARNESS_CLI_ALLOW_NPM_EXEC:-}" == "1" ]]; then
+		if ! command -v npm >/dev/null 2>&1; then
+			echo "Error: npm is required for HARNESS_CLI_ALLOW_NPM_EXEC fallback." >&2
+			exit 1
+		fi
+		exec npm exec --yes --package "$FALLBACK_PACKAGE" -- harness "$@"
+	fi
+
 	echo "Error: local @brainwav/coding-harness could not be resolved from this repo." >&2
 	echo "This is a local install/bootstrap problem, not a harness command failure." >&2
 	echo "Repair from the repo root with one of:" >&2
@@ -60,6 +69,15 @@ fi
 
 if [[ $resolution_status -ne 0 ]]; then
 	echo "Error: failed to resolve the local @brainwav/coding-harness CLI entrypoint." >&2
+	echo "This indicates a local install/bootstrap problem, not a harness command failure." >&2
+	echo "Repair from the repo root with one of:" >&2
+	echo "  npm install" >&2
+	echo "  npm install --save-dev @brainwav/coding-harness" >&2
+	exit 1
+fi
+
+if [[ -z "$CLI_PATH" ]]; then
+	echo "Error: local @brainwav/coding-harness resolver returned an empty CLI path." >&2
 	echo "This indicates a local install/bootstrap problem, not a harness command failure." >&2
 	echo "Repair from the repo root with one of:" >&2
 	echo "  npm install" >&2
