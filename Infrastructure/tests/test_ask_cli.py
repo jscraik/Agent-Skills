@@ -250,6 +250,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("recommended_candidate", goal)
         self.assertIn("alternative_candidates", goal)
 
+    def test_skills_improve_json_contract(self):
+        """Verify `ask skills improve` returns an agent-facing recommendation envelope."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "improve",
+            "autofix",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        improvement = output.get("data", {}).get("improvement", {})
+        self.assertEqual(improvement.get("schema_version"), "skill-improvement-recommendation.v1")
+        self.assertIn("agent_summary", improvement)
+        self.assertIn("recommended_capability", improvement)
+        self.assertIn("reachability", improvement)
+        self.assertIn("proof", improvement)
+        self.assertIn("next_command", improvement)
+
     def test_repo_doctor_catalog_json_contract(self):
         """
         Verify `ask repo doctor-catalog --json` returns a catalog parity payload with required fields.

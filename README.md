@@ -6,7 +6,7 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository manages **20 canonical skills** routed through root-level skill
+This repository manages **21 canonical skills** routed through root-level skill
 surfaces, generated `$` command handles, and a larger latent skill/plugin
 catalog behind rooted projections. Author a capability once, route it
 intelligently, validate quality, project it safely into runtime, and keep the

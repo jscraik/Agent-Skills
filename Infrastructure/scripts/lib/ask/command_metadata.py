@@ -16,6 +16,7 @@ VALID_ACTIONS = {
         "proof",
         "route",
         "goal",
+        "improve",
         "starter",
         "sync",
         "audit",
@@ -52,6 +53,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         ),
         "ask skills proof he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
+        "ask skills improve \"fix PR review comments faster\" --json",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
     ],
     "reviewers": [
@@ -135,6 +137,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",
     ],
+    ("skills", "improve"): [
+        "ask skills improve \"make agents better at fixing PR review comments\" --json",
+    ],
     ("skills", "route"): [
         "ask skills route \"debug flaky tests\"",
     ],
@@ -198,6 +203,7 @@ FUZZY_MATCHES = {
     "path": "chain",
     "route": "chain",
     "goal": "goal",
+    "improve": "improve",
     "doctor": "doctor-catalog",
     "catalog": "doctor-catalog",
     "provider": "provider-audit",

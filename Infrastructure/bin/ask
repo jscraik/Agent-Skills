@@ -32,6 +32,7 @@ from ask.commands.skills import (
     reviewers_resolve,
     route_skills,
     goal_skills,
+    improve_skills,
     sync_skills,
     audit_skill,
     install_skill,
@@ -590,6 +591,10 @@ def main():
     skills_goal_parser.add_argument("intent", nargs="+", help="Intent text to route")
     skills_goal_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
     skills_goal_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
+    skills_improve_parser = skills_subparsers.add_parser("improve", help="Recommend one capability for an agent improvement goal", parents=[global_parser])
+    skills_improve_parser.add_argument("goal", nargs="+", help="Improvement goal text to route")
+    skills_improve_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
+    skills_improve_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
 
     skills_starter_parser = skills_subparsers.add_parser("starter", help="List starter-mode curated skills", parents=[global_parser])
     skills_starter_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
@@ -989,6 +994,13 @@ def main():
                 top_k=args.top_k,
                 considered_limit=args.considered_limit,
             )
+        elif args.action == "improve":
+            result = improve_skills(
+                repo_root,
+                goal_text=" ".join(args.goal),
+                top_k=args.top_k,
+                considered_limit=args.considered_limit,
+            )
         elif args.action == "starter":
             result = list_skills(
                 repo_root,
@@ -1015,7 +1027,7 @@ def main():
                 message=f"{action_msg} for topic 'skills'",
                 fix_suggestion=(
                     "Valid actions: list, budget, handles, resolve, parse, proof, "
-                    "route, goal, starter, sync, audit, install, fold, init"
+                    "route, goal, improve, starter, sync, audit, install, fold, init"
                 )
             ))
 
@@ -1502,6 +1514,17 @@ def main():
                         print("Disambiguation prompts:")
                         for prompt in prompts:
                             print(f"  - {prompt}")
+                elif args.topic == "skills" and args.action == "improve":
+                    improvement = result.data["improvement"]
+                    print(f"🎯 Skill improvement: {improvement['status']}")
+                    print(improvement["agent_summary"])
+                    recommended = improvement.get("recommended_capability")
+                    if recommended:
+                        print(f"Recommended: ${recommended.get('handle')} ({recommended.get('path')})")
+                    reachability = improvement.get("reachability", {})
+                    print(f"Reachability: {reachability.get('status')}")
+                    if improvement.get("next_command"):
+                        print(f"Next: {improvement['next_command']}")
                 elif args.topic == "skills" and args.action == "starter":
                     print(
                         f"Starter skills ({len(result.data['skills'])}) "

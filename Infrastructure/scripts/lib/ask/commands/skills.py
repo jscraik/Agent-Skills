@@ -8,7 +8,7 @@ import sys
 import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -1498,6 +1498,207 @@ def goal_skills(
         )
     )
     return result
+
+
+def _candidate_handle(candidate: dict[str, Any]) -> str:
+    """Return the best command-handle spelling for a routed candidate."""
+    name = str(candidate.get("name") or "").strip().lstrip("$")
+    if name:
+        return name
+    path = str(candidate.get("path") or "").strip().rstrip("/")
+    if path:
+        return Path(path).name
+    candidate_id_value = str(candidate.get("candidate_id") or "").strip()
+    if candidate_id_value:
+        return candidate_id_value.rsplit(":", 1)[-1].strip().lstrip("$")
+    return ""
+
+
+_IMPROVE_STOPWORDS = frozenset({
+    "a",
+    "an",
+    "and",
+    "at",
+    "better",
+    "for",
+    "make",
+    "of",
+    "the",
+    "to",
+})
+
+
+def _improve_tokens(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", text.lower())
+        if len(token) > 1 and token not in _IMPROVE_STOPWORDS
+    }
+
+
+def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str, Any] | None:
+    """Select one command handle when formal goal routing is too ambiguous."""
+    request_tokens = _improve_tokens(goal_text)
+    if not request_tokens:
+        return None
+    try:
+        handles = handles_report(repo_root_path=repo_root, include_handles=True).get("handles", [])
+    except Exception:
+        return None
+    scored: list[tuple[int, str, dict[str, Any], set[str]]] = []
+    for row in handles:
+        if not isinstance(row, dict):
+            continue
+        handle = str(row.get("handle") or "")
+        searchable = " ".join(
+            str(row.get(key) or "")
+            for key in ("handle", "owner", "source_path", "description", "invoke_via")
+        )
+        overlap = request_tokens & _improve_tokens(searchable)
+        if overlap:
+            scored.append((len(overlap), handle, row, overlap))
+    if not scored:
+        return None
+    score, _handle, row, overlap = max(scored, key=lambda item: (item[0], -len(item[1]), item[1]))
+    if score < 2:
+        return None
+    return {
+        "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
+        "candidate_type": row.get("kind", "skill"),
+        "name": row.get("handle"),
+        "path": row.get("command_handle_path"),
+        "confidence": round(min(0.95, 0.45 + (score * 0.1)), 2),
+        "rationale": [
+            "fallback command-handle description match",
+            "matched terms=" + ",".join(sorted(overlap)),
+        ],
+        "scope_rank": 2,
+    }
+
+
+def improve_skills(
+    repo_root: Path,
+    goal_text: str,
+    top_k: int = 3,
+    considered_limit: int = 20,
+) -> CallResult:
+    """Route a user goal into one capability recommendation with proof status."""
+    result = CallResult()
+    result.metadata["command"] = "skills improve"
+    goal_result = goal_skills(
+        repo_root,
+        intent_text=goal_text,
+        top_k=top_k,
+        considered_limit=considered_limit,
+    )
+    goal_decision = goal_result.data.get("goal_decision", {})
+    route_decision_status = goal_result.data.get("route_decision_status")
+    recommended = goal_decision.get("recommended_candidate")
+
+    improvement: dict[str, Any] = {
+        "schema_version": "skill-improvement-recommendation.v1",
+        "goal": goal_text,
+        "status": "resolved" if goal_result.status == "success" and recommended else "blocked",
+        "agent_summary": "",
+        "recommended_capability": None,
+        "why": [],
+        "reachability": {
+            "status": "not_checked",
+            "proof_status": None,
+            "required_gates_passed": None,
+            "user_runtime_ready": None,
+        },
+        "proof": None,
+        "alternatives": goal_decision.get("alternative_candidates", []),
+        "next_command": None,
+        "goal_decision": goal_decision,
+    }
+
+    fallback_used = False
+    fallback_allowed = route_decision_status in (None, "unresolved_ambiguity")
+    if not isinstance(recommended, dict) and fallback_allowed:
+        recommended = _fallback_improvement_candidate(repo_root, goal_text)
+        fallback_used = recommended is not None
+
+    if not isinstance(recommended, dict):
+        prompts = goal_decision.get("disambiguation_prompts") or []
+        summary = goal_decision.get("operator_action") or "Goal did not resolve to one capability."
+        improvement["agent_summary"] = summary
+        improvement["disambiguation_prompts"] = prompts
+        improvement["next_command"] = (
+            f"./bin/ask skills goal {shlex.quote(goal_text)} --json --robot"
+        )
+        result.status = "error"
+        result.data["improvement"] = improvement
+        result.data["goal_decision"] = goal_decision
+        result.errors.extend(goal_result.errors)
+        if not result.errors:
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="skills improve could not resolve one recommended capability.",
+                    fix_suggestion=summary,
+                )
+            )
+        return result
+
+    handle = _candidate_handle(recommended)
+    proof_result = skills_proof(repo_root, handle=handle) if handle else CallResult(status="error")
+    proof = proof_result.data.get("proof", {})
+    gates = proof.get("gates", {}) if isinstance(proof, dict) else {}
+    required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
+    required_gates_passed = all(bool(gates.get(gate)) for gate in required)
+    user_runtime_ready = bool(
+        (gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists"))
+        or (gates.get("agents_user_link") and gates.get("agents_user_command_handle_exists"))
+    )
+    rationale = recommended.get("rationale") or []
+    capability = {
+        "handle": handle,
+        "name": recommended.get("name"),
+        "path": recommended.get("path"),
+        "candidate_id": recommended.get("candidate_id"),
+        "candidate_type": recommended.get("candidate_type"),
+        "confidence": recommended.get("confidence"),
+    }
+
+    improvement["recommended_capability"] = capability
+    improvement["why"] = rationale
+    if fallback_used:
+        improvement["status"] = "resolved_with_fallback"
+        improvement["goal_decision_status"] = goal_decision.get("decision_status")
+    improvement["reachability"] = {
+        "status": "pass" if proof_result.status == "success" else "fail",
+        "proof_status": proof.get("status") if isinstance(proof, dict) else "fail",
+        "required_gates_passed": required_gates_passed,
+        "user_runtime_ready": user_runtime_ready,
+    }
+    improvement["proof"] = proof
+    improvement["agent_summary"] = (
+        f"Recommended ${handle} for this goal."
+        if proof_result.status == "success"
+        else f"Recommended ${handle}, but reachability proof failed."
+    )
+    improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(handle)} --json --robot"
+
+    result.data["improvement"] = improvement
+    result.data["goal_decision"] = goal_decision
+    if proof_result.status == "success":
+        return result
+
+    improvement["status"] = "blocked_reachability"
+    result.status = "error"
+    result.errors.extend(proof_result.errors)
+    if not result.errors:
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"skills improve selected '{handle}', but reachability proof failed.",
+                fix_suggestion=improvement["next_command"],
+            )
+        )
+    return result
+
 
 def _create_symlink(source: Path, target: Path, dry_run: bool = False, *, replace_existing: bool = False) -> str:
     """

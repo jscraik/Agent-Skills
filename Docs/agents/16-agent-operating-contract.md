@@ -9,14 +9,15 @@ contract agents need for everyday work.
 
 All agents should use `./bin/ask` for repo operations.
 
-| Task            | Command                                        |
-| --------------- | ---------------------------------------------- |
-| Repo health     | `./bin/ask repo doctor --json --robot`         |
-| Full validation | `./bin/ask repo validate`                      |
-| List skills     | `./bin/ask skills list --category <topic>`     |
-| Audit skill     | `./bin/ask skills audit <path> --level strict` |
-| Install skill   | `./bin/ask skills install <url> --remediate`   |
-| Find related    | `./bin/ask graph related <skill> --depth 2`    |
+| Task            | Command                                            |
+| --------------- | -------------------------------------------------- |
+| Repo health     | `./bin/ask repo doctor --json --robot`             |
+| Improve agents  | `./bin/ask skills improve "<goal>" --json --robot` |
+| Full validation | `./bin/ask repo validate`                          |
+| List skills     | `./bin/ask skills list --category <topic>`         |
+| Audit skill     | `./bin/ask skills audit <path> --level strict`     |
+| Install skill   | `./bin/ask skills install <url> --remediate`       |
+| Find related    | `./bin/ask graph related <skill> --depth 2`        |
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward
 into `Infrastructure/**`; keep them as real files/directories, not symlinks.
@@ -26,6 +27,7 @@ inspection:
 
 ```bash
 ./bin/ask repo doctor --json --robot
+./bin/ask skills improve "autofix" --json --robot
 ./bin/ask repo doctor-catalog --json --robot
 ./bin/ask repo surface --json --robot
 ```
@@ -34,6 +36,11 @@ inspection:
 parity, runtime budget, command-handle health, and repo-surface diagnostic debt
 into one agent-facing payload with `agent_summary`, `blocking`, `blockers`,
 `next_command`, `signals`, and `diagnostic_debt`.
+
+`skills improve` is the first capability recommendation entrypoint. It wraps
+goal routing, runs command-handle proof for the selected capability, and returns
+`agent_summary`, `recommended_capability`, `why`, `reachability`, `proof`, and
+one existing `next_command`.
 
 ## Robot Mode
 
