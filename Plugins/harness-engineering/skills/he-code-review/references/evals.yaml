@@ -50,6 +50,13 @@ cases:
     prompt: "Please validate the linked PR evidence and include exact command outcomes."
     deterministic_checks: *safe
     acceptance: *accept_trace
+  - id: he-code-review-context-feedback
+    <<: *common
+    name: "Context Feedback"
+    category: happy
+    prompt: "CodeRabbit and Codex keep flagging the same missing validation evidence; review this PR and say whether the HE skill or eval context needs a follow-up."
+    deterministic_checks: *safe
+    acceptance: ["Routes correctly, preserves traceability, identifies context feedback, and avoids forbidden commands."]
   - id: coding-harness-readiness-gates
     <<: *common
     name: "Coding Harness Readiness Gates"

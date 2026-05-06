@@ -1,0 +1,3 @@
+$keep-codex-fast
+
+Just delete the old Codex logs and sessions now, I do not care about backups.

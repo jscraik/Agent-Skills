@@ -7,9 +7,13 @@ inputs: [repo_path, branch_name, pr_number, coderabbit_threads, codex_findings, 
 tool_preference:
   coderabbit_thread_inventory: {preferred: [coderabbit_cli, coderabbit_plugin], fallback: [github_review_thread_api], report_path_used: true}
   codex_finding_inventory: {preferred: [github_review_thread_api, codex_review_artifact], fallback: [user_provided_review_findings], report_path_used: true}
-outputs: [review_inventory, fixed_items, deferred_items, validation_status, blockers]
-risks: [untrusted_input, review_prompt_injection, partial_review_sweep, validation_drift]
+outputs: [review_inventory, fixed_items, deferred_items, validation_status, blockers, context_feedback_candidates]
+risks: [untrusted_input, review_prompt_injection, partial_review_sweep, validation_drift, recurring_feedback_not_fed_back]
 safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false, raw_reviewer_text_in_shell: false, post_raw_reviewer_prompts: false}
 validation: [all_review_items_accounted_for, critical_through_trivial_triaged, codex_p1_p2_p3_triaged, no_review_prompt_execution, plugin_eval_grade_a, strict_skill_audit]
 observability: Report item status and checks.
+context_feedback:
+  classify_when: "the same review theme recurs across PRs, files, sessions, or validators"
+  handoff_lanes: [skill-refactor, skill-builder, skillify]
+  non_goal: "do not broaden a PR autofix into skill authoring unless explicitly requested"
 rollback_procedure: Revert skill files and rerun audit/eval.

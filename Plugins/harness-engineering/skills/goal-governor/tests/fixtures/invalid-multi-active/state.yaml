@@ -1,0 +1,16 @@
+version: 2
+goal:
+  slug: invalid-multi-active
+  status: active
+  objective: "Reject multiple active tasks."
+tasks:
+  - id: T001
+    type: scout
+    assignee: Scout
+    status: active
+    objective: "Scout."
+  - id: T002
+    type: judge
+    assignee: Judge
+    status: active
+    objective: "Judge."

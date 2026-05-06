@@ -1,20 +1,27 @@
 ---
 name: he-heartbeat
-description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation is needed."
+description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
 metadata:
   skill-type: team_automation
+  triggers:
+    - he heartbeat
+    - goal-aware scheduling
+    - until-green checks
+    - thread continuation
 ---
 # Harness Engineering Heartbeat
 ## Philosophy
-Continue only with a clear stop rule. Heartbeats should preserve context, not create background noise.
+Continue only with a clear stop rule. Heartbeats should preserve context, wake the thread with fresh state, and keep scheduling separate from HE lifecycle ownership.
 ## When to Use
 Use when monitoring, wakeups, until-green loops, or follow-up automation is requested.
 ## Inputs
-Target thread/workspace, cadence, stop condition, issue/PR/check links.
+Target thread/workspace, cadence, stop condition, issue/PR/check links, optional active thread goal.
 ## Outputs
 Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
 ## Procedure
-Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations.
+Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
+
+For GitHub PR sweeps, keep the loop concrete: identify the PR set, re-check GitHub truth, inspect CircleCI/job logs for failing checks, inspect CodeRabbit/Codex review threads, and route each wake-up to the smallest safe `he-code-review` or `he-work` follow-up. Use `git-project-triage` as a helper role only when it is available in the Codex agent manifest; if the role is missing, continue inline and report that delegation gap.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Confirm schedule, destination, and safe prompt scope.
 ## Failure mode
@@ -24,9 +31,13 @@ Redact secrets; do not create cron workarounds for short thread follow-up. Do no
 ## Anti-Patterns
 - Creating duplicate wakeups for the same PR, issue, or thread.
 - Running without an explicit stop condition or next visible update.
+- Using a heartbeat prompt or `/goal` objective as a replacement for Linear, PR, validation, or lifecycle exit evidence.
+- Scheduling unattended destructive actions, merges, deploys, or tracker closure without explicit approval.
 ## Examples
 - "Inspect PR 154 every 30 minutes in this thread until CI is green or a blocker appears."
 - "Keep watching JSC-246 after the merge queue starts and wake this thread with the next required action."
+- "Rotate across the open coding-harness PRs with GitHub, CircleCI, CodeRabbit, and Codex comments; use `git-project-triage` when available, wake every 30 minutes, and stop only once the PRs are green, merged, or explicitly blocked."
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
+- Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`

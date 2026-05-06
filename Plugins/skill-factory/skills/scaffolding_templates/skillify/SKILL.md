@@ -13,6 +13,8 @@ Capture a completed Codex workflow as a reusable skill package with explicit tri
 
 Preserve repeatable behavior, not one-off transcript noise. Generated skills should be clear, auditable, and runnable.
 
+Package context only when the workflow has a path through generate, test, distribute, observe, and adapt.
+
 ## When To Use
 
 - User asks to skillify, operationalize, or package a repeatable process.
@@ -30,13 +32,16 @@ Preserve repeatable behavior, not one-off transcript noise. Generated skills sho
 1. Capture the source workflow and intended reuse scope.
 2. Prefer bounded session-collector evidence over raw transcripts.
 3. Extract stable triggers, prerequisites, inputs, deliverables, and safety boundaries.
-4. Draft `SKILL.md` from the repository template.
-5. Add references, contract, evals, and task profile needed by governance gates.
-6. Run structure and quality validation until clean.
+4. Define how the new skill will be tested, distributed, observed, and adapted after future failures.
+5. Draft `SKILL.md` from the repository template.
+6. Add references, contract, evals, and task profile needed by governance gates.
+7. Run structure and quality validation until clean.
 
 ## Deliverables
 
 Return the skill path, package files created or changed, context routes, findings, validations, and any missing inputs. Structured output should include `schema_version: 1`.
+
+When source evidence comes from a transcript, PR review, or session bundle, summarize the reusable pattern and keep raw text in bounded evidence artifacts only.
 
 ## Safety
 
@@ -65,6 +70,7 @@ If the workflow is not repeatable, the destination is unclear, or required evide
 ## Gotchas
 
 - Do not turn one-off exploration into durable instructions.
+- Do not package a workflow unless the observation source and adaptation owner are clear.
 - Keep heavy examples, templates, and collector detail in references.
 
 ## Progressive Disclosure
@@ -74,6 +80,7 @@ Never drop required context for brevity; move it into references or deferred con
 - Local contract, evals, and task profile: `references/`
 - Skill template and intake detail: `Infrastructure/references/deferred-skill-context/skill-factory-skillify/references/`
 - Archived full package: `Infrastructure/references/deferred-skill-context/skill-factory-skillify/`
+- Context development lifecycle: `Plugins/skill-factory/references/context-development-lifecycle.md`
 
 ## Validation
 

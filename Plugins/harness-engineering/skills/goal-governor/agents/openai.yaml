@@ -1,0 +1,10 @@
+name: goal-governor
+description: Govern long-running Codex `/goal` work with repo-visible state, scoped tasks, receipts, and validation gates.
+interfaces:
+  default_prompt: "Create or continue a Codex goal board with native-goal reconciliation and evidence-backed receipts."
+  display_name: "Goal Governor"
+  tags:
+    - codex
+    - goals
+    - harness
+    - workflow

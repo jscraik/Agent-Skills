@@ -1,0 +1,31 @@
+version: 2
+goal:
+  slug: valid
+  status: active
+  objective: "Validate a healthy goal board."
+  native_objective: "/goal Follow docs/goals/valid/goal.md"
+rules:
+  one_active_task: true
+  require_fresh_verification: true
+  require_final_audit: true
+checks:
+  dirty_fingerprint: unknown
+  last_verification:
+    command: null
+    outcome: unknown
+    checked_at: null
+tasks:
+  - id: T001
+    type: scout
+    assignee: Scout
+    status: active
+    objective: "Find validation commands."
+    inputs: []
+    constraints:
+      - "Read-only."
+    expected_output: "Evidence receipt."
+    allowed_files: []
+    verify: []
+    stop_if:
+      - "Needs write access."
+    receipt_id: null

@@ -1,0 +1,1 @@
+The report says logs_2.sqlite is huge and Codex is still open. Can we rotate it now?

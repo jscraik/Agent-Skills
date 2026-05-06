@@ -35,12 +35,45 @@ Do not use for net-new feature design or broad architecture rewrites.
 
 ## Workflow
 
-1. Load repo instructions and determine the diff source.
-2. If the refactor is risky, first read the archived refactor planning gate in deferred context.
-3. Review the same scope through three lanes: reuse, quality, and efficiency.
-4. Rank findings by behavior risk, confidence, and implementation cost.
-5. Apply the smallest safe fixes; skip low-value or unverifiable suggestions.
-6. Run the smallest real validation that exercises the changed behavior.
+### Step 1: Identify scope
+
+1. Resolve scope in this order:
+   - If the user names a scope (file, directory, function, or scope phrase), use that scope exactly.
+   - Else, if in a git repository, use the current branch diff against its upstream/base (`git diff <upstream>...`) so the pass is focused on feature changes.
+   - If no upstream diff exists, use staged plus unstaged diff (`git diff HEAD`).
+   - If neither is available, use the most recently edited files in recent conversation context.
+2. If no non-empty scope can be resolved, stop and ask the user for a concrete scope rather than guessing.
+
+### Step 2: Launch 3 review agents in parallel
+
+1. Spawn three reviewers with the full resolved scope (or equivalent file set):
+   - Code reuse reviewer
+   - Code quality reviewer
+   - Efficiency reviewer
+2. Pass each reviewer the exact same scoped diff and ask for ranked findings only.
+3. Use the reviewer rubric in `references/reviewer-rubric.md` for repeatable checks without expanding this entrypoint.
+4. Dispatch reviewers in parallel when the platform supports it. Use the configured reviewer model when available; omit overrides that would break dispatch.
+5. Skip this lane only when scope is intentionally narrow and no code review is applicable (for example, docs-only edits).
+
+### Step 3: Fix issues
+
+1. Aggregate all reviewer findings after all three complete.
+2. Apply each actionable finding directly against the scoped changes.
+3. If a finding is low-value, uncertain, or a clear false positive, record it under `skipped` and proceed without argument.
+4. Do not broaden scope beyond the resolved target unless a safety requirement forces it.
+
+### Step 4: Verify behavior is preserved
+
+1. Run the smallest validation path that exercises the changed behavior.
+2. For code changes, run typecheck and lint for the full project unless a repo-specific contract requires a narrower equivalent.
+3. Run tests scoped to changed paths; broaden only when edits touch shared utilities, hot paths, or high fan-out modules.
+4. If tests or checks fail, report the check name and relevant output, fix the underlying cause, and rerun; do not weaken assertions or relax type constraints.
+5. If no lint, typecheck, or test suite is configured, state that explicitly in the summary.
+
+### Step 5: Summarize
+
+1. Return concise outcomes: what was improved, what was intentionally left unchanged, and what was skipped.
+2. Include validation commands and results with explicit pass/fail markers.
 
 ## Deliverables
 
@@ -78,17 +111,23 @@ If the diff is missing, behavior preservation cannot be checked, or validation c
 
 ## Examples
 
-- "Simplify the current changes in `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh` and keep behavior unchanged."
-- "Do a final reuse and quality pass on the PR diff before I push it."
+- When the user asks: "Can you take one more cleanup pass over my branch before I open the PR?"
+- When the user says: "Please inspect the changed polling helper and validate that any dedupe keeps the same behavior."
 
 ## Progressive Disclosure
 
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
+- Read when: reviewer agents need concrete reuse, quality, and efficiency checks: `references/reviewer-rubric.md`
 - Refactor planning detail: `Infrastructure/references/deferred-skill-context/agent-ops-simplify/references/refactor-planning-gate.md`
 - Archived long-form playbooks and examples: `Infrastructure/references/deferred-skill-context/agent-ops-simplify/`
 
 ## Validation
 
 When changing this skill, run strict skill audit, Plugin Eval, and the repo format/progressive-disclosure gates. Fail fast: stop at the first failed gate and do not proceed until the blocker is fixed.
+
+For simplify reviews that include behavior or runtime code:
+
+- Use scoped typecheck/lint first only if the project has project-specific wrappers for both; otherwise use the fastest canonical full-check equivalents.
+- Test coverage should be scoped to touched files unless the edit touches shared abstractions or broad utility surfaces.

@@ -1,0 +1,46 @@
+I couldn’t read your local `report` skill directly in this sandbox, but I did inspect the closest matching skill patterns and the failure mode is pretty clear: the skill is probably mixing “generate the report content” with “choose the final artifact type.”
+
+The two patterns that look most useful here are:
+
+- A clean `finalize_bundle` step that decides the shipped artifact once, at the very end, with mode-aware behavior for `report.md` vs `README.md` and no stale re-runs. See the bundle lifecycle plan in the research recipe gist: [Research Recipe: Local Report Bundle + vis-lens Family](https://gist.github.com/Trecek/4d4ed91677ddad29e19d9481f03df2a9)
+- A round-based improvement loop with a fresh reviewer thread each round, explicit state/log files, and a hard stop after a small number of rounds. See the paper loop pattern: [Auto Paper Improvement Loop](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep/blob/main/skills/auto-paper-improvement-loop/SKILL.md)
+
+What I’d tune in the `report` skill:
+
+1. Add an explicit artifact contract section.
+   - State the expected output type per mode, for example:
+     - `local` -> `report.md`
+     - `pr` -> `README.md`
+     - `both` -> both, with one canonical source of truth
+   - Make the skill fail fast if it emits anything else.
+
+2. Split generation from finalization.
+   - Generation writes the report body.
+   - Finalization performs the only rename/export/compression step.
+   - This prevents the “wrong artifact type” bug from being reintroduced by a rerun.
+
+3. Add a short improvement loop.
+   - Round 1: generate artifact, then run an independent reviewer that checks only the current artifact and the contract.
+   - Round 2: patch the skill if the reviewer says the artifact type is wrong, then regenerate and recheck.
+   - Stop after 2 rounds unless there is a contract violation still unresolved.
+
+4. Make the reviewer bias-resistant.
+   - Use a fresh reviewer context each round.
+   - Don’t tell the reviewer what changed previously.
+   - Only let it inspect the current file tree and the expected artifact contract.
+
+5. Persist the loop state.
+   - `REPORT_IMPROVEMENT_LOG.md` for score/progress.
+   - `REPORT_IMPROVEMENT_STATE.json` for resume/recovery.
+   - That makes tuning repeatable instead of ad hoc.
+
+6. Keep the skill lean.
+   - Put the loop mechanics in the main `SKILL.md`.
+   - Put any long artifact-mapping rules or examples in a small reference file if needed, following the skill anatomy guidance from GitHub’s Agent Skills docs: [Skill Anatomy](https://github.com/addyosmani/agent-skills/blob/main/docs/skill-anatomy.md)
+
+If you want, send me either:
+
+1. The path to the `report` skill directory, or
+2. The `SKILL.md` contents
+
+and I’ll turn this into a concrete patch with the improvement loop wired in.

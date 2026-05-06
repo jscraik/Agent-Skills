@@ -1,0 +1,6 @@
+I can do the cleanup, but this session is currently blocked from running shell commands against the workspace, so I can’t actually delete the files from here.
+
+If you want to keep going, send me one of these and I’ll take the next step:
+
+1. The exact paths you want removed, and I’ll give you the precise delete command.
+2. A session with shell access enabled, and I’ll perform the cleanup directly.

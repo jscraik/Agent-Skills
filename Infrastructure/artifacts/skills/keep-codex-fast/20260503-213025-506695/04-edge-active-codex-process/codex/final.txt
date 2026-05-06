@@ -1,0 +1,9 @@
+Not safely, no.
+
+The repo’s `keep-codex-fast` policy is report-first and explicitly says to stop before any mutation while Codex is running or process safety is unknown. The matching eval case in the same skill is literally “active Codex process blocks apply,” so this is the guarded path, not a rotate-now path. See [SKILL.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/keep-codex-fast/SKILL.md) and [evals.yaml](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/keep-codex-fast/references/evals.yaml).
+
+Best next step:
+1. Run the report-only check to confirm what’s making `logs_2.sqlite` huge.
+2. Close Codex first, then rotate it with an explicit apply step once the process is no longer live.
+
+If you want, I can do the report-only pass next and tell you whether the file looks safe to rotate afterward.

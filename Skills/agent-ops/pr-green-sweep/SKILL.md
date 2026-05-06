@@ -1,6 +1,6 @@
 ---
 name: pr-green-sweep
-description: "WHAT: Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub, CodeRabbit, CircleCI, and branch/worktree closure."
+description: "WHAT: Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub, CodeRabbit, CircleCI, autofix, heartbeat, and branch/worktree pruning."
 metadata:
   skill-type: team_automation
   lifecycle_state: active
@@ -15,7 +15,7 @@ metadata:
 
 ## Philosophy
 - Keep every open PR moving from live evidence, not stale assumptions.
-- Use the specialist lanes for their jobs: GitHub for PR truth, CodeRabbit and `autofix` for review threads, CircleCI for CI failures, HE heartbeat for continuation, and HE router for cleanup.
+- Use the specialist lanes for their jobs: GitHub for PR truth, CodeRabbit and `autofix` for review threads, CircleCI for CI failures, HE heartbeat for continuation, and HE router prune-branches mode for cleanup.
 - Merge only after the current head is clean, review state is accounted for, required checks are green, and branch protection is satisfied.
 
 ## When To Use
@@ -53,7 +53,7 @@ metadata:
 - Use `[@github]` and `[@git-project-triage]` for open PR discovery, rotation order, mergeability, review state, and branch protection truth.
 - Use `[$autofix]`, `[@coderabbit]`, and `[@coderabbit]` subagent coverage for unresolved CodeRabbit threads and Codex P1-P3 findings.
 - Use `[@circleci]` and `[@circleci]` subagent coverage for failing CircleCI jobs; fix from exact failing job logs.
-- Use `[$he-router]` after every target PR is merged to prune/delete local and remote branches/worktrees.
+- Use `[$he-router]` in prune-branches mode after every target PR is merged to prune/delete local and remote branches/worktrees.
 - Do not hand-edit generated review artifacts, fabricate check status, mark comments resolved without a real fix or stale classification, or delete branches/worktrees before merge state is verified.
 
 ## Workflow
@@ -94,6 +94,11 @@ metadata:
 - Creating duplicate heartbeats for the same project PR sweep.
 - Deleting branches because they look stale without checking worktrees, upstream state, and unique commits.
 
+## Gotchas
+- A green local test run is not merge readiness; refresh GitHub required checks and review-thread state on the latest head SHA.
+- Branch or worktree pruning is a post-merge cleanup step; prove merge state and unique commits before deleting anything.
+- Heartbeat reuse is part of the safety contract. Do not create a second monitor for the same project and PR set.
+
 ## Examples
 - "Use `$pr-green-sweep` on this repo until every open PR is green, merged, and the branch slate is clean."
 - "Set up a heartbeat to rotate through my open PRs, fix CodeRabbit and CircleCI blockers, then merge them."
@@ -109,5 +114,7 @@ metadata:
 
 | Skill | When to use together |
 |---|---|
+| [[he-heartbeat]] | Create or reuse the recurring continuation loop before starting an until-green monitor |
 | [[autofix]] | Address actionable CodeRabbit or Codex review findings with verified code changes |
+| [[he-router]] | Run the folded prune-branches branch/worktree cleanup path after merge proof |
 | [[verification-before-completion]] | Confirm latest-head checks, review threads, mergeability, and cleanup evidence before closeout |

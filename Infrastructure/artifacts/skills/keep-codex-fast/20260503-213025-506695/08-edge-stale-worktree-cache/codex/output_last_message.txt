@@ -1,0 +1,15 @@
+I couldn’t produce a trustworthy size report from this session because the shell is blocked before any inspection can run. Even trivial commands fail with:
+
+`sandbox-exec: sandbox_apply: Operation not permitted`
+
+That means I couldn’t verify:
+- `git worktree list --porcelain`
+- any `du`-based worktree/cache sizing
+- any `git` or filesystem metadata needed to explain why targets look big
+
+No deletions were attempted.
+
+If you want, I can retry as soon as the shell sandbox is usable, and I’ll do it non-destructively by checking:
+1. active and abandoned worktrees
+2. `~/.cache`, `~/.codex`, `~/Library/Caches`, and repo-local cache dirs
+3. the largest subpaths inside any big targets so we can see what is actually consuming space

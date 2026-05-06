@@ -31,6 +31,16 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: autofix}
       - {type: regex, value: "(?i)(coderabbit|codex|fixed|reviewed|blocked|validation)"}
+  - id: happy-context-feedback
+    name: repeated feedback candidate
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Fix the actionable CodeRabbit and Codex comments, but also tell me if the same feedback means one of our skills or evals needs updating."
+    acceptance:
+      - {type: skill_selected, expected_skill: autofix}
+      - {type: regex, value: "(?is)(?=.*context)(?=.*feedback)(?=.*(skill|eval))(?=.*candidate)"}
   - id: edge-stale
     name: stale review comments
     category: edge

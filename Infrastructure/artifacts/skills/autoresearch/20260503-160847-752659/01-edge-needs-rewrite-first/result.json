@@ -1,0 +1,52 @@
+{
+  "id": "edge-needs-rewrite-first",
+  "name": "target needs rewrite before optimization",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": false,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "should_trigger set, but skill selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex",
+        "final": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/autoresearch/20260503-160847-752659/01-edge-needs-rewrite-first/codex/stderr.txt",
+        "jsonl": null
+      },
+      "metrics": {
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] should_trigger set, but skill selection signal was unavailable for this run."
+  ]
+}

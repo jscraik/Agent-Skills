@@ -1,0 +1,1 @@
+Can you simplify the current diff without changing behavior?
