@@ -479,6 +479,11 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+      - name: Install Python validation deps
+        run: python -m pip install --upgrade pip pyyaml pytest jsonschema
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=test
 
@@ -497,6 +502,11 @@ jobs:
     needs: [risk-policy-gate]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+      - name: Install Python validation deps
+        run: python -m pip install --upgrade pip pyyaml pytest jsonschema
       - name: Run repo validation
         run: ./bin/ask repo validate --scope=check
 
