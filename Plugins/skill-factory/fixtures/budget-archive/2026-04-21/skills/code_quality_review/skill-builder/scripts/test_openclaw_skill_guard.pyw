@@ -85,6 +85,38 @@ class OpenClawSkillGuardTests(unittest.TestCase):
         findings = scan_source(src, "Infrastructure/scripts/test.ts")
         self.assertTrue(any(f.code == "security.suspicious_websocket" and f.level == "warn" for f in findings))
 
+    def test_detects_unsanitized_path_interpolation_in_prompt_builder(self) -> None:
+        src = (
+            "def buildReviewPrompt(workspace_dir):\n"
+            "    return f'Review workspace at {workspace_dir}'\n"
+        )
+        findings = scan_source(src, "Infrastructure/scripts/test.py")
+        self.assertTrue(
+            any(
+                f.code == "security.prompt_unsanitized_path_interpolation" and f.level == "warn"
+                for f in findings
+            )
+        )
+
+    def test_allows_sanitized_path_interpolation_in_prompt_builder(self) -> None:
+        src = (
+            "def buildReviewPrompt(workspace_dir):\n"
+            "    safe = sanitize_for_prompt(workspace_dir)\n"
+            "    return f'Review workspace at {safe}'\n"
+        )
+        findings = scan_source(src, "Infrastructure/scripts/test.py")
+        self.assertFalse(any(f.code == "security.prompt_unsanitized_path_interpolation" for f in findings))
+
+    def test_detects_os_tempdir_as_path_trust_boundary(self) -> None:
+        src = (
+            "base = Path(tempfile.gettempdir()).resolve()\n"
+            "target = Path(user_path).resolve()\n"
+            "if not _is_path_inside(base, target):\n"
+            "    raise ValueError('outside temp')\n"
+        )
+        findings = scan_source(src, "Infrastructure/scripts/test.py")
+        self.assertTrue(any(f.code == "security.tmpdir_trust_boundary" and f.level == "warn" for f in findings))
+
     def test_detects_risky_calls_on_regex_lines(self) -> None:
         # Dangerous call must not be suppressed just because re.compile appears on the same line.
         src = "compiled = re.compile('x') ; os.system('echo hi')\n"
