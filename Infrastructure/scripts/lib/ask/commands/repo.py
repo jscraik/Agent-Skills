@@ -426,6 +426,16 @@ def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
     }
 
 
+def _skipped_dependency_signal(source: str, summary: str) -> dict[str, Any]:
+    return {
+        "state": "skipped",
+        "severity": "warning",
+        "summary": summary,
+        "source": source,
+        "next_command": "./bin/ask repo status --json --robot",
+    }
+
+
 def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
     try:
         return builder(*args)
@@ -442,18 +452,46 @@ def repo_doctor(repo_root: Path) -> CallResult:
         projection_sync_signal = _safe_signal(_projection_sync_signal, status_result)
     except Exception as exc:
         repo_status_signal = _unknown_signal_error_signal(exc)
-        projection_sync_signal = _unknown_signal_error_signal(exc)
-    signals = {
-        "repo_status": repo_status_signal,
-        "projection_sync": projection_sync_signal,
-        "catalog_parity": _safe_signal(lambda: _catalog_parity_signal(doctor_catalog(repo_root))),
-        "runtime_budget": _safe_signal(lambda: _runtime_budget_signal(skills_budget(repo_root))),
-        "command_handles": _safe_signal(
+        projection_sync_signal = _skipped_dependency_signal(
+            "repo_status",
+            "Projection sync could not be checked because repo status failed.",
+        )
+
+    repo_status_ready = repo_status_signal.get("state") == "pass"
+    if repo_status_ready:
+        catalog_parity_signal = _safe_signal(lambda: _catalog_parity_signal(doctor_catalog(repo_root)))
+        runtime_budget_signal = _safe_signal(lambda: _runtime_budget_signal(skills_budget(repo_root)))
+        command_handles_signal = _safe_signal(
             lambda: _command_handles_signal(
                 skills_handles(repo_root, check=True, include_handles=False)
             )
-        ),
-        "repo_surface": _safe_signal(lambda: _repo_surface_signal(repo_surface(repo_root))),
+        )
+        repo_surface_signal = _safe_signal(lambda: _repo_surface_signal(repo_surface(repo_root)))
+    else:
+        catalog_parity_signal = _skipped_dependency_signal(
+            "doctor_catalog",
+            "Catalog parity could not be checked because repo status is not ready.",
+        )
+        runtime_budget_signal = _skipped_dependency_signal(
+            "skills_budget",
+            "Runtime budget could not be checked because repo status is not ready.",
+        )
+        command_handles_signal = _skipped_dependency_signal(
+            "skills_handles",
+            "Command handles could not be checked because repo status is not ready.",
+        )
+        repo_surface_signal = _skipped_dependency_signal(
+            "repo_surface",
+            "Repo surface could not be checked because repo status is not ready.",
+        )
+
+    signals = {
+        "repo_status": repo_status_signal,
+        "projection_sync": projection_sync_signal,
+        "catalog_parity": catalog_parity_signal,
+        "runtime_budget": runtime_budget_signal,
+        "command_handles": command_handles_signal,
+        "repo_surface": repo_surface_signal,
     }
     payload = build_golden_path_payload(
         signals=signals,

@@ -139,10 +139,16 @@ class TestAskRepoDoctor(unittest.TestCase):
         ), patch(
             "ask.commands.repo.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+        ) as catalog_mock, patch(
+            "ask.commands.repo.skills_budget",
+            return_value=_budget_result(),
+        ) as budget_mock, patch(
             "ask.commands.repo.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ) as handles_mock, patch(
+            "ask.commands.repo.repo_surface",
+            return_value=_surface_result(),
+        ) as surface_mock:
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -150,7 +156,15 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(doctor["blocking"])
         self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
         self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["runtime_budget"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["command_handles"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        catalog_mock.assert_not_called()
+        budget_mock.assert_not_called()
+        handles_mock.assert_not_called()
+        surface_mock.assert_not_called()
 
     def test_runtime_budget_command_failure_blocks(self) -> None:
         failed_budget = _result(status="error", data={"runtime_budget": {"status": "fail"}})
@@ -237,7 +251,9 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(doctor["blocking"])
         blocker_ids = {blocker["id"] for blocker in doctor["blockers"]}
         self.assertIn("repo_status", blocker_ids)
-        self.assertIn("projection_sync", blocker_ids)
+        self.assertNotIn("projection_sync", blocker_ids)
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
 
 
