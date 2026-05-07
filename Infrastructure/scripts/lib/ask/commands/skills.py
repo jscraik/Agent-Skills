@@ -1959,8 +1959,9 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
             scored.append((len(overlap), handle, row, overlap))
     if not scored:
         return None
-    score, _handle, row, overlap = max(scored, key=lambda item: (item[0], -len(item[1]), item[1]))
-    if score < 2:
+    score, handle, row, overlap = max(scored, key=lambda item: (item[0], -len(item[1]), item[1]))
+    normalized_handle = handle.strip().lower().lstrip("$")
+    if score < 2 and normalized_handle not in request_tokens:
         return None
     return {
         "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
