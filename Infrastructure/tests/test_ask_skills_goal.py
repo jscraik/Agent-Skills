@@ -220,7 +220,7 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("fallback command-handle description match", improvement["why"])
 
-    def test_improve_fallback_allows_single_token_goal(self) -> None:
+    def test_improve_fallback_accepts_exact_single_token_handle(self) -> None:
         route_decision = {
             "decision_status": "unresolved_ambiguity",
             "policy_identity": "abc123def4567890",
@@ -248,17 +248,13 @@ class TestAskSkillsGoal(unittest.TestCase):
             patch("ask.commands.skills.handles_report", return_value=handles),
             patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix")),
         ):
-            result = improve_skills(
-                REPO_ROOT,
-                "autofix",
-                top_k=3,
-                considered_limit=20,
-            )
+            result = improve_skills(REPO_ROOT, "autofix", top_k=3, considered_limit=20)
 
         self.assertEqual(result.status, "success")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "resolved_with_fallback")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
+        self.assertIn("matched terms=autofix", improvement["why"])
 
     def test_improve_does_not_bypass_catalog_parity_block(self) -> None:
         route_decision = {
