@@ -173,7 +173,8 @@ Use `pr-branch-review` when the target is:
 Use `artifact-review` when the target is:
 - `.harness/specs/*.md`
 - `.harness/plan/*.md`
-- `.harness/specs/*.md`
+- `docs/ui-plans/*.md`
+- `docs/solutions/*.md`
 - `docs/ui-plans/*.md`
 - `docs/solutions/*.md`
 - another markdown design or delivery artifact explicitly provided by the user
