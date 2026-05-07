@@ -220,6 +220,46 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("fallback command-handle description match", improvement["why"])
 
+    def test_improve_fallback_allows_single_token_goal(self) -> None:
+        route_decision = {
+            "decision_status": "unresolved_ambiguity",
+            "policy_identity": "abc123def4567890",
+            "failure_class": "AMBIGUITY_UNRESOLVED",
+            "operator_action": "Narrow request.",
+            "selected_candidates": [],
+            "considered_candidates": [],
+            "ambiguity_set": [],
+        }
+        handles = {
+            "handles": [
+                {
+                    "handle": "autofix",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                    "owner": "agent-ops",
+                    "description": "Fix PR review feedback and unresolved review comments.",
+                    "invoke_via": "agent-ops",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                }
+            ]
+        }
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.handles_report", return_value=handles),
+            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix")),
+        ):
+            result = improve_skills(
+                REPO_ROOT,
+                "autofix",
+                top_k=3,
+                considered_limit=20,
+            )
+
+        self.assertEqual(result.status, "success")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
+
     def test_improve_does_not_bypass_catalog_parity_block(self) -> None:
         route_decision = {
             "decision_status": "blocked_catalog_parity",

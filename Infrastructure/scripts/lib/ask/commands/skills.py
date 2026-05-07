@@ -1960,7 +1960,8 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
     if not scored:
         return None
     score, _handle, row, overlap = max(scored, key=lambda item: (item[0], -len(item[1]), item[1]))
-    if score < 2:
+    minimum_score = min(2, len(request_tokens))
+    if score < minimum_score:
         return None
     return {
         "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
