@@ -34,7 +34,7 @@ python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/check_
 Validate tracked-work traceability:
 
 ```bash
-python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/<filename>.md
+./bin/ask python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/<filename>.md
 ```
 
 ## General plan template
