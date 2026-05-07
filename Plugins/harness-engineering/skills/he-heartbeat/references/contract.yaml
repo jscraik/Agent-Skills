@@ -20,6 +20,7 @@ outputs:
   - heartbeat mode, selected cadence, selected stage or folded mode, and target
   - automation name, status, id when created or updated, destination, target_binding, and active state
   - live checks, stop conditions, immediate-run outcome, and next wake-up behavior
+  - "XP operating artifacts: slack_policy for unattended uncertainty and blackboard_delta for durable continuation state"
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
 
 non_goals:

@@ -30,6 +30,18 @@ tracker_status: resolved|created|blocked|not_applicable|user_opted_out
 artifact_status: none|drafted|updated|validated|not_applicable
 traceability_status: pass|blocked|not_applicable
 validation_status: pass|fail|blocked|not_run_with_reason|not_applicable
+domain_language:
+  status: stable|ambiguous|conflicted|not_applicable
+  canonical_terms: []
+  avoided_aliases: []
+  unresolved_terms: []
+  context_file: CONTEXT.md|CONTEXT-MAP.md|domain-context-contract.md|not_applicable
+context_map:
+  source_of_truth: user_request|linear|spec|plan|worktree|pr|validation|project_brain|heartbeat|goal|session_evidence|not_applicable
+  translated_from: []
+  relationship: source_of_truth|translation|handoff|evidence_only|stale_snapshot|not_applicable
+  conflict_status: none|blocked|resolved|not_applicable
+  conflict_rule: stop|refresh|prefer_source|record_blocker|not_applicable
 exit_status: ready_for_next_stage|blocked|done
 next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
 missing_inputs: []
@@ -59,6 +71,7 @@ For short chat responses, summarize the same fields without losing blocker, trac
 - Do not route to `he-work` while plan/source traceability, validation strategy, or scope boundary is missing.
 - Do not claim `done` without validation evidence or a concrete reason validation is not applicable.
 - Do not let a PR, branch, local plan, or session summary replace Linear as tracker of record.
+- Do not let external review, CI, session, or user wording change HE domain meaning without translation through `domain-context-contract.md`.
 - In coding-harness-managed repos, lifecycle transitions require populated or explicitly blocked Harness command bridge fields.
 
 ## Stage Minimums

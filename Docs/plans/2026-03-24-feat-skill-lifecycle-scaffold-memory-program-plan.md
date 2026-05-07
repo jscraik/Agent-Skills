@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-LIFECYCLE-MEMORY-20260324
 title: feat: Skill Lifecycle, Scaffold Quality, and Institutional Memory Program Delivery Plan
 type: feat
 status: active

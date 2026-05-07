@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-ARSCONTEXTA-GRAPH-20260226
 title: feat: Ars Contexta Graph Visual + Communities + Evolution
 type: feat
 status: completed

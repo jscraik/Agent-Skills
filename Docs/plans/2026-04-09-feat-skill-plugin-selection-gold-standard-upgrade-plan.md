@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SELECTION-GOLD-20260409
 title: feat: Skill and Plugin Selection Gold-Standard Upgrade Plan
 type: feat
 status: completed

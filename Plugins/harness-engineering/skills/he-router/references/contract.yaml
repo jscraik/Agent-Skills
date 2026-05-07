@@ -24,6 +24,7 @@ outputs:
   - confidence value such as high, medium, or blocked
   - one-sentence rationale
   - one recommended next step
+  - "XP operating artifact: blackboard_delta when route choice changes durable workflow state or user intent"
   - lifecycle exit status fields when routing is part of an active HE handoff
   - missing input when blocked
 

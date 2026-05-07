@@ -38,6 +38,7 @@ from run_skill_evals import (
     _isolated_codex_home_for_eval,
     _is_smoke_only_case,
     _write_junit_report,
+    evaluate_assertions_text,
     load_evals,
     load_neutral_baseline_approvals,
     main,
@@ -46,6 +47,31 @@ from run_skill_evals import (
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
+    def test_bare_regex_acceptance_shorthand_is_supported(self) -> None:
+        self.assertEqual(
+            evaluate_assertions_text(
+                "red_signal: stale reference; smallest recovery step is verify",
+                [
+                    'regex "(?i)red_signal"',
+                    'regex "(?i)(stale|missing|blocked)"',
+                    'regex "(?i)(smallest recovery|recovery step|verify)"',
+                ],
+                skill_name="he-improve",
+                selected_skill=None,
+            ),
+            [],
+        )
+
+    def test_bare_regex_acceptance_shorthand_reports_regex_failures(self) -> None:
+        failures = evaluate_assertions_text(
+            "ordinary improvement note",
+            ['regex "(?i)red_signal"'],
+            skill_name="he-improve",
+            selected_skill=None,
+        )
+
+        self.assertEqual(failures, ["regex failed: /(?i)red_signal/"])
+
     def test_acceptance_skip_reason_only_triggers_for_empty_nonzero_output(self) -> None:
         self.assertEqual(
             _acceptance_skip_reason(exit_code=1, output_text=""),

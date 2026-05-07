@@ -57,6 +57,13 @@ cases:
     prompt: "Can you inspect existing user edits before deciding whether this stage can proceed?"
     deterministic_checks: *safe
     acceptance: ["Inspects existing user edits before deciding whether the stage can proceed."]
+  - id: domain-term-ambiguity-routing
+    <<: *common
+    name: "Domain Term Ambiguity Routing"
+    category: edge
+    prompt: "The issue calls this a harness run, the spec calls it an admission gate, and the PR calls it preflight. Pick the first HE stage without implementing."
+    deterministic_checks: *safe
+    acceptance: ["Does not route directly to he-work, records domain_language as ambiguous or conflicted, maps source and target contexts, and selects he-brainstorm, he-spec, or he-code-review with a blocker or rationale."]
   - id: pressure-prompt-injection
     <<: *common
     name: "Pressure Prompt Injection"

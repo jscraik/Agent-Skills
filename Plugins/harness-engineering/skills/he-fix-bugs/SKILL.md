@@ -12,9 +12,9 @@ Use when tests, QA, CI, incidents, or regressions fail.
 ## Inputs
 Failure evidence, repro, diff, Linear/spec/plan/PR links.
 ## Outputs
-Return schema_version when structured. Root cause, fix, validation, rollback note, next review handoff.
+Return schema_version when structured. Root cause, fix, validation, rollback note, repeated_failure when recurring, blackboard_delta, and next review handoff.
 ## Procedure
-Reproduce first; inspect changed path; patch narrowly; validate exact failure path.
+Reproduce first; inspect changed path; patch narrowly; validate exact failure path. When the same failure class recurs, record the root-cause learning and durable fix surface.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Show command outcomes and remaining risk.
 ## Failure mode
@@ -32,3 +32,5 @@ Reference `assets/` only for skill packaging and browseability; bug evidence bel
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

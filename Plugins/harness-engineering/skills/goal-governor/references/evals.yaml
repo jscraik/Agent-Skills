@@ -38,8 +38,20 @@ cases:
     expected_route: "doctor"
     acceptance:
       - "Checks [features].goals."
+      - "Checks native objective is non-empty and within the 4,000-character limit."
       - "Checks max_depth >= 2 for Jamie's Codex harness."
       - "Checks Scout/Judge/Worker role availability."
+  - id: budget-limited-native-goal
+    <<: *common
+    name: "Budget Limited Native Goal"
+    category: edge
+    prompt: "Continue this /goal, but Codex says the native goal is budgetLimited and the board still has an active worker task."
+    deterministic_checks: *safe
+    expected_route: "continue"
+    acceptance:
+      - "Classifies budgetLimited as native goal drift or stop-state evidence."
+      - "Does not continue Worker implementation before PM or Judge classification."
+      - "Reports token budget evidence separately from completion receipts."
   - id: repair-invalid-board
     <<: *common
     name: "Repair Invalid Board"

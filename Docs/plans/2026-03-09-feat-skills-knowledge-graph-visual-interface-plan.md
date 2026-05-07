@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILLS-KG-VISUAL-20260309
 title: feat: Skills Knowledge Graph Visual Interface Delivery Plan
 type: feat
 status: active

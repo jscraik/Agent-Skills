@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 
 VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
-    "repo": ["status", "validate", "check-stability", "doctor-catalog", "provider-audit", "surface"],
+    "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "surface"],
     "skills": [
         "list",
         "budget",
@@ -14,8 +14,11 @@ VALID_ACTIONS = {
         "resolve",
         "parse",
         "proof",
+        "prove",
+        "explain",
         "route",
         "goal",
+        "improve",
         "starter",
         "sync",
         "audit",
@@ -36,6 +39,8 @@ VALID_ACTIONS = {
 TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "repo": [
         "ask repo status",
+        "ask repo doctor --json",
+        "ask repo closeout --changed --json",
         "ask repo validate --ephemeral",
         "ask repo doctor-catalog --strict",
         "ask repo surface --json",
@@ -50,7 +55,10 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
             "\"use $skill-builder to validate $he-heartbeat with @skillinspector\" --json"
         ),
         "ask skills proof he-heartbeat --json",
+        "ask skills prove he-heartbeat --json",
+        "ask skills explain he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
+        "ask skills improve \"fix PR review comments faster\" --json",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
     ],
     "reviewers": [
@@ -85,6 +93,14 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
 }
 
 COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
+    ("repo", "doctor"): [
+        "ask repo doctor --json",
+        "ask repo doctor --robot --json",
+    ],
+    ("repo", "closeout"): [
+        "ask repo closeout --changed --json",
+        "ask repo closeout --changed --robot --json",
+    ],
     ("repo", "doctor-catalog"): [
         "ask repo doctor-catalog",
     ],
@@ -115,6 +131,12 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills sync --scope workspace --projection rooted --json",
         "ask skills sync --scope user --projection rooted --json",
     ],
+    ("skills", "prove"): [
+        "ask skills prove he-heartbeat --json",
+    ],
+    ("skills", "explain"): [
+        "ask skills explain autofix --json",
+    ],
     ("reviewers", "resolve"): [
         "ask reviewers resolve skillinspector --json",
     ],
@@ -129,6 +151,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",
+    ],
+    ("skills", "improve"): [
+        "ask skills improve \"make agents better at fixing PR review comments\" --json",
     ],
     ("skills", "route"): [
         "ask skills route \"debug flaky tests\"",
@@ -175,6 +200,8 @@ FUZZY_MATCHES = {
     "list": "list",
     "ls": "list",
     "resolve": "resolve",
+    "prove": "prove",
+    "explain": "explain",
     "handles": "handles",
     "init": "init",
     "create": "init",
@@ -193,7 +220,10 @@ FUZZY_MATCHES = {
     "path": "chain",
     "route": "chain",
     "goal": "goal",
-    "doctor": "doctor-catalog",
+    "improve": "improve",
+    "closeout": "closeout",
+    "finish": "closeout",
+    "doctor": "doctor",
     "catalog": "doctor-catalog",
     "provider": "provider-audit",
     "provider-audit": "provider-audit",

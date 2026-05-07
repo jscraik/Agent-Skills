@@ -12,11 +12,26 @@ inputs:
 outputs:
   - result
   - evidence_summary
+  - complexity_symptoms
+  - design_options
+  - recommended_first_move
+  - reversibility
+  - tracer_proof
+  - decision_surface
   - validation_status
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
+  - premature_redesign
+  - complexity_displacement
+required_deep_review_fields:
+  - complexity_symptoms
+  - design_options.patch_design
+  - design_options.interface_design
+  - recommended_first_move
+  - tracer_proof
+  - reversibility
 safety:
   untrusted_inputs: true
   redact_secrets: true
@@ -24,5 +39,6 @@ safety:
 validation:
   - plugin_eval_grade_a
   - strict_skill_audit
+  - tracer_proof_or_blocker
 observability: "Report validation commands and outcomes."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

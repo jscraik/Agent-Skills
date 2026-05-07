@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-SKILL-AUTHORING-ITER-20260404
 title: feat: Skill Authoring Family Iteration Upgrade
 type: feat
 status: complete

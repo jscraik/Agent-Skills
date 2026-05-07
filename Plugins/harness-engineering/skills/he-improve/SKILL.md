@@ -12,9 +12,9 @@ Use when hardening, optimising, polishing, or capability-lifting existing code/s
 ## Inputs
 Current artifact, evidence, session-collector evidence, metrics, constraints.
 ## Outputs
-Return schema_version when structured. Gap list, prioritized improvements, validation, retained references.
+Return schema_version when structured. Gap list, red_signal, prioritized improvements, validation, blackboard_delta, retained references.
 ## Procedure
-Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
+Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; translate external source material into invariants, evals, references, contracts, or an explicit rejection; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Compare before/after behavior and command outcomes.
 ## Failure mode
@@ -35,3 +35,5 @@ Reference `assets/` only for skill packaging and browseability; experiment logs 
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Session evidence: `Plugins/harness-engineering/references/session-evidence-skillify-triage.md`
 - Skill improvement loop: `Plugins/harness-engineering/references/skill-improvement-loop.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

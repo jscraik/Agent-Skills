@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-CLI-20260406
 title: ask (Agent Skills Kit) CLI Implementation Plan
 status: draft
 date: 2026-04-06

@@ -581,6 +581,22 @@ def _json_get_path(obj: Any, path: str) -> Any:
 def _normalize_assert(a: Assertion) -> Dict[str, Any]:
     if isinstance(a, str):
         s = a.strip()
+        bare_match = re.match(r"^(contains|not_contains|regex|not_regex)\s+(.+)$", s, flags=re.IGNORECASE)
+        if bare_match:
+            assertion_type = bare_match.group(1).lower()
+            value = bare_match.group(2).strip()
+            if value.startswith(("'", '"')):
+                try:
+                    parts = shlex.split(value)
+                except ValueError as exc:
+                    raise ValueError(f"Invalid quoted assertion value: {value!r}") from exc
+                if len(parts) != 1:
+                    raise ValueError(
+                        f"Assertion shorthand expects one value for {assertion_type}, "
+                        f"got {len(parts)} tokens: {value!r}"
+                    )
+                value = parts[0]
+            return {"type": assertion_type, "value": value}
         for prefix, t in [
             ("regex:", "regex"),
             ("not_regex:", "not_regex"),
@@ -2449,7 +2465,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
             if c.should_trigger is not None and selected_skill is None:
-                runner_warnings.append("should_trigger set, but skill selection signal was unavailable for this run.")
+                expected = "selected" if c.should_trigger else "not selected"
+                runner_warnings.append(
+                    f"should_trigger expected skill to be {expected}, but selection signal was unavailable for this run."
+                )
 
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None

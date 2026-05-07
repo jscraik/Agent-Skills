@@ -1,13 +1,24 @@
 import subprocess
 import json
 import re
+import shlex
 import sys
 from pathlib import Path
-from typing import List
+from typing import Any, List
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
+from ask.commands.skills import skills_budget, skills_handles
+from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
+GENERATED_SURFACE_PREFIXES = (
+    ".agents/skills/",
+    ".skillsets/",
+    ".skill-telemetry/",
+)
+CANONICAL_SKILL_PREFIXES = (
+    "Skills/",
+)
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """
@@ -188,6 +199,580 @@ def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
             fix_suggestion="Regenerate catalog parity diagnostics and rerun doctor-catalog.",
         )
     )
+    return result
+
+
+def _error_summary(result: CallResult, fallback: str) -> str:
+    if result.errors:
+        return result.errors[0].message
+    return fallback
+
+
+def _repo_status_signal(status_result: CallResult) -> dict[str, Any]:
+    if status_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(status_result, "Repository status check failed."),
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+        }
+    if not status_result.data.get("is_git"):
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": "Repository root is not a git repository.",
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Repository status is readable.",
+        "source": "repo_status",
+        "details": {
+            "repo_root": status_result.data.get("repo_root"),
+            "is_git": status_result.data.get("is_git"),
+        },
+    }
+
+
+def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
+    if status_result.status != "success":
+        return {
+            "state": "skipped",
+            "severity": "warning",
+            "summary": "Projection sync could not be checked because repo status failed.",
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+        }
+    if not status_result.data.get("is_git"):
+        return {
+            "state": "skipped",
+            "severity": "warning",
+            "summary": "Projection sync not checked because the repository root is not a git repository.",
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+            "details": {"is_git": False},
+        }
+    if status_result.data.get("skills_synced"):
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Workspace skill runtime appears synced.",
+            "source": "repo_status",
+            "details": {"skills_synced": True},
+        }
+    return {
+        "state": "block",
+        "severity": "blocker",
+        "summary": "Workspace skill runtime does not appear synced.",
+        "source": "repo_status",
+        "next_command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "details": {"skills_synced": False},
+    }
+
+
+def _catalog_parity_signal(catalog_result: CallResult) -> dict[str, Any]:
+    report = catalog_result.data.get("catalog_parity", {})
+    if catalog_result.status == "success" and report.get("drift_detected") is False:
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Catalog parity is resolved.",
+            "source": "doctor_catalog",
+            "details": {
+                "decision_status": report.get("decision_status"),
+                "canonical_count": report.get("canonical_count"),
+                "policy_identity": report.get("policy_identity"),
+            },
+        }
+    if report.get("drift_detected") is True:
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": f"Catalog parity drift detected: {report.get('drift_class')}.",
+            "source": "doctor_catalog",
+            "next_command": "./bin/ask repo doctor-catalog --json --robot",
+            "details": {
+                "decision_status": report.get("decision_status"),
+                "drift_class": report.get("drift_class"),
+                "operator_action": report.get("operator_action"),
+            },
+        }
+    return {
+        "state": "error",
+        "severity": "blocker",
+        "summary": _error_summary(catalog_result, "Catalog parity check failed."),
+        "source": "doctor_catalog",
+        "next_command": "./bin/ask repo doctor-catalog --json --robot",
+    }
+
+
+def _runtime_budget_signal(runtime_result: CallResult) -> dict[str, Any]:
+    report = runtime_result.data.get("runtime_budget", {})
+    violations = report.get("violations") or []
+    status = report.get("status")
+    details = {
+        "status": status,
+        "default_visible_count": report.get("default_visible_count"),
+        "estimated_description_tokens": report.get("estimated_description_tokens"),
+        "violation_count": len(violations),
+    }
+    if runtime_result.status == "success" and status == "pass":
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Runtime budget is within policy.",
+            "source": "skills_budget",
+            "details": details,
+        }
+    if violations:
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": f"Runtime budget has {len(violations)} policy violation(s).",
+            "source": "skills_budget",
+            "next_command": "./bin/ask runtime budget --json --robot",
+            "details": details,
+        }
+    if runtime_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(runtime_result, "Runtime budget check failed."),
+            "source": "skills_budget",
+            "next_command": "./bin/ask runtime budget --json --robot",
+            "details": details,
+        }
+    return {
+        "state": "warn",
+        "severity": "warning",
+        "summary": "Runtime budget returned a non-passing advisory status.",
+        "source": "skills_budget",
+        "next_command": "./bin/ask runtime budget --json --robot",
+        "details": details,
+    }
+
+
+def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
+    report = handles_result.data.get("command_surface", {})
+    violations = report.get("violations") or []
+    details = {
+        "status": report.get("status"),
+        "handle_count": report.get("handle_count"),
+        "violation_count": len(violations),
+    }
+    if handles_result.status == "success" and report.get("status") == "pass":
+        return {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Command handles validate cleanly.",
+            "source": "skills_handles",
+            "details": details,
+        }
+    if violations:
+        summary = f"Command-handle validation found {len(violations)} violation(s)."
+    else:
+        summary = _error_summary(handles_result, "Command-handle validation failed.")
+    return {
+        "state": "block",
+        "severity": "blocker",
+        "summary": summary,
+        "source": "skills_handles",
+        "next_command": "./bin/ask skills handles --check --json --robot",
+        "details": details,
+    }
+
+
+def _repo_surface_signal(surface_result: CallResult) -> dict[str, Any]:
+    report = surface_result.data.get("repo_surface", {})
+    summary = report.get("summary", {})
+    blocking_findings = summary.get("blocking_findings", 0)
+    details = {
+        "status": report.get("status"),
+        "total_paths": summary.get("total_paths"),
+        "blocking_findings": blocking_findings,
+        "counts_by_code": summary.get("counts_by_code", {}),
+    }
+    if surface_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(surface_result, "Repo surface inventory failed."),
+            "source": "repo_surface",
+            "next_command": "./bin/ask repo surface --json --robot",
+            "details": details,
+        }
+    if report.get("status") == "warning" or blocking_findings:
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": f"Repo surface has {blocking_findings} diagnostic finding(s).",
+            "source": "repo_surface",
+            "next_command": "./bin/ask repo surface --json --robot",
+            "details": details,
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Repo surface inventory has no diagnostic debt.",
+        "source": "repo_surface",
+        "details": details,
+    }
+
+
+def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
+    return {
+        "state": "error",
+        "severity": "blocker",
+        "summary": f"Repo doctor failed while composing signals: {type(exc).__name__}.",
+        "source": "repo_doctor",
+        "next_command": "./bin/ask repo status --json --robot",
+        "details": {
+            "error_type": type(exc).__name__,
+        },
+    }
+
+
+def _skipped_signal(summary: str, source: str) -> dict[str, Any]:
+    return {
+        "state": "skipped",
+        "severity": "info",
+        "summary": summary,
+        "source": source,
+    }
+
+
+def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, Any]]:
+    return {
+        "catalog_parity": _skipped_signal(
+            f"Catalog parity skipped {reason}.",
+            "repo_status",
+        ),
+        "runtime_budget": _skipped_signal(
+            f"Runtime budget skipped {reason}.",
+            "repo_status",
+        ),
+        "command_handles": _skipped_signal(
+            f"Command-handle validation skipped {reason}.",
+            "repo_status",
+        ),
+        "repo_surface": _skipped_signal(
+            f"Repo surface inventory skipped {reason}.",
+            "repo_status",
+        ),
+    }
+
+
+def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
+    try:
+        return builder(*args)
+    except (OSError, RuntimeError, ValueError, KeyError, TypeError) as exc:
+        return _unknown_signal_error_signal(exc)
+
+
+def repo_doctor(repo_root: Path) -> CallResult:
+    """Compose repo health checks into one compact agent-facing doctor payload."""
+    result = CallResult()
+    try:
+        status_result = repo_status(repo_root)
+    except Exception as exc:
+        signals = {
+            "repo_status": _unknown_signal_error_signal(exc),
+            "projection_sync": _skipped_signal(
+                "Projection sync skipped because repository status failed.",
+                "repo_status",
+            ),
+            **_repo_status_skipped_downstream_signals(
+                "because repository status failed"
+            ),
+        }
+    else:
+        repo_status_signal = _safe_signal(_repo_status_signal, status_result)
+        projection_sync_signal = _safe_signal(_projection_sync_signal, status_result)
+        signals = {
+            "repo_status": repo_status_signal,
+            "projection_sync": projection_sync_signal,
+        }
+        if repo_status_signal.get("state") in {"block", "error"}:
+            signals.update(
+                _repo_status_skipped_downstream_signals(
+                    "until repository status is ready"
+                )
+            )
+        elif projection_sync_signal.get("state") == "block":
+            signals.update(
+                _repo_status_skipped_downstream_signals(
+                    "until workspace skill runtime projection is synced"
+                )
+            )
+        else:
+            signals.update(
+                {
+                    "catalog_parity": _safe_signal(
+                        lambda: _catalog_parity_signal(doctor_catalog(repo_root))
+                    ),
+                    "runtime_budget": _safe_signal(
+                        lambda: _runtime_budget_signal(skills_budget(repo_root))
+                    ),
+                    "command_handles": _safe_signal(
+                        lambda: _command_handles_signal(
+                            skills_handles(repo_root, check=True, include_handles=False)
+                        )
+                    ),
+                    "repo_surface": _safe_signal(
+                        lambda: _repo_surface_signal(repo_surface(repo_root))
+                    ),
+                }
+            )
+    payload = build_golden_path_payload(
+        signals=signals,
+        normal_next_command="./bin/ask repo status --json --robot",
+    )
+    result.data["doctor"] = payload
+    result.data.update(payload)
+    result.status = "error" if payload["blocking"] else "success"
+    if payload["blocking"]:
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=payload["agent_summary"],
+                fix_suggestion=payload.get("next_command"),
+            )
+        )
+    return result
+
+
+def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
+    command = ["git", *args]
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"git command timed out: {' '.join(command)}") from exc
+    except OSError as exc:
+        raise RuntimeError(
+            f"git command could not start: {' '.join(command)} ({exc})"
+        ) from exc
+    if process.returncode != 0:
+        detail = (process.stderr or process.stdout or "").strip()
+        raise RuntimeError(
+            f"git command failed: {' '.join(command)}"
+            + (f" ({detail})" if detail else "")
+        )
+    return [line.strip() for line in process.stdout.splitlines() if line.strip()]
+
+
+def collect_changed_files(repo_root: Path) -> list[str]:
+    """Return repo-relative staged, unstaged, and untracked file paths."""
+    changed = set()
+    for args in (
+        ["diff", "--name-only", "--diff-filter=ACMRD", "--"],
+        ["diff", "--cached", "--name-only", "--diff-filter=ACMRD", "--"],
+        ["ls-files", "--others", "--exclude-standard"],
+    ):
+        changed.update(_git_output_lines(repo_root, args))
+    return sorted(changed)
+
+
+def _quote_paths(paths: list[str]) -> str:
+    return " ".join(shlex.quote(path) for path in paths)
+
+
+def _validation_command_for_changed_files(changed_files: list[str]) -> str:
+    if not changed_files:
+        return "./bin/ask repo validate --json --robot"
+    return (
+        "./bin/ask repo validate --changed-files "
+        f"{_quote_paths(changed_files)} --json --robot"
+    )
+
+
+def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
+    generated_changed = [
+        path for path in changed_files
+        if path.startswith(GENERATED_SURFACE_PREFIXES)
+    ]
+    canonical_skill_changed = [
+        path for path in changed_files
+        if _is_canonical_skill_path(path)
+    ]
+    commands = []
+    if canonical_skill_changed or generated_changed:
+        commands.extend(
+            [
+                "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+                "./bin/ask skills handles --check --json --robot",
+            ]
+        )
+    return {
+        "needed": bool(commands),
+        "commands": commands,
+        "generated_changed_files": generated_changed,
+        "canonical_skill_changed_files": canonical_skill_changed,
+    }
+
+
+def _is_canonical_skill_path(path: str) -> bool:
+    if path.startswith(CANONICAL_SKILL_PREFIXES):
+        return True
+    parts = path.split("/")
+    return (
+        len(parts) >= 4
+        and parts[0] == "Plugins"
+        and parts[1] != "cache"
+        and parts[2] in {"skills", "Skills"}
+    )
+
+
+def _closeout_runtime_budget(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    details = (
+        doctor_payload.get("signals", {})
+        .get("runtime_budget", {})
+        .get("details", {})
+    )
+    return {
+        "status": details.get("status"),
+        "default_visible_count": details.get("default_visible_count"),
+        "estimated_description_tokens": details.get("estimated_description_tokens"),
+        "violation_count": details.get("violation_count", 0),
+    }
+
+
+def _closeout_surface_policy(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    details = (
+        doctor_payload.get("signals", {})
+        .get("repo_surface", {})
+        .get("details", {})
+    )
+    return {
+        "status": details.get("status"),
+        "blocking_findings": details.get("blocking_findings", 0),
+        "total_paths": details.get("total_paths"),
+        "counts_by_code": details.get("counts_by_code", {}),
+    }
+
+
+def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any]]:
+    commands = [
+        {
+            "id": "repo_doctor",
+            "reason": "Confirm golden-path health before claiming completion.",
+            "command": "./bin/ask repo doctor --json --robot",
+        }
+    ]
+    if changed_files:
+        commands.append(
+            {
+                "id": "changed_validation",
+                "reason": "Run validation scoped to the files currently changed.",
+                "command": _validation_command_for_changed_files(changed_files),
+            }
+        )
+    else:
+        commands.append(
+            {
+                "id": "repo_status",
+                "reason": "No changed files were detected; confirm clean repository state.",
+                "command": "./bin/ask repo status --json --robot",
+            }
+        )
+    return commands
+
+
+def _diagnostic_debt_next_command(diagnostic_debt: list[dict[str, Any]]) -> str | None:
+    for debt in diagnostic_debt:
+        next_command = debt.get("next_command") if isinstance(debt, dict) else None
+        if isinstance(next_command, str) and next_command.strip():
+            return next_command
+    return None
+
+
+def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) -> CallResult:
+    """Report completion readiness without editing, validating, or committing."""
+    result = CallResult()
+    doctor_result = repo_doctor(repo_root)
+    doctor_payload = doctor_result.data.get("doctor", {})
+    changed_files_error = None
+    changed_files: list[str] = []
+    if changed:
+        try:
+            changed_files = collect_changed_files(repo_root)
+        except RuntimeError as exc:
+            changed_files_error = str(exc)
+    sync_report = _closeout_sync_report(changed_files)
+    blockers: list[str] = []
+    if changed_files_error:
+        blockers.append("changed_file_detection_failed")
+    if doctor_payload.get("blocking"):
+        blockers.append("repo_doctor_blocking")
+    if sync_report["needed"]:
+        blockers.append("sync_required")
+    diagnostic_debt = doctor_payload.get("diagnostic_debt", [])
+    if strict and diagnostic_debt:
+        blockers.append("strict_diagnostic_debt")
+
+    focused_validation = _closeout_focused_validation(changed_files)
+    ready = not blockers
+    next_command: str | None
+    if changed_files_error:
+        next_command = "./bin/ask repo status --json --robot"
+    elif doctor_payload.get("blocking"):
+        next_command = doctor_payload.get("next_command")
+    elif sync_report["needed"]:
+        next_command = sync_report["commands"][0]
+    elif strict and diagnostic_debt:
+        next_command = (
+            _diagnostic_debt_next_command(diagnostic_debt)
+            or doctor_payload.get("next_command")
+            or "./bin/ask repo doctor --json --robot"
+        )
+    elif changed_files:
+        next_command = _validation_command_for_changed_files(changed_files)
+    else:
+        next_command = "./bin/ask repo status --json --robot"
+
+    payload = {
+        "agent_summary": (
+            "Ready: no closeout blockers detected."
+            if ready
+            else f"Blocked: closeout has {len(blockers)} blocker(s)."
+        ),
+        "changed_files": changed_files,
+        "changed_file_count": len(changed_files),
+        "changed_mode_requested": changed,
+        "changed_files_error": changed_files_error,
+        "sync": sync_report,
+        "runtime_budget": _closeout_runtime_budget(doctor_payload),
+        "surface_policy": _closeout_surface_policy(doctor_payload),
+        "focused_validation": focused_validation,
+        "diagnostic_debt": diagnostic_debt,
+        "commit_readiness": {
+            "ready": ready,
+            "blockers": blockers,
+            "strict": strict,
+        },
+        "doctor": doctor_payload,
+        "next_command": next_command,
+    }
+    result.data["repo_closeout"] = payload
+    result.data.update(payload)
+    result.status = "success" if ready else "error"
+    if not ready:
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=payload["agent_summary"],
+                fix_suggestion=next_command,
+            )
+        )
     return result
 
 

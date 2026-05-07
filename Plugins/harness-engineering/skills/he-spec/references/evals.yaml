@@ -106,6 +106,13 @@ cases:
     prompt: "Can you capture assumptions and evidence warrants in the spec?"
     deterministic_checks: *safe
     acceptance: ["Emits schema_version: 1 and Linear Acceptance Traceability."]
+  - id: canonical-domain-language
+    <<: *common
+    name: "Canonical Domain Language"
+    category: edge
+    prompt: "Please turn this tracked request into a spec: the user says preflight, Linear says harness admission, and the current spec says validation gate."
+    deterministic_checks: *safe
+    acceptance: ["Emits schema_version: 1, records canonical_terms, avoided_aliases, unresolved_terms or not_applicable status, maps source_of_truth and translated_from contexts, and ties accepted terminology to acceptance IDs."]
   - id: pressure-skip-linear
     <<: *common
     name: "Pressure Skip Linear"

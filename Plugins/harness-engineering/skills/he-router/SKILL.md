@@ -13,7 +13,7 @@ Use when stage choice is unclear, mixed, or a folded alias appears.
 ## Inputs
 Request text, repo root, optional Linear/session evidence.
 ## Outputs
-Return `schema_version` when structured, plus `selected_stage`, `source_path`, `folded_mode`, `blocker`, and `lifecycle_exit_status`.
+Return `schema_version` when structured, plus `selected_stage`, `source_path`, `folded_mode`, `blocker`, `blackboard_delta`, and `lifecycle_exit_status`.
 ## Procedure
 Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage.
 ## Validation
@@ -35,3 +35,5 @@ Redact secrets; never enumerate every child skill to the model. Do not remove im
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
 - Preserved router rules: `references/context-preservation.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

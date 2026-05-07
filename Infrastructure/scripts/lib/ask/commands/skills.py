@@ -8,7 +8,7 @@ import sys
 import importlib.util
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -50,6 +50,7 @@ from ask.selection_contract import (  # noqa: E402
     candidate_id,
     canonical_sort_key,
 )
+from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
 
 
 @dataclass
@@ -784,6 +785,410 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     return result
 
 
+def _skill_audit_target(repo_root: Path, resolution: dict[str, Any]) -> str | None:
+    source = resolution.get("source_path")
+    if not source:
+        return None
+    target = Path(str(source))
+    if not target.is_absolute():
+        target = repo_root / target
+    if target.name == "SKILL.md":
+        target = target.parent
+    try:
+        return target.resolve().relative_to(repo_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return None
+
+
+def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
+    workouts_root = repo_root / ".workouts"
+    if not workouts_root.is_dir():
+        return []
+    normalized = handle.strip().lower().replace("_", "-")
+
+    def _normalized_metadata_values(value: Any) -> set[str]:
+        if value is None:
+            return set()
+        if isinstance(value, str):
+            return {value.strip().lower().replace("_", "-")}
+        if isinstance(value, dict):
+            result: set[str] = set()
+            for nested in value.values():
+                result.update(_normalized_metadata_values(nested))
+            return result
+        if isinstance(value, (list, tuple, set)):
+            result: set[str] = set()
+            for nested in value:
+                result.update(_normalized_metadata_values(nested))
+            return result
+        return {str(value).strip().lower().replace("_", "-")}
+
+    candidates: list[str] = []
+    for workout in sorted(workouts_root.glob("**/workout.yaml")):
+        workout_id = workout.parent.relative_to(workouts_root).as_posix()
+        try:
+            from ask.commands.workouts import _load_structured_file
+
+            metadata = _load_structured_file(workout)
+        except (OSError, ValueError):
+            continue
+        explicit_values: set[str] = set()
+        for key in (
+            "skills",
+            "handles",
+            "target_skills",
+            "target_handles",
+            "skill",
+            "handle",
+            "skill_id",
+            "id",
+            "target_module",
+            "target_skill",
+            "target_handle",
+        ):
+            explicit_values.update(_normalized_metadata_values(metadata.get(key)))
+        for value in _normalized_metadata_values(metadata.get("target_source_path")):
+            path = Path(value)
+            explicit_values.add(path.stem)
+            if path.parent.name:
+                explicit_values.add(path.parent.name)
+        if normalized in explicit_values:
+            candidates.append(workout_id)
+    return candidates
+
+
+def skills_prove(repo_root: Path, handle: str) -> CallResult:
+    """Compose an agent-facing proof scorecard for one skill handle."""
+    result = CallResult()
+    result.metadata["command"] = "skills prove"
+    query = handle.strip()
+    goal_resolution: dict[str, Any] | None = None
+    reachability_result = skills_proof(repo_root, query)
+    command_proof = reachability_result.data.get("proof", {})
+    initial_resolution = command_proof.get("resolution") if isinstance(command_proof, dict) else {}
+    resolver_ok = isinstance(initial_resolution, dict) and initial_resolution.get("status") == "ok"
+    if reachability_result.status != "success" and not resolver_ok:
+        improvement_result = improve_skills(repo_root, goal_text=query)
+        goal_resolution = improvement_result.data.get("improvement")
+        candidate = (goal_resolution or {}).get("recommended_capability") or {}
+        if candidate.get("handle"):
+            reachability_result = skills_proof(repo_root, str(candidate["handle"]))
+        else:
+            result.status = "error"
+            result.data["skill_proof"] = {
+                "schema_version": "skill-proof-scorecard.v1",
+                "query": query,
+                "handle": None,
+                "proof_status": "blocked_goal_resolution",
+                "agent_summary": f"Could not resolve goal '{query}' to one skill handle.",
+                "reachability": {"status": "not_checked", "source": "goal_resolution"},
+                "structural_quality": {"status": "not_checked", "audit_command": None},
+                "analytics": {
+                    "status": "unavailable_or_legacy",
+                    "evidence_class": "native_skill_invocation_projection",
+                    "note": "No skill handle was available for analytics lookup.",
+                },
+                "outcome_proof": {"status": "not_checked", "workout_candidates": [], "evidence_class": "outcome_proof"},
+                "goal_resolution": goal_resolution,
+                "next_command": (goal_resolution or {}).get("next_command") or f"./bin/ask skills improve {shlex.quote(query)} --json --robot",
+            }
+            result.errors.extend(improvement_result.errors)
+            if not result.errors:
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message=f"Could not resolve goal '{query}' to one skill handle.",
+                        fix_suggestion=result.data["skill_proof"]["next_command"],
+                    )
+                )
+            return result
+    command_proof = reachability_result.data.get("proof", {})
+    resolution = command_proof.get("resolution") if isinstance(command_proof, dict) else {}
+    if not isinstance(resolution, dict):
+        resolution = {}
+    normalized = str(command_proof.get("handle") or resolution.get("handle") or handle.lstrip("$"))
+    reachability_status = command_proof.get("status") if isinstance(command_proof, dict) else "missing"
+
+    audit_target = _skill_audit_target(repo_root, resolution)
+    structural_detail: dict[str, Any] = {
+        "status": "missing",
+        "audit_level": "compat",
+        "audit_command": None,
+    }
+    if audit_target:
+        audit_result = audit_skill(repo_root, audit_target, level="compat")
+        structural_detail = {
+            "status": "pass" if audit_result.status == "success" else "fail",
+            "audit_level": "compat",
+            "audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level compat --json --robot",
+            "strict_audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level strict --json --robot",
+            "diagnostics_exit_code": audit_result.data.get("diagnostics", {}).get("exit_code"),
+        }
+
+    analytics = skill_invocation_analytics(repo_root, normalized)
+    workouts = _skill_workout_candidates(repo_root, normalized)
+    outcome_status = "missing"
+    next_command = f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot"
+    if reachability_status != "pass":
+        proof_status = "blocked_reachability"
+    elif structural_detail["status"] != "pass":
+        proof_status = "blocked_structural_quality"
+        next_command = structural_detail.get("audit_command") or next_command
+    elif workouts:
+        proof_status = "reachable_without_outcome_proof"
+        outcome_status = "available_not_run"
+        next_command = f"./bin/ask workouts run {shlex.quote(workouts[0])} --json --robot"
+    else:
+        proof_status = "reachable_without_outcome_proof"
+        next_command = structural_detail.get("strict_audit_command") or next_command
+
+    scorecard = {
+        "schema_version": "skill-proof-scorecard.v1",
+        "query": query,
+        "handle": normalized,
+        "proof_status": proof_status,
+        "agent_summary": (
+            f"${normalized} is reachable and structurally valid, but outcome proof is not present."
+            if proof_status == "reachable_without_outcome_proof"
+            else f"${normalized} proof is blocked at {proof_status.replace('blocked_', '').replace('_', ' ')}."
+        ),
+        "reachability": {
+            "status": reachability_status,
+            "source": "command_handle_proof",
+            "command": f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot",
+        },
+        "structural_quality": structural_detail,
+        "analytics": analytics,
+        "outcome_proof": {
+            "status": outcome_status,
+            "workout_candidates": workouts,
+            "evidence_class": "outcome_proof",
+        },
+        "next_command": next_command,
+    }
+    if goal_resolution:
+        scorecard["goal_resolution"] = goal_resolution
+    result.data["skill_proof"] = scorecard
+    result.data["command_handle_proof"] = command_proof
+    if proof_status.startswith("blocked_"):
+        result.status = "error"
+        result.errors.extend(reachability_result.errors)
+        if not result.errors:
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Skill proof scorecard is blocked for '{normalized}'.",
+                    fix_suggestion=next_command,
+                )
+            )
+    return result
+
+
+def _skill_sections(path: Path) -> dict[str, list[str]]:
+    """Return markdown section bodies keyed by heading text."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in lines:
+        match = re.match(r"^##\s+(.+?)\s*$", line)
+        if match:
+            current = match.group(1).strip().lower()
+            sections[current] = []
+            continue
+        if current:
+            sections[current].append(line)
+    return sections
+
+
+def _section_items(sections: dict[str, list[str]], names: tuple[str, ...], limit: int = 4) -> list[str]:
+    """Extract concise bullets or first paragraphs from named markdown sections."""
+    items: list[str] = []
+    for name in names:
+        for raw in sections.get(name, []):
+            line = raw.strip()
+            if not line:
+                continue
+            line = re.sub(r"^[-*]\s+", "", line)
+            line = re.sub(r"^\d+\.\s+", "", line)
+            items.append(line)
+            if len(items) >= limit:
+                return items
+    return items
+
+
+def _skill_usage_items(sections: dict[str, list[str]], limit: int = 4) -> tuple[list[str], list[str]]:
+    """Split positive and negative guidance from a skill's usage section."""
+    when_to_use: list[str] = []
+    when_not_to_use: list[str] = []
+    for raw in sections.get("when to use", []):
+        line = raw.strip()
+        if not line:
+            continue
+        line = re.sub(r"^[-*]\s+", "", line)
+        line = re.sub(r"^\d+\.\s+", "", line)
+        if line.lower().startswith("avoid "):
+            when_not_to_use.append(line)
+        else:
+            when_to_use.append(line)
+        if len(when_to_use) >= limit and len(when_not_to_use) >= limit:
+            break
+    return when_to_use[:limit], when_not_to_use[:limit]
+
+
+def _skill_validation_commands(source_path: Path, repo_root: Path) -> list[str]:
+    """Return executable validation commands for a resolved skill source."""
+    try:
+        relative_source = source_path.relative_to(repo_root)
+    except ValueError:
+        return []
+    audit_target = relative_source.parent if relative_source.name == "SKILL.md" else relative_source
+    return [f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict --json --robot"]
+
+
+def explain_skill(repo_root: Path, handle: str) -> CallResult:
+    """Explain one command-visible skill handle for agent use."""
+    result = CallResult()
+    result.metadata["command"] = "skills explain"
+    resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
+    normalized = resolution.get("handle", handle.lstrip("$"))
+    if resolution.get("status") != "ok":
+        result.status = "error"
+        result.data["explanation"] = {
+            "schema_version": "skill-explanation.v1",
+            "status": "blocked",
+            "handle": normalized,
+            "agent_summary": f"Could not resolve skill handle '{normalized}'.",
+            "next_command": f"./bin/ask skills resolve {shlex.quote(str(normalized))} --json --robot",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Could not explain skill handle '{normalized}': {resolution.get('error_code')}",
+                fix_suggestion=resolution.get("operator_action"),
+            )
+        )
+        return result
+
+    source_path_value = str(resolution.get("source_path") or "").strip()
+    if not source_path_value:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skill handle '{normalized}' resolved without a canonical source path.",
+                fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+            )
+        )
+        return result
+    raw_source_path = Path(source_path_value)
+    source_path = raw_source_path if raw_source_path.is_absolute() else repo_root / raw_source_path
+    try:
+        resolved_source = source_path.resolve()
+        resolved_repo = repo_root.resolve()
+        try:
+            resolved_source.relative_to(resolved_repo)
+        except ValueError:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_PATH_TRAVERSAL",
+                    message=f"Skill handle '{normalized}' resolved outside the repository root.",
+                    fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+                )
+            )
+            return result
+    except (ValueError, OSError) as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Failed to validate source path: {e}",
+                fix_suggestion="Ensure the source path is valid and accessible",
+            )
+        )
+        return result
+    if not resolved_source.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Resolved source for '{normalized}' is missing: {source_path}",
+                fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+            )
+        )
+        return result
+    try:
+        sections = _skill_sections(source_path)
+    except OSError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Resolved source for '{normalized}' could not be read: {source_path}",
+                fix_suggestion=f"Fix source permissions or rerun `./bin/ask skills explain {shlex.quote(str(normalized))}` after syncing.",
+            )
+        )
+        return result
+    description = str(resolution.get("description") or "").strip()
+    when_to_use, inline_when_not_to_use = _skill_usage_items(sections, limit=4)
+    when_to_use = when_to_use or ([description] if description else [])
+    when_not_to_use = inline_when_not_to_use or _section_items(sections, ("avoid",), limit=4)
+    required_validation = _section_items(sections, ("validation",), limit=4)
+    known_limitations = _section_items(sections, ("failure mode", "anti-patterns", "constraints"), limit=4)
+    validation_commands = _skill_validation_commands(source_path, repo_root)
+    proof_result = skills_proof(repo_root, str(normalized))
+    proof = proof_result.data.get("proof", {})
+
+    skills_explain = {
+        "schema_version": "skills-explain.v1",
+        "query": handle,
+        "canonical_source": resolution.get("source_path"),
+        "generated_handle": resolution.get("command_handle_path"),
+        "runtime_projection": (resolution.get("provenance") or {}).get("projection_mode"),
+        "runtime_visibility": resolution.get("runtime_visibility"),
+        "owner": resolution.get("owner"),
+        "root_router": resolution.get("invoke_via"),
+        "loaded_references": [],
+        "when_to_use": when_to_use,
+        "when_not_to_use": when_not_to_use,
+        "validation": validation_commands,
+        "overlaps": [],
+        "ambiguity_notes": [],
+    }
+    explanation = {
+        "schema_version": "skill-explanation.v1",
+        "status": "resolved",
+        "handle": normalized,
+        "agent_summary": f"${normalized} is for {description}" if description else f"${normalized} is resolved.",
+        "what_it_is": description,
+        "when_to_use": when_to_use,
+        "when_not_to_use": when_not_to_use,
+        "canonical_source_path": resolution.get("source_path"),
+        "runtime_projection_path": resolution.get("command_handle_path"),
+        "command_handles": [
+            {
+                "handle": normalized,
+                "path": resolution.get("command_handle_path"),
+                "invoke_via": resolution.get("invoke_via"),
+            }
+        ],
+        "required_validation": required_validation,
+        "validation_commands": validation_commands,
+        "known_limitations": known_limitations,
+        "overlaps": skills_explain["overlaps"],
+        "ambiguity_notes": skills_explain["ambiguity_notes"],
+        "reachability": {
+            "status": proof.get("status") if isinstance(proof, dict) else "not_checked",
+            "proof_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+        },
+        "resolution": resolution,
+        "next_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+    }
+    result.data["skills_explain"] = skills_explain
+    result.data["explanation"] = explanation
+    return result
+
+
 def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
     """Resolve one reviewer/subagent handle from the reviewer namespace."""
     result = CallResult()
@@ -1498,6 +1903,208 @@ def goal_skills(
         )
     )
     return result
+
+
+def _candidate_handle(candidate: dict[str, Any]) -> str:
+    """Return the best command-handle spelling for a routed candidate."""
+    name = str(candidate.get("name") or "").strip().lstrip("$")
+    if name:
+        return name
+    path = str(candidate.get("path") or "").strip().rstrip("/")
+    if path:
+        return Path(path).name
+    candidate_id_value = str(candidate.get("candidate_id") or "").strip()
+    if candidate_id_value:
+        return candidate_id_value.rsplit(":", 1)[-1].strip().lstrip("$")
+    return ""
+
+
+_IMPROVE_STOPWORDS = frozenset({
+    "a",
+    "an",
+    "and",
+    "at",
+    "better",
+    "for",
+    "make",
+    "of",
+    "the",
+    "to",
+})
+
+
+def _improve_tokens(text: str) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", text.lower())
+        if len(token) > 1 and token not in _IMPROVE_STOPWORDS
+    }
+
+
+def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str, Any] | None:
+    """Select one command handle when formal goal routing is too ambiguous."""
+    request_tokens = _improve_tokens(goal_text)
+    if not request_tokens:
+        return None
+    try:
+        handles = handles_report(repo_root_path=repo_root, include_handles=True).get("handles", [])
+    except (OSError, RuntimeError, ValueError, KeyError, TypeError):
+        return None
+    scored: list[tuple[int, str, dict[str, Any], set[str]]] = []
+    for row in handles:
+        if not isinstance(row, dict):
+            continue
+        handle = str(row.get("handle") or "")
+        searchable = " ".join(
+            str(row.get(key) or "")
+            for key in ("handle", "owner", "source_path", "description", "invoke_via")
+        )
+        overlap = request_tokens & _improve_tokens(searchable)
+        if overlap:
+            scored.append((len(overlap), handle, row, overlap))
+    if not scored:
+        return None
+    score, handle, row, overlap = max(scored, key=lambda item: (item[0], -len(item[1]), item[1]))
+    normalized_handle = handle.strip().lower().lstrip("$")
+    if score < 2 and normalized_handle not in request_tokens:
+        return None
+    return {
+        "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
+        "candidate_type": row.get("kind", "skill"),
+        "name": row.get("handle"),
+        "path": row.get("command_handle_path"),
+        "confidence": round(min(0.95, 0.45 + (score * 0.1)), 2),
+        "rationale": [
+            "fallback command-handle description match",
+            "matched terms=" + ",".join(sorted(overlap)),
+        ],
+        "scope_rank": 2,
+    }
+
+
+def improve_skills(
+    repo_root: Path,
+    goal_text: str,
+    top_k: int = 3,
+    considered_limit: int = 20,
+) -> CallResult:
+    """Route a user goal into one capability recommendation with proof status."""
+    result = CallResult()
+    result.metadata["command"] = "skills improve"
+    goal_result = goal_skills(
+        repo_root,
+        intent_text=goal_text,
+        top_k=top_k,
+        considered_limit=considered_limit,
+    )
+    goal_decision = goal_result.data.get("goal_decision", {})
+    route_decision_status = goal_result.data.get("route_decision_status")
+    recommended = goal_decision.get("recommended_candidate")
+
+    improvement: dict[str, Any] = {
+        "schema_version": "skill-improvement-recommendation.v1",
+        "goal": goal_text,
+        "status": "resolved" if goal_result.status == "success" and recommended else "blocked",
+        "agent_summary": "",
+        "recommended_capability": None,
+        "why": [],
+        "reachability": {
+            "status": "not_checked",
+            "proof_status": None,
+            "required_gates_passed": None,
+            "user_runtime_ready": None,
+        },
+        "proof": None,
+        "alternatives": goal_decision.get("alternative_candidates", []),
+        "next_command": None,
+        "goal_decision": goal_decision,
+    }
+
+    fallback_used = False
+    fallback_allowed = route_decision_status == "unresolved_ambiguity"
+    if not isinstance(recommended, dict) and fallback_allowed:
+        recommended = _fallback_improvement_candidate(repo_root, goal_text)
+        fallback_used = recommended is not None
+
+    if not isinstance(recommended, dict):
+        prompts = goal_decision.get("disambiguation_prompts") or []
+        summary = goal_decision.get("operator_action") or "Goal did not resolve to one capability."
+        improvement["agent_summary"] = summary
+        improvement["disambiguation_prompts"] = prompts
+        improvement["next_command"] = (
+            f"./bin/ask skills goal {shlex.quote(goal_text)} --json --robot"
+        )
+        result.status = "error"
+        result.data["improvement"] = improvement
+        result.data["goal_decision"] = goal_decision
+        result.errors.extend(goal_result.errors)
+        if not result.errors:
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="skills improve could not resolve one recommended capability.",
+                    fix_suggestion=summary,
+                )
+            )
+        return result
+
+    handle = _candidate_handle(recommended)
+    proof_result = skills_proof(repo_root, handle=handle) if handle else CallResult(status="error")
+    proof = proof_result.data.get("proof", {})
+    gates = proof.get("gates", {}) if isinstance(proof, dict) else {}
+    required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
+    required_gates_passed = all(bool(gates.get(gate)) for gate in required)
+    user_runtime_ready = bool(
+        (gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists"))
+        or (gates.get("agents_user_link") and gates.get("agents_user_command_handle_exists"))
+    )
+    rationale = recommended.get("rationale") or []
+    capability = {
+        "handle": handle,
+        "name": recommended.get("name"),
+        "path": recommended.get("path"),
+        "candidate_id": recommended.get("candidate_id"),
+        "candidate_type": recommended.get("candidate_type"),
+        "confidence": recommended.get("confidence"),
+    }
+
+    improvement["recommended_capability"] = capability
+    improvement["why"] = rationale
+    if fallback_used:
+        improvement["status"] = "resolved_with_fallback"
+        improvement["goal_decision_status"] = goal_decision.get("decision_status")
+    improvement["reachability"] = {
+        "status": "pass" if proof_result.status == "success" else "fail",
+        "proof_status": proof.get("status") if isinstance(proof, dict) else "fail",
+        "required_gates_passed": required_gates_passed,
+        "user_runtime_ready": user_runtime_ready,
+    }
+    improvement["proof"] = proof
+    improvement["agent_summary"] = (
+        f"Recommended ${handle} for this goal."
+        if proof_result.status == "success"
+        else f"Recommended ${handle}, but reachability proof failed."
+    )
+    improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(handle)} --json --robot"
+
+    result.data["improvement"] = improvement
+    result.data["goal_decision"] = goal_decision
+    if proof_result.status == "success":
+        return result
+
+    improvement["status"] = "blocked_reachability"
+    result.status = "error"
+    result.errors.extend(proof_result.errors)
+    if not result.errors:
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"skills improve selected '{handle}', but reachability proof failed.",
+                fix_suggestion=improvement["next_command"],
+            )
+        )
+    return result
+
 
 def _create_symlink(source: Path, target: Path, dry_run: bool = False, *, replace_existing: bool = False) -> str:
     """

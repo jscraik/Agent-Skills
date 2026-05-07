@@ -31,6 +31,7 @@ outputs:
   - go, go-with-conditions, or no-go recommendation
   - traceability assessment
   - security and supply-chain status for relevant PRs
+  - "XP operating artifacts: repeated_failure learning for recurring defect classes, plus blackboard_delta"
   - review-thread disposition and next action
 
 non_goals:

@@ -12,7 +12,7 @@ Use when execution is approved or tiny and low risk.
 ## Inputs
 Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees, optional active thread goal.
 ## Outputs
-Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff.
+Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
 ## Procedure
 Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
@@ -40,3 +40,5 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Work contract: `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
 - Modes: `Plugins/harness-engineering/skills/he-work/references/execution-modes.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

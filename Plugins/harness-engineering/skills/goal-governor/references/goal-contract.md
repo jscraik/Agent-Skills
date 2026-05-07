@@ -10,6 +10,7 @@ Goal Governor adds a repo-visible board that agents must read before acting. The
 
 - `native_goal_missing`: board exists but native goal is absent.
 - `native_goal_paused`: board is active but native goal is paused.
+- `native_goal_budget_limited`: native goal exhausted its token budget while board work remains active.
 - `native_goal_complete_but_board_active`: native goal says complete while board has active work.
 - `board_done_but_native_active`: board is done while native goal is still active.
 - `objective_mismatch`: native objective does not point at or match the selected `goal.md`.
@@ -37,6 +38,10 @@ goal:
   status: active
   objective: "Make the Codex goal workflow auditable."
   native_objective: "/goal Follow docs/goals/example-goal/goal.md"
+  native_status: active
+  token_budget: null
+  tokens_used: 0
+  time_used_seconds: 0
 rules:
   one_active_task: true
   require_fresh_verification: true
@@ -111,5 +116,6 @@ Treat verification as stale when:
 - Dirty fingerprint changed since verification.
 - The configured verification command no longer exists.
 - The board was resumed after a branch switch or long idle interval.
+- Native goal status, budget, token usage, or elapsed-time fields changed since the last reconciliation receipt.
 
 Stale verification routes to Scout, Judge, or PM recovery before Worker implementation.

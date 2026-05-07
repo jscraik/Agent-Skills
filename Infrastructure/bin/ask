@@ -29,9 +29,12 @@ from ask.commands.skills import (
     skills_resolve,
     skills_parse,
     skills_proof,
+    skills_prove,
+    explain_skill,
     reviewers_resolve,
     route_skills,
     goal_skills,
+    improve_skills,
     sync_skills,
     audit_skill,
     install_skill,
@@ -40,7 +43,17 @@ from ask.commands.skills import (
     extract_family_fail_lines,
 )
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
-from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog, provider_audit, repo_surface
+from ask.commands.repo import (
+    check_hub_stability,
+    doctor_catalog,
+    provider_audit,
+    repo_closeout,
+    repo_doctor,
+    repo_status,
+    repo_surface,
+    repo_validate,
+)
+from ask.golden_path import render_golden_path_summary
 from ask.commands.plugins import (
     init_plugin,
     install_plugin,
@@ -519,9 +532,12 @@ def main():
         help="Run a named validation subset for CI check-name parity",
     )
     repo_validate_parser.add_argument("--changed-files", nargs="+", default=[], help="Scope validation to these changed files")
-
     repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
     repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
+    repo_subparsers.add_parser("doctor", help="Agent-facing repository health entrypoint", description="Agent-facing repository health entrypoint", parents=[global_parser])
+    repo_closeout_parser = repo_subparsers.add_parser("closeout", help="Report completion readiness", parents=[global_parser])
+    repo_closeout_parser.add_argument("--changed", action="store_true", help="Infer staged, unstaged, and untracked changed files for commit readiness")
+    repo_closeout_parser.add_argument("--strict", action="store_true", help="Treat diagnostic debt as closeout blocking")
     repo_doctor_catalog_parser = repo_subparsers.add_parser(
         "doctor-catalog",
         help="Diagnose canonical catalog parity drift",
@@ -552,18 +568,11 @@ def main():
     skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection or command-handle writes without changing files")
     skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve a command-visible skill handle", parents=[global_parser])
     skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
-    skills_parse_parser = skills_subparsers.add_parser(
-        "parse",
-        help="Parse and resolve $ skill and @ reviewer handles from a prompt",
-        parents=[global_parser],
-    )
-    skills_parse_parser.add_argument(
-        "request",
-        nargs="+",
-        help="Prompt text containing $ skill and @ reviewer handles",
-    )
-    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser])
-    skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
+    skills_parse_parser = skills_subparsers.add_parser("parse", help="Parse and resolve $ skill and @ reviewer handles from a prompt", parents=[global_parser])
+    skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing $ skill and @ reviewer handles")
+    skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser]).add_argument("handle", help="Skill handle to prove, with or without leading $")
+    skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
+    skills_subparsers.add_parser("explain", help="Explain when and how to use a skill handle", parents=[global_parser]).add_argument("handle", help="Skill handle to explain")
 
     # --- reviewers ---
     reviewers_parser = subparsers.add_parser("reviewers", help="Reviewer/subagent handle management", parents=[global_parser])
@@ -583,6 +592,10 @@ def main():
     skills_goal_parser.add_argument("intent", nargs="+", help="Intent text to route")
     skills_goal_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
     skills_goal_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
+    skills_improve_parser = skills_subparsers.add_parser("improve", help="Recommend one capability for an agent improvement goal", parents=[global_parser])
+    skills_improve_parser.add_argument("goal", nargs="+", help="Improvement goal text to route")
+    skills_improve_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
+    skills_improve_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
 
     skills_starter_parser = skills_subparsers.add_parser("starter", help="List starter-mode curated skills", parents=[global_parser])
     skills_starter_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
@@ -923,6 +936,10 @@ def main():
             )
         elif args.action == "check-stability":
             result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
+        elif args.action == "doctor":
+            result = repo_doctor(repo_root)
+        elif args.action == "closeout":
+            result = repo_closeout(repo_root, changed=args.changed, strict=args.strict)
         elif args.action == "doctor-catalog":
             result = doctor_catalog(repo_root, strict=args.strict)
         elif args.action == "provider-audit":
@@ -935,7 +952,7 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'repo'",
-                fix_suggestion="Valid actions: status, validate, check-stability, doctor-catalog, provider-audit, surface"
+                fix_suggestion="Valid actions: status, validate, check-stability, doctor, closeout, doctor-catalog, provider-audit, surface"
             ))
 
     elif args.topic == "skills":
@@ -966,6 +983,10 @@ def main():
             result = skills_parse(repo_root, request_text=" ".join(args.request))
         elif args.action == "proof":
             result = skills_proof(repo_root, handle=args.handle)
+        elif args.action == "prove":
+            result = skills_prove(repo_root, handle=" ".join(args.handle))
+        elif args.action == "explain":
+            result = explain_skill(repo_root, handle=args.handle)
         elif args.action == "route":
             result = route_skills(
                 repo_root,
@@ -977,6 +998,13 @@ def main():
             result = goal_skills(
                 repo_root,
                 intent_text=" ".join(args.intent),
+                top_k=args.top_k,
+                considered_limit=args.considered_limit,
+            )
+        elif args.action == "improve":
+            result = improve_skills(
+                repo_root,
+                goal_text=" ".join(args.goal),
                 top_k=args.top_k,
                 considered_limit=args.considered_limit,
             )
@@ -1001,14 +1029,7 @@ def main():
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'skills'",
-                fix_suggestion=(
-                    "Valid actions: list, budget, handles, resolve, parse, proof, "
-                    "route, goal, starter, sync, audit, install, fold, init"
-                )
-            ))
+            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, install, fold, init"))
 
     elif args.topic == "reviewers":
         if args.action == "resolve":
@@ -1337,6 +1358,14 @@ def main():
                     print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
                     if args.changed_files:
                         print(f"   Checked {result.data['checked_files']} changed file(s)")
+                elif args.topic == "repo" and args.action == "doctor":
+                    doctor = result.data.get("doctor", result.data)
+                    for line in render_golden_path_summary(
+                        doctor,
+                        title="Repo doctor",
+                        status_icon="✅",
+                    ):
+                        print(line)
                 elif args.topic == "repo" and args.action == "doctor-catalog":
                     report = result.data.get("catalog_parity", {})
                     print(f"✅ Catalog parity: {report.get('decision_status', 'resolved')}")
@@ -1411,6 +1440,12 @@ def main():
                     live = proof.get("live_codex_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
+                elif args.topic == "skills" and args.action == "explain":
+                    explanation = result.data.get("explanation", {})
+                    print(f"ℹ️  Skill: ${explanation.get('handle')} ({explanation.get('status')})")
+                    print(explanation.get("agent_summary", ""))
+                    print(f"Source: {explanation.get('canonical_source_path')}")
+                    print(f"Next: {explanation.get('next_command')}")
                 elif args.topic == "skills" and args.action == "parse":
                     parsed = result.data.get("parse", {})
                     print(f"✅ Parse succeeded: {parsed.get('status', 'ok')}")
@@ -1485,6 +1520,17 @@ def main():
                         print("Disambiguation prompts:")
                         for prompt in prompts:
                             print(f"  - {prompt}")
+                elif args.topic == "skills" and args.action == "improve":
+                    improvement = result.data["improvement"]
+                    print(f"🎯 Skill improvement: {improvement['status']}")
+                    print(improvement["agent_summary"])
+                    recommended = improvement.get("recommended_capability")
+                    if recommended:
+                        print(f"Recommended: ${recommended.get('handle')} ({recommended.get('path')})")
+                    reachability = improvement.get("reachability", {})
+                    print(f"Reachability: {reachability.get('status')}")
+                    if improvement.get("next_command"):
+                        print(f"Next: {improvement['next_command']}")
                 elif args.topic == "skills" and args.action == "starter":
                     print(
                         f"Starter skills ({len(result.data['skills'])}) "
@@ -1811,6 +1857,12 @@ def main():
                 if args.action == "check-stability" and "errors" in result.data:
                     for e in result.data["errors"]:
                         print(f"   ERROR: {e}")
+                if args.action == "doctor" and "doctor" in result.data:
+                    for line in render_golden_path_summary(
+                        result.data["doctor"],
+                        indent="   ",
+                    ):
+                        print(line)
                 if args.action == "surface" and "repo_surface" in result.data:
                     summary = result.data["repo_surface"].get("summary", {})
                     print(

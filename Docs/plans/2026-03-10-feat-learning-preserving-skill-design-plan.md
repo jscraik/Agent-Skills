@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-LEARNING-PRESERVING-SKILLS-20260310
 title: feat: Learning-Preserving Skill Design Delivery Plan
 type: feat
 status: active

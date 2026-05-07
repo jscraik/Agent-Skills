@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-LLM-WIKI-PIVOT-20260414
 title: LLM Wiki Runtime Pivot Implementation Plan
 type: feat
 status: active

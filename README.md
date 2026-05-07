@@ -6,11 +6,13 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository manages **20 canonical skills** routed through root-level skill
-surfaces, generated `$` command handles, and a larger latent skill/plugin
-catalog behind rooted projections. Author a capability once, route it
-intelligently, validate quality, project it safely into runtime, and keep the
-human and agent command surface small enough to use.
+This repository exposes **21 skills** through root-level skill surfaces,
+generated `$` command handles, and rooted runtime projections. The broader
+latent catalog currently contains 71 skills across 7 topic clusters (agent-ops:
+42, backend-platform: 4, content-publishing: 6, frontend-ui: 10,
+mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability
+once, route it intelligently, validate quality, project it safely into runtime,
+and keep the human and agent command surface small enough to use.
 
 **What this gives you:**
 
@@ -29,26 +31,34 @@ Start with the product framing and proof contract:
 
 ## Quick start
 
+For AI coding agents, start with the product path:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills improve "<goal>" --json --robot
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+That sequence answers the important questions in order: can I work safely, what
+capability matches this job, how do I use it, what proof exists, and what must
+pass before I claim done.
+
 ```bash
 # Bash-first setup (recommended): open bash, then load repo environment
 bash
 source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
-# See what's available
-ask graph topics
-ask skills list --json
-ask skills handles --json --no-handles
+# Explore the catalog when you need broader context
+./bin/ask graph topics
+./bin/ask skills list --json
+./bin/ask skills handles --json --no-handles
 
-# Validate the repository
-ask repo validate --ephemeral
-
-# Inspect repo surface ownership and runtime budget
-ask repo surface --json
-ask runtime budget --json --robot
-
-# Sync to your runtime
-ask skills sync --scope workspace --projection rooted
-ask skills sync --scope user --projection rooted
+# Validate or sync the repository directly
+./bin/ask repo validate --ephemeral
+./bin/ask skills sync --scope workspace --projection rooted
+./bin/ask skills sync --scope user --projection rooted
 ```
 
 ## What you can do
@@ -57,64 +67,83 @@ ask skills sync --scope user --projection rooted
 
 ```bash
 # List the visible runtime surface
-ask skills list
+./bin/ask skills list
 
 # Check all generated command handles
-ask skills handles --check --json
+./bin/ask skills handles --check --json
 
 # Resolve a command-visible skill handle
-ask skills resolve he-heartbeat --json
+./bin/ask skills resolve he-heartbeat --json
 
 # Resolve a reviewer/subagent handle
-ask reviewers resolve skillinspector --json
+./bin/ask reviewers resolve skillinspector --json
 
 # Search skills
-ask graph find security --tier stable
+./bin/ask graph find security --tier stable
 
 # See related skills
-ask graph related skill-builder --depth 2
+./bin/ask graph related skill-builder --depth 2
 
 # Find path between skills
-ask graph chain skill-creator skill-installer
+./bin/ask graph chain skill-creator skill-installer
 ```
 
 ### Validate quality
 
 ```bash
 # Quick structural check
-ask skills audit backend/cli-spec --level compat
+./bin/ask skills audit backend/cli-spec --level compat
 
 # Full security audit
-ask skills audit backend/cli-spec --level strict
+./bin/ask skills audit backend/cli-spec --level strict
 
 # Run evaluation suite
-ask evals run backend/cli-spec --mode smoke
+./bin/ask evals run backend/cli-spec --mode smoke
 
 # Validate entire repository
-ask repo validate --ephemeral
+./bin/ask repo validate --ephemeral
 
 # Report the current runtime surface and context budget
-ask runtime surface --json
-ask runtime budget --json
+./bin/ask runtime surface --json
+./bin/ask runtime budget --json
 
 # Verify generated command handles match rooted manifests
-ask skills handles --check --json
+./bin/ask skills handles --check --json
+```
+
+### Agent-facing golden paths
+
+```bash
+# Can I work safely?
+./bin/ask repo doctor --json --robot
+
+# What capability should I use?
+./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot
+
+# How do I use this capability?
+./bin/ask skills explain he-heartbeat --json --robot
+
+# What proof exists?
+./bin/ask skills prove he-heartbeat --json --robot
+
+# What must pass before I claim done?
+./bin/ask repo closeout --changed --json --robot
 ```
 
 ### Manage lifecycle
 
 ```bash
 # Install from GitHub with auto-remediation
-ask skills install https://github.com/owner/repo --remediate
+./bin/ask skills install https://github.com/owner/repo --remediate
 
 # Check for overlap
-ask skills fold source-skill target-skill
+./bin/ask skills fold source-skill target-skill
 
 # Create new skill
-ask skills init my-skill --category backend --description "Does X when Y"
+./bin/ask skills init my-skill --category backend --description "Does X when Y"
 
 # Create plugin scaffold
-ask plugins init my-plugin --with-marketplace
+./bin/ask plugins init my-plugin --with-marketplace
 ```
 
 ## Distribution
@@ -129,9 +158,9 @@ When intent is clear but syntax is off, use `--robot` (or `-r`):
 
 ```bash
 # These work and get corrected:
-ask skill list --robot          # -> skills list
-ask skills ls --robot           # -> skills list
-ask graph search X --robot      # -> graph find X
+./bin/ask skill list --robot          # -> skills list
+./bin/ask skills ls --robot           # -> skills list
+./bin/ask graph search X --robot      # -> graph find X
 ```
 
 Errors include suggestions and examples:
@@ -143,21 +172,21 @@ Hint: Did you mean 'ask skills'?
    Valid topics: repo, skills, runtime, plugins, evals, graph, mcp, wiki, workouts
 
 Examples:
-   - ask skills list
-   - ask graph find security
+   - ./bin/ask skills list
+   - ./bin/ask graph find security
 ```
 
 ## Programmatic usage
 
 ```bash
 # JSON output with trace IDs
-ask repo status --json --trace-id "build-123"
+./bin/ask repo status --json --trace-id "build-123"
 
 # Check for corrections
-ask skill list --robot --json | jq '.metadata.correction_note'
+./bin/ask skill list --robot --json | jq '.metadata.correction_note'
 
 # Ephemeral validation (read-only)
-ask repo validate --ephemeral
+./bin/ask repo validate --ephemeral
 ```
 
 **Response envelope** (all commands):
@@ -186,32 +215,37 @@ This repo separates source, projection, and live runtime visibility:
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-`ask skills list --json` reports the current visible runtime surface. In the current rooted projection this is a compact first-level list of root routers plus generated command handles. `ask skills handles --json --no-handles` validates the full command surface; it currently reports 109 generated command handles with no violations.
+`ask skills list --json` reports the current visible runtime surface. In the
+current rooted projection this is a compact first-level list of root routers
+plus generated command handles. `ask skills handles --json --no-handles`
+validates the full command surface and reports the current handle count and any
+violations.
 
 A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
 
 ```bash
-ask skills resolve he-heartbeat --json
+./bin/ask skills resolve he-heartbeat --json
 ```
 
 Reviewer handles stay outside the skill command surface and resolve through:
 
 ```bash
-ask reviewers resolve skillinspector --json
+./bin/ask reviewers resolve skillinspector --json
 ```
 
 Repo surface ownership is part of the same control-plane contract. Before
 cleanup, projection changes, or runtime ownership decisions, use:
 
 ```bash
-ask repo surface --json
+./bin/ask repo surface --json
 ```
 
 The policy for classifying source, fixtures, generated state, runtime state,
 historical artifacts, and unknown ownership lives in
 [Repo Surface Ownership](Docs/agents/15-repo-surface-ownership.md).
-Namespace-first product command contracts for future health, onboarding,
-improvement, explanation, proof, next-action, and closeout flows live in
+Namespace-first product command contracts for current and future health,
+onboarding, improvement, explanation, proof, next-action, and closeout flows
+live in
 [ask Product Golden Path Command Contracts](Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md).
 
 ## Skill graph (manual topic clusters, non-canonical)
@@ -220,7 +254,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                              |
 | ------------------ | ------ | ----------------------------------------------------- |
-| agent-ops          | 40     | docs-expert, autofix, unslopify, simplify             |
+| agent-ops          | 42     | docs-expert, autofix, unslopify, simplify             |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
 | product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
@@ -239,7 +273,7 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 40 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- agent-ops/            # 42 skills: docs-expert, autofix, unslopify, simplify, ...
 |   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
 |   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me

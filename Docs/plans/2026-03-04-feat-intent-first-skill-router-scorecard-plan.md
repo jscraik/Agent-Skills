@@ -1,4 +1,5 @@
 ---
+plan_id: ASK-INTENT-ROUTER-SCORECARD-20260304
 title: feat: Intent-First Skill Router Scorecard (Top-3 + Confidence)
 type: feat
 status: completed

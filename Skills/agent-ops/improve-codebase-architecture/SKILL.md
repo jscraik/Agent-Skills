@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: Review and improve codebase architecture when deeper module boundaries, clearer context language, better interfaces, testability, or Linear-backed decisions are needed.
+description: Use when reviewing or improving codebase architecture needs deeper module boundaries, clearer context language, better interfaces, stronger testability, or Linear-backed decisions.
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active
@@ -17,6 +17,7 @@ metadata:
 - Find architecture moves that reduce cognitive load and improve leverage before broad refactors.
 - Start from live evidence and local patterns.
 - Do not remove important context for budget trimming; use progressive disclosure.
+- Treat architecture as daily design work: choose the smallest reversible move that improves the code currently under pressure.
 
 ## When To Use
 - The user asks to improve architecture, module boundaries, interfaces, or testability.
@@ -37,9 +38,11 @@ metadata:
 
 ## Outputs
 - ranked opportunities
+- named complexity symptoms
 - context-language updates
 - Linear decision status
 - interface alternatives
+- tracer proof
 - validation paths
 - Schema-bound outputs include schema_version.
 
@@ -48,8 +51,11 @@ metadata:
 - Scope request and read active repo instructions.
 - Discover context language and Linear evidence when available.
 - Map modules, public entry points, callers, and tests.
-- Identify deepening opportunities and shallow abstractions.
-- Recommend the first move with risk and validation.
+- Classify the primary complexity symptom before proposing a change.
+- Sketch two viable designs: smallest local patch and deeper interface move.
+- Prefer deep modules, information hiding, orthogonal ownership, and contract-backed interfaces.
+- Define a thin tracer proof that exercises the proposed path in production-like wiring.
+- Recommend the first move with risk, reversibility, and validation.
 
 ## Constraints
 - Redact secrets, customer data, tokens, and sensitive logs.
@@ -70,6 +76,8 @@ metadata:
 - Replacing repo contracts with generic advice.
 - Hiding uncertainty or missing evidence.
 - Loading archived context before the active workflow proves it is needed.
+- Moving complexity sideways into callers, config, docs, or follow-up agents.
+- Selecting a broad redesign before a tracer proof or reversible first step exists.
 
 ## Examples
 - Run improve-codebase-architecture on this repo.
@@ -78,6 +86,7 @@ metadata:
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- Use references/architecture-practice-contract.md for book-derived architecture heuristics, decision checks, and output shape.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

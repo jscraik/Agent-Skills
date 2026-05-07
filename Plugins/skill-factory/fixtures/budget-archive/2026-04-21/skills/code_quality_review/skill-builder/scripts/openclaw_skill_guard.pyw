@@ -274,6 +274,32 @@ SOURCE_RULES: List[Rule] = [
     ),
     Rule(
         "warn",
+        "security.prompt_unsanitized_path_interpolation",
+        "Runtime path/URL value interpolated into a prompt builder without an obvious sanitizer.",
+        compile_safe_regex(
+            r"(?:build|render|compose|construct|format)[A-Za-z0-9_]*Prompt[\s\S]{0,1200}"
+            r"(?:"
+            r"f[\"'][^\"'\n]*\{[^}\n]*\b(?:cwd|path|url|workspace(?:_dir|Dir)?|mountPath|browserNoVncUrl|displayWorkspaceDir)[^}\n]*\}[^\"'\n]*[\"']"
+            r"|`[^`\n]*\$\{[^}\n]*\b(?:cwd|path|url|workspace(?:_dir|Dir)?|mountPath|browserNoVncUrl|displayWorkspaceDir)[^}\n]*\}[^`\n]*`"
+            r")",
+            re.IGNORECASE,
+            allow_nested=True,
+        ),
+        remediation="Sanitize or wrap untrusted path/URL values before inserting them into prompt text.",
+    ),
+    Rule(
+        "warn",
+        "security.tmpdir_trust_boundary",
+        "OS temp directory appears to be used as a path-containment trust boundary.",
+        compile_safe_regex(
+            r"(?:tempfile\.gettempdir\(\)|os\.tmpdir\(\)|process\.env\.TMPDIR|[\"']/tmp[\"']).{0,600}"
+            r"(?:_?is_?path_?inside|isPathInside|relative_to|startsWith|startswith)\s*\(",
+            re.DOTALL,
+        ),
+        remediation="Constrain paths to the active workspace/sandbox root or a tool-owned temp root, not arbitrary OS temp.",
+    ),
+    Rule(
+        "warn",
         "security.hex_obfuscation",
         "Hex-encoded string sequence detected (possible obfuscation).",
         compile_safe_regex(r"(?:\\x[0-9a-fA-F]{2}){6,}", allow_nested=True),
@@ -431,6 +457,14 @@ def scan_source(text: str, rel_file: str) -> List[Finding]:
                 # that start in comments and span into executable lines.
                 start = m.start() + 1
                 continue
+            if rule.code == "security.prompt_unsanitized_path_interpolation":
+                match_text = m.group(0)
+                if re.search(
+                    r"\b(?:sanitizeForPromptLiteral|sanitizeForPromptLiterals|wrapUntrustedPromptDataBlock|sanitize_for_prompt|sanitizePrompt|escapePrompt|validatePrompt)",
+                    match_text,
+                ):
+                    start = m.end()
+                    continue
             out.append(
                 Finding(
                     rule.level,

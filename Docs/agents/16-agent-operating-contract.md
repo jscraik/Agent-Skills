@@ -9,17 +9,52 @@ contract agents need for everyday work.
 
 All agents should use `./bin/ask` for repo operations.
 
-| Task            | Command                                        |
-| --------------- | ---------------------------------------------- |
-| Repo health     | `./bin/ask repo status`                        |
-| Full validation | `./bin/ask repo validate`                      |
-| List skills     | `./bin/ask skills list --category <topic>`     |
-| Audit skill     | `./bin/ask skills audit <path> --level strict` |
-| Install skill   | `./bin/ask skills install <url> --remediate`   |
-| Find related    | `./bin/ask graph related <skill> --depth 2`    |
+| Task            | Command                                            |
+| --------------- | -------------------------------------------------- |
+| Repo health     | `./bin/ask repo doctor --json --robot`             |
+| Improve agents  | `./bin/ask skills improve "<goal>" --json --robot` |
+| Explain skill   | `./bin/ask skills explain <handle> --json --robot` |
+| Prove skill     | `./bin/ask skills prove <handle> --json --robot`   |
+| Full validation | `./bin/ask repo validate`                          |
+| List skills     | `./bin/ask skills list --category <topic>`         |
+| Audit skill     | `./bin/ask skills audit <path> --level strict`     |
+| Install skill   | `./bin/ask skills install <url> --remediate`       |
+| Find related    | `./bin/ask graph related <skill> --depth 2`        |
 
 `bin/` and `scripts/` at repo root are stable wrapper entrypoints that forward
 into `Infrastructure/**`; keep them as real files/directories, not symlinks.
+
+For AI coding agents, start with the compact doctor command before deeper repo
+inspection:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills improve "autofix" --json --robot
+./bin/ask skills explain autofix --json --robot
+./bin/ask skills prove autofix --json --robot
+./bin/ask repo doctor-catalog --json --robot
+./bin/ask repo surface --json --robot
+```
+
+`repo doctor` is the first health entrypoint. It composes repo status, catalog
+parity, runtime budget, command-handle health, and repo-surface diagnostic debt
+into one agent-facing payload with `agent_summary`, `blocking`, `blockers`,
+`next_command`, `signals`, and `diagnostic_debt`.
+
+`skills improve` is the first capability recommendation entrypoint. It wraps
+goal routing, runs command-handle proof for the selected capability, and returns
+`agent_summary`, `recommended_capability`, `why`, `reachability`, `proof`, and
+one existing `next_command`.
+
+`skills explain` turns a command handle into concise use guidance. It returns
+what the capability is for, when to use it, canonical source, runtime handle,
+validation guidance, known limitations, reachability status, and the proof
+command to run next.
+
+`skills prove` is the product-facing scorecard for capability proof. It keeps
+the existing command-handle `skills proof` payload as reachability evidence and
+adds structural quality, analytics availability, outcome proof, and one next
+command without claiming structural or invocation evidence as outcome proof.
 
 ## Robot Mode
 

@@ -22,6 +22,7 @@ outputs:
   - baseline + per-experiment log entries
   - best-result summary with delta from baseline
   - A/B/C loop output with `warnings_remaining` and `stop_rule_status`
+  - "XP operating artifacts: red_signal when evidence is missing or stale, plus blackboard_delta for durable state changes"
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
   - next-step route (`continue`, `he-work`, or `stop`)
   - subagent route decision: auto delegation when roles exist, inline/manual fallback otherwise
