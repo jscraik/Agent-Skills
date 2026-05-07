@@ -399,6 +399,104 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.data["skill_proof"]["handle"], "security-reviewer")
         self.assertIn("goal_resolution", result.data["skill_proof"])
 
+    def test_skills_prove_resolved_handle_failure_does_not_use_goal_fallback(self):
+        """Verify a resolved handle with broken reachability stays on the requested handle."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult, ErrorObject
+
+            failed_reachability = CallResult(status="error")
+            failed_reachability.data["proof"] = {
+                "status": "fail",
+                "handle": "he-heartbeat",
+                "resolution": {
+                    "status": "ok",
+                    "handle": "he-heartbeat",
+                    "source_path": "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+                },
+            }
+            failed_reachability.errors.append(
+                ErrorObject(code="ERR_VALIDATION", message="reachability failed")
+            )
+
+            with mock.patch.object(
+                skills_commands,
+                "skills_proof",
+                return_value=failed_reachability,
+            ), mock.patch.object(
+                skills_commands,
+                "improve_skills",
+            ) as improve_mock, mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ), mock.patch.object(
+                skills_commands,
+                "skill_invocation_analytics",
+                return_value={"status": "unavailable_or_legacy"},
+            ):
+                result = skills_commands.skills_prove(Path.cwd(), "he-heartbeat")
+        finally:
+            sys.path.remove(lib_path)
+
+        improve_mock.assert_not_called()
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.data["skill_proof"]["handle"], "he-heartbeat")
+        self.assertEqual(result.data["skill_proof"]["proof_status"], "blocked_reachability")
+
+    def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
+        """Verify workout outcome candidates are not inferred from directory names."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands.skills import _skill_workout_candidates
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                false_positive = repo_root / ".workouts" / "he-heartbeat-but-not-referenced"
+                false_positive.mkdir(parents=True)
+                false_positive.joinpath("workout.yaml").write_text(
+                    "id: unrelated\nskills:\n  - other-skill\n",
+                    encoding="utf-8",
+                )
+                explicit_match = repo_root / ".workouts" / "explicit-outcome"
+                explicit_match.mkdir(parents=True)
+                explicit_match.joinpath("workout.yaml").write_text(
+                    "id: outcome\nhandles:\n  - he-heartbeat\n",
+                    encoding="utf-8",
+                )
+
+                candidates = _skill_workout_candidates(repo_root, "he_heartbeat")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(candidates, ["explicit-outcome"])
+
+    def test_skill_invocation_analytics_resolves_relative_telemetry_dir_from_repo_root(self):
+        """Verify relative SKILL_TELEMETRY_DIR overrides are repo-root relative."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.skill_analytics import skill_invocation_analytics
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                telemetry_dir = repo_root / "telemetry"
+                telemetry_dir.mkdir(parents=True)
+                telemetry_dir.joinpath("skill-invocations.jsonl").write_text(
+                    json.dumps({"skill_id": "he-heartbeat", "timestamp": "2026-05-07T10:00:00Z"}) + "\n",
+                    encoding="utf-8",
+                )
+                with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": "telemetry"}):
+                    analytics = skill_invocation_analytics(repo_root, "he-heartbeat")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(analytics["status"], "available")
+        self.assertEqual(analytics["matching_invocation_count"], 1)
+
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--robot", "--json"]
@@ -426,9 +524,11 @@ class TestAskCLI(unittest.TestCase):
             "required_validation",
             "validation_commands",
             "known_limitations",
+            "reachability",
             "next_command",
         ):
             self.assertIn(field, explanation)
+        self.assertIsInstance(explanation["reachability"], dict)
 
     def test_skills_explain_rejects_out_of_repo_source_path(self):
         """Verify explain validates resolved skill paths before reading skill files."""
@@ -602,6 +702,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(improvement.get("schema_version"), "skill-improvement-recommendation.v1")
         self.assertIn("agent_summary", improvement)
         self.assertIn("recommended_capability", improvement)
+        self.assertIn("why", improvement)
         self.assertIn("reachability", improvement)
         self.assertIn("proof", improvement)
         self.assertIn("next_command", improvement)

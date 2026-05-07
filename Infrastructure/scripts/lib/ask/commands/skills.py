@@ -800,11 +800,37 @@ def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
     if not workouts_root.is_dir():
         return []
     normalized = handle.strip().lower().replace("_", "-")
+
+    def _normalized_metadata_values(value: Any) -> set[str]:
+        if value is None:
+            return set()
+        if isinstance(value, str):
+            return {value.strip().lower().replace("_", "-")}
+        if isinstance(value, dict):
+            values: set[str] = set()
+            for nested in value.values():
+                values.update(_normalized_metadata_values(nested))
+            return values
+        if isinstance(value, (list, tuple, set)):
+            values: set[str] = set()
+            for nested in value:
+                values.update(_normalized_metadata_values(nested))
+            return values
+        return {str(value).strip().lower().replace("_", "-")}
+
     candidates: list[str] = []
     for workout in sorted(workouts_root.glob("**/workout.yaml")):
         workout_id = workout.parent.relative_to(workouts_root).as_posix()
-        searchable = workout_id.lower().replace("_", "-")
-        if normalized in searchable:
+        try:
+            from ask.commands.workouts import _load_structured_file
+
+            metadata = _load_structured_file(workout)
+        except (OSError, ValueError):
+            continue
+        explicit_values: set[str] = set()
+        for key in ("skills", "handles", "skill", "handle", "skill_id", "id"):
+            explicit_values.update(_normalized_metadata_values(metadata.get(key)))
+        if normalized in explicit_values:
             candidates.append(workout_id)
     return candidates
 
@@ -816,7 +842,10 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     query = handle.strip()
     goal_resolution: dict[str, Any] | None = None
     reachability_result = skills_proof(repo_root, query)
-    if reachability_result.status != "success":
+    command_proof = reachability_result.data.get("proof", {})
+    initial_resolution = command_proof.get("resolution") if isinstance(command_proof, dict) else {}
+    resolver_ok = isinstance(initial_resolution, dict) and initial_resolution.get("status") == "ok"
+    if reachability_result.status != "success" and not resolver_ok:
         improvement_result = improve_skills(repo_root, goal_text=query)
         goal_resolution = improvement_result.data.get("improvement")
         candidate = (goal_resolution or {}).get("recommended_capability") or {}

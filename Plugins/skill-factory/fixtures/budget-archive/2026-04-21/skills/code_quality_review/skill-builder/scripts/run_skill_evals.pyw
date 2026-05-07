@@ -2464,8 +2464,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
-            if c.should_trigger is True and selected_skill is None:
-                runner_warnings.append("should_trigger set, but skill selection signal was unavailable for this run.")
+            if c.should_trigger is not None and selected_skill is None:
+                expected = "selected" if c.should_trigger else "not selected"
+                runner_warnings.append(
+                    f"should_trigger expected skill to be {expected}, but selection signal was unavailable for this run."
+                )
 
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None
