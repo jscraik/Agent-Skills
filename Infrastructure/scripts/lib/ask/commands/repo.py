@@ -460,7 +460,26 @@ def repo_doctor(repo_root: Path) -> CallResult:
     except Exception as exc:
         signals = {
             "repo_status": _unknown_signal_error_signal(exc),
-            "projection_sync": _unknown_signal_error_signal(exc),
+            "projection_sync": _skipped_signal(
+                "Projection sync skipped because repository status failed.",
+                "repo_status",
+            ),
+            "catalog_parity": _skipped_signal(
+                "Catalog parity skipped because repository status failed.",
+                "repo_status",
+            ),
+            "runtime_budget": _skipped_signal(
+                "Runtime budget skipped because repository status failed.",
+                "repo_status",
+            ),
+            "command_handles": _skipped_signal(
+                "Command-handle validation skipped because repository status failed.",
+                "repo_status",
+            ),
+            "repo_surface": _skipped_signal(
+                "Repo surface inventory skipped because repository status failed.",
+                "repo_status",
+            ),
         }
     else:
         repo_status_signal = _safe_signal(_repo_status_signal, status_result)
