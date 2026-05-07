@@ -12,7 +12,7 @@ Use when requirements are needed before plan/work; Explore first and ask second.
 ## Inputs
 Problem, Linear issue, QA report, source evidence, current-vs-latest spec status.
 ## Outputs
-Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan.
+Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
 ## Procedure
 Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable.
 ## Validation
@@ -37,3 +37,5 @@ Reference `assets/` only for skill packaging and browseability; spec source mate
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Doctrine: `Plugins/harness-engineering/references/he-spec-doctrine.md`
 - Artifact: `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

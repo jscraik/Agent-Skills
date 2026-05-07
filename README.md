@@ -6,13 +6,13 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository manages **71 skills** across 7 topic clusters (agent-ops: 42,
-backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1,
-product-strategy: 3, security-ops: 5) routed through root-level skill surfaces,
-generated `$` command handles, and a larger latent skill/plugin catalog behind
-rooted projections. Author a capability once, route it intelligently, validate
-quality, project it safely into runtime, and keep the human and agent command
-surface small enough to use.
+This repository exposes **21 skills** through root-level skill surfaces,
+generated `$` command handles, and rooted runtime projections. The broader
+latent catalog currently contains 71 skills across 7 topic clusters (agent-ops:
+42, backend-platform: 4, content-publishing: 6, frontend-ui: 10,
+mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability
+once, route it intelligently, validate quality, project it safely into runtime,
+and keep the human and agent command surface small enough to use.
 
 **What this gives you:**
 

@@ -78,3 +78,14 @@ cases:
     prompt: "Can you inspect the non trigger clean implementation workflow and keep the traceability evidence?"
     deterministic_checks: *safe
     acceptance: *accept_trace
+  - id: xp-red-signal-before-patch
+    <<: *common
+    name: "XP Red Signal Before Patch"
+    category: edge
+    prompt: "Use this XP excerpt to improve HE skills, but the only evidence is a stale note from last week; do not patch until you identify the red signal and smallest recovery step."
+    deterministic_checks: *safe
+    acceptance:
+      - regex "(?i)red_signal"
+      - regex "(?i)(stale|missing|blocked)"
+      - regex "(?i)(smallest recovery|recovery step|verify)"
+      - regex "(?i)(invariant|eval|contract|reference|rejection)"

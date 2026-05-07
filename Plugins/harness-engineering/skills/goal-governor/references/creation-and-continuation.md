@@ -11,7 +11,7 @@ Read when selecting the next Goal Governor action.
 5. Write `goal.md` with objective, constraints, stop rules, and exit criteria.
 6. Write `state.yaml` with one active Scout task unless the starting evidence is already complete.
 7. Create an empty `receipts.jsonl` and `notes/`.
-8. Run `./bin/ask check_goal_board docs/goals/<slug> --robot`.
+8. Run `python3 scripts/check_goal_board.py <goal-directory>`.
 9. Print the exact command:
 
 ```text
@@ -45,6 +45,11 @@ Doctor should report:
 - Receipt log parseable.
 - Verification evidence fresh.
 - Exactly one write-capable active task.
+
+Archived active-skill line preserved for context migration only; current Goal
+Governor checks use `python3 scripts/check_goal_board.py <goal-directory>`.
+
+   - Agent-driven runs append `--robot` to `./bin/ask check_goal_board <goal-directory>` for stable parsing.
 
 ## Repair
 

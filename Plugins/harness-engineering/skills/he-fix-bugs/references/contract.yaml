@@ -18,6 +18,7 @@ inputs:
 outputs:
   - reproduction status (`confirmed`, `not_reproduced`, `partial`, or `blocked`)
   - root-cause chain with evidence references
+  - "XP operating artifacts: repeated_failure root-cause learning when the same failure class recurs, plus blackboard_delta"
   - fix plan and test recommendations
   - implementation summary when fix execution is requested
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields

@@ -3,6 +3,7 @@ import subprocess
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -200,6 +201,111 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
         self.assertIn("live invocation: manual_session_gate", result.stdout)
 
+    def test_skills_prove_json_contract(self):
+        """Verify ask skills prove separates reachability, quality, analytics, and outcome proof."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.strip(), result.stderr)
+        output = json.loads(result.stdout)
+        skill_proof = output["data"]["skill_proof"]
+        self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
+        self.assertEqual(skill_proof["handle"], "he-heartbeat")
+        self.assertIn("reachability", skill_proof)
+        self.assertIn("structural_quality", skill_proof)
+        self.assertIn("analytics", skill_proof)
+        self.assertIn("outcome_proof", skill_proof)
+        self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
+        self.assertIn("command_handle_proof", output["data"])
+
+    def test_skills_prove_uses_skill_invocation_projection(self):
+        """Verify ask skills prove consumes ASK-local skill invocation analytics."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            telemetry_dir = os.path.join(temp_dir, "telemetry")
+            os.makedirs(telemetry_dir, exist_ok=True)
+            with open(os.path.join(telemetry_dir, "skill-invocations.jsonl"), "w", encoding="utf-8") as handle:
+                handle.write(
+                    json.dumps(
+                        {
+                            "skill_id": "he-heartbeat",
+                            "plugin_id": "harness-engineering",
+                            "turn_id_hash": "turn_123",
+                            "thread_id_hash": "thread_123",
+                            "invoke_type": "skill",
+                            "scope": "workspace",
+                            "model_slug": "gpt-5.3-codex",
+                            "product_client_id_hash": "client_123",
+                            "repository_hash": "repo_123",
+                            "timestamp": "2026-05-07T10:00:00Z",
+                        },
+                        sort_keys=True,
+                    )
+                    + "\n"
+                )
+
+            env = os.environ.copy()
+            env["SKILL_TELEMETRY_DIR"] = telemetry_dir
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            result = _run_cli(cmd, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "available")
+        self.assertEqual(analytics["matching_invocation_count"], 1)
+        self.assertEqual(analytics["latest_invocation"]["plugin_id"], "harness-engineering")
+        self.assertEqual(analytics["latest_invocation"]["turn_id_hash"], "turn_123")
+
+    def test_skills_prove_reports_projection_parse_warning(self):
+        """Verify ask skills prove preserves valid projection rows with parse warnings."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            telemetry_dir = os.path.join(temp_dir, "telemetry")
+            os.makedirs(telemetry_dir, exist_ok=True)
+            with open(os.path.join(telemetry_dir, "skill-invocations.jsonl"), "w", encoding="utf-8") as handle:
+                handle.write("{not-json\n")
+                handle.write(json.dumps({"skill_id": "other-skill", "timestamp": "2026-05-07T10:00:00Z"}) + "\n")
+
+            env = os.environ.copy()
+            env["SKILL_TELEMETRY_DIR"] = telemetry_dir
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            result = _run_cli(cmd, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "parse_warning")
+        self.assertEqual(analytics["invocation_count"], 1)
+        self.assertEqual(analytics["matching_invocation_count"], 0)
+        self.assertEqual(analytics["parse_error_count"], 1)
+
+    def test_skills_prove_goal_fallback_json_contract(self):
+        """Verify ask skills prove routes or clearly blocks a goal query."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "prove",
+            "fix",
+            "PR",
+            "review",
+            "comments",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertTrue(result.stdout.strip(), result.stderr)
+        output = json.loads(result.stdout)
+        skill_proof = output["data"]["skill_proof"]
+        self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
+        self.assertEqual(skill_proof["query"], "fix PR review comments")
+        self.assertIn(
+            skill_proof["proof_status"],
+            ("blocked_goal_resolution", "blocked_reachability", "reachable_without_outcome_proof"),
+        )
+        self.assertIn("goal_resolution", skill_proof)
+        self.assertIn("recommended_capability", skill_proof["goal_resolution"])
+
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--robot", "--json"]
@@ -369,6 +475,36 @@ class TestAskCLI(unittest.TestCase):
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Agent-facing repository health entrypoint", result.stdout)
+
+    def test_repo_closeout_json_contract(self):
+        """Verify `ask repo closeout --changed --json` exposes readiness fields."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "closeout",
+            "--changed",
+            "--robot",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        closeout = output.get("data", {}).get("repo_closeout", {})
+        self.assertIn("changed_files", closeout)
+        self.assertIn("sync", closeout)
+        self.assertIn("runtime_budget", closeout)
+        self.assertIn("surface_policy", closeout)
+        self.assertIn("focused_validation", closeout)
+        self.assertIn("commit_readiness", closeout)
+        self.assertIn("next_command", closeout)
+
+    def test_repo_closeout_help_mentions_completion_readiness(self):
+        """Verify `ask repo closeout --help` exposes completion-readiness wording."""
+        cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "repo", "closeout", "--help"]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("commit readiness", result.stdout)
 
     def test_goal_alias_normalization(self):
         """

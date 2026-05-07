@@ -581,6 +581,16 @@ def _json_get_path(obj: Any, path: str) -> Any:
 def _normalize_assert(a: Assertion) -> Dict[str, Any]:
     if isinstance(a, str):
         s = a.strip()
+        bare_match = re.match(r"^(contains|not_contains|regex|not_regex)\s+(.+)$", s, flags=re.IGNORECASE)
+        if bare_match:
+            assertion_type = bare_match.group(1).lower()
+            value = bare_match.group(2).strip()
+            if value.startswith(("'", '"')):
+                try:
+                    value = shlex.split(value)[0]
+                except ValueError:
+                    pass
+            return {"type": assertion_type, "value": value}
         for prefix, t in [
             ("regex:", "regex"),
             ("not_regex:", "not_regex"),

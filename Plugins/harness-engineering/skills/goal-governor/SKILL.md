@@ -53,6 +53,7 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
 - Created or repaired board files when the mode allows edits.
 - Next safe action classification.
 - Machine-checkable validation evidence.
+- `blackboard_delta` and `slack_policy` for long-running continuation.
 - Residual risks or owner-input blockers.
 
 ## Workflow
@@ -63,8 +64,7 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
    - Native objective is non-empty and no more than 4,000 characters; keep bulk instructions in `goal.md`.
    - Agent config supports the intended delegation depth; for Jamie's Codex harness, require `max_depth >= 2`.
    - The selected validation commands exist and are repo-canonical.
-   - Existing board files pass `./bin/ask check_goal_board <goal-directory>`.
-   - Agent-driven runs append `--robot` to `./bin/ask check_goal_board <goal-directory>` for stable parsing.
+   - Existing board files pass `python3 scripts/check_goal_board.py <goal-directory>`.
 3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete` (normalize native `budgetLimited` to output `budget_limited`).
 4. Treat token budget, tokens used, elapsed seconds, lifecycle updates, and budget-limited transitions as evidence, not completion proof.
 5. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
@@ -142,15 +142,15 @@ risks:
 - Read [references/goal-contract.md](./references/goal-contract.md) when creating or validating `goal.md`, `state.yaml`, or `receipts.jsonl`.
 - Read [references/creation-and-continuation.md](./references/creation-and-continuation.md) when choosing create, continue, repair, or import behavior.
 - Read [references/evals.yaml](./references/evals.yaml) when testing this skill with binary trigger and behavior checks.
+- Read [../../references/pragmatic-operating-invariants.md](../../references/pragmatic-operating-invariants.md) when continuation exposes repeated drift, stale state, or broken-window cleanup.
+- Read [../../references/xp-operating-contract.md](../../references/xp-operating-contract.md) when emitting blackboard deltas, slack policy, red signals, or repeated-failure learning.
 
 ## Validation
 
 Validate the skill package:
 
 ```bash
-./bin/ask check_goal_board <goal-directory>
-# Agent-driven validation:
-./bin/ask check_goal_board <goal-directory> --robot
+python3 scripts/check_goal_board.py <goal-directory>
 ./bin/ask skills audit <skill-directory> --level strict --robot
 ```
 

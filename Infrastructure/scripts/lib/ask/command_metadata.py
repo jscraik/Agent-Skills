@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 
 VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
-    "repo": ["status", "validate", "check-stability", "doctor", "doctor-catalog", "provider-audit", "surface"],
+    "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "surface"],
     "skills": [
         "list",
         "budget",
@@ -14,6 +14,7 @@ VALID_ACTIONS = {
         "resolve",
         "parse",
         "proof",
+        "prove",
         "explain",
         "route",
         "goal",
@@ -39,6 +40,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "repo": [
         "ask repo status",
         "ask repo doctor --json",
+        "ask repo closeout --changed --json",
         "ask repo validate --ephemeral",
         "ask repo doctor-catalog --strict",
         "ask repo surface --json",
@@ -53,6 +55,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
             "\"use $skill-builder to validate $he-heartbeat with @skillinspector\" --json"
         ),
         "ask skills proof he-heartbeat --json",
+        "ask skills prove he-heartbeat --json",
         "ask skills explain he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
         "ask skills improve \"fix PR review comments faster\" --json",
@@ -94,6 +97,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask repo doctor --json",
         "ask repo doctor --robot --json",
     ],
+    ("repo", "closeout"): [
+        "ask repo closeout --changed --json",
+        "ask repo closeout --changed --robot --json",
+    ],
     ("repo", "doctor-catalog"): [
         "ask repo doctor-catalog",
     ],
@@ -123,6 +130,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills proof he-heartbeat --json",
         "ask skills sync --scope workspace --projection rooted --json",
         "ask skills sync --scope user --projection rooted --json",
+    ],
+    ("skills", "prove"): [
+        "ask skills prove he-heartbeat --json",
     ],
     ("skills", "explain"): [
         "ask skills explain autofix --json",
@@ -190,6 +200,7 @@ FUZZY_MATCHES = {
     "list": "list",
     "ls": "list",
     "resolve": "resolve",
+    "prove": "prove",
     "explain": "explain",
     "handles": "handles",
     "init": "init",
@@ -210,6 +221,8 @@ FUZZY_MATCHES = {
     "route": "chain",
     "goal": "goal",
     "improve": "improve",
+    "closeout": "closeout",
+    "finish": "closeout",
     "doctor": "doctor-catalog",
     "catalog": "doctor-catalog",
     "provider": "provider-audit",

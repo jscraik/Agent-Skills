@@ -12,7 +12,7 @@ Use for PRs, branches, diffs, commits, readiness, and disputed review feedback.
 ## Inputs
 Diff, repo guidance, Linear issue, spec, plan, PR evidence, validation output.
 ## Outputs
-Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff, repeated context-feedback candidates.
+Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, repeated_failure when recurring, blackboard_delta, next handoff, repeated context-feedback candidates.
 ## Procedure
 Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; in coding-harness-managed repos also check Project Brain, north-star evidence, and Harness review gates; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix. If CodeRabbit, Codex, or human review feedback repeats across PRs, classify whether the HE context, evals, or skill routing should adapt after the immediate review.
 ## Validation
@@ -38,3 +38,5 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Review policy index: `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
 - Doctrine: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

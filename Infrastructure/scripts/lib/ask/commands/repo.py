@@ -1,6 +1,7 @@
 import subprocess
 import json
 import re
+import shlex
 import sys
 from pathlib import Path
 from typing import Any, List
@@ -10,6 +11,15 @@ from ask.commands.skills import skills_budget, skills_handles
 from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
+GENERATED_SURFACE_PREFIXES = (
+    ".agents/skills/",
+    ".skillsets/",
+    ".skill-telemetry/",
+)
+CANONICAL_SKILL_PREFIXES = (
+    "Plugins/",
+    "Skills/",
+)
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """
@@ -426,13 +436,12 @@ def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
     }
 
 
-def _skipped_dependency_signal(source: str, summary: str) -> dict[str, Any]:
+def _skipped_signal(summary: str, source: str) -> dict[str, Any]:
     return {
         "state": "skipped",
-        "severity": "warning",
+        "severity": "info",
         "summary": summary,
         "source": source,
-        "next_command": "./bin/ask repo status --json --robot",
     }
 
 
@@ -448,51 +457,76 @@ def repo_doctor(repo_root: Path) -> CallResult:
     result = CallResult()
     try:
         status_result = repo_status(repo_root)
-        repo_status_signal = _safe_signal(_repo_status_signal, status_result)
-        projection_sync_signal = _safe_signal(_projection_sync_signal, status_result)
     except Exception as exc:
-        repo_status_signal = _unknown_signal_error_signal(exc)
-        projection_sync_signal = _skipped_dependency_signal(
-            "repo_status",
-            "Projection sync could not be checked because repo status failed.",
-        )
-
-    repo_status_ready = repo_status_signal.get("state") == "pass"
-    if repo_status_ready:
-        catalog_parity_signal = _safe_signal(lambda: _catalog_parity_signal(doctor_catalog(repo_root)))
-        runtime_budget_signal = _safe_signal(lambda: _runtime_budget_signal(skills_budget(repo_root)))
-        command_handles_signal = _safe_signal(
-            lambda: _command_handles_signal(
-                skills_handles(repo_root, check=True, include_handles=False)
-            )
-        )
-        repo_surface_signal = _safe_signal(lambda: _repo_surface_signal(repo_surface(repo_root)))
+        signals = {
+            "repo_status": _unknown_signal_error_signal(exc),
+            "projection_sync": _skipped_signal(
+                "Projection sync skipped because repository status failed.",
+                "repo_status",
+            ),
+            "catalog_parity": _skipped_signal(
+                "Catalog parity skipped because repository status failed.",
+                "repo_status",
+            ),
+            "runtime_budget": _skipped_signal(
+                "Runtime budget skipped because repository status failed.",
+                "repo_status",
+            ),
+            "command_handles": _skipped_signal(
+                "Command-handle validation skipped because repository status failed.",
+                "repo_status",
+            ),
+            "repo_surface": _skipped_signal(
+                "Repo surface inventory skipped because repository status failed.",
+                "repo_status",
+            ),
+        }
     else:
-        catalog_parity_signal = _skipped_dependency_signal(
-            "doctor_catalog",
-            "Catalog parity could not be checked because repo status is not ready.",
-        )
-        runtime_budget_signal = _skipped_dependency_signal(
-            "skills_budget",
-            "Runtime budget could not be checked because repo status is not ready.",
-        )
-        command_handles_signal = _skipped_dependency_signal(
-            "skills_handles",
-            "Command handles could not be checked because repo status is not ready.",
-        )
-        repo_surface_signal = _skipped_dependency_signal(
-            "repo_surface",
-            "Repo surface could not be checked because repo status is not ready.",
-        )
-
-    signals = {
-        "repo_status": repo_status_signal,
-        "projection_sync": projection_sync_signal,
-        "catalog_parity": catalog_parity_signal,
-        "runtime_budget": runtime_budget_signal,
-        "command_handles": command_handles_signal,
-        "repo_surface": repo_surface_signal,
-    }
+        repo_status_signal = _safe_signal(_repo_status_signal, status_result)
+        signals = {
+            "repo_status": repo_status_signal,
+            "projection_sync": _safe_signal(_projection_sync_signal, status_result),
+        }
+        if repo_status_signal.get("state") in {"block", "error"}:
+            signals.update(
+                {
+                    "catalog_parity": _skipped_signal(
+                        "Catalog parity skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                    "runtime_budget": _skipped_signal(
+                        "Runtime budget skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                    "command_handles": _skipped_signal(
+                        "Command-handle validation skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                    "repo_surface": _skipped_signal(
+                        "Repo surface inventory skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                }
+            )
+        else:
+            signals.update(
+                {
+                    "catalog_parity": _safe_signal(
+                        lambda: _catalog_parity_signal(doctor_catalog(repo_root))
+                    ),
+                    "runtime_budget": _safe_signal(
+                        lambda: _runtime_budget_signal(skills_budget(repo_root))
+                    ),
+                    "command_handles": _safe_signal(
+                        lambda: _command_handles_signal(
+                            skills_handles(repo_root, check=True, include_handles=False)
+                        )
+                    ),
+                    "repo_surface": _safe_signal(
+                        lambda: _repo_surface_signal(repo_surface(repo_root))
+                    ),
+                }
+            )
     payload = build_golden_path_payload(
         signals=signals,
         normal_next_command="./bin/ask repo status --json --robot",
@@ -506,6 +540,207 @@ def repo_doctor(repo_root: Path) -> CallResult:
                 code=ErrorCode.ERR_VALIDATION,
                 message=payload["agent_summary"],
                 fix_suggestion=payload.get("next_command"),
+            )
+        )
+    return result
+
+
+def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
+    command = ["git", *args]
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"git command timed out: {' '.join(command)}") from exc
+    if process.returncode != 0:
+        detail = (process.stderr or process.stdout or "").strip()
+        raise RuntimeError(
+            f"git command failed: {' '.join(command)}"
+            + (f" ({detail})" if detail else "")
+        )
+    return [line.strip() for line in process.stdout.splitlines() if line.strip()]
+
+
+def collect_changed_files(repo_root: Path) -> list[str]:
+    """Return repo-relative staged, unstaged, and untracked file paths."""
+    changed = set()
+    for args in (
+        ["diff", "--name-only", "--diff-filter=ACMRD", "--"],
+        ["diff", "--cached", "--name-only", "--diff-filter=ACMRD", "--"],
+        ["ls-files", "--others", "--exclude-standard"],
+    ):
+        changed.update(_git_output_lines(repo_root, args))
+    return sorted(changed)
+
+
+def _quote_paths(paths: list[str]) -> str:
+    return " ".join(shlex.quote(path) for path in paths)
+
+
+def _validation_command_for_changed_files(changed_files: list[str]) -> str:
+    if not changed_files:
+        return "./bin/ask repo validate --json --robot"
+    return (
+        "./bin/ask repo validate --changed-files "
+        f"{_quote_paths(changed_files)} --json --robot"
+    )
+
+
+def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
+    generated_changed = [
+        path for path in changed_files
+        if path.startswith(GENERATED_SURFACE_PREFIXES)
+    ]
+    canonical_skill_changed = [
+        path for path in changed_files
+        if path.startswith(CANONICAL_SKILL_PREFIXES)
+    ]
+    commands = []
+    if canonical_skill_changed or generated_changed:
+        commands.extend(
+            [
+                "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+                "./bin/ask skills handles --check --json --robot",
+            ]
+        )
+    return {
+        "needed": bool(commands),
+        "commands": commands,
+        "generated_changed_files": generated_changed,
+        "canonical_skill_changed_files": canonical_skill_changed,
+    }
+
+
+def _closeout_runtime_budget(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    details = (
+        doctor_payload.get("signals", {})
+        .get("runtime_budget", {})
+        .get("details", {})
+    )
+    return {
+        "status": details.get("status"),
+        "default_visible_count": details.get("default_visible_count"),
+        "estimated_description_tokens": details.get("estimated_description_tokens"),
+        "violation_count": details.get("violation_count", 0),
+    }
+
+
+def _closeout_surface_policy(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    details = (
+        doctor_payload.get("signals", {})
+        .get("repo_surface", {})
+        .get("details", {})
+    )
+    return {
+        "status": details.get("status"),
+        "blocking_findings": details.get("blocking_findings", 0),
+        "total_paths": details.get("total_paths"),
+        "counts_by_code": details.get("counts_by_code", {}),
+    }
+
+
+def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any]]:
+    commands = [
+        {
+            "id": "repo_doctor",
+            "reason": "Confirm golden-path health before claiming completion.",
+            "command": "./bin/ask repo doctor --json --robot",
+        }
+    ]
+    if changed_files:
+        commands.append(
+            {
+                "id": "changed_validation",
+                "reason": "Run validation scoped to the files currently changed.",
+                "command": _validation_command_for_changed_files(changed_files),
+            }
+        )
+    else:
+        commands.append(
+            {
+                "id": "repo_status",
+                "reason": "No changed files were detected; confirm clean repository state.",
+                "command": "./bin/ask repo status --json --robot",
+            }
+        )
+    return commands
+
+
+def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) -> CallResult:
+    """Report completion readiness without editing, validating, or committing."""
+    result = CallResult()
+    doctor_result = repo_doctor(repo_root)
+    doctor_payload = doctor_result.data.get("doctor", {})
+    changed_files_error = None
+    try:
+        changed_files = collect_changed_files(repo_root)
+    except RuntimeError as exc:
+        changed_files = []
+        changed_files_error = str(exc)
+    sync_report = _closeout_sync_report(changed_files)
+    blockers: list[str] = []
+    if changed_files_error:
+        blockers.append("changed_file_detection_failed")
+    if doctor_payload.get("blocking"):
+        blockers.append("repo_doctor_blocking")
+    if sync_report["needed"]:
+        blockers.append("sync_required")
+    diagnostic_debt = doctor_payload.get("diagnostic_debt", [])
+    if strict and diagnostic_debt:
+        blockers.append("strict_diagnostic_debt")
+
+    focused_validation = _closeout_focused_validation(changed_files)
+    ready = not blockers
+    next_command: str | None
+    if changed_files_error:
+        next_command = "./bin/ask repo status --json --robot"
+    elif doctor_payload.get("blocking"):
+        next_command = doctor_payload.get("next_command")
+    elif sync_report["needed"]:
+        next_command = sync_report["commands"][0]
+    elif changed_files:
+        next_command = _validation_command_for_changed_files(changed_files)
+    else:
+        next_command = "./bin/ask repo status --json --robot"
+
+    payload = {
+        "agent_summary": (
+            "Ready: no closeout blockers detected."
+            if ready
+            else f"Blocked: closeout has {len(blockers)} blocker(s)."
+        ),
+        "changed_files": changed_files,
+        "changed_file_count": len(changed_files),
+        "changed_mode_requested": changed,
+        "changed_files_error": changed_files_error,
+        "sync": sync_report,
+        "runtime_budget": _closeout_runtime_budget(doctor_payload),
+        "surface_policy": _closeout_surface_policy(doctor_payload),
+        "focused_validation": focused_validation,
+        "diagnostic_debt": diagnostic_debt,
+        "commit_readiness": {
+            "ready": ready,
+            "blockers": blockers,
+            "strict": strict,
+        },
+        "doctor": doctor_payload,
+        "next_command": next_command,
+    }
+    result.data["repo_closeout"] = payload
+    result.data.update(payload)
+    result.status = "success" if ready else "error"
+    if not ready:
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=payload["agent_summary"],
+                fix_suggestion=next_command,
             )
         )
     return result

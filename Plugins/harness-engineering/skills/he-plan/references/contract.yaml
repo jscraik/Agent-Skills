@@ -24,6 +24,7 @@ outputs:
   - Linear/spec/plan/PR traceability matrix for tracked work
   - coding_harness lifecycle block including plan-gate status when the repo is coding-harness-managed
   - requirements, dependencies, test scenarios, verification outcomes, rollback, and risk notes
+  - "XP operating artifacts: slack_policy for allowable uncertainty and blackboard_delta for durable plan-state updates"
   - explicit classification of assumptions, blockers, and deferred implementation unknowns
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
 

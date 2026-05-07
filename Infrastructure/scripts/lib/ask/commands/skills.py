@@ -50,6 +50,7 @@ from ask.selection_contract import (  # noqa: E402
     candidate_id,
     canonical_sort_key,
 )
+from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
 
 
 @dataclass
@@ -781,6 +782,154 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 fix_suggestion="Run `./bin/ask skills sync --scope workspace --projection rooted`, then `./bin/ask skills sync --scope user --projection rooted`, and rerun proof.",
             )
         )
+    return result
+
+
+def _skill_audit_target(resolution: dict[str, Any]) -> str | None:
+    source = resolution.get("source_path")
+    if not source:
+        return None
+    target = Path(str(source))
+    if target.name == "SKILL.md":
+        target = target.parent
+    return target.as_posix()
+
+
+def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
+    workouts_root = repo_root / ".workouts"
+    if not workouts_root.is_dir():
+        return []
+    normalized = handle.strip().lower().replace("_", "-")
+    candidates: list[str] = []
+    for workout in sorted(workouts_root.glob("**/workout.yaml")):
+        workout_id = workout.parent.relative_to(workouts_root).as_posix()
+        searchable = workout_id.lower().replace("_", "-")
+        if normalized in searchable:
+            candidates.append(workout_id)
+    return candidates
+
+
+def skills_prove(repo_root: Path, handle: str) -> CallResult:
+    """Compose an agent-facing proof scorecard for one skill handle."""
+    result = CallResult()
+    result.metadata["command"] = "skills prove"
+    query = handle.strip()
+    goal_resolution: dict[str, Any] | None = None
+    reachability_result = skills_proof(repo_root, query)
+    if reachability_result.status != "success" and " " in query:
+        improvement_result = improve_skills(repo_root, goal_text=query)
+        goal_resolution = improvement_result.data.get("improvement")
+        candidate = (goal_resolution or {}).get("recommended_capability") or {}
+        if candidate.get("handle"):
+            reachability_result = skills_proof(repo_root, str(candidate["handle"]))
+        else:
+            result.status = "error"
+            result.data["skill_proof"] = {
+                "schema_version": "skill-proof-scorecard.v1",
+                "query": query,
+                "handle": None,
+                "proof_status": "blocked_goal_resolution",
+                "agent_summary": f"Could not resolve goal '{query}' to one skill handle.",
+                "reachability": {"status": "not_checked", "source": "goal_resolution"},
+                "structural_quality": {"status": "not_checked", "audit_command": None},
+                "analytics": {
+                    "status": "unavailable_or_legacy",
+                    "evidence_class": "native_skill_invocation_projection",
+                    "note": "No skill handle was available for analytics lookup.",
+                },
+                "outcome_proof": {"status": "not_checked", "workout_candidates": [], "evidence_class": "outcome_proof"},
+                "goal_resolution": goal_resolution,
+                "next_command": (goal_resolution or {}).get("next_command") or f"./bin/ask skills improve {shlex.quote(query)} --json --robot",
+            }
+            result.errors.extend(improvement_result.errors)
+            if not result.errors:
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message=f"Could not resolve goal '{query}' to one skill handle.",
+                        fix_suggestion=result.data["skill_proof"]["next_command"],
+                    )
+                )
+            return result
+    command_proof = reachability_result.data.get("proof", {})
+    resolution = command_proof.get("resolution") if isinstance(command_proof, dict) else {}
+    if not isinstance(resolution, dict):
+        resolution = {}
+    normalized = str(command_proof.get("handle") or resolution.get("handle") or handle.lstrip("$"))
+    reachability_status = command_proof.get("status") if isinstance(command_proof, dict) else "missing"
+
+    audit_target = _skill_audit_target(resolution)
+    structural_detail: dict[str, Any] = {
+        "status": "missing",
+        "audit_level": "compat",
+        "audit_command": None,
+    }
+    if audit_target:
+        audit_result = audit_skill(repo_root, audit_target, level="compat")
+        structural_detail = {
+            "status": "pass" if audit_result.status == "success" else "fail",
+            "audit_level": "compat",
+            "audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level compat --json --robot",
+            "strict_audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level strict --json --robot",
+            "diagnostics_exit_code": audit_result.data.get("diagnostics", {}).get("exit_code"),
+        }
+
+    analytics = skill_invocation_analytics(repo_root, normalized)
+    workouts = _skill_workout_candidates(repo_root, normalized)
+    outcome_status = "missing"
+    next_command = f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot"
+    if reachability_status != "pass":
+        proof_status = "blocked_reachability"
+    elif structural_detail["status"] != "pass":
+        proof_status = "blocked_structural_quality"
+        next_command = structural_detail.get("audit_command") or next_command
+    elif workouts:
+        proof_status = "reachable_without_outcome_proof"
+        outcome_status = "available_not_run"
+        next_command = f"./bin/ask workouts run {shlex.quote(workouts[0])} --json --robot"
+    else:
+        proof_status = "reachable_without_outcome_proof"
+        next_command = structural_detail.get("strict_audit_command") or next_command
+
+    scorecard = {
+        "schema_version": "skill-proof-scorecard.v1",
+        "query": query,
+        "handle": normalized,
+        "proof_status": proof_status,
+        "agent_summary": (
+            f"${normalized} is reachable and structurally valid, but outcome proof is not present."
+            if proof_status == "reachable_without_outcome_proof"
+            else f"${normalized} proof is blocked at {proof_status.replace('blocked_', '').replace('_', ' ')}."
+        ),
+        "reachability": {
+            "status": reachability_status,
+            "source": "command_handle_proof",
+            "command": f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot",
+        },
+        "structural_quality": structural_detail,
+        "analytics": analytics,
+        "outcome_proof": {
+            "status": outcome_status,
+            "workout_candidates": workouts,
+            "evidence_class": "outcome_proof",
+        },
+        "next_command": next_command,
+    }
+    if goal_resolution:
+        scorecard["goal_resolution"] = goal_resolution
+    result.data["skill_proof"] = scorecard
+    result.data["command_handle_proof"] = command_proof
+    if proof_status.startswith("blocked_"):
+        result.status = "error"
+        result.errors.extend(reachability_result.errors)
+        if not result.errors:
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Skill proof scorecard is blocked for '{normalized}'.",
+                    fix_suggestion=next_command,
+                )
+            )
     return result
 
 
