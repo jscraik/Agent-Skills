@@ -264,6 +264,29 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertIn("repo_doctor_blocking", closeout["commit_readiness"]["blockers"])
         self.assertEqual(closeout["next_command"], "./bin/ask repo doctor-catalog --json --robot")
 
+    def test_strict_closeout_uses_diagnostic_debt_remediation(self) -> None:
+        doctor = {
+            "blocking": False,
+            "next_command": "./bin/ask repo status --json --robot",
+            "diagnostic_debt": [
+                {
+                    "id": "repo_surface",
+                    "next_command": "./bin/ask repo surface --json --robot",
+                }
+            ],
+            "signals": {},
+        }
+        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": doctor}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True, strict=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertIn("strict_diagnostic_debt", closeout["commit_readiness"]["blockers"])
+        self.assertEqual(closeout["next_command"], "./bin/ask repo surface --json --robot")
+
     def test_catalog_parity_drift_blocks_and_selects_catalog_doctor(self) -> None:
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
             "ask.commands.repo.doctor_catalog",

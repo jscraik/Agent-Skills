@@ -676,6 +676,14 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
     return commands
 
 
+def _diagnostic_debt_next_command(diagnostic_debt: list[dict[str, Any]]) -> str | None:
+    for debt in diagnostic_debt:
+        next_command = debt.get("next_command") if isinstance(debt, dict) else None
+        if isinstance(next_command, str) and next_command.strip():
+            return next_command
+    return None
+
+
 def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) -> CallResult:
     """Report completion readiness without editing, validating, or committing."""
     result = CallResult()
@@ -709,7 +717,11 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
     elif sync_report["needed"]:
         next_command = sync_report["commands"][0]
     elif strict and diagnostic_debt:
-        next_command = doctor_payload.get("next_command") or "./bin/ask repo doctor --json --robot"
+        next_command = (
+            _diagnostic_debt_next_command(diagnostic_debt)
+            or doctor_payload.get("next_command")
+            or "./bin/ask repo doctor --json --robot"
+        )
     elif changed_files:
         next_command = _validation_command_for_changed_files(changed_files)
     else:
