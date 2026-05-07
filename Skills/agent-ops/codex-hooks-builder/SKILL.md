@@ -36,6 +36,7 @@ metadata:
 - validation commands
 - current Codex hook runtime docs or schema evidence
 - effective hook sources such as user, project, managed, or plugin-bundled hooks
+- compact lifecycle source evidence when using PreCompact or PostCompact
 
 ## Outputs
 - hook pack changes
@@ -50,10 +51,13 @@ metadata:
 - Confirm repo-local versus user-level ownership before editing.
 - Inspect existing hook config, scripts, and installation path.
 - Check current Codex hook docs, local schema, or runtime evidence before changing event names, matchers, feature flags, or output handling.
-- Model the supported events explicitly: SessionStart, PreToolUse, PermissionRequest, PostToolUse, UserPromptSubmit, and Stop.
-- Prefer the current `[features].hooks` flag while preserving the legacy `codex_hooks` alias when an existing install or validator still depends on it.
+- Model the supported events explicitly: SessionStart, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact, UserPromptSubmit, and Stop.
+- Prefer the current `[features].hooks` flag. Treat `[features].codex_hooks` as a deprecated legacy alias: remove it from new configs, preserve it only when supporting a proven older runtime, and call out any official-doc/runtime conflict before editing.
 - Account for every active hook source: user `hooks.json`, user `config.toml`, project `.codex` files, managed hook directories, plugin-bundled hooks, and inline `[hooks]` config.
-- Treat matchers as event-specific: tool-name matchers for PreToolUse, PermissionRequest, and PostToolUse; `startup|resume|clear` for SessionStart; ignored matchers for UserPromptSubmit and Stop.
+- Treat matchers as event-specific: tool-name matchers for PreToolUse, PermissionRequest, and PostToolUse; `manual|auto` trigger matchers for PreCompact and PostCompact; `startup|resume|clear` for SessionStart; ignored matchers for UserPromptSubmit and Stop.
+- For compact lifecycle hooks, verify against `codex-rs/hooks/src/events/compact.rs` and the generated `pre-compact` / `post-compact` schemas in the target Codex checkout.
+- Pair compact lifecycle hooks with compaction-prompt review: `compact_prompt` or `experimental_compact_prompt_file` steers compaction content, while PreCompact and PostCompact observe, gate, or record the lifecycle around it.
+- Keep compact hook stdout quiet. Plain stdout is ignored for PreCompact/PostCompact; return schema-bound JSON only when a hook intentionally needs a system message or `continue: false` stop.
 - Use effective-hook listing or repo validators when available to prove the assembled hook set, not only the edited file.
 - Use scaffold helpers when they fit the requested pack.
 - Keep scripts minimal, deterministic, and explicit about inputs.

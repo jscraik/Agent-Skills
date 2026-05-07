@@ -1,0 +1,1 @@
+The hook pack only sets codex_hooks and the current runtime warns that it is deprecated. Review whether to move to features.hooks while preserving compatibility only for older runtimes.
