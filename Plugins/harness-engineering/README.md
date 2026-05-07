@@ -38,6 +38,26 @@ Source of truth:
 
 Tracked work should carry the same Linear/spec/plan/PR chain through brainstorm, spec, plan, work, and review. Non-trivial tracked work must resolve or create the Linear issue through `references/linear-tracker-gate.md`; blocked tracker writes must return a ready-to-create payload instead of silently continuing.
 
+For existing tracked plans, run `references/linear-delta-capture-gate.md`
+before `he-spec`, `he-plan`, or `he-work` consumes
+`.harness/linear/<repo-name>-linear-plan.md`. New or changed Linear issues are
+captured into the plan as classified deltas first, then at most one admitted
+item becomes the current or next execution slice.
+
+Solved-problem capture belongs to `he-compound` and writes new HE solution
+artifacts under `.harness/solutions/**` using
+`references/solution-capture-contract.md`. Legacy `docs/solutions/**` entries
+are source evidence and overlap/freshness inputs. When the repo uses Project
+Brain, solution capture also syncs or explicitly blocks the matching
+`.harness/knowledge/**` update.
+
+Dedicated UI plans are `he-plan` artifacts. New UI plans use
+`.harness/plan/**-ui-plan.md`; legacy `docs/ui-plan/**` and
+`docs/ui-plans/**` paths are compatibility source evidence unless the user asks
+to preserve that convention. When Project Brain is active, UI plans feed it as
+plan/decision context first; only implementation-proven reusable UI learnings
+become `.harness/solutions/**` captures.
+
 ## Agent-Native Compression
 
 When HE work touches a cockpit, command catalog, README front door, default help,

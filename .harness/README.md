@@ -15,6 +15,9 @@ execution, and review documents; keep local runtime output out of git.
 | `.harness/brainstorm/**.md` | lifecycle-artifact | Durable HE brainstorm output. |
 | `.harness/specs/**.md` | lifecycle-artifact | Durable HE spec output. |
 | `.harness/plan/**.md` | lifecycle-artifact | Durable HE plan output. |
+| `.harness/plan/**-ui-plan.md` | lifecycle-artifact | Dedicated UI implementation plans owned by `he-plan`. |
+| `.harness/solutions/**.md` | lifecycle-artifact/reference | Verified reusable HE solution captures owned by `he-compound`. |
+| `.harness/knowledge/**` | reference/policy | Project Brain knowledge synced from accepted solution captures and repo decisions. |
 | `.harness/features/**.md` | secondary-context | Repo intent and feature guardrails. |
 | `.harness/strategy/**.md` | secondary-context | Strategy and moat rationale. |
 | `.harness/triage/**.md` | secondary-context | Prioritization and discarded paths. |
@@ -26,6 +29,34 @@ execution, and review documents; keep local runtime output out of git.
 Secondary context is not execution authority by itself. Implementation work must
 be admitted by the selected `.harness/linear/**` or `.harness/refactors/**`
 slice before `he-spec`, `he-plan`, or `he-work` can use it as scope.
+
+For Linear-backed work, `.harness/linear/<repo-name>-linear-plan.md` should also
+carry the live-delta boundary:
+
+- `Approved Current Slice`: the single milestone, parent issue, refactor phase,
+  or execution slice available to the next HE stage.
+- `Linear Delta Capture`: new or changed Linear issues classified as
+  `already_covered`, `duplicate_or_superseded`, `candidate_next_slice`,
+  `blocker_for_current_slice`, `out_of_scope`, or `needs_human_triage`.
+- `Label status`: confirmation that required Linear labels already exist, were
+  created from approved reusable categories, or are blocked with a
+  ready-to-create payload.
+- `Approved Next Slice Queue`: ordered candidates admitted by the plan for the
+  next bounded plugin HE spec, plan, or work pass.
+
+New Linear issues do not drive implementation directly until this plan admits
+one of them into the current slice or next-slice queue.
+
+Legacy `docs/solutions/**`, `docs/ui-plan/**`, and `docs/ui-plans/**` may be
+read as source evidence. New HE solution captures should use
+`.harness/solutions/**`; new dedicated UI plans should use
+`.harness/plan/**-ui-plan.md`.
+
+When Project Brain is active, accepted solution captures feed
+`.harness/knowledge/<domain>/knowledge.md` as reusable solved knowledge. UI
+plans feed Project Brain as plan/decision context first and are promoted to
+solution knowledge only after implementation or review proves a reusable
+pattern.
 
 ## Ignored Surfaces
 

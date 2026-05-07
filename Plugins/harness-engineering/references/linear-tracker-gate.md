@@ -4,7 +4,7 @@ Use this when `he-brainstorm`, `he-spec`, or `he-plan` handles non-trivial deliv
 
 ## Rule
 
-Linear is the tracker of record. HE brainstorms, specs, and plans support Linear; they do not replace it.
+Linear is the tracker of record. HE brainstorms, specs, and plans support Linear; they do not replace it. `.harness/linear/<repo-name>-linear-plan.md` is the approved execution snapshot for Harness Engineering stages; use `linear-delta-capture-gate.md` to capture live Linear changes before a tracked spec, plan, or work stage consumes that snapshot.
 
 Before handoff, resolve or create the Linear issue. If creation is blocked, stop with `linear_blocked`, exact missing fields, and a ready-to-create payload.
 
@@ -26,8 +26,10 @@ The gate does not apply to throwaway exploration, tiny local-only edits, private
 1. Search/list/get likely Linear issues before creating one.
 2. Reuse if found; link key/URL and why it is tracker of record.
 3. Create if missing and metadata is available.
-4. If metadata/tooling is missing, return `linear_status: linear_blocked`, exact missing fields/tool state, and a complete ready payload.
-5. Stop when `linear_status: linear_blocked` unless an explicit override decision is recorded with actor, reason, timestamp, and the blocked payload. Continue only after `linear_status: resolved|created|user_opted_out` or that recorded override.
+4. For existing tracked plans, run the Linear Delta Capture Gate before selecting the next HE execution slice.
+5. Verify required labels exist and are applied; create missing approved reusable labels when tooling and metadata allow it.
+6. If metadata/tooling is missing, return `linear_status: linear_blocked`, exact missing fields/tool state, and a complete ready payload.
+7. Stop when `linear_status: linear_blocked` unless an explicit override decision is recorded with actor, reason, timestamp, and the blocked payload. Continue only after `linear_status: resolved|created|user_opted_out` or that recorded override.
 
 ## Minimum Issue Payload
 
@@ -41,6 +43,7 @@ linear_issue:
   title: "<plain behavior title>"
   priority: "<priority or missing>"
   labels: ["<labels>"]
+  label_status: "resolved|created|blocked|not_required"
   blocked_by: ["<issue keys or None - can start immediately>"]
   body_sections:
     - Problem / actual behavior

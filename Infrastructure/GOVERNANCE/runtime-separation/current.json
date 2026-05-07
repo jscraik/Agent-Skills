@@ -17,7 +17,7 @@
         "blocker_id": null,
         "command": "bin/ask plugins doctor --json",
         "drift_class": null,
-        "evidence_ref": "sha256:fd1618b718fd6eaae3e29120def935b069524fad4f7213ae121dae63cdd3dca0",
+        "evidence_ref": "sha256:df02742fbc955e338834a6de33c6ade2d52ea59b284a4c484144f4e0568ec1cb",
         "normalized_fields": {
           "activation_plugins": [
             {
@@ -76,7 +76,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status browser-use --json",
           "drift_class": null,
-          "evidence_ref": "sha256:87b3642bbf0654981e11b230be1dc466debb306b365ee6059a994a28644a66a7",
+          "evidence_ref": "sha256:5cd8d069da9c3795374df3286bf169059cfd0626668e9edc0e9ce601b7fbb6e9",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": false,
@@ -99,7 +99,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status harness-engineering --json",
           "drift_class": null,
-          "evidence_ref": "sha256:8abaa79bb07fb6e469cdc7812461675b6b92bbb7232e006a2f37e2bb31a7127f",
+          "evidence_ref": "sha256:0fd56c53e23b587959bcdd9840b0b43e7d633b21058303cd06649fc4cab95aa2",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -122,7 +122,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status plugin-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:598303a4025b672bfe93c7f3a39b939af93a81464f28d0ceecde507fd23a0863",
+          "evidence_ref": "sha256:a49ded5798bd91b495a951c58364835c208291aec48ad7d3280f4e05667ddf78",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -145,7 +145,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status skill-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:45ad86f373a06bebb6fc2f6b52482a3fddfdb49558029c3cbc6fdefb64ec2e1c",
+          "evidence_ref": "sha256:528c3599cac35adca44c0e1dc102301fe5c3982837f99341204e592dc0c4e2ea",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -169,7 +169,7 @@
         "blocker_id": "catalog:cc4eb19d4fe8",
         "command": "bin/ask repo doctor-catalog --strict --json",
         "drift_class": "command_exit_nonzero",
-        "evidence_ref": "sha256:05fe0281d595a54c16b1635aa407b9fc84de4297b3f6bbcad1ea5fd754ec8d6e",
+        "evidence_ref": "sha256:8a71e1c054a49d574ecf0829a59540139105ca029cf6665923a2db1d4710a19a",
         "normalized_fields": {
           "command": "repo doctor-catalog --strict --json",
           "decision_status": "blocked_catalog_parity",
@@ -184,7 +184,7 @@
         "blocker_id": null,
         "command": "bin/ask repo status --json",
         "drift_class": null,
-        "evidence_ref": "sha256:7f1e5690d7e286a9ea740ca5de396b9e9e346f02979d5ab1c21cd8e2d1fdae3d",
+        "evidence_ref": "sha256:4bfac6e80138fc9dcfc35080ac351e1aa5731054599654c062199ecab255a8b3",
         "normalized_fields": {
           "command": "repo status --json",
           "is_git": true,
@@ -212,20 +212,20 @@
         "blocker_id": null,
         "command": "bin/ask skills list --json",
         "drift_class": null,
-        "evidence_ref": "sha256:101ae5ed808d5dd79948d697882234372b17f0ed7efe5d72ea8b5de53cf508ed",
+        "evidence_ref": "sha256:bd1f487ff8c005fa3a0ee95aabe0dad16b2615274451eec18b709bff70963147",
         "normalized_fields": {
           "command": "skills list --json",
           "sample_names": [
             "agent-ops",
-            "agents-md",
-            "autofix",
-            "autoresearch",
             "backend-platform",
-            "bootstrap",
-            "codex-agent-creator",
-            "codex-automation-architect",
-            "codex-hooks-builder",
-            "coding-harness"
+            "content-publishing",
+            "frontend-ui",
+            "harness-engineering",
+            "mobile-native",
+            "plugin-factory",
+            "product-strategy",
+            "security-ops",
+            "skill-factory"
           ],
           "skill_count": 31,
           "status": "success"
@@ -234,7 +234,7 @@
         "subject_id": "skills"
       }
     },
-    "command_checks_digest": "e8e0fa0383bc68b933e30216ac20e0a3a4bed2cbb0f3e9c6eb058b279db23df6",
+    "command_checks_digest": "0ad52e4cb5fbfd8822bc6a0578cfb074da81320d4f4cebfaeda5c388e65e5d65",
     "discovery_identity": "bf744874220d18acb86d8d63fd57b4c637a3d6ad0b2dac73bc1e57d20121fcdd",
     "duplicate_shadow_drift_classes": {
       "plugins_doctor": null,
@@ -261,7 +261,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/browser-use",
         "consumer_id": "plugins_status.browser-use",
-        "evidence_ref": "sha256:87b3642bbf0654981e11b230be1dc466debb306b365ee6059a994a28644a66a7",
+        "evidence_ref": "sha256:5cd8d069da9c3795374df3286bf169059cfd0626668e9edc0e9ce601b7fbb6e9",
         "legacy_resolution": "./Plugins/browser-use",
         "parity_result": "fail",
         "plugin_id": "browser-use",
@@ -271,7 +271,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/harness-engineering",
         "consumer_id": "plugins_status.harness-engineering",
-        "evidence_ref": "sha256:8abaa79bb07fb6e469cdc7812461675b6b92bbb7232e006a2f37e2bb31a7127f",
+        "evidence_ref": "sha256:0fd56c53e23b587959bcdd9840b0b43e7d633b21058303cd06649fc4cab95aa2",
         "legacy_resolution": "./Plugins/harness-engineering",
         "parity_result": "fail",
         "plugin_id": "harness-engineering",
@@ -281,7 +281,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/plugin-factory",
         "consumer_id": "plugins_status.plugin-factory",
-        "evidence_ref": "sha256:598303a4025b672bfe93c7f3a39b939af93a81464f28d0ceecde507fd23a0863",
+        "evidence_ref": "sha256:a49ded5798bd91b495a951c58364835c208291aec48ad7d3280f4e05667ddf78",
         "legacy_resolution": "./Plugins/plugin-factory",
         "parity_result": "fail",
         "plugin_id": "plugin-factory",
@@ -291,7 +291,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/skill-factory",
         "consumer_id": "plugins_status.skill-factory",
-        "evidence_ref": "sha256:45ad86f373a06bebb6fc2f6b52482a3fddfdb49558029c3cbc6fdefb64ec2e1c",
+        "evidence_ref": "sha256:528c3599cac35adca44c0e1dc102301fe5c3982837f99341204e592dc0c4e2ea",
         "legacy_resolution": "./Plugins/skill-factory",
         "parity_result": "fail",
         "plugin_id": "skill-factory",
