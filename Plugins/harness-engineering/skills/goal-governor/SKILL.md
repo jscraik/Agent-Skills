@@ -150,9 +150,7 @@ risks:
 Validate the skill package:
 
 ```bash
-./bin/ask check_goal_board <goal-directory>
-# Agent-driven validation:
-./bin/ask check_goal_board <goal-directory> --robot
+python3 scripts/check_goal_board.py <goal-directory>
 ./bin/ask skills audit <skill-directory> --level strict --robot
 ```
 

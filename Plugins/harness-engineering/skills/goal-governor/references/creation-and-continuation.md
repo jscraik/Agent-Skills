@@ -46,6 +46,11 @@ Doctor should report:
 - Verification evidence fresh.
 - Exactly one write-capable active task.
 
+Archived active-skill line preserved for context migration only; current Goal
+Governor checks use `python3 scripts/check_goal_board.py <goal-directory>`.
+
+   - Agent-driven runs append `--robot` to `./bin/ask check_goal_board <goal-directory>` for stable parsing.
+
 ## Repair
 
 Safe repairs:
