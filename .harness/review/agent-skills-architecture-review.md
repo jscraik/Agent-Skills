@@ -1235,11 +1235,11 @@ If it succeeds, it will succeed because it becomes both a productive skill/plugi
 
 3. Reduce docs entrypoints to a small live chain:
 
-- `AGENTS.md`;
-- `UBIQUITOUS_LANGUAGE.md`;
-- `Docs/agents/README.md`;
-- `Docs/agents/14-path-ownership-boundaries.md`;
-- validation guide.
+   - `AGENTS.md`;
+   - `UBIQUITOUS_LANGUAGE.md`;
+   - `Docs/agents/README.md`;
+   - `Docs/agents/14-path-ownership-boundaries.md`;
+   - validation guide.
 
 4. Move repeated prose into command output or validators.
 

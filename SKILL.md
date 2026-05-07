@@ -12,7 +12,7 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills](#.agents-skills)
+- [.Agents — Skills](#agents-skills)
 - [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
@@ -59,4 +59,3 @@ Do not hand-edit runtime projections.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
 - `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
-

@@ -12,14 +12,14 @@ triggers:
   - the user needs explicit behavior, lifecycle, failure, observability, or validation rules before planning
 
 inputs:
-  - approved execution slice: one milestone, one parent issue, one refactor phase, or one execution slice
-  - `.harness/linear/<repo-name>-linear-plan.md` for tracked coding-harness execution
-  - selected `.harness/refactors/<selected-refactor>.md` when the route is refactor or migration work
-  - `.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary constraints and intent
-  - a brainstorm path, existing spec path, parent spec path, UI source path, or clear feature description
-  - Linear issue key/URL, or enough Linear metadata to create the tracker issue for non-trivial tracked work
-  - relevant constraints, success criteria, risks, and linked documents when available
-  - optional `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, `.harness/features/*.md`, platform, design-system, accessibility, performance, or operational context as secondary evidence only
+  - "approved execution slice: one milestone, one parent issue, one refactor phase, or one execution slice"
+  - "`.harness/linear/<repo-name>-linear-plan.md` for tracked coding-harness execution"
+  - "selected `.harness/refactors/<selected-refactor>.md` when the route is refactor or migration work"
+  - "`.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary constraints and intent"
+  - "a brainstorm path, existing spec path, parent spec path, UI source path, or clear feature description"
+  - "Linear issue key/URL, or enough Linear metadata to create the tracker issue for non-trivial tracked work"
+  - "relevant constraints, success criteria, risks, and linked documents when available"
+  - "optional `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, `.harness/features/*.md`, platform, design-system, accessibility, performance, or operational context as secondary evidence only"
 
 outputs:
   - schema_version: 1 status reports and machine-readable contract metadata

@@ -57,6 +57,7 @@ def test_active_he_spec_consumes_approved_execution_slice() -> None:
     text = read(HE_ROOT / "skills/he-spec/SKILL.md")
 
     for phrase in [
+        "approved execution slice as one milestone, one parent issue, one refactor phase, or one execution slice",
         "bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice",
         ".harness/linear/<repo-name>-linear-plan.md",
         ".harness/refactors/<selected-refactor>.md",

@@ -10,7 +10,7 @@ Make intent testable. A good HE spec preserves source truth, states boundaries, 
 ## When to Use
 Use when requirements are needed before plan/work; Explore first and ask second.
 ## Inputs
-Problem, approved execution slice, Linear issue, QA report, source evidence, current-vs-latest spec status.
+Problem, approved execution slice as one milestone, one parent issue, one refactor phase, or one execution slice, Linear issue, QA report, source evidence, current-vs-latest spec status.
 ## Outputs
 Return schema_version when structured. schema_version: 1, bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice; complete replacement spec section or `.harness/specs/**.md` artifact; Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
 ## Procedure

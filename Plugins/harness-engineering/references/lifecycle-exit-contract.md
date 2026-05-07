@@ -60,12 +60,12 @@ domain_language:
 exit_status: ready_for_next_stage|blocked|done
 next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
 missing_inputs: []
-  evidence:
+evidence:
   linear: "<issue key/url or blocker>"
   artifacts: ["<repo-relative paths>"]
   validation: ["<command -> pass|fail|blocked>"]
   pr: "<PR URL or not_applicable>"
-  coding_harness:
+coding_harness:
   mode: coding-harness-managed|generic-he|unknown
   linear_state: S0_TRIAGE|S1_READY|S2_IN_PROGRESS|S3_IN_REVIEW|S4_DONE|S5_FAIL|unknown|not_applicable
   blocked_overlay: true|false|unknown|not_applicable
