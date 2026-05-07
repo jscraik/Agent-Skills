@@ -219,6 +219,24 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
         self.assertIn("command_handle_proof", output["data"])
 
+    def test_skill_audit_target_relativizes_absolute_repo_paths(self):
+        """Verify proof audit commands cannot leak machine-specific absolute source paths."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            source_path = Path.cwd() / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            audit_target = skills_commands._skill_audit_target(  # noqa: SLF001
+                Path.cwd(),
+                {"source_path": str(source_path)},
+            )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(audit_target, "Skills/agent-ops/autofix")
+        self.assertNotIn(str(Path.cwd()), audit_target)
+
     def test_skills_prove_uses_skill_invocation_projection(self):
         """Verify ask skills prove consumes ASK-local skill invocation analytics."""
         with tempfile.TemporaryDirectory() as temp_dir:

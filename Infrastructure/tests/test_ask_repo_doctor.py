@@ -9,7 +9,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.commands.repo import repo_closeout, repo_doctor  # noqa: E402
+from ask.commands.repo import _git_output_lines, repo_closeout, repo_doctor  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
@@ -229,6 +229,14 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertIn("changed_file_detection_failed", closeout["commit_readiness"]["blockers"])
         self.assertEqual(closeout["changed_files_error"], "git command failed")
         self.assertEqual(closeout["next_command"], "./bin/ask repo status --json --robot")
+
+    def test_git_output_lines_normalizes_startup_failures(self) -> None:
+        with patch("ask.commands.repo.subprocess.run", side_effect=OSError("git missing")):
+            with self.assertRaises(RuntimeError) as raised:
+                _git_output_lines(REPO_ROOT, ["status", "--short"])
+
+        self.assertIn("git command could not start: git status --short", str(raised.exception))
+        self.assertIsInstance(raised.exception.__cause__, OSError)
 
     def test_closeout_changed_non_skill_file_recommends_scoped_validation(self) -> None:
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
