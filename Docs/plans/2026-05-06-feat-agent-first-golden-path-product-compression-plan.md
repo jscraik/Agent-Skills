@@ -290,6 +290,31 @@ style. If no shared strict pattern exists, strict behavior can be deferred.
 
 ## Task Graph
 
+```yaml
+tasks:
+  - id: P0
+    title: Confirm repaired baseline
+    depends_on: []
+  - id: P1
+    title: Create response contract
+    depends_on: [P0]
+  - id: P2
+    title: Expose command route
+    depends_on: [P1]
+  - id: P3
+    title: Compose repo signals
+    depends_on: [P2]
+  - id: P4
+    title: Prove behavior with tests
+    depends_on: [P3]
+  - id: P5
+    title: Document new entrypoint
+    depends_on: [P4]
+  - id: P6
+    title: Close traceability evidence
+    depends_on: [P5]
+```
+
 ```text
 P0 -> P1 -> P2 -> P3 -> P4 -> P5 -> P6
 ```

@@ -14,6 +14,7 @@ All agents should use `./bin/ask` for repo operations.
 | Repo health     | `./bin/ask repo doctor --json --robot`             |
 | Improve agents  | `./bin/ask skills improve "<goal>" --json --robot` |
 | Explain skill   | `./bin/ask skills explain <handle> --json --robot` |
+| Prove skill     | `./bin/ask skills prove <handle> --json --robot`   |
 | Full validation | `./bin/ask repo validate`                          |
 | List skills     | `./bin/ask skills list --category <topic>`         |
 | Audit skill     | `./bin/ask skills audit <path> --level strict`     |
@@ -30,6 +31,7 @@ inspection:
 ./bin/ask repo doctor --json --robot
 ./bin/ask skills improve "autofix" --json --robot
 ./bin/ask skills explain autofix --json --robot
+./bin/ask skills prove autofix --json --robot
 ./bin/ask repo doctor-catalog --json --robot
 ./bin/ask repo surface --json --robot
 ```
@@ -48,6 +50,11 @@ one existing `next_command`.
 what the capability is for, when to use it, canonical source, runtime handle,
 validation guidance, known limitations, reachability status, and the proof
 command to run next.
+
+`skills prove` is the product-facing scorecard for capability proof. It keeps
+the existing command-handle `skills proof` payload as reachability evidence and
+adds structural quality, analytics availability, outcome proof, and one next
+command without claiming structural or invocation evidence as outcome proof.
 
 ## Robot Mode
 

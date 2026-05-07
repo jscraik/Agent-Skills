@@ -198,6 +198,51 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
         self.assertIn("live invocation: manual_session_gate", result.stdout)
 
+    def test_skills_prove_json_contract(self):
+        """Verify ask skills prove separates reachability, quality, analytics, and outcome proof."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.strip(), result.stderr)
+        output = json.loads(result.stdout)
+        skill_proof = output["data"]["skill_proof"]
+        self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
+        self.assertEqual(skill_proof["handle"], "he-heartbeat")
+        self.assertIn("reachability", skill_proof)
+        self.assertIn("structural_quality", skill_proof)
+        self.assertIn("analytics", skill_proof)
+        self.assertIn("outcome_proof", skill_proof)
+        self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
+        self.assertIn("command_handle_proof", output["data"])
+
+    def test_skills_prove_goal_fallback_json_contract(self):
+        """Verify ask skills prove routes or clearly blocks a goal query."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "prove",
+            "fix",
+            "PR",
+            "review",
+            "comments",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertTrue(result.stdout.strip(), result.stderr)
+        output = json.loads(result.stdout)
+        skill_proof = output["data"]["skill_proof"]
+        self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
+        self.assertEqual(skill_proof["query"], "fix PR review comments")
+        self.assertIn(
+            skill_proof["proof_status"],
+            ("blocked_goal_resolution", "blocked_reachability", "reachable_without_outcome_proof"),
+        )
+        self.assertIn("goal_resolution", skill_proof)
+        self.assertIn("recommended_capability", skill_proof["goal_resolution"])
+
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--json"]
