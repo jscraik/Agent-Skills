@@ -26,7 +26,7 @@ Use this pass when the plan already exists and the main question is:
 
 If a document path is provided, read it.
 
-If no document is specified, ask for the target file or look for the most recent relevant file under `Docs/plans/`.
+If no document is specified, ask for the target file or look for the most recent relevant file under `.harness/plan/`.
 
 ### 2. Assess before fixing
 

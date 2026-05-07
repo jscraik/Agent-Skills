@@ -73,7 +73,7 @@ Do not proceed until the user has supplied a usable feature description.
 ## Deliverables
 - Brainstorm summary (what to build and why)
 - 2-3 approaches with trade-offs and recommendation
-- Requirements document (`docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`) when durable decisions exist
+- Requirements document (`.harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md`) when durable decisions exist
 - Key decisions, rationale, success criteria, questions
 - Explicit values: `spec_required` (none/lite/full), `risk_level` (low/medium/high), `complexity` (small/medium/large)
 - Legacy `*-brainstorm.md` compatibility when resuming older work
@@ -93,11 +93,11 @@ If critical context remains missing after one concise follow-up, stop and surfac
 - do not auto-advance to planning or spec without user confirmation
 - keep implementation details such as libraries, schemas, endpoints, and file layouts out of the requirements doc unless the brainstorm is inherently about a technical or architectural decision
 - keep outputs concise and use repo-relative paths when referencing files
-- generated document paths must stay repo-relative (for example, `docs/brainstorms/...`), never absolute paths, because absolute paths break portability across machines and worktrees
+- generated document paths must stay repo-relative (for example, `.harness/brainstorm/...`), never absolute paths, because absolute paths break portability across machines and worktrees
 - **PII/Secrets redaction**: redact all personal data, tokens, credentials, API keys, and sensitive values from requirements docs, examples, and summaries
 
 ## Acceptance criteria
-- Requirements doc at `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md` (new work) or legacy doc updated
+- Requirements doc at `.harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md` (new work) or legacy doc updated
 - Key decisions, rationale, questions, success criteria captured
 - Explicit `spec_required`, `risk_level`, `complexity` values
 - Doc is concrete enough that `he-plan` does not need to invent behavior
@@ -135,7 +135,7 @@ Read when: you need reusable interview templates and payload examples -> `Infras
 ### Phase 0: Resume, Assess, and Route
 
 #### 0.1 Resume Existing Work When Appropriate
-If the user references an existing brainstorm topic or document, or there is an obvious recent matching `*-requirements.md` file in `docs/brainstorms/`:
+If the user references an existing brainstorm topic or document, or there is an obvious recent matching `*-requirements.md` file in `.harness/brainstorm/`:
 - Read the document
 - Confirm with the user before resuming: "Found an existing requirements doc for [topic]. Should I continue from this, or start fresh?"
 - If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
@@ -244,12 +244,12 @@ Use these defaults:
 Write or update a requirements document only when the conversation produced durable decisions worth preserving.
 
 Default artifact path for new substantial work:
-- `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+- `.harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md`
 
 Compatibility rule:
 - If resuming an existing legacy `*-brainstorm.md` document, update it in place unless the user explicitly wants to rename
 
-Ensure `docs/brainstorms/` exists before writing. Use frontmatter with `title`, `date`, `status`, `spec_required`, `risk_level`, and `complexity`.
+Ensure `.harness/brainstorm/` exists before writing. Use frontmatter with `title`, `date`, `status`, `spec_required`, `risk_level`, and `complexity`.
 
 For non-trivial work, capture:
 - Problem Frame
@@ -300,7 +300,7 @@ Use the closeout templates in `Infrastructure/references/brainstorm-workflow-det
 ## Examples
 - User says: "We have three dashboard personalization ideas; run `he-brainstorm` and recommend one direction with clear requirements before we plan."
 - User says: "Compare first-run onboarding options for our repo setup flow and decide whether this should go to `he-spec` or directly to `he-plan`."
-- User asks: "Resume `docs/brainstorms/2026-04-02-agent-feedback-loop-requirements.md`, resolve remaining blockers, then tell me the next HE stage."
+- User asks: "Resume `.harness/brainstorm/2026-04-02-agent-feedback-loop-requirements.md`, resolve remaining blockers, then tell me the next HE stage."
 
 ## References
 - Contract: `Infrastructure/references/contract.yaml`

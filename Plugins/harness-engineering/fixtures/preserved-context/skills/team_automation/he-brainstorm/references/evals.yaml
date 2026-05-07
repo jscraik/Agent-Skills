@@ -40,7 +40,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-brainstorm"
       - type: regex
-        value: "(?i)(docs/brainstorms/.*-requirements\\.md|requirements document)"
+        value: "(?i)(.harness/brainstorm/.*-requirements\\.md|requirements document)"
 
   - id: decide-if-spec-needed
     name: decide if spec is needed
@@ -130,7 +130,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "There is already a recent requirements doc for this feature in docs/brainstorms. Resume it instead of starting over and tell me whether we should spec or plan next."
+    prompt: "There is already a recent requirements doc for this feature in .harness/brainstorm. Resume it instead of starting over and tell me whether we should spec or plan next."
     acceptance:
       - type: skill_selected
         expected_skill: "he-brainstorm"

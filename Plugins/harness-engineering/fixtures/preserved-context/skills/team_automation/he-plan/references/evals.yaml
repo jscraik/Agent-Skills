@@ -53,7 +53,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
-        value: "(?i)(Docs/plans/|standard-plan|ui-enhanced-plan)"
+        value: "(?i)(.harness/plan/|standard-plan|ui-enhanced-plan)"
 
   - id: brainstorm-lite-blocks-plan
     name: brainstorm says lite spec required
@@ -100,12 +100,12 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Plan this UI work from Docs/specs/2026-03-20-settings-ui-spec.md and keep compatibility with the older prompt flow."
+    prompt: "Plan this UI work from .harness/specs/2026-03-20-settings-ui-spec.md and keep compatibility with the older prompt flow."
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
-        value: "(?i)(Docs/specs/.+-ui-spec\\.md|compatibility|docs/ui-plans/|Docs/plans/.+-ui-plan\\.md)"
+        value: "(?i)(.harness/specs/.+-ui-spec\\.md|compatibility|docs/ui-plans/|.harness/plan/.+-ui-plan\\.md)"
 
   - id: local-research-needed
     name: local research needed
@@ -130,7 +130,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "There is a recent docs/brainstorms requirements file for this feature. Use it as the source of truth and make sure its requirements and open questions carry into the plan."
+    prompt: "There is a recent .harness/brainstorm requirements file for this feature. Use it as the source of truth and make sure its requirements and open questions carry into the plan."
     acceptance:
       - type: skill_selected
         expected_skill: "he-plan"

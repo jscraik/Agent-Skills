@@ -47,9 +47,9 @@ It is acceptable for `he-code-review` to borrow technical-review semantics durin
 
 ## Protected artifacts
 The following paths are workflow artifacts and must never produce deletion, cleanup, or gitignore findings:
-- `Docs/specs/*.md`
-- `Docs/plans/*.md`
-- `docs/ui-specs/*.md`
+- `.harness/specs/*.md`
+- `.harness/plan/*.md`
+- `.harness/specs/*.md`
 - `docs/ui-plans/*.md`
 - `docs/solutions/*.md`
 - `prototypes/ui/*.html` while the prototype direction is still active

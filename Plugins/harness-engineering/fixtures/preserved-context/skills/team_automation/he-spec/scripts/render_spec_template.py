@@ -41,7 +41,7 @@ DEFAULT_CONTEXT: Dict[str, str] = {
     "SPEC_TYPE": "feat",
     "SPEC_STATUS": "draft",
     "SPEC_DATE": "2026-04-10",
-    "SPEC_ORIGIN": "docs/brainstorms/2026-04-10-symphony-service-requirements.md",
+    "SPEC_ORIGIN": ".harness/brainstorm/2026-04-10-symphony-service-requirements.md",
     "LINEAR_PROJECT": "JSC",
     "LINEAR_ISSUE": "JSC-200",
     "LINEAR_PARENT": "JSC-190",

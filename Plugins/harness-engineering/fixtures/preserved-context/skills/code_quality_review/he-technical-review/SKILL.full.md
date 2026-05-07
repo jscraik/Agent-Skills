@@ -162,9 +162,9 @@ Use `code-diff-review` when the target is:
 - a code file path or changed file set
 
 Use `document-review` when the target is:
-- `Docs/specs/*.md`
-- `Docs/plans/*.md`
-- `docs/ui-specs/*.md`
+- `.harness/specs/*.md`
+- `.harness/plan/*.md`
+- `.harness/specs/*.md`
 - `docs/ui-plans/*.md`
 - another architecture/design markdown document explicitly provided by the user
 
@@ -318,8 +318,8 @@ If the diff includes `package.json`, `Cargo.toml`, `requirements.txt`, `go.mod`,
 - "When the user asks for a technical review of a risky billing change, inspect the diff, linked plan, and tests first, then call out duplicate-charge risk, rollback gaps, and missing validation."
 - "Please technical-review the current branch diff for the Stripe retry change. I care most about duplicate-charge risk, missing integration coverage, and whether the rollback story is believable."
 - "Review GitHub PR `#482` before merge. The change touches `app/models/invoice.rb`, `app/services/billing/retry_payment.rb`, and `spec/requests/api/invoices_spec.rb`; give me the important engineering risks first."
-- "Score `Docs/specs/2026-03-23-auth-session-rotation-spec.md` for planning readiness, especially lifecycle handling, failure recovery, and observability."
-- "Review `Docs/plans/2026-03-23-auth-session-rotation-plan.md` against its linked spec and tell me whether execution can proceed safely or if the sequencing still leaves implementers guessing."
+- "Score `.harness/specs/2026-03-23-auth-session-rotation-spec.md` for planning readiness, especially lifecycle handling, failure recovery, and observability."
+- "Review `.harness/plan/2026-03-23-auth-session-rotation-plan.md` against its linked spec and tell me whether execution can proceed safely or if the sequencing still leaves implementers guessing."
 - "Do a technical review of `app/services/sync_user.rb` plus the related tests. I suspect the implementation missed callback behavior and idempotency coverage."
 
 ## References

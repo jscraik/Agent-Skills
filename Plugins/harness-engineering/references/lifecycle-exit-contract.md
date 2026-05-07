@@ -18,6 +18,21 @@ Folded stages are modes, not the default route:
 - `he-technical-review`, `he-reliability-review` -> `he-code-review`
 - `he-compound-refresh` -> `he-compound`
 
+## Durable Artifact Routing
+
+HE stage markdown belongs in the repo-local Harness surface:
+
+| Stage or mode | Artifact root |
+| --- | --- |
+| `he-ideate` folded mode | `.harness/ideate/**.md` |
+| `he-brainstorm` | `.harness/brainstorm/**.md` |
+| `he-spec` | `.harness/specs/**.md` |
+| `he-plan` | `.harness/plan/**.md` |
+
+Legacy `Docs/`, `Specs/`, `Plans/`, or `docs/brainstorms/` paths may be read as
+source evidence, but new durable docs for these stages should be written under
+the matching `.harness` root and listed in `evidence.artifacts`.
+
 ## Required Status Shape
 
 When structured output is requested, or when handing off to another HE stage, emit:
@@ -77,9 +92,9 @@ For short chat responses, summarize the same fields without losing blocker, trac
 ## Stage Minimums
 
 - `he-router`: selected stage, confidence, matched rule, missing input if blocked.
-- `he-brainstorm`: problem frame, scope tier, spec decision, Linear tracker state for durable handoff, next stage.
-- `he-spec`: accepted behavior contract, stable acceptance IDs, Linear Work Item Contract, next planning slice.
-- `he-plan`: stable units, dependencies, tests, rollback, Linear/spec/plan/PR traceability matrix.
+- `he-brainstorm`: problem frame, scope tier, spec decision, Linear tracker state for durable handoff, `.harness/brainstorm` or folded `.harness/ideate` artifact when written, next stage.
+- `he-spec`: accepted behavior contract, stable acceptance IDs, Linear Work Item Contract, `.harness/specs` artifact, next planning slice.
+- `he-plan`: stable units, dependencies, tests, rollback, `.harness/plan` artifact, Linear/spec/plan/PR traceability matrix.
 - `he-work`: changed slices, completed IDs, validation evidence, drift notes, PR/Linear handoff.
 - `he-code-review`: findings, readiness verdict, evidence ladder, next action.
 - `he-fix-bugs`: reproduction, root cause, fix/verification status, regression test recommendation.

@@ -31,9 +31,9 @@ In managed repos, `project_brain_status: not_applicable` is valid only when `.ha
 
 | Stage | Required coding-harness behavior |
 | --- | --- |
-| `he-brainstorm` | Resolve/create Linear before durable handoff; run `harness brainstorm-gate --json` when present; if blocked, return a ready-to-create Linear payload. |
-| `he-spec` | Resolve/create Linear before tracked specs; include Linear Work Item Contract and acceptance traceability; run or block any repo spec/Linear gate. |
-| `he-plan` | Run or block `harness plan-gate --require-plan-id --require-traceability --json`; preserve acceptance IDs, plan IDs, Linear keys, and future PR evidence. |
+| `he-brainstorm` | Resolve/create Linear before durable handoff; write brainstorm docs under `.harness/brainstorm/**.md` or folded ideation docs under `.harness/ideate/**.md`; run `harness brainstorm-gate --json` when present; if blocked, return a ready-to-create Linear payload. |
+| `he-spec` | Resolve/create Linear before tracked specs; write specs under `.harness/specs/**.md`; include Linear Work Item Contract and acceptance traceability; run or block any repo spec/Linear gate. |
+| `he-plan` | Write plans under `.harness/plan/**.md`; run or block `harness plan-gate --require-plan-id --require-traceability --json`; preserve acceptance IDs, plan IDs, Linear keys, and future PR evidence. |
 | `he-work` | Inspect branch, dirty state, and Harness artifacts; run/block `blast-radius`, `policy-gate`, `preflight-gate`, and `validation-plan`. |
 | `he-code-review` | Review `Linear -> spec/source IDs -> plan -> PR -> validation`; run/block docs, review, CodeRabbit, learnings, context, and north-star gates. |
 | `he-compound` | Map earliest incomplete HE stage plus Harness lifecycle state; refresh Project Brain when `.harness/knowledge/**`, `.harness/decisions/**`, or `.harness/review-log.md` changed. |

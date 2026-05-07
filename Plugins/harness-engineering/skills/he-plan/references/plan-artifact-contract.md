@@ -2,6 +2,10 @@
 
 Read when writing or validating the saved plan body.
 
+Durable plan markdown is written under `.harness/plan/**.md`. Legacy `Plans/`
+or docs paths may be read as source evidence, but replacement plans should move
+to the Harness artifact root.
+
 - Use stable IDs for plan units and acceptance items. Never renumber existing IDs during resume, split, deletion, or deepening.
 - Keep paths repo-relative inside the artifact. Absolute paths are acceptable in chat links, not in portable plan files.
 - Preserve source IDs from Linear, requirements, specs, actors, flows, acceptance examples, and UI validation criteria when supplied.

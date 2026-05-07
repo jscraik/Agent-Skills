@@ -117,9 +117,9 @@ Do not proceed until the user has supplied a usable planning source.
 - a plan-mode decision: `generic-plan | standard-plan | ui-enhanced-plan | dedicated-ui-plan`
 - a concise planning summary focused on execution order, dependencies, validation, and rollout
 - a written plan artifact at one of:
-  - `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
+  - `.harness/plan/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
   - `docs/ui-plans/YYYY-MM-DD-<descriptive-name>-ui-plan.md`
-  - compatibility mode: `Docs/plans/YYYY-MM-DD-<topic>-ui-plan.md` only when the repo already uses that convention or the user explicitly requests it
+  - compatibility mode: `.harness/plan/YYYY-MM-DD-<topic>-ui-plan.md` only when the repo already uses that convention or the user explicitly requests it
 - explicit implementation phases with stable IDs:
   - `P0`, `P1`, `P2` for general plans
   - `UP0`, `UP1`, `UP2` for dedicated UI plans
@@ -171,18 +171,18 @@ Mode selection:
 - `dedicated-ui-plan` for explicit UI implementation planning
 
 Source resolution order:
-- existing plan path or obvious matching recent plan in `Docs/plans/`
+- existing plan path or obvious matching recent plan in `.harness/plan/`
 - active Linear issue from the user request, branch key, existing artifact frontmatter, or tracker context
-- matching recent requirements doc in `docs/brainstorms/*-requirements.md`
+- matching recent requirements doc in `.harness/brainstorm/*-requirements.md`
 - for general planning:
   - explicit spec path
   - explicit brainstorm path
-  - matching recent spec in `Docs/specs/`
-  - matching recent brainstorm in `docs/brainstorms/`
+  - matching recent spec in `.harness/specs/`
+  - matching recent brainstorm in `.harness/brainstorm/`
   - raw feature description only
 - for UI planning:
-  - explicit UI spec path in `docs/ui-specs/`
-  - explicit UI spec path in legacy `Docs/specs/*-ui-spec.md`
+  - explicit UI spec path in `.harness/specs/`
+  - explicit UI spec path in legacy `.harness/specs/*-ui-spec.md`
   - parent spec with `ui_required: true`
   - raw UI feature description only
 
@@ -262,7 +262,7 @@ For services or high blast-radius work, include explicit failure-domain and reco
 
 ### Phase 7: Write the plan artifact
 Ensure the destination directory exists before writing:
-- `Docs/plans/` for general plans
+- `.harness/plan/` for general plans
 - `docs/ui-plans/` for dedicated UI plans
 
 Use the canonical frontmatter, required sections, and template details in `Infrastructure/references/plan-artifacts.md`.

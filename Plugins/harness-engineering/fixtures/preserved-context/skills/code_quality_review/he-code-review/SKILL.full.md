@@ -171,9 +171,9 @@ Use `pr-branch-review` when the target is:
 - a diff or changed file set
 
 Use `artifact-review` when the target is:
-- `Docs/specs/*.md`
-- `Docs/plans/*.md`
-- `docs/ui-specs/*.md`
+- `.harness/specs/*.md`
+- `.harness/plan/*.md`
+- `.harness/specs/*.md`
 - `docs/ui-plans/*.md`
 - `docs/solutions/*.md`
 - another markdown design or delivery artifact explicitly provided by the user
@@ -335,7 +335,7 @@ See `references/he-anti-patterns.md`:
 ## Examples
 - User says: "We’re about to merge PR `#482`; do the broad readiness review and tell me what still blocks safe rollout."
 - User says: "Please review the current branch as a whole package, not just the technical nits, and tell me whether we should run browser verification before shipping."
-- User says: "I need a review of `Docs/plans/2026-03-23-001-feat-example-plan.md` that tells me whether it is actually ready for `he-work` or needs another workflow step first."
+- User says: "I need a review of `.harness/plan/2026-03-23-001-feat-example-plan.md` that tells me whether it is actually ready for `he-work` or needs another workflow step first."
 - User says: "Review the latest PR, keep the Harness Engineering artifact files out of cleanup chatter, and drop the findings into our `todos/` flow if that convention exists here."
 
 ## References

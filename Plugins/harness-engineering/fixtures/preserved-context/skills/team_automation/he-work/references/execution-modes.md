@@ -15,7 +15,7 @@ For deterministic specialist/delegate role selection, use `./sub-agent-map.md`.
 
 ## Primary lanes
 - `plan-led`
-  - default for `Docs/plans/*.md` and `docs/ui-plans/*.md`
+  - default for `.harness/plan/*.md` and `docs/ui-plans/*.md`
   - safest path for multi-phase, high-risk, or cross-cutting work
 - `todo-led`
   - allowed when the todo artifact already encodes the dependency structure and verification expectations
