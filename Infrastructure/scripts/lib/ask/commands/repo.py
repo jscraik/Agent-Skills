@@ -558,7 +558,9 @@ def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"git command timed out: {' '.join(command)}") from exc
     except OSError as exc:
-        raise RuntimeError(f"git command could not start: {' '.join(command)} ({exc})") from exc
+        raise RuntimeError(
+            f"git command could not start: {' '.join(command)} ({exc})"
+        ) from exc
     if process.returncode != 0:
         detail = (process.stderr or process.stdout or "").strip()
         raise RuntimeError(

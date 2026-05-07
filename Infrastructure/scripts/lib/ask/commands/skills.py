@@ -790,14 +790,12 @@ def _skill_audit_target(repo_root: Path, resolution: dict[str, Any]) -> str | No
     if not source:
         return None
     target = Path(str(source))
-    absolute_target = target if target.is_absolute() else repo_root / target
+    if not target.is_absolute():
+        target = repo_root / target
     if target.name == "SKILL.md":
         target = target.parent
-        absolute_target = absolute_target.parent
-    if not target.is_absolute():
-        return target.as_posix()
     try:
-        return absolute_target.resolve().relative_to(repo_root.resolve()).as_posix()
+        return target.resolve().relative_to(repo_root.resolve()).as_posix()
     except (OSError, ValueError):
         return None
 

@@ -8,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills import goal_skills, improve_skills  # noqa: E402
+from ask.commands.skills import _skill_audit_target, goal_skills, improve_skills  # noqa: E402
 from ask.envelope import CallResult  # noqa: E402
 
 
@@ -255,6 +255,21 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(improvement["status"], "resolved_with_fallback")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("matched terms=autofix", improvement["why"])
+
+    def test_skill_audit_target_normalizes_absolute_source_path(self) -> None:
+        resolution = {
+            "source_path": str(REPO_ROOT / "Skills" / "agent-ops" / "autofix" / "SKILL.md"),
+        }
+
+        self.assertEqual(
+            _skill_audit_target(REPO_ROOT, resolution),
+            "Skills/agent-ops/autofix",
+        )
+
+    def test_skill_audit_target_rejects_outside_repo_path(self) -> None:
+        resolution = {"source_path": "/tmp/outside-repo/SKILL.md"}
+
+        self.assertEqual(_skill_audit_target(REPO_ROOT, resolution), None)
 
     def test_improve_does_not_bypass_catalog_parity_block(self) -> None:
         route_decision = {
