@@ -302,7 +302,7 @@ repo_root_real="$(cd "$repo_root" && pwd -P)"
 
 # Return success when sync phases can create and remove a file in the target
 # directory. Plain `-w` checks can be misleading in sandboxed runs, so use the
-# same kind of mutation rsync/cache cleanup needs.
+# can_mutate_sync_dir verifies the given directory can be created and written to by creating the directory, writing a probe file inside it, and removing that probe file.
 can_mutate_sync_dir() {
   local dir="$1"
   local probe=""
@@ -320,6 +320,7 @@ can_mutate_sync_dir() {
   return 0
 }
 
+# skip_unwritable_sync_phase logs a warning that the given directory is not writable and that the named sync phase will be skipped to avoid sandbox rsync/cache cleanup noise.
 skip_unwritable_sync_phase() {
   local label="$1"
   local dir="$2"
@@ -442,7 +443,8 @@ is_plugin_hidden_lane_skill_name() {
   esac
 }
 # register_plugin_router_skill_source registers a mapping from a router-visible plugin skill name to its discovered directory and detects name collisions.
-# Returns 0 on success; returns 1 and prints collision details to stderr if the same skill name is already registered with a different directory.
+# register_plugin_router_skill_source registers a plugin-visible router skill name with its discovered directory and detects collisions.
+# If the same skill name is already registered with a different directory, prints collision details to stderr and returns 1; returns 0 on success.
 register_plugin_router_skill_source() {
   local skill_name="$1"
   local discovered_dir="$2"
@@ -475,7 +477,7 @@ if [ "$skills_dir_writable" = "1" ]; then
   done
 fi
 
-# Recreate symlinks for all discovered SKILL.md directories (with exclusions).
+# find_skill_files_with_policy lists SKILL.md files under the given root while excluding any paths that match SELECTION_POLICY_EXCLUDED_SEGMENTS and prints matching paths to stdout.
 find_skill_files_with_policy() {
   local root="$1"
   local segment=""
@@ -596,7 +598,7 @@ extract_skill_type() {
 
 # Return success when a discovered skill path resolves to a plugin-owned bundle
 # under Plugins/<plugin>/skills/<skill>. These should not appear as standalone
-# entries in the flat runtime skill list.
+# is_plugin_owned_skill_path determines whether a SKILL.md path belongs to a plugin's skills directory under the repository's Plugins/<plugin>/skills tree and returns 0 if it does, 1 otherwise.
 is_plugin_owned_skill_path() {
   local skill_path="$1"
   local skill_dir_rel=""
@@ -713,7 +715,8 @@ else
   echo "[INFO] Skipped flat runtime skill projection because $skills_dir is not writable."
 fi
 
-# generate_skill_index regenerates the repository root SKILL.md index from skills' YAML frontmatter, grouping skills by category and extracting short descriptions where available.
+# generate_skill_index regenerates the repository SKILL.md index from discovered SKILL.md frontmatter, grouping skills by category and using `metadata.short-description` (falling back to `description`) for each entry.
+# index_file is the path to write the generated index (overwrites or creates the file).
 generate_skill_index() {
   local index_file="$1"
   local temp_dir=""
@@ -1223,7 +1226,7 @@ remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.cursor/skills"
 }
 
-# sync_user_skills synchronises a source skills directory into a user's target directory by creating or updating a symlink (default) or by copying contents, with optional force replacement of existing non-symlink targets.
+# sync_user_skills synchronizes a source skills directory into a user's target directory by creating or updating a symlink (default) or by copying contents when mode="copy"; when `force` is `1` an existing non-symlink target will be replaced.
 sync_user_skills() {
   local source_dir="$1"
   local target_dir="$2"
@@ -1398,7 +1401,12 @@ resolve_marketplace_source_dir() {
 # normalize_plugin_copy materializes top-level skill alias symlink directories
 # and symlinked skill files inside copied plugin skills/ trees, then removes
 # fixtures and duplicate category lanes.
-# `label` is used only for log context (for example "runtime" or "cached").
+# normalize_plugin_copy materializes symlinked skills and nested symlinks inside a plugin copy, removes fixtures and duplicate category lanes, and prunes command-handle duplicate entries so the plugin copy becomes a self-contained, real directory tree.
+# 
+# It replaces first-level skill symlinks under <plugin_dir>/skills with copied directories when the symlink target resolves inside the plugin copy, recursively materializes nested directory and file symlinks within those copies, materializes stray symlinks elsewhere in the plugin before pruning fixtures, removes configured duplicate category lanes, and removes duplicate command-handle skill entries according to the repository command-surface index.
+# 
+# plugin_dir - path to the plugin copy root to normalize.
+# label - optional short context string used in log messages (default: "runtime").
 normalize_plugin_copy() {
   local plugin_dir="$1"
   local label="${2:-runtime}"
@@ -1947,7 +1955,7 @@ sync_local_marketplace_cache() {
 
 # sync_versioned_local_marketplace_cache keeps the legacy repository-local
 # cache shape aligned for Codex builds that still inspect
-# <repo>/Plugins/cache/<marketplace>/<plugin>/<version>/skills directly.
+# sync_versioned_local_marketplace_cache synchronizes local marketplace plugins listed in a marketplace JSON into a versioned cache at the given cache root, installing each plugin under <cache_root>/<marketplace>/<plugin>/<version>, normalizing copied plugin content, and pruning stale versions and plugin directories.
 sync_versioned_local_marketplace_cache() {
   local marketplace_file="$1"
   local cache_root="$2"
@@ -2102,7 +2110,10 @@ sync_repo_cache_snapshots_to_runtime_cache() {
   fi
 }
 
-# materialize_plugin_cache_roots ensures each plugin directory under the given cache_root has a flattened `.codex-plugin` root by locating a nested candidate (preferentially `local/`), copying or rsyncing that candidate into the plugin directory, and removing nested duplicate plugin roots.
+# materialize_plugin_cache_roots ensures each plugin directory under `cache_root` contains a top-level `.codex-plugin` root by locating a nested candidate (preferentially `local/`) and promoting it into the plugin directory, removing other nested `.codex-plugin` roots.
+# 
+# Arguments:
+#   cache_root - path to the runtime cache root containing marketplace/plugin subdirectories.
 materialize_plugin_cache_roots() {
   local cache_root="$1"
   local marketplace_dir=""
@@ -2238,7 +2249,7 @@ sync_codex_profile_homes() {
 }
 
 # cleanup_legacy_local_marketplace_cache removes a legacy visible local marketplace
-# cache directory or symlink if it exists.
+# cleanup_legacy_local_marketplace_cache removes a legacy local marketplace cache directory or symlink if it exists, skipping the operation when the parent directory cannot be safely mutated.
 cleanup_legacy_local_marketplace_cache() {
   local legacy_cache_root="$1"
   if [ -d "$legacy_cache_root" ] || [ -L "$legacy_cache_root" ]; then
@@ -2251,7 +2262,7 @@ cleanup_legacy_local_marketplace_cache() {
   fi
 }
 
-# sync_plugin_cache_projections runs Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py to synchronise plugin-cache projections; if the script is missing it logs a warning and skips.
+# sync_plugin_cache_projections synchronizes plugin-cache projections by invoking Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py; if that script is missing or the runtime cache root cannot be mutated, it logs a warning and skips the sync.
 sync_plugin_cache_projections() {
   local projection_script="$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py"
 

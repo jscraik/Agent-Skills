@@ -153,6 +153,15 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 
 
 def classify_path(path: str | Path) -> SurfaceFinding:
+    """
+    Classify a repository file path into a SurfaceFinding that describes its ownership policy surface, status, and recommended next steps.
+    
+    Parameters:
+        path (str | Path): Repository-relative file path to classify. The path is normalized (POSIX, no leading "./") before classification.
+    
+    Returns:
+        SurfaceFinding: A finding containing `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (which may include normalized `next_steps`).
+    """
     normalized = _normalize_path(path)
     suffix = Path(normalized).suffix.lower()
 
