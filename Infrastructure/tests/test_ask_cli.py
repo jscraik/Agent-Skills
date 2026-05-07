@@ -281,6 +281,52 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(analytics["matching_invocation_count"], 0)
         self.assertEqual(analytics["parse_error_count"], 1)
 
+    def test_skills_prove_reports_parse_warning_with_matching_record(self):
+        """Verify parse warnings are visible even when the target skill has evidence."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            telemetry_dir = os.path.join(temp_dir, "telemetry")
+            os.makedirs(telemetry_dir, exist_ok=True)
+            with open(os.path.join(telemetry_dir, "skill-invocations.jsonl"), "w", encoding="utf-8") as handle:
+                handle.write("{not-json\n")
+                handle.write(json.dumps({"skill_id": "he-heartbeat", "timestamp": "2026-05-07T10:00:00Z"}) + "\n")
+
+            env = os.environ.copy()
+            env["SKILL_TELEMETRY_DIR"] = telemetry_dir
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            result = _run_cli(cmd, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "parse_warning")
+        self.assertEqual(analytics["matching_invocation_count"], 1)
+        self.assertEqual(analytics["parse_error_count"], 1)
+
+    def test_skill_invocation_analytics_handles_projection_read_errors(self):
+        """Verify projection read errors return an unavailable summary."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask import skill_analytics
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                telemetry_dir = Path(temp_dir) / "telemetry"
+                telemetry_dir.mkdir(parents=True)
+                projection = telemetry_dir / "skill-invocations.jsonl"
+                projection.write_text("", encoding="utf-8")
+                with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(telemetry_dir)}), mock.patch.object(
+                    Path,
+                    "open",
+                    side_effect=PermissionError("permission denied"),
+                ):
+                    analytics = skill_analytics.skill_invocation_analytics(Path.cwd(), "he-heartbeat")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(analytics["status"], "unavailable_or_legacy")
+        self.assertEqual(analytics["parse_error_count"], 1)
+        self.assertIn("permission denied", analytics["parse_errors"][0]["message"])
+
     def test_skills_prove_goal_fallback_json_contract(self):
         """Verify ask skills prove routes or clearly blocks a goal query."""
         cmd = [
@@ -362,6 +408,55 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_PATH_TRAVERSAL")
+
+    def test_skills_explain_rejects_missing_source_path(self):
+        """Verify explain rejects resolved handles that omit the source path."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with mock.patch.object(
+                skills_commands,
+                "resolve_skill_handle",
+                return_value={
+                    "status": "ok",
+                    "handle": "missing-source",
+                    "description": "missing source",
+                },
+            ):
+                result = skills_commands.explain_skill(Path.cwd(), "missing-source")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("without a canonical source path", result.errors[0].message)
+
+    def test_skills_explain_rejects_nonexistent_source_file(self):
+        """Verify explain rejects stale handles before reading source sections."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with mock.patch.object(
+                skills_commands,
+                "resolve_skill_handle",
+                return_value={
+                    "status": "ok",
+                    "handle": "stale-source",
+                    "source_path": "Skills/agent-ops/nope/SKILL.md",
+                    "description": "stale source",
+                },
+            ):
+                result = skills_commands.explain_skill(Path.cwd(), "stale-source")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("is missing", result.errors[0].message)
 
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""

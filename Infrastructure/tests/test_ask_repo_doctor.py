@@ -145,6 +145,39 @@ class TestAskRepoDoctor(unittest.TestCase):
             "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
         )
 
+    def test_closeout_changed_plugin_reference_does_not_require_sync(self) -> None:
+        changed_files = ["Plugins/harness-engineering/references/xp-operating-contract.md"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask repo validate --changed-files "
+            "Plugins/harness-engineering/references/xp-operating-contract.md --json --robot",
+        )
+
+    def test_closeout_changed_plugin_skill_requires_sync(self) -> None:
+        changed_files = ["Plugins/harness-engineering/skills/goal-governor/SKILL.md"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertTrue(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        )
+
     def test_closeout_checks_changed_files_even_without_changed_flag(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
@@ -355,6 +388,43 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
         self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
         self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+
+    def test_repo_status_error_result_gates_downstream_checks(self) -> None:
+        failed_status = CallResult(status="error")
+        failed_status.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message="Repository status is unavailable.",
+                fix_suggestion="Rerun repo status.",
+            )
+        )
+        with patch("ask.commands.repo.repo_status", return_value=failed_status), patch(
+            "ask.commands.repo.doctor_catalog",
+            side_effect=AssertionError("doctor_catalog should be gated"),
+        ), patch(
+            "ask.commands.repo.skills_budget",
+            side_effect=AssertionError("skills_budget should be gated"),
+        ), patch(
+            "ask.commands.repo.skills_handles",
+            side_effect=AssertionError("skills_handles should be gated"),
+        ), patch(
+            "ask.commands.repo.repo_surface",
+            side_effect=AssertionError("repo_surface should be gated"),
+        ):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
+        self.assertEqual(
+            doctor["signals"]["repo_status"]["summary"],
+            "Repository status is unavailable.",
+        )
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["runtime_budget"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["command_handles"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
 
     def test_unexpected_signal_exception_returns_doctor_blocker(self) -> None:
         with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")), patch(

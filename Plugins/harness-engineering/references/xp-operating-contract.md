@@ -7,8 +7,8 @@ from replacing working software.
 ## Simple Design
 
 - Make the current behavior observable before changing it.
-- For repo operations, use `./bin/ask` (stable wrapper to `Infrastructure/bin/ask`) as the default command surface.
-- If an operation is unavailable via `./bin/ask`, explicitly note the exception and rationale.
+- For repo operations, use `./bin/ask` as the default command surface; it forwards to `Infrastructure/bin/ask`.
+- If an operation is unavailable via `./bin/ask`, state the exception and rationale.
 - Prefer a narrow test or eval that would have caught the regression.
 - Keep names and states consistent across native tools, skill output, and
   generated evidence.

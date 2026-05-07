@@ -17,7 +17,6 @@ GENERATED_SURFACE_PREFIXES = (
     ".skill-telemetry/",
 )
 CANONICAL_SKILL_PREFIXES = (
-    "Plugins/",
     "Skills/",
 )
 
@@ -445,6 +444,27 @@ def _skipped_signal(summary: str, source: str) -> dict[str, Any]:
     }
 
 
+def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, Any]]:
+    return {
+        "catalog_parity": _skipped_signal(
+            f"Catalog parity skipped {reason}.",
+            "repo_status",
+        ),
+        "runtime_budget": _skipped_signal(
+            f"Runtime budget skipped {reason}.",
+            "repo_status",
+        ),
+        "command_handles": _skipped_signal(
+            f"Command-handle validation skipped {reason}.",
+            "repo_status",
+        ),
+        "repo_surface": _skipped_signal(
+            f"Repo surface inventory skipped {reason}.",
+            "repo_status",
+        ),
+    }
+
+
 def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
     try:
         return builder(*args)
@@ -464,21 +484,8 @@ def repo_doctor(repo_root: Path) -> CallResult:
                 "Projection sync skipped because repository status failed.",
                 "repo_status",
             ),
-            "catalog_parity": _skipped_signal(
-                "Catalog parity skipped because repository status failed.",
-                "repo_status",
-            ),
-            "runtime_budget": _skipped_signal(
-                "Runtime budget skipped because repository status failed.",
-                "repo_status",
-            ),
-            "command_handles": _skipped_signal(
-                "Command-handle validation skipped because repository status failed.",
-                "repo_status",
-            ),
-            "repo_surface": _skipped_signal(
-                "Repo surface inventory skipped because repository status failed.",
-                "repo_status",
+            **_repo_status_skipped_downstream_signals(
+                "because repository status failed"
             ),
         }
     else:
@@ -489,24 +496,9 @@ def repo_doctor(repo_root: Path) -> CallResult:
         }
         if repo_status_signal.get("state") in {"block", "error"}:
             signals.update(
-                {
-                    "catalog_parity": _skipped_signal(
-                        "Catalog parity skipped until repository status is ready.",
-                        "repo_status",
-                    ),
-                    "runtime_budget": _skipped_signal(
-                        "Runtime budget skipped until repository status is ready.",
-                        "repo_status",
-                    ),
-                    "command_handles": _skipped_signal(
-                        "Command-handle validation skipped until repository status is ready.",
-                        "repo_status",
-                    ),
-                    "repo_surface": _skipped_signal(
-                        "Repo surface inventory skipped until repository status is ready.",
-                        "repo_status",
-                    ),
-                }
+                _repo_status_skipped_downstream_signals(
+                    "until repository status is ready"
+                )
             )
         else:
             signals.update(
@@ -599,7 +591,7 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
     ]
     canonical_skill_changed = [
         path for path in changed_files
-        if path.startswith(CANONICAL_SKILL_PREFIXES)
+        if _is_canonical_skill_path(path)
     ]
     commands = []
     if canonical_skill_changed or generated_changed:
@@ -615,6 +607,18 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
         "generated_changed_files": generated_changed,
         "canonical_skill_changed_files": canonical_skill_changed,
     }
+
+
+def _is_canonical_skill_path(path: str) -> bool:
+    if path.startswith(CANONICAL_SKILL_PREFIXES):
+        return True
+    parts = path.split("/")
+    return (
+        len(parts) >= 4
+        and parts[0] == "Plugins"
+        and parts[1] != "cache"
+        and parts[2] in {"skills", "Skills"}
+    )
 
 
 def _closeout_runtime_budget(doctor_payload: dict[str, Any]) -> dict[str, Any]:

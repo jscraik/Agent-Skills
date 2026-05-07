@@ -59,9 +59,9 @@ def skill_invocation_analytics(repo_root: Path, handle: str) -> dict[str, Any]:
             "status": "unavailable_or_legacy",
             "evidence_class": "native_skill_invocation_projection",
             "projection_path": projection_ref,
-            "note": "Skill invocation projection could not be read.",
+            "note": f"Skill invocation projection could not be read: {exc}",
             "parse_error_count": 1,
-            "parse_errors": [{"line": 0, "message": str(exc)}],
+            "parse_errors": [{"line": None, "message": str(exc)}],
         }
 
     if parse_errors and not invocation_count:
