@@ -329,10 +329,17 @@ class TestAskCLI(unittest.TestCase):
                 telemetry_dir.mkdir(parents=True)
                 projection = telemetry_dir / "skill-invocations.jsonl"
                 projection.write_text("", encoding="utf-8")
+                original_open = Path.open
+
+                def selective_open(path_self, *args, **kwargs):
+                    if path_self == projection:
+                        raise PermissionError("permission denied")
+                    return original_open(path_self, *args, **kwargs)
+
                 with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": str(telemetry_dir)}), mock.patch.object(
                     Path,
                     "open",
-                    side_effect=PermissionError("permission denied"),
+                    selective_open,
                 ):
                     analytics = skill_analytics.skill_invocation_analytics(Path.cwd(), "he-heartbeat")
         finally:

@@ -807,15 +807,15 @@ def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
         if isinstance(value, str):
             return {value.strip().lower().replace("_", "-")}
         if isinstance(value, dict):
-            values: set[str] = set()
+            result: set[str] = set()
             for nested in value.values():
-                values.update(_normalized_metadata_values(nested))
-            return values
+                result.update(_normalized_metadata_values(nested))
+            return result
         if isinstance(value, (list, tuple, set)):
-            values: set[str] = set()
+            result: set[str] = set()
             for nested in value:
-                values.update(_normalized_metadata_values(nested))
-            return values
+                result.update(_normalized_metadata_values(nested))
+            return result
         return {str(value).strip().lower().replace("_", "-")}
 
     candidates: list[str] = []
@@ -1943,7 +1943,7 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
         return None
     try:
         handles = handles_report(repo_root_path=repo_root, include_handles=True).get("handles", [])
-    except Exception:
+    except (OSError, RuntimeError, ValueError, KeyError, TypeError):
         return None
     scored: list[tuple[int, str, dict[str, Any], set[str]]] = []
     for row in handles:

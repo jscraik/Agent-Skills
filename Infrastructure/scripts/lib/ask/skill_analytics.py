@@ -111,6 +111,7 @@ def _record_matches_skill(record: dict[str, Any], normalized: str) -> bool:
 
 
 def _latest_record(current: dict[str, Any] | None, candidate: dict[str, Any]) -> dict[str, Any]:
+    """Return the newest record; telemetry timestamps are expected to be ISO 8601 strings."""
     if current is None:
         return candidate
     current_key = str(current.get("timestamp") or current.get("started_at") or "")

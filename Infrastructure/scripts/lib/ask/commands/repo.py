@@ -468,7 +468,7 @@ def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, 
 def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
     try:
         return builder(*args)
-    except Exception as exc:
+    except (OSError, RuntimeError, ValueError, KeyError, TypeError) as exc:
         return _unknown_signal_error_signal(exc)
 
 
@@ -490,14 +490,21 @@ def repo_doctor(repo_root: Path) -> CallResult:
         }
     else:
         repo_status_signal = _safe_signal(_repo_status_signal, status_result)
+        projection_sync_signal = _safe_signal(_projection_sync_signal, status_result)
         signals = {
             "repo_status": repo_status_signal,
-            "projection_sync": _safe_signal(_projection_sync_signal, status_result),
+            "projection_sync": projection_sync_signal,
         }
         if repo_status_signal.get("state") in {"block", "error"}:
             signals.update(
                 _repo_status_skipped_downstream_signals(
                     "until repository status is ready"
+                )
+            )
+        elif projection_sync_signal.get("state") == "block":
+            signals.update(
+                _repo_status_skipped_downstream_signals(
+                    "until workspace skill runtime projection is synced"
                 )
             )
         else:
@@ -690,11 +697,12 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
     doctor_result = repo_doctor(repo_root)
     doctor_payload = doctor_result.data.get("doctor", {})
     changed_files_error = None
-    try:
-        changed_files = collect_changed_files(repo_root)
-    except RuntimeError as exc:
-        changed_files = []
-        changed_files_error = str(exc)
+    changed_files: list[str] = []
+    if changed:
+        try:
+            changed_files = collect_changed_files(repo_root)
+        except RuntimeError as exc:
+            changed_files_error = str(exc)
     sync_report = _closeout_sync_report(changed_files)
     blockers: list[str] = []
     if changed_files_error:

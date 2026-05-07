@@ -178,19 +178,20 @@ class TestAskRepoDoctor(unittest.TestCase):
             "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
         )
 
-    def test_closeout_checks_changed_files_even_without_changed_flag(self) -> None:
+    def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files) as collect_mock, patch(
             "ask.commands.repo.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=False)
 
         closeout = result.data["repo_closeout"]
-        self.assertEqual(result.status, "error")
+        collect_mock.assert_not_called()
+        self.assertEqual(result.status, "success")
         self.assertFalse(closeout["changed_mode_requested"])
-        self.assertEqual(closeout["changed_files"], changed_files)
-        self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
+        self.assertEqual(closeout["changed_files"], [])
+        self.assertTrue(closeout["commit_readiness"]["ready"])
 
     def test_closeout_strict_diagnostic_debt_uses_doctor_next_command(self) -> None:
         with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
@@ -334,6 +335,42 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["signals"]["command_handles"]["state"], "skipped")
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        catalog_mock.assert_not_called()
+        budget_mock.assert_not_called()
+        handles_mock.assert_not_called()
+        surface_mock.assert_not_called()
+
+    def test_unsynced_projection_prioritizes_sync_before_downstream_checks(self) -> None:
+        with patch(
+            "ask.commands.repo.repo_status",
+            return_value=_status_result(skills_synced=False, is_git=True),
+        ), patch(
+            "ask.commands.repo.doctor_catalog",
+            side_effect=AssertionError("doctor_catalog should be gated"),
+        ) as catalog_mock, patch(
+            "ask.commands.repo.skills_budget",
+            side_effect=AssertionError("skills_budget should be gated"),
+        ) as budget_mock, patch(
+            "ask.commands.repo.skills_handles",
+            side_effect=AssertionError("skills_handles should be gated"),
+        ) as handles_mock, patch(
+            "ask.commands.repo.repo_surface",
+            side_effect=AssertionError("repo_surface should be gated"),
+        ) as surface_mock:
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertTrue(doctor["blocking"])
+        self.assertEqual(doctor["blockers"][0]["id"], "projection_sync")
+        self.assertEqual(
+            doctor["next_command"],
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        )
+        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["runtime_budget"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["command_handles"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
         catalog_mock.assert_not_called()
         budget_mock.assert_not_called()
         handles_mock.assert_not_called()
