@@ -18,6 +18,7 @@ inputs:
   - "`.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary constraints and intent"
   - "a brainstorm path, existing spec path, parent spec path, UI source path, or clear feature description"
   - "Linear issue key/URL, or enough Linear metadata to create the tracker issue for non-trivial tracked work"
+  - "Linear label metadata or permission to create missing approved reusable labels when tracked work requires them"
   - "relevant constraints, success criteria, risks, and linked documents when available"
   - "optional `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, `.harness/features/*.md`, platform, design-system, accessibility, performance, or operational context as secondary evidence only"
 
@@ -28,6 +29,7 @@ outputs:
   - a depth decision for standard specs such as none, lite, or full
   - a written spec artifact with stable SA or VAC identifiers
   - Linear Work Item Contract and Linear Acceptance Traceability for tracked specs
+  - Linear Delta Capture status with label reconciliation for existing tracked plans
   - linear_blocked status with missing fields and ready-to-create payload when the tracker gate cannot complete
   - coding_harness lifecycle block with Harness command gate status, `project_brain_status`, and companion `project_brain_evidence_state` when the target repo is coding-harness-managed
   - source-parity notes covering current active source, superseded/latest-only artifacts, and session evidence used
@@ -61,6 +63,7 @@ risks:
   - contract ambiguity; mitigate with explicit section requirements and stable acceptance IDs
   - UI ambiguity causing planning churn; mitigate with ui_required detection and dedicated UI-spec mode
   - missing Linear traceability; mitigate by resolving or creating the Linear issue before writing tracked specs
+  - missing or one-off labels; mitigate by reusing existing labels, creating only approved reusable labels, or blocking with a ready-to-create payload
   - coding-harness Project Brain drift; mitigate by recording whether Project Brain is updated, blocked, or not applicable
   - stale or generic external guidance; mitigate with bounded primary-source research and dated citations
   - prior-session drift; mitigate by treating session-collector output as supporting evidence, not tracker authority

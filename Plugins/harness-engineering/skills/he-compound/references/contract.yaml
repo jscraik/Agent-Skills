@@ -2,7 +2,7 @@ schema_version: 1
 
 purpose: >
   Coordinate the Harness Engineering lifecycle from the correct stage, or
-  capture a verified solved problem into a durable `docs/solutions/` artifact
+  capture a verified solved problem into a durable `.harness/solutions/` artifact
   with explicit evidence, prevention guidance, overlap-aware duplicate
   avoidance, and narrow refresh follow-up when warranted.
 
@@ -10,20 +10,23 @@ triggers:
   - the user wants the Harness Engineering workflow routed or resumed from the correct stage
   - the user wants the final compound stage run after implementation
   - the user wants a recently solved issue documented while the context is fresh
-  - the user wants a durable `docs/solutions/` artifact instead of ephemeral chat guidance
+  - the user wants a durable solution artifact instead of ephemeral chat guidance
 
 inputs:
   - a problem statement, workflow state, artifact path, or solved-problem context
   - current Harness Engineering artifact paths when they exist
   - constraints such as risk, compliance, accessibility, or rollout sensitivity
   - for learning capture, evidence that the fix is solved and verified
+  - legacy `docs/solutions/**` or UI-plan paths when they are relevant source evidence
 
 outputs:
   - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
   - "for lifecycle mode, the current stage, completed stages, blockers, and exact next Harness Engineering command"
   - "for coding-harness-managed repos, command-level bridge evidence for Linear state, Harness transition, Project Brain status, and north-star evidence status"
+  - "for compression recovery, active_stage: spec_refresh_required and next_action: run he-spec with the agent-native compression contract"
   - "for compression recovery, recovery_stage: spec_refresh_required and next_action: run he-spec with the agent-native compression contract"
-  - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
+  - "for learning capture, a single created or updated .harness/solutions/[filename].md artifact"
+  - "Project Brain status when .harness/knowledge/** is in use: updated, blocked, not_applicable, or explicitly_deferred"
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
   - "XP operating artifact: blackboard_delta summarizing durable state changes across stages"
   - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
@@ -40,8 +43,9 @@ non_goals:
 risks:
   - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
   - coding-harness lifecycle drift; mitigate with Harness command bridge state before choosing the next stage
-  - losing the strong legacy solved-problem flow; mitigate with explicit learning-capture mode and dedicated reference rules
-  - creating duplicate solution docs for the same solved problem; mitigate with overlap scoring and refresh-in-place on high-overlap matches
+  - losing the strong legacy solved-problem flow; mitigate with explicit learning-capture mode, `.harness/solutions/**`, and dedicated reference rules
+  - creating duplicate solution docs for the same solved problem; mitigate with overlap scoring across `.harness/solutions/**` and `docs/solutions/**`, then refresh-in-place on high-overlap matches
+  - Project Brain drift; mitigate by syncing or explicitly blocking `.harness/knowledge/**` updates when the repo uses Project Brain
   - over-broad refresh recommendations; mitigate with narrow scope hints and evidence thresholds
   - compact-safe overlap blind spots; mitigate by treating compact-safe as an explicit tradeoff and only recommending narrow follow-up refreshes when obvious
   - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used

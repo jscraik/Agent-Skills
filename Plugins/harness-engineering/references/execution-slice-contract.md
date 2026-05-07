@@ -1,6 +1,10 @@
 # Execution Slice Contract
 
-Use this when `he-spec`, `he-plan`, or `he-work` translates Harness artifacts into implementation work. The selected execution slice is the authority; surrounding review, strategy, and feature material is context until admitted by that slice.
+Use this when `he-spec`, `he-plan`, or `he-work` translates Harness artifacts
+into implementation work. The selected execution slice is the authority;
+surrounding review, strategy, and feature material is context until admitted by
+that slice. For tracked work, run the Linear Delta Capture Gate before consuming
+the selected slice.
 
 ## Authority Order
 
@@ -31,6 +35,13 @@ For tracked implementation, the stage must resolve the selected Linear slice bef
 - dependencies
 - agent/human execution route
 
+Before `he-spec`, `he-plan`, or `he-work` uses those fields, compare the live
+Linear project/milestone/parent issue graph with the `.harness/linear/**`
+snapshot using `linear-delta-capture-gate.md`. The gate also reconciles required
+Linear labels, creating only approved reusable labels when tooling and metadata
+allow it. New Linear issues are deltas, not scope, until they are classified and
+admitted into `Approved Current Slice` or `Approved Next Slice Queue`.
+
 For refactor or migration work, the selected `.harness/refactors/<selected-refactor>.md` is required and must provide safe migration path, desired end state, anti-regression constraints, and rollback rules.
 
 ## Secondary Inputs
@@ -50,6 +61,9 @@ Stop and return the smallest recovery step when:
 
 - no selected milestone, parent issue, refactor phase, or execution slice can be identified
 - tracked implementation lacks `.harness/linear/<repo-name>-linear-plan.md` or equivalent explicit Linear fields
+- live Linear deltas are present but unclassified
+- required Linear labels are missing, unapproved, or blocked from creation
+- more than one new Linear item is being promoted into the current HE spec, plan, or work slice
 - a refactor or migration route lacks the selected `.harness/refactors/<selected-refactor>.md`
 - `.harness/decisions/*.md` or `.harness/core/*.md` conflict with the selected slice
 - secondary review, strategy, triage, or feature material attempts to drive implementation directly
