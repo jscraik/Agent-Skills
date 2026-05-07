@@ -816,7 +816,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     query = handle.strip()
     goal_resolution: dict[str, Any] | None = None
     reachability_result = skills_proof(repo_root, query)
-    if reachability_result.status != "success" and " " in query:
+    if reachability_result.status != "success":
         improvement_result = improve_skills(repo_root, goal_text=query)
         goal_resolution = improvement_result.data.get("improvement")
         candidate = (goal_resolution or {}).get("recommended_capability") or {}

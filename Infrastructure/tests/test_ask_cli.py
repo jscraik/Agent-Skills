@@ -354,6 +354,51 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("goal_resolution", skill_proof)
         self.assertIn("recommended_capability", skill_proof["goal_resolution"])
 
+    def test_skills_prove_single_token_goal_uses_improve_fallback(self):
+        """Verify one-word goals use the same improvement route as phrase goals."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            failed_reachability = CallResult(status="error")
+            goal_result = CallResult()
+            goal_result.data["improvement"] = {
+                "recommended_capability": {"handle": "security-reviewer"},
+                "next_command": "./bin/ask skills proof security-reviewer --json --robot",
+            }
+            reachable_result = CallResult()
+            reachable_result.data["proof"] = {
+                "status": "pass",
+                "handle": "security-reviewer",
+                "resolution": {
+                    "handle": "security-reviewer",
+                    "source_path": "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+                },
+            }
+
+            with mock.patch.object(
+                skills_commands,
+                "skills_proof",
+                side_effect=[failed_reachability, reachable_result],
+            ), mock.patch.object(
+                skills_commands,
+                "improve_skills",
+                return_value=goal_result,
+            ) as improve_mock, mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ):
+                result = skills_commands.skills_prove(Path.cwd(), "security")
+        finally:
+            sys.path.remove(lib_path)
+
+        improve_mock.assert_called_once()
+        self.assertEqual(result.data["skill_proof"]["handle"], "security-reviewer")
+        self.assertIn("goal_resolution", result.data["skill_proof"])
+
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--robot", "--json"]
