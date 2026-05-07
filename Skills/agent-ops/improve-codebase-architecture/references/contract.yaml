@@ -14,6 +14,8 @@ outputs:
   - evidence_summary
   - complexity_symptoms
   - design_options
+  - recommended_first_move
+  - reversibility
   - tracer_proof
   - decision_surface
   - validation_status

@@ -46,6 +46,7 @@ context_map:
 blocker: "<smallest recovery step or null>"
 next_stage: "<he-stage|done|null>"
 validation:
+  status: pass|fail|blocked|not_run_with_reason|not_applicable
   commands: []
   outcomes: []
 ```

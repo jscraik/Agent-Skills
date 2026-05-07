@@ -1,5 +1,5 @@
 {"type":"thread.started","thread_id":"019dff85-f740-74a2-8bae-bf025d9e4107"}
-{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Ignored unsupported project-local config keys in /Users/jamiecraik/dev/agent-skills/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml."}}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Ignored unsupported project-local config keys in <REDACTED_PATH>/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml."}}
 {"type":"item.completed","item":{"id":"item_1","type":"error","message":"`[features].codex_hooks` is deprecated. Use `[features].hooks` instead. (Enable it with `--enable hooks` or `[features].hooks` in config.toml. See https://developers.openai.com/codex/config-basic#feature-flags for details.)"}}
 {"type":"turn.started"}
 {"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"I’m going to pull in the Harness Engineering guidance first, then I’ll turn the bug report into a spec once you share it. If the report is already somewhere in the workspace, I’ll look for it so we can avoid extra back-and-forth."}}

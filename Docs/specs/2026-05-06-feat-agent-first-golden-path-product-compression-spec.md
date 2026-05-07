@@ -1008,18 +1008,25 @@ against these checks:
 
 ## Planning-Ready First Slice
 
-First implementation should target `ask repo doctor` and the shared
-golden-path envelope fields.
+First implementation should target `ask repo doctor`, `ask skills improve`,
+`ask skills explain`, and the shared golden-path envelope fields.
 
 Minimum first slice:
 
 - Compose existing `repo status`, `repo doctor-catalog`, `runtime budget`,
-  `skills handles --check`, and `repo surface` helpers.
-- Return `agent_summary`, `blocking`, `blockers`, and `next_command`.
+  `skills handles --check`, and `repo surface` helpers for `ask repo doctor`.
+- Implement `ask skills improve` to wrap goal routing and run command-handle
+  proof for the selected capability.
+- Implement `ask skills explain` to convert a command handle into concise usage
+  guidance.
+- Return `agent_summary`, `blocking`, `blockers`, and `next_command` from all
+  golden-path commands.
 - Preserve strict-mode behavior.
-- Add tests for healthy state, catalog parity drift, and surface warning debt.
-- Update the smallest README/product-doc section needed to advertise doctor as
-  the first agent command.
+- Add tests for healthy state, catalog parity drift, surface warning debt, goal
+  routing with catalog parity, command-handle explanation, and skill improvement
+  workflows.
+- Update the smallest README/product-doc section needed to advertise doctor,
+  improve, and explain as the first agent commands.
 - Defer collector implementation to a separate slice unless planning chooses to
   start with analytics proof before doctor.
 

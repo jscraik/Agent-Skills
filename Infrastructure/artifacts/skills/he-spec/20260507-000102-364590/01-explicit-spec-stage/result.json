@@ -1,4 +1,5 @@
 {
+  "_diagnostic_note": "This artifact records a failing run stored as expected-fail diagnostics, not consumed as governance/pass evidence.",
   "id": "explicit-spec-stage",
   "name": "Explicit Spec Stage",
   "category": "happy",

@@ -1,4 +1,5 @@
 {
+  "_diagnostic_note": "This artifact records a failing run and is stored for diagnostic purposes only, not as governance/pass evidence.",
   "runner": "codex",
   "exit_code": 0,
   "passed": false,

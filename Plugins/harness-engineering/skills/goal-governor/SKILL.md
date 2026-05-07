@@ -63,7 +63,7 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
    - Native objective is non-empty and no more than 4,000 characters; keep bulk instructions in `goal.md`.
    - Agent config supports the intended delegation depth; for Jamie's Codex harness, require `max_depth >= 2`.
    - The selected validation commands exist and are repo-canonical.
-   - Existing board files pass `python3 Plugins/harness-engineering/skills/goal-governor/scripts/check_goal_board.py <goal-directory>`.
+   - Existing board files pass `./bin/ask check_goal_board <goal-directory>`.
 3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete` (normalize native `budgetLimited` to output `budget_limited`).
 4. Treat token budget, tokens used, elapsed seconds, lifecycle updates, and budget-limited transitions as evidence, not completion proof.
 5. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
@@ -147,7 +147,7 @@ risks:
 Validate the skill package:
 
 ```bash
-python3 Plugins/harness-engineering/skills/goal-governor/scripts/check_goal_board.py <goal-directory>
+./bin/ask check_goal_board <goal-directory>
 ./bin/ask skills audit <skill-directory> --level strict --robot
 ```
 

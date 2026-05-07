@@ -63,9 +63,8 @@ The first slice is intentionally narrow:
 - return a compact golden-path envelope with `agent_summary`, `blocking`,
   `blockers`, `next_command`, and `signals`;
 - add focused tests and documentation for this first command;
-- leave `ask skills improve`, `ask skills explain`, `ask skills prove`,
-  `ask repo closeout --changed`, and cross-project analytics wiring as
-  follow-on work.
+- leave `ask skills prove`, `ask repo closeout --changed`, and cross-project
+  analytics wiring as follow-on work.
 
 This keeps the next implementation PR useful on its own: a cold agent can ask
 the repo whether it is safe to work and receive one evidence-backed next action.
@@ -568,7 +567,7 @@ Implementation should verify exact helper boundaries before editing.
 Planning validation:
 
 ```bash
-python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json --patterns '**/*.md' '**/*.mdx'
 ./Infrastructure/scripts/harness-cli.sh plan-gate --require-plan-id --require-traceability --json
 git status --short -- Docs/specs Docs/plans
 ```
@@ -580,6 +579,7 @@ First implementation validation:
 ./bin/ask repo doctor --json --robot
 python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py Infrastructure/tests/test_ask_cli.py
 ./bin/ask repo validate --json --robot
+python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json --patterns '**/*.md' '**/*.mdx'
 ./Infrastructure/scripts/harness-cli.sh plan-gate --require-plan-id --require-traceability --json
 ```
 
