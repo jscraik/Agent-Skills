@@ -7,7 +7,7 @@ Use this when compact stage files defer context. Do not trim silently: move dura
 ## Runtime References
 
 - Routing and domain context: `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/domain-model-routing.md`, `references/domain-context-contract.md`, `references/design-complexity-contract.md`
-- Lifecycle, artifact, and tracker gates: `references/lifecycle-exit-contract.md`, `references/artifact-routing-contract.md`, `references/linear-tracker-gate.md`, `references/coding-harness-command-bridge.md`, `references/goal-continuity.md`
+- Lifecycle, artifact, slice, and tracker gates: `references/lifecycle-exit-contract.md`, `references/artifact-routing-contract.md`, `references/execution-slice-contract.md`, `references/linear-tracker-gate.md`, `references/coding-harness-command-bridge.md`, `references/goal-continuity.md`
 - Intake and evidence: `references/qa-intake-routing.md`, `references/session-evidence-contract.md`, `references/session-evidence-skillify-triage.md`
 - Skill improvement: `references/skill-improvement-loop.md`
 - Delegation: `references/subagent-routing.md`, `references/subagent-call-contract.md`
@@ -170,6 +170,18 @@ Return schema_version when structured. durable plan, complete replacement plan w
 Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable. When feedback says a prior cockpit, golden-path, or agent-native plan was too additive, load the compression contract and make first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metric gates blocking acceptance criteria.
 Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
 - "Inspect JSC-246 and implement only the units in `Plans/JSC-246-account-settings.md`, preserve my dirty edits, then run `bash scripts/run-harness-setup-checks.sh`."
+```
+
+The 2026-05-07 execution-slice pass preserved these compact-entrypoint lines
+outside the runtime bodies while moving the expanded authority order and stop
+rules into `references/execution-slice-contract.md`:
+
+```text
+Problem, Linear issue, QA report, source evidence, current-vs-latest spec status.
+Return schema_version when structured. schema_version: 1, complete replacement spec section or `.harness/specs/**.md` artifact, Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
+Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; before writing durable docs choose `.harness/specs/**.md` from the artifact routing contract; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable. When feedback says a prior cockpit, golden-path, or agent-native plan was too additive, load the compression contract and make first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metric gates blocking acceptance criteria.
+Explore first, ask second; use update_plan only for live progress; before writing durable docs choose `.harness/plan/**.md` from the artifact routing contract; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility: name the exact first-contact budget, shrink default help, demote plumbing commands, require full catalogs to use an advanced/all flag, rewrite the README front door around the golden path, add admission tests, add fresh-agent eval, and require ablation decisions for every still-visible command family.
+Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 ```
 
 ## Preservation Contract

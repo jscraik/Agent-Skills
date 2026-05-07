@@ -12,12 +12,14 @@ triggers:
   - revising a plan while preserving stable IDs and traceability
 
 inputs:
+  - approved execution slice: one milestone, one parent issue, one refactor phase, or one execution slice
   - authoritative source artifact or clear direct request
   - Linear issue and relationship graph for non-trivial tracked work, or enough Linear metadata to create it before planning
   - source acceptance IDs, actors, flows, examples, UI criteria, or invariants when supplied
   - repo constraints, paths, patterns, validation requirements, and rollout rules
 
 outputs:
+  - selected execution slice type, source path, and explicit planning boundary
   - mode and depth decision: fresh/resume/deepen plus lightweight/standard/deep
   - durable plan artifact with stable plan IDs and acceptance IDs
   - resolved or created Linear issue key/URL for tracked plans, or linear_blocked status with missing fields and ready-to-create payload
@@ -43,6 +45,7 @@ rollback_procedure: >
 
 non_goals:
   - implementing code or running mutating commands
+  - expanding beyond the selected execution slice from secondary review, strategy, triage, or feature docs
   - replacing he-brainstorm or he-spec when product behavior is unresolved
   - using update_plan as the durable plan artifact
   - creating vague task lists without source traceability or test specificity
@@ -60,3 +63,4 @@ risks:
   - over-planning into implementation; mitigate with plan-only boundaries and deferred implementation notes
   - additive compatibility dominating subtractive clarity; mitigate by sequencing default-help budget, agent-catalog budget, docs front-door collapse, standalone-command admission tests, fresh-agent eval, and ablation proof as blocking units
   - compression plans remaining too subjective to implement; mitigate by requiring exact public command names, hidden command names, future command admission criteria, and generated snapshot commands in the plan artifact
+  - execution-slice drift; mitigate by loading `references/execution-slice-contract.md` and blocking any plan unit that is not admitted by the selected Linear/refactor slice

@@ -12,14 +12,19 @@ triggers:
   - the user needs explicit behavior, lifecycle, failure, observability, or validation rules before planning
 
 inputs:
+  - approved execution slice: one milestone, one parent issue, one refactor phase, or one execution slice
+  - `.harness/linear/<repo-name>-linear-plan.md` for tracked coding-harness execution
+  - selected `.harness/refactors/<selected-refactor>.md` when the route is refactor or migration work
+  - `.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary constraints and intent
   - a brainstorm path, existing spec path, parent spec path, UI source path, or clear feature description
   - Linear issue key/URL, or enough Linear metadata to create the tracker issue for non-trivial tracked work
   - relevant constraints, success criteria, risks, and linked documents when available
-  - optional platform, design-system, accessibility, performance, or operational context
+  - optional `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, `.harness/features/*.md`, platform, design-system, accessibility, performance, or operational context as secondary evidence only
 
 outputs:
   - schema_version: 1 status reports and machine-readable contract metadata
   - a spec-mode choice such as standard-spec or dedicated-ui-spec
+  - selected execution slice type and source path
   - a depth decision for standard specs such as none, lite, or full
   - a written spec artifact with stable SA or VAC identifiers
   - Linear Work Item Contract and Linear Acceptance Traceability for tracked specs
@@ -44,6 +49,8 @@ rollback_procedure: >
 non_goals:
   - direct implementation
   - turning the spec into a task plan
+  - creating a giant programme spec from the whole review stack
+  - letting secondary review, strategy, triage, or feature material drive implementation directly
   - inventing contract-level behavior that is not grounded in source artifacts or research
   - skipping or weakening the Linear tracker gate for non-trivial tracked work
   - skipping the companion UI-spec need when the work clearly requires it
@@ -58,3 +65,4 @@ risks:
   - stale or generic external guidance; mitigate with bounded primary-source research and dated citations
   - prior-session drift; mitigate by treating session-collector output as supporting evidence, not tracker authority
   - advisory compression language; mitigate by making first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metrics blocking acceptance gates
+  - review-stack sprawl; mitigate by requiring one selected execution slice and treating secondary Harness roots as context unless admitted by the Linear/refactor slice

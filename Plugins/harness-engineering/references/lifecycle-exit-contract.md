@@ -51,8 +51,8 @@ domain_language:
   avoided_aliases: []
   unresolved_terms: []
   context_file: CONTEXT.md|CONTEXT-MAP.md|domain-context-contract.md|not_applicable
-context_map:
-  source_of_truth: user_request|linear|spec|plan|worktree|pr|validation|project_brain|heartbeat|goal|session_evidence|not_applicable
+  context_map:
+    source_of_truth: user_request|linear|spec|plan|worktree|pr|validation|project_brain|heartbeat|goal|session_evidence|not_applicable
   translated_from: []
   relationship: source_of_truth|translation|handoff|evidence_only|stale_snapshot|not_applicable
   conflict_status: none|blocked|resolved|not_applicable
@@ -60,12 +60,12 @@ context_map:
 exit_status: ready_for_next_stage|blocked|done
 next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
 missing_inputs: []
-evidence:
+  evidence:
   linear: "<issue key/url or blocker>"
   artifacts: ["<repo-relative paths>"]
   validation: ["<command -> pass|fail|blocked>"]
   pr: "<PR URL or not_applicable>"
-coding_harness:
+  coding_harness:
   mode: coding-harness-managed|generic-he|unknown
   linear_state: S0_TRIAGE|S1_READY|S2_IN_PROGRESS|S3_IN_REVIEW|S4_DONE|S5_FAIL|unknown|not_applicable
   blocked_overlay: true|false|unknown|not_applicable
@@ -93,9 +93,9 @@ For short chat responses, summarize the same fields without losing blocker, trac
 
 - `he-router`: selected stage, confidence, matched rule, missing input if blocked.
 - `he-brainstorm`: problem frame, scope tier, spec decision, Linear tracker state for durable handoff, `.harness/brainstorm` or folded `.harness/ideate` artifact when written, next stage.
-- `he-spec`: accepted behavior contract, stable acceptance IDs, Linear Work Item Contract, `.harness/specs` artifact, next planning slice.
-- `he-plan`: stable units, dependencies, tests, rollback, `.harness/plan` artifact, Linear/spec/plan/PR traceability matrix.
-- `he-work`: changed slices, completed IDs, validation evidence, drift notes, PR/Linear handoff.
+- `he-spec`: accepted behavior contract for one selected milestone, parent issue, refactor phase, or execution slice; stable acceptance IDs; Linear Work Item Contract; `.harness/specs` artifact; explicit In Scope and Out of Scope boundaries; next planning slice.
+- `he-plan`: stable units, dependencies, tests, rollback, `.harness/plan` artifact, Linear/spec/plan/PR traceability matrix, and proof the plan stays inside the selected execution slice.
+- `he-work`: changed slices, completed IDs, validation evidence, drift notes, PR/Linear handoff, and proof the implementation stayed inside the selected execution slice.
 - `he-code-review`: findings, readiness verdict, evidence ladder, next action.
 - `he-fix-bugs`: reproduction, root cause, fix/verification status, regression test recommendation.
 - `he-improve`: baseline, measured delta, accepted/rejected experiment, rollback posture.

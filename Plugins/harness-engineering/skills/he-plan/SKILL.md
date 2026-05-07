@@ -14,7 +14,7 @@ Spec, Linear issue, repo state, constraints, product blockers.
 ## Outputs
 Return schema_version when structured. `.harness/plan/**.md` durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix, slack_policy, and blackboard_delta.
 ## Procedure
-Explore first, ask second; use update_plan only for live progress; before writing durable docs choose `.harness/plan/**.md` from the artifact routing contract; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility: name the exact first-contact budget, shrink default help, demote plumbing commands, require full catalogs to use an advanced/all flag, rewrite the README front door around the golden path, add admission tests, add fresh-agent eval, and require ablation decisions for every still-visible command family.
+Explore first, ask second; use update_plan only for live progress; before writing durable docs choose `.harness/plan/**.md` from the artifact routing contract; when planning coding-harness-managed work load the execution slice contract and keep the plan inside the selected milestone, parent issue, refactor phase, or execution slice; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them. Treat `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, and `.harness/features/*.md` as context unless the approved Linear/refactor slice admits them. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility: name the exact first-contact budget, shrink default help, demote plumbing commands, require full catalogs to use an advanced/all flag, rewrite the README front door around the golden path, add admission tests, add fresh-agent eval, and require ablation decisions for every still-visible command family.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check dependencies, tests, rollback, and handoff readiness.
 ## Failure mode
@@ -27,6 +27,7 @@ Redact secrets; do not mutate files in planning. Do not remove important context
 - Skipping the Linear or coding-harness gate because the implementation feels obvious.
 - Deferring the real compression moves while counting metadata, classification, or docs routing as success.
 - Leaving help/catalog budgets as principles instead of naming the concrete public rails, hidden commands, and blocked future additions.
+- Expanding a plan from secondary review, strategy, triage, or feature docs after the selected execution slice is already approved.
 ## Examples
 - "Inspect `.harness/specs/account-settings.md` and JSC-246, then write the implementation plan under `.harness/plan/` with plan IDs, validation commands, rollback, and a Linear/spec/plan traceability table."
 - "Inspect the latest preflight output, then deepen `.harness/plan/JSC-246-account-settings.md` and return a complete replacement plan."
@@ -37,6 +38,7 @@ Reference `assets/` only for skill packaging and browseability; durable plans an
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
+- Execution slice contract: `Plugins/harness-engineering/references/execution-slice-contract.md`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
 - Artifact routing: `Plugins/harness-engineering/references/artifact-routing-contract.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`

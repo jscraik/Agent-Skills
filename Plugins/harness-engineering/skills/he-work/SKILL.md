@@ -14,7 +14,7 @@ Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees, optiona
 ## Outputs
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
 ## Procedure
-Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
+Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; for coding-harness-managed work load the execution slice contract and verify the plan/todo maps to one selected milestone, parent issue, refactor phase, or execution slice before editing; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
@@ -26,6 +26,7 @@ Redact secrets; preserve user edits. Do not remove important context for budget 
 - Editing before checking the active branch, dirty state, and source artifact.
 - Editing when an active thread goal conflicts with the branch, issue, plan, or PR.
 - Expanding product scope because implementation uncovered a tempting adjacent fix.
+- Pulling unapproved work from secondary review, strategy, triage, or feature docs instead of the selected execution slice.
 - Claiming done without exact validation or blocked-gate evidence.
 ## Examples
 - "Inspect JSC-246 and implement only the units in `.harness/plan/JSC-246-account-settings.md`, preserve my dirty edits, then run `bash scripts/run-harness-setup-checks.sh`."
@@ -37,6 +38,7 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
+- Execution slice contract: `Plugins/harness-engineering/references/execution-slice-contract.md`
 - Approval flow: `repo:Plugins/harness-engineering/skills/shared/references/approval-flow.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Work contract: `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
