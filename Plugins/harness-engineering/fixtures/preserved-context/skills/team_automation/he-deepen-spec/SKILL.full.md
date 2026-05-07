@@ -79,7 +79,7 @@ Non-triggers:
 - optional user emphasis on specific weak sections or exhaustive coverage
 
 If the spec path is missing, ask one direct question:
-- Which spec should I deepen? You can give me a path from `.harness/specs/` or `.harness/specs/`.
+- Which spec should I deepen? You can give me a path under `.harness/specs/`.
 
 Do not proceed until you have a valid spec file path.
 
