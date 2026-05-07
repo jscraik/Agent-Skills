@@ -1073,7 +1073,7 @@ Warn initially; block after policy adoption.
 
 ## 13. Technical Debt Hotspots
 
-### `Infrastructure/scripts/lib/ask/commands/skills.py`
+### Technical debt hotspot: `Infrastructure/scripts/lib/ask/commands/skills.py`
 
 Debt type:
 
@@ -1085,7 +1085,7 @@ Why it matters:
 
 This file is central to the product. If it remains the place where every skill-related concept lands, the repo will become less agent-operable over time.
 
-### `Infrastructure/bin/ask`
+### Technical debt hotspot: `Infrastructure/bin/ask`
 
 Debt type:
 
