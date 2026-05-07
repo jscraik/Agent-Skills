@@ -800,80 +800,56 @@ def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
     if not workouts_root.is_dir():
         return []
     normalized = handle.strip().lower().replace("_", "-")
+
+    def _normalized_metadata_values(value: Any) -> set[str]:
+        if value is None:
+            return set()
+        if isinstance(value, str):
+            return {value.strip().lower().replace("_", "-")}
+        if isinstance(value, dict):
+            values: set[str] = set()
+            for nested in value.values():
+                values.update(_normalized_metadata_values(nested))
+            return values
+        if isinstance(value, (list, tuple, set)):
+            values: set[str] = set()
+            for nested in value:
+                values.update(_normalized_metadata_values(nested))
+            return values
+        return {str(value).strip().lower().replace("_", "-")}
+
     candidates: list[str] = []
     for workout in sorted(workouts_root.glob("**/workout.yaml")):
         workout_id = workout.parent.relative_to(workouts_root).as_posix()
-        metadata = _load_workout_metadata(workout)
-        if _workout_references_skill(metadata, normalized):
+        try:
+            from ask.commands.workouts import _load_structured_file
+
+            metadata = _load_structured_file(workout)
+        except (OSError, ValueError):
+            continue
+        explicit_values: set[str] = set()
+        for key in (
+            "skills",
+            "handles",
+            "target_skills",
+            "target_handles",
+            "skill",
+            "handle",
+            "skill_id",
+            "id",
+            "target_module",
+            "target_skill",
+            "target_handle",
+        ):
+            explicit_values.update(_normalized_metadata_values(metadata.get(key)))
+        for value in _normalized_metadata_values(metadata.get("target_source_path")):
+            path = Path(value)
+            explicit_values.add(path.stem)
+            if path.parent.name:
+                explicit_values.add(path.parent.name)
+        if normalized in explicit_values:
             candidates.append(workout_id)
     return candidates
-
-
-def _load_workout_metadata(path: Path) -> dict[str, Any]:
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:
-        return {}
-    try:
-        loaded = json.loads(text)
-    except json.JSONDecodeError:
-        loaded = None
-    if loaded is None:
-        try:
-            import yaml  # type: ignore
-        except ImportError:
-            loaded = _load_simple_yaml_mapping(text)
-        else:
-            try:
-                loaded = yaml.safe_load(text)
-            except yaml.YAMLError:
-                loaded = _load_simple_yaml_mapping(text)
-            except (OSError, ValueError):
-                loaded = _load_simple_yaml_mapping(text)
-    if loaded is None:
-        loaded = _load_simple_yaml_mapping(text)
-    return loaded if isinstance(loaded, dict) else {}
-
-
-def _load_simple_yaml_mapping(text: str) -> dict[str, Any]:
-    loaded: dict[str, Any] = {}
-    current_key: str | None = None
-    for raw_line in text.splitlines():
-        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
-            continue
-        indent = len(raw_line) - len(raw_line.lstrip(" "))
-        line = raw_line.strip()
-        if indent == 0 and ":" in line:
-            key, value = line.split(":", 1)
-            current_key = key.strip()
-            value = value.strip().strip("\"'")
-            loaded[current_key] = value if value else []
-        elif current_key and line.startswith("- "):
-            if not isinstance(loaded.get(current_key), list):
-                loaded[current_key] = []
-            loaded[current_key].append(line[2:].strip().strip("\"'"))
-    return loaded
-
-
-def _workout_references_skill(metadata: dict[str, Any], normalized: str) -> bool:
-    def normalize(value: Any) -> str:
-        return str(value).strip().lower().replace("_", "-")
-
-    for key in ("id", "skill", "handle", "target_module", "target_skill", "target_handle"):
-        if normalize(metadata.get(key)) == normalized:
-            return True
-    for key in ("skills", "handles", "target_skills", "target_handles"):
-        value = metadata.get(key)
-        if isinstance(value, list) and any(normalize(item) == normalized for item in value):
-            return True
-    source_path = normalize(metadata.get("target_source_path"))
-    return bool(source_path and Path(source_path).stem == normalized)
-
-
-def _resolved_as_handle(reachability_result: CallResult) -> bool:
-    proof = reachability_result.data.get("proof", {})
-    resolution = proof.get("resolution") if isinstance(proof, dict) else {}
-    return isinstance(resolution, dict) and resolution.get("status") == "ok"
 
 
 def skills_prove(repo_root: Path, handle: str) -> CallResult:
@@ -883,7 +859,10 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     query = handle.strip()
     goal_resolution: dict[str, Any] | None = None
     reachability_result = skills_proof(repo_root, query)
-    if reachability_result.status != "success" and not _resolved_as_handle(reachability_result):
+    command_proof = reachability_result.data.get("proof", {})
+    initial_resolution = command_proof.get("resolution") if isinstance(command_proof, dict) else {}
+    resolver_ok = isinstance(initial_resolution, dict) and initial_resolution.get("status") == "ok"
+    if reachability_result.status != "success" and not resolver_ok:
         improvement_result = improve_skills(repo_root, goal_text=query)
         goal_resolution = improvement_result.data.get("improvement")
         candidate = (goal_resolution or {}).get("recommended_capability") or {}
