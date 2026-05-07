@@ -476,6 +476,36 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Agent-facing repository health entrypoint", result.stdout)
 
+    def test_repo_closeout_json_contract(self):
+        """Verify `ask repo closeout --changed --json` exposes readiness fields."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "closeout",
+            "--changed",
+            "--robot",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+        self.assertTrue(result.stdout.strip(), f"Expected JSON output, stderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        closeout = output.get("data", {}).get("repo_closeout", {})
+        self.assertIn("changed_files", closeout)
+        self.assertIn("sync", closeout)
+        self.assertIn("runtime_budget", closeout)
+        self.assertIn("surface_policy", closeout)
+        self.assertIn("focused_validation", closeout)
+        self.assertIn("commit_readiness", closeout)
+        self.assertIn("next_command", closeout)
+
+    def test_repo_closeout_help_mentions_completion_readiness(self):
+        """Verify `ask repo closeout --help` exposes completion-readiness wording."""
+        cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "repo", "closeout", "--help"]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("commit readiness", result.stdout)
+
     def test_goal_alias_normalization(self):
         """
         Ensure the `goal create` CLI alias returns a skills-style goal decision in the JSON envelope.

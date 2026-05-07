@@ -9,7 +9,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.commands.repo import repo_doctor  # noqa: E402
+from ask.commands.repo import repo_closeout, repo_doctor  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
@@ -113,6 +113,72 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["blocking"])
         self.assertEqual(doctor["blockers"], [])
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+
+    def test_closeout_without_changes_reports_ready_existing_next_command(self) -> None:
+        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertEqual(closeout["changed_files"], [])
+        self.assertEqual(closeout["next_command"], "./bin/ask repo status --json --robot")
+
+    def test_closeout_changed_skill_source_requires_sync_before_validation(self) -> None:
+        changed_files = ["Skills/product-strategy/example/SKILL.md"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertFalse(closeout["commit_readiness"]["ready"])
+        self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
+        self.assertTrue(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+        )
+
+    def test_closeout_changed_non_skill_file_recommends_scoped_validation(self) -> None:
+        changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask repo validate --changed-files "
+            "Infrastructure/scripts/lib/ask/commands/repo.py --json --robot",
+        )
+
+    def test_closeout_blocks_on_doctor_blocker(self) -> None:
+        doctor = {
+            "blocking": True,
+            "next_command": "./bin/ask repo doctor-catalog --json --robot",
+            "diagnostic_debt": [],
+            "signals": {},
+        }
+        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(status="error", data={"doctor": doctor}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertIn("repo_doctor_blocking", closeout["commit_readiness"]["blockers"])
+        self.assertEqual(closeout["next_command"], "./bin/ask repo doctor-catalog --json --robot")
 
     def test_catalog_parity_drift_blocks_and_selects_catalog_doctor(self) -> None:
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(

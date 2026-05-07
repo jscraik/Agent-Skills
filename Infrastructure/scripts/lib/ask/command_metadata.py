@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 
 VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
 VALID_ACTIONS = {
-    "repo": ["status", "validate", "check-stability", "doctor", "doctor-catalog", "provider-audit", "surface"],
+    "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "surface"],
     "skills": [
         "list",
         "budget",
@@ -40,6 +40,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "repo": [
         "ask repo status",
         "ask repo doctor --json",
+        "ask repo closeout --changed --json",
         "ask repo validate --ephemeral",
         "ask repo doctor-catalog --strict",
         "ask repo surface --json",
@@ -95,6 +96,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("repo", "doctor"): [
         "ask repo doctor --json",
         "ask repo doctor --robot --json",
+    ],
+    ("repo", "closeout"): [
+        "ask repo closeout --changed --json",
+        "ask repo closeout --changed --robot --json",
     ],
     ("repo", "doctor-catalog"): [
         "ask repo doctor-catalog",
@@ -216,6 +221,8 @@ FUZZY_MATCHES = {
     "route": "chain",
     "goal": "goal",
     "improve": "improve",
+    "closeout": "closeout",
+    "finish": "closeout",
     "doctor": "doctor-catalog",
     "catalog": "doctor-catalog",
     "provider": "provider-audit",

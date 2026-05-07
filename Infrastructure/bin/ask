@@ -43,7 +43,16 @@ from ask.commands.skills import (
     extract_family_fail_lines,
 )
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
-from ask.commands.repo import repo_status, repo_validate, check_hub_stability, doctor_catalog, repo_doctor, provider_audit, repo_surface
+from ask.commands.repo import (
+    check_hub_stability,
+    doctor_catalog,
+    provider_audit,
+    repo_closeout,
+    repo_doctor,
+    repo_status,
+    repo_surface,
+    repo_validate,
+)
 from ask.golden_path import render_golden_path_summary
 from ask.commands.plugins import (
     init_plugin,
@@ -523,15 +532,12 @@ def main():
         help="Run a named validation subset for CI check-name parity",
     )
     repo_validate_parser.add_argument("--changed-files", nargs="+", default=[], help="Scope validation to these changed files")
-
     repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
     repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
-    repo_subparsers.add_parser(
-        "doctor",
-        help="Agent-facing repository health entrypoint",
-        description="Agent-facing repository health entrypoint",
-        parents=[global_parser],
-    )
+    repo_subparsers.add_parser("doctor", help="Agent-facing repository health entrypoint", parents=[global_parser])
+    repo_closeout_parser = repo_subparsers.add_parser("closeout", help="Report completion readiness", parents=[global_parser])
+    repo_closeout_parser.add_argument("--changed", action="store_true", help="Infer staged, unstaged, and untracked changed files for commit readiness")
+    repo_closeout_parser.add_argument("--strict", action="store_true", help="Treat diagnostic debt as closeout blocking")
     repo_doctor_catalog_parser = repo_subparsers.add_parser(
         "doctor-catalog",
         help="Diagnose canonical catalog parity drift",
@@ -932,6 +938,8 @@ def main():
             result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
         elif args.action == "doctor":
             result = repo_doctor(repo_root)
+        elif args.action == "closeout":
+            result = repo_closeout(repo_root, changed=args.changed, strict=args.strict)
         elif args.action == "doctor-catalog":
             result = doctor_catalog(repo_root, strict=args.strict)
         elif args.action == "provider-audit":
@@ -944,7 +952,7 @@ def main():
             result.errors.append(ErrorObject(
                 code=ErrorCode.ERR_VALIDATION,
                 message=f"{action_msg} for topic 'repo'",
-                fix_suggestion="Valid actions: status, validate, check-stability, doctor-catalog, provider-audit, surface"
+                fix_suggestion="Valid actions: status, validate, check-stability, doctor, closeout, doctor-catalog, provider-audit, surface"
             ))
 
     elif args.topic == "skills":
