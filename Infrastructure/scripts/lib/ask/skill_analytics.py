@@ -64,11 +64,12 @@ def skill_invocation_analytics(repo_root: Path, handle: str) -> dict[str, Any]:
             "parse_errors": [{"line": None, "message": str(exc)}],
         }
 
-    status = "available" if matching_invocation_count else "no_matching_invocations"
     if parse_errors and not invocation_count:
         status = "parse_error"
     elif parse_errors:
         status = "parse_warning"
+    else:
+        status = "available" if matching_invocation_count else "no_matching_invocations"
 
     summary: dict[str, Any] = {
         "status": status,
