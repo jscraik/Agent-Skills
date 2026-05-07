@@ -873,6 +873,30 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         return result
 
     source_path = repo_root / str(resolution.get("source_path"))
+    # Validate that source_path is contained within repo_root to prevent directory traversal
+    try:
+        resolved_source = source_path.resolve()
+        resolved_repo = repo_root.resolve()
+        if not resolved_source.is_relative_to(resolved_repo):
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_SECURITY",
+                    message=f"Skill source path '{source_path}' is outside repository bounds",
+                    fix_suggestion="Only skills within the repository can be read",
+                )
+            )
+            return result
+    except (ValueError, OSError) as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Failed to validate source path: {e}",
+                fix_suggestion="Ensure the source path is valid and accessible",
+            )
+        )
+        return result
     sections = _skill_sections(source_path)
     description = str(resolution.get("description") or "").strip()
     when_to_use, inline_when_not_to_use = _skill_usage_items(sections, limit=4)

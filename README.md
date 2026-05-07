@@ -6,11 +6,13 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository manages **21 canonical skills** routed through root-level skill
-surfaces, generated `$` command handles, and a larger latent skill/plugin
-catalog behind rooted projections. Author a capability once, route it
-intelligently, validate quality, project it safely into runtime, and keep the
-human and agent command surface small enough to use.
+This repository manages **71 skills** across 7 topic clusters (agent-ops: 42,
+backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1,
+product-strategy: 3, security-ops: 5) routed through root-level skill surfaces,
+generated `$` command handles, and a larger latent skill/plugin catalog behind
+rooted projections. Author a capability once, route it intelligently, validate
+quality, project it safely into runtime, and keep the human and agent command
+surface small enough to use.
 
 **What this gives you:**
 
@@ -49,6 +51,11 @@ ask runtime budget --json --robot
 # Sync to your runtime
 ask skills sync --scope workspace --projection rooted
 ask skills sync --scope user --projection rooted
+
+# Agent-facing golden paths
+ask repo doctor --json --robot                          # Health check with JSON output
+ask skills improve "improve test coverage"              # Get improvement suggestions
+ask skills explain he-heartbeat                         # Explain a specific skill
 ```
 
 ## What you can do
@@ -99,6 +106,30 @@ ask runtime budget --json
 
 # Verify generated command handles match rooted manifests
 ask skills handles --check --json
+```
+
+### Agent-facing golden paths
+
+```bash
+# Repository health and diagnostics
+ask repo doctor --json --robot
+
+# Skill improvement workflow
+ask skills improve "improve test coverage"
+./bin/ask skills improve "add error handling"
+
+# Skill explanation and understanding
+ask skills explain he-heartbeat
+ask skills explain skill-builder
+
+# Skill proof and validation evidence
+ask skills proof backend/cli-spec --json
+
+# Next action suggestions
+ask skills next-action he-heartbeat --json
+
+# Plan closeout workflow
+ask skills closeout my-plan-id --json
 ```
 
 ### Manage lifecycle

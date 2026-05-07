@@ -2,7 +2,7 @@
 plan_id: ASK-ONBOARDING-CLOSEOUT-20260329
 title: fix: Outstanding Onboarding and Readiness Closeout
 type: fix
-status: active
+status: completed
 date: 2026-03-29
 origin: Infrastructure/artifacts/skill-graphs/onboarding/wave-readiness.json
 parent_plan: Docs/plans/2026-02-26-feat-all-skills-graph-migration-onboarding-plan.md
