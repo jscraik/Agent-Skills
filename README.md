@@ -215,7 +215,11 @@ This repo separates source, projection, and live runtime visibility:
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-`ask skills list --json` reports the current visible runtime surface. In the current rooted projection this is a compact first-level list of root routers plus generated command handles. `ask skills handles --json --no-handles` validates the full command surface; it currently reports 93 generated command handles with no violations.
+`ask skills list --json` reports the current visible runtime surface. In the
+current rooted projection this is a compact first-level list of root routers
+plus generated command handles. `ask skills handles --json --no-handles`
+validates the full command surface and reports the current handle count and any
+violations.
 
 A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
 
