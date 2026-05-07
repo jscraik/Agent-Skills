@@ -527,16 +527,24 @@ def repo_doctor(repo_root: Path) -> CallResult:
 
 
 def _git_output_lines(repo_root: Path, args: list[str]) -> list[str]:
-    process = subprocess.run(
-        ["git", *args],
-        cwd=str(repo_root),
-        capture_output=True,
-        text=True,
-        timeout=SCRIPT_TIMEOUT_SECONDS,
-        check=False,
-    )
+    command = ["git", *args]
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"git command timed out: {' '.join(command)}") from exc
     if process.returncode != 0:
-        return []
+        detail = (process.stderr or process.stdout or "").strip()
+        raise RuntimeError(
+            f"git command failed: {' '.join(command)}"
+            + (f" ({detail})" if detail else "")
+        )
     return [line.strip() for line in process.stdout.splitlines() if line.strip()]
 
 
@@ -648,11 +656,18 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
 def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) -> CallResult:
     """Report completion readiness without editing, validating, or committing."""
     result = CallResult()
-    changed_files = collect_changed_files(repo_root) if changed else []
     doctor_result = repo_doctor(repo_root)
     doctor_payload = doctor_result.data.get("doctor", {})
+    changed_files_error = None
+    try:
+        changed_files = collect_changed_files(repo_root)
+    except RuntimeError as exc:
+        changed_files = []
+        changed_files_error = str(exc)
     sync_report = _closeout_sync_report(changed_files)
     blockers: list[str] = []
+    if changed_files_error:
+        blockers.append("changed_file_detection_failed")
     if doctor_payload.get("blocking"):
         blockers.append("repo_doctor_blocking")
     if sync_report["needed"]:
@@ -664,7 +679,9 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
     focused_validation = _closeout_focused_validation(changed_files)
     ready = not blockers
     next_command: str | None
-    if doctor_payload.get("blocking"):
+    if changed_files_error:
+        next_command = "./bin/ask repo status --json --robot"
+    elif doctor_payload.get("blocking"):
         next_command = doctor_payload.get("next_command")
     elif sync_report["needed"]:
         next_command = sync_report["commands"][0]
@@ -681,6 +698,8 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
         ),
         "changed_files": changed_files,
         "changed_file_count": len(changed_files),
+        "changed_mode_requested": changed,
+        "changed_files_error": changed_files_error,
         "sync": sync_report,
         "runtime_budget": _closeout_runtime_budget(doctor_payload),
         "surface_policy": _closeout_surface_policy(doctor_payload),

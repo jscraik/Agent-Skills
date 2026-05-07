@@ -145,6 +145,36 @@ class TestAskRepoDoctor(unittest.TestCase):
             "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
         )
 
+    def test_closeout_checks_changed_files_even_without_changed_flag(self) -> None:
+        changed_files = ["Skills/product-strategy/example/SKILL.md"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=False)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertFalse(closeout["changed_mode_requested"])
+        self.assertEqual(closeout["changed_files"], changed_files)
+        self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
+
+    def test_closeout_blocks_when_changed_file_detection_fails(self) -> None:
+        with patch(
+            "ask.commands.repo.collect_changed_files",
+            side_effect=RuntimeError("git command failed"),
+        ), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertIn("changed_file_detection_failed", closeout["commit_readiness"]["blockers"])
+        self.assertEqual(closeout["changed_files_error"], "git command failed")
+        self.assertEqual(closeout["next_command"], "./bin/ask repo status --json --robot")
+
     def test_closeout_changed_non_skill_file_recommends_scoped_validation(self) -> None:
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
