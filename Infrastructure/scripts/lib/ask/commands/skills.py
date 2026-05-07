@@ -785,14 +785,19 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     return result
 
 
-def _skill_audit_target(resolution: dict[str, Any]) -> str | None:
+def _skill_audit_target(repo_root: Path, resolution: dict[str, Any]) -> str | None:
     source = resolution.get("source_path")
     if not source:
         return None
     target = Path(str(source))
+    if not target.is_absolute():
+        target = repo_root / target
     if target.name == "SKILL.md":
         target = target.parent
-    return target.as_posix()
+    try:
+        return target.resolve().relative_to(repo_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return None
 
 
 def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
@@ -904,7 +909,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     normalized = str(command_proof.get("handle") or resolution.get("handle") or handle.lstrip("$"))
     reachability_status = command_proof.get("status") if isinstance(command_proof, dict) else "missing"
 
-    audit_target = _skill_audit_target(resolution)
+    audit_target = _skill_audit_target(repo_root, resolution)
     structural_detail: dict[str, Any] = {
         "status": "missing",
         "audit_level": "compat",

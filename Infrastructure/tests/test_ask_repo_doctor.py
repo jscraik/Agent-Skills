@@ -230,6 +230,19 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["changed_files_error"], "git command failed")
         self.assertEqual(closeout["next_command"], "./bin/ask repo status --json --robot")
 
+    def test_closeout_normalizes_git_startup_failure(self) -> None:
+        with patch("ask.commands.repo.subprocess.run", side_effect=OSError("git missing")), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertIn("changed_file_detection_failed", closeout["commit_readiness"]["blockers"])
+        self.assertIn("git command could not start", closeout["changed_files_error"])
+        self.assertIn("git missing", closeout["changed_files_error"])
+
     def test_closeout_changed_non_skill_file_recommends_scoped_validation(self) -> None:
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
