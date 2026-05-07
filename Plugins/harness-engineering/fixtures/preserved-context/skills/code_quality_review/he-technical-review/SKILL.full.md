@@ -164,7 +164,7 @@ Use `code-diff-review` when the target is:
 Use `document-review` when the target is:
 - `.harness/specs/*.md`
 - `.harness/plan/*.md`
-- `.harness/specs/*.md`
+- `docs/ui-plans/*.md`
 - `docs/ui-plans/*.md`
 - another architecture/design markdown document explicitly provided by the user
 
