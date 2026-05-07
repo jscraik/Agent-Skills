@@ -816,7 +816,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     query = handle.strip()
     goal_resolution: dict[str, Any] | None = None
     reachability_result = skills_proof(repo_root, query)
-    if reachability_result.status != "success" and " " in query:
+    if reachability_result.status != "success":
         improvement_result = improve_skills(repo_root, goal_text=query)
         goal_resolution = improvement_result.data.get("improvement")
         candidate = (goal_resolution or {}).get("recommended_capability") or {}
@@ -935,10 +935,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
 
 def _skill_sections(path: Path) -> dict[str, list[str]]:
     """Return markdown section bodies keyed by heading text."""
-    try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        return {}
+    lines = path.read_text(encoding="utf-8").splitlines()
     sections: dict[str, list[str]] = {}
     current: str | None = None
     for line in lines:
@@ -1069,7 +1066,18 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
             )
         )
         return result
-    sections = _skill_sections(source_path)
+    try:
+        sections = _skill_sections(source_path)
+    except OSError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Resolved source for '{normalized}' could not be read: {source_path}",
+                fix_suggestion=f"Fix source permissions or rerun `./bin/ask skills explain {shlex.quote(str(normalized))}` after syncing.",
+            )
+        )
+        return result
     description = str(resolution.get("description") or "").strip()
     when_to_use, inline_when_not_to_use = _skill_usage_items(sections, limit=4)
     when_to_use = when_to_use or ([description] if description else [])

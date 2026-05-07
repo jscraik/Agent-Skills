@@ -352,6 +352,50 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("goal_resolution", skill_proof)
         self.assertIn("recommended_capability", skill_proof["goal_resolution"])
 
+    def test_skills_prove_single_token_goal_uses_improve_fallback(self):
+        """Verify one-word goals use goal resolution instead of raw reachability failure."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            failed_proof = CallResult(status="error")
+            improved = CallResult()
+            improved.data["improvement"] = {
+                "recommended_capability": {"handle": "security-ops"},
+                "next_command": "./bin/ask skills improve security --json --robot",
+            }
+            recovered_proof = CallResult()
+            recovered_proof.data["proof"] = {
+                "status": "pass",
+                "handle": "security-ops",
+                "resolution": {
+                    "handle": "security-ops",
+                    "source_path": "Skills/security-ops/SKILL.md",
+                },
+            }
+            with mock.patch.object(
+                skills_commands,
+                "skills_proof",
+                side_effect=[failed_proof, recovered_proof],
+            ), mock.patch.object(
+                skills_commands,
+                "improve_skills",
+                return_value=improved,
+            ), mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ):
+                result = skills_commands.skills_prove(Path.cwd(), "security")
+        finally:
+            sys.path.remove(lib_path)
+
+        proof = result.data["skill_proof"]
+        self.assertEqual(proof["handle"], "security-ops")
+        self.assertIn("goal_resolution", proof)
+
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--robot", "--json"]
@@ -455,6 +499,35 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
         self.assertIn("is missing", result.errors[0].message)
+
+    def test_skills_explain_rejects_unreadable_source_file(self):
+        """Verify explain rejects source files that cannot be read."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with mock.patch.object(
+                skills_commands,
+                "resolve_skill_handle",
+                return_value={
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "description": "autofix",
+                },
+            ), mock.patch.object(
+                skills_commands,
+                "_skill_sections",
+                side_effect=PermissionError("permission denied"),
+            ):
+                result = skills_commands.explain_skill(Path.cwd(), "autofix")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        self.assertIn("could not be read", result.errors[0].message)
 
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""

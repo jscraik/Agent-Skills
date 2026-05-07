@@ -708,6 +708,8 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
         next_command = doctor_payload.get("next_command")
     elif sync_report["needed"]:
         next_command = sync_report["commands"][0]
+    elif strict and diagnostic_debt:
+        next_command = doctor_payload.get("next_command") or "./bin/ask repo doctor --json --robot"
     elif changed_files:
         next_command = _validation_command_for_changed_files(changed_files)
     else:

@@ -192,6 +192,27 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["changed_files"], changed_files)
         self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
 
+    def test_closeout_strict_diagnostic_debt_uses_doctor_next_command(self) -> None:
+        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(
+                data={
+                    "doctor": {
+                        "blocking": False,
+                        "diagnostic_debt": [{"id": "repo_surface"}],
+                        "next_command": "./bin/ask repo surface --json --robot",
+                        "signals": {},
+                    }
+                }
+            ),
+        ):
+            result = repo_closeout(REPO_ROOT, strict=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertIn("strict_diagnostic_debt", closeout["commit_readiness"]["blockers"])
+        self.assertEqual(closeout["next_command"], "./bin/ask repo surface --json --robot")
+
     def test_closeout_blocks_when_changed_file_detection_fails(self) -> None:
         with patch(
             "ask.commands.repo.collect_changed_files",
