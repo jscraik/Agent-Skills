@@ -237,6 +237,15 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
             "source": "repo_status",
             "next_command": "./bin/ask repo status --json --robot",
         }
+    if not status_result.data.get("is_git"):
+        return {
+            "state": "skipped",
+            "severity": "warning",
+            "summary": "Projection sync not checked because the repository root is not a git repository.",
+            "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+            "details": {"is_git": False},
+        }
     if status_result.data.get("skills_synced"):
         return {
             "state": "pass",

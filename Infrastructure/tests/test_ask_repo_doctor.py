@@ -21,11 +21,11 @@ def _result(status: str = "success", data: dict | None = None) -> CallResult:
     return result
 
 
-def _status_result(skills_synced: bool = True) -> CallResult:
+def _status_result(skills_synced: bool = True, is_git: bool = True) -> CallResult:
     return _result(
         data={
             "repo_root": ".",
-            "is_git": True,
+            "is_git": is_git,
             "skills_synced": skills_synced,
         }
     )
@@ -131,6 +131,26 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["next_command"], "./bin/ask repo doctor-catalog --json --robot")
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "warn")
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+
+    def test_non_git_root_prioritizes_repo_status_before_projection_sync(self) -> None:
+        with patch(
+            "ask.commands.repo.repo_status",
+            return_value=_status_result(skills_synced=False, is_git=False),
+        ), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertTrue(doctor["blocking"])
+        self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
 
     def test_runtime_budget_command_failure_blocks(self) -> None:
         failed_budget = _result(status="error", data={"runtime_budget": {"status": "fail"}})
