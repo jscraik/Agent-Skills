@@ -28,7 +28,7 @@ Redact secrets; do not turn brainstorming into execution. Do not remove importan
 ## Examples
 - "Inspect JSC-246 and the three QA notes in `Docs/qa/account-settings.md`; separate stated facts, inferred behavior, and out-of-scope work before filing or updating Linear."
 - "Inspect the coding-harness Linear sync idea, compare the tracker-only option with the Project Brain option, and tell me which one should survive before we spec it."
-- "Route the handoff toward he-spec, he-plan, or he-work only after ambiguity is resolved."
+- "Analyze whether the data-sync ambiguity in JSC-310 is spec-ready yet, and if not, hold the handoff until options are clear."
 ## Assets
 Reference `assets/` only for skill packaging and browseability; workflow source of truth stays in this SKILL and references.
 ## References

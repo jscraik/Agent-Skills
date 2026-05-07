@@ -309,9 +309,19 @@ class TestMiseToml(unittest.TestCase):
 
 class TestGitignore(unittest.TestCase):
     def setUp(self):
+        """
+        Prepare test fixture by loading the repository .gitignore file into self._lines as a list of lines.
+        
+        Each line is decoded as UTF-8 and split on line boundaries; the resulting list preserves original ordering and excludes trailing newline characters.
+        """
         self._lines = GITIGNORE_PATH.read_text(encoding="utf-8").splitlines()
 
     def test_artifacts_policy_entry_present(self):
+        """
+        Ensure the repository .gitignore includes an artifacts/policy/ ignore entry in either relative or leading-slash form.
+        
+        Checks that either "artifacts/policy/" or "/artifacts/policy/" appears among the file's lines.
+        """
         self.assertTrue(
             "artifacts/policy/" in self._lines or "/artifacts/policy/" in self._lines
         )
@@ -328,6 +338,11 @@ class TestGitignore(unittest.TestCase):
             self.assertIn(entry, self._lines)
 
     def test_harness_curated_roots_are_trackable(self):
+        """
+        Asserts that specific curated `.harness/` root directories are marked as trackable in `.gitignore`.
+        
+        Checks for the presence of negated ignore patterns that ensure the following curated roots are tracked: `!.harness/core/`, `!.harness/linear/`, `!.harness/refactors/`, `!.harness/specs/`, and `!.harness/review/`.
+        """
         for entry in [
             "!.harness/core/",
             "!.harness/linear/",

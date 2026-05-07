@@ -9,10 +9,21 @@ CONTRACT = HE_ROOT / "references/execution-slice-contract.md"
 
 
 def read(path: Path) -> str:
+    """
+    Read the entire text contents of the file at the given path using UTF-8 encoding.
+    
+    Returns:
+        str: The file contents as a Unicode string.
+    """
     return path.read_text(encoding="utf-8")
 
 
 def test_execution_slice_contract_names_authority_inputs() -> None:
+    """
+    Check that the execution-slice contract names the required authority input file path patterns and the permitted selection concepts.
+    
+    Asserts that the contract text includes authority input patterns such as harness linear plans, refactors, decisions, core, and brainstorm documents, and that it requires selecting exactly one of: milestone, parent issue, refactor phase, or execution slice.
+    """
     text = read(CONTRACT)
 
     for phrase in [
@@ -74,6 +85,11 @@ def test_downstream_stages_obey_selected_slice_boundary() -> None:
 
 
 def test_shared_contract_is_indexed_and_bridged() -> None:
+    """
+    Verify that the execution-slice contract is referenced and referenced terms are bridged across HE reference documents.
+    
+    Checks that the deferred-context index references the execution-slice contract, the coding-harness command bridge mentions "approved execution slice", and the lifecycle exit contract mentions "selected execution slice".
+    """
     index = read(HE_ROOT / "references/deferred-context-index.md")
     bridge = read(HE_ROOT / "references/coding-harness-command-bridge.md")
     lifecycle = read(HE_ROOT / "references/lifecycle-exit-contract.md")

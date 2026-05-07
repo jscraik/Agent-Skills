@@ -200,6 +200,17 @@ Mark current active state; if `/goal` is active, confirm it matches the branch, 
 Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; for coding-harness-managed work load the execution slice contract and verify the plan/todo maps to one selected milestone, parent issue, refactor phase, or execution slice before editing; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 ```
 
+The 2026-05-08 remote-branch merge preserved these compact-entrypoint and
+fixture lines outside runtime bodies while retaining the merged contract updates:
+
+```text
+- `.harness/specs/*.md`
+- do not recommend deleting or gitignoring Harness Engineering pipeline artifacts in `.harness/brainstorm/`, `.harness/plan/`, or `docs/solutions/`
+- Which spec should I deepen? You can give me a path from `.harness/specs/` or `.harness/specs/`.
+- "Route the handoff toward he-spec, he-plan, or he-work only after ambiguity is resolved."
+Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage and hand off durable board governance to `Skills/agent-ops/goal-governor`. When a diagnosis names compression as the missing acceptance gate or says `spec_refresh_required`, route to `he-spec` and include the compression contract.
+```
+
 ## Preservation Contract
 
 - Active `SKILL.md` files stay concise and routing-safe.

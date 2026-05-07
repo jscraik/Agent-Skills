@@ -33,7 +33,7 @@ outputs:
   - linear_blocked status with missing fields and ready-to-create payload when the tracker gate cannot complete
   - coding_harness lifecycle block with Harness command gate status, `project_brain_status`, and companion `project_brain_evidence_state` when the target repo is coding-harness-managed
   - source-parity notes covering current active source, superseded/latest-only artifacts, and session evidence used
-  - compression recovery gates when cockpit, golden-path, command-catalog, or first-contact UX is in scope
+  - compression recovery gates when cockpit, command catalog, README front door, default help, golden-path command, or other first-contact UX is in scope
   - "XP operating artifact: blackboard_delta for new or changed durable requirements"
   - exact parallel research support via repo-research-analyst, learnings-researcher, and conditional external-research roles when needed
   - explicit validation and next-stage handoff guidance

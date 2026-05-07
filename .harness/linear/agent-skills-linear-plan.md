@@ -563,7 +563,7 @@ Review confirmation received for this plan:
 
 Before any Linear mutation, still confirm the explicit create/update action and the exact objects to be created.
 
-Final workflow decision:
+Final workflow decision (after the subsequent `$he-spec` flow):
 
 - Initial review selected `Plan only`.
 - During the subsequent `$he-spec` flow, the Linear tracker gate was corrected and the minimal active set was created:

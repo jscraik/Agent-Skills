@@ -40,7 +40,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-brainstorm"
       - type: regex
-        value: "(?i)(.harness/brainstorm/.*-requirements\\.md|requirements document)"
+        value: "(?i)(\\.harness/brainstorm/.*-requirements\\.md|requirements document)"
 
   - id: decide-if-spec-needed
     name: decide if spec is needed

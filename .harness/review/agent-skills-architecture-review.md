@@ -20,7 +20,7 @@ Evidence basis:
 
 - Repository instructions and domain language: `AGENTS.md`, `UBIQUITOUS_LANGUAGE.md`, `Docs/agents/**`, `.harness/features/agent-skills-intent.md`.
 - Runtime and command surfaces: `Infrastructure/bin/ask`, `Infrastructure/scripts/lib/ask/commands/**`, `Infrastructure/scripts/lifecycle-and-sync/**`.
-- Validation and governance: `Infrastructure/scripts/validate_all.sh`, `Infrastructure/scripts/verify-work.sh`, `.github/workflows/**`, `.circleci/config.yml`, `harness.contract.json`, `.harness/quality/criteria.md`.
+- Validation and governance: `Infrastructure/scripts/validate_all.sh`, `Infrastructure/scripts/validation-and-linting/verify-work.sh`, `.github/workflows/**`, `.circleci/config.yml`, `harness.contract.json`, `.harness/quality/criteria.md`.
 - Skill and plugin trees: `Skills/**/SKILL.md`, `Plugins/**/skills/**`, `.agents/skills/**` where relevant as runtime projection evidence.
 - Repository surface and debt signals from live commands:
   - `./bin/ask repo doctor --json --robot` returned a blocking catalog parity signal with `catalog_parity.count_mismatch`, while repo status, projection sync, runtime budget, and command handles passed.
@@ -1073,7 +1073,7 @@ Warn initially; block after policy adoption.
 
 ## 13. Technical Debt Hotspots
 
-### `Infrastructure/scripts/lib/ask/commands/skills.py`
+### Technical debt hotspot: `Infrastructure/scripts/lib/ask/commands/skills.py`
 
 Debt type:
 
@@ -1085,7 +1085,7 @@ Why it matters:
 
 This file is central to the product. If it remains the place where every skill-related concept lands, the repo will become less agent-operable over time.
 
-### `Infrastructure/bin/ask`
+### Technical debt hotspot: `Infrastructure/bin/ask`
 
 Debt type:
 

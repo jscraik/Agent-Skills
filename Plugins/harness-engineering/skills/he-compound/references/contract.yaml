@@ -24,6 +24,7 @@ outputs:
   - "for lifecycle mode, the current stage, completed stages, blockers, and exact next Harness Engineering command"
   - "for coding-harness-managed repos, command-level bridge evidence for Linear state, Harness transition, Project Brain status, and north-star evidence status"
   - "for compression recovery, active_stage: spec_refresh_required and next_action: run he-spec with the agent-native compression contract"
+  - "for compression recovery, recovery_stage: spec_refresh_required and next_action: run he-spec with the agent-native compression contract"
   - "for learning capture, a single created or updated .harness/solutions/[filename].md artifact"
   - "Project Brain status when .harness/knowledge/** is in use: updated, blocked, not_applicable, or explicitly_deferred"
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
