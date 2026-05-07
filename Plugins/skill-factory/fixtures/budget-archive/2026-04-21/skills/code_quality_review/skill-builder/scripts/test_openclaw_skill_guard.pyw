@@ -101,8 +101,8 @@ class OpenClawSkillGuardTests(unittest.TestCase):
     def test_allows_sanitized_path_interpolation_in_prompt_builder(self) -> None:
         src = (
             "def buildReviewPrompt(workspace_dir):\n"
-            "    safe = sanitize_for_prompt(workspace_dir)\n"
-            "    return f'Review workspace at {safe}'\n"
+            "    workspace_dir = sanitize_for_prompt(workspace_dir)\n"
+            "    return f'Review workspace at {workspace_dir}'\n"
         )
         findings = scan_source(src, "Infrastructure/scripts/test.py")
         self.assertFalse(any(f.code == "security.prompt_unsanitized_path_interpolation" for f in findings))

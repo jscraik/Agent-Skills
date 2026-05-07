@@ -1021,7 +1021,33 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         )
         return result
 
-    source_path = repo_root / str(resolution.get("source_path"))
+    raw_source_path = Path(str(resolution.get("source_path") or ""))
+    source_path = raw_source_path if raw_source_path.is_absolute() else repo_root / raw_source_path
+    try:
+        resolved_source = source_path.resolve()
+        resolved_repo = repo_root.resolve()
+        try:
+            resolved_source.relative_to(resolved_repo)
+        except ValueError:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_PATH_TRAVERSAL",
+                    message=f"Skill handle '{normalized}' resolved outside the repository root.",
+                    fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+                )
+            )
+            return result
+    except (ValueError, OSError) as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Failed to validate source path: {e}",
+                fix_suggestion="Ensure the source path is valid and accessible",
+            )
+        )
+        return result
     sections = _skill_sections(source_path)
     description = str(resolution.get("description") or "").strip()
     when_to_use, inline_when_not_to_use = _skill_usage_items(sections, limit=4)
@@ -1914,7 +1940,7 @@ def improve_skills(
     }
 
     fallback_used = False
-    fallback_allowed = route_decision_status in (None, "unresolved_ambiguity")
+    fallback_allowed = route_decision_status == "unresolved_ambiguity"
     if not isinstance(recommended, dict) and fallback_allowed:
         recommended = _fallback_improvement_candidate(repo_root, goal_text)
         fallback_used = recommended is not None

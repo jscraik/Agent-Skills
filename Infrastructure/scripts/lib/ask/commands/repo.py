@@ -240,9 +240,11 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
     if not status_result.data.get("is_git"):
         return {
             "state": "skipped",
-            "severity": "info",
-            "summary": "Projection sync skipped until repository status is ready.",
+            "severity": "warning",
+            "summary": "Projection sync not checked because the repository root is not a git repository.",
             "source": "repo_status",
+            "next_command": "./bin/ask repo status --json --robot",
+            "details": {"is_git": False},
         }
     if status_result.data.get("skills_synced"):
         return {
@@ -433,6 +435,13 @@ def _skipped_signal(summary: str, source: str) -> dict[str, Any]:
     }
 
 
+def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
+    try:
+        return builder(*args)
+    except Exception as exc:
+        return _unknown_signal_error_signal(exc)
+
+
 def repo_doctor(repo_root: Path) -> CallResult:
     """Compose repo health checks into one compact agent-facing doctor payload."""
     result = CallResult()
@@ -440,13 +449,14 @@ def repo_doctor(repo_root: Path) -> CallResult:
         status_result = repo_status(repo_root)
     except Exception as exc:
         signals = {
-            "unknown_signal_error": _unknown_signal_error_signal(exc),
+            "repo_status": _unknown_signal_error_signal(exc),
+            "projection_sync": _unknown_signal_error_signal(exc),
         }
     else:
-        repo_status_signal = _repo_status_signal(status_result)
+        repo_status_signal = _safe_signal(_repo_status_signal, status_result)
         signals = {
             "repo_status": repo_status_signal,
-            "projection_sync": _projection_sync_signal(status_result),
+            "projection_sync": _safe_signal(_projection_sync_signal, status_result),
         }
         if repo_status_signal.get("state") in {"block", "error"}:
             signals.update(
@@ -472,12 +482,20 @@ def repo_doctor(repo_root: Path) -> CallResult:
         else:
             signals.update(
                 {
-                    "catalog_parity": _catalog_parity_signal(doctor_catalog(repo_root)),
-                    "runtime_budget": _runtime_budget_signal(skills_budget(repo_root)),
-                    "command_handles": _command_handles_signal(
-                        skills_handles(repo_root, check=True, include_handles=False)
+                    "catalog_parity": _safe_signal(
+                        lambda: _catalog_parity_signal(doctor_catalog(repo_root))
                     ),
-                    "repo_surface": _repo_surface_signal(repo_surface(repo_root)),
+                    "runtime_budget": _safe_signal(
+                        lambda: _runtime_budget_signal(skills_budget(repo_root))
+                    ),
+                    "command_handles": _safe_signal(
+                        lambda: _command_handles_signal(
+                            skills_handles(repo_root, check=True, include_handles=False)
+                        )
+                    ),
+                    "repo_surface": _safe_signal(
+                        lambda: _repo_surface_signal(repo_surface(repo_root))
+                    ),
                 }
             )
     payload = build_golden_path_payload(

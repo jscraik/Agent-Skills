@@ -96,6 +96,13 @@ Return schema_version when structured. Heartbeat prompt, status, stop rule, `nex
 
 ## Active Entrypoint Rewrite Preservation
 
+The PR 152 review-fix pass preserved removed Goal Governor validator wording
+while replacing the active command examples with the canonical packaged path:
+
+```text
+   - Existing board files pass `./bin/ask check_goal_board <goal-directory> --robot`.
+```
+
 The 2026-05-03 Harness Engineering tightening preserved these compact-entrypoint lines outside the runtime bodies:
 
 ```text

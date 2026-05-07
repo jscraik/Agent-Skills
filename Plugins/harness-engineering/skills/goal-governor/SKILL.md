@@ -65,7 +65,7 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
    - Agent config supports the intended delegation depth; for Jamie's Codex harness, require `max_depth >= 2`.
    - The selected validation commands exist and are repo-canonical.
    - Existing board files pass `python3 scripts/check_goal_board.py <goal-directory>`.
-3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete`.
+3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete` (normalize native `budgetLimited` to output `budget_limited`).
 4. Treat token budget, tokens used, elapsed seconds, lifecycle updates, and budget-limited transitions as evidence, not completion proof.
 5. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
 6. Refuse write-capable work until the active Worker task declares `allowed_files`, `verify`, and `stop_if`.
@@ -112,7 +112,7 @@ docs/goals/<slug>/
 
 - Native `/goal` state and repo-visible board state can drift. Reconcile both before choosing Worker work.
 - A receipt is only useful when it names the exact verifier and outcome; vague "tested" notes are not completion evidence.
-- `budgetLimited` is a native stop/steering state. Classify scope, verification, and owner decision before Worker work.
+- `budgetLimited` is a native stop/steering state that maps to normalized output status `budget_limited`. Classify scope, verification, and owner decision before Worker work.
 - Delegation still follows the shared HE subagent call contract; do not assume Scout, Judge, or Worker roles exist until runtime config proves they are available.
 
 ## Output Contract
@@ -150,7 +150,9 @@ risks:
 Validate the skill package:
 
 ```bash
-python3 scripts/check_goal_board.py <goal-directory>
+./bin/ask check_goal_board <goal-directory>
+# Agent-driven validation:
+./bin/ask check_goal_board <goal-directory> --robot
 ./bin/ask skills audit <skill-directory> --level strict --robot
 ```
 

@@ -132,6 +132,26 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "warn")
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
 
+    def test_non_git_root_prioritizes_repo_status_before_projection_sync(self) -> None:
+        with patch(
+            "ask.commands.repo.repo_status",
+            return_value=_status_result(skills_synced=False, is_git=False),
+        ), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertTrue(doctor["blocking"])
+        self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+
     def test_runtime_budget_command_failure_blocks(self) -> None:
         failed_budget = _result(status="error", data={"runtime_budget": {"status": "fail"}})
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
@@ -227,14 +247,23 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
 
     def test_unexpected_signal_exception_returns_doctor_blocker(self) -> None:
-        with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")):
+        with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
         self.assertEqual(result.status, "error")
         self.assertTrue(doctor["blocking"])
-        self.assertEqual(doctor["blockers"][0]["id"], "unknown_signal_error")
-        self.assertNotIn("projection_sync", doctor["signals"])
+        blocker_ids = {blocker["id"] for blocker in doctor["blockers"]}
+        self.assertIn("repo_status", blocker_ids)
+        self.assertIn("projection_sync", blocker_ids)
+        self.assertEqual(doctor["signals"]["repo_status"]["state"], "error")
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "error")
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
 
 

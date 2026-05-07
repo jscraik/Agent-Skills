@@ -40,12 +40,20 @@ evidence_freshness: fresh|stale|blocked|not_applicable
 red_flags: []
 domain_language:
   status: stable|ambiguous|conflicted|not_applicable
+  canonical_terms: []
+  avoided_aliases: []
+  unresolved_terms: []
+  context_file: CONTEXT.md|CONTEXT-MAP.md|domain-context-contract.md|not_applicable
 context_map:
   source_of_truth: user_request|linear|spec|plan|worktree|pr|validation|project_brain|heartbeat|goal|session_evidence|not_applicable
+  translated_from: []
+  relationship: source_of_truth|translation|handoff|evidence_only|stale_snapshot|not_applicable
   conflict_status: none|blocked|resolved|not_applicable
+  conflict_rule: stop|refresh|prefer_source|record_blocker|not_applicable
 blocker: "<smallest recovery step or null>"
-next_stage: "<he-stage|done|null>"
+next_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
 validation:
+  status: pass|fail|blocked|not_run_with_reason|not_applicable
   commands: []
   outcomes: []
 ```
