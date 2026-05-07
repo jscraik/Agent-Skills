@@ -356,6 +356,43 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
         self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
 
+    def test_repo_status_error_result_gates_downstream_checks(self) -> None:
+        failed_status = CallResult(status="error")
+        failed_status.errors.append(
+            ErrorObject(
+                code="ERR_RUNTIME",
+                message="Repository status is unavailable.",
+                fix_suggestion="Rerun repo status.",
+            )
+        )
+        with patch("ask.commands.repo.repo_status", return_value=failed_status), patch(
+            "ask.commands.repo.doctor_catalog",
+            side_effect=AssertionError("doctor_catalog should be gated"),
+        ), patch(
+            "ask.commands.repo.skills_budget",
+            side_effect=AssertionError("skills_budget should be gated"),
+        ), patch(
+            "ask.commands.repo.skills_handles",
+            side_effect=AssertionError("skills_handles should be gated"),
+        ), patch(
+            "ask.commands.repo.repo_surface",
+            side_effect=AssertionError("repo_surface should be gated"),
+        ):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
+        self.assertEqual(
+            doctor["signals"]["repo_status"]["summary"],
+            "Repository status is unavailable.",
+        )
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["runtime_budget"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["command_handles"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
+
     def test_unexpected_signal_exception_returns_doctor_blocker(self) -> None:
         with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")), patch(
             "ask.commands.repo.doctor_catalog",
