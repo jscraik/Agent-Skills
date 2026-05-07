@@ -200,7 +200,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--json"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--robot", "--json"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -228,7 +228,6 @@ class TestAskCLI(unittest.TestCase):
             "next_command",
         ):
             self.assertIn(field, explanation)
-
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector", "--json"]
