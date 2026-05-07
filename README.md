@@ -54,8 +54,8 @@ ask skills sync --scope user --projection rooted
 
 # Agent-facing golden paths
 ./bin/ask repo doctor --json --robot                          # Health check with JSON output
-./bin/ask skills improve "improve test coverage"              # Get improvement suggestions
-./bin/ask skills explain he-heartbeat                         # Explain a specific skill
+./bin/ask skills improve "improve test coverage" --json --robot
+./bin/ask skills explain he-heartbeat --json --robot
 ```
 
 ## What you can do
@@ -115,12 +115,12 @@ ask skills handles --check --json
 ./bin/ask repo doctor --json --robot
 
 # Skill improvement workflow
-./bin/ask skills improve "improve test coverage"
-./bin/ask skills improve "add error handling"
+./bin/ask skills improve "improve test coverage" --json --robot
+./bin/ask skills improve "add error handling" --json --robot
 
 # Skill explanation and understanding
-./bin/ask skills explain he-heartbeat
-./bin/ask skills explain skill-builder
+./bin/ask skills explain he-heartbeat --json --robot
+./bin/ask skills explain skill-builder --json --robot
 
 # Skill proof and validation evidence
 ./bin/ask skills proof backend/cli-spec --json

@@ -872,18 +872,20 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         )
         return result
 
-    source_path = repo_root / str(resolution.get("source_path"))
-    # Validate that source_path is contained within repo_root to prevent directory traversal
+    raw_source_path = Path(str(resolution.get("source_path") or ""))
+    source_path = raw_source_path if raw_source_path.is_absolute() else repo_root / raw_source_path
     try:
         resolved_source = source_path.resolve()
         resolved_repo = repo_root.resolve()
-        if not resolved_source.is_relative_to(resolved_repo):
+        try:
+            resolved_source.relative_to(resolved_repo)
+        except ValueError:
             result.status = "error"
             result.errors.append(
                 ErrorObject(
-                    code="ERR_SECURITY",
-                    message=f"Skill source path '{source_path}' is outside repository bounds",
-                    fix_suggestion="Only skills within the repository can be read",
+                    code="ERR_PATH_TRAVERSAL",
+                    message=f"Skill handle '{normalized}' resolved outside the repository root.",
+                    fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
                 )
             )
             return result

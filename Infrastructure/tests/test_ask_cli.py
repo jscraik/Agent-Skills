@@ -3,6 +3,8 @@ import subprocess
 import json
 import os
 import sys
+from pathlib import Path
+from unittest import mock
 
 
 def _run_cli(cmd: list[str], **kwargs):
@@ -228,6 +230,27 @@ class TestAskCLI(unittest.TestCase):
             "next_command",
         ):
             self.assertIn(field, explanation)
+
+    def test_skills_explain_rejects_out_of_repo_source_path(self):
+        """Verify explain validates resolved skill paths before reading skill files."""
+        sys.path.insert(0, str(Path.cwd() / "Infrastructure" / "scripts" / "lib"))
+        from ask.commands import skills as skills_commands
+
+        with mock.patch.object(
+            skills_commands,
+            "resolve_skill_handle",
+            return_value={
+                "status": "ok",
+                "handle": "escaped",
+                "source_path": "../outside/SKILL.md",
+                "description": "outside repo",
+            },
+        ):
+            result = skills_commands.explain_skill(Path.cwd(), "escaped")
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_PATH_TRAVERSAL")
+
     def test_reviewers_resolve_json_contract(self):
         """Verify ask reviewers resolve exposes the reviewer handle namespace."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "resolve", "skillinspector", "--json"]
