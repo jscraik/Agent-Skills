@@ -73,17 +73,17 @@ parent_issue:
   blocked_by: []
 sub_issues:
   - key: JSC-285
-  - title: "[agent-skills] Map skills command responsibilities and output contracts"
+    title: "[agent-skills] Map skills command responsibilities and output contracts"
     priority: 1
     execution_route: Agent-safe
   - key: JSC-286
-  - title: "[agent-skills] Extract plugin cache service behind existing behavior"
+    title: "[agent-skills] Extract plugin cache service behind existing behavior"
     priority: 2
     execution_route: Agent-assisted
     blocked_by:
       - JSC-285
   - key: JSC-287
-  - title: "[agent-skills] Write proof taxonomy and lifecycle ADR"
+    title: "[agent-skills] Write proof taxonomy and lifecycle ADR"
     priority: 1
     execution_route: Agent-assisted; human-review required
 ```
