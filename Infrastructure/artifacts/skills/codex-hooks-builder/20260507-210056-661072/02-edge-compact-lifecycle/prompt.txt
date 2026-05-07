@@ -1,0 +1,1 @@
+Upgrade this Codex hook pack for compact lifecycle support. Validate PreCompact and PostCompact against the local pre-compact and post-compact schemas, explain matcher triggers, and keep hook stdout hidden unless schema JSON is intentional.
