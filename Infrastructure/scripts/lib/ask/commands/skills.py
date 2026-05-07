@@ -994,7 +994,7 @@ def _skill_validation_commands(source_path: Path, repo_root: Path) -> list[str]:
     except ValueError:
         return []
     audit_target = relative_source.parent if relative_source.name == "SKILL.md" else relative_source
-    return [f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict"]
+    return [f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict --json --robot"]
 
 
 def explain_skill(repo_root: Path, handle: str) -> CallResult:
@@ -1021,7 +1021,18 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         )
         return result
 
-    raw_source_path = Path(str(resolution.get("source_path") or ""))
+    source_path_value = str(resolution.get("source_path") or "").strip()
+    if not source_path_value:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skill handle '{normalized}' resolved without a canonical source path.",
+                fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+            )
+        )
+        return result
+    raw_source_path = Path(source_path_value)
     source_path = raw_source_path if raw_source_path.is_absolute() else repo_root / raw_source_path
     try:
         resolved_source = source_path.resolve()
@@ -1045,6 +1056,16 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
                 code="ERR_VALIDATION",
                 message=f"Failed to validate source path: {e}",
                 fix_suggestion="Ensure the source path is valid and accessible",
+            )
+        )
+        return result
+    if not resolved_source.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Resolved source for '{normalized}' is missing: {source_path}",
+                fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
             )
         )
         return result

@@ -17,7 +17,6 @@ GENERATED_SURFACE_PREFIXES = (
     ".skill-telemetry/",
 )
 CANONICAL_SKILL_PREFIXES = (
-    "Plugins/",
     "Skills/",
 )
 
@@ -592,13 +591,13 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
     ]
     canonical_skill_changed = [
         path for path in changed_files
-        if path.startswith(CANONICAL_SKILL_PREFIXES)
+        if _is_canonical_skill_path(path)
     ]
     commands = []
     if canonical_skill_changed or generated_changed:
         commands.extend(
             [
-                "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+                "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
                 "./bin/ask skills handles --check --json --robot",
             ]
         )
@@ -608,6 +607,18 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
         "generated_changed_files": generated_changed,
         "canonical_skill_changed_files": canonical_skill_changed,
     }
+
+
+def _is_canonical_skill_path(path: str) -> bool:
+    if path.startswith(CANONICAL_SKILL_PREFIXES):
+        return True
+    parts = path.split("/")
+    return (
+        len(parts) >= 4
+        and parts[0] == "Plugins"
+        and parts[1] != "cache"
+        and parts[2] in {"skills", "Skills"}
+    )
 
 
 def _closeout_runtime_budget(doctor_payload: dict[str, Any]) -> dict[str, Any]:

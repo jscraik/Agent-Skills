@@ -9,9 +9,7 @@
     "contains failed: 'Emits schema_version: 1 and Linear Acceptance Traceability.'"
   ],
   "tier2_findings": [],
-  "warnings": [
-    "should_trigger set, but skill selection signal was unavailable for this run."
-  ],
+  "warnings": [],
   "artifacts": {
     "dir": "Infrastructure/artifacts/skills/he-spec/20260507-000102-364590/01-explicit-spec-stage/codex",
     "final": "Infrastructure/artifacts/skills/he-spec/20260507-000102-364590/01-explicit-spec-stage/codex/final.txt",

@@ -223,7 +223,7 @@ FUZZY_MATCHES = {
     "improve": "improve",
     "closeout": "closeout",
     "finish": "closeout",
-    "doctor": "doctor-catalog",
+    "doctor": "doctor",
     "catalog": "doctor-catalog",
     "provider": "provider-audit",
     "provider-audit": "provider-audit",

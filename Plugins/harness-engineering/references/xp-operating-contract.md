@@ -7,7 +7,8 @@ from replacing working software.
 ## Simple Design
 
 - Make the current behavior observable before changing it.
-- Choose the least surprising command surface already used by the repo.
+- For repo operations, use `./bin/ask` as the default command surface; it forwards to `Infrastructure/bin/ask`.
+- If an operation is unavailable via `./bin/ask`, state the exception and rationale.
 - Prefer a narrow test or eval that would have caught the regression.
 - Keep names and states consistent across native tools, skill output, and
   generated evidence.
@@ -16,7 +17,7 @@ from replacing working software.
 
 - A fix cannot name the exact failing command, comment, or artifact.
 - A stage adds process without reducing future decision load.
-- A handoff hides an unresolved blocker behind generic "follow up" wording.
+- A handoff hides an unresolved blocker behind generic "follow-up" wording.
 - A workflow asks agents to infer state that can be read from a command or file.
 
 ## Slack Policy

@@ -142,7 +142,40 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(closeout["sync"]["needed"])
         self.assertEqual(
             closeout["next_command"],
-            "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        )
+
+    def test_closeout_changed_plugin_reference_does_not_require_sync(self) -> None:
+        changed_files = ["Plugins/harness-engineering/references/xp-operating-contract.md"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask repo validate --changed-files "
+            "Plugins/harness-engineering/references/xp-operating-contract.md --json --robot",
+        )
+
+    def test_closeout_changed_plugin_skill_requires_sync(self) -> None:
+        changed_files = ["Plugins/harness-engineering/skills/goal-governor/SKILL.md"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        self.assertTrue(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
         )
 
     def test_closeout_checks_changed_files_even_without_changed_flag(self) -> None:

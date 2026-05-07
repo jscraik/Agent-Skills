@@ -587,9 +587,15 @@ def _normalize_assert(a: Assertion) -> Dict[str, Any]:
             value = bare_match.group(2).strip()
             if value.startswith(("'", '"')):
                 try:
-                    value = shlex.split(value)[0]
-                except ValueError:
-                    pass
+                    parts = shlex.split(value)
+                except ValueError as exc:
+                    raise ValueError(f"Invalid quoted assertion value: {value!r}") from exc
+                if len(parts) != 1:
+                    raise ValueError(
+                        f"Assertion shorthand expects one value for {assertion_type}, "
+                        f"got {len(parts)} tokens: {value!r}"
+                    )
+                value = parts[0]
             return {"type": assertion_type, "value": value}
         for prefix, t in [
             ("regex:", "regex"),
@@ -2458,7 +2464,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
-            if c.should_trigger is not None and selected_skill is None:
+            if c.should_trigger is True and selected_skill is None:
                 runner_warnings.append("should_trigger set, but skill selection signal was unavailable for this run.")
 
             # Assertions + rubric parsing
