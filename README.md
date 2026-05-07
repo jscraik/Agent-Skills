@@ -31,31 +31,34 @@ Start with the product framing and proof contract:
 
 ## Quick start
 
+For AI coding agents, start with the product path:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills improve "<goal>" --json --robot
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+That sequence answers the important questions in order: can I work safely, what
+capability matches this job, how do I use it, what proof exists, and what must
+pass before I claim done.
+
 ```bash
 # Bash-first setup (recommended): open bash, then load repo environment
 bash
 source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply_env
 
-# See what's available
+# Explore the catalog when you need broader context
 ./bin/ask graph topics
 ./bin/ask skills list --json
 ./bin/ask skills handles --json --no-handles
 
-# Validate the repository
+# Validate or sync the repository directly
 ./bin/ask repo validate --ephemeral
-
-# Inspect repo surface ownership and runtime budget
-./bin/ask repo surface --json
-./bin/ask runtime budget --json --robot
-
-# Sync to your runtime
 ./bin/ask skills sync --scope workspace --projection rooted
 ./bin/ask skills sync --scope user --projection rooted
-
-# Agent-facing golden paths
-./bin/ask repo doctor --json --robot                          # Health check with JSON output
-./bin/ask skills improve "improve test coverage" --json --robot
-./bin/ask skills explain he-heartbeat --json --robot
 ```
 
 ## What you can do
@@ -111,25 +114,20 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 ### Agent-facing golden paths
 
 ```bash
-# Repository health and diagnostics
+# Can I work safely?
 ./bin/ask repo doctor --json --robot
 
-# Skill improvement workflow
-./bin/ask skills improve "improve test coverage" --json --robot
-./bin/ask skills improve "add error handling" --json --robot
+# What capability should I use?
+./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot
 
-# Skill explanation and understanding
+# How do I use this capability?
 ./bin/ask skills explain he-heartbeat --json --robot
-./bin/ask skills explain skill-builder --json --robot
 
-# Skill proof and validation evidence
-./bin/ask skills proof backend/cli-spec --json
+# What proof exists?
+./bin/ask skills prove he-heartbeat --json --robot
 
-# Next action suggestions
-./bin/ask skills next-action he-heartbeat --json
-
-# Plan closeout workflow
-./bin/ask skills closeout my-plan-id --json
+# What must pass before I claim done?
+./bin/ask repo closeout --changed --json --robot
 ```
 
 ### Manage lifecycle
@@ -217,7 +215,7 @@ This repo separates source, projection, and live runtime visibility:
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-`ask skills list --json` reports the current visible runtime surface. In the current rooted projection this is a compact first-level list of root routers plus generated command handles. `ask skills handles --json --no-handles` validates the full command surface; it currently reports 109 generated command handles with no violations.
+`ask skills list --json` reports the current visible runtime surface. In the current rooted projection this is a compact first-level list of root routers plus generated command handles. `ask skills handles --json --no-handles` validates the full command surface; it currently reports 93 generated command handles with no violations.
 
 A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
 
