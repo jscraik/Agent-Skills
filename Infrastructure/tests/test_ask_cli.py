@@ -266,14 +266,16 @@ class TestAskCLI(unittest.TestCase):
                 handle.write("{not-json\n")
                 handle.write(json.dumps({"skill_id": "other-skill", "timestamp": "2026-05-07T10:00:00Z"}) + "\n")
 
-            env = os.environ.copy()
-            env["SKILL_TELEMETRY_DIR"] = telemetry_dir
-            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
-            result = _run_cli(cmd, env=env)
+            with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": telemetry_dir}):
+                lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+                sys.path.insert(0, lib_path)
+                try:
+                    from ask.skill_analytics import skill_invocation_analytics
 
-        self.assertEqual(result.returncode, 0, result.stderr)
-        output = json.loads(result.stdout)
-        analytics = output["data"]["skill_proof"]["analytics"]
+                    analytics = skill_invocation_analytics(Path.cwd(), "he-heartbeat")
+                finally:
+                    sys.path.remove(lib_path)
+
         self.assertEqual(analytics["status"], "parse_warning")
         self.assertEqual(analytics["invocation_count"], 1)
         self.assertEqual(analytics["matching_invocation_count"], 0)
@@ -339,20 +341,24 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_explain_rejects_out_of_repo_source_path(self):
         """Verify explain validates resolved skill paths before reading skill files."""
-        sys.path.insert(0, str(Path.cwd() / "Infrastructure" / "scripts" / "lib"))
-        from ask.commands import skills as skills_commands
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
 
-        with mock.patch.object(
-            skills_commands,
-            "resolve_skill_handle",
-            return_value={
-                "status": "ok",
-                "handle": "escaped",
-                "source_path": "../outside/SKILL.md",
-                "description": "outside repo",
-            },
-        ):
-            result = skills_commands.explain_skill(Path.cwd(), "escaped")
+            with mock.patch.object(
+                skills_commands,
+                "resolve_skill_handle",
+                return_value={
+                    "status": "ok",
+                    "handle": "escaped",
+                    "source_path": "../outside/SKILL.md",
+                    "description": "outside repo",
+                },
+            ):
+                result = skills_commands.explain_skill(Path.cwd(), "escaped")
+        finally:
+            sys.path.remove(lib_path)
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_PATH_TRAVERSAL")

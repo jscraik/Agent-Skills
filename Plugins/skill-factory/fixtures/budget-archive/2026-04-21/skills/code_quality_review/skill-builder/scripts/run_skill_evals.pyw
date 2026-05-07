@@ -587,9 +587,17 @@ def _normalize_assert(a: Assertion) -> Dict[str, Any]:
             value = bare_match.group(2).strip()
             if value.startswith(("'", '"')):
                 try:
-                    value = shlex.split(value)[0]
-                except ValueError:
-                    pass
+                    tokens = shlex.split(value)
+                except ValueError as exc:
+                    raise ValueError(
+                        f"Invalid quoted assertion value for '{assertion_type}': {value!r}"
+                    ) from exc
+                if len(tokens) != 1:
+                    raise ValueError(
+                        "Assertion shorthand expects exactly one quoted value for "
+                        f"'{assertion_type}', got {len(tokens)} tokens: {value!r}"
+                    )
+                value = tokens[0]
             return {"type": assertion_type, "value": value}
         for prefix, t in [
             ("regex:", "regex"),

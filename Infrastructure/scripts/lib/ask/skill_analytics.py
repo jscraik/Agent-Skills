@@ -36,29 +36,40 @@ def skill_invocation_analytics(repo_root: Path, handle: str) -> dict[str, Any]:
     latest: dict[str, Any] | None = None
     parse_errors: list[dict[str, Any]] = []
     normalized = _normalize_handle(handle)
-    with projection_path.open(encoding="utf-8") as projection:
-        for line_number, raw_line in enumerate(projection, start=1):
-            line = raw_line.strip()
-            if not line:
-                continue
-            try:
-                record = json.loads(line)
-            except json.JSONDecodeError as exc:
-                parse_errors.append({"line": line_number, "message": str(exc)})
-                continue
-            if isinstance(record, dict):
-                invocation_count += 1
-                if _record_matches_skill(record, normalized):
-                    matching_invocation_count += 1
-                    latest = _latest_record(latest, record)
-            else:
-                parse_errors.append({"line": line_number, "message": "record is not an object"})
+    try:
+        with projection_path.open(encoding="utf-8") as projection:
+            for line_number, raw_line in enumerate(projection, start=1):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    parse_errors.append({"line": line_number, "message": str(exc)})
+                    continue
+                if isinstance(record, dict):
+                    invocation_count += 1
+                    if _record_matches_skill(record, normalized):
+                        matching_invocation_count += 1
+                        latest = _latest_record(latest, record)
+                else:
+                    parse_errors.append({"line": line_number, "message": "record is not an object"})
+    except OSError as exc:
+        return {
+            "status": "unavailable_or_legacy",
+            "evidence_class": "native_skill_invocation_projection",
+            "projection_path": projection_ref,
+            "note": "Skill invocation projection could not be read.",
+            "parse_error_count": 1,
+            "parse_errors": [{"line": 0, "message": str(exc)}],
+        }
 
-    status = "available" if matching_invocation_count else "no_matching_invocations"
     if parse_errors and not invocation_count:
         status = "parse_error"
-    elif parse_errors and not matching_invocation_count:
+    elif parse_errors:
         status = "parse_warning"
+    else:
+        status = "available" if matching_invocation_count else "no_matching_invocations"
 
     summary: dict[str, Any] = {
         "status": status,

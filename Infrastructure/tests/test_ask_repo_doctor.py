@@ -142,7 +142,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(closeout["sync"]["needed"])
         self.assertEqual(
             closeout["next_command"],
-            "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
         )
 
     def test_closeout_checks_changed_files_even_without_changed_flag(self) -> None:

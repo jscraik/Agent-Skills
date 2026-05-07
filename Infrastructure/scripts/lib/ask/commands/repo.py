@@ -605,7 +605,7 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
     if canonical_skill_changed or generated_changed:
         commands.extend(
             [
-                "bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+                "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
                 "./bin/ask skills handles --check --json --robot",
             ]
         )
