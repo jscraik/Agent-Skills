@@ -1,5 +1,5 @@
 {"type":"thread.started","thread_id":"019dff86-411a-7ca2-9de9-e78c865a49c0"}
-{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Ignored unsupported project-local config keys in /Users/jamiecraik/dev/agent-skills/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml."}}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Ignored unsupported project-local config keys in <redacted-home>/dev/agent-skills/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml."}}
 {"type":"item.completed","item":{"id":"item_1","type":"error","message":"`[features].codex_hooks` is deprecated. Use `[features].hooks` instead. (Enable it with `--enable hooks` or `[features].hooks` in config.toml. See https://developers.openai.com/codex/config-basic#feature-flags for details.)"}}
 {"type":"turn.started"}
 {"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"I’m going to pull the session-collector evidence first, then I’ll summarize what matters for the spec so we can write from the actual run history instead of assumptions."}}
