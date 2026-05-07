@@ -9,8 +9,8 @@ execution, and review documents; keep local runtime output out of git.
 | --- | --- | --- |
 | `.harness/core/**.md` | policy | Non-negotiable repo invariants and operating rules. |
 | `.harness/decisions/**.md` | policy/reference | Architecture decisions and tradeoffs. |
-| `.harness/linear/**.md` | execution-input | Approved Linear destination, milestone, issue, priority, labels, dependencies, and execution route. |
-| `.harness/refactors/**.md` | execution-input | Selected refactor or migration route, rollback rules, and anti-regression constraints. |
+| `.harness/linear/**.md` | policy (execution-input authority) | Approved Linear destination, milestone, issue, priority, labels, dependencies, and execution route. |
+| `.harness/refactors/**.md` | policy (execution-input authority) | Selected refactor or migration route, rollback rules, and anti-regression constraints. |
 | `.harness/ideate/**.md` | lifecycle-artifact | Durable HE ideation output. |
 | `.harness/brainstorm/**.md` | lifecycle-artifact | Durable HE brainstorm output. |
 | `.harness/specs/**.md` | lifecycle-artifact | Durable HE spec output. |
