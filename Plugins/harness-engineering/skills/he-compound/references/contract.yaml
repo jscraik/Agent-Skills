@@ -24,6 +24,7 @@ outputs:
   - "for coding-harness-managed repos, command-level bridge evidence for Linear state, Harness transition, Project Brain status, and north-star evidence status"
   - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
+  - "XP operating artifact: blackboard_delta summarizing durable state changes across stages"
   - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
   - "structured status output with schema_version: 1 when requested, including exact Harness command/path evidence for every blocked lifecycle field"
 

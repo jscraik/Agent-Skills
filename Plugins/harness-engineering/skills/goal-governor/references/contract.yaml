@@ -15,6 +15,7 @@ outputs:
   - "native and board state reconciliation"
   - "next safe action"
   - "validation evidence"
+  - "XP operating artifacts: blackboard delta and slack policy for long-running continuation"
   - "receipts or repair proposal"
 non_goals:
   - "ordinary one-file fixes"

@@ -66,6 +66,28 @@ Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
 Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 ```
 
+The 2026-05-07 design-complexity and XP operating-contract rewrite preserved these compact-entrypoint lines outside the runtime bodies:
+
+```text
+Return schema_version when structured. Stated / Inferred / Out of scope, options, risks, warrant notes, and next stage.
+Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff, repeated context-feedback candidates.
+Return schema_version when structured. Stage map, active owner, blockers, next action, and retained references.
+Return schema_version when structured. Root cause, fix, validation, rollback note, next review handoff.
+Reproduce first; inspect changed path; patch narrowly; validate exact failure path.
+Return schema_version when structured. Gap list, prioritized improvements, validation, retained references.
+Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
+Return schema_version when structured. durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix.
+Return `schema_version` when structured, plus `selected_stage`, `source_path`, `folded_mode`, `blocker`, and `lifecycle_exit_status`.
+Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan.
+Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff.
+Return schema_version when structured. Goal status, heartbeat decision, stop rule, next wakeup, and residual risk.
+Return schema_version when structured. Board health report, native/board reconciliation, next safe action, machine-checkable validation evidence, residual risks, and owner-input blockers.
+Existing board files pass `scripts/check_goal_board.py`.
+   - Existing board files pass `scripts/check_goal_board.py`.
+python3 scripts/check_goal_board.py <goal-directory>
+Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
+```
+
 ## Preservation Contract
 
 - Active `SKILL.md` files stay concise and routing-safe.

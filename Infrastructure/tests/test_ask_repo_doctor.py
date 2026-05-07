@@ -21,11 +21,11 @@ def _result(status: str = "success", data: dict | None = None) -> CallResult:
     return result
 
 
-def _status_result(skills_synced: bool = True) -> CallResult:
+def _status_result(skills_synced: bool = True, is_git: bool = True) -> CallResult:
     return _result(
         data={
             "repo_root": ".",
-            "is_git": True,
+            "is_git": is_git,
             "skills_synced": skills_synced,
         }
     )
@@ -202,6 +202,30 @@ class TestAskRepoDoctor(unittest.TestCase):
             "Command-handle validation found 3 violation(s).",
         )
 
+    def test_non_git_repo_status_gates_downstream_checks(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result(is_git=False)), patch(
+            "ask.commands.repo.doctor_catalog",
+            side_effect=AssertionError("doctor_catalog should be gated"),
+        ), patch(
+            "ask.commands.repo.skills_budget",
+            side_effect=AssertionError("skills_budget should be gated"),
+        ), patch(
+            "ask.commands.repo.skills_handles",
+            side_effect=AssertionError("skills_handles should be gated"),
+        ), patch(
+            "ask.commands.repo.repo_surface",
+            side_effect=AssertionError("repo_surface should be gated"),
+        ):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertTrue(doctor["blocking"])
+        self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
+        self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
+        self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
+
     def test_unexpected_signal_exception_returns_doctor_blocker(self) -> None:
         with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")):
             result = repo_doctor(REPO_ROOT)
@@ -210,6 +234,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(result.status, "error")
         self.assertTrue(doctor["blocking"])
         self.assertEqual(doctor["blockers"][0]["id"], "unknown_signal_error")
+        self.assertNotIn("projection_sync", doctor["signals"])
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
 
 

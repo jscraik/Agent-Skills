@@ -29,6 +29,7 @@ outputs:
   - requirements artifact path when a durable handoff is created
   - Linear issue key/URL for tracked handoffs, or linear_blocked status with missing fields and ready-to-create payload
   - coding_harness lifecycle block when the target repo exposes Harness gates or Project Brain
+  - "XP operating artifact: blackboard_delta describing changed shared understanding and persistence targets"
   - recommended next HE stage
 
 non_goals:

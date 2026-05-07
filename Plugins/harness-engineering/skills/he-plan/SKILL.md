@@ -12,7 +12,7 @@ Use after approved spec/issue; do non-mutating inspection before planning.
 ## Inputs
 Spec, Linear issue, repo state, constraints, product blockers.
 ## Outputs
-Return schema_version when structured. durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix.
+Return schema_version when structured. durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix, slack_policy, and blackboard_delta.
 ## Procedure
 Explore first, ask second; use update_plan only for live progress; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them.
 ## Validation
@@ -35,3 +35,5 @@ Reference `assets/` only for skill packaging and browseability; durable plans an
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

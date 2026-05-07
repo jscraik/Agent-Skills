@@ -12,7 +12,7 @@ Use when work spans brainstorm/spec/plan/work/review or needs refresh/resume con
 ## Inputs
 Goal, Linear/project-brain state, specs, plans, PRs, session evidence.
 ## Outputs
-Return schema_version when structured. Stage map, active owner, blockers, next action, and retained references.
+Return schema_version when structured. Stage map, active owner, blockers, next action, blackboard_delta, and retained references.
 ## Procedure
 Inspect live state; pick stage order; keep Linear/spec/plan/PR links; in coding-harness-managed repos preserve Harness lifecycle state and refresh Project Brain when repository context changes.
 ## Validation
@@ -34,3 +34,5 @@ Reference `assets/` only for skill packaging and browseability; lifecycle state 
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

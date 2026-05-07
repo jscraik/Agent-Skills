@@ -17,7 +17,7 @@ Use when monitoring, wakeups, until-green loops, or follow-up automation is requ
 ## Inputs
 Target thread/workspace, cadence, stop condition, issue/PR/check links, optional active thread goal.
 ## Outputs
-Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
+Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, slack_policy, blackboard_delta, and next user-visible update.
 ## Procedure
 Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
 
@@ -41,3 +41,5 @@ Redact secrets; do not create cron workarounds for short thread follow-up. Do no
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
+- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

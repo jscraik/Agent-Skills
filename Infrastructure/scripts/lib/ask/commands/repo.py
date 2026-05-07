@@ -237,6 +237,13 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
             "source": "repo_status",
             "next_command": "./bin/ask repo status --json --robot",
         }
+    if not status_result.data.get("is_git"):
+        return {
+            "state": "skipped",
+            "severity": "info",
+            "summary": "Projection sync skipped until repository status is ready.",
+            "source": "repo_status",
+        }
     if status_result.data.get("skills_synced"):
         return {
             "state": "pass",
@@ -417,25 +424,62 @@ def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
     }
 
 
+def _skipped_signal(summary: str, source: str) -> dict[str, Any]:
+    return {
+        "state": "skipped",
+        "severity": "info",
+        "summary": summary,
+        "source": source,
+    }
+
+
 def repo_doctor(repo_root: Path) -> CallResult:
     """Compose repo health checks into one compact agent-facing doctor payload."""
     result = CallResult()
     try:
         status_result = repo_status(repo_root)
-        signals = {
-            "repo_status": _repo_status_signal(status_result),
-            "projection_sync": _projection_sync_signal(status_result),
-            "catalog_parity": _catalog_parity_signal(doctor_catalog(repo_root)),
-            "runtime_budget": _runtime_budget_signal(skills_budget(repo_root)),
-            "command_handles": _command_handles_signal(
-                skills_handles(repo_root, check=True, include_handles=False)
-            ),
-            "repo_surface": _repo_surface_signal(repo_surface(repo_root)),
-        }
     except Exception as exc:
         signals = {
             "unknown_signal_error": _unknown_signal_error_signal(exc),
         }
+    else:
+        repo_status_signal = _repo_status_signal(status_result)
+        signals = {
+            "repo_status": repo_status_signal,
+            "projection_sync": _projection_sync_signal(status_result),
+        }
+        if repo_status_signal.get("state") in {"block", "error"}:
+            signals.update(
+                {
+                    "catalog_parity": _skipped_signal(
+                        "Catalog parity skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                    "runtime_budget": _skipped_signal(
+                        "Runtime budget skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                    "command_handles": _skipped_signal(
+                        "Command-handle validation skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                    "repo_surface": _skipped_signal(
+                        "Repo surface inventory skipped until repository status is ready.",
+                        "repo_status",
+                    ),
+                }
+            )
+        else:
+            signals.update(
+                {
+                    "catalog_parity": _catalog_parity_signal(doctor_catalog(repo_root)),
+                    "runtime_budget": _runtime_budget_signal(skills_budget(repo_root)),
+                    "command_handles": _command_handles_signal(
+                        skills_handles(repo_root, check=True, include_handles=False)
+                    ),
+                    "repo_surface": _repo_surface_signal(repo_surface(repo_root)),
+                }
+            )
     payload = build_golden_path_payload(
         signals=signals,
         normal_next_command="./bin/ask repo status --json --robot",
