@@ -24,6 +24,8 @@ outputs:
   - Linear/spec/plan/PR traceability matrix for tracked work
   - coding_harness lifecycle block including plan-gate status when the repo is coding-harness-managed
   - requirements, dependencies, test scenarios, verification outcomes, rollback, and risk notes
+  - subtractive compression units before additive metadata when first-contact or cockpit surfaces are in scope
+  - exact first-contact budget decision for cockpit/compression plans, including default-help rails, agent-catalog rails, commands to demote or hide, and the advanced/all escape hatch
   - "XP operating artifacts: slack_policy for allowable uncertainty and blackboard_delta for durable plan-state updates"
   - explicit classification of assumptions, blockers, and deferred implementation unknowns
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
@@ -45,6 +47,8 @@ non_goals:
   - using update_plan as the durable plan artifact
   - creating vague task lists without source traceability or test specificity
   - mutating tracker state outside the Linear workflow or skipping the Linear tracker gate
+  - deferring help/catalog/docs compression while allowing implementation-presence criteria to pass
+  - describing command compression as a direction without listing the visible rails, demoted commands, and admission tests that make it enforceable
 
 risks:
   - asking user questions that repo inspection could answer; mitigate with explore-first rules
@@ -54,3 +58,5 @@ risks:
   - missing Harness gate evidence in coding-harness-managed repos; mitigate by running or explicitly blocking plan-gate and transition commands
   - weak tests; mitigate with behavior-focused scenarios and mock anti-pattern guidance
   - over-planning into implementation; mitigate with plan-only boundaries and deferred implementation notes
+  - additive compatibility dominating subtractive clarity; mitigate by sequencing default-help budget, agent-catalog budget, docs front-door collapse, standalone-command admission tests, fresh-agent eval, and ablation proof as blocking units
+  - compression plans remaining too subjective to implement; mitigate by requiring exact public command names, hidden command names, future command admission criteria, and generated snapshot commands in the plan artifact

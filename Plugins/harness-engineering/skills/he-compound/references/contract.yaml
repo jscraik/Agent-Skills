@@ -22,6 +22,7 @@ outputs:
   - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
   - "for lifecycle mode, the current stage, completed stages, blockers, and exact next Harness Engineering command"
   - "for coding-harness-managed repos, command-level bridge evidence for Linear state, Harness transition, Project Brain status, and north-star evidence status"
+  - "for compression recovery, active_stage: spec_refresh_required and next_action: run he-spec with the agent-native compression contract"
   - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
   - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
   - "XP operating artifact: blackboard_delta summarizing durable state changes across stages"
@@ -34,6 +35,7 @@ non_goals:
   - documenting unsolved or unverified problems as durable learnings
   - broad stale-doc sweeps without evidence
   - deleting or ignoring Harness Engineering artifact directories
+  - advancing product-compression work to implementation when the current blocker is a missing spec acceptance gate
 
 risks:
   - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
@@ -44,6 +46,7 @@ risks:
   - compact-safe overlap blind spots; mitigate by treating compact-safe as an explicit tradeoff and only recommending narrow follow-up refreshes when obvious
   - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used
   - helper-role drift during learning capture; mitigate with the one-file-write rule and orchestrator-owned final assembly
+  - additive stage progress hiding product clutter; mitigate by requiring first-contact compression and ablation status before work/review handoff
 
 observability: >
   Record selected mode, earliest incomplete stage, artifact paths checked,

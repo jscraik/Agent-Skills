@@ -10,7 +10,7 @@ metadata:
     - durable goal governance
   lifecycle_state: active
   maturity: experimental
-  owner: Harness Engineering Team
+  owner: Agent Ops Team
   review_cadence: quarterly
   metadata_source: frontmatter
   quality_target: plugin-eval-a
@@ -64,7 +64,7 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
    - Native objective is non-empty and no more than 4,000 characters; keep bulk instructions in `goal.md`.
    - Agent config supports the intended delegation depth; for Jamie's Codex harness, require `max_depth >= 2`.
    - The selected validation commands exist and are repo-canonical.
-   - Existing board files pass `python3 scripts/check_goal_board.py <goal-directory>`.
+   - Existing board files pass `python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-directory>`.
 3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete` (normalize native `budgetLimited` to output `budget_limited`).
 4. Treat token budget, tokens used, elapsed seconds, lifecycle updates, and budget-limited transitions as evidence, not completion proof.
 5. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
@@ -113,7 +113,7 @@ docs/goals/<slug>/
 - Native `/goal` state and repo-visible board state can drift. Reconcile both before choosing Worker work.
 - A receipt is only useful when it names the exact verifier and outcome; vague "tested" notes are not completion evidence.
 - `budgetLimited` is a native stop/steering state that maps to normalized output status `budget_limited`. Classify scope, verification, and owner decision before Worker work.
-- Delegation still follows the shared HE subagent call contract; do not assume Scout, Judge, or Worker roles exist until runtime config proves they are available.
+- Delegation must follow the relevant repo's subagent call contract; do not assume Scout, Judge, or Worker roles exist until runtime config proves they are available.
 
 ## Output Contract
 
@@ -136,21 +136,20 @@ risks:
 
 ## Progressive Disclosure
 
-- Read [references/deferred-context-index.md](../../references/deferred-context-index.md) when preserving or recovering context moved out of active skill text.
-- Read [references/subagent-call-contract.md](../../references/subagent-call-contract.md) before delegating Scout, Judge, PM, or Worker tasks.
+- Preserve moved context in local `references/` files; do not delete it for budget alone.
+- Read `Plugins/harness-engineering/references/subagent-call-contract.md` only when a Harness Engineering goal delegates HE Scout, Judge, PM, or Worker tasks.
 - Read [references/native-goal-runtime.md](./references/native-goal-runtime.md) when reconciling with current `~/dev/codex` native goal behavior.
 - Read [references/goal-contract.md](./references/goal-contract.md) when creating or validating `goal.md`, `state.yaml`, or `receipts.jsonl`.
 - Read [references/creation-and-continuation.md](./references/creation-and-continuation.md) when choosing create, continue, repair, or import behavior.
 - Read [references/evals.yaml](./references/evals.yaml) when testing this skill with binary trigger and behavior checks.
-- Read [../../references/pragmatic-operating-invariants.md](../../references/pragmatic-operating-invariants.md) when continuation exposes repeated drift, stale state, or broken-window cleanup.
-- Read [../../references/xp-operating-contract.md](../../references/xp-operating-contract.md) when emitting blackboard deltas, slack policy, red signals, or repeated-failure learning.
+- For Harness Engineering blackboard, slack, or lifecycle deltas, read `Plugins/harness-engineering/references/xp-operating-contract.md` and `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`.
 
 ## Validation
 
 Validate the skill package:
 
 ```bash
-python3 scripts/check_goal_board.py <goal-directory>
+python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-directory>
 ./bin/ask skills audit <skill-directory> --level strict --robot
 ```
 

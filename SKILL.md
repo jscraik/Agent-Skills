@@ -12,15 +12,29 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
+- [.Agents — Skills](#.agents-skills)
 - [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
-- `total_skills`: 21
+- `total_skills`: 31
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: 8c69fbfa81b89658
 
 ## Catalog
+
+## .Agents — Skills
+
+- `agent-ops` — Route agent operations, repo hygiene, validation, automation, and workflow support without loading individual operational skills by default.
+- `backend-platform` — Route backend, data, API, platform, and infrastructure implementation work without exposing every backend module up front.
+- `content-publishing` — Route writing, publishing, editorial, docs, and content operations work while keeping detailed content modules latent.
+- `frontend-ui` — Route frontend interface, design-system, browser, and user-experience work while keeping component-level skills latent until selected.
+- `harness-engineering` — Route Harness Engineering lifecycle and session-evidence requests when users need brainstorming, planning, implementation, review, fixes, heartbeats, or prior-run improvement.
+- `mobile-native` — Route mobile-native app, platform, device, and app-store work without loading unrelated implementation skills.
+- `plugin-factory` — Route plugin creation, plugin installation, scaffolding, packaging, and plugin lifecycle work through bounded modules.
+- `product-strategy` — Route product, planning, research synthesis, prioritization, and strategy work with latent specialist modules selected only as needed.
+- `security-ops` — Review, route, and audit security work. Use when tasks involve threat modeling, secrets, policy, or operational security risk.
+- `skill-factory` — Use when creating, auditing, installing, refactoring, or governing Codex skills while preserving local plugin browseability.
 
 ## Skills — Agent Ops
 

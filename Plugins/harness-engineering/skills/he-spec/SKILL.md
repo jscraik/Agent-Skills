@@ -14,7 +14,7 @@ Problem, Linear issue, QA report, source evidence, current-vs-latest spec status
 ## Outputs
 Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
 ## Procedure
-Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable.
+Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable. When feedback says a prior cockpit, golden-path, or agent-native plan was too additive, load the compression contract and make first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metric gates blocking acceptance criteria.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
@@ -25,6 +25,7 @@ Redact secrets; do not invent requirements. Do not remove important context for 
 - Inventing acceptance criteria that are not grounded in source evidence.
 - Writing task sequences instead of behavior contracts.
 - Weakening Linear traceability because a local spec already exists.
+- Treating classification, metadata, docs routing, or command existence as compression proof.
 ## Examples
 - For `JSC-246`, convert a QA report about the account settings flow into a complete replacement spec section with Linear Acceptance Traceability, acceptance IDs, assumptions, validation, and rollback notes.
 - When a current spec exists but the latest session evidence changes scope, compare current-vs-latest spec status before adding requirements.
@@ -35,6 +36,7 @@ Reference `assets/` only for skill packaging and browseability; spec source mate
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
+- Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
 - Doctrine: `Plugins/harness-engineering/references/he-spec-doctrine.md`
 - Artifact: `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`

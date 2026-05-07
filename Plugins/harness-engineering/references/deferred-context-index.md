@@ -88,16 +88,42 @@ python3 scripts/check_goal_board.py <goal-directory>
 Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
 ```
 
+The 2026-05-07 agent-native compression and review-loop pass preserved these
+compact-entrypoint lines outside the runtime bodies while moving the expanded
+behavior into `references/agent-native-compression-contract.md` and
+`skills/he-code-review/references/review-loop-patterns.md`:
+
+```text
+Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, repeated_failure when recurring, blackboard_delta, next handoff, repeated context-feedback candidates.
+Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; in coding-harness-managed repos also check Project Brain, north-star evidence, and Harness review gates; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix. If CodeRabbit, Codex, or human review feedback repeats across PRs, classify whether the HE context, evals, or skill routing should adapt after the immediate review.
+Inspect live state; pick stage order; keep Linear/spec/plan/PR links; in coding-harness-managed repos preserve Harness lifecycle state and refresh Project Brain when repository context changes.
+Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; translate external source material into invariants, evals, references, contracts, or an explicit rejection; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
+Explore first, ask second; use update_plan only for live progress; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them.
+Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage.
+Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable.
+```
+
 ## Preservation Contract
 
 - Active `SKILL.md` files stay concise and routing-safe.
 - Removed operational prose belongs in stage-local `references/*` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`.
 - `fixtures/preserved-context/**` preserves legacy full-stage guides for audit and migration comparison only.
 
+## Plan Preserved Context
+
+- `Plugins/harness-engineering/references/he-plan-doctrine.md`
+- `Plugins/harness-engineering/skills/he-plan/references/codex-plan-mode.md`
+- `Plugins/harness-engineering/skills/he-plan/references/plan-artifact-contract.md`
+- `Plugins/harness-engineering/skills/he-plan/references/planning-depth.md`
+- `Plugins/harness-engineering/skills/he-plan/references/deepening-review.md`
+- `Plugins/harness-engineering/skills/he-plan/references/test-strategy.md`
+- `Plugins/harness-engineering/skills/he-plan/references/visual-communication.md`
+
 ## Active Entrypoint Rewrite Preservation
 
-The PR 152 review-fix pass preserved removed Goal Governor validator wording
-while replacing the active command examples with the canonical packaged path:
+The PR 152 review-fix pass preserved removed Goal Governor validator wording.
+Goal Governor is now an independent skill at `Skills/agent-ops/goal-governor`;
+active board validation examples live there:
 
 ```text
    - Existing board files pass `./bin/ask check_goal_board <goal-directory>`.

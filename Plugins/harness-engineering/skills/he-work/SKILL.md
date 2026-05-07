@@ -30,6 +30,7 @@ Redact secrets; preserve user edits. Do not remove important context for budget 
 ## Examples
 - "Inspect JSC-246 and implement only the units in `Plans/JSC-246-account-settings.md`, preserve my dirty edits, then run `bash scripts/run-harness-setup-checks.sh`."
 - "Inspect `Infrastructure/templates/linear-handoff.md`; it has the wrong Linear field name, so make that tiny fix, run its focused test, and hand off for review."
+- "Use delegate mode only for bounded verified slices."
 ## Assets
 Reference `assets/` only for skill packaging and browseability; execution evidence belongs in validation output, PRs, and handoff notes.
 ## References
