@@ -53,9 +53,9 @@ ask skills sync --scope workspace --projection rooted
 ask skills sync --scope user --projection rooted
 
 # Agent-facing golden paths
-ask repo doctor --json --robot                          # Health check with JSON output
-ask skills improve "improve test coverage"              # Get improvement suggestions
-ask skills explain he-heartbeat                         # Explain a specific skill
+./bin/ask repo doctor --json --robot                          # Health check with JSON output
+./bin/ask skills improve "improve test coverage"              # Get improvement suggestions
+./bin/ask skills explain he-heartbeat                         # Explain a specific skill
 ```
 
 ## What you can do
@@ -112,24 +112,24 @@ ask skills handles --check --json
 
 ```bash
 # Repository health and diagnostics
-ask repo doctor --json --robot
+./bin/ask repo doctor --json --robot
 
 # Skill improvement workflow
-ask skills improve "improve test coverage"
+./bin/ask skills improve "improve test coverage"
 ./bin/ask skills improve "add error handling"
 
 # Skill explanation and understanding
-ask skills explain he-heartbeat
-ask skills explain skill-builder
+./bin/ask skills explain he-heartbeat
+./bin/ask skills explain skill-builder
 
 # Skill proof and validation evidence
-ask skills proof backend/cli-spec --json
+./bin/ask skills proof backend/cli-spec --json
 
 # Next action suggestions
-ask skills next-action he-heartbeat --json
+./bin/ask skills next-action he-heartbeat --json
 
 # Plan closeout workflow
-ask skills closeout my-plan-id --json
+./bin/ask skills closeout my-plan-id --json
 ```
 
 ### Manage lifecycle
@@ -252,7 +252,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                              |
 | ------------------ | ------ | ----------------------------------------------------- |
-| agent-ops          | 40     | docs-expert, autofix, unslopify, simplify             |
+| agent-ops          | 42     | docs-expert, autofix, unslopify, simplify             |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
 | product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
@@ -271,7 +271,7 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 40 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- agent-ops/            # 42 skills: docs-expert, autofix, unslopify, simplify, ...
 |   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
 |   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me
