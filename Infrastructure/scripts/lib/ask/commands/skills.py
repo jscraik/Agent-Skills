@@ -50,6 +50,7 @@ from ask.selection_contract import (  # noqa: E402
     candidate_id,
     canonical_sort_key,
 )
+from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
 
 
 @dataclass
@@ -833,8 +834,8 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                 "structural_quality": {"status": "not_checked", "audit_command": None},
                 "analytics": {
                     "status": "unavailable_or_legacy",
-                    "evidence_class": "collector_health",
-                    "note": "Native Codex skill analytics projection is deferred to the collector-backed phase.",
+                    "evidence_class": "native_skill_invocation_projection",
+                    "note": "No skill handle was available for analytics lookup.",
                 },
                 "outcome_proof": {"status": "not_checked", "workout_candidates": [], "evidence_class": "outcome_proof"},
                 "goal_resolution": goal_resolution,
@@ -873,6 +874,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             "diagnostics_exit_code": audit_result.data.get("diagnostics", {}).get("exit_code"),
         }
 
+    analytics = skill_invocation_analytics(repo_root, normalized)
     workouts = _skill_workout_candidates(repo_root, normalized)
     outcome_status = "missing"
     next_command = f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot"
@@ -905,11 +907,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             "command": f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot",
         },
         "structural_quality": structural_detail,
-        "analytics": {
-            "status": "unavailable_or_legacy",
-            "evidence_class": "collector_health",
-            "note": "Native Codex skill analytics projection is deferred to the collector-backed phase.",
-        },
+        "analytics": analytics,
         "outcome_proof": {
             "status": outcome_status,
             "workout_candidates": workouts,

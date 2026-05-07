@@ -656,6 +656,16 @@ Projection fields should include `skill_id`, `plugin_id`, `turn_id_hash`,
 `product_client_id_hash`, timestamp, and privacy-safe repository attribution
 when available.
 
+First implementation slice:
+
+- Add an ASK-local reader for `.skill-telemetry/skill-invocations.jsonl`.
+- Wire `ask skills prove <skill-or-goal>` to report analytics status from that
+  projection when present.
+- Keep missing analytics honest as `unavailable_or_legacy`; do not treat
+  analytics as structural validation or outcome proof.
+- Keep raw telemetry parsing out of Agent Skills Kit. Session collector remains
+  the owner of raw source normalization in F5.
+
 ### F5: Session Collector Changes
 
 Update `/Users/jamiecraik/.agents/session-collector` to normalize supported

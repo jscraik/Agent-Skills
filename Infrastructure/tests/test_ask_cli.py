@@ -3,6 +3,7 @@ import subprocess
 import json
 import os
 import sys
+import tempfile
 
 
 def _run_cli(cmd: list[str], **kwargs):
@@ -215,6 +216,66 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("outcome_proof", skill_proof)
         self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
         self.assertIn("command_handle_proof", output["data"])
+
+    def test_skills_prove_uses_skill_invocation_projection(self):
+        """Verify ask skills prove consumes ASK-local skill invocation analytics."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            telemetry_dir = os.path.join(temp_dir, "telemetry")
+            os.makedirs(telemetry_dir, exist_ok=True)
+            with open(os.path.join(telemetry_dir, "skill-invocations.jsonl"), "w", encoding="utf-8") as handle:
+                handle.write(
+                    json.dumps(
+                        {
+                            "skill_id": "he-heartbeat",
+                            "plugin_id": "harness-engineering",
+                            "turn_id_hash": "turn_123",
+                            "thread_id_hash": "thread_123",
+                            "invoke_type": "skill",
+                            "scope": "workspace",
+                            "model_slug": "gpt-5.3-codex",
+                            "product_client_id_hash": "client_123",
+                            "repository_hash": "repo_123",
+                            "timestamp": "2026-05-07T10:00:00Z",
+                        },
+                        sort_keys=True,
+                    )
+                    + "\n"
+                )
+
+            env = os.environ.copy()
+            env["SKILL_TELEMETRY_DIR"] = telemetry_dir
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            result = _run_cli(cmd, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "available")
+        self.assertEqual(analytics["matching_invocation_count"], 1)
+        self.assertEqual(analytics["latest_invocation"]["plugin_id"], "harness-engineering")
+        self.assertEqual(analytics["latest_invocation"]["turn_id_hash"], "turn_123")
+
+    def test_skills_prove_reports_projection_parse_warning(self):
+        """Verify ask skills prove preserves valid projection rows with parse warnings."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            telemetry_dir = os.path.join(temp_dir, "telemetry")
+            os.makedirs(telemetry_dir, exist_ok=True)
+            with open(os.path.join(telemetry_dir, "skill-invocations.jsonl"), "w", encoding="utf-8") as handle:
+                handle.write("{not-json\n")
+                handle.write(json.dumps({"skill_id": "other-skill", "timestamp": "2026-05-07T10:00:00Z"}) + "\n")
+
+            env = os.environ.copy()
+            env["SKILL_TELEMETRY_DIR"] = telemetry_dir
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            result = _run_cli(cmd, env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        analytics = output["data"]["skill_proof"]["analytics"]
+        self.assertEqual(analytics["status"], "parse_warning")
+        self.assertEqual(analytics["invocation_count"], 1)
+        self.assertEqual(analytics["matching_invocation_count"], 0)
+        self.assertEqual(analytics["parse_error_count"], 1)
 
     def test_skills_prove_goal_fallback_json_contract(self):
         """Verify ask skills prove routes or clearly blocks a goal query."""
