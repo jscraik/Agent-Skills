@@ -74,6 +74,41 @@ def test_harness_database_is_runtime_state_violation() -> None:
     assert finding.code == "tracked_runtime_database"
 
 
+def test_harness_curated_context_paths_are_classified() -> None:
+    cases = {
+        ".harness/core/architecture-invariants.md": ("policy", "policy_surface"),
+        ".harness/linear/agent-skills-linear-plan.md": ("policy", "policy_surface"),
+        ".harness/refactors/ask-control-plane-decomposition.md": ("policy", "policy_surface"),
+        ".harness/specs/agent-skills-ask-control-plane-decomposition-spec.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/review/agent-skills-architecture-review.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+    }
+
+    for path, (classification, code) in cases.items():
+        finding = MODULE.classify_path(path)
+        assert finding.classification == classification
+        assert finding.status == "ok"
+        assert finding.code == code
+
+
+def test_harness_runtime_outputs_are_violations() -> None:
+    cases = {
+        ".harness/backups/abc.bak": "tracked_harness_backup",
+        ".harness/ci-migrate-snapshots/snapshot.json": "tracked_harness_snapshot",
+    }
+
+    for path, code in cases.items():
+        finding = MODULE.classify_path(path)
+        assert finding.status == "violation"
+        assert finding.blocking is True
+        assert finding.code == code
+
+
 def test_json_report_has_required_fields_and_deterministic_order() -> None:
     findings = MODULE.classify_paths(
         [

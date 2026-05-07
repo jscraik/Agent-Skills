@@ -74,6 +74,7 @@ sync-symlink/
 .diagram/context/refresh.log
 !.diagram/manifest.json
 semgrep.sarif
+Plugins/*.zip
 Infrastructure/artifacts/diagrams/
 Infrastructure/artifacts/dist/
 Infrastructure/artifacts/build/dist/
@@ -98,6 +99,43 @@ Infrastructure/reports/data/candidates.json
 /Infrastructure/artifacts/skill-graphs/runs/**/iter-*-improved.txt
 /Infrastructure/artifacts/skill-graphs/runs/**/summary.md
 /Infrastructure/artifacts/skill-graphs/runs/**/events.jsonl
+
+# Harness runtime/scratch outputs
+.harness/backups/
+.harness/*.db
+.harness/ci-migrate-snapshots/
+
+# Harness curated control-plane docs and contract JSON stay trackable.
+!.harness/
+!.harness/core/
+!.harness/core/**
+!.harness/decisions/
+!.harness/decisions/**
+!.harness/linear/
+!.harness/linear/**
+!.harness/refactors/
+!.harness/refactors/**
+!.harness/features/
+!.harness/features/**
+!.harness/strategy/
+!.harness/strategy/**
+!.harness/triage/
+!.harness/triage/**
+!.harness/review/
+!.harness/review/**
+!.harness/ideate/
+!.harness/ideate/**
+!.harness/brainstorm/
+!.harness/brainstorm/**
+!.harness/specs/
+!.harness/specs/**
+!.harness/plan/
+!.harness/plan/**
+!.harness/memory/
+!.harness/memory/**
+!.harness/quality/
+!.harness/quality/**
+!.harness/*.json
 
 # Local backups/patch leftovers
 *.bak

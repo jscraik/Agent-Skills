@@ -312,10 +312,30 @@ class TestGitignore(unittest.TestCase):
         self._lines = GITIGNORE_PATH.read_text(encoding="utf-8").splitlines()
 
     def test_artifacts_policy_entry_present(self):
-        self.assertIn("artifacts/policy/", self._lines)
+        self.assertTrue(
+            "artifacts/policy/" in self._lines or "/artifacts/policy/" in self._lines
+        )
 
     def test_original_infrastructure_artifacts_policy_still_present(self):
         self.assertIn("Infrastructure/artifacts/policy/", self._lines)
+
+    def test_harness_runtime_outputs_ignored(self):
+        for entry in [
+            ".harness/backups/",
+            ".harness/*.db",
+            ".harness/ci-migrate-snapshots/",
+        ]:
+            self.assertIn(entry, self._lines)
+
+    def test_harness_curated_roots_are_trackable(self):
+        for entry in [
+            "!.harness/core/",
+            "!.harness/linear/",
+            "!.harness/refactors/",
+            "!.harness/specs/",
+            "!.harness/review/",
+        ]:
+            self.assertIn(entry, self._lines)
 
 
 # ---------------------------------------------------------------------------
