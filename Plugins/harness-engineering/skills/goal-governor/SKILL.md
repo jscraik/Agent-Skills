@@ -64,6 +64,7 @@ Do not use for ordinary one-file fixes, quick questions, or implementation tasks
    - Agent config supports the intended delegation depth; for Jamie's Codex harness, require `max_depth >= 2`.
    - The selected validation commands exist and are repo-canonical.
    - Existing board files pass `./bin/ask check_goal_board <goal-directory>`.
+   - Agent-driven runs append `--robot` to `./bin/ask check_goal_board <goal-directory>` for stable parsing.
 3. Reconcile native and board state, including `active`, `paused`, `budgetLimited`, and `complete` (normalize native `budgetLimited` to output `budget_limited`).
 4. Treat token budget, tokens used, elapsed seconds, lifecycle updates, and budget-limited transitions as evidence, not completion proof.
 5. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
@@ -148,6 +149,8 @@ Validate the skill package:
 
 ```bash
 ./bin/ask check_goal_board <goal-directory>
+# Agent-driven validation:
+./bin/ask check_goal_board <goal-directory> --robot
 ./bin/ask skills audit <skill-directory> --level strict --robot
 ```
 

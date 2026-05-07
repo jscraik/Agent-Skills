@@ -78,7 +78,7 @@ The PR 152 review-fix pass preserved removed Goal Governor validator wording
 while replacing the active command examples with the canonical packaged path:
 
 ```text
-   - Existing board files pass `./bin/ask scripts/check_goal_board.py`.
+   - Existing board files pass `./bin/ask check_goal_board <goal-directory> --robot`.
 ```
 
 The 2026-05-03 Harness Engineering tightening preserved these compact-entrypoint lines outside the runtime bodies:

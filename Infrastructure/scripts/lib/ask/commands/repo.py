@@ -427,9 +427,16 @@ def _safe_signal(builder: Any, *args: Any) -> dict[str, Any]:
 def repo_doctor(repo_root: Path) -> CallResult:
     """Compose repo health checks into one compact agent-facing doctor payload."""
     result = CallResult()
+    try:
+        status_result = repo_status(repo_root)
+        repo_status_signal = _safe_signal(_repo_status_signal, status_result)
+        projection_sync_signal = _safe_signal(_projection_sync_signal, status_result)
+    except Exception as exc:
+        repo_status_signal = _unknown_signal_error_signal(exc)
+        projection_sync_signal = _unknown_signal_error_signal(exc)
     signals = {
-        "repo_status": _safe_signal(lambda: _repo_status_signal(repo_status(repo_root))),
-        "projection_sync": _safe_signal(lambda: _projection_sync_signal(repo_status(repo_root))),
+        "repo_status": repo_status_signal,
+        "projection_sync": projection_sync_signal,
         "catalog_parity": _safe_signal(lambda: _catalog_parity_signal(doctor_catalog(repo_root))),
         "runtime_budget": _safe_signal(lambda: _runtime_budget_signal(skills_budget(repo_root))),
         "command_handles": _safe_signal(

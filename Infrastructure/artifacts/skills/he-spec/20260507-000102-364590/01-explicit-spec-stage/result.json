@@ -1,13 +1,15 @@
 {
   "_diagnostic_note": "This artifact records a failing run stored as expected-fail diagnostics, not consumed as governance/pass evidence.",
+  "diagnostic_expected_fail": true,
+  "governance_evidence": false,
   "id": "explicit-spec-stage",
   "name": "Explicit Spec Stage",
-  "category": "happy",
+  "category": "diagnostic",
   "eval_modes": [
     "smoke",
     "release"
   ],
-  "should_trigger": true,
+  "should_trigger": false,
   "prepend_skill": false,
   "baseline_type": null,
   "comparison_inputs": null,
@@ -46,11 +48,11 @@
           "duplicate_command_ratio": 0.0,
           "max_repeated_command_count": 0,
           "turn_count": 1,
-          "error_event_count": 0,
+          "error_event_count": 2,
           "token_usage": {
             "input_tokens": 80896,
             "output_tokens": 937,
-            "reasoning_tokens": 0,
+            "reasoning_tokens": 613,
             "total_tokens": 81833
           }
         },

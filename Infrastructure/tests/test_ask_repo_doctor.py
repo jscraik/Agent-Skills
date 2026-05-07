@@ -203,13 +203,21 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
 
     def test_unexpected_signal_exception_returns_doctor_blocker(self) -> None:
-        with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")):
+        with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
         self.assertEqual(result.status, "error")
         self.assertTrue(doctor["blocking"])
-        self.assertEqual(doctor["blockers"][0]["id"], "unknown_signal_error")
+        blocker_ids = {blocker["id"] for blocker in doctor["blockers"]}
+        self.assertIn("repo_status", blocker_ids)
+        self.assertIn("projection_sync", blocker_ids)
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
 
 

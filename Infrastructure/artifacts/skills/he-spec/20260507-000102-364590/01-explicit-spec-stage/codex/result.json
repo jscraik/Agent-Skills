@@ -1,5 +1,7 @@
 {
   "_diagnostic_note": "This artifact records a failing run and is stored for diagnostic purposes only, not as governance/pass evidence.",
+  "diagnostic_expected_fail": true,
+  "governance_evidence": false,
   "runner": "codex",
   "exit_code": 0,
   "passed": false,
@@ -25,11 +27,11 @@
       "duplicate_command_ratio": 0.0,
       "max_repeated_command_count": 0,
       "turn_count": 1,
-      "error_event_count": 0,
+      "error_event_count": 2,
       "token_usage": {
         "input_tokens": 80896,
         "output_tokens": 937,
-        "reasoning_tokens": 0,
+        "reasoning_tokens": 613,
         "total_tokens": 81833
       }
     },

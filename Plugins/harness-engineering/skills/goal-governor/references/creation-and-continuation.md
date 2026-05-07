@@ -11,7 +11,7 @@ Read when selecting the next Goal Governor action.
 5. Write `goal.md` with objective, constraints, stop rules, and exit criteria.
 6. Write `state.yaml` with one active Scout task unless the starting evidence is already complete.
 7. Create an empty `receipts.jsonl` and `notes/`.
-8. Run `python3 Plugins/harness-engineering/skills/goal-governor/scripts/check_goal_board.py docs/goals/<slug>`.
+8. Run `./bin/ask check_goal_board docs/goals/<slug> --robot`.
 9. Print the exact command:
 
 ```text
