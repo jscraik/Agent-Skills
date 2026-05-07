@@ -11,7 +11,10 @@ INVOCATIONS_FILENAME = "skill-invocations.jsonl"
 def skill_telemetry_dir(repo_root: Path) -> Path:
     """Return the ASK-local generated skill telemetry projection directory."""
     override = os.environ.get("SKILL_TELEMETRY_DIR", "").strip()
-    return Path(override) if override else repo_root / TELEMETRY_DIRNAME
+    if not override:
+        return repo_root / TELEMETRY_DIRNAME
+    override_path = Path(override)
+    return override_path if override_path.is_absolute() else repo_root / override_path
 
 
 def analytics_projection_path(repo_root: Path) -> Path:

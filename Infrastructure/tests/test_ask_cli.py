@@ -302,6 +302,21 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(analytics["matching_invocation_count"], 1)
         self.assertEqual(analytics["parse_error_count"], 1)
 
+    def test_skill_invocation_analytics_relative_override_uses_repo_root(self):
+        """Verify relative telemetry overrides are anchored to the repository root."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask import skill_analytics
+
+            repo_root = Path("/tmp/agent-skills-repo")
+            with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": "generated/telemetry"}):
+                telemetry_dir = skill_analytics.skill_telemetry_dir(repo_root)
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(telemetry_dir, repo_root / "generated" / "telemetry")
+
     def test_skill_invocation_analytics_handles_projection_read_errors(self):
         """Verify projection read errors return an unavailable summary."""
         lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
@@ -399,6 +414,64 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.data["skill_proof"]["handle"], "security-reviewer")
         self.assertIn("goal_resolution", result.data["skill_proof"])
 
+    def test_skills_prove_does_not_improve_resolved_failed_handle(self):
+        """Verify resolved handles report reachability failures without goal rerouting."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            failed_reachability = CallResult(status="error")
+            failed_reachability.data["proof"] = {
+                "status": "fail",
+                "handle": "he-heartbeat",
+                "resolution": {
+                    "status": "ok",
+                    "handle": "he-heartbeat",
+                    "source_path": "Skills/harness-engineering/he-heartbeat/SKILL.md",
+                },
+            }
+
+            with mock.patch.object(
+                skills_commands,
+                "skills_proof",
+                return_value=failed_reachability,
+            ), mock.patch.object(
+                skills_commands,
+                "improve_skills",
+            ) as improve_mock:
+                result = skills_commands.skills_prove(Path.cwd(), "he-heartbeat")
+        finally:
+            sys.path.remove(lib_path)
+
+        improve_mock.assert_not_called()
+        skill_proof = result.data["skill_proof"]
+        self.assertEqual(skill_proof["handle"], "he-heartbeat")
+        self.assertEqual(skill_proof["proof_status"], "blocked_reachability")
+
+    def test_skill_workout_candidates_require_explicit_metadata(self):
+        """Verify workout outcome proof does not match directory names by substring."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                false_positive = repo_root / ".workouts" / "he-heartbeat-lookalike"
+                explicit = repo_root / ".workouts" / "explicit" / "route"
+                false_positive.mkdir(parents=True)
+                explicit.mkdir(parents=True)
+                (false_positive / "workout.yaml").write_text("id: unrelated\n", encoding="utf-8")
+                (explicit / "workout.yaml").write_text("target_module: he-heartbeat\n", encoding="utf-8")
+
+                candidates = skills_commands._skill_workout_candidates(repo_root, "he-heartbeat")
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(candidates, ["explicit/route"])
+
     def test_skills_explain_json_contract(self):
         """Verify ask skills explain returns concise agent-facing skill guidance."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "autofix", "--robot", "--json"]
@@ -426,9 +499,11 @@ class TestAskCLI(unittest.TestCase):
             "required_validation",
             "validation_commands",
             "known_limitations",
+            "reachability",
             "next_command",
         ):
             self.assertIn(field, explanation)
+        self.assertIsInstance(explanation["reachability"], dict)
 
     def test_skills_explain_rejects_out_of_repo_source_path(self):
         """Verify explain validates resolved skill paths before reading skill files."""
@@ -604,6 +679,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("recommended_capability", improvement)
         self.assertIn("reachability", improvement)
         self.assertIn("proof", improvement)
+        self.assertIn("why", improvement)
         self.assertIn("next_command", improvement)
 
     def test_repo_doctor_catalog_json_contract(self):
